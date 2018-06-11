@@ -277,7 +277,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   routeToServices = (cfGuid: string = null, appGuid: string = null): StepOnNextResult => {
-    if (this.cSIHelperService.isAppServices()) {
+    if (this.modeService.isAppServicesMode()) {
       this.store.dispatch(new RouterNav({ path: ['/applications', cfGuid, appGuid, 'services'] }));
     } else {
       this.store.dispatch(new RouterNav({ path: ['/services'] }));
