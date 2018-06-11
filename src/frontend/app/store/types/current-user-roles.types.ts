@@ -1,5 +1,19 @@
 import { ScopeStrings } from '../../core/current-user-permissions.config';
 
+export interface RolesRequestState {
+  initialised: boolean;
+  fetching: boolean;
+  error: boolean;
+}
+
+export function getDefaultRolesRequestState(): RolesRequestState {
+  return {
+    initialised: false,
+    fetching: false,
+    error: false
+  };
+}
+
 export function getDefaultEndpointRoles(): ICfRolesState {
   return {
     global: {
@@ -15,7 +29,8 @@ export function getDefaultEndpointRoles(): ICfRolesState {
     },
     organizations: {
 
-    }
+    },
+    state: getDefaultRolesRequestState()
   };
 }
 
@@ -50,6 +65,7 @@ export interface ICfRolesState {
   global: IGlobalRolesState;
   spaces: ISpacesRoleState;
   organizations: IOrgsRoleState;
+  state: RolesRequestState;
 }
 
 export interface IAllCfRolesState {
@@ -64,4 +80,5 @@ export interface IStratosRolesState {
 export interface ICurrentUserRolesState {
   internal: IStratosRolesState;
   cf: IAllCfRolesState;
+  state: RolesRequestState;
 }

@@ -6,7 +6,7 @@ export interface ApplicationStateData {
   indicator: CardStatus;
   actions: {
     [key: string]: boolean
-  } | string;
+  };
 }
 
 export enum CardStatus {
