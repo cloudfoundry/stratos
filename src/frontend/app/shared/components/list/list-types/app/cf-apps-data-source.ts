@@ -1,5 +1,6 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
+import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -20,7 +21,6 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { Subscription } from 'rxjs/Subscription';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
   return new GetAllApplications(paginationKey, [

@@ -19,13 +19,13 @@ type PostgresGooseDBVersionRepository struct {
 
 // NewPostgresGooseDBVersionRepository will create a new instance of the PostgresInstanceRepository
 func NewPostgresGooseDBVersionRepository(dcp *sql.DB) (Repository, error) {
-	log.Println("NewPostgresGooseDBVersionRepository")
+	log.Debug("NewPostgresGooseDBVersionRepository")
 	return &PostgresGooseDBVersionRepository{db: dcp}, nil
 }
 
 // GetCurrentVersion - Returns the latest GooseDBVersionRecord
 func (p *PostgresGooseDBVersionRepository) GetCurrentVersion() (GooseDBVersionRecord, error) {
-	log.Println("GetCurrentVersion")
+	log.Debug("GetCurrentVersion")
 
 	dbVersion := new(GooseDBVersionRecord)
 

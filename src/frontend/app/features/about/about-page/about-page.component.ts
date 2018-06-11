@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { AppState } from '../../../store/app-state';
@@ -16,6 +16,7 @@ export class AboutPageComponent implements OnInit {
 
   sessionData$: Observable<SessionData>;
   versionNumber$: Observable<string>;
+  userIsAdmin$: Observable<boolean>;
 
   constructor(private store: Store<AppState>, @Inject(Customizations) public customizations: CustomizationsMetadata) { }
 
@@ -23,6 +24,10 @@ export class AboutPageComponent implements OnInit {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
       filter(auth => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData)
+    );
+
+    this.userIsAdmin$ = this.sessionData$.pipe(
+      map(session => session.user && session.user.admin)
     );
 
     this.versionNumber$ = this.sessionData$.pipe(

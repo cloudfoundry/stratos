@@ -8,7 +8,7 @@
       matTooltip="Create Space">
       <mat-icon>add_box</mat-icon>
     </button>
-    <button mat-icon-button name="user-management" *ngIf="cfEndpointService.connected$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users/manage" matTooltip="Manage Users">
+    <button mat-icon-button name="user-management" *ngIf="canUpdateRoles$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users/manage" matTooltip="Manage Users">
       <mat-icon>people</mat-icon>
     </button>
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli" matTooltip="CLI Info">

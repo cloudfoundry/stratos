@@ -1,8 +1,7 @@
+
+import {of as observableOf,  BehaviorSubject ,  Observable ,  combineLatest } from 'rxjs';
 import { Component, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { first, map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../core/cf-api.types';
@@ -109,8 +108,8 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   private setupObservables() {
     const { cfGuid, orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
-    const org$ = orgGuid ? this.cfOrgService.org$ : Observable.of(null);
-    const space$ = spaceGuid ? this.cfSpaceService.space$ : Observable.of(null);
+    const org$ = orgGuid ? this.cfOrgService.org$ : observableOf(null);
+    const space$ = spaceGuid ? this.cfSpaceService.space$ : observableOf(null);
     this.endpointOrgSpace$ = combineLatest(
       this.cfEndpointService.endpoint$,
       org$,

@@ -2,9 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
 
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
 import { RouterNav } from '../../../store/actions/router.actions';

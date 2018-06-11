@@ -1,9 +1,7 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
+import { Observable ,  combineLatest } from 'rxjs';
+import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish ,  withLatestFrom } from 'rxjs/operators';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';

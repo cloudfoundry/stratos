@@ -1,7 +1,8 @@
+
+import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
@@ -96,7 +97,7 @@ export class UsersRolesEffects {
       // const obs = this.createActionObs(action);
       observables.push(this.createActionObs(action));
     });
-    return Observable.combineLatest(...observables).pipe(
+    return observableCombineLatest(...observables).pipe(
       first()
     );
   }

@@ -1,5 +1,6 @@
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { MenuComponent } from '../po/menu.po';
 import { EndpointsPage } from './endpoints.po';
 
@@ -33,6 +34,7 @@ describe('Endpoints', () => {
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
+            ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             // Should have removed the only row, so we should see welcome message again
             expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
           });
@@ -61,6 +63,7 @@ describe('Endpoints', () => {
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
+            ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             endpointsPage.table.getRows().then(rows => {
               expect(rows.length).toBe(endpointCount - 1);
             });

@@ -3,7 +3,7 @@
   <div class="loading-page__indicator">
     <div *ngIf="alert" class="loading-page__indicator-alert">{{ alert }}</div>
     <div>{{ text }}</div>
-    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" [mode]="'query'">
+    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" mode="indeterminate">
     </mat-progress-bar>
   </div>
 </div>

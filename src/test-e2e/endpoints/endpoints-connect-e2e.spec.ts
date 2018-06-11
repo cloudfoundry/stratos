@@ -3,6 +3,7 @@ import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
@@ -134,6 +135,7 @@ describe('Endpoints', () => {
             expect(items['connect']).not.toBeDefined();
             expect(items['disconnect']).toBeDefined();
             items['disconnect'].click();
+            ConfirmDialogComponent.expectDialogAndConfirm('Disconnect', 'Disconnect Endpoint');
 
             // Wait for snackbar
             const snackBar = new SnackBarComponent();

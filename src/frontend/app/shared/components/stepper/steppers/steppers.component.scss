@@ -64,6 +64,7 @@
     margin: 12px 36px;
     min-height: 160px;
     overflow-y: auto;
+    padding: 0 2px; // Some cards/tables/etc will be clipped without this padding
   }
   &__wrapper {
     display: flex;
@@ -78,6 +79,9 @@
   &__navigation-right {
     flex: 1;
     text-align: right;
+    button {
+      margin-left: 8px;
+    }
   }
   .stepper-form {
     // Use a specific style instead of form element selected. This prevents these generic styles bleading into child components of a stepper

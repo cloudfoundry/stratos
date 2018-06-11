@@ -3,12 +3,11 @@ import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factor
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { map, tap, mergeMap, switchMap } from 'rxjs/operators';
+import { map, tap, mergeMap, switchMap ,  distinctUntilChanged } from 'rxjs/operators';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest } from 'rxjs';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { distinctUntilChanged } from 'rxjs/operators';
 
 export class ListRowSateHelper {
   public getRowStateManager(

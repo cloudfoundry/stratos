@@ -1,11 +1,15 @@
-
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, MatSnackBar, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Subscription } from 'rxjs/Rx';
+
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
-import { first } from 'rxjs/operators';
+
+import { first, map, take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+
 
 
 @Component({
@@ -23,7 +27,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   constructor(
     private userProfileService: UserProfileService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.editProfileForm = this.fb.group({
       givenName: '',
@@ -48,8 +53,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   private errorSnack;
 
-  // Wire up to permissions and only allow password change if user has the 'password.write' group
-  private canChangePassword = true;
+  // Only allow password change if user has the 'password.write' group
+  private canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
 
   private passwordRequired = false;
 
@@ -114,7 +119,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       }
     }
     const obs$ = this.userProfileService.updateProfile(this.profile, updates);
-    return obs$.take(1).map(([profileErr, passwordErr]) => {
+    return obs$.pipe(take(1), map(([profileErr, passwordErr]) => {
       const okay = !profileErr && !passwordErr;
       this.error = !okay;
       if (!okay) {
@@ -125,6 +130,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
         success: okay,
         redirect: okay
       };
-    });
+    }), );
   }
 }

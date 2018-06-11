@@ -1,7 +1,6 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
@@ -57,7 +56,7 @@ export class CurrentUserPermissionsChecker {
 
     if (type === PermissionTypes.ENDPOINT_SCOPE) {
       if (!endpointGuid) {
-        return Observable.of(false);
+        return observableOf(false);
       }
       return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as ScopeStrings));
     }
@@ -105,7 +104,8 @@ export class CurrentUserPermissionsChecker {
   }
 
   private checkAllSpacesInOrg(orgState: IOrgRoleState, endpointSpaces: ISpacesRoleState, permission: PermissionStrings) {
-    return orgState.spaceGuids.map(spaceGuid => {
+    const spaceGuids = !!orgState && orgState.spaceGuids ? orgState.spaceGuids : [];
+    return spaceGuids.map(spaceGuid => {
       const space = endpointSpaces[spaceGuid];
       return space ? space[permission] || false : false;
     }).some(check => check);
@@ -136,14 +136,9 @@ export class CurrentUserPermissionsChecker {
   public getEndpointScopesCheck(permission: ScopeStrings, endpointGuid?: string) {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => {
-        return combineLatest(guids.map(guid => {
-          return this.check(PermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid);
-        })).pipe(
-          map(checks => checks.some(check => check)),
-          distinctUntilChanged()
-        );
-      })
+      switchMap(guids => combineLatest(guids.map(guid => this.check(PermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      map(checks => checks.some(check => check)),
+      distinctUntilChanged()
     );
   }
 
@@ -183,17 +178,12 @@ export class CurrentUserPermissionsChecker {
     } else if (!actualGuid) {
       const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
       return endpointGuids$.pipe(
-        switchMap(guids => {
-          return combineLatest(guids.map(guid => {
-            return this.checkAllOfType(guid, type, cfPermissions);
-          })).pipe(
-            map(checks => checks.some(check => check)),
-            distinctUntilChanged()
-          );
-        })
+        switchMap(guids => combineLatest(guids.map(guid => this.checkAllOfType(guid, type, cfPermissions)))),
+        map(checks => checks.some(check => check)),
+        distinctUntilChanged()
       );
     }
-    return Observable.of(false);
+    return observableOf(false);
   }
 
   public getFeatureFlagChecks(configs: PermissionConfig[], endpointGuid?: string): Observable<boolean>[] {
@@ -212,12 +202,10 @@ export class CurrentUserPermissionsChecker {
         return combineLatest(
           paginationKeys.map(
             key => new PaginationMonitor<APIResource<IFeatureFlag>>(this.store, key, entityFactory(featureFlagSchemaKey)).currentPage$
-          )
-        ).pipe(
-          map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-          distinctUntilChanged()
-        );
-      })
+          ));
+      }),
+      map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
+      distinctUntilChanged()
     );
   }
 
@@ -275,7 +263,7 @@ export class CurrentUserPermissionsChecker {
   public reduceChecks(checks: Observable<boolean>[], type: '||' | '&&' = '||') {
     const func = type === '||' ? 'some' : 'every';
     if (!checks || !checks.length) {
-      return Observable.of(true);
+      return observableOf(true);
     }
     return combineLatest(checks).pipe(
       map(flags => flags[func](flag => flag)),
@@ -323,7 +311,7 @@ export class CurrentUserPermissionsChecker {
   }
 
   private getEndpointGuidObservable(endpointGuid: string) {
-    return !endpointGuid ? this.getAllEndpointGuids() : Observable.of([endpointGuid]);
+    return !endpointGuid ? this.getAllEndpointGuids() : observableOf([endpointGuid]);
   }
 
   private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: PermissionStrings): boolean {

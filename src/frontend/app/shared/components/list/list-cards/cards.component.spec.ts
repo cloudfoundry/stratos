@@ -22,7 +22,7 @@ describe('CardsComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CardsComponent);
+    fixture = TestBed.createComponent<CardsComponent<EntityInfo>>(CardsComponent);
     component = fixture.componentInstance;
     component.component = {} as CardCell<any>;
     component.dataSource = {} as IListDataSource<EntityInfo>;

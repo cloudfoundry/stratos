@@ -9,7 +9,7 @@
         &.stepper-form__tags__chip-list__chip,
         &.stepper-form__tags__chip-list__chip + &.stepper-form__tags__chip-list__chip {
           $chip-padding: 5px;
-          margin: $chip-padding $chip-padding $chip-padding 0;
+          margin: $chip-padding 0 $chip-padding $chip-padding;
         }
       }
     }

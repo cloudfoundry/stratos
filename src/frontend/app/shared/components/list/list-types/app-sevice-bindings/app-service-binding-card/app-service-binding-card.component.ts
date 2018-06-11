@@ -1,7 +1,8 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { first, map, switchMap, tap, withLatestFrom, filter } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
@@ -88,7 +89,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       },
       {
         label: 'Date Created On',
-        data$: Observable.of(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
+        data$: observableOf(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
       }
     ];
 
@@ -100,7 +101,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   showEnvVars = () => {
 
-    Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+    observableCombineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
         withLatestFrom(),
         map(([[service, serviceInstance, allEnvVars]]) => {

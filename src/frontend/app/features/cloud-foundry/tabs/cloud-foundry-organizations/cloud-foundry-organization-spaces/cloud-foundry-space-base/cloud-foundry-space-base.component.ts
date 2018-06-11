@@ -1,18 +1,19 @@
+
+import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../../environments/environment';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
-import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
+import { getActiveRouteCfOrgSpaceProvider, canUpdateOrgSpaceRoles } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -47,7 +48,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       link: 'users',
       label: 'Users',
       // Hide the users tab unless we are in development
-      hidden: Observable.of(environment.production)
+      hidden: observableOf(environment.production)
     }
   ];
 
@@ -62,12 +63,14 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   public permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
   public permsSpaceDelete = CurrentUserPermissions.SPACE_DELETE;
+  public canUpdateRoles$: Observable<boolean>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     private cfSpaceService: CloudFoundrySpaceService,
     private cfOrgService: CloudFoundryOrganizationService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)
@@ -77,6 +80,12 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       first()
     );
     this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
+
+    this.canUpdateRoles$ = canUpdateOrgSpaceRoles(
+      currentUserPermissionsService,
+      cfSpaceService.cfGuid,
+      cfSpaceService.orgGuid,
+      cfSpaceService.spaceGuid);
   }
 
   private setUpBreadcrumbs(

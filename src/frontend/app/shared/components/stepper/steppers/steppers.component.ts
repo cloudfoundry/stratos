@@ -1,3 +1,7 @@
+
+import { of as observableOf, combineLatest, Observable, Subscription } from 'rxjs';
+
+import { switchMap, catchError, first, map } from 'rxjs/operators';
 import {
   AfterContentInit,
   Component,
@@ -9,9 +13,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { first, map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs/Rx';
 
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -98,10 +99,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
-      this.nextSub = obs$
-        .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
-        .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+      this.nextSub = obs$.pipe(
+        first(),
+        catchError(() => observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false })),
+        switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           step.error = !success;
           step.busy = false;
           this.enterData = data;
@@ -114,7 +115,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             }
           }
           return [];
-        }).subscribe();
+        }), ).subscribe();
     }
   }
 
@@ -162,15 +163,18 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private findValidStep(index: number, isNextDirection: boolean) {
     // Ensure the required step can be activated (not skipped), if not continue in the correct direction until we've found one that can be
+
+    // Candidate step index
     index = Math.min(index, this.steps.length - 1);
-    // Create list of all not skipped stepped
+    // Create list of all not skipped stepped. Any candidate step to go to should exist in here
     const nonSkipSteps = this.steps.filter(step => !step.skip);
+    // Iterate through steps until we find a valid one
     while (true) {
-      // Can this step be activated?
-      const newIndex = nonSkipSteps.findIndex(step => step === this.steps[index]);
-      if (newIndex !== -1) {
+      // Can this step be activated (exists in nonSkippedSteps)?
+      const found = nonSkipSteps.findIndex(step => step === this.steps[index]) >= 0;
+      if (found) {
         // Yes, step is valid
-        return newIndex;
+        return index;
       }
       // No? Try again with the next or previous step
       index = isNextDirection ? ++index : --index;

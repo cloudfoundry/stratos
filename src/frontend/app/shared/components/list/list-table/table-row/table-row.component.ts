@@ -1,6 +1,6 @@
 import { CdkRow } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
