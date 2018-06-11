@@ -1,16 +1,16 @@
 resources:
-- name: stratos-ui
+- name: stratos
   type: git
   source:
-    repo: SUSE/stratos-ui
-    uri: https://github.com/SUSE/stratos-ui.git
-    branch: {{stratos-ui-branch}}
+    uri: git@github.com:((github-organization))/((github-repository))
+    branch: ((stratos-branch))
+    private_key: ((github-private-key))
 - name: aio-docker-image
   type: docker-image
   source:
-    username: {{docker-username}}
-    password: {{docker-password}}
-    repository: splatform/stratos-ui
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: splatform/stratos
 - name: after-midnight
   type: time
   source:
@@ -27,45 +27,45 @@ groups:
 jobs:
 - name: build-helm-images
   plan:
-  - get: stratos-ui
+  - get: stratos
   - get: after-midnight
     trigger: true
   - do:
     - task: generete-certs
       timeout: 2m
-      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+      file: stratos/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos-ui/deploy/ci/tasks/build-images/build-helm.yml
+      file: stratos/deploy/ci/tasks/build-images/build-helm.yml
       params:
-        DOCKER_USERNAME: {{docker-username}}
-        DOCKER_PASSWORD: {{docker-password}}
+        DOCKER_USERNAME: ((docker-username))
+        DOCKER_PASSWORD: ((docker-password))
 - name: build-dc-images
   plan:
-  - get: stratos-ui
+  - get: stratos
   - get: after-midnight
     trigger: true
   - do:
     - task: generete-certs
       timeout: 2m
-      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+      file: stratos/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos-ui/deploy/ci/tasks/build-images/build-dc.yml
+      file: stratos/deploy/ci/tasks/build-images/build-dc.yml
       params:
-        DOCKER_USERNAME: {{docker-username}}
-        DOCKER_PASSWORD: {{docker-password}}
+        DOCKER_USERNAME: ((docker-username))
+        DOCKER_PASSWORD: ((docker-password))
 
 - name: build-aio-image
   public: true
   serial: true
   plan:
-  - get: stratos-ui
+  - get: stratos
   - get: after-midnight
     trigger: true
   - put: aio-docker-image
     params:
-      build: stratos-ui
-      dockerfile: stratos-ui/deploy/Dockerfile.all-in-one
+      build: stratos
+      dockerfile: stratos/deploy/Dockerfile.all-in-one
