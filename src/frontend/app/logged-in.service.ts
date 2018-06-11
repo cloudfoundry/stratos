@@ -37,6 +37,9 @@ export class LoggedInService {
 
   private _activityPromptShown = false;
 
+  private _sub: Subscription;
+
+  private _destroying = false;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -44,12 +47,14 @@ export class LoggedInService {
     private dialog: MatDialog,
     private ngZone: NgZone
   ) {
+  }
 
+  init() {
     const eventStreams = this._userActiveEvents.map((eventName) => {
       return fromEvent(document, eventName);
     });
 
-    this.store.select(s => s.auth)
+    this._sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
         this._sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
@@ -68,6 +73,17 @@ export class LoggedInService {
           }
         }
       });
+  }
+
+  destroy() {
+    this._destroying = true;
+    if (this._sub) {
+      this._sub.unsubscribe();
+    }
+    this.closeSessionCheckerPoll();
+    if (this._userInteractionChecker) {
+      this._userInteractionChecker.unsubscribe();
+    }
   }
 
   // Run outside Angular zone for protractor tests to work
@@ -111,7 +127,7 @@ export class LoggedInService {
   }
 
   private _checkSession() {
-    if (this._activityPromptShown) {
+    if (this._activityPromptShown || this._destroying) {
       return;
     }
 
