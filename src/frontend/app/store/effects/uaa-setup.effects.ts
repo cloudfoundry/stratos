@@ -1,18 +1,19 @@
+import { Injectable } from '@angular/core';
+import { Headers, Http, URLSearchParams } from '@angular/http';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
-import {map, switchMap, catchError} from 'rxjs/operators';
+import { AppState } from '../app-state';
 import {
+  SetUAAScope,
   SETUP_UAA,
   SETUP_UAA_SCOPE,
   SetupUAA,
-  SetupUAASuccess,
   SetupUAAFailed,
-  SetUAAScope
+  SetupUAASuccess,
 } from './../actions/setup.actions';
-import { Headers, Http, URLSearchParams } from '@angular/http';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
-import { Actions, Effect } from '@ngrx/effects';
-import { Injectable } from '@angular/core';
+
 
 @Injectable()
 export class UAASetupEffect {
@@ -46,8 +47,10 @@ export class UAASetupEffect {
         headers
       }).pipe(
         map(data => new SetupUAASuccess(data.json())),
-        catchError((err, caught) => [new SetupUAAFailed(err)]), );
+        catchError((err, caught) => [new SetupUAAFailed(`Failed to setup UAA endpoint. ${this.fetchError(err)}`)])
+      );
     }));
+
 
   @Effect() uassSetScope = this.actions$.ofType<SetUAAScope>(SETUP_UAA_SCOPE).pipe(
     switchMap(({ scope }) => {
@@ -60,7 +63,15 @@ export class UAASetupEffect {
         headers
       }).pipe(
         map(data => new SetupUAASuccess({})),
-        catchError((err, caught) => [new SetupUAAFailed(err)]), );
+        catchError((err, caught) => [new SetupUAAFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)])
+      );
     }));
 
+  private fetchError(err): string {
+    try {
+      const body = JSON.parse(err._body);
+      return body.error;
+    } catch (err) { }
+    return '';
+  }
 }

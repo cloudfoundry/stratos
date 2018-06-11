@@ -7,6 +7,7 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 import { AppNameUniqueChecking } from '../../app-name-unique.directive/app-name-unique.directive';
@@ -21,8 +22,7 @@ import { AppNameUniqueChecking } from '../../app-name-unique.directive/app-name-
 })
 export class CreateApplicationStep2Component implements OnInit {
 
-  constructor(private store: Store<AppState>, private fb: FormBuilder) {
-  }
+  constructor(private store: Store<AppState>, private fb: FormBuilder) { }
 
   form: FormGroup;
 
@@ -33,7 +33,7 @@ export class CreateApplicationStep2Component implements OnInit {
 
   name: string;
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetNewAppName(this.name));
     return observableOf({ success: true });
   }

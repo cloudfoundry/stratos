@@ -1,5 +1,5 @@
 <div class="specify-details">
-  <div *ngIf="(hasInstances$ | async) && showModeSelection">
+  <div *ngIf="!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection">
     <div>
       <mat-radio-group [(ngModel)]="formMode" class="specify-details__radio-group" [disabled]="(serviceInstances$ | async)?.length === 0">
         <mat-radio-button *ngFor="let mode of formModes" [value]="mode.key" class="specify-details__radio-group__radio" (click)="resetForms(mode.key)">
@@ -17,7 +17,7 @@
     </mat-form-field>
     <mat-form-field class="stepper-form__tags">
       <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
-        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
+        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (removed)="removeTag(tag)">
           {{tag.label}}
           <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
         </mat-chip>

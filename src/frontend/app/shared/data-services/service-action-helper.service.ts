@@ -20,7 +20,7 @@ export class ServiceActionHelperService {
   ) { }
 
   detachServiceBinding = (
-    serviceBindings: APIResource<IServiceBinding>[] ,
+    serviceBindings: APIResource<IServiceBinding>[],
     serviceInstanceGuid: string,
     endpointGuid: string,
     noConfirm = false
@@ -63,4 +63,7 @@ export class ServiceActionHelperService {
     );
   }
 
+
+  editServiceBinding = (guid: string, endpointGuid: string) =>
+    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'] }))
 }

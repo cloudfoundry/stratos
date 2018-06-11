@@ -49,7 +49,9 @@ export class SetCreateServiceInstance implements Action {
     public spaceGuid: string,
     public tags: string[],
     public jsonParams: string,
-    public spaceScoped: boolean = false) {
+    public spaceScoped: boolean = false,
+    public serviceInstanceGuid: string = null
+  ) {
 
   }
   type = SET_CREATE_SERVICE_INSTANCE;

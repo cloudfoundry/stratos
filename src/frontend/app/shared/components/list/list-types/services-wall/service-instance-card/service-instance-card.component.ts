@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
@@ -20,11 +20,24 @@ import { CardCell } from '../../../list.types';
   ]
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> implements OnInit {
+  serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
 
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
+
+  @Input('row')
+  set row(row) {
+    if (row) {
+      this.serviceInstanceEntity = row;
+      this.serviceInstanceTags = row.entity.tags.map(t => ({
+        value: t
+      }));
+      this.cfGuid = row.entity.cfGuid;
+      this.hasMultipleBindings.next(!(row.entity.service_bindings.length > 0));
+    }
+  }
 
   constructor(
     private store: Store<AppState>,
@@ -38,15 +51,19 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   ngOnInit() {
 
-    this.serviceInstanceTags = this.row.entity.tags.map(t => ({
+    this.serviceInstanceTags = this.serviceInstanceEntity.entity.tags.map(t => ({
       value: t
     }));
 
     this.cardMenu = [
       {
+        label: 'Edit',
+        action: this.edit,
+      },
+      {
         label: 'Unbind',
         action: this.detach,
-        disabled: observableOf(this.row.entity.service_bindings.length === 0)
+        disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0)
       },
       {
         label: 'Delete',
@@ -54,15 +71,26 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       }
     ];
 
-    this.cfGuid = this.row.entity.cfGuid;
+    this.cfGuid = this.serviceInstanceEntity.entity.cfGuid;
   }
 
 
   detach = () => {
-    this.serviceActionHelperService.detachServiceBinding(this.row.entity.service_bindings, this.row.metadata.guid, this.row.entity.cfGuid);
+    this.serviceActionHelperService.detachServiceBinding
+      (this.serviceInstanceEntity.entity.service_bindings,
+      this.serviceInstanceEntity.metadata.guid,
+      this.serviceInstanceEntity.entity.cfGuid);
   }
 
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(this.row.metadata.guid, this.row.entity.cfGuid);
+  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+    this.serviceInstanceEntity.metadata.guid,
+    this.serviceInstanceEntity.entity.cfGuid
+  )
+
+  edit = () => this.serviceActionHelperService.editServiceBinding(
+    this.serviceInstanceEntity.metadata.guid,
+    this.serviceInstanceEntity.entity.cfGuid
+  )
 
 }
