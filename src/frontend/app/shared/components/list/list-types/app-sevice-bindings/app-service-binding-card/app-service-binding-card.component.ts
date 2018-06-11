@@ -1,5 +1,5 @@
 
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable } from 'rxjs';
+import { combineLatest as observableCombineLatest, of as observableOf, Observable } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -49,7 +49,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     super();
     this.cardMenu = [
       {
-        label: 'Detach',
+        label: 'Unbind',
         action: this.detach
       }
     ];

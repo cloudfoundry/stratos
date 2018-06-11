@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
@@ -33,16 +33,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   ) {
     super();
 
-    this.cardMenu = [
-      {
-        label: 'Detach',
-        action: this.detach,
-      },
-      {
-        label: 'Delete',
-        action: this.delete
-      }
-    ];
 
   }
 
@@ -51,6 +41,18 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     this.serviceInstanceTags = this.row.entity.tags.map(t => ({
       value: t
     }));
+
+    this.cardMenu = [
+      {
+        label: 'Unbind',
+        action: this.detach,
+        disabled: observableOf(this.row.entity.service_bindings.length === 0)
+      },
+      {
+        label: 'Delete',
+        action: this.delete
+      }
+    ];
 
     this.cfGuid = this.row.entity.cfGuid;
   }

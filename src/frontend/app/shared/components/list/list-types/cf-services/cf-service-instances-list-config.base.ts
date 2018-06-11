@@ -104,8 +104,8 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
-    label: 'Detach',
-    description: 'Detach Service Instance',
+    label: 'Unbind',
+    description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length === 1)),
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
