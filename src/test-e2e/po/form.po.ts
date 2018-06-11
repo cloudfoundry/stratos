@@ -145,14 +145,15 @@ export class FormComponent extends Component {
             ctrl.click();
             ctrl.sendKeys(value);
             ctrl.sendKeys(Key.RETURN);
+            expect(this.getText(field)).toBe(value);
             break;
           default:
             ctrl.click();
             ctrl.clear();
             ctrl.sendKeys(value);
+            expect(this.getText(field)).toBe(value);
             break;
         }
-        expect(this.getText(field)).toBe(value);
       });
     });
   }

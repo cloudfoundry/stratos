@@ -48,8 +48,8 @@ describe('CF Endpoints Dashboard', () => {
     });
 
     it('should not have any breadcrumbs', () => {
-      expect(cloudFoundry.header.getTitle()).toBe(cfEndpoint.name);
-      expect(cloudFoundry.breadcrumbs.isPresent()).toBeFalsy();
+      expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
+      expect(cloudFoundry.breadcrumbs.waitUntilNotShown());
     });
   });
 
@@ -69,7 +69,7 @@ describe('CF Endpoints Dashboard', () => {
       cloudFoundry.list.cards.getCards().then(cards => {
         expect(cards.length).toBeGreaterThan(1);
         cards[0].click();
-        expect(cloudFoundry.header.getTitle()).toBe(cfEndpoint.name);
+        expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
       });
     });
   });
