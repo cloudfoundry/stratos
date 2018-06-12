@@ -28,6 +28,9 @@
     background-color: mat-color($primary);
     color: mat-contrast($primary, 500);
   }
+  .log-viewer__messageError {
+    background-color: map-get($status-colors, danger);
+  }
   @each $colour-name,
   $colour in $ansi-colours {
     .ansi-#{$colour-name} {
