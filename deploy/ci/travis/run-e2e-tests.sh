@@ -18,7 +18,7 @@ echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
-# There are two ways of running - building and deploying a full docker-compose deploymenty
+# There are two ways of running - building and deploying a full docker-compose deployment
 # or doing a local build and running that with sqlite
 
 E2E_TARGET="e2e-local"
