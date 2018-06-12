@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 	"os"
@@ -55,6 +56,44 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
 		return handleSessionError(err, isVerify)
 	}
+}
+
+// Support for Angular XSRF
+func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("xsrfMiddleware")
+
+		// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
+		if c.Request().Method() == "GET" || c.Request().Method() == "HEAD" {
+			return h(c)
+		}
+		errMsg := "Failed to get stored XSRF token from user session"
+		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
+		if err == nil {
+			// Check the token against the header
+			if c.Request().Header().Contains(XSRFTokenHeader) {
+				requestToken := c.Request().Header().Get(XSRFTokenHeader)
+				if compareTokens(requestToken, token) {
+					return h(c)
+				}
+				errMsg = "Supplied XSRF Token does not match"
+			} else {
+				errMsg = "XSRF Token was not supplied in the header"
+			}
+		}
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"XSRF Token could not be found or does not match",
+			"XSRF Token error: %s", errMsg,
+		)
+	}
+}
+
+func compareTokens(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	return subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
 }
 
 func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
