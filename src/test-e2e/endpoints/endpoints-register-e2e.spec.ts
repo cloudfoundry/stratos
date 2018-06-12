@@ -3,6 +3,7 @@ import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
+import { SnackBarComponent } from '../po/snackbar.po';
 import { ServicesPage } from '../services/services.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 import { RegisterDialog } from './register-dialog.po';
@@ -149,9 +150,10 @@ describe('Endpoints', () => {
         });
         register.stepper.next();
 
-        // NOTE: The dialog should stay and show an error
-        // Fix this test once this is implemented
-        fail('not complete');
+        const snackBar = new SnackBarComponent();
+        snackBar.waitUntilShown();
+        /* tslint:disable-line:max-line-length*/
+        expect(snackBar.hasMessage(`SSL error - x509: certificate signed by unknown authority. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"`));
       });
 
       it('Successful register', () => {
