@@ -130,6 +130,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 
 @NgModule({
   imports: [
@@ -230,6 +231,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     NoServicePlansComponent,
     CreateApplicationStep1Component,
     BindAppsStepComponent,
+    CfEndpointsMissingComponent,
   ],
   exports: [
     FormsModule,
