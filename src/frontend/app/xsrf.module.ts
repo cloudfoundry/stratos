@@ -11,8 +11,11 @@ import { Inject, Injectable, NgModule, PLATFORM_ID } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+<<<<<<< HEAD
 import { Request, XSRFStrategy, RequestMethod } from '@angular/http';
 
+=======
+>>>>>>> Revert "Revert "Add support for Angular XSRF protection""
 const STRATOS_XSRF_HEADER_NAME = 'X-XSRF-Token';
 
 @Injectable()
@@ -49,6 +52,7 @@ export class HttpXsrfHeaderInterceptor implements HttpInterceptor {
   }
 }
 
+<<<<<<< HEAD
 
 // XSRF Stragety for legacy http library calls
 @Injectable()
@@ -61,6 +65,8 @@ export class StratosHeaderXSRFStrategy implements XSRFStrategy {
     }
   }
 }
+=======
+>>>>>>> Revert "Revert "Add support for Angular XSRF protection""
 @NgModule({
   providers: [
     { provide: HttpXsrfTokenExtractor, useClass: HttpXsrfHeaderExtractor },
@@ -69,7 +75,10 @@ export class StratosHeaderXSRFStrategy implements XSRFStrategy {
       useClass: HttpXsrfHeaderInterceptor,
       multi: true,
     }],
+<<<<<<< HEAD
     { provide: XSRFStrategy, useClass: StratosHeaderXSRFStrategy },
+=======
+>>>>>>> Revert "Revert "Add support for Angular XSRF protection""
   ],
 })
 export class XSRFModule { }

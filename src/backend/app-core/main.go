@@ -20,6 +20,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
+	"github.com/gorilla/sessions"
 	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -135,7 +136,7 @@ func main() {
 	log.Info("Database connection pool created.")
 
 	// Initialize session store for Gorilla sessions
-	sessionStore, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
+	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -154,7 +155,7 @@ func main() {
 	log.Info("Session store initialized.")
 
 	// Setup the global interface for the proxy
-	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
+	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions)
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
@@ -296,7 +297,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, error) {
+func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, *sessions.Options, error) {
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
@@ -304,6 +305,12 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 
 	if config.IsSet(VCapApplication) {
 		setSecureCookie = false
+	}
+
+	// Allow the cookie domain to be configured
+	domain := pc.CookieDomain
+	if domain == "-" {
+		domain = ""
 	}
 
 	// Store depends on the DB Type
@@ -314,7 +321,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
 		sessionStore.Options.Secure = setSecureCookie
-		return sessionStore, err
+		if len(domain) > 0 {
+			sessionStore.Options.Domain = domain
+		}
+		return sessionStore, sessionStore.Options, err
 	}
 	// Store depends on the DB Type
 	if databaseProvider == datastore.MYSQL {
@@ -324,7 +334,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
 		sessionStore.Options.Secure = setSecureCookie
-		return sessionStore, err
+		if len(domain) > 0 {
+			sessionStore.Options.Domain = domain
+		}
+		return sessionStore, sessionStore.Options, err
 	}
 
 	log.Info("Creating SQLite session store")
@@ -333,7 +346,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
 	sessionStore.Options.Secure = setSecureCookie
-	return sessionStore, err
+	if len(domain) > 0 {
+		sessionStore.Options.Domain = domain
+	}
+	return sessionStore, sessionStore.Options, err
 }
 
 func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, error) {
@@ -413,12 +429,13 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore) *portalProxy {
+func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options) *portalProxy {
 	log.Debug("newPortalProxy")
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
 		SessionStore:           ss,
+		SessionStoreOptions:    sessionStoreOptions,
 	}
 
 	return pp
@@ -582,6 +599,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
+	sessionGroup.Use(p.xsrfMiddleware)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
