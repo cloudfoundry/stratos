@@ -182,6 +182,10 @@ spec:
         - name: SKIP_SSL_VALIDATION 
           value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
         {{- end }}
+        {{- if .Values.env.DOMAIN }}  
+        - name: COOKIE_DOMAIN
+          value: {{.Values.env.DOMAIN}}
+        {{- end }}
         ports:
         - containerPort: 3003
           name: proxy
