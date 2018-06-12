@@ -3,7 +3,7 @@
     <h1>Delete application</h1>
   </app-page-header>
   <ng-container *ngIf="relatedEntities$ | async as entities">
-    <app-steppers [cancel]="cancelUrl">
+    <app-steppers [cancel]="cancelUrl" [nextButtonProgress]="false">
       <app-step *ngIf="entities.routes && entities.routes.length" title="Routes">
         <div class="app-delete__monitors">
           <p>Please select any attached application routes you would like to delete.</p>

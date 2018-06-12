@@ -10,6 +10,7 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { CardStatusComponent } from '../../cards/card-status/card-status.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { CsiModeService } from '../csi-mode.service';
 
 describe('SelectPlanStepComponent', () => {
   let component: SelectPlanStepComponent;
@@ -28,7 +29,8 @@ describe('SelectPlanStepComponent', () => {
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         PaginationMonitorFactory,
-        EntityMonitorFactory
+        EntityMonitorFactory,
+        CsiModeService
       ]
     })
       .compileComponents();
