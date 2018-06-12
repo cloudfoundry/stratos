@@ -23,7 +23,7 @@ export function roleInfoFromSessionReducer(
 ): ICurrentUserRolesState {
   const { user, endpoints } = action.sessionData;
   const cfRoles = propagateEndpointsAdminPermissions(state.cf, Object.values(endpoints.cf));
-  return finishCfRoles(state, cfRoles, user);
+  return applyInternalScopes(state, cfRoles, user);
 }
 
 export function updateNewlyConnectedEndpoint(
@@ -38,10 +38,13 @@ export function updateNewlyConnectedEndpoint(
     user: endpoint.user,
     guid: action.guid
   }]);
-  return finishCfRoles(state, cfRoles, action.endpoint.user);
+  return {
+    ...state,
+    cf: cfRoles
+  };
 }
 
-function finishCfRoles(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
+function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
