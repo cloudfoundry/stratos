@@ -33,6 +33,12 @@ import {
   TableCellEditVariableComponent,
 } from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
 import {
+  TableCellAppCfOrgSpaceComponent,
+} from '../../list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component';
+import {
+  TableCellAppCfOrgSpaceHeaderComponent,
+} from '../../list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import {
   TableCellAppInstancesComponent,
 } from '../../list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
@@ -131,7 +137,9 @@ export const listTableCells = [
   TableCellRoleOrgSpaceComponent,
   TableCellSelectOrgComponent,
   TableCellCommitAuthorComponent,
-  TableCellRequestMonitorIconComponent
+  TableCellRequestMonitorIconComponent,
+  TableCellAppCfOrgSpaceHeaderComponent,
+  TableCellAppCfOrgSpaceComponent
 ];
 
 @Component({

@@ -13,10 +13,11 @@ import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '
 import { createListFilterConfig } from '../../list.helper';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
+import { TableCellAppCfOrgSpaceHeaderComponent } from './table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/table-cell-app-cforgspace.component';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
-
 
 @Injectable()
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
@@ -83,6 +84,11 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       }
     },
     {
+      columnId: 'cfOrgSpace',
+      headerCellComponent: TableCellAppCfOrgSpaceHeaderComponent,
+      cellComponent: TableCellAppCfOrgSpaceComponent,
+    },
+    {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {
         getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
@@ -93,17 +99,6 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         field: 'metadata.created_at'
       },
       cellFlex: '2'
-    },
-    {
-      columnId: 'orgSpace', headerCell: () => 'Org/Space',
-      cellDefinition: {
-        getValue: (row: APIResource) => `${row.entity.space.entity.organization.entity.name}/${row.entity.space.entity.name}`
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'orgSpace',
-        field: 'entity.space.entity.organization.entity.name'
-      }
     },
   ];
   viewType = ListViewTypes.BOTH;

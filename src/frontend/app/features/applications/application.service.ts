@@ -153,7 +153,7 @@ export class ApplicationService {
   static getApplicationState(
     store: Store<AppState>,
     appStateService: ApplicationStateService,
-    app: APIResource<IApp>,
+    app: IApp,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
     const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
