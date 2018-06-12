@@ -28,7 +28,7 @@
     background-color: mat-color($primary);
     color: mat-contrast($primary, 500);
   }
-  .log-viewer__messageError {
+  .log-viewer__message-error {
     background-color: map-get($status-colors, danger);
   }
   @each $colour-name,

@@ -9,7 +9,7 @@
 
   <div *ngIf="statusMessage$ | async as message">
 
-  <div class="log-viewer__message" *ngIf="message.message" [ngClass]="{'log-viewer__messageError': message.isError}">
+  <div class="log-viewer__message" *ngIf="message.message" [ngClass]="{'log-viewer__message-error': message.isError}">
     <div class="log-viewer__messageText">{{ message.message }}</div>
   </div>
 </div>  
