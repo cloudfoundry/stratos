@@ -135,7 +135,7 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		CFAdminIdentifier:    CFAdminIdentifier,
 	}
 
-	pp := newPortalProxy(pc, db, nil, nil)
+	pp := newPortalProxy(pc, db, nil)
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)

@@ -125,6 +125,12 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
       this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
     label: 'Edit',
     description: 'Edit Service Instance',
+    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+    row$.pipe(
+      switchMap(
+        row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+      )
+    )
   };
 
   private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {

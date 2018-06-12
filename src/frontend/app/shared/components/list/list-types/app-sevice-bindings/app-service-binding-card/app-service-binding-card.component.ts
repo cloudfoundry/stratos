@@ -22,6 +22,8 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
 import { DatePipe } from '@angular/common';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -39,20 +41,25 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   constructor(
     private store: Store<AppState>,
+    private dialog: MatDialog,
+    private datePipe: DatePipe,
+    private confirmDialog: ConfirmationDialogService,
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
-    private dialog: MatDialog,
-    private confirmDialog: ConfirmationDialogService,
     private serviceActionHelperService: ServiceActionHelperService,
-    private datePipe: DatePipe
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
-    this.cardMenu = [
-      {
-        label: 'Unbind',
-        action: this.detach
-      }
-    ];
+    this.cardMenu = [{
+      label: 'Unbind',
+      action: this.detach,
+      can: this.appService.waitForAppEntity$.pipe(
+        switchMap(app => this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_BINDING_EDIT,
+          this.appService.cfGuid,
+          app.entity.entity.space_guid
+        )))
+    }];
   }
   ngOnInit(): void {
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(

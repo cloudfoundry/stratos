@@ -94,6 +94,17 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       },
       cellFlex: '2'
     },
+    {
+      columnId: 'orgSpace', headerCell: () => 'Org/Space',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${row.entity.space.entity.organization.entity.name}/${row.entity.space.entity.name}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'orgSpace',
+        field: 'entity.space.entity.organization.entity.name'
+      }
+    },
   ];
   viewType = ListViewTypes.BOTH;
   text = {

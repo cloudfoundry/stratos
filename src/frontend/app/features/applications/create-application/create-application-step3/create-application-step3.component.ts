@@ -78,7 +78,7 @@ export class CreateApplicationStep3Component implements OnInit {
         return { success: true };
       }),
       catchError((err: Error) => {
-        return observableOf({ success: false, message: `Failed... ${err.message}` });
+        return observableOf({ success: false, message: err.message });
       })
     );
   }
@@ -100,7 +100,7 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
-    return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid)), 'Could not create application: ');
+    return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid)), 'Could not create application');
   }
 
   createRoute(): Observable<RequestInfoState> {
@@ -122,7 +122,7 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
       return this.wrapObservable(this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)),
-        'Application created. Could not create route: ');
+        'Application created. Could not create route');
     }
     return observableOf({
       ...getDefaultRequestState(),
@@ -133,7 +133,7 @@ export class CreateApplicationStep3Component implements OnInit {
   associateRoute(appGuid, routeGuid, endpointGuid): Observable<RequestInfoState> {
     this.store.dispatch(new AssociateRouteWithAppApplication(appGuid, routeGuid, endpointGuid));
     return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, appGuid)),
-      'Application and route created. Could not associated route with app: ');
+      'Application and route created. Could not associated route with app');
   }
 
   private wrapObservable(obs$: Observable<RequestInfoState>, errorString: string): Observable<RequestInfoState> {
@@ -144,7 +144,8 @@ export class CreateApplicationStep3Component implements OnInit {
       first(),
       tap(state => {
         if (state.error) {
-          throw new Error(errorString + state.message);
+          const fullErrorString = errorString + (state.message ? `: ${state.message}` : '');
+          throw new Error(fullErrorString);
         }
       })
     );

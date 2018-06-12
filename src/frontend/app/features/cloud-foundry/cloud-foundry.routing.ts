@@ -135,6 +135,30 @@ const cloudFoundry: Routes = [{
               path: 'organizations',
               component: CloudFoundryOrganizationsComponent,
             },
+            {
+              path: 'users',
+              component: CloudFoundryUsersComponent
+            },
+            {
+              path: 'firehose',
+              component: CloudFoundryFirehoseComponent
+            },
+            {
+              path: 'feature-flags',
+              component: CloudFoundryFeatureFlagsComponent
+            },
+            {
+              path: 'build-packs',
+              component: CloudFoundryBuildPacksComponent
+            },
+            {
+              path: 'stacks',
+              component: CloudFoundryStacksComponent
+            },
+            {
+              path: 'security-groups',
+              component: CloudFoundrySecurityGroupsComponent
+            }
           ]
         },
         {
@@ -200,30 +224,6 @@ const cloudFoundry: Routes = [{
                 }
               ]
             },
-            {
-              path: 'users',
-              component: CloudFoundryUsersComponent
-            },
-            {
-              path: 'firehose',
-              component: CloudFoundryFirehoseComponent
-            },
-            {
-              path: 'feature-flags',
-              component: CloudFoundryFeatureFlagsComponent
-            },
-            {
-              path: 'build-packs',
-              component: CloudFoundryBuildPacksComponent
-            },
-            {
-              path: 'stacks',
-              component: CloudFoundryStacksComponent
-            },
-            {
-              path: 'security-groups',
-              component: CloudFoundrySecurityGroupsComponent
-            }
           ]
         }]
     },
