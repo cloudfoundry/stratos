@@ -29,13 +29,9 @@ stages:
   - Frontend Unit Tests
   - Backend
   - name: E2E tests
-<<<<<<< HEAD
-    if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR head_branch =~ ^.*-(?i:e2e)$
-=======
     if: type != pull_request
   - name: E2E tests quick
     if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
->>>>>>> origin/v2-master
 jobs:
   include:
   - stage: Frontend Lint
