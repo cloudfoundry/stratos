@@ -34,7 +34,17 @@ describe('CardAppComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        state: ''
+        state: '',
+        space: {
+          entity: {
+            name: '',
+            organization: {
+              entity: {
+                name: '',
+              }
+            },
+          },
+        },
       },
       metadata: {} as APIResourceMetadata,
     };
