@@ -9,6 +9,8 @@
   </div>
 </app-page-header>
 
+<app-endpoints-missing [showToolbarHint]="false" [showSnackForNoneConnected]="false"></app-endpoints-missing>
+
 <ng-template #noEntriesForCurrentFilter>
   <app-no-content-message [icon]="'apps'" [firstLine]="'There are no services for the current filter'" [secondLine]="{
   text: ''
