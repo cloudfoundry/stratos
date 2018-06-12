@@ -1,0 +1,61 @@
+$green: #008744;
+$blue: #0057e7;
+$red: #d62d20;
+$yellow: #ffa700;
+$white: #eee;
+$width: 100px;
+.showbox {
+  position: absolute;
+  top: 45%;
+}
+
+.loader {
+  margin: 0 auto;
+  position: relative;
+  width: 100px;
+  &::before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
+}
+
+.circular {
+  animation: rotate 2s linear infinite;
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  margin: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform-origin: center center;
+  width: 100;
+}
+
+.path {
+  animation: dash .9s ease-in-out infinite;
+  stroke: $blue;
+  stroke-linecap: round;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 50, 200;
+    stroke-dashoffset: -25px;
+  }
+  100% {
+    stroke-dasharray: 100, 200;
+    stroke-dashoffset: -100px;
+  }
+}
