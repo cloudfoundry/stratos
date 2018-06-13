@@ -43,7 +43,7 @@
     <app-step title="Stratos Admin Scope" [onNext]="uaaScopeNext">
       <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration" text="Please wait - this will take a few moments">
         <div class="uaa-wizard__form">
-          <p>Please select the UAA scope to use to identify Stratos Administrator users:</p>
+          <p>Please select the UAA scope to use to identify users as Stratos Administrators:</p>
           <form class="stepper-form">
             <mat-form-field>
               <mat-select selected="uaaScopes[0]" [(ngModel)]="selectedScope" name="UAAScope">
