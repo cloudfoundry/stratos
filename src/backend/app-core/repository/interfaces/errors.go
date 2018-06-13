@@ -13,7 +13,7 @@ type ErrHTTPShadow struct {
 	LogMessage string
 }
 
-type errHTTPRequest struct {
+type ErrHTTPRequest struct {
 	Status     int
 	InnerError error
 	Response   string
@@ -33,7 +33,7 @@ func NewHTTPShadowError(status int, userFacingError string, fmtString string, ar
 	return shadowError
 }
 
-func (e errHTTPRequest) Error() string {
+func (e ErrHTTPRequest) Error() string {
 	body := "No request body"
 	if len(e.Response) != 0 {
 		body = e.Response
@@ -52,7 +52,7 @@ func LogHTTPError(r *http.Response, innerErr error) error {
 		status = r.StatusCode
 	}
 
-	return errHTTPRequest{
+	return ErrHTTPRequest{
 		Status:     status,
 		InnerError: innerErr,
 		Response:   string(b),
