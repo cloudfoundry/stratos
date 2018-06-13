@@ -317,7 +317,8 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     SelectPlanStepComponent,
     SelectServiceComponent,
     CreateApplicationStep1Component,
-    BindAppsStepComponent
+    BindAppsStepComponent,
+    CfEndpointsMissingComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
