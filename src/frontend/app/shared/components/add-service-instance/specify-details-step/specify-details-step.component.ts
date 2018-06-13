@@ -22,6 +22,7 @@ import {
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
+import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import {
   SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
@@ -263,9 +264,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                 filter(s => {
                   return s && !s.creating;
                 }),
-                map(req => req.error ?
-                  { success: false, message: `Failed to create service instance binding: ${req.message}` } :
-                  this.routeToServices(state.cfGuid, state.bindAppGuid))
+                map(req => {
+                  if (req.error) {
+                    return { success: false, message: `Failed to create service instance binding: ${req.message}` };
+                  } else {
+                    // Refetch env vars for app, since they have been changed by CF
+                    this.store.dispatch(
+                      new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+                    );
+
+                    return this.routeToServices(state.cfGuid, state.bindAppGuid);
+                  }
+                })
               );
           } else {
             return observableOf(this.routeToServices());
