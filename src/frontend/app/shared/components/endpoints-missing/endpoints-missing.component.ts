@@ -38,7 +38,7 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
 
   private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private userService: UserService, private snackBar: MatSnackBar, public endpointsService: EndpointsService) { }
+  constructor(private snackBar: MatSnackBar, public endpointsService: EndpointsService) { }
 
   ngAfterViewInit() {
     this.noContent$ = observableCombineLatest(
