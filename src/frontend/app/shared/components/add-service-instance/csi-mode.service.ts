@@ -29,9 +29,10 @@ const defaultViewDetail = {
 @Injectable()
 export class CsiModeService {
 
-  spaceScopedDetails: SpaceScopedService;
   private mode: string;
   public viewDetail: ViewDetail;
+  // This property is only used when launching the Create Service Instance Wizard from the Marketplace
+  spaceScopedDetails: SpaceScopedService = { isSpaceScoped: false };
 
   constructor(
     private activatedRoute: ActivatedRoute
