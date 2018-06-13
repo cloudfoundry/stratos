@@ -14,6 +14,8 @@ import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../.
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -25,7 +27,8 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   constructor(
     public store: Store<AppState>,
     public cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CurrentUserPermissionsService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     super();
   }
@@ -35,6 +38,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList<OrgUserRoleNames>>(
       userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
     );
+    console.log(row);
     this.chipsConfig = this.getChipConfig(userOrgPermInfo);
   }
 
@@ -48,6 +52,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         ...perm,
         name: orgPerms.name,
         guid: orgPerms.orgGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,
@@ -64,6 +69,15 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   }
 
   public removePermission(cellPermission: ICellPermissionList<OrgUserRoleNames>) {
+    const confirmation = new ConfirmationDialogConfig(
+      'Remove Permission',
+      `Are you sure you want to remove permission '${cellPermission.name}: ${cellPermission.string}'` +
+      ` from user '${cellPermission.userName}'?`,
+      'Delete',
+      true
+    );
+    this.confirmDialog.open(confirmation, () => {
+
     this.store.dispatch(new RemoveUserPermission(
       this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       cellPermission.userGuid,
@@ -71,6 +85,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
       cellPermission.key,
       false
     ));
+  });
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>

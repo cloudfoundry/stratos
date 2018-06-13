@@ -14,6 +14,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
   name: string;
   guid: string;
   userGuid: string;
+  userName?: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid?: string;
