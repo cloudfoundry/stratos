@@ -33,7 +33,8 @@ import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
 
-
+const hostPattern = '(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])';
+const pathPattern = `^((\/)${hostPattern}?(\/)*)*$`;
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
@@ -76,9 +77,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.addHTTPRoute = new FormGroup({
-      host: new FormControl('', [<any>Validators.required]),
+      host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern)]),
       domain: new FormControl('', [<any>Validators.required]),
-      path: new FormControl('')
+      path: new FormControl('', [Validators.pattern(pathPattern)])
     });
     this.addRouteMode = this.addRouteModes[0];
 
