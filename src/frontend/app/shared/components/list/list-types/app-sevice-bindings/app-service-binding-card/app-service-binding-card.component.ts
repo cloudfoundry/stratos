@@ -50,16 +50,27 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
-    this.cardMenu = [{
-      label: 'Unbind',
-      action: this.detach,
-      can: this.appService.waitForAppEntity$.pipe(
-        switchMap(app => this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_BINDING_EDIT,
-          this.appService.cfGuid,
-          app.entity.entity.space_guid
-        )))
-    }];
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.appService.waitForAppEntity$.pipe(
+          switchMap(app => this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            this.appService.cfGuid,
+            app.entity.entity.space_guid
+          )))
+      },
+      {
+        label: 'Unbind',
+        action: this.detach,
+        can: this.appService.waitForAppEntity$.pipe(
+          switchMap(app => this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            this.appService.cfGuid,
+            app.entity.entity.space_guid
+          )))
+      }];
   }
   ngOnInit(): void {
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
@@ -140,4 +151,11 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.appService.cfGuid
     );
   }
+
+  edit = () => this.serviceActionHelperService.editServiceBinding(
+    this.row.entity.service_instance_guid,
+    this.appService.cfGuid,
+    { 'appId': this.appService.appGuid }
+  )
+
 }
