@@ -127,8 +127,8 @@ export class APIEffect {
         errors.forEach(error => {
           if (error.error) {
             const fakedAction = { ...actionClone, endpointGuid: error.guid };
-            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
             const errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
+            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction, errorMessage));
             this.store.dispatch(new WrapperRequestActionFailed(
               errorMessage,
               { ...actionClone, endpointGuid: error.guid },
@@ -163,7 +163,7 @@ export class APIEffect {
           }
         })));
         return [
-          new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
+          new APISuccessOrFailedAction(actionClone.actions[2], actionClone, error.message),
           new WrapperRequestActionFailed(
             error.message,
             actionClone,
