@@ -1,8 +1,8 @@
 
 import { of as observableOf, Observable, combineLatest } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { first, map } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
 
 import { environment } from '../../../../../../../environments/environment';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
@@ -14,6 +14,7 @@ import { CloudFoundryOrganizationService } from '../../../../services/cloud-foun
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -25,7 +26,7 @@ import { CurrentUserPermissionsService } from '../../../../../../core/current-us
     CloudFoundryOrganizationService
   ]
 })
-export class CloudFoundrySpaceBaseComponent implements OnInit {
+export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   tabLinks = [
     {
@@ -65,9 +66,12 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   public permsSpaceDelete = CurrentUserPermissions.SPACE_DELETE;
   public canUpdateRoles$: Observable<boolean>;
 
+  public schema = entityFactory(spaceSchemaKey);
+  deleteRedirectSub: any;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    private cfSpaceService: CloudFoundrySpaceService,
+    public cfSpaceService: CloudFoundrySpaceService,
     private cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
     currentUserPermissionsService: CurrentUserPermissionsService
@@ -86,6 +90,23 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       cfSpaceService.cfGuid,
       cfSpaceService.orgGuid,
       cfSpaceService.spaceGuid);
+
+    this.deleteRedirectSub = this.cfSpaceService.spaceEntityService.entityObs$.pipe(
+      tap(({ entityRequestInfo }) => {
+        if (entityRequestInfo.deleting.deleted) {
+          this.store.dispatch(new RouterNav({
+            path: [
+              'cloud-foundry',
+              this.cfSpaceService.cfGuid,
+              'organizations',
+              this.cfSpaceService.orgGuid,
+              'spaces']
+          }));
+        }
+      })
+    ).subscribe();
+
+
   }
 
   private setUpBreadcrumbs(
@@ -115,7 +136,9 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   }
 
 
-  ngOnInit() { }
+  ngOnDestroy() {
+    this.deleteRedirectSub.unsubscribe();
+  }
 
   deleteSpace = () => {
     this.cfOrgService.deleteSpace(
@@ -123,16 +146,6 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       this.cfSpaceService.orgGuid,
       this.cfSpaceService.cfGuid
     );
-
-    this.store.dispatch(new RouterNav({
-      path: [
-        'cloud-foundry',
-        this.cfSpaceService.cfGuid,
-        'organizations',
-        this.cfSpaceService.orgGuid,
-        'spaces']
-    }
-    ));
   }
 
 }
