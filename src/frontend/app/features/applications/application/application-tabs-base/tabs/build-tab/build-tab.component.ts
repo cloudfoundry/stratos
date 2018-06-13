@@ -31,6 +31,8 @@ export class BuildTabComponent implements OnInit {
 
   getFullApiUrl = getFullEndpointApiUrl;
 
+  sshStatus$: Observable<string>;
+
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
       combineLatest(
@@ -39,5 +41,16 @@ export class BuildTabComponent implements OnInit {
       map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct(), );
+
+    this.sshStatus$ = this.applicationService.application$.pipe(
+      combineLatest(this.applicationService.appSpace$),
+      map(([app, space]) => {
+        if (! space.entity.allow_ssh) {
+          return 'Disabled by the space';
+        } else {
+          return app.app.entity.enable_ssh ? 'Yes' : 'No';
+       }
+      })
+    );
   }
 }
