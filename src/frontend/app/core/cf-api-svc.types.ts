@@ -1,5 +1,6 @@
 import { APIResource } from '../store/types/api.types';
 import { IApp, IOrganization } from './cf-api.types';
+import { StringLiteral } from 'typescript';
 
 export interface ILastOperation {
   type: string;
@@ -58,11 +59,13 @@ export interface IServicePlan {
   extra: string; // stringified IServiceExtra
   unique_id: string;
   public: boolean;
-  bindable: number;
+  bindable: number | boolean;
   active: boolean;
   service_url: string;
   service_instances_url: string;
   service?: APIResource<IService>;
+  guid?: string;
+  cfGuid?: string;
 }
 
 export interface IServicePlanExtra {
@@ -72,18 +75,25 @@ export interface IServicePlanExtra {
 export interface IService {
   label: string;
   description: string;
-  active: number;
-  bindable: number;
+  active: number | boolean;
+  bindable: number | boolean;
   unique_id: string;
   extra: string; // stringified IServiceExtra object
   tags: string[];
   requires: string[];
   service_broker_guid: string;
-  plan_updateable: number;
+  plan_updateable: number | boolean;
   service_plans_url: string;
   service_plans: APIResource<IServicePlan>[];
   cfGuid?: string;
   guid?: string;
+  // deprecated properties
+  provider?: string;
+  url?: string;
+  long_description?: string;
+  version?: string;
+  info_url?: string;
+  documentation_url?: string;
 
 }
 
@@ -109,4 +119,6 @@ export interface IServiceBroker {
   broker_url: string;
   auth_username: string;
   space_guid?: string;
+  guid?: string;
+  cfGuid?: string;
 }

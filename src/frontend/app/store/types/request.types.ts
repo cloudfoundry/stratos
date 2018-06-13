@@ -48,6 +48,7 @@ export interface IRequestAction extends RequestAction {
 
 export interface IUpdateRequestAction {
   apiAction: IRequestAction | PaginatedAction;
+  busy: boolean;
   error: string;
 }
 
@@ -90,6 +91,7 @@ export abstract class RequestUpdateAction implements Action {
 export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
   constructor(
     public apiAction: IRequestAction,
+    public busy: boolean,
     public error: string,
   ) {
     super();
@@ -122,7 +124,6 @@ export class StartRequestAction extends RequestAction {
     super();
   }
 }
-
 
 export class WrapperRequestActionSuccess extends RequestSuccessAction implements ISuccessRequestAction {
   constructor(

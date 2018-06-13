@@ -1,19 +1,13 @@
-import { E2EHelpers, ConsoleUserType } from '../helpers/e2e-helpers';
-import { browser } from 'protractor';
-import { ResetsHelpers } from '../helpers/reset-helpers';
-import { EndpointsPage, EndpointMetadata, resetToLoggedIn } from './endpoints.po';
 import { ApplicationsPage } from '../applications/applications.po';
-import { SideNavMenuItem } from '../po/side-nav.po';
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
-import { ServicesPage } from '../services/services.po';
-import { SnackBarComponent } from '../po/snackbar.po';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { MenuComponent } from '../po/menu.po';
+import { ServicesPage } from '../services/services.po';
+import { EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
-  const helpers = new E2EHelpers();
-  const secrets = new SecretsHelpers();
-  const resets = new ResetsHelpers();
   const endpointsPage = new EndpointsPage();
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
@@ -21,19 +15,21 @@ describe('Endpoints', () => {
 
   describe('Unregister Endpoints -', () => {
 
+    const toUnregister = e2e.secrets.getDefaultCFEndpoint();
+
     describe('As Admin -', () => {
 
       describe('Single endpoint -', () => {
 
         beforeAll(() => {
-          const toUnregister = secrets.getDefaultCFEndpoint();
-          // Only bind the default Cloud Foundry endpoint
-          resetToLoggedIn(resets.resetAllEndpoints.bind(resets, null, null, false, toUnregister.name), true);
+          // Only register the default Cloud Foundry endpoint
+          e2e.setup(ConsoleUserType.admin)
+          .clearAllEndpoints()
+          .registerDefaultCloudFoundry();
         });
 
         it('Successfully unregister', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
-          const toUnregister = secrets.getDefaultCFEndpoint();
 
           // Should have a single row initially
           endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1); });
@@ -44,6 +40,7 @@ describe('Endpoints', () => {
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
+            ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             // Should have removed the only row, so we should see welcome message again
             expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
           });
@@ -53,14 +50,14 @@ describe('Endpoints', () => {
       describe('Multiple endpoints -', () => {
 
         beforeAll(() => {
-          const toUnregister = secrets.getDefaultCFEndpoint();
           // Ensure we have multiple endpoints registered
-          resetToLoggedIn(resets.resetAllEndpoints.bind(resets, null, null, true), true);
+          e2e.setup(ConsoleUserType.admin)
+          .clearAllEndpoints()
+          .registerMultipleCloudFoundries();
         });
 
         it('Successfully unregister', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
-          const toUnregister = secrets.getDefaultCFEndpoint();
 
           // Current number of rows
           let endpointCount = 0;
@@ -72,6 +69,7 @@ describe('Endpoints', () => {
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
+            ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             endpointsPage.table.getRows().then(rows => {
               expect(rows.length).toBe(endpointCount - 1);
             });
@@ -83,11 +81,12 @@ describe('Endpoints', () => {
     describe('As User -', () => {
 
       beforeAll(() => {
-        resetToLoggedIn(resets.resetAllEndpoints, false);
+        e2e.setup(ConsoleUserType.user)
+        .clearAllEndpoints()
+        .registerDefaultCloudFoundry();
       });
 
       it('unregister is not visible', () => {
-        const toUnregister = secrets.getDefaultCFEndpoint();
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Should have a single row initially

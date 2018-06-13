@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-eula-content',
   templateUrl: '../../../../assets/eula.html'
 })
-export class EulaPageContentComponent{}
+export class EulaPageContentComponent {}
 
 @Component({
   selector: 'app-eula-page',

@@ -1,6 +1,9 @@
+
+import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
+
+import {take} from 'rxjs/operators';
 import { SessionData } from '../../../store/types/auth.types';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { EndpointModel, EndpointState, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
 import { AppState, IRequestEntityTypeState } from '../../../store/app-state';
@@ -20,8 +23,6 @@ import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.sele
 
 @Injectable()
 export class CfAuthService {
-
-
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   sessionData$: Observable<SessionData>;
   // WIP: RC Initialise previously released promise when all init requests finished. For the time being use this, then make selector
@@ -51,8 +52,8 @@ export class CfAuthService {
   }
 
   initialise() {
-    Observable.combineLatest(
-      this.endpoints$.take(1),
+    observableCombineLatest(
+      this.endpoints$.pipe(take(1)),
       this.sessionData$,
     ).subscribe(([endpoints, session]: [IRequestEntityTypeState<EndpointModel>, SessionData]) => {
       this.session = session;
@@ -138,11 +139,11 @@ export class CfAuthService {
       // promises = promises.concat(_addSpaceRolePromisesForUser(endpointGuid, userId));
     }
 
-    Observable.combineLatest(
+    observableCombineLatest(
       this.sessionData$,
       this.featureFlags$[endpointGuid],
       this.userSummaries$[endpointGuid][cfUserGuid],
-    ).take(1).subscribe(([session, featureFlags, userSummary]: [SessionData, CFFeatureFlags, CfAuthUserSummary]) => {
+    ).pipe(take(1)).subscribe(([session, featureFlags, userSummary]: [SessionData, CFFeatureFlags, CfAuthUserSummary]) => {
       const mappedSummary: CfAuthUserSummaryMapped = {
         organizations: {
           audited: userSummary.audited_organizations,

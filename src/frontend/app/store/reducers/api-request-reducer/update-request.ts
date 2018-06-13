@@ -1,10 +1,5 @@
-import { IStartRequestAction, IRequestAction, IUpdateRequestAction } from '../../types/request.types';
-import {
-  getEntityRequestState,
-  mergeUpdatingState,
-  modifyRequestWithRequestType,
-  setEntityRequestState,
-} from './request-helpers';
+import { IRequestAction, IUpdateRequestAction } from '../../types/request.types';
+import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
 export function updateRequest(state, action: IUpdateRequestAction) {
   if (!action.apiAction.guid) {
@@ -17,7 +12,7 @@ export function updateRequest(state, action: IUpdateRequestAction) {
     apiAction,
     requestState.updating,
     {
-      busy: !!apiAction.updatingKey,
+      busy: action.busy,
       error: !!action.error,
       message: '',
     }

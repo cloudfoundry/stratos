@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';

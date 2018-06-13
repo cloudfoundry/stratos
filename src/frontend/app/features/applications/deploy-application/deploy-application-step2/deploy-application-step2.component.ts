@@ -1,11 +1,10 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { filter, map, take, tap } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
-import { Subscription } from 'rxjs/Subscription';
+import { filter, map, take, tap ,  withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -33,6 +32,7 @@ import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { SourceType } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -94,14 +94,14 @@ export class DeployApplicationStep2Component
     private paginationMonitorFactory: PaginationMonitorFactory
   ) { }
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(
       new SaveAppDetails({
         projectName: this.repository,
         branch: this.repositoryBranch
       })
     );
-    return Observable.of({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
+    return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
   ngOnInit() {
@@ -174,7 +174,7 @@ export class DeployApplicationStep2Component
       map(([p, q]) => p)
     );
 
-    const updateBranchAndCommit = Observable.combineLatest(
+    const updateBranchAndCommit = observableCombineLatest(
       this.repositoryBranches$,
       deployBranchName$,
       this.projectInfo$,
@@ -250,8 +250,8 @@ export class DeployApplicationStep2Component
   }
 
   ngAfterContentInit() {
-    this.validate = this.sourceSelectionForm.statusChanges.map(() => {
+    this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
       return this.sourceSelectionForm.valid || this.isRedeploy;
-    });
+    }));
   }
 }

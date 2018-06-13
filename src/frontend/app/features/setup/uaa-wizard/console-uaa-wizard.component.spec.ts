@@ -4,22 +4,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { MDAppModule } from '../../../core/md.module';
-import { StepComponent } from '../../../shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
-import { ConsoleUaaWizardComponent } from './console-uaa-wizard.component';
-import { DotContentComponent } from '../../../core/dot-content/dot-content.component';
-import { SharedModule } from '../../../shared/shared.module';
 import { CoreModule } from '../../../core/core.module';
-import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
+import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
-import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { SharedModule } from '../../../shared/shared.module';
 import { SetupModule } from '../setup.module';
+import { ConsoleUaaWizardComponent } from './console-uaa-wizard.component';
 
 describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;

@@ -1,3 +1,5 @@
+
+import {map} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -14,10 +16,10 @@ export class SetClientFilterEffect {
     private store: Store<AppState>,
   ) { }
 
-  @Effect({ dispatch: false }) clearPageNumber$ = this.actions$.ofType<SetClientFilter>(SET_CLIENT_FILTER)
-    .map(action => {
+  @Effect({ dispatch: false }) clearPageNumber$ = this.actions$.ofType<SetClientFilter>(SET_CLIENT_FILTER).pipe(
+    map(action => {
       // We reset the page when a param is changed.
       this.store.dispatch(new SetClientPage(action.entityKey, action.paginationKey, 1));
-    });
+    }));
 }
 

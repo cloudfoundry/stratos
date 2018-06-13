@@ -1,5 +1,5 @@
-import { TestBed } from '@angular/core/testing';
 import { APP_BASE_HREF } from '@angular/common';
+import { TestBed } from '@angular/core/testing';
 
 /**
  * The ngx Charts lobrary needs APP_BASE_HREF - so we will provide it through
@@ -10,4 +10,11 @@ beforeEach( () => {
   TestBed.configureTestingModule({
     providers: [ { provide: APP_BASE_HREF, useValue: '/' } ]
   });
+});
+
+/**
+ * Bump up the Jasmine timeout from 5 seconds
+ */
+beforeAll( () => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 });

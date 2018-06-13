@@ -177,9 +177,19 @@
       var scriptOutFolder = path.join(conf.outputPath, 'deploy/db');
       fs.ensureDirSync(scriptOutFolder);
       // Copy config.properties if there is not one already
-      fs.copySync(path.resolve(__dirname, '../deploy/cloud-foundry/config.properties'), path.join(conf.outputPath, 'config.properties'), {
+      fs.copySync(path.resolve(__dirname, './dev/config.properties'), path.join(conf.outputPath, 'config.properties'), {
         overwrite: false
       });
+
+      // Link the UI folder - the backend will serve this up and this ensures for dev that the backend API is served from /pp
+      var uiDestFolder = path.resolve(__dirname, '../dist');
+      var uiFolder = path.resolve(conf.outputPath, 'ui');
+      if (!fs.existsSync(uiDestFolder)) {
+        fs.mkdirpSync(uiDestFolder);
+      }
+      if (!fs.existsSync(uiFolder)) {
+        fs.symlinkSync(uiDestFolder, uiFolder);
+      }
 
       // Copy the dev certs as well if they exist
       var devCerts = path.resolve(__dirname, '../dev-certs');
@@ -193,6 +203,13 @@
           fs.copySync(path.join(devCerts, 'server.crt'), path.join(outDevCerts, 'pproxy.crt'));
           fs.copySync(path.join(devCerts, 'server.key'), path.join(outDevCerts, 'pproxy.key'));
         }
+      }
+
+      // Copy proxy.conf.js so the front-end is all ready to go against a local backend - if not already exsiting
+      var proxyConf = path.resolve(__dirname, '../proxy.conf.js');
+      var localProxyConf = path.resolve(__dirname, './proxy.conf.localdev.js');
+      if (!fs.existsSync(proxyConf)) {
+        fs.copySync(localProxyConf, proxyConf);
       }
 
       return done();

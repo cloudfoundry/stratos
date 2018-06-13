@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -21,9 +23,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     },
     icon: 'delete',
     label: 'Delete',
-    description: '',
-    visible: (row: ListAppEnvVar) => true,
-    enabled: (row: ListAppEnvVar) => true,
+    description: ''
   };
 
   private listActionDelete: IListAction<ListAppEnvVar> = {
@@ -32,8 +32,8 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     },
     label: 'Delete',
     description: '',
-    visible: (row: ListAppEnvVar) => true,
-    enabled: (row: ListAppEnvVar) => true,
+    createVisible: () => observableOf(true),
+    createEnabled: () => observableOf(true)
   };
 
   columns: Array<ITableColumn<ListAppEnvVar>> = [

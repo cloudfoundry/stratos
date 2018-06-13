@@ -1,25 +1,13 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+
+import {of as observableOf,  BehaviorSubject, Observable, Subscription, Subject } from 'rxjs';
+
+import {combineLatest,  catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
-import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { interval } from 'rxjs/observable/interval';
-import { catchError, filter, map, mergeMap, share, switchMap, takeWhile, tap, first } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
-import {
-  CfAppsDataSource,
-  createGetAllAppAction,
-} from '../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { GetAppEnvVarsAction } from '../../../store/actions/app-metadata.actions';
-import { DeleteDeployAppSection } from '../../../store/actions/deploy-applications.actions';
-import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../store/selectors/api.selectors';
@@ -112,14 +100,14 @@ export class DeployApplicationDeployer {
     }
 
     const readyFilter = this.fsFileInfo ? () => true :
-    (appDetail) => !!appDetail.applicationSource && !!appDetail.applicationSource.projectName;
+      (appDetail) => !!appDetail.applicationSource && !!appDetail.applicationSource.projectName;
     this.isOpen = true;
     this.connectSub = this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       mergeMap(appDetails => {
         const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, appDetails.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, appDetails.cloudFoundryDetails.space));
-        return Observable.of(appDetails).combineLatest(orgSubscription, spaceSubscription);
+        return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
       }),
       first(),
       tap(([appDetail, org, space]) => {
@@ -133,7 +121,7 @@ export class DeployApplicationDeployer {
           `?org=${org.entity.name}&space=${space.entity.name}`
         );
 
-        this.inputStream = new QueueingSubject<string>();
+        this.inputStream = new Subject<string>();
         this.messages = websocketConnect(streamUrl, this.inputStream)
           .messages.pipe(
             catchError(e => {
@@ -154,7 +142,7 @@ export class DeployApplicationDeployer {
             filter((log) => log.type === SocketEventTypes.DATA),
             map((log) => log.message)
           );
-          this.msgSub = this.messages.subscribe();
+        this.msgSub = this.messages.subscribe();
       })
     ).subscribe();
   }
@@ -261,7 +249,7 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.SOURCE_REQUIRED:
         this.inputStream.next(this.sendProjectInfo(this.applicationSource));
-      break;
+        break;
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:
       case SocketEventTypes.MANIFEST:
@@ -278,7 +266,7 @@ export class DeployApplicationDeployer {
     // Update for the previous file transfer
     if (this.currentFileTransfer) {
       this.fileTransferStatus.bytesSent += this.currentFileTransfer.size;
-      this.fileTransferStatus.filesSent ++;
+      this.fileTransferStatus.filesSent++;
       this.fileTransferStatus$.next(this.fileTransferStatus);
     }
 

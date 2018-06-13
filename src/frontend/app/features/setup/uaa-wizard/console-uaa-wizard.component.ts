@@ -1,11 +1,10 @@
-import { AfterContentInit, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { any } from 'codelyzer/util/function';
-import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { VerifySession } from '../../../store/actions/auth.actions';
 import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
@@ -19,7 +18,7 @@ import { UAASetupState } from '../../../store/types/uaa-setup.types';
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
+export class ConsoleUaaWizardComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private router: Router) { }
 
@@ -38,37 +37,40 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       username: this.uaaForm.get('adminUsername').value,
       console_client_secret: this.uaaForm.get('clientSecret').value,
     }));
-    return this.store.select('uaaSetup')
-      .skipWhile((state: UAASetupState) => {
+    return this.store.select('uaaSetup').pipe(
+      skipWhile((state: UAASetupState) => {
         return state.settingUp;
-      })
-      .map((state: UAASetupState) => {
-        this.uaaScopes = state.payload.scope;
-        this.selectedScope = 'stratos.admin';
+      }),
+      map((state: UAASetupState) => {
+        const success = !state.error;
+        if (success) {
+          this.uaaScopes = state.payload.scope;
+          this.selectedScope = 'stratos.admin';
+        }
         return {
-          success: !state.error,
+          success,
           message: state.message
         };
-      });
+      }), );
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
     this.applyingSetup$.next(true);
-    return this.store.select(s => [s.uaaSetup, s.auth])
-      .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+    return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
+      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
-      })
-      .delay(3000)
-      .take(10)
-      .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+      }),
+      delay(3000),
+      take(10),
+      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
         }
         return validUAASessionData;
-      })
-      .map((state: [UAASetupState, AuthState]) => {
+      }),
+      map((state: [UAASetupState, AuthState]) => {
         if (!state[0].error) {
           // Do a hard reload of the app
           const loc = window.location;
@@ -81,7 +83,7 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
           success: !state[0].error,
           message: state[0].message
         };
-      });
+      }), );
   }
   ngOnInit() {
     this.uaaForm = new FormGroup({
@@ -102,9 +104,6 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       observer.next(this.uaaForm.valid);
     });
 
-  }
-
-  ngAfterContentInit() {
   }
 
 }

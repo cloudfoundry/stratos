@@ -10,6 +10,7 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
+import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'applications', pathMatch: 'full' },
@@ -23,7 +24,8 @@ const appRoutes: Routes = [
     children: [
       { path: 'dashboard', component: HomePageComponent },
       { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule' },
-      { path: 'endpoints',
+      {
+        path: 'endpoints',
         children: [{
           path: '',
           loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule',
@@ -33,7 +35,8 @@ const appRoutes: Routes = [
           loadChildren: 'app/features/metrics/metrics.module#MetricsModule',
         }]
       },
-      { path: 'service-catalog', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
+      { path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
+      { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
@@ -43,6 +46,10 @@ const appRoutes: Routes = [
     path: 'noendpoints',
     component: NoEndpointsNonAdminComponent,
     canActivate: [AuthGuardService],
+  },
+  {
+    path: '**',
+    component: PageNotFoundComponentComponent
   }
 ];
 

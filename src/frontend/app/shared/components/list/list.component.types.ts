@@ -1,5 +1,5 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+
+import {of as observableOf,  BehaviorSubject ,  Observable } from 'rxjs';
 
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
@@ -72,10 +72,17 @@ export interface IListConfig<T> {
    */
   tableFixedRowHeight?: boolean;
   /**
+   * Set the align-self of each cell in the row
+   */
+  tableRowAlignSelf?: string;
+  /**
    * The card component used in card view
    */
   cardComponent?: any;
   hideRefresh?: boolean;
+  /**
+   * Allow selection regardless of number or visibility of multi actions
+   */
   allowSelection?: boolean;
 }
 
@@ -102,7 +109,6 @@ export class ListConfig<T> implements IListConfig<T> {
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;
-  tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
   allowSelection = false;
@@ -112,22 +118,27 @@ export class ListConfig<T> implements IListConfig<T> {
   getColumns = (): ITableColumn<T>[] => null;
   getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getInitialised = () => Observable.of(true);
+  getInitialised = () => observableOf(true);
 }
 
 export interface IBaseListAction<T> {
   icon?: string;
   label: string;
   description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean | Observable<T>;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
+  createVisible?: (row$: Observable<T>) => Observable<boolean>;
+  createEnabled?: (row$: Observable<T>) => Observable<boolean>;
 }
 
-export interface IMultiListAction<T> extends IBaseListAction<T> {
+export interface IOptionalAction<T> extends IBaseListAction<T> {
+  visible$?: Observable<boolean>;
+  enabled$?: Observable<boolean>;
+}
+
+export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    *
@@ -136,6 +147,6 @@ export interface IMultiListAction<T> extends IBaseListAction<T> {
   action: (items: T[]) => boolean;
 }
 
-export interface IGlobalListAction<T> extends IBaseListAction<T> {
+export interface IGlobalListAction<T> extends IOptionalAction<T> {
   action: () => void;
 }

@@ -3,16 +3,14 @@ import { tap } from 'rxjs/operators';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { cfUserSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
+import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
+import { ListConfig } from '../../list.component.types';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource } from './../../../../../store/types/api.types';
 import { CfUser } from './../../../../../store/types/user.types';
-import { CfUserService } from './../../../../data-services/cf-user.service';
-import { CfUserListConfigService } from './cf-user-list-config.service';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
-import { ListConfig } from '../../list.component.types';
 
 
 function setupStateManager(paginationMonitor: PaginationMonitor<APIResource<CfUser>>) {

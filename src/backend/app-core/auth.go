@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -44,14 +45,23 @@ const CFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
-// SessionExpiresAfterHeader Custom header for communicating the session expiry time to clients
+// ClientRequestDateHeader Custom header for getting date form client
 const ClientRequestDateHeader = "X-Cap-Request-Date"
 
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
+// XSRFTokenHeader - XSRF Token Header name
+const XSRFTokenHeader = "X-Xsrf-Token"
+
+// XSRFTokenCookie - XSRF Token Cookie name
+const XSRFTokenCookie = "XSRF-TOKEN"
+
+// XSRFTokenSessionName - XSRF Token Session name
+const XSRFTokenSessionName = "xsrf_token"
+
 func (p *portalProxy) getUAAIdentityEndpoint() string {
-	log.Info("getUAAIdentityEndpoint")
+	log.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
 }
 
@@ -129,6 +139,9 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
 
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
@@ -210,6 +223,11 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 				TokenExpiry: tokenRecord.TokenExpiry,
 				APIEndpoint: cnsiRecord.APIEndpoint,
 				Admin:       isAdmin,
+			}
+
+			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
+			if ok {
+				resp.User = cnsiUser
 			}
 
 			return resp, nil
@@ -380,6 +398,9 @@ func (p *portalProxy) logout(c echo.Context) error {
 	log.Debug("logout")
 
 	p.removeEmptyCookie(c)
+
+	// Remove the XSRF Token from the session
+	p.unsetSessionValue(c, XSRFTokenSessionName)
 
 	err := p.clearSession(c)
 	if err != nil {
@@ -619,12 +640,51 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
 	err = c.JSON(http.StatusOK, info)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
+func (p *portalProxy) ensureXSRFToken(c echo.Context) {
+	token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
+	if err != nil || len(token) == 0 {
+		// Need a new token
+		tokenBytes, err := generateRandomBytes(32)
+		if err == nil {
+			token = base64.StdEncoding.EncodeToString(tokenBytes)
+		} else {
+			token = ""
+		}
+		sessionValues := make(map[string]interface{})
+		sessionValues[XSRFTokenSessionName] = token
+		p.setSessionValues(c, sessionValues)
+	}
+
+	if len(token) > 0 {
+		c.Response().Header().Set(XSRFTokenHeader, token)
+	}
+}
+
+// See: https://github.com/gorilla/csrf/blob/a8abe8abf66db8f4a9750d76ba95b4021a354757/helpers.go
+// generateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random number generator fails to function correctly.
+func generateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	// err == nil only if len(b) == n
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+
 }
 
 func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
@@ -679,9 +739,10 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 
 	// add the uaa entry to the output
 	uaaEntry := &interfaces.ConnectedUser{
-		GUID:  userGUID,
-		Name:  userTokenInfo.UserName,
-		Admin: uaaAdmin,
+		GUID:   userGUID,
+		Name:   userTokenInfo.UserName,
+		Admin:  uaaAdmin,
+		Scopes: userTokenInfo.Scope,
 	}
 
 	return uaaEntry, nil
@@ -693,15 +754,22 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 }
 
 func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {
-	log.Debug("GetCNSIUser")
+	log.Debug("GetCNSIUserAndToken")
 
 	// get the uaa token record
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
-		log.Error(msg)
+		log.Debug(msg)
 		return nil, nil, false
 	}
+
+	cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, &cfTokenRecord)
+	return cnsiUser, &cfTokenRecord, ok
+}
+
+func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+	log.Debug("GetCNSIUserFromToken")
 
 	var cnsiUser *interfaces.ConnectedUser
 	var scope = []string{}
@@ -717,13 +785,14 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 		if err != nil {
 			msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
 			log.Errorf(msg, err)
-			return nil, nil, false
+			return nil, false
 		}
 
 		// add the uaa entry to the output
 		cnsiUser = &interfaces.ConnectedUser{
-			GUID: userTokenInfo.UserGUID,
-			Name: userTokenInfo.UserName,
+			GUID:   userTokenInfo.UserGUID,
+			Name:   userTokenInfo.UserName,
+			Scopes: userTokenInfo.Scope,
 		}
 		scope = userTokenInfo.Scope
 	}
@@ -733,7 +802,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 	if err != nil {
 		msg := "Unable to load CNSI record: %s"
 		log.Errorf(msg, err)
-		return nil, nil, false
+		return nil, false
 	}
 	// TODO should be an extension point
 	if cnsiRecord.CNSIType == "cf" {
@@ -741,7 +810,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 		cnsiUser.Admin = cnsiAdmin
 	}
 
-	return cnsiUser, &cfTokenRecord, true
+	return cnsiUser, true
 }
 
 // Refresh the UAA Token for the user

@@ -1,16 +1,16 @@
-import { EndpointState } from '../../../store/types/endpoint.types';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Rx';
+import { Observable ,  Subscription } from 'rxjs';
+import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
+import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { map, takeUntil, takeWhile, finalize, tap, delay, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+import { RouterRedirect } from '../../../store/reducers/routing.reducer';
+import { EndpointState } from '../../../store/types/endpoint.types';
 
 @Component({
   selector: 'app-login-page',
@@ -36,7 +36,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   busy$: Observable<boolean>;
 
-  redirectPath: string;
+  redirect: RouterRedirect;
 
   message = '';
 
@@ -56,7 +56,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       auth$
         .pipe(
           tap(({ auth, endpoints }) => {
-            this.redirectPath = auth.redirectPath;
+            this.redirect = auth.redirect;
             this.handleOther(auth, endpoints);
           }),
           takeWhile(({ auth, endpoints }) => {
@@ -81,7 +81,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
     }
-    this.store.dispatch(new RouterNav({ path: [this.redirectPath || '/'] }, null));
+    if (this.redirect) {
+      this.store.dispatch(new RouterNav({ path: [this.redirect.path], query: this.redirect.queryParams || {} }));
+    } else {
+      this.store.dispatch(new RouterNav({ path: ['/'] }, null));
+    }
   }
 
   private handleOther(auth: AuthState, endpoints: EndpointState) {
