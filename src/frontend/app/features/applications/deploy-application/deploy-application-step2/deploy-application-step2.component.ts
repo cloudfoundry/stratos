@@ -25,11 +25,10 @@ import {
   selectNewProjectCommit,
   selectPEProjectName,
   selectProjectExists,
-  selectSourceSubType,
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { SourceType } from '../../../../store/types/deploy-application.types';
+import { SourceType, GitAppDetails } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -47,27 +46,31 @@ export class DeployApplicationStep2Component
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
   sourceTypes: SourceType[] = [
-    { name: 'Git', id: 'git' },
-    { name: 'File or folder', id: 'fs' },
+    { name: 'Public Github', id: 'github' },
+    { name: 'Public Git URL', id: 'giturl' },
+    { name: 'Application Archive File', id: 'file' },
+    { name: 'Application Folder', id: 'folder' },
   ];
   sourceType$: Observable<SourceType>;
-  GIT_SOURCE_TYPE = 1;
-  GITHUB_SUB_SOURCE_TYPE = 0;
-  sourceSubTypes: SourceType[] = [
-    { id: 'github', name: 'Public Github' },
-    { id: 'giturl', name: 'Public Git URL' }
-  ];
-  sourceSubType$: Observable<string>;
+  INITIAL_SOURCE_TYPE = 0; // GitHub by default
   repositoryBranches$: Observable<any>;
   validate: Observable<boolean>;
   projectInfo$: Observable<GithubRepo>;
   commitSubscription: Subscription;
+
   // ngModel Properties
   sourceType: SourceType;
-  sourceSubType: SourceType;
   repositoryBranch: GitBranch = { name: null, commit: null };
   repository: string;
   stepperText = 'Please specify the source';
+
+  // Git URL
+  gitUrl: string;
+  gitUrlBranchName: string;
+
+  // Observables for source types
+  sourceTypeGithub$: Observable<boolean>;
+  sourceTypeNeedsUpload$: Observable<boolean>;
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
@@ -95,12 +98,23 @@ export class DeployApplicationStep2Component
   ) { }
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(
-      new SaveAppDetails({
+    // Set the details based on which source type is selected
+    let details: GitAppDetails;
+    if (this.sourceType.id === 'github') {
+      details = {
         projectName: this.repository,
         branch: this.repositoryBranch
-      })
-    );
+      };
+    } else if (this.sourceType.id === 'giturl') {
+      details = {
+        projectName: this.gitUrl,
+        branch: {
+          name: this.gitUrlBranchName
+        }
+      };
+    }
+
+    this.store.dispatch(new SaveAppDetails(details));
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
@@ -110,7 +124,16 @@ export class DeployApplicationStep2Component
     }
 
     this.sourceType$ = this.store.select(selectSourceType);
-    this.sourceSubType$ = this.store.select(selectSourceSubType);
+
+    this.sourceTypeGithub$ = this.sourceType$.pipe(
+      filter(type => type && !!type.id),
+      map(type => type.id === 'github')
+    );
+
+    this.sourceTypeNeedsUpload$ = this.sourceType$.pipe(
+      filter(type => type && !!type.id),
+      map(type => type.id === 'folder' || type.id === 'file')
+    );
 
     const fetchBranches = this.store
       .select(selectProjectExists)
@@ -214,8 +237,7 @@ export class DeployApplicationStep2Component
       filter(p => !p),
       take(1),
       tap(p => {
-        this.setSourceType(this.sourceTypes[this.GIT_SOURCE_TYPE]);
-        this.setSourceSubType(this.sourceSubTypes[this.GITHUB_SUB_SOURCE_TYPE]);
+        this.setSourceType(this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
       })
     );
 
@@ -223,7 +245,6 @@ export class DeployApplicationStep2Component
       filter(p => !!p),
       tap(p => {
         this.sourceType = this.sourceTypes.find(s => s.id === p.id);
-        this.sourceSubType = this.sourceSubTypes.find(s => s.id === p.subType);
       })
     );
 
@@ -241,9 +262,6 @@ export class DeployApplicationStep2Component
   }
 
   setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));
-
-  setSourceSubType = event =>
-    this.store.dispatch(new SetAppSourceSubType(event))
 
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));
