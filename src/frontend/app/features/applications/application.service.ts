@@ -1,7 +1,7 @@
 
 import { of as observableOf, Observable } from 'rxjs';
 
-import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap, tap } from 'rxjs/operators';
+import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
