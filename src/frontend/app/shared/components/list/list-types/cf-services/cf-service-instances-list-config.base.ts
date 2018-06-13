@@ -27,8 +27,6 @@ import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 
-
-
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
 }
@@ -111,7 +109,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     action: (item: APIResource) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
-    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length === 1)),
+    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
@@ -126,11 +124,11 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     label: 'Edit',
     description: 'Edit Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
-    row$.pipe(
-      switchMap(
-        row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+      row$.pipe(
+        switchMap(
+          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+        )
       )
-    )
   };
 
   private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
