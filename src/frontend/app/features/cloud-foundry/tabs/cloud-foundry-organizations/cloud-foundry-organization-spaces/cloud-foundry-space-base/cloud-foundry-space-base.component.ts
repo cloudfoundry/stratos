@@ -108,6 +108,12 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
               routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}/spaces`
             }
           ]
+        },
+        {
+          key: 'services-wall',
+          breadcrumbs: [
+            { value: 'Services', routerLink: `/services` }
+          ]
         }
       ])),
       first()

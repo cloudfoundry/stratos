@@ -26,6 +26,7 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import { TableCellSpaceNameComponent } from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 
 
 
@@ -56,6 +57,12 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
         getValue: (row) => `${row.entity.name}`
       },
       cellFlex: '2'
+    },
+    {
+      columnId: 'space',
+      headerCell: () => 'Space',
+      cellComponent: TableCellSpaceNameComponent,
+      cellFlex: '1'
     },
     {
       columnId: 'service',
