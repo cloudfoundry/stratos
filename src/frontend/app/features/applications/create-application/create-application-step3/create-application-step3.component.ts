@@ -118,7 +118,8 @@ export class CreateApplicationStep3Component implements OnInit {
         {
           space_guid: space,
           domain_guid: this.selectedDomainGuid,
-          host: hostName
+          host: hostName,
+          isTCP: false
         }
       ));
       return this.wrapObservable(this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)),

@@ -6,6 +6,7 @@ import { CFStartAction, ICFAction } from '../types/request.types';
 import { entityFactory } from '../helpers/entity-factory';
 import { routeSchemaKey } from '../helpers/entity-factory';
 import { schema } from 'normalizr';
+import { Route } from '../types/route.types';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -41,15 +42,20 @@ export abstract class BaseRouteAction extends CFStartAction implements ICFAction
 }
 
 export class CreateRoute extends BaseRouteAction {
-  constructor(guid: string, endpointGuid: string, route: NewRoute) {
+  constructor(guid: string, endpointGuid: string, route: Route) {
     super(guid, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'routes';
     this.options.method = 'post';
     this.options.body = {
-      generate_port: true,
       ...route
     };
+    if (route.isTCP && route.port === -1) {
+      this.options.params = new URLSearchParams();
+      this.options.params.set('generate_port', 'true');
+      delete this.options.body.port;
+    }
+    delete this.options.body.isTCP;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
 }
