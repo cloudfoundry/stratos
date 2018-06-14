@@ -63,8 +63,8 @@
   &__form {
     display: flex;
     flex-direction: column;
-    .mat-form-field:not(.mat-form-field-invalid) {
-      .mat-input-placeholder  {
+    .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
+      .mat-form-field-label  {
         color: $suse-text-gray;
       }
       .mat-form-field-underline {
@@ -107,6 +107,7 @@
   }
   &__loading {
     display: none;
+    max-width: 400px;    
   }
   &__busy {
     .suse-login__form {

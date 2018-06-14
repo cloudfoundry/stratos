@@ -5,6 +5,7 @@ import { Customizations, CustomizationsMetadata } from '../core/customizations.t
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { SuseLoginComponent } from './suse-login/suse-login.component';
+import { AboutModule } from '../features/about/about.module';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2018 SUSE',
@@ -29,11 +30,18 @@ const SuseCustomizations: CustomizationsMetadata = {
 })
 export class SuseModule {
 
+  static init = false;
+
   constructor(private router: Router) {
-    // Override the component used for the login route
-    const routeConfig = [...router.config];
-    const loginRoute = routeConfig.find(r => r.path === 'login') || {};
-    loginRoute.component = SuseLoginComponent;
-    router.resetConfig(routeConfig);
+    // Only update the routes once
+    if (!SuseModule.init) {
+      // Override the component used for the login route
+      const routeConfig = [...router.config];
+      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
+      loginRoute.component = SuseLoginComponent;
+      console.log(routeConfig);
+      router.resetConfig(routeConfig);
+      SuseModule.init = true;
+    }
   }
 }
