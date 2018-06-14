@@ -1,0 +1,145 @@
+@import '../../../sass/custom/suse-colors';
+.suse-login {
+  align-items: center;
+  background-color: $suse-blue;
+  border-bottom: 10px solid $suse-primary;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  &__header,
+  &__content,
+  &__footer {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__header {
+    background-color: $suse-secondary;
+    color: $suse-text;
+    flex: 0 0 60px;
+    font-size: 24px;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+  }
+  &__content {
+    align-items: flex-start;
+    color: $suse-text;
+    flex: 1;
+    margin-top: 100px;
+    overflow-y: auto;
+    width: 90%;
+  }
+  &__footer {
+    flex: 0 0 auto;
+    width: 90%;
+    padding: 20px 0;
+  }
+  &__title {
+    width: 90%;
+  }
+  &__copyright {
+    color: $suse-text-gray;
+    flex: 1;
+  }
+  &__logo {
+    img {
+      width: 79px;
+    }
+  }
+  &__intro {
+    flex: 1;
+    margin-right: 24px;
+  }
+  &__box {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 24px;
+    height: 260px;
+  }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
+      .mat-form-field-label {
+        color: $suse-text-gray;
+      }
+      .mat-form-field-underline {
+        background-color: $suse-text-gray;
+      }
+    }
+  }
+  &__submit.mat-raised-button {
+    &.mat-primary[disabled] {
+      color: $suse-button-gray;
+    }
+    margin-top: 24px;
+  }
+  &__headline {
+    color: $suse-primary;
+    font-size: 52px;
+    font-weight: 300;
+    margin: 0;
+  }
+  &__tagline {
+    color: $suse-text-gray;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.5;
+    margin: 24px 0;
+  }
+  &__form-outer {
+    $cubic: cubic-bezier(.215, .61, .355, 1);
+    $time: 250ms;
+    height: 200px;
+    max-width: 400px;
+    opacity: 1;
+    transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
+  }
+  &__form-title {
+    color: $suse-text;
+    font-size: 30px;
+    font-weight: 300;
+    margin-bottom: 24px;
+  }
+  &__loading {
+    display: none;
+    max-width: 400px;
+  }
+  &__busy {
+    .suse-login__form-title {
+      display: none;
+    }
+    .suse-login__form-outer {
+      height: 0;
+      opacity: 0;
+    }
+    .suse-login__loading {
+      display: block;
+    }
+  }
+  &__message {
+    font-size: 18px;
+    font-weight: 300;
+    height: 20px;
+    padding-top: 20px;
+  }
+}
+
+@media(max-width: 768px) {
+  .suse-login {
+    &__intro {
+      display: none;
+    }
+    &__box {
+      margin: 0;
+    }
+    &__content {
+      max-width: 400px;
+      width: 80%;
+    }
+  }
+}
