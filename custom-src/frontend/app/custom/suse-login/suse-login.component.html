@@ -7,7 +7,7 @@
       <h1 class="suse-login__headline">SUSE Stratos<br>Cloud Foundry<br>Console</h1>
       <p class="suse-login__tagline">Use SUSE Stratos to develop, compose, and manage Cloud Foundry workloads.</p>
     </div>
-    <div class="suse-login__box suse-login__busy" [ngClass]="{'suse-login__busy': busy$ | async }">
+    <div class="suse-login__box" [ngClass]="{'suse-login__busy': busy$ | async }">
       <div class="suse-login__form-title">Sign in</div>
       <div class="suse-login__form-outer">
         <form class="suse-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
@@ -21,7 +21,7 @@
         </form>
       </div>
       <div class="suse-login__loading">
-        <mat-progress-bar mode="query"></mat-progress-bar>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       </div>
       <div class="suse-login__message" [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
         {{ message }}
