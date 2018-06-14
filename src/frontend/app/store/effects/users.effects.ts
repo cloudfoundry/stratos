@@ -157,7 +157,7 @@ export class UsersEffects {
 
   handleNoOrgs(action: GetAllUsersAsNonAdmin, mockPaginationAction: PaginatedAction, mockRequestType: ApiRequestTypes): Observable<any> {
     // There's no orgs to fetch users from, instead create a mock user entity for the signed in user. This avoids some ugly 'no user' type
-    // messages and '-' shown for user count
+    // messages and '-' shown for user count and improves the general experience for those who may be visiting for the first time.
     return this.store.select(endpointsEntityRequestDataSelector(action.cfGuid)).pipe(
       first(),
       map(cfEndpoint => {
