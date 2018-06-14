@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CfEndpointCardComponent } from './endpoint-card.component';
 import { SharedModule } from '../../../../../shared.module';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 
 describe('EndpointCardComponent', () => {
   let component: CfEndpointCardComponent;
@@ -13,6 +14,9 @@ describe('EndpointCardComponent', () => {
       imports: [
         SharedModule,
         RouterTestingModule,
+      ],
+      providers: [
+        EntityMonitorFactory
       ]
     })
       .compileComponents();
