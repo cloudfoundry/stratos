@@ -39,7 +39,6 @@ export class SuseModule {
       const routeConfig = [...router.config];
       const loginRoute = routeConfig.find(r => r.path === 'login') || {};
       loginRoute.component = SuseLoginComponent;
-      console.log(routeConfig);
       router.resetConfig(routeConfig);
       SuseModule.init = true;
     }
