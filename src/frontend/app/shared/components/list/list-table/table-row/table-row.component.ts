@@ -19,10 +19,10 @@ export class TableRowComponent extends CdkRow implements OnInit {
   @Input('rowState')
   rowState: Observable<RowState>;
 
-  private inErrorState$: Observable<boolean>;
-  private errorMessage$: Observable<string>;
-  private isBlocked$: Observable<boolean>;
-  private isHighlighted$: Observable<boolean>;
+  public inErrorState$: Observable<boolean>;
+  public errorMessage$: Observable<string>;
+  public isBlocked$: Observable<boolean>;
+  public isHighlighted$: Observable<boolean>;
 
   ngOnInit() {
     if (this.rowState) {
