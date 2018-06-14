@@ -37,8 +37,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   guideText = 'Specify the application to bind (Optional)';
   constructor(
     private store: Store<AppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private csiGuidsService: CsiGuidsService
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.stepperForm = new FormGroup({
       apps: new FormControl(''),
@@ -46,33 +45,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     });
   }
 
-  private fetchApps() {
-    this.apps$.pipe(
-      map(apps => {
-        if (this.boundAppId) {
-          return apps.filter(a => a.metadata.guid === this.boundAppId);
-        }
-        return apps;
-      }),
-      map(apps => apps.sort(appDataSort)),
-      first(),
-      map(apps => apps.slice(0, 50)),
-      tap(apps => {
-        if (this.boundAppId) {
-          this.stepperForm.controls.apps.setValue(this.boundAppId);
-          this.stepperForm.controls.apps.disable();
-          this.guideText = 'Specify binding params (optional)';
-        }
-      }
-      )
-    ).subscribe();
-  }
-  private getApps(cfGuid: string, spaceGuid: string, paginationKey: string) {
-    return getPaginationObservables<APIResource<IApp>>({
-      store: this.store,
-      action: new GetAllAppsInSpace(cfGuid, spaceGuid, paginationKey),
-      paginationMonitor: this.paginationMonitorFactory.create(paginationKey, entityFactory(applicationSchemaKey))
-    }, true).entities$;
+  private setBoundApp() {
+    if (this.boundAppId) {
+      this.stepperForm.controls.apps.setValue(this.boundAppId);
+      this.stepperForm.controls.apps.disable();
+      this.guideText = 'Specify binding params (optional)';
+    }
   }
 
   ngAfterContentInit() {
@@ -99,7 +77,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           )
         }, true).entities$;
       }));
-    this.fetchApps();
+    this.setBoundApp();
   }
 
   submit = (): Observable<StepOnNextResult> => {
