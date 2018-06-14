@@ -18,6 +18,8 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
+import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
+import { XSRFModule } from './xsrf.module';
 
 
 // Create action for router navigation. See
@@ -48,10 +50,15 @@ export class CustomRouterStateSerializer
   }
 }
 
+/**
+ * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
+ */
+
 @NgModule({
   declarations: [
     AppComponent,
     NoEndpointsNonAdminComponent,
+    PageNotFoundComponentComponent,
   ],
   imports: [
     BrowserModule,
@@ -69,6 +76,7 @@ export class CustomRouterStateSerializer
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
     CustomModule,
+    XSRFModule,
   ],
   providers: [
     LoggedInService,

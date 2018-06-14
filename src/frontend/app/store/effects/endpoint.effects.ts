@@ -1,8 +1,9 @@
+
+import {catchError,  mergeMap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { mergeMap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -23,6 +24,7 @@ import {
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
+  EndpointActionComplete,
 } from '../actions/endpoint.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
@@ -83,8 +85,8 @@ export class EndpointsEffect {
       ];
     }));
 
-  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS).pipe(
+    mergeMap(action => {
       const actionType = 'update';
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
@@ -106,10 +108,10 @@ export class EndpointsEffect {
         action.endpointType,
         action.body,
       );
-    });
+    }));
 
-  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS).pipe(
+    mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
@@ -126,10 +128,10 @@ export class EndpointsEffect {
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
       );
-    });
+    }));
 
-  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS).pipe(
+    mergeMap(action => {
 
       const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
       const params: HttpParams = new HttpParams({
@@ -146,10 +148,10 @@ export class EndpointsEffect {
         [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
         action.endpointType
       );
-    });
+    }));
 
-  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS).pipe(
+    mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
@@ -170,11 +172,11 @@ export class EndpointsEffect {
         null,
         this.processRegisterError
       );
-    });
+    }));
 
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
-    `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+      `Please ensure the endpoint address is correct and try again (${e.error.error})`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }
@@ -213,10 +215,10 @@ export class EndpointsEffect {
     return this.http.post(url, body || {}, {
       headers,
       params
-    }).mergeMap((endpoint: EndpointModel) => {
+    }).pipe(mergeMap((endpoint: EndpointModel) => {
       const actions = [];
       if (actionStrings[0]) {
-        actions.push({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType, endpoint });
+        actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
       }
       if (apiActionType === 'delete') {
         actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -226,8 +228,8 @@ export class EndpointsEffect {
       }
       actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
       return actions;
-    })
-      .catch(e => {
+    }),
+      catchError(e => {
         const actions = [];
         if (actionStrings[1]) {
           actions.push({ type: actionStrings[1], guid: apiAction.guid });
@@ -235,6 +237,6 @@ export class EndpointsEffect {
         const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
         actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
         return actions;
-      });
+      }), );
   }
 }

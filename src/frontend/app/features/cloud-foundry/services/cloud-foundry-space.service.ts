@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
@@ -30,18 +30,18 @@ import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { CfUser } from '../../../store/types/user.types';
 
-const noQuotaDefinition = {
+const noQuotaDefinition = (orgGuid: string) => ({
   entity: {
     memory_limit: -1,
     app_instance_limit: -1,
     instance_memory_limit: -1,
     name: 'None assigned',
-    organization_guid: this.orgGuid,
+    organization_guid: orgGuid,
     total_services: -1,
     total_routes: -1
   },
   metadata: null
-};
+});
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -128,7 +128,7 @@ export class CloudFoundrySpaceService {
       if (q.entity.entity.space_quota_definition) {
         return q.entity.entity.space_quota_definition;
       } else {
-        return noQuotaDefinition;
+        return noQuotaDefinition(this.orgGuid);
       }
     }));
     this.allSpaceUsers = getPaginationObservables({

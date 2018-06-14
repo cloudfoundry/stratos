@@ -1,5 +1,6 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
 import { AppState } from '../../../../store/app-state';
@@ -7,6 +8,7 @@ import { Store } from '@ngrx/store';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { HttpClient } from '@angular/common/http';
 import { map, filter } from 'rxjs/operators';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application-step-source-upload',
@@ -35,7 +37,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
     if (!isNext) {
       this.deployer.close();
     }
-   }
+  }
 
   onEnter = (data: FileScannerInfo) => {
     // Previous step is expected to pass us the file info for the files to be uploaded
@@ -46,8 +48,8 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   }
 
   // Make the deployer available to the next step
-  onNext = () => {
-    return Observable.of({ success: true, data: this.deployer });
+  onNext: StepOnNextFunction = () => {
+    return observableOf({ success: true, data: this.deployer });
   }
 
   ngOnDestroy() {

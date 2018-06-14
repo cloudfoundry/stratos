@@ -35,6 +35,8 @@ export const serviceBrokerSchemaKey = 'serviceBroker';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
+export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
+export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 
 const entityCache: {
   [key: string]: EntitySchema
@@ -138,14 +140,28 @@ const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
         service_bindings: [new EntitySchema(serviceBindingSchemaKey, {
           app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
         }, { idAttribute: getAPIResourceGuid })],
-        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid })
+        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
       },
-      service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
     }, { idAttribute: getAPIResourceGuid }),
     service: ServiceNoPlansSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
+
+const ServiceBindingsNoBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
+  entity: {
+    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    service_instance: new EntitySchema(serviceInstancesSchemaKey, {
+      entity: {
+        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+      },
+    }, { idAttribute: getAPIResourceGuid }),
+    service: ServiceNoPlansSchema
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBindingNoBindingsSchemaKey] = ServiceBindingsNoBindingsSchema;
 
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
@@ -247,6 +263,15 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;
+
+const ServiceInstancesWithNoBindingsSchema = new EntitySchema(serviceInstancesSchemaKey, {
+  entity: {
+    service_plan: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    service: [new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    space: SpaceSchema
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceInstancesWithNoBindingsSchemaKey] = ServiceInstancesWithNoBindingsSchema;
 
 const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {
   entity: {

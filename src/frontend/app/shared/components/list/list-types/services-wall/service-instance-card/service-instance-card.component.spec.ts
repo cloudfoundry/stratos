@@ -35,7 +35,7 @@ describe('ServiceInstanceCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        service_plan_guid: '',
+        service_plan_guid: 'test',
         space_guid: '',
         dashboard_url: '',
         type: '',
@@ -64,6 +64,23 @@ describe('ServiceInstanceCardComponent', () => {
             bindable: 0,
             active: false,
             service_url: '',
+            service: {
+              entity: {
+                label: '',
+                description: '',
+                active: 1,
+                bindable: 1,
+                unique_id: '',
+                extra: '',
+                tags: [''],
+                requires: [''],
+                service_broker_guid: '',
+                plan_updateable: 1,
+                service_plans_url: '',
+                service_plans: [],
+              },
+              metadata: null
+            },
             service_instances_url: '',
           },
           metadata: {

@@ -15,7 +15,7 @@ describe('TableCellEventTimestampComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellEventTimestampComponent);
+    fixture = TestBed.createComponent<TableCellEventTimestampComponent<EntityInfo>>(TableCellEventTimestampComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {}

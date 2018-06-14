@@ -1,33 +1,32 @@
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
+
+import { of as observableOf, Observable, forkJoin } from 'rxjs';
+
+import { catchError, withLatestFrom, map, mergeMap } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { forkJoin } from 'rxjs/observable/forkJoin';
-import { map, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
+import { SendEventAction } from '../actions/internal-events.actions';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { listEntityRelations } from '../helpers/entity-relations';
+import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
+import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAction } from '../types/request.types';
+import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import { APIResource, NormalizedResponse, instanceOfAPIResource } from './../types/api.types';
+import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
-import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
-import { listEntityRelations } from '../helpers/entity-relations';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { SendEventAction } from '../actions/internal-events.actions';
-import { InternalEventSeverity, APIEventState } from '../types/internal-events.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -64,11 +63,11 @@ export class APIEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
-    .withLatestFrom(this.store)
-    .mergeMap(([action, state]) => {
+  @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START).pipe(
+    withLatestFrom(this.store),
+    mergeMap(([action, state]) => {
       return this.doApiRequest(action, state);
-    });
+    }), );
 
   private doApiRequest(action, state) {
     const actionClone = { ...action };
@@ -128,9 +127,10 @@ export class APIEffect {
         errors.forEach(error => {
           if (error.error) {
             const fakedAction = { ...actionClone, endpointGuid: error.guid };
-            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
+            const errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
+            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction, errorMessage));
             this.store.dispatch(new WrapperRequestActionFailed(
-              error.errorCode,
+              errorMessage,
               { ...actionClone, endpointGuid: error.guid },
               requestType
             ));
@@ -151,25 +151,26 @@ export class APIEffect {
           }
         )];
       }),
-    ).catch(error => {
-      const endpoints: string[] = options.headers.get(endpointHeader).split((','));
-      endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
-        eventCode: error.status || '500',
-        severity: InternalEventSeverity.ERROR,
-        message: 'Jetstream API request error',
-        metadata: {
-          url: error.url || apiAction.options.url
-        }
-      })));
-      return [
-        new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
-        new WrapperRequestActionFailed(
-          error.message,
-          actionClone,
-          requestType
-        )
-      ];
-    });
+      catchError(error => {
+        const endpointString = options.headers.get(endpointHeader) || '';
+        const endpoints: string[] = endpointString.split((','));
+        endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
+          eventCode: error.status || '500',
+          severity: InternalEventSeverity.ERROR,
+          message: 'Jetstream API request error',
+          metadata: {
+            url: error.url || apiAction.options.url
+          }
+        })));
+        return [
+          new APISuccessOrFailedAction(actionClone.actions[2], actionClone, error.message),
+          new WrapperRequestActionFailed(
+            error.message,
+            actionClone,
+            requestType
+          )
+        ];
+      }));
   }
 
   private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
@@ -209,7 +210,8 @@ export class APIEffect {
           error: false,
           errorCode: '200',
           guid: action.endpointGuid,
-          url: action.options.url
+          url: action.options.url,
+          errorResponse: null
         }];
       }
       return null;
@@ -342,7 +344,7 @@ export class APIEffect {
   }
 
   private makeRequest(options): Observable<any> {
-    return this.http.request(new Request(options)).map(response => {
+    return this.http.request(new Request(options)).pipe(map(response => {
       let resData;
       try {
         resData = response.json();
@@ -350,7 +352,7 @@ export class APIEffect {
         resData = null;
       }
       return resData;
-    });
+    }));
   }
 
   private handleMultiEndpoints(resData, apiAction: IRequestAction): {
@@ -403,7 +405,7 @@ export class APIEffect {
         });
         // Make those requests
         const requests = [];
-        requests.push(Observable.of(firstResData)); // Already made the first request, don't repeat it
+        requests.push(observableOf(firstResData)); // Already made the first request, don't repeat it
         for (let i = 2; i <= maxPages; i++) { // Make any additional page requests
           const requestOption = { ...options };
           requestOption.params.set('page', i.toString());

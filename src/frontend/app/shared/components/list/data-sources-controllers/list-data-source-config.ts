@@ -1,12 +1,11 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { OperatorFunction } from 'rxjs/interfaces';
+import { OperatorFunction ,  Observable } from 'rxjs';
 
 import { AppState } from '../../../../store/app-state';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState } from './list-data-source-types';
-import { Observable } from 'rxjs/Observable';
 import { IListConfig } from '../list.component.types';
 
 export interface IListDataSourceConfig<A, T> {

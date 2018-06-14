@@ -87,7 +87,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 		case !ok:
 			response = []byte(`{"error": {"statusCode": 500, "status": "Request timed out"}}`)
 		case cnsiResponse.Error != nil:
-			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": "%q"}}`, cnsiResponse.Error.Error()))
+			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": %q}}`, cnsiResponse.Error.Error()))
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
@@ -95,9 +95,9 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 		if cnsiResponse.StatusCode >= 400 {
 			errorJson, err := json.Marshal(cnsiResponse)
 			if err != nil {
-				errorJson = []byte(fmt.Sprintf(`{"statusCode": 500, "status": "Failed to proxy request"}"`))
+				errorJson = []byte(fmt.Sprintf(`{"statusCode": 500, "status": "Failed to proxy request"}`))
 			}
-			response = []byte(fmt.Sprintf(`{"error": %s, "errorResponse": %s}`, errorJson, string(cnsiResponse.Response)))
+			response = []byte(fmt.Sprintf(`{"error": %s, "errorResponse": %q}`, errorJson, string(cnsiResponse.Response)))
 		}
 		if len(response) > 0 {
 			jsonResponse[guid] = (*json.RawMessage)(&response)
@@ -151,7 +151,8 @@ func fwdCNSIStandardHeaders(cnsiRequest *interfaces.CNSIRequest, req *http.Reque
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
 		//  - "Connection", "X-Cap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
+		// - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
+		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
 
 		// Forwarding everything else
 		default:
@@ -337,6 +338,7 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
 		cnsiRequest.StatusCode = res.StatusCode
+		cnsiRequest.Status = res.Status
 		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
 	}

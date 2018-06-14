@@ -11,11 +11,4 @@ import { Component, OnInit } from '@angular/core';
     useClass: CfUserListConfigService
   }]
 })
-export class CloudFoundryUsersComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class CloudFoundryUsersComponent { }

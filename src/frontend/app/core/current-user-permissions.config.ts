@@ -8,14 +8,21 @@ export enum CurrentUserPermissions {
   SPACE_CREATE = 'create.space',
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
+  SPACE_CHANGE_ROLES = 'change-roles.space',
   ROUTE_CREATE = 'create.route',
   // ROUTE_BINDING_CREATE = 'create.binding.route',
   ORGANIZATION_CREATE = 'create.org',
   ORGANIZATION_DELETE = 'delete.org',
   ORGANIZATION_EDIT = 'edit.org',
   ORGANIZATION_SUSPEND = 'suspend.org',
+  ORGANIZATION_CHANGE_ROLES = 'change-roles.org',
+  SERVICE_INSTANCE_DELETE = 'delete.service-instance',
+  SERVICE_INSTANCE_CREATE = 'create.service-instance',
+  SERVICE_BINDING_EDIT = 'edit.service-binding',
+  FIREHOSE_VIEW = 'view-firehose',
   ENDPOINT_REGISTER = 'register.endpoint',
-  PASSWORD_CHANGE = 'change-password'
+  PASSWORD_CHANGE = 'change-password',
+  SERVICE_INSTANCE_EDIT = 'edit.service-instance',
 }
 export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {
@@ -95,11 +102,11 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   ],
+  [CurrentUserPermissions.SPACE_CHANGE_ROLES]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   [CurrentUserPermissions.ROUTE_CREATE]: [
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
   ],
-  // [CurrentUserPermissions.ROUTE_BINDING_CREATE]: new PermissionConfigLink(CurrentUserPermissions.ROUTE_CREATE),
   [CurrentUserPermissions.ORGANIZATION_CREATE]: [
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation),
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
@@ -113,6 +120,14 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
   [CurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
+  [CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+  [CurrentUserPermissions.SERVICE_INSTANCE_DELETE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_INSTANCE_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_INSTANCE_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_BINDING_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.FIREHOSE_VIEW]: [
+    new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP)
+  ],
   [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
   [CurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(PermissionTypes.STRATOS_SCOPE, ScopeStrings.STRATOS_CHANGE_PASSWORD),
 };

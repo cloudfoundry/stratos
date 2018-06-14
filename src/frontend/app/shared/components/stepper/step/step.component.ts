@@ -1,8 +1,5 @@
-import 'rxjs/add/observable/of';
-
-import { Component, Input, OnInit, TemplateRef, ViewChild, Output, EventEmitter } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Observable, of as observableOf } from 'rxjs';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -10,13 +7,17 @@ export interface IStepperStep {
   onEnter?: (data?: any) => void;
 }
 
-export type StepOnNextFunction = () => Observable<{
-  success: boolean,
-  message?: string,
+export interface StepOnNextResult {
+  success: boolean;
+  message?: string;
   // Should we redirect to the store previous state?
-  redirect?: boolean,
-  data?: any,
-}>;
+  redirect?: boolean;
+  // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
+  ignoreSuccess?: boolean;
+  data?: any;
+}
+
+export type StepOnNextFunction = () => Observable<StepOnNextResult>;
 
 @Component({
   selector: 'app-step',
@@ -38,7 +39,7 @@ export class StepComponent {
   @Input()
   title: string;
 
-  @Output() onHidden= new EventEmitter<boolean>();
+  @Output() onHidden = new EventEmitter<boolean>();
 
   @Input('hidden')
   set hidden(hidden: boolean) {
@@ -69,7 +70,7 @@ export class StepComponent {
   disablePrevious = false;
 
   @Input('blocked')
-  blocked: boolean;
+  blocked = false;
 
   @Input('destructiveStep')
   public destructiveStep = false;
@@ -81,7 +82,7 @@ export class StepComponent {
   skip = false;
 
   @Input()
-  onNext: StepOnNextFunction = () => Observable.of({ success: true })
+  onNext: StepOnNextFunction = () => observableOf({ success: true })
 
   @Input()
   onEnter: (data: any) => void = () => { }

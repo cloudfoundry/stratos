@@ -1,8 +1,10 @@
+
+import {combineLatest as observableCombineLatest,  Observable ,  Subscription } from 'rxjs';
+
+import {tap} from 'rxjs/operators';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ListSort } from '../../../../store/actions/list.actions';
 import { AppState } from '../../../../store/app-state';
@@ -18,7 +20,7 @@ const tableColumnSelect = {
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
   class: 'table-column-select',
-  cellFlex: '1'
+  cellFlex: '0 0 75px'
 };
 
 const tableColumnAction = {
@@ -26,7 +28,7 @@ const tableColumnAction = {
   headerCell: () => '',
   cellComponent: TableCellActionsComponent,
   class: 'app-table__cell--table-column-action',
-  cellFlex: '1'
+  cellFlex: '0 0 75px'
 };
 
 @Component({
@@ -75,7 +77,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   initWidgetStore() {
-    const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {
+    const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
       if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
         this.sort.sort({
           id: sort.field,
@@ -83,16 +85,16 @@ export class TableComponent<T> implements OnInit, OnDestroy {
           disableClear: true
         });
       }
-    });
+    }));
 
-    const sortWidgetToStore = this.sort.sortChange.do((sort: Sort) => {
+    const sortWidgetToStore = this.sort.sortChange.pipe(tap((sort: Sort) => {
       this.paginationController.sort({
         field: sort.active,
         direction: sort.direction,
       });
-    });
+    }));
 
-    this.uberSub = Observable.combineLatest(
+    this.uberSub = observableCombineLatest(
       sortStoreToWidget,
       sortWidgetToStore,
     ).subscribe();

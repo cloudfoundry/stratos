@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
@@ -36,9 +37,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   constructor(store: Store<AppState>,
     datePipe: DatePipe,
     private cfOrgSpaceService: CfOrgSpaceDataService,
+    currentUserPermissionsService: CurrentUserPermissionsService,
     serviceActionHelperService: ServiceActionHelperService
   ) {
-    super(store, datePipe, serviceActionHelperService);
+    super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
     const multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),

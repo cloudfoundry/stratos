@@ -57,7 +57,7 @@ type PgsqlTokenRepository struct {
 
 // NewPgsqlTokenRepository - get a reference to the token data source
 func NewPgsqlTokenRepository(dcp *sql.DB) (Repository, error) {
-	log.Println("NewPgsqlTokenRepository")
+	log.Debug("NewPgsqlTokenRepository")
 	return &PgsqlTokenRepository{db: dcp}, nil
 }
 
@@ -78,27 +78,27 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // saveAuthToken - Save the Auth token to the datastore
 func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
-	log.Println("SaveAuthToken")
+	log.Debug("SaveAuthToken")
 	if userGUID == "" {
 		msg := "Unable to save Auth Token without a valid User GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	if tr.AuthToken == "" {
 		msg := "Unable to save Auth Token without a valid Auth Token."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
-	log.Println("Encrypting Auth Token")
+	log.Debug("Encrypting Auth Token")
 	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
 	}
 	var ciphertextRefreshToken []byte
 	if tr.RefreshToken != "" {
-		log.Println("Encrypting Refresh Token")
+		log.Debug("Encrypting Refresh Token")
 		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
 		if err != nil {
 			return err
@@ -109,33 +109,33 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.Toke
 	var count int
 	err = p.db.QueryRow(countAuthTokens, userGUID).Scan(&count)
 	if err != nil {
-		log.Printf("Unknown error attempting to find UAA token: %v", err)
+		log.Debugf("Unknown error attempting to find UAA token: %v", err)
 	}
 
 	switch count {
 	case 0:
 
-		log.Println("Performing INSERT of encrypted tokens")
+		log.Debug("Performing INSERT of encrypted tokens")
 		if _, err := p.db.Exec(insertAuthToken, userGUID, "uaa", ciphertextAuthToken,
 			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT UAA token: %v"
-			log.Printf(msg, err)
+			log.Debugf(msg, err)
 			return fmt.Errorf(msg, err)
 		}
 
-		log.Println("UAA token INSERT complete")
+		log.Debug("UAA token INSERT complete")
 
 	default:
 
-		log.Println("Performing UPDATE of encrypted tokens")
+		log.Debug("Performing UPDATE of encrypted tokens")
 		if _, updateErr := p.db.Exec(updateAuthToken, ciphertextAuthToken, ciphertextRefreshToken,
 			tr.TokenExpiry, userGUID, "uaa"); updateErr != nil {
 			msg := "Unable to UPDATE UAA token: %v"
-			log.Printf(msg, updateErr)
+			log.Debugf(msg, updateErr)
 			return fmt.Errorf(msg, updateErr)
 		}
 
-		log.Println("UAA token UPDATE complete.")
+		log.Debug("UAA token UPDATE complete.")
 	}
 
 	return nil
@@ -143,10 +143,10 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.Toke
 
 // FindAuthToken - return the UAA token from the datastore
 func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
-	log.Println("FindAuthToken")
+	log.Debug("FindAuthToken")
 	if userGUID == "" {
 		msg := "Unable to find UAA Token without a valid User GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return interfaces.TokenRecord{}, errors.New(msg)
 	}
 
@@ -161,17 +161,17 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
-		log.Printf(msg, err)
+		log.Debugf(msg, err)
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
-	log.Println("Decrypting Auth Token")
+	log.Debug("Decrypting Auth Token")
 	plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 	if err != nil {
 		return interfaces.TokenRecord{}, err
 	}
 
-	log.Println("Decrypting Refresh Token")
+	log.Debug("Decrypting Refresh Token")
 	plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 	if err != nil {
 		return interfaces.TokenRecord{}, err
@@ -188,26 +188,26 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
 func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
-	log.Println("SaveCNSIToken")
+	log.Debug("SaveCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to save CNSI Token without a valid CNSI GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to save CNSI Token without a valid User GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	if tr.AuthToken == "" {
 		msg := "Unable to save CNSI Token without a valid Auth Token."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
-	log.Println("Encrypting Auth Token")
+	log.Debug("Encrypting Auth Token")
 	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
@@ -215,7 +215,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 	var ciphertextRefreshToken []byte
 	if tr.RefreshToken != "" {
-		log.Println("Encrypting Refresh Token")
+		log.Debug("Encrypting Refresh Token")
 		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
 		if err != nil {
 			return err
@@ -226,7 +226,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	var count int
 	err = p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
 	if err != nil {
-		log.Printf("Unknown error attempting to find CNSI token: %v", err)
+		log.Debugf("Unknown error attempting to find CNSI token: %v", err)
 	}
 
 	switch count {
@@ -236,20 +236,20 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, tr.AuthType, tr.Metadata); insertErr != nil {
 
 			msg := "Unable to INSERT CNSI token: %v"
-			log.Printf(msg, insertErr)
+			log.Debugf(msg, insertErr)
 			return fmt.Errorf(msg, insertErr)
 		}
 
-		log.Println("CNSI token INSERT complete.")
+		log.Debug("CNSI token INSERT complete.")
 
 	default:
 
-		log.Println("Existing CNSI token found - attempting update.")
+		log.Debug("Existing CNSI token found - attempting update.")
 		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry,
 			tr.Disconnected, tr.Metadata, cnsiGUID, userGUID, "cnsi", tr.AuthType)
 		if err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
-			log.Printf(msg, err)
+			log.Debugf(msg, err)
 			return fmt.Errorf(msg, err)
 		}
 
@@ -266,7 +266,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 			log.Warn("UPDATE CNSI token: More than 1 row was updated (expected only 1)")
 		}
 
-		log.Println("CNSI token UPDATE complete")
+		log.Debug("CNSI token UPDATE complete")
 	}
 
 	return nil
@@ -283,16 +283,16 @@ func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string,
 }
 
 func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte, includeDisconnected bool) (interfaces.TokenRecord, error) {
-	log.Println("findCNSIToken")
+	log.Debug("findCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to find CNSI Token without a valid CNSI GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return interfaces.TokenRecord{}, errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to find CNSI Token without a valid User GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return interfaces.TokenRecord{}, errors.New(msg)
 	}
 
@@ -315,17 +315,17 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	if err != nil {
 		msg := "Unable to Find CNSI token: %v"
-		log.Printf(msg, err)
+		log.Debugf(msg, err)
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
-	log.Println("Decrypting Auth Token")
+	log.Debug("Decrypting Auth Token")
 	plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 	if err != nil {
 		return interfaces.TokenRecord{}, err
 	}
 
-	log.Println("Decrypting Refresh Token")
+	log.Debug("Decrypting Refresh Token")
 	plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 	if err != nil {
 		return interfaces.TokenRecord{}, err
@@ -345,23 +345,23 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 // DeleteCNSIToken - remove a CNSI token (disconnect from a given CNSI)
 func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string) error {
-	log.Println("DeleteCNSIToken")
+	log.Debug("DeleteCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to delete CNSI Token without a valid CNSI GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to delete CNSI Token without a valid User GUID."
-		log.Println(msg)
+		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	_, err := p.db.Exec(deleteCNSIToken, cnsiGUID, userGUID)
 	if err != nil {
 		msg := "Unable to Delete CNSI token: %v"
-		log.Printf(msg, err)
+		log.Debugf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
 

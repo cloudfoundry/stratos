@@ -57,7 +57,7 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // List - Returns a list of CNSI Records
 func (p *PostgresCNSIRepository) List() ([]*interfaces.CNSIRecord, error) {
-	log.Println("List")
+	log.Debug("List")
 	rows, err := p.db.Query(listCNSIs)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
@@ -100,7 +100,7 @@ func (p *PostgresCNSIRepository) List() ([]*interfaces.CNSIRecord, error) {
 
 // ListByUser - Returns a list of CNSIs registered by a user
 func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
-	log.Println("ListByUser")
+	log.Debug("ListByUser")
 	rows, err := p.db.Query(listCNSIsByUser, "cnsi", userGUID)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
@@ -143,13 +143,13 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*interfaces.Conn
 
 // Find - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) Find(guid string) (interfaces.CNSIRecord, error) {
-	log.Println("Find")
+	log.Debug("Find")
 	return p.findBy(findCNSI, guid)
 }
 
 // FindByAPIEndpoint - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.CNSIRecord, error) {
-	log.Println("FindByAPIEndpoint")
+	log.Debug("FindByAPIEndpoint")
 	return p.findBy(findCNSIByAPIEndpoint, endpoint)
 }
 
@@ -187,7 +187,7 @@ func (p *PostgresCNSIRepository) findBy(query, match string) (interfaces.CNSIRec
 
 // Save - Persist a CNSI Record to a datastore
 func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) error {
-	log.Println("Save")
+	log.Debug("Save")
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
 		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
@@ -198,7 +198,7 @@ func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) e
 
 // Delete - Persist a CNSI Record to a datastore
 func (p *PostgresCNSIRepository) Delete(guid string) error {
-	log.Println("Delete")
+	log.Debug("Delete")
 	if _, err := p.db.Exec(deleteCNSI, guid); err != nil {
 		return fmt.Errorf("Unable to Delete CNSI record: %v", err)
 	}

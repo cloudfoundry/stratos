@@ -1,21 +1,13 @@
-import { ApplicationStateComponent } from '../../../../application-state/application-state.component';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../application-state/application-state-icon/application-state-icon.component';
-import { ApplicationStateIconPipe } from '../../../../application-state/application-state-icon/application-state-icon.pipe';
-import { CoreModule } from '../../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { ApplicationStateService } from '../../../../application-state/application-state.service';
-
-import { CardAppComponent } from './card-app.component';
 import { RouterTestingModule } from '@angular/router/testing';
+
+import { CoreModule } from '../../../../../../core/core.module';
 import { APIResourceMetadata } from '../../../../../../store/types/api.types';
-import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
-import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../../../../shared.module';
+import { ApplicationStateService } from '../../../../application-state/application-state.service';
+import { CardAppComponent } from './card-app.component';
 
 describe('CardAppComponent', () => {
   let component: CardAppComponent;
@@ -42,7 +34,17 @@ describe('CardAppComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        state: ''
+        state: '',
+        space: {
+          entity: {
+            name: '',
+            organization: {
+              entity: {
+                name: '',
+              }
+            },
+          },
+        },
       },
       metadata: {} as APIResourceMetadata,
     };

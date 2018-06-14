@@ -20,6 +20,7 @@ import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
 
 export function logger(reducer) {
@@ -41,6 +42,7 @@ export const appReducers = {
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
+  manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer
 } as ActionReducerMap<{}>;

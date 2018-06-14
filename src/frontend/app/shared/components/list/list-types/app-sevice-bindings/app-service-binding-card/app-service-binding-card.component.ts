@@ -1,7 +1,8 @@
+
+import { combineLatest as observableCombineLatest, of as observableOf, Observable } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { first, map, switchMap, tap, withLatestFrom, filter } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
@@ -21,7 +22,13 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
 import { DatePipe } from '@angular/common';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 
+interface EnvVarData {
+  key: string;
+  value: string;
+}
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
@@ -29,6 +36,7 @@ import { ServiceActionHelperService } from '../../../../../data-services/service
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 
+  envVarsAvailable$: Observable<EnvVarData>;
   listData: IListRowCellData[];
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
@@ -38,21 +46,25 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   constructor(
     private store: Store<AppState>,
+    private dialog: MatDialog,
+    private datePipe: DatePipe,
+    private confirmDialog: ConfirmationDialogService,
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
-    private dialog: MatDialog,
-    private confirmDialog: ConfirmationDialogService,
     private serviceActionHelperService: ServiceActionHelperService,
-    private datePipe: DatePipe
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
-    this.cardMenu = [
-      {
-        icon: 'settings',
-        label: 'Detach',
-        action: this.detach
-      }
-    ];
+    this.cardMenu = [{
+      label: 'Unbind',
+      action: this.detach,
+      can: this.appService.waitForAppEntity$.pipe(
+        switchMap(app => this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_BINDING_EDIT,
+          this.appService.cfGuid,
+          app.entity.entity.space_guid
+        )))
+    }];
   }
   ngOnInit(): void {
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
@@ -89,7 +101,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       },
       {
         label: 'Date Created On',
-        data$: Observable.of(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
+        data$: observableOf(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
       }
     ];
 
@@ -97,38 +109,36 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       map(o => o.entity.entity.tags.map(t => ({ value: t })))
     );
     this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
-  }
 
-  showEnvVars = () => {
-
-    Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+    this.envVarsAvailable$ = observableCombineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
-        withLatestFrom(),
-        map(([[service, serviceInstance, allEnvVars]]) => {
+        map(([service, serviceInstance, allEnvVars]) => {
           const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
           const serviceInstanceName = (serviceInstance as EntityInfo<APIResource<IServiceInstance>>).entity.entity.name;
           const serviceLabel = (service as EntityInfo<APIResource<IService>>).entity.entity.label;
+
           if (systemEnvJson['VCAP_SERVICES'][serviceLabel]) {
             return {
               key: serviceInstanceName,
               value: systemEnvJson['VCAP_SERVICES'][serviceLabel].find(s => s.name === serviceInstanceName)
             };
           }
+          return null;
         }),
-        tap(data => {
-          this.dialog.open(EnvVarViewComponent, {
-            data: data,
-            disableClose: false
-          });
-        }),
-        first()
-      ).subscribe();
+        filter(p => !!p),
+    );
+  }
 
+  showEnvVars = (envVarData: EnvVarData) => {
+    this.dialog.open(EnvVarViewComponent, {
+      data: envVarData,
+      disableClose: false
+    });
   }
 
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
-      this.row.metadata.guid,
+      [this.row],
       this.row.entity.service_instance_guid,
       this.appService.cfGuid
     );

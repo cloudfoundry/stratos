@@ -93,11 +93,11 @@ type VCapApplicationData struct {
 }
 
 type LoginRes struct {
-	Account     string   	 		 `json:"account"`
-	TokenExpiry int64    		 	 `json:"token_expiry"`
-	APIEndpoint *url.URL 		 	 `json:"api_endpoint"`
-	Admin       bool    		 	 `json:"admin"`
-	User				*ConnectedUser `json:"user"`
+	Account     string         `json:"account"`
+	TokenExpiry int64          `json:"token_expiry"`
+	APIEndpoint *url.URL       `json:"api_endpoint"`
+	Admin       bool           `json:"admin"`
+	User        *ConnectedUser `json:"user"`
 }
 
 type LoginHookFunc func(c echo.Context) error
@@ -198,6 +198,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl           string   `configName:"AUTO_REG_CF_URL"`
+	CookieDomain                string   `configName:"COOKIE_DOMAIN"`
 	CFAdminIdentifier           string
 	CloudFoundryInfo            *CFInfo
 	HTTPS                       bool

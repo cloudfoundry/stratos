@@ -11,20 +11,10 @@ import { CfUserService } from '../../../data-services/cf-user.service';
   templateUrl: './card-cf-org-user-details.component.html',
   styleUrls: ['./card-cf-org-user-details.component.scss']
 })
-export class CardCfOrgUserDetailsComponent implements OnInit {
-
-
+export class CardCfOrgUserDetailsComponent {
   constructor(
     private cfOrgService: CloudFoundryOrganizationService,
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService
-  ) {
-
-  }
-
-
-  ngOnInit() {
-  }
-
-
+  ) { }
 }

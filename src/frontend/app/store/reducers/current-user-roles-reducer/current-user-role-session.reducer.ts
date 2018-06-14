@@ -7,21 +7,51 @@ import {
   IStratosRolesState,
   IGlobalRolesState
 } from '../../types/current-user-roles.types';
-import { SessionData, SessionDataEndpoint, SessionEndpoints, SessionUser } from '../../types/auth.types';
+import { SessionData, SessionDataEndpoint, SessionEndpoints, SessionUser, SessionEndpoint } from '../../types/auth.types';
 import { ScopeStrings } from '../../../core/current-user-permissions.config';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
+import { EndpointModel, INewlyConnectedEndpointInfo, EndpointUser } from '../../types/endpoint.types';
+
+interface PartialEndpoint {
+  user: EndpointUser | SessionUser;
+  guid: string;
+}
 
 export function roleInfoFromSessionReducer(
   state: ICurrentUserRolesState,
-  user: SessionUser,
-  endpoints: SessionEndpoints
+  action: VerifiedSession
 ): ICurrentUserRolesState {
-  const cfRoles = propagateEndpointsAdminPermissions(state.cf, endpoints);
+  const { user, endpoints } = action.sessionData;
+  const cfRoles = propagateEndpointsAdminPermissions(state.cf, Object.values(endpoints.cf));
+  return applyInternalScopes(state, cfRoles, user);
+}
+
+export function updateNewlyConnectedEndpoint(
+  state: ICurrentUserRolesState,
+  action: EndpointActionComplete
+): ICurrentUserRolesState {
+  if (action.endpointType !== 'cf') {
+    return state;
+  }
+  const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
+  const cfRoles = propagateEndpointsAdminPermissions(state.cf, [{
+    user: endpoint.user,
+    guid: action.guid
+  }]);
+  return {
+    ...state,
+    cf: cfRoles
+  };
+}
+
+function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
     const isAdmin = internalRoles.scopes.includes(ScopeStrings.STRATOS_ADMIN);
     internalRoles.isAdmin = isAdmin;
   }
+
   return {
     ...state,
     cf: cfRoles,
@@ -29,8 +59,11 @@ export function roleInfoFromSessionReducer(
   };
 }
 
-function propagateEndpointsAdminPermissions(cfState: IAllCfRolesState, endpoints: SessionEndpoints): IAllCfRolesState {
-  return Object.values(endpoints.cf).reduce((state, endpoint) => {
+function propagateEndpointsAdminPermissions(
+  cfState: IAllCfRolesState,
+  endpoints: PartialEndpoint[]
+): IAllCfRolesState {
+  return Object.values(endpoints).reduce((state, endpoint) => {
     return {
       ...state,
       [endpoint.guid]: propagateEndpointAdminPermissions(state[endpoint.guid], endpoint)
@@ -38,7 +71,7 @@ function propagateEndpointsAdminPermissions(cfState: IAllCfRolesState, endpoints
   }, { ...cfState });
 }
 
-function propagateEndpointAdminPermissions(state: ICfRolesState = getDefaultEndpointRoles(), endpoint: SessionDataEndpoint) {
+function propagateEndpointAdminPermissions(state: ICfRolesState = getDefaultEndpointRoles(), endpoint: PartialEndpoint) {
   const scopes = endpoint.user ? endpoint.user.scopes : [];
   const global = getEndpointRoles(scopes, state.global);
   return {
