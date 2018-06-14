@@ -63,8 +63,8 @@
     height: 0;
     margin: 12px 36px;
     min-height: 160px;
-    overflow-y: auto;
     overflow: visible;
+    overflow-y: auto;
     padding: 0 2px; // Some cards/tables/etc will be clipped without this padding
   }
   &__wrapper {
