@@ -68,7 +68,7 @@ export class CloudFoundryEndpointService {
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
-      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
+      : createEntityRelationPaginationKey(endpointSchemaKey);
     return new GetAllOrganizations(
       paginationKey,
       cfGuid, [
@@ -83,7 +83,7 @@ export class CloudFoundryEndpointService {
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
-      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
+      : createEntityRelationPaginationKey(endpointSchemaKey);
     return new GetAllOrganizations(
       paginationKey,
       cfGuid, [
