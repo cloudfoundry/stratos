@@ -91,9 +91,6 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
-    console.log(this.entityConfig);
-
-
   }
 
   setCounts = (apps: APIResource<any>[]) => {

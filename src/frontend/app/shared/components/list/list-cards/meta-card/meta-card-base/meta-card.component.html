@@ -1,4 +1,10 @@
 <mat-card class="meta-card" [ngClass]="clickAction ? 'meta-card-pointer' : ''" (click)="clickAction ? clickAction() : null">
+  <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
+    <div class="meta-card__deleting-overlay-inner">
+      <div class="meta-card__deleting-text">Deleting</div>
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+  </div>
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
@@ -25,10 +31,4 @@
       </span>
     </div>
   </mat-card-content>
-  <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
-    <div class="meta-card__deleting-overlay-inner">
-      <div class="meta-card__deleting-text">Deleting</div>
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </div>
-  </div>
 </mat-card>

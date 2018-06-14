@@ -34,7 +34,6 @@ export class MetaCardComponent {
 
   @Input('entityConfig')
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
-    console.log(entityConfig);
     if (entityConfig) {
       const entityMonitor = this.entityMonitorFactory.create(
         entityConfig.guid,
@@ -45,7 +44,7 @@ export class MetaCardComponent {
     }
   }
 
-  isDeleting$: Observable<boolean> = observableOf(false);
+  public isDeleting$: Observable<boolean> = observableOf(false);
 
   @Input('actionMenu')
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
