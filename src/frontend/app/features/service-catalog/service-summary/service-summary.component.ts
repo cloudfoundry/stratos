@@ -7,6 +7,7 @@ import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource } from '../../../store/types/api.types';
 import { ServicesService } from '../services.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-service-summary',
@@ -15,6 +16,7 @@ import { ServicesService } from '../services.service';
 })
 export class ServiceSummaryComponent {
 
+  isBrokerAvailable$: Observable<boolean>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   instances$: Observable<APIResource<IServiceInstance>[]>;
   constructor(
@@ -24,6 +26,9 @@ export class ServiceSummaryComponent {
 
     this.instances$ = servicesService.serviceInstances$;
     this.servicePlans$ = servicesService.servicePlans$;
+    this.isBrokerAvailable$ = servicesService.serviceBroker$.pipe(
+      map(p => !!p)
+    );
   }
 
   serviceInstancesLink = () => {
