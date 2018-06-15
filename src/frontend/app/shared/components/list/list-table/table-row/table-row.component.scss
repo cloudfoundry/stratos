@@ -46,14 +46,13 @@
     }
     &-wrapper {
       align-items: center;
-      justify-content: center;
       bottom: 0;
       display: flex;
+      justify-content: center;
       left: 0;
       position: absolute;
       right: 0;
       top: 0;
-      display: flex;
       z-index: 999;
     }
   }
