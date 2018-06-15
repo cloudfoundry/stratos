@@ -130,6 +130,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 
 @NgModule({
@@ -231,6 +232,7 @@ import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
     NoServicePlansComponent,
     CreateApplicationStep1Component,
     BindAppsStepComponent,
+    CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
   ],
   exports: [
@@ -319,6 +321,7 @@ import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
     CreateApplicationStep1Component,
     BindAppsStepComponent,
     CapitalizeFirstPipe,
+    CfEndpointsMissingComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

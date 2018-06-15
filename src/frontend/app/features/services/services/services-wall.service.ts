@@ -27,7 +27,7 @@ export class ServicesWallService {
   }
 
   initServicesObservable = () => {
-    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, 'all');
+    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,

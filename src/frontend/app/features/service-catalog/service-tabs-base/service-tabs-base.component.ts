@@ -39,7 +39,7 @@ export class ServiceTabsBaseComponent {
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
     this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(
       map(p => p.length > 0));
-   this.canCreateServiceInstance =  CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
+    this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.toolTipText$ = this.hasVisiblePlans$.pipe(
       map(hasPlans => {
         if (hasPlans) {
@@ -57,6 +57,8 @@ export class ServiceTabsBaseComponent {
     this.servicesService.serviceGuid,
     'create'
   ]
+
+  isServiceSpaceScoped = () => this.servicesService.isSpaceScoped$;
 
   getServiceLabel = (): Observable<string> => {
     return this.servicesService.service$.pipe(

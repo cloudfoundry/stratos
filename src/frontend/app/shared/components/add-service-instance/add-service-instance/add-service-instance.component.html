@@ -3,7 +3,7 @@
 </app-page-header>
 <div class="add-service-instance">
   <app-steppers [cancel]="serviceInstancesUrl">
-    <app-step *ngIf="modeService.viewDetail.showSelectCf" title="Cloud Foundry" [valid]="selectCF.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
+    <app-step *ngIf="modeService.viewDetail.showSelectCf && !isSpaceScoped()" title="Cloud Foundry" [valid]="selectCF.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
       <app-create-application-step1 [stepperText]="stepperText" [isMarketplaceMode]="inMarketplaceMode" #selectCF></app-create-application-step1>
     </app-step>
     <app-step title="Select Service" *ngIf="modeService.viewDetail.showSelectService" [valid]="selectService.validate | async" [onNext]="selectService.onNext">
