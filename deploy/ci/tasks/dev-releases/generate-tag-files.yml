@@ -17,6 +17,7 @@ run:
     - |
       cd stratos
       LATEST_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | tail -1)
+      cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
       FILENAME="release-${LATEST_TAG}"
       tar -cf ${FILENAME}.tar v2-alpha-tag
