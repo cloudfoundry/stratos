@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
@@ -21,6 +21,8 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-cf-space-card',
@@ -44,11 +46,11 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   appCount: number;
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
+  entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService,
-    private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private cfOrgService: CloudFoundryOrganizationService,
     private currentUserPermissionsService: CurrentUserPermissionsService
@@ -58,6 +60,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   ngOnInit() {
     this.spaceGuid = this.row.metadata.guid;
+    this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
     this.orgGuid = this.cfOrgService.orgGuid;
     this.cardMenu = [
       {

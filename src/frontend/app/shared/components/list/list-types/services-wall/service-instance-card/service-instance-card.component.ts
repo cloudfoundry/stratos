@@ -12,6 +12,8 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell } from '../../../list.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -28,10 +30,12 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
+  entityConfig: ComponentEntityMonitorConfig;
 
   @Input('row')
   set row(row) {
     if (row) {
+      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
       this.serviceInstanceEntity = row;
       this.serviceInstanceTags = row.entity.tags.map(t => ({
         value: t
@@ -42,8 +46,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   constructor(
-    private store: Store<AppState>,
-    private servicesWallService: ServicesWallService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
@@ -51,7 +53,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   ngOnInit() {
-
     this.serviceInstanceTags = this.serviceInstanceEntity.entity.tags.map(t => ({
       value: t
     }));
@@ -109,7 +110,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     let extraInfo: IServiceExtra = null;
     try {
       extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-    } catch (e) {}
+    } catch (e) { }
     let displayName = serviceEntity.entity.label;
     if (extraInfo && extraInfo.displayName) {
       displayName = extraInfo.displayName;

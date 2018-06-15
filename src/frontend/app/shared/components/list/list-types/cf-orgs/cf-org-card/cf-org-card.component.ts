@@ -1,5 +1,5 @@
 
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -20,6 +20,9 @@ import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { getEntityDeleteSections } from '../../../../../../store/selectors/api.selectors';
+import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-cf-org-card',
@@ -39,11 +42,11 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   appCount: number;
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
+  public entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService,
-    private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
@@ -61,6 +64,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
         can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
+
   }
 
   ngOnInit() {
@@ -86,7 +90,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;
-
+    this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
   }
 
   setCounts = (apps: APIResource<any>[]) => {

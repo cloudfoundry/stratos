@@ -1,4 +1,4 @@
-<app-meta-card class="app-service-card" [actionMenu]="cardMenu">
+<app-meta-card class="app-service-card" [actionMenu]="cardMenu" [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div class="app-service-card__title">
       {{ (serviceInstance$ | async)?.entity.entity.name}}

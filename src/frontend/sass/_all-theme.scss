@@ -32,6 +32,7 @@
 @import '../app/features/applications/deploy-application/deploy-application-step2/deploy-application-fs/deploy-application-fs.component.theme';
 @import '../app/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import '../app/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
+@import '../app/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -103,6 +104,7 @@ $side-nav-light-active: #484848;
   @include app-upload-progress-indicator-component-theme($theme, $app-theme);
   @include page-404($theme, $app-theme);
   @include about-page-theme($theme, $app-theme);
+  @include meta-card-component($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
