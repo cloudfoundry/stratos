@@ -103,14 +103,19 @@ export class CfUserService {
     });
   }
 
-  getOrgRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
-    // Discover user's roles for each org via each of the 4 org role types
+  getOrgRolesFromUser(user: CfUser, org?: APIResource<IOrganization>): IUserPermissionInOrg[] {
     const res: IUserPermissionInOrg[] = [];
     const orgGuids = new Set<string>();
-    this.parseOrgRole(user, orgGuids, user.organizations, res);
-    this.parseOrgRole(user, orgGuids, user.audited_organizations, res);
-    this.parseOrgRole(user, orgGuids, user.billing_managed_organizations, res);
-    this.parseOrgRole(user, orgGuids, user.managed_organizations, res);
+    if (org) {
+      // Discover user's roles in this specific org
+      this.parseOrgRole(user, orgGuids, [org], res);
+    } else {
+      // Discover user's roles for each org via each of the 4 org role types
+      this.parseOrgRole(user, orgGuids, user.organizations, res);
+      this.parseOrgRole(user, orgGuids, user.audited_organizations, res);
+      this.parseOrgRole(user, orgGuids, user.billing_managed_organizations, res);
+      this.parseOrgRole(user, orgGuids, user.managed_organizations, res);
+    }
     return res;
   }
 
@@ -137,13 +142,18 @@ export class CfUserService {
     });
   }
 
-  getSpaceRolesFromUser(user: CfUser): IUserPermissionInSpace[] {
+  getSpaceRolesFromUser(user: CfUser, spaces?: APIResource<ISpace>[]): IUserPermissionInSpace[] {
     const res: IUserPermissionInSpace[] = [];
     const spaceGuids = new Set<string>();
-    // User might have unique spaces in any of the space role collections, so loop through each
-    this.parseSpaceRole(user, spaceGuids, user.spaces, res);
-    this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
-    this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+    if (spaces) {
+      // Discover user's roles in this specific space
+      this.parseSpaceRole(user, spaceGuids, spaces, res);
+    } else {
+      // User might have unique spaces in any of the space role collections, so loop through each
+      this.parseSpaceRole(user, spaceGuids, user.spaces, res);
+      this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
+      this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+    }
     return res;
   }
 
