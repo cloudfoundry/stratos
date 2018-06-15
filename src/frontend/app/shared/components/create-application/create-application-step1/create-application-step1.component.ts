@@ -1,20 +1,19 @@
-
-import { of as observableOf,  Observable } from 'rxjs';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-
+import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { ISpace } from '../../../../core/cf-api.types';
+import { PermissionStrings } from '../../../../core/current-user-permissions.config';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
+import {
+  getSpacesFromOrgWithRole,
+} from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
-import { getSpacesFromOrgWithRole } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { PermissionStrings } from '../../../../core/current-user-permissions.config';
-import { ISpace } from '../../../../core/cf-api.types';
-
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 
 
@@ -25,6 +24,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
+  hasOrgs$: Observable<boolean>;
   @Input('isMarketplaceMode')
   isMarketplaceMode: boolean;
   constructor(
@@ -58,6 +58,10 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngOnInit() {
     this.spaces$ = this.getSpacesFromPermissions();
+    this.hasOrgs$ = this.cfOrgSpaceService.cf.select.pipe(
+     switchMap(o => this.cfOrgSpaceService.getEndpointOrgs(o)),
+     map(o => o.length > 0)
+    );
     this.hasSpaces$ = this.spaces$.pipe(
       map(spaces => !!spaces.length)
     );
