@@ -116,6 +116,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       org$: org$.pipe(map(org => org ? org.entity : null))
     };
     this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
+      org$: org$.pipe(map(org => org ? org.entity : null)),
       spaces$: combineLatest(org$, space$ || observableOf(null)).pipe(
         map(([org, space]) => {
           if (space) {
