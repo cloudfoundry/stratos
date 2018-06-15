@@ -6,7 +6,7 @@ resource_types:
   source:
     repository: ((docker-image-resource))
     tag: ((docker-image-resource-tag))
-    
+
 resources:
 - name: stratos
   type: git
@@ -14,6 +14,7 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
+    tag_filter: "v2*"
 - name: stratos-master
   type: git
   source:
@@ -52,7 +53,7 @@ resources:
   source:
     bucket: concourse-stratos-ui
     endpoint: ((minio-server-endpoint))
-    regexp: temp-artifacts/v(.*).tar
+    regexp: temp-artifacts/release-(.*).tar
     access_key_id: ((minio-access-key))
     secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
@@ -69,6 +70,7 @@ jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
+    trigger: true
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
