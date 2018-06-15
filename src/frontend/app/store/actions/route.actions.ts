@@ -1,12 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { Action } from '@ngrx/store';
-
-import { EntityInfo } from '../types/api.types';
+import { entityFactory, routeSchemaKey } from '../helpers/entity-factory';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { entityFactory } from '../helpers/entity-factory';
-import { routeSchemaKey } from '../helpers/entity-factory';
-import { schema } from 'normalizr';
 import { Route } from '../types/route.types';
+
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -50,12 +46,12 @@ export class CreateRoute extends BaseRouteAction {
     this.options.body = {
       ...route
     };
-    if (route.isTCP && route.port === -1) {
+    const isTCP = !route.host && route.port;
+    if (isTCP && route.port === -1) {
       this.options.params = new URLSearchParams();
       this.options.params.set('generate_port', 'true');
       delete this.options.body.port;
     }
-    delete this.options.body.isTCP;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
 }

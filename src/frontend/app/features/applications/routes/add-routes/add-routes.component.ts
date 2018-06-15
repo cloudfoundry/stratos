@@ -231,7 +231,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private createAndMapRoute(newRouteGuid: string, domainGuid: string, host, path, port, isTCP): Observable<StepOnNextResult> {
-    this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port, isTCP)));
+    this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port)));
     return this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
         filter(route => !route.creating && !route.fetching),
