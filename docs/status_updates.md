@@ -6,9 +6,9 @@ Weekly status updates are published here.
 
 We are working towards a release of V2. We are now functionally complete and are working through priority 1 issues and defects.
 
-- The tentative release schedule is updated here - [Roadmap](roadmap.md).
+- The release schedule is updated here - [Roadmap](roadmap.md).
 - Priority 1 defects are labelled P1 - you can view them with this [Filter](https://github.com/cloudfoundry-incubator/stratos/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+label%3AP1)
-- We are releasing Beta 1 of Version 2 of Stratos today.
+- We have tagged a Beta 1 of Version 2 of Stratos today - https://github.com/cloudfoundry-incubator/stratos/releases/tag/v2.0.0-beta-001
 
 We've been working through a large number of defects this week -
 
