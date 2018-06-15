@@ -29,7 +29,7 @@ export class AddEditSpaceStepBase {
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-    const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
+    const paginationKey = getPaginationKey('cf-space', this.orgGuid);
 
     const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
 
