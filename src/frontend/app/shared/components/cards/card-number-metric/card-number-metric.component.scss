@@ -7,25 +7,25 @@
     align-items: center;
     display: flex;
     flex-direction: row;
-    padding: 12px 24px;
+    padding: 12px;
     > div {
       flex: 1;
     }
   }
   &__icon {
-    flex: 0 0 42px;
-    font-size: 42px;
-    height: 42px;
+    flex: 0 0 40px;
+    font-size: 40px;
+    height: 40px;
     margin-right: 12px;
-    width: 42px;
+    width: 40px;
   }
   &__label {
-    font-size: 16px;
+    font-size: 15px;
   }
   &__value {
-    font-size: 24px;
+    font-size: 23px;
   }
   &__limit {
-    font-size: 20px;
+    font-size: 18px;
   }
 }
