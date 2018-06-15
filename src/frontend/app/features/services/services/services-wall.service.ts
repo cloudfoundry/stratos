@@ -49,8 +49,12 @@ export class ServicesWallService {
     refCount()
   )
 
+  getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
+    return createEntityRelationPaginationKey(serviceSchemaKey, `${cfGuid}-${spaceGuid}`);
+  }
+
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
-    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, `${cfGuid}-${spaceGuid}`);
+    const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,

@@ -54,8 +54,6 @@ import { CsiModeService } from '../csi-mode.service';
   ]
 })
 export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {
-
-
   initialisedService$: Observable<boolean>;
   skipApps$: Observable<boolean>;
   cancelUrl: string;
