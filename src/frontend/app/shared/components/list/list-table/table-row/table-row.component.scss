@@ -4,7 +4,7 @@
       cursor: not-allowed;
       &__inner {
         * {
-          opacity: .8;
+          opacity: .65;
         }
       }
     }
@@ -32,6 +32,31 @@
   border-width: 0 0 1px;
   display: flex;
   transition: opacity .25s;
+  &-wrapper {
+    position: relative;
+  }
+  &__deletion-bar {
+    &-inner {
+      flex: .5;
+      max-width: 200px;
+    }
+    &-text {
+      padding-bottom: 5px;
+      text-align: center;
+    }
+    &-wrapper {
+      align-items: center;
+      justify-content: center;
+      bottom: 0;
+      display: flex;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: flex;
+      z-index: 999;
+    }
+  }
   &__error {
     display: none;
     justify-content: middle;

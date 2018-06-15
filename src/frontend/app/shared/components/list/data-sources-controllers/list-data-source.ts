@@ -158,9 +158,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.transformEntity = config.transformEntity;
     this.isLocal = config.isLocal || false;
     this.transformEntities = config.transformEntities;
-    this.rowsState = config.rowsState ? config.rowsState.pipe(
-      publishReplay(1), refCount()
-    ) : observableOf({}).pipe(first());
+    this.rowsState = config.rowsState;
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
@@ -179,17 +177,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return config.refresh ? config.refresh : () => {
       this.store.dispatch(this.action);
     };
-  }
-  /**
-   * Will return the row state with default values filled in.
-   * @param row The data for the current row
-   */
-  getRowState(row: T) {
-    return this.rowsState.pipe(
-      map(state => ({ ...getDefaultRowState(), ...(state[this.getRowUniqueId(row)] || {}) })),
-      distinctUntilChanged(),
-      publishReplay(1), refCount()
-    );
   }
 
   disconnect() {
