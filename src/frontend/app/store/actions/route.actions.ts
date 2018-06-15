@@ -25,6 +25,8 @@ export interface NewRoute {
   domain_guid: string;
   space_guid: string;
   host?: string;
+  port?: number;
+  path?: string;
 }
 
 export abstract class BaseRouteAction extends CFStartAction implements ICFAction {
@@ -38,7 +40,7 @@ export abstract class BaseRouteAction extends CFStartAction implements ICFAction
 }
 
 export class CreateRoute extends BaseRouteAction {
-  constructor(guid: string, endpointGuid: string, route: Route) {
+  constructor(guid: string, endpointGuid: string, route: NewRoute) {
     super(guid, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'routes';
