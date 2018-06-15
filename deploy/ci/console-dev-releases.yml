@@ -70,6 +70,7 @@ jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
+    trigger: true
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
