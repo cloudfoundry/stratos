@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-base:opensuse
+FROM splatform/stratos-bk-base:v1
 
 RUN zypper -n in mariadb-client
 COPY outputs/stratos-dbmigrator /usr/local/bin/
