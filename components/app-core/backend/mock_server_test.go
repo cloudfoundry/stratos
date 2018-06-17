@@ -168,18 +168,18 @@ func expectOneRow() sqlmock.Rows {
 
 func expectCFRow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, mockClientSecret)
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret)
 }
 
 func expectCERow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, mockClientSecret)
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret)
 }
 
 func expectCFAndCERows() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, mockClientSecret).
-		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, mockClientSecret)
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret).
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret)
 }
 
 func expectTokenRow() sqlmock.Rows {
@@ -292,6 +292,8 @@ const (
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret"}
 
 var mockEncryptionKey = make([]byte, 32)
+
+var cipherClientSecret,_ = crypto.EncryptToken(mockEncryptionKey,mockClientSecret)
 
 var mockV2InfoResponse = interfaces.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,

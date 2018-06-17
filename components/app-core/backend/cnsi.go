@@ -46,15 +46,15 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
-	cfclientid :=  c.FormValue("cf_client_id")
-	cfclientsecret := c.FormValue("cf_client_secret")
+	cnsiClientId :=  c.FormValue("cnsi_client_id")
+	cnsiClientSecret := c.FormValue("cnsi_client_secret")
 
-	if cfclientid == "" {
-		cfclientid = p.GetConfig().CFClient
-		cfclientsecret = p.GetConfig().CFClientSecret
+	if cnsiClientId == "" {
+		cnsiClientId = p.GetConfig().CFClient
+		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cfclientid, cfclientsecret, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
 
-	cnsiList, err = cnsiRepo.List()
+	cnsiList, err = cnsiRepo.List(p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return cnsiList, err
 	}
@@ -261,7 +261,7 @@ func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) 
 		return interfaces.CNSIRecord{}, err
 	}
 
-	rec, err := cnsiRepo.Find(guid)
+	rec, err := cnsiRepo.Find(guid, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return interfaces.CNSIRecord{}, err
 	}
@@ -281,7 +281,7 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 		return rec, err
 	}
 
-	rec, err = cnsiRepo.FindByAPIEndpoint(endpoint)
+	rec, err = cnsiRepo.FindByAPIEndpoint(endpoint, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return rec, err
 	}
@@ -307,7 +307,7 @@ func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error 
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
-	err = cnsiRepo.Save(guid, c)
+	err = cnsiRepo.Save(guid, c, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		msg := "Unable to save a CNSI Token: %v"
 		log.Errorf(msg, err)
