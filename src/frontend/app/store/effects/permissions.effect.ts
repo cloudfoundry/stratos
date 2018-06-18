@@ -129,7 +129,7 @@ export class PermissionsEffects {
     // Per endpoint fetch feature flags and user roles (unless admin, where we don't need to), then mark endpoint as initialised
     endpoints.forEach(endpoint => {
       if (endpoint.user.admin) {
-        requests[endpoint.guid].push(observableOf(true));
+        requests[endpoint.guid] = [observableOf(true)];
       } else {
         // START fetching cf roles for current user
         this.store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS));
