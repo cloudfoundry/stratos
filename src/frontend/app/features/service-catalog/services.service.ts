@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import {
   IService,
@@ -12,24 +12,27 @@ import {
   IServicePlan,
   IServicePlanVisibility,
 } from '../../core/cf-api-svc.types';
+import { ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../store/actions/service.actions';
+import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   entityFactory,
   serviceBrokerSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
+  spaceSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getServiceInstancesInCf, getSvcAvailability, getServicePlans } from './services-helper';
+import { getServiceInstancesInCf, getServicePlans, getSvcAvailability } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -39,8 +42,15 @@ export interface ServicePlanAccessibility {
   spaceGuid?: string;
 }
 
+export interface SpaceScopedService {
+  isSpaceScoped: boolean;
+  spaceGuid?: string;
+  orgGuid?: string;
+}
+
 @Injectable()
 export class ServicesService {
+  isSpaceScoped$: Observable<SpaceScopedService>;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   serviceGuid: any;
@@ -202,6 +212,36 @@ export class ServicesService {
       combineLatest(this.service$),
       map(([brokers, service]) => brokers.filter(broker => broker.metadata.guid === service.entity.service_broker_guid)),
       map(o => (o.length === 0 ? null : o[0]))
+    );
+    this.isSpaceScoped$ = this.serviceBroker$.pipe(
+      map(o => o ? o.entity.space_guid : null),
+      switchMap(spaceGuid => {
+        if (!spaceGuid) {
+          // Its possible the user is unable to see service broker,
+          // therefore, we can't know if this service is space-scoped or not.
+          // We are assuming it's not, since we dont have any other means of determining that.
+          return observableOf({
+            isSpaceScoped: false
+          });
+        } else {
+
+          const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
+            spaceSchemaKey,
+            entityFactory(spaceSchemaKey),
+            spaceGuid,
+            new GetSpace(spaceGuid, this.cfGuid),
+            true
+          );
+          return spaceEntityService.waitForEntity$.pipe(
+            filter(o => !!o && !!o.entity),
+            map(o => ({
+              isSpaceScoped: true,
+              spaceGuid: spaceGuid,
+              orgGuid: o.entity.entity.organization_guid
+            })),
+          );
+        }
+      })
     );
     this.allServiceInstances$ = this.getServiceInstances();
     this.serviceInstances$ = this.allServiceInstances$.pipe(

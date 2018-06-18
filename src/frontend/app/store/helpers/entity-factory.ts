@@ -293,6 +293,7 @@ const ApplicationEntitySchema = new EntitySchema(
         entity: {
           ...coreSpaceSchemaParams,
           routes: [RouteNoAppsSchema],
+          service_instances: [ServiceInstancesWithNoBindingsSchema],
           organization: OrganizationsWithoutSpaces,
         }
       }, { idAttribute: getAPIResourceGuid }),
