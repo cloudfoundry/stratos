@@ -208,7 +208,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:v1
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -241,7 +241,7 @@ function buildUI {
     -e GROUP_ID=$(id -g) \
     -e STRATOS_BOWER="${STRATOS_BOWER}" \
     -w /usr/src/app \
-    splatform/stratos-ui-build-base:opensuse \
+    splatform/stratos-ui-build-base:v1 \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
