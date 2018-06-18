@@ -44,7 +44,7 @@ export class GetServicesInstancesInSpace
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Service Instances', 'Get all in Space');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
   initialParams = {

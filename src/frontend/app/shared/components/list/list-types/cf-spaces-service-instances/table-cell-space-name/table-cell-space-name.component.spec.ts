@@ -1,37 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { ServiceInstanceCardComponent } from './service-instance-card.component';
+import { TableCellSpaceNameComponent } from './table-cell-space-name.component';
+import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
-describe('ServiceInstanceCardComponent', () => {
-  let component: ServiceInstanceCardComponent;
-  let fixture: ComponentFixture<ServiceInstanceCardComponent>;
+describe('TableCellSpaceNameComponent', () => {
+  let component: TableCellSpaceNameComponent<any>;
+  let fixture: ComponentFixture<TableCellSpaceNameComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        BaseTestModules,
-        createBasicStoreModule(),
-      ],
-      providers: [
-        ServicesWallService,
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
-        ServiceActionHelperService,
-      ]
+      declarations: [ TableCellSpaceNameComponent ],
+      imports: [BaseTestModulesNoShared]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ServiceInstanceCardComponent);
+    fixture = TestBed.createComponent(TableCellSpaceNameComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {

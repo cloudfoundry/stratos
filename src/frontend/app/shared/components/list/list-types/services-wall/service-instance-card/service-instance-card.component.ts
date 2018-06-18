@@ -117,4 +117,16 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     return displayName;
   }
 
+  getSpaceName = () => this.serviceInstanceEntity.entity.space.entity.name;
+  getSpaceURL = () => [
+    '/cloud-foundry',
+     this.serviceInstanceEntity.entity.cfGuid,
+     'organizations',
+     this.serviceInstanceEntity.entity.space.entity.organization_guid,
+     'spaces',
+     this.serviceInstanceEntity.entity.space_guid,
+     'summary'
+    ]
+    getSpaceBreadcrumbs = () => ({ 'breadcrumbs': 'services-wall'});
+
 }
