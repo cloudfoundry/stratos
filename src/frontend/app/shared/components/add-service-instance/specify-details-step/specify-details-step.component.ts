@@ -22,6 +22,7 @@ import {
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
+import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import {
   SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
@@ -75,11 +76,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   @Input('showModeSelection')
   showModeSelection = false;
 
+  @Input('appId') appId: string;
+
   formMode: FormMode;
 
   selectExistingInstanceForm: FormGroup;
   createNewInstanceForm: FormGroup;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   cSIHelperService: CreateServiceInstanceHelperService;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -154,6 +158,31 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.hasInstances$ = this.serviceInstances$.pipe(
       filter(p => !!p),
       map(p => p.length > 0),
+    );
+
+    this.bindableServiceInstances$ = this.serviceInstances$.pipe(
+      map(svcs => {
+        if (!this.appId) {
+          return svcs;
+        } else {
+          const updated = [];
+          svcs.forEach(svc => {
+            const alreadyBound = !!svc.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
+            if (alreadyBound) {
+              const updatedSvc: APIResource<IServiceInstance> = {
+                entity: { ...svc.entity },
+                metadata: {...svc.metadata}
+              };
+              updatedSvc.entity.name += ' (Already bound)';
+              updatedSvc.metadata.guid = null;
+              updated.push(updatedSvc);
+            } else {
+              updated.push(svc);
+            }
+          });
+          return updated;
+        }
+      })
     );
   }
 
@@ -263,9 +292,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                 filter(s => {
                   return s && !s.creating;
                 }),
-                map(req => req.error ?
-                  { success: false, message: `Failed to create service instance binding: ${req.message}` } :
-                  this.routeToServices(state.cfGuid, state.bindAppGuid))
+                map(req => {
+                  if (req.error) {
+                    return { success: false, message: `Failed to create service instance binding: ${req.message}` };
+                  } else {
+                    // Refetch env vars for app, since they have been changed by CF
+                    this.store.dispatch(
+                      new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+                    );
+
+                    return this.routeToServices(state.cfGuid, state.bindAppGuid);
+                  }
+                })
               );
           } else {
             return observableOf(this.routeToServices());

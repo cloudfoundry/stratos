@@ -1,16 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { APIResource } from '../../../../store/types/api.types';
-import { IServiceBroker } from '../../../../core/cf-api-svc.types';
-import { filter, map, switchMap } from 'rxjs/operators';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { ISpace } from '../../../../core/cf-api.types';
-import { spaceSchemaKey, entityFactory, spaceWithOrgKey, domainSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
-import { GetSpace } from '../../../../store/actions/space.actions';
 import { Observable } from 'rxjs';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+
+import { IServiceBroker } from '../../../../core/cf-api-svc.types';
+import { ISpace } from '../../../../core/cf-api.types';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { ServicesService } from '../../../../features/service-catalog/services.service';
+import { GetSpace } from '../../../../store/actions/space.actions';
+import { AppState } from '../../../../store/app-state';
+import { entityFactory, spaceSchemaKey, spaceWithOrgKey } from '../../../../store/helpers/entity-factory';
+import { APIResource } from '../../../../store/types/api.types';
 
 @Component({
   selector: 'app-service-broker-card',
@@ -19,7 +19,8 @@ import { Observable } from 'rxjs';
 })
 export class ServiceBrokerCardComponent {
 
-  spaceLink$: Observable<string[]>;
+  spaceName: string;
+  spaceLink: string[];
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
   constructor(
     private servicesService: ServicesService,
@@ -27,10 +28,14 @@ export class ServiceBrokerCardComponent {
     private entityServiceFactory: EntityServiceFactory
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;
-    this.spaceLink$ = this.serviceBroker$.pipe(
+
+    this.serviceBroker$.pipe(
       filter(o => !!o),
-      switchMap(broker => {
-        const spaceGuid = broker.entity.space_guid;
+      map(o => o.entity.space_guid),
+      take(1),
+      filter(o => !!o),
+      // Broker is space scoped
+      switchMap(spaceGuid => {
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
           entityFactory(spaceWithOrgKey),
           spaceGuid,
@@ -39,8 +44,8 @@ export class ServiceBrokerCardComponent {
         );
         return spaceService.waitForEntity$;
       }),
-      map(space => {
-        return ['/cloud-foundry',
+      tap(space => {
+        this.spaceLink = ['/cloud-foundry',
           this.servicesService.cfGuid,
           'organizations',
           space.entity.entity.organization_guid,
@@ -48,7 +53,8 @@ export class ServiceBrokerCardComponent {
           space.entity.metadata.guid,
           'summary'
         ];
+        this.spaceName = space.entity.entity.name;
       })
-    );
+    ).subscribe();
   }
 }

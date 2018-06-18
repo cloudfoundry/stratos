@@ -278,7 +278,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
       tap(([selectedOrg, spaces]) => {
         if (
           !!spaces.length &&
-          !this.space.select.getValue() &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
             (this.selectMode === CfOrgSpaceSelectMode.ANY))
         ) {

@@ -1,4 +1,4 @@
-import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
   applicationSchemaKey,
@@ -7,19 +7,15 @@ import {
   routeSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  serviceInstancesWithNoBindingsSchemaKey,
-  serviceSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
+  createEntityRelationPaginationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-  createEntityRelationPaginationKey,
 } from '../helpers/entity-relations.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { getPaginationKey } from './pagination.actions';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
@@ -79,7 +75,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     this.options.url = `apps/${guid}/service_bindings`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    this.paginationKey = paginationKey || getPaginationKey(this.entityKey, endpointGuid, guid);
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
   actions = getActions('Application Service Bindings', 'Get All');
   initialParams = {

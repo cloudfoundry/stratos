@@ -13,7 +13,7 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../reducers.module';
 import { Store } from '@ngrx/store';
 
-describe('EndpointsPageComponent', () => {
+describe('SnackBarEffect', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [EndpointsPageComponent],

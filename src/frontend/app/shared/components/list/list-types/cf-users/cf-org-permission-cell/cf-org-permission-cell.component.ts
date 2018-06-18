@@ -13,6 +13,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
@@ -25,9 +26,10 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   constructor(
     public store: Store<AppState>,
     public cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CurrentUserPermissionsService,
+    confirmDialog: ConfirmationDialogService
   ) {
-    super();
+    super(confirmDialog);
   }
 
   protected setChipConfig(row: APIResource<CfUser>) {
@@ -48,6 +50,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         ...perm,
         name: orgPerms.name,
         guid: orgPerms.orgGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
@@ -13,6 +13,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
@@ -26,9 +27,10 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   constructor(
     public store: Store<AppState>,
     public cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CurrentUserPermissionsService,
+    confirmDialog: ConfirmationDialogService
   ) {
-    super();
+    super(confirmDialog);
   }
 
   protected setChipConfig(row: APIResource<CfUser>) {
@@ -49,6 +51,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         ...perm,
         name: spacePerms.name,
         guid: spacePerms.spaceGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,
