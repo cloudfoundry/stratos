@@ -17,5 +17,5 @@
     <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
   </mat-form-field>
-  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue">Skip SSL validation for the endpoint</mat-checkbox>
+  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue" labelPosition="before">Skip SSL validation for the endpoint</mat-checkbox>
 </form>
