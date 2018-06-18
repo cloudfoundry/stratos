@@ -142,7 +142,6 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 	if c.Request().Method() == http.MethodGet {
 		state := c.QueryParam("state")
-		log.Error(state)
 		return c.Redirect(http.StatusTemporaryRedirect, state)
 	}
 
@@ -172,51 +171,16 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interfaces.LoginRes, error) {
-	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
-	userID, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
-	}
-
-	uaaToken, err := p.GetUAATokenRecord(userID)
-	if err == nil { // Found the user's UAA token
-		u, err := getUserTokenInfo(uaaToken.AuthToken)
-		if err != nil {
-			return nil, echo.NewHTTPError(http.StatusInternalServerError, "Could not parse current user UAA token")
-		}
-
-		// Save the console UAA token as the cnsi UAA token if:
-		// Attempting to login to auto-registered cnsi endpoint
-		// AND the auto-registered endpoint has the same UAA endpoint as console
-		theCNSIrecord, _ := p.GetCNSIRecord(cnsiGUID)
-		if p.GetConfig().AutoRegisterCFUrl == theCNSIrecord.APIEndpoint.String() { // CNSI API endpoint is the auto-register endpoint
-			cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
-			cnsiInfo, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
-			if err != nil {
-				log.Fatal("Could not get the info for Cloud Foundry", err)
-				return nil, err
-			}
-
-			uaaUrl, err := url.Parse(cnsiInfo.AuthorizationEndpoint)
-			if err != nil {
-				return nil, fmt.Errorf("invalid authorization endpoint URL %s %s", cnsiInfo.AuthorizationEndpoint, err)
-			}
-
-			if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
-				_, err = p.saveCNSIToken(cnsiGUID, *u, uaaToken.AuthToken, uaaToken.RefreshToken, false)
-				return nil, err
-			} else {
-				log.Info("The auto-registered endpoint UAA server does not match console UAA server.")
-			}
-		}
-	} else {
-		log.Warn("Could not find current user UAA token")
-	}
-
 	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
 
 	if err != nil {
 		return nil, err
+	}
+
+	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
+	userID, err := p.GetSessionStringValue(c, "user_id")
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 	u.UserGUID = userID
 
@@ -232,6 +196,42 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	}
 
 	return resp, nil
+}
+
+func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIrecord interfaces.CNSIRecord) (error) {
+	userID, err := p.GetSessionStringValue(c, "user_id")
+	if err != nil {
+		return errors.New("could not find correct session value")
+	}
+	uaaToken, err := p.GetUAATokenRecord(userID)
+	if err == nil { // Found the user's UAA token
+		u, err := getUserTokenInfo(uaaToken.AuthToken)
+		if err != nil {
+			return errors.New("could not parse current user UAA token")
+		}
+		cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
+		cnsiInfo, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
+		if err != nil {
+			log.Fatal("Could not get the info for Cloud Foundry", err)
+			return err
+		}
+
+		uaaUrl, err := url.Parse(cnsiInfo.AuthorizationEndpoint)
+		if err != nil {
+			return fmt.Errorf("invalid authorization endpoint URL %s %s", cnsiInfo.AuthorizationEndpoint, err)
+		}
+
+		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+			_, err = p.saveCNSIToken(theCNSIrecord.GUID, *u, uaaToken.AuthToken, uaaToken.RefreshToken, false)
+			return  err
+		} else {
+			return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
+		}
+	} else {
+		log.Warn("Could not find current user UAA token")
+		return err
+	}
+	return  nil
 }
 
 func (p *portalProxy) verifyLoginToCNSI(c echo.Context) error {
@@ -411,7 +411,6 @@ func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, c
 	body.Set("client_id", client)
 	body.Set("client_secret", clientSecret)
 	body.Set("redirect_uri", getSSORedirectUri(state))
-	log.Info(getSSORedirectUri(state))
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
