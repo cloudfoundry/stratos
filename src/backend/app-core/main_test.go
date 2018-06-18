@@ -61,7 +61,7 @@ func (e *echoContextMock) Reset(engine.Request, engine.Response)               {
 func TestLoadPortalConfig(t *testing.T) {
 
 	os.Unsetenv("DATABASE_PROVIDER")
-	os.Setenv("HTTP_CLIENT_TIMEOUT_IN_SECS", "120")
+	os.Setenv("HTTP_CLIENT_TIMEOUT_IN_SECS", "10")
 	os.Setenv("SKIP_SSL_VALIDATION", "true")
 	os.Setenv("CONSOLE_PROXY_TLS_ADDRESS", ":8080")
 	os.Setenv("CONSOLE_CLIENT", "portal-proxy")
