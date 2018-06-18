@@ -1,6 +1,19 @@
 # Stratos Roadmap
 
-Last Updated: 25 April 2018
+Last Updated: 15 June 2018
+
+# Version 2 Timeline
+
+The current foucs is on releasing V2 of Stratos. The current timeline is:
+
+|Date|Milestone|
+|---|---|
+|15 June|Beta 1|
+|20 June|Beta 2|
+|25 June|RC 1|
+|20 July|2.0.0|
+
+
 
 ## Agile
 

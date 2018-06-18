@@ -33,7 +33,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       uaa_endpoint: this.uaaForm.get('apiUrl').value,
       console_client: this.uaaForm.get('clientId').value,
       password: this.uaaForm.get('adminPassword').value,
-      skip_ssl_validation: true,
+      skip_ssl_validation: this.uaaForm.get('skipSll').value,
       username: this.uaaForm.get('adminUsername').value,
       console_client_secret: this.uaaForm.get('clientSecret').value,
     }));
@@ -45,7 +45,11 @@ export class ConsoleUaaWizardComponent implements OnInit {
         const success = !state.error;
         if (success) {
           this.uaaScopes = state.payload.scope;
-          this.selectedScope = 'stratos.admin';
+          if (this.uaaScopes.find(scope => scope === 'stratos.admin')) {
+            this.selectedScope = 'stratos.admin';
+          } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
+            this.selectedScope = 'cloud_controller.admin';
+          }
         }
         return {
           success,
@@ -88,6 +92,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
   ngOnInit() {
     this.uaaForm = new FormGroup({
       apiUrl: new FormControl('', [<any>Validators.required]),
+      skipSll: new FormControl(false),
       clientId: new FormControl('', [<any>Validators.required]),
       clientSecret: new FormControl(''),
       adminUsername: new FormControl('', [<any>Validators.required]),
