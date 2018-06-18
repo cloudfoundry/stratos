@@ -114,15 +114,15 @@ const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
   // correct values - so remove them to avoid this
   processStrategy: (value) => {
     const newValue = {
-      entity: {...value.entity},
-      metadata: {...value.metadata}
+      entity: { ...value.entity },
+      metadata: { ...value.metadata }
     };
     if (newValue.entity.router_group_type === null) {
       delete newValue.entity.router_group_type;
     }
     return newValue;
   }
- });
+});
 entityCache[domainSchemaKey] = DomainSchema;
 
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {
@@ -252,6 +252,7 @@ const OrganizationsWithoutSpaces = new EntitySchema(organizationSchemaKey, {
     ...coreOrgSchemaParams,
   }
 }, { idAttribute: getAPIResourceGuid });
+
 const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,

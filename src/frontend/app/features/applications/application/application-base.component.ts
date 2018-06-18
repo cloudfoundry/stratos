@@ -10,6 +10,8 @@ import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { EntitySchemaTreeBuilder } from '../../../store/helpers/schema-tree-traverse';
+import { RecursiveDelete } from '../../../store/effects/recusive-entity-delete.effect';
 
 
 function applicationServiceFactory(
@@ -37,6 +39,7 @@ function entityServiceFactory(
   activatedRoute: ActivatedRoute
 ) {
   const { id, cfId } = activatedRoute.snapshot.params;
+  new EntitySchemaTreeBuilder().buildTree(new RecursiveDelete('1', entityFactory(applicationSchemaKey)), {});
   return _entityServiceFactory.create(
     applicationSchemaKey,
     entityFactory(applicationSchemaKey),
