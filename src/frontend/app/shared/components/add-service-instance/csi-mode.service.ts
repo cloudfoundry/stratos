@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
+import { SpaceScopedService } from '../../../features/service-catalog/services.service';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -31,6 +32,8 @@ export class CsiModeService {
   private mode: string;
   public viewDetail: ViewDetail;
   private cancelUrl: string;
+  // This property is only used when launching the Create Service Instance Wizard from the Marketplace
+  spaceScopedDetails: SpaceScopedService = { isSpaceScoped: false };
 
   constructor(
     private activatedRoute: ActivatedRoute
@@ -46,6 +49,11 @@ export class CsiModeService {
       this.viewDetail = {
         ...defaultViewDetail,
         showSelectService: false,
+      };
+      this.spaceScopedDetails = {
+        isSpaceScoped: activatedRoute.snapshot.queryParams['isSpaceScoped'] === 'true' ? true : false,
+        spaceGuid: activatedRoute.snapshot.queryParams['spaceGuid'],
+        orgGuid: activatedRoute.snapshot.queryParams['orgGuid'],
       };
     }
 

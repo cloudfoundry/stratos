@@ -66,6 +66,9 @@ export class ServicesServiceMock {
   }]);
 
   serviceInstances$ = observableOf([]);
+  isSpaceScoped$ = observableOf({
+    isSpaceScoped: false
+  });
   serviceBroker$ = observableOf({
     entity: {
       name: 'app-autoscaler',

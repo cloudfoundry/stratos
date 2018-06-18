@@ -2,6 +2,59 @@
 
 Weekly status updates are published here.
 
+## 15 June 2018
+
+We are working towards a release of V2. We are now functionally complete and are working through priority 1 issues and defects.
+
+- The release schedule is updated here - [Roadmap](roadmap.md).
+- Priority 1 defects are labelled P1 - you can view them with this [Filter](https://github.com/cloudfoundry-incubator/stratos/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+label%3AP1)
+- We have tagged a Beta 1 of Version 2 of Stratos today - https://github.com/cloudfoundry-incubator/stratos/releases/tag/v2.0.0-beta-001
+
+We've been working through a large number of defects this week -
+
+- Deploy info card shows both file and folder info [\#2351](https://github.com/cloudfoundry-incubator/stratos/issues/2351)
+- App Service Instances: Modal appears off screen [\#2347](https://github.com/cloudfoundry-incubator/stratos/issues/2347)
+- Users list is empty after cancel [\#2339](https://github.com/cloudfoundry-incubator/stratos/issues/2339)
+- We still show large no connected CF endpoints even when you connect a metrics endpoint [\#2332](https://github.com/cloudfoundry-incubator/stratos/issues/2332)
+- Connected endpoint does not show 'unregister' action [\#2321](https://github.com/cloudfoundry-incubator/stratos/issues/2321)
+- Service instance page shows no 'no cf connected' warning [\#2320](https://github.com/cloudfoundry-incubator/stratos/issues/2320)
+- No page header on Cloud Foundry pages when you go directly there [\#2319](https://github.com/cloudfoundry-incubator/stratos/issues/2319)
+- Service Instance entity is not updated after unbinding an app [\#2317](https://github.com/cloudfoundry-incubator/stratos/issues/2317)
+- Service broker card intermittently appears immediately below service summary card [\#2314](https://github.com/cloudfoundry-incubator/stratos/issues/2314)
+- Select cf/org/space in create service instance stepper mentions `app` [\#2313](https://github.com/cloudfoundry-incubator/stratos/issues/2313)
+- Adding a space scoped service should not show org/space selection step [\#2311](https://github.com/cloudfoundry-incubator/stratos/issues/2311)
+- Front-end unit tests are unreliable in Travis [\#2308](https://github.com/cloudfoundry-incubator/stratos/issues/2308)
+- Not all backend tests are run [\#2300](https://github.com/cloudfoundry-incubator/stratos/issues/2300)
+- Log Stream token refresh does not work [\#2299](https://github.com/cloudfoundry-incubator/stratos/issues/2299)
+- Marketplace: Service Broker card should be hidden if the broker isn't returned by API [\#2279](https://github.com/cloudfoundry-incubator/stratos/issues/2279)
+- Endpoint Users are not refetched when an endpoint is reconnected as a different user. [\#2274](https://github.com/cloudfoundry-incubator/stratos/issues/2274)
+- Marketplace service cards tags list fails to expand [\#2263](https://github.com/cloudfoundry-incubator/stratos/issues/2263)
+- App bound service is shown in services to bind to list [\#2253](https://github.com/cloudfoundry-incubator/stratos/issues/2253)
+- Error response handling is broken [\#2242](https://github.com/cloudfoundry-incubator/stratos/issues/2242)
+- Investigate issue with space-scoped services being returned incorrectly by the `List Services for Space` request [\#2240](https://github.com/cloudfoundry-incubator/stratos/issues/2240)
+- App Log Stream shows `Connecting....` for apps that aren't running [\#2235](https://github.com/cloudfoundry-incubator/stratos/issues/2235)
+- Map Existing Routes: Sort by apps attached is broken [\#2210](https://github.com/cloudfoundry-incubator/stratos/issues/2210)
+- Application: OFFLINE WHILE UPDATING state only allows the delete action. [\#2208](https://github.com/cloudfoundry-incubator/stratos/issues/2208)
+- Cf/Org/Space filters are not updating on endpoint change [\#2162](https://github.com/cloudfoundry-incubator/stratos/issues/2162)
+- Component effects are cropped in steppers [\#2116](https://github.com/cloudfoundry-incubator/stratos/issues/2116)
+- Cloud Foundry orgs and space views contain multiple app-headers [\#2051](https://github.com/cloudfoundry-incubator/stratos/issues/2051)
+- 2nd row of tabs sometimes disappears [\#2005](https://github.com/cloudfoundry-incubator/stratos/issues/2005)
+- Instances tab shows Unknown when scaling \(with crashed app\) [\#2002](https://github.com/cloudfoundry-incubator/stratos/issues/2002)
+- Console setup improvements \#2 [\#1974](https://github.com/cloudfoundry-incubator/stratos/issues/1974)
+- Services page does not update after connecting/disconnected an SCF [\#1973](https://github.com/cloudfoundry-incubator/stratos/issues/1973)
+- White bar flashes at top of page on Cloud Foundry page [\#1963](https://github.com/cloudfoundry-incubator/stratos/issues/1963)
+- Show service type in service wall card [\#2315](https://github.com/cloudfoundry-incubator/stratos/issues/2315)
+- Show space name in space broker card [\#2312](https://github.com/cloudfoundry-incubator/stratos/issues/2312)
+- Add confirmation modals where required [\#2257](https://github.com/cloudfoundry-incubator/stratos/issues/2257)
+- Add git commit id and whether user is an admin on the about page [\#2246](https://github.com/cloudfoundry-incubator/stratos/issues/2246)
+- Update base images for git vulnerability CVE 2018-11235 [\#2241](https://github.com/cloudfoundry-incubator/stratos/issues/2241)
+- Update service steppers following async stepper changes [\#2234](https://github.com/cloudfoundry-incubator/stratos/issues/2234)
+- CF Permissions - Apply to user management [\#2226](https://github.com/cloudfoundry-incubator/stratos/issues/2226)
+- CF Permissions - Apply to services [\#2225](https://github.com/cloudfoundry-incubator/stratos/issues/2225)
+- CF Permissions - Apply to App Wall + Summary [\#2224](https://github.com/cloudfoundry-incubator/stratos/issues/2224)
+- V1 e2e fix [\#2316](https://github.com/cloudfoundry-incubator/stratos/pull/2316) ([nwmac](https://github.com/nwmac))
+
+
 ## 08 June 2018
 
 The team have been working on the following issues and PRs this week:

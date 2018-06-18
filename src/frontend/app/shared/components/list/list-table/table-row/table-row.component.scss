@@ -21,7 +21,7 @@
     border-left-style: solid;
     border-left-width: 4px;
     .table-row__inner {
-      padding-left: 20px; // Cancel out highlighted padding (border left in theme)
+      margin-left: -4px; // Cancel out highlighted padding (border left in theme)
     }
   }
 }
@@ -57,5 +57,6 @@
   &__inner {
     display: flex;
     flex: 1;
+    width: 100%;
   }
 }

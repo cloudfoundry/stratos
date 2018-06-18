@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -63,9 +64,25 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 	authEndpoint := fmt.Sprintf("%s/oauth/token", url)
 	uaaRes, err := p.getUAATokenWithCreds(skipSSLValidation, username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
 	if err != nil {
+
+		errInfo, ok := err.(interfaces.ErrHTTPRequest)
+		if ok {
+			if errInfo.Status == 0 {
+				if strings.Contains(errInfo.Error(), "x509: certificate") {
+					return interfaces.NewHTTPShadowError(
+						http.StatusBadRequest,
+						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting",
+						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting", err)
+				}
+				return interfaces.NewHTTPShadowError(
+					http.StatusBadRequest,
+					"Could not connect to the UAA - check UAA Endpoint URL",
+					"Could not connect to the UAA - check UAA Endpoint URL", err)
+			}
+		}
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
-			"Failed to authenticate with UAA",
+			"Failed to authenticate with UAA - check Client ID, Secret and credentials",
 			"Failed to authenticate with UAA due to %s", err)
 	}
 
@@ -73,7 +90,7 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
-			"Failed to authenticate with UAA2",
+			"Failed to authenticate with UAA - check Client ID, Secret and credentials",
 			"Failed to authenticate with UAA due to %s", err)
 	}
 
