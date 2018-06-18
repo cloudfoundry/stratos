@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { IService } from '../../../../../../core/cf-api-svc.types';
+import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -26,8 +26,15 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
     this.serviceName$ = this.store.select(selectEntity<APIResource<IService>>('service', this.row.entity.service_guid))
       .pipe(
       filter(s => !!s),
-      map(s => s.entity.label)
-      );
+      map(s => {
+        let serviceLabel = s.entity.label;
+        try {
+          const extraInfo: IServiceExtra = s.entity.extra ? JSON.parse(s.entity.extra) : null;
+          serviceLabel = extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceLabel;
+        }catch (e) {}
+        return serviceLabel;
+      })
+    );
   }
 
 }

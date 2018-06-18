@@ -34,7 +34,7 @@
   <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'" [formGroup]="selectExistingInstanceForm">
     <mat-form-field>
       <mat-select class="form-control" placeholder="Service Instance" required formControlName="serviceInstances">
-        <mat-option *ngFor="let sI of serviceInstances$ | async" [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
+        <mat-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid" [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
 

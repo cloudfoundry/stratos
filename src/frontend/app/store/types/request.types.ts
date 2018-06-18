@@ -103,8 +103,8 @@ export interface ICFAction extends IRequestAction {
   actions: string[];
 }
 
-export class APISuccessOrFailedAction implements Action {
-  constructor(public type, public apiAction: ICFAction | PaginatedAction) { }
+export class APISuccessOrFailedAction<T = any> implements Action {
+  constructor(public type, public apiAction: ICFAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartCFAction extends CFStartAction implements IStartRequestAction {

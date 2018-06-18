@@ -579,7 +579,8 @@ const testInitialStoreState: AppState = {
     serviceInstance: {},
     serviceBinding: {},
     service: {},
-    githubCommits: {}
+    githubCommits: {},
+    domain: {}
   },
   dashboard: {
     sidenavOpen: true,

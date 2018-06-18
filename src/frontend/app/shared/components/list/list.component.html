@@ -104,7 +104,7 @@
       </app-table>
     </div>
     <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
-      <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize" [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)" [length]="paginatorSettings.length">
+      <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize" [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [length]="paginatorSettings.length">
       </mat-paginator>
     </mat-card>
   </div>

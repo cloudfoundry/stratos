@@ -284,7 +284,7 @@ export class ApplicationService {
       appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
     ), startWith(false), publishReplay(1), refCount(), );
 
-    this.applicationUrl$ = this.app$.pipe(
+    this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
       map(({ entity }) => entity),
       map(app => {
         const routes = app && app.entity.routes ? app.entity.routes : [];
@@ -294,29 +294,12 @@ export class ApplicationService {
         }
         return null;
       }),
-      switchMap(route => {
-        if (!route) {
-          return observableOf(null);
-        } else {
-          // The route can async update itself to contain the required domain... so we need to watch it for it's normalized content
-          return this.entityServiceFactory.create<APIResource>(
-            routeSchemaKey,
-            entityFactory(routeSchemaKey),
-            route.metadata.guid,
-            {
-              type: '',
-              entityKey: routeSchemaKey,
-              entity: entityFactory(routeSchemaKey)
-            },
-            false)
-            .entityObs$.pipe(
-              map(entRoute => entRoute.entity),
-              filter(entRoute => entRoute.entity.domain),
-              map(entRoute => getRoute(entRoute, true, false, entRoute.entity.domain))
-            );
-        }
-      })
-    ).pipe(publishReplay(1), refCount(), );
+      filter(entRoute => entRoute.entity && entRoute.entity.domain),
+      map(entRoute => getRoute(entRoute, true, false, {
+        entityRequestInfo: undefined,
+        entity: entRoute.entity.domain
+      }))
+    );
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
