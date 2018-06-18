@@ -131,6 +131,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 
 @NgModule({
   imports: [
@@ -232,6 +233,7 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     CreateApplicationStep1Component,
     BindAppsStepComponent,
     CfEndpointsMissingComponent,
+    CapitalizeFirstPipe,
   ],
   exports: [
     FormsModule,
@@ -318,6 +320,7 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     SelectServiceComponent,
     CreateApplicationStep1Component,
     BindAppsStepComponent,
+    CapitalizeFirstPipe,
     CfEndpointsMissingComponent
   ],
   entryComponents: [
