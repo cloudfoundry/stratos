@@ -1,29 +1,32 @@
-
-import { combineLatest as observableCombineLatest, of as observableOf, Observable } from 'rxjs';
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { Store } from '@ngrx/store';
-import { first, map, switchMap, tap, withLatestFrom, filter } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { GetService } from '../../../../../../store/actions/service.actions';
-import { AppState } from '../../../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import {
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceSchemaKey,
+} from '../../../../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
-import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
-import { DatePipe } from '@angular/common';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+
+
 
 interface EnvVarData {
   key: string;
@@ -43,12 +46,11 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance>[]>;
+  entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
-    private store: Store<AppState>,
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private confirmDialog: ConfirmationDialogService,
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
@@ -78,6 +80,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       }];
   }
   ngOnInit(): void {
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(serviceBindingSchemaKey));
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesSchemaKey,
       entityFactory(serviceInstancesSchemaKey),
