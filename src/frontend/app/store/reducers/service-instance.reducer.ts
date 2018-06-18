@@ -1,4 +1,4 @@
-import { IServiceInstance } from '../../core/cf-api-svc.types';
+import { IServiceInstance, IServiceBinding } from '../../core/cf-api-svc.types';
 import {
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   CREATE_SERVICE_BINDING_ACTION_SUCCESS,
@@ -49,8 +49,9 @@ export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResourc
       };
     case CREATE_SERVICE_BINDING_ACTION_SUCCESS:
       const createServiceBindingAction = (action.apiAction as CreateServiceBinding);
+      const newServiceBindingEntity = (action.response.entities.serviceBinding[action.response.result[0]] as APIResource<IServiceBinding>);
       serviceInstanceGuid = createServiceBindingAction.serviceInstanceGuid;
-      serviceBindingGuid = createServiceBindingAction.guid;
+      serviceBindingGuid = newServiceBindingEntity.metadata.guid;
       serviceInstanceEntity = state[serviceInstanceGuid];
       return {
         ...state,

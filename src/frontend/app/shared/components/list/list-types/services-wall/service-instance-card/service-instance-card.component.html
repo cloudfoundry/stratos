@@ -3,6 +3,10 @@
     <div class="app-service-card__title">{{ serviceInstanceEntity?.entity.name }}</div>
   </app-meta-card-title>
   <app-meta-card-item>
+    <app-meta-card-key>Service</app-meta-card-key>
+    <app-meta-card-value>{{ getServiceName() }} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Service Plan</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity?.entity.service_plan?.entity.name}} </app-meta-card-value>
   </app-meta-card-item>
