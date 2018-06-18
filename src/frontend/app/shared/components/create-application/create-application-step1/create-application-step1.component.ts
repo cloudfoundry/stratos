@@ -14,9 +14,6 @@ import {
 } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
-
-
-
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
@@ -24,7 +21,6 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  hasOrgs$: Observable<boolean>;
   @Input('isMarketplaceMode')
   isMarketplaceMode: boolean;
   constructor(
@@ -34,6 +30,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   public spaces$: Observable<ISpace[]>;
   public hasSpaces$: Observable<boolean>;
+  public hasOrgs$: Observable<boolean>;
 
   cfValid$: Observable<boolean>;
 
@@ -58,9 +55,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngOnInit() {
     this.spaces$ = this.getSpacesFromPermissions();
-    this.hasOrgs$ = this.cfOrgSpaceService.cf.select.pipe(
-     switchMap(o => this.cfOrgSpaceService.getEndpointOrgs(o)),
-     map(o => o.length > 0)
+    this.hasOrgs$ = this.cfOrgSpaceService.org.list$.pipe(
+      map(o => o && o.length > 0)
     );
     this.hasSpaces$ = this.spaces$.pipe(
       map(spaces => !!spaces.length)
