@@ -1,5 +1,5 @@
 
-import { of as observableOf, BehaviorSubject, Observable, combineLatest as observableCombineLatest, Subscription } from 'rxjs';
+import { of as observableOf, BehaviorSubject, Observable, combineLatest as observableCombineLatest, Subscription, combineLatest } from 'rxjs';
 
 import {
   debounceTime,
@@ -187,9 +187,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     private store: Store<AppState>,
     private cd: ChangeDetectorRef,
     public config: ListConfig<T>
-  ) { }
-
-  ngOnInit() {
+  ) {
+    this.dataSource = this.config.getDataSource();
     if (this.config.getInitialised) {
       this.initialised$ = this.config.getInitialised().pipe(
         filter(initialised => initialised),
@@ -198,11 +197,44 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         publishReplay(1), refCount()
       );
     } else {
-      this.initialise();
       this.initialised$ = observableOf(true);
+      this.initialise();
     }
+    this.setupLoadingIndicators();
   }
 
+  private setupLoadingIndicators() {
+    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
+      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
+      withLatestFrom(this.dataSource.pagination$),
+      map(([loading, page]) => page),
+      map(pag => pag.currentPage),
+      pairwise(),
+      map(([oldPage, newPage]) => oldPage !== newPage),
+      startWith(true)
+    );
+
+    this.showProgressBar$ = combineLatest(
+      this.dataSource.isLoadingPage$.pipe(startWith(true)),
+      this.initialised$.pipe(startWith(false))
+    ).pipe(
+      map(([loading, initialised]) => loading || !initialised),
+      tap(console.log),
+      withLatestFrom(canShowLoading$),
+      map(([loading, canShowLoading]) => {
+        return canShowLoading && loading;
+      }),
+      distinctUntilChanged()
+    );
+
+    this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
+      withLatestFrom(canShowLoading$),
+      map(([loading, canShowLoading]) => {
+        return !canShowLoading && loading;
+      }),
+      distinctUntilChanged()
+    );
+  }
 
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
@@ -213,7 +245,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     );
     this.singleActions = this.config.getSingleActions();
     this.columns = this.config.getColumns();
-    this.dataSource = this.config.getDataSource();
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
     // Create convenience observables that make the html clearer
@@ -420,33 +451,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
           return newVal;
         })
       );
-
-    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
-      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      withLatestFrom(this.dataSource.pagination$),
-      map(([loading, page]) => page),
-      map(pag => pag.currentPage),
-      pairwise(),
-      map(([oldPage, newPage]) => oldPage !== newPage),
-      startWith(true)
-    );
-
-    this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
-      startWith(true),
-      withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => {
-        return canShowLoading && loading;
-      }),
-      distinctUntilChanged()
-    );
-
-    this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
-      withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => {
-        return !canShowLoading && loading;
-      }),
-      distinctUntilChanged()
-    );
   }
 
   ngAfterViewInit() {

@@ -1,8 +1,8 @@
-<div class="list-component" *ngIf="initialised$ | async" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
+<div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
   <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async) && (showProgressBar$ | async)" mode="indeterminate"></mat-progress-bar>
   <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
     <mat-progress-bar color="primary" *ngIf="showProgressBar$ | async" mode="indeterminate"></mat-progress-bar>
-    <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
+    <mat-card *ngIf="initialised$ | async " [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
       <div class="list-component__header__left">
         <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
         <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
@@ -91,39 +91,41 @@
       </div>
     </mat-card>
   </div>
-  <div class="refresh-button__no-header" *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
-    <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+  <div *ngIf="initialised$ | async">
+    <div class="refresh-button__no-header" *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
+      <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
         <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
       </button>
-  </div>
-  <div class="list-component__body">
-    <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
-      <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-      <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController"
-        [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
-      </app-table>
     </div>
-    <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
-      <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize" [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [length]="paginatorSettings.length">
-      </mat-paginator>
-    </mat-card>
-  </div>
-  <ng-template #defaultNoEntries>
-    <mat-card class="list-component__default-no-entries">
-      <mat-card-content>
-        <div class="no-rows">{{config.text?.noEntries || 'There are no entries.'}}</div>
-      </mat-card-content>
-    </mat-card>
-  </ng-template>
-  <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async)" class="list-component__no-entries">
-    <ng-container *ngIf="(noRowsNotFiltering$ | async)">
-      <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
+    <div class="list-component__body">
+      <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
+        <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
+        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController"
+          [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+        </app-table>
+      </div>
+      <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
+        <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize" [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [length]="paginatorSettings.length">
+        </mat-paginator>
+      </mat-card>
+    </div>
+    <ng-template #defaultNoEntries>
+      <mat-card class="list-component__default-no-entries">
+        <mat-card-content>
+          <div class="no-rows">{{config.text?.noEntries || 'There are no entries.'}}</div>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
+    <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async)" class="list-component__no-entries">
+      <ng-container *ngIf="(noRowsNotFiltering$ | async)">
+        <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
+        </ng-container>
       </ng-container>
-    </ng-container>
-    <ng-container *ngIf="(noRowsHaveFilter$ | async)">
-      <ng-container *ngTemplateOutlet="noEntriesForCurrentFilter ? noEntriesForCurrentFilter : defaultNoEntries">
+      <ng-container *ngIf="(noRowsHaveFilter$ | async)">
+        <ng-container *ngTemplateOutlet="noEntriesForCurrentFilter ? noEntriesForCurrentFilter : defaultNoEntries">
+        </ng-container>
       </ng-container>
-    </ng-container>
+    </div>
   </div>
 </div>
 
