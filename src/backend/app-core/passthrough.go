@@ -116,7 +116,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 				errorStatus.Status = "Failed to proxy request"
 			}
 			// Check that the error response was valid json - convert to string otherwise
-			if !json.Valid(cnsiResponse.Response) {
+			if !isValidJSON(cnsiResponse.Response) {
 				errorResponse = []byte(fmt.Sprintf("%q", cnsiResponse.Response))
 			} else {
 				errorResponse = cnsiResponse.Response
@@ -137,6 +137,13 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 	}
 
 	return jsonResponse
+}
+
+// When we move to goland 1.9 we can use json.isValid()
+func isValidJSON(data []byte) bool {
+	var res interface{}
+	err := json.Unmarshal(data, res)
+	return err == nil
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (interfaces.CNSIRequest, error) {
