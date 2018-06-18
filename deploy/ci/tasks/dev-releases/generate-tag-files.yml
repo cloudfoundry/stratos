@@ -20,4 +20,7 @@ run:
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
       FILENAME="release-${LATEST_TAG}"
-      tar -cf ${FILENAME}.tar v2-alpha-tag
+      cat > build-args << EOF
+      stratos_version="${LATEST_TAG}"
+      EOF
+      tar -cf ${FILENAME}.tar v2-alpha-tag build-args

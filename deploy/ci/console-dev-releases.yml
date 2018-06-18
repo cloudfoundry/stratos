@@ -95,6 +95,7 @@ jobs:
           build: stratos/
           target_name:  prod-build
           tag: image-tag/v2-alpha-tag
+          build_args_file: image-tag/build-args
       - put: postflight-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk

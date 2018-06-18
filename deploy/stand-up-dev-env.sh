@@ -18,7 +18,7 @@ DEPLOY_PATH=${STRATOS_UI_PATH}/deploy
 
 NO_UI=false
 CLEAN=false
-
+STRATOS_VERSION=v2.0.0-$(git log -1 --format="%h")
 function usage {
     echo "usage: $PROG [-c] [-n]"
     echo "       -c    Clean up before building."
@@ -90,7 +90,7 @@ function build {
     # Prevent docker from creating the migration volume as root if it doesn't exist
     mkdir -p ./hsc-upgrade-volume
 
-    docker-compose -f ${DEV_DOCKER_COMPOSE} build
+    docker-compose -f ${DEV_DOCKER_COMPOSE} build --build-arg stratos_version=${STRATOS_VERSION}
     docker-compose -f ${DEV_DOCKER_COMPOSE} up -d
 }
 
