@@ -14,7 +14,7 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
-    tag_filter: "v2*"
+    tag_filter: "2*"
 - name: stratos-master
   type: git
   source:

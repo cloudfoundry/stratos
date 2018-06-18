@@ -18,7 +18,8 @@ DEPLOY_PATH=${STRATOS_UI_PATH}/deploy
 
 NO_UI=false
 CLEAN=false
-STRATOS_VERSION=v2.0.0-$(git log -1 --format="%h")
+PACKAGE_JSON_VERSION=$(cat ${STRATOS_UI_PATH}/package.json | grep version | grep -Po "([0-9\.]?)*")
+STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
 function usage {
     echo "usage: $PROG [-c] [-n]"
     echo "       -c    Clean up before building."

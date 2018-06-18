@@ -18,7 +18,9 @@ function env_vars {
 pushd "${DEPLOYDIR}"
 ls
 env_vars
-STRATOS_VERSION=v2.0.0-$(git log -1 --format="%h")
+
+PACKAGE_JSON_VERSION=$(cat ${DEPLOYDIR}/../package.json | grep version | grep -Po "([0-9\.]?)*")
+STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
 BUILD_ARG=" --build-arg stratos_version=${STRATOS_VERSION}"
 docker-compose -f docker-compose.development.yml stop nginx
 docker-compose -f docker-compose.development.yml  stop proxy
