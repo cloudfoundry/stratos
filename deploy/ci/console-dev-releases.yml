@@ -45,7 +45,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-mariadb
+    repository: ((docker-org))/stratos-console
 
 # Artifacts
 - name: image-tag
