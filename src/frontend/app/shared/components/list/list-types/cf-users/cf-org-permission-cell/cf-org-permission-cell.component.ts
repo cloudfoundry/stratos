@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, of as observableOf } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { IOrganization } from '../../../../../../core/cf-api.types';
@@ -11,7 +11,7 @@ import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
+import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
@@ -60,6 +60,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         ...perm,
         name: orgPerms.name,
         guid: orgPerms.orgGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,

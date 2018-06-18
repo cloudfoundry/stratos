@@ -94,6 +94,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         ...perm,
         name: spacePerms.name,
         guid: spacePerms.spaceGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,

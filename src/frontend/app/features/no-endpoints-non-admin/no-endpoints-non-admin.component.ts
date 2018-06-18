@@ -1,7 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Logout } from '../../store/actions/auth.actions';
-import { AppState } from '../../store/app-state';
 
 @Component({
   selector: 'app-no-endpoints-non-admin',

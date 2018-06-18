@@ -1,5 +1,5 @@
 
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -20,6 +20,8 @@ import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 
 @Component({
   selector: 'app-cf-org-card',
@@ -45,7 +47,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private cfEndpointService: CloudFoundryEndpointService,
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     super();
 
@@ -123,10 +126,18 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   }
 
   delete = () => {
-    this.cfEndpointService.deleteOrg(
-      this.row.metadata.guid,
-      this.cfEndpointService.cfGuid
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Organization',
+      `Are you sure you want to delete organization '${this.row.entity.name}'?`,
+      'Delete',
+      true
     );
+    this.confirmDialog.open(confirmation, () => {
+      this.cfEndpointService.deleteOrg(
+        this.row.metadata.guid,
+        this.cfEndpointService.cfGuid
+      );
+    });
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({

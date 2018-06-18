@@ -6,6 +6,7 @@ import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { AppChip } from '../../../chips/chips.component';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellCustom } from '../../list.types';
 
@@ -15,6 +16,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
   name: string;
   guid: string;
   userGuid: string;
+  userName?: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid?: string;
@@ -55,12 +57,25 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
       chipConfig.busy = perm.busy;
       chipConfig.clearAction = chip => {
         const permission = chip.key;
-        this.removePermission(permission);
+        this.removePermissionWarn(permission);
       };
       chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
         map(can => !can),
       );
       return chipConfig;
+    });
+  }
+
+  protected removePermissionWarn(cellPermission: ICellPermissionList<T>) {
+    const confirmation = new ConfirmationDialogConfig(
+      'Remove Permission',
+      `Are you sure you want to remove permission '${cellPermission.name}: ${cellPermission.string}'` +
+      ` from user '${cellPermission.userName}'?`,
+      'Delete',
+      true
+    );
+    this.confirmDialog.open(confirmation, () => {
+      this.removePermission(cellPermission);
     });
   }
 

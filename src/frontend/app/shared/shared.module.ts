@@ -130,6 +130,8 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 
 @NgModule({
   imports: [
@@ -230,6 +232,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     NoServicePlansComponent,
     CreateApplicationStep1Component,
     BindAppsStepComponent,
+    CfEndpointsMissingComponent,
+    CapitalizeFirstPipe,
   ],
   exports: [
     FormsModule,
@@ -315,7 +319,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     SelectPlanStepComponent,
     SelectServiceComponent,
     CreateApplicationStep1Component,
-    BindAppsStepComponent
+    BindAppsStepComponent,
+    CapitalizeFirstPipe,
+    CfEndpointsMissingComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

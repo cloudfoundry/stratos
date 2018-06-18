@@ -183,7 +183,7 @@ spec:
           value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
         {{- end }}
         {{- if .Values.env.DOMAIN }}  
-        - name: COOKIE_DOMAIN
+        - name: X_COOKIE_DOMAIN
           value: {{.Values.env.DOMAIN}}
         {{- end }}
         ports:
