@@ -133,29 +133,29 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     const space$ = sharedDomains$.pipe(
       // We don't need the shared domains, but we need them fetched first so we get the router_group_type
       switchMap(sharedDomains => this.appService.waitForAppEntity$
-      .pipe(
-        switchMap(app => {
-          const space = app.entity.entity.space as APIResource<ISpace>;
-          this.spaceGuid = space.metadata.guid;
-          const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
-            entityFactory(spaceSchemaKey),
-            this.spaceGuid,
-            new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
-            true
-          );
-          return spaceService.waitForEntity$;
-        }),
-        filter(({ entity, entityRequestInfo }) => !!entity.entity.domains),
-        tap(({ entity, entityRequestInfo }) => {
-          this.domains = [];
-          const domains = entity.entity.domains;
-          domains.forEach(domain => {
-            this.domains.push(domain);
-          });
-          this.selectedDomain = Object.values(this.domains)[0];
-        })
-      )
-    ));
+        .pipe(
+          switchMap(app => {
+            const space = app.entity.entity.space as APIResource<ISpace>;
+            this.spaceGuid = space.metadata.guid;
+            const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
+              entityFactory(spaceSchemaKey),
+              this.spaceGuid,
+              new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
+              true
+            );
+            return spaceService.waitForEntity$;
+          }),
+          filter(({ entity, entityRequestInfo }) => !!entity.entity.domains),
+          tap(({ entity, entityRequestInfo }) => {
+            this.domains = [];
+            const domains = entity.entity.domains;
+            domains.forEach(domain => {
+              this.domains.push(domain);
+            });
+            this.selectedDomain = Object.values(this.domains)[0];
+          })
+        )
+      ));
 
     this.subscriptions.push(space$.subscribe());
 
@@ -215,10 +215,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     const newRouteGuid =
       isTcpRoute ? 'tcp_' : 'http_' +
-      this._getValueForKey('host', formGroup) +
-      this._getValueForKey('port', formGroup) +
-      this._getValueForKey('path', formGroup) +
-      domainGuid;
+        this._getValueForKey('host', formGroup) +
+        this._getValueForKey('port', formGroup) +
+        this._getValueForKey('path', formGroup) +
+        domainGuid;
 
     return this.createAndMapRoute(
       newRouteGuid,
@@ -230,7 +230,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     );
   }
 
-  private createAndMapRoute(newRouteGuid: string, domainGuid: string, host, path, port, isTCP): Observable<StepOnNextResult> {
+  private createAndMapRoute(
+    newRouteGuid: string,
+    domainGuid: string,
+    host: string,
+    path: string,
+    port: number,
+    isTCP: boolean): Observable<StepOnNextResult> {
+    if (path && path.length && path[0] !== '/') {
+      path = '/' + path;
+    }
+
     this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port)));
     return this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
