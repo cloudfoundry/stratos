@@ -106,12 +106,32 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
-    org$: Observable<EntityInfo<APIResource<IOrganization>>> = observableOf(null),
-    space$: Observable<EntityInfo<APIResource<ISpace>>> = observableOf(null),
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {
     super();
 
-    // Assign the org and/or spaces obs to the cell configs. These will be used to determine which org or space roles to show
+    this.assignColumnConfig(org$, space$);
+
+    this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+      tap(cf => {
+        const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
+        this.dataSource = new CfUserDataSourceService(store, action, this);
+      }),
+      map(cf => cf && cf.state.initialised),
+    );
+    this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
+  }
+
+  /**
+   * Assign the org and/or spaces obs to the cell configs. These will be used to determine which org or space roles to show
+   *
+   * @private
+   * @memberof CfUserListConfigService
+   */
+  private assignColumnConfig = (
+    org$: Observable<EntityInfo<APIResource<IOrganization>>> = observableOf(null),
+    space$: Observable<EntityInfo<APIResource<ISpace>>> = observableOf(null)) => {
     this.columns.find(column => column.columnId === 'roles').cellConfig = {
       org$: org$.pipe(map(org => org ? org.entity : null))
     };
@@ -129,16 +149,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         })
       )
     };
-
-
-    this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
-        this.dataSource = new CfUserDataSourceService(store, action, this);
-      }),
-      map(cf => cf && cf.state.initialised),
-    );
-    this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
   }
 
   private createCanUpdateOrgSpaceRoles = () => canUpdateOrgSpaceRoles(
