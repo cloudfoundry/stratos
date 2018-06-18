@@ -36,8 +36,8 @@ import { FetchAllDomains } from '../../../../store/actions/domains.actions';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
-const hostPattern = '(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])';
-const pathPattern = `^((\/)${hostPattern}?(\/)*)*$`;
+const hostPattern = '^([\\w\\-\\.]*)$';
+const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
