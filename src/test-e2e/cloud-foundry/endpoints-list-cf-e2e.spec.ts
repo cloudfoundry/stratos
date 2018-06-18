@@ -6,7 +6,6 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem, SideNavigation } from '../po/side-nav.po';
 
 describe('CF Endpoints Dashboard', () => {
-  const endpointsPage = new EndpointsPage();
   const cloudFoundry = new CloudFoundryPage();
   const nav = new SideNavigation();
   const cfEndpoint = e2e.secrets.getDefaultCFEndpoint();
@@ -63,6 +62,7 @@ describe('CF Endpoints Dashboard', () => {
 
     beforeEach(() => {
       nav.goto(SideNavMenuItem.CloudFoundry);
+      cloudFoundry.waitForPage();
     });
 
     it('should be the CF Endpoints page', () => {

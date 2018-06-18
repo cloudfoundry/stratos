@@ -42,6 +42,7 @@ export class RequestHelpers {
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
+      resolveWithFullResponse: true,
       agentOptions: {
         ca: ca
       },
@@ -68,12 +69,22 @@ export class RequestHelpers {
       options.formData = formData;
     }
 
+    if (req._xsrfToken) {
+      options.headers = options.headers || {};
+      options.headers['x-xsrf-token'] = req._xsrfToken;
+    }
+
     E2E.debugLog('REQ: ' + options.method + ' ' + options.url);
     E2E.debugLog('   > ' + JSON.stringify(options));
 
     req(options).then((response) => {
       E2E.debugLog('OK');
-      p.fulfill(response);
+
+      // Get XSRF Token
+      if (response.headers['x-xsrf-token'] ) {
+        req._xsrfToken = response.headers['x-xsrf-token'];
+      }
+      p.fulfill(response.body);
     }).catch((e) => {
       E2E.debugLog('ERROR');
       E2E.debugLog(e);

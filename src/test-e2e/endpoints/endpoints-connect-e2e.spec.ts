@@ -90,7 +90,8 @@ describe('Endpoints', () => {
           return menu.getItemMap().then(items => {
             expect(items['connect']).not.toBeDefined();
             expect(items['disconnect']).toBeDefined();
-            expect(items['unregister']).toBeDefined();
+            // Only admins can unregister
+            expect(items['unregister']).not.toBeDefined();
             return menu.close();
           });
 
@@ -141,7 +142,7 @@ describe('Endpoints', () => {
             const snackBar = new SnackBarComponent();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
-
+            
             endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
               expect(data.connected).toBeFalsy();
             });
