@@ -48,8 +48,8 @@ function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRoles
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
-    const isAdmin = internalRoles.scopes.includes(ScopeStrings.STRATOS_ADMIN);
-    internalRoles.isAdmin = isAdmin;
+    // The admin scope is configurable - so look at the flag provided by the backend
+    internalRoles.isAdmin = user.admin;
   }
 
   return {

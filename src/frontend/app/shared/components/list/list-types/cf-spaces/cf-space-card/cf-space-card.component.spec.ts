@@ -11,6 +11,7 @@ import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { CfOrgCardComponent } from '../../cf-orgs/cf-org-card/cf-org-card.component';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 describe('CfSpaceCardComponent', () => {
   let component: CfOrgCardComponent;
@@ -21,7 +22,7 @@ describe('CfSpaceCardComponent', () => {
       declarations: [CfOrgCardComponent, ...MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
-        CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
+        CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory, ConfirmationDialogService]
     })
       .compileComponents();
   }));

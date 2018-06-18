@@ -5,7 +5,7 @@
       matTooltip="Edit Space">
         <mat-icon>edit</mat-icon>
       </button>
-    <button mat-icon-button name="delete" *appUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;" (click)="deleteSpace()" matTooltip="Delete Space">
+    <button mat-icon-button name="delete" *appUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;" (click)="deleteSpaceWarn()" matTooltip="Delete Space">
         <mat-icon>delete</mat-icon>
       </button>
     <button mat-icon-button name="user-management" *ngIf="canUpdateRoles$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users/manage" matTooltip="Manage Users">

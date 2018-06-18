@@ -25,6 +25,10 @@ import { ServiceActionHelperService } from '../../../../../data-services/service
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 
+interface EnvVarData {
+  key: string;
+  value: string;
+}
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
@@ -32,6 +36,7 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 
+  envVarsAvailable$: Observable<EnvVarData>;
   listData: IListRowCellData[];
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
@@ -104,33 +109,31 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       map(o => o.entity.entity.tags.map(t => ({ value: t })))
     );
     this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
-  }
 
-  showEnvVars = () => {
-
-    observableCombineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+    this.envVarsAvailable$ = observableCombineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
-        withLatestFrom(),
-        map(([[service, serviceInstance, allEnvVars]]) => {
+        map(([service, serviceInstance, allEnvVars]) => {
           const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
           const serviceInstanceName = (serviceInstance as EntityInfo<APIResource<IServiceInstance>>).entity.entity.name;
           const serviceLabel = (service as EntityInfo<APIResource<IService>>).entity.entity.label;
+
           if (systemEnvJson['VCAP_SERVICES'][serviceLabel]) {
             return {
               key: serviceInstanceName,
               value: systemEnvJson['VCAP_SERVICES'][serviceLabel].find(s => s.name === serviceInstanceName)
             };
           }
+          return null;
         }),
-        tap(data => {
-          this.dialog.open(EnvVarViewComponent, {
-            data: data,
-            disableClose: false
-          });
-        }),
-        first()
-      ).subscribe();
+        filter(p => !!p),
+    );
+  }
 
+  showEnvVars = (envVarData: EnvVarData) => {
+    this.dialog.open(EnvVarViewComponent, {
+      data: envVarData,
+      disableClose: false
+    });
   }
 
   detach = () => {

@@ -1,3 +1,15 @@
 :host {
   flex: 1
 }
+
+.select-service__select-wrapper {
+  align-items: center;
+  display: flex;
+}
+
+.service-busy-indicator {
+  opacity: 0;
+  &__show {
+    opacity: 1;
+  }
+}

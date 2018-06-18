@@ -1,20 +1,23 @@
 
-import { of as observableOf, Observable, combineLatest } from 'rxjs';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
-
 import { environment } from '../../../../../../../environments/environment';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
-import { getActiveRouteCfOrgSpaceProvider, canUpdateOrgSpaceRoles } from '../../../../cf.helpers';
+import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+
+
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -74,7 +77,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     public cfSpaceService: CloudFoundrySpaceService,
     private cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)
@@ -138,6 +142,19 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.deleteRedirectSub.unsubscribe();
+  }
+
+  deleteSpaceWarn = () => {
+    // .first within name$
+    this.name$.subscribe(name => {
+      const confirmation = new ConfirmationDialogConfig(
+        'Delete Space',
+        `Are you sure you want to delete space '${name}'?`,
+        'Delete',
+        true
+      );
+      this.confirmDialog.open(confirmation, this.deleteSpace);
+    });
   }
 
   deleteSpace = () => {

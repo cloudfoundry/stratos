@@ -1,14 +1,16 @@
-import { CoreModule } from '../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EndpointsMissingComponent } from './endpoints-missing.component';
+import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';
+import { CoreModule } from '../../../core/core.module';
+
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { SharedModule } from '../../shared.module';
 
-describe('EndpointsMissingComponent', () => {
-  let component: EndpointsMissingComponent;
-  let fixture: ComponentFixture<EndpointsMissingComponent>;
+
+describe('CfEndpointsMissingComponent', () => {
+  let component: CfEndpointsMissingComponent;
+  let fixture: ComponentFixture<CfEndpointsMissingComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -23,12 +25,12 @@ describe('EndpointsMissingComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EndpointsMissingComponent);
+    fixture = TestBed.createComponent(CfEndpointsMissingComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should be created', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });
