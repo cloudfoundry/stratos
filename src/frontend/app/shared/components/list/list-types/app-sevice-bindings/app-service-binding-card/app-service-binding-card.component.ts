@@ -13,7 +13,7 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { GetService } from '../../../../../../store/actions/service.actions';
 import { AppState } from '../../../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey, serviceBindingSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
@@ -66,7 +66,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     }];
   }
   ngOnInit(): void {
-    this.entityConfig = new ComponentEntityMonitorConfig(this.row.entity.service_instance_guid, entityFactory(serviceInstancesSchemaKey));
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(serviceBindingSchemaKey));
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesSchemaKey,
       entityFactory(serviceInstancesSchemaKey),
