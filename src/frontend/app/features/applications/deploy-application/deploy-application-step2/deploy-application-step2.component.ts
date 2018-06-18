@@ -13,7 +13,6 @@ import {
   FetchCommit,
   SaveAppDetails,
   SetAppSourceDetails,
-  SetAppSourceSubType,
   SetBranch,
   SetDeployBranch,
 } from '../../../../store/actions/deploy-applications.actions';

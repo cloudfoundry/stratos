@@ -172,7 +172,7 @@ export class DeployApplicationDeployer {
     const github = {
       project: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.subType,
+      type: appSource.type.id,
       commit: appSource.commit
     };
 
@@ -188,7 +188,7 @@ export class DeployApplicationDeployer {
     const gitUrl = {
       url: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.subType
+      type: appSource.type.id
     };
 
     const msg = {

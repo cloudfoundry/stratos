@@ -7,7 +7,6 @@ import { IRequestAction } from '../types/request.types';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
-export const SET_APP_SOURCE_SUB_TYPE = '[Deploy App] Set App Source Sub Type';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
 export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';
@@ -29,11 +28,6 @@ export const FETCH_BRANCH_FAILED = '[GitHub] Fetch branch failed';
 export class SetAppSourceDetails implements Action {
   constructor(public sourceType: SourceType) { }
   type = SET_APP_SOURCE_DETAILS;
-}
-
-export class SetAppSourceSubType implements Action {
-  constructor(public subType: SourceType) { }
-  type = SET_APP_SOURCE_SUB_TYPE;
 }
 
 export class CheckProjectExists implements Action {
