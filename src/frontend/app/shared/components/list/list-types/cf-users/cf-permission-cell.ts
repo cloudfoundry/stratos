@@ -60,7 +60,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
         this.removePermissionWarn(permission);
       };
       if (perm.string === UserRoleLabels.org.short.users) {
-        // If there are other roles, disable clear button
+        // If there are other roles than Org User, disable clear button
         chipConfig.hideClearButton$ = this.userEntity.pipe(
          filter(p => !!p),
          map( (entity: CfUser) => this.cfUserService.hasRoles(entity))

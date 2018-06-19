@@ -76,9 +76,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     ));
   }
 
-  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) => {
-    return this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
-  }
-
+  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
+    this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
 
 }
