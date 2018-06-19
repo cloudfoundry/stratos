@@ -44,10 +44,11 @@ export class SpaceRouteDataSourceHelper {
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const unmapping = request.updating['unmapping'] || { busy: false };
-              const blocked = request.deleting.busy;
               const busy = unmapping.busy;
               rowStateManager.setRowState(route.metadata.guid, {
-                blocked,
+                deleting: request.deleting.busy,
+                error: request.deleting.error,
+                blocked: unmapping.busy,
                 busy
               });
             })
