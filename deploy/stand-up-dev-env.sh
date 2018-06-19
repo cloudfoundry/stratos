@@ -18,7 +18,7 @@ DEPLOY_PATH=${STRATOS_UI_PATH}/deploy
 
 NO_UI=false
 CLEAN=false
-PACKAGE_JSON_VERSION=$(cat ${STRATOS_UI_PATH}/package.json | grep version | grep -Po "([0-9\.]?)*")
+PACKAGE_JSON_VERSION=$(cat ${STRATOS_UI_PATH}/package.json| grep version | grep -Eo "([0-9]*.[0-9]*.[0-9]*)\",$" | sed 's/.\{2\}$//
 STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
 function usage {
     echo "usage: $PROG [-c] [-n]"
