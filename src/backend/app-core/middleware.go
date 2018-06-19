@@ -20,6 +20,8 @@ import (
 
 const cfSessionCookieName = "JSESSIONID"
 
+const StratosDomainHeader = "x-stratos-domain"
+
 func handleSessionError(err error, doNotLog bool) error {
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(
@@ -54,6 +56,10 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 		// Don't log an error if we are verifying the session, as a failure is not an error
 		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
+		if isVerify {
+			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
+			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
+		}
 		return handleSessionError(err, isVerify)
 	}
 }
