@@ -39,7 +39,6 @@ function entityServiceFactory(
   activatedRoute: ActivatedRoute
 ) {
   const { id, cfId } = activatedRoute.snapshot.params;
-  new EntitySchemaTreeBuilder().buildTree(new RecursiveDelete('1', entityFactory(applicationSchemaKey)), {});
   return _entityServiceFactory.create(
     applicationSchemaKey,
     entityFactory(applicationSchemaKey),
