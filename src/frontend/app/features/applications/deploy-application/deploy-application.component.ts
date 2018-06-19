@@ -15,6 +15,7 @@ import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { DeployApplicationSource } from '../../../store/types/deploy-application.types';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application',
@@ -38,15 +39,15 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {
-        if (appSource && appSource.type && appSource.type) {
-          return appSource.type.id === 'git' && appSource.type.subType === 'giturl';
+        if (appSource && appSource.type) {
+          return appSource.type.id === 'giturl';
         }
         return false;
       })
     );
   }
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new StoreCFSettings({
       cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
       org: this.cfOrgSpaceService.org.select.getValue(),

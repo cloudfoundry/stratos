@@ -36,6 +36,7 @@ export const serviceBrokerSchemaKey = 'serviceBroker';
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
+export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 
 const entityCache: {
   [key: string]: EntitySchema
@@ -106,7 +107,22 @@ entityCache[appEventSchemaKey] = EventSchema;
 const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[stackSchemaKey] = StackSchema;
 
-const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
+  idAttribute: getAPIResourceGuid,
+  // Work around for an issue where router_group_type can come back null from one API call but
+  // for shared_domains call it is correctly populated - the null values can overwrite the
+  // correct values - so remove them to avoid this
+  processStrategy: (value) => {
+    const newValue = {
+      entity: {...value.entity},
+      metadata: {...value.metadata}
+    };
+    if (newValue.entity.router_group_type === null) {
+      delete newValue.entity.router_group_type;
+    }
+    return newValue;
+  }
+ });
 entityCache[domainSchemaKey] = DomainSchema;
 
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {
@@ -147,6 +163,20 @@ const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
+
+const ServiceBindingsNoBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
+  entity: {
+    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    service_instance: new EntitySchema(serviceInstancesSchemaKey, {
+      entity: {
+        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+      },
+    }, { idAttribute: getAPIResourceGuid }),
+    service: ServiceNoPlansSchema
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBindingNoBindingsSchemaKey] = ServiceBindingsNoBindingsSchema;
 
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
@@ -244,7 +274,7 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    space: SpaceSchema
+    space: SpaceSchema.withEmptyDefinition()
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;
@@ -278,6 +308,7 @@ const ApplicationEntitySchema = new EntitySchema(
         entity: {
           ...coreSpaceSchemaParams,
           routes: [RouteNoAppsSchema],
+          service_instances: [ServiceInstancesWithNoBindingsSchema],
           organization: OrganizationsWithoutSpaces,
         }
       }, { idAttribute: getAPIResourceGuid }),

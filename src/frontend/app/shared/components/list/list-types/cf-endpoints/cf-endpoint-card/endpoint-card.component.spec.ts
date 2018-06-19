@@ -3,6 +3,10 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { SharedModule } from '../../../../../shared.module';
 import { CfEndpointCardComponent } from './endpoint-card.component';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 
 describe('EndpointCardComponent', () => {
   let component: CfEndpointCardComponent;
@@ -11,8 +15,14 @@ describe('EndpointCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        createBasicStoreModule(),
         SharedModule,
         RouterTestingModule,
+        BaseTestModules,
+      ],
+      providers: [
+        EntityMonitorFactory,
+        ServiceActionHelperService
       ]
     })
       .compileComponents();

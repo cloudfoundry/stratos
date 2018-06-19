@@ -1,10 +1,9 @@
 
-import { of as observableOf, Observable, Subscription, combineLatest as observableCombineLatest } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Observable, Subscription, combineLatest as observableCombineLatest, of as observableOf } from 'rxjs';
 import { delay, filter, first, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
-
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
@@ -15,12 +14,13 @@ import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { appStatsSchemaKey } from '../../../../store/helpers/entity-factory';
+import { appStatsSchemaKey, entityFactory, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -52,7 +52,7 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
-
+  public schema = entityFactory(applicationSchemaKey);
 
   constructor(
     private route: ActivatedRoute,
@@ -107,6 +107,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
+  appActions$: Observable<{ [key: string]: boolean }>;
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }
@@ -299,6 +300,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return !!(isFetchingApp || isUpdating);
     }));
+
+    this.appActions$ = this.applicationService.applicationState$.pipe(
+      map(app => app.actions)
+    );
   }
 
   ngOnDestroy() {

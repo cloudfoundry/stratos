@@ -1,5 +1,5 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { ElementFinder, protractor } from 'protractor/built';
+import { browser, element, promise } from 'protractor';
 
 const until = protractor.ExpectedConditions;
 
@@ -24,12 +24,16 @@ export abstract class Component {
 
   waitUntilShown(): promise.Promise<void> {
     return browser.wait(until.presenceOf(this.locator), 5000,
-    'Element taking too long to appear in the DOM').then(() => {
-      return browser.wait(until.visibilityOf(this.locator), 5000, 'Element not visible timing out').then(v => {
-        // Slight delay for animations
-        return browser.driver.sleep(100);
+      'Element taking too long to appear in the DOM').then(() => {
+        return browser.wait(until.visibilityOf(this.locator), 5000, 'Element not visible timing out').then(v => {
+          // Slight delay for animations
+          return browser.driver.sleep(100);
+        });
       });
-    });
+  }
+
+  waitUntilNotShown(): promise.Promise<void> {
+    return browser.wait(until.invisibilityOf(this.locator), 5000);
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {

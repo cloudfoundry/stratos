@@ -1,17 +1,25 @@
 import { Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { AppChip } from '../../../chips/chips.component';
 import { TableCellCustom } from '../../list.types';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+
 
 export interface ICellPermissionList<T> extends IUserRole<T> {
   busy: Observable<boolean>;
   name: string;
   guid: string;
   userGuid: string;
+  userName?: string;
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid?: string;
 }
 
 interface ICellPermissionUpdates {
@@ -27,6 +35,11 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   public chipsConfig: AppChip<ICellPermissionList<T>>[];
   protected guid: string;
 
+
+  constructor(private confirmDialog: ConfirmationDialogService) {
+    super();
+  }
+
   protected setChipConfig(user: APIResource<CfUser>) {
 
   }
@@ -39,15 +52,31 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
       chipConfig.busy = perm.busy;
       chipConfig.clearAction = chip => {
         const permission = chip.key;
-        this.removePermission(permission);
+        this.removePermissionWarn(permission);
       };
-      // // Disable removal of role, since we can't add any
-      // chipConfig.hideClearButton = true;
+      chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
+        map(can => !can),
+      );
       return chipConfig;
+    });
+  }
+
+  protected removePermissionWarn(cellPermission: ICellPermissionList<T>) {
+    const confirmation = new ConfirmationDialogConfig(
+      'Remove Permission',
+      `Are you sure you want to remove permission '${cellPermission.name}: ${cellPermission.string}'` +
+      ` from user '${cellPermission.userName}'?`,
+      'Delete',
+      true
+    );
+    this.confirmDialog.open(confirmation, () => {
+      this.removePermission(cellPermission);
     });
   }
 
   protected removePermission(cellPermission: ICellPermissionList<T>) {
 
   }
+
+  protected canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> => observableOf(false);
 }

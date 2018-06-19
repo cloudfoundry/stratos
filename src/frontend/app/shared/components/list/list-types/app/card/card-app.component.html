@@ -14,6 +14,12 @@
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
+    <app-meta-card-key>Org/Space</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.entity.space.entity.organization.entity.name }}/{{ row.entity.space.entity.name }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Created</app-meta-card-key>
     <app-meta-card-value>
       {{ row.metadata.created_at | date:'medium' }}

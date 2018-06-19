@@ -37,6 +37,30 @@ describe('ServiceInstanceCardComponent', () => {
       entity: {
         service_plan_guid: 'test',
         space_guid: '',
+        space: {
+          entity: {
+            name: '',
+            organization_guid: '',
+            allow_ssh: false,
+            organization_url: '',
+            developers_url: '',
+            managers_url: '',
+            auditors_url: '',
+            apps_url: '',
+            routes_url: '',
+            domains_url: '',
+            service_instances_url: '',
+            app_events_url: '',
+            security_groups_url: '',
+            staging_security_groups_url: '',
+          },
+          metadata: {
+            created_at: '',
+            guid: '',
+            updated_at: '',
+            url: ''
+          }
+        },
         dashboard_url: '',
         type: '',
         tags: [],
@@ -64,6 +88,23 @@ describe('ServiceInstanceCardComponent', () => {
             bindable: 0,
             active: false,
             service_url: '',
+            service: {
+              entity: {
+                label: '',
+                description: '',
+                active: 1,
+                bindable: 1,
+                unique_id: '',
+                extra: '',
+                tags: [''],
+                requires: [''],
+                service_broker_guid: '',
+                plan_updateable: 1,
+                service_plans_url: '',
+                service_plans: [],
+              },
+              metadata: null
+            },
             service_instances_url: '',
           },
           metadata: {

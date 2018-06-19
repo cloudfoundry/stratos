@@ -3,7 +3,7 @@ import { of as observableOf, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, combineLatest } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -141,10 +141,12 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     createEnabled: row$ =>
       row$.pipe(switchMap(row => {
         return this.appService.app$.pipe(
-          map(app => {
+          combineLatest(this.appService.appSpace$),
+          map(([app, space]) => {
             return row.value &&
               row.value.state === 'RUNNING' &&
-              app.entity.entity.enable_ssh;
+              app.entity.entity.enable_ssh &&
+              space.entity.allow_ssh;
           })
         );
       }))

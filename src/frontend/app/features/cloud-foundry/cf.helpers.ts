@@ -1,7 +1,10 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, first, tap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, tap, share, publishReplay, refCount } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
 import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
@@ -11,8 +14,11 @@ import { selectPaginationState } from '../../store/selectors/pagination.selector
 import { APIResource } from '../../store/types/api.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ICfRolesState } from '../../store/types/current-user-roles.types';
+import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+
 
 export interface IUserRole<T> {
   string: string;
@@ -141,7 +147,7 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
 function hasRole(user: CfUser, guid: string, roleType: string) {
   if (user[roleType]) {
     const roles = user[roleType] as APIResource[];
-    return !!roles.find(o => o.metadata.guid === guid);
+    return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
 }
@@ -195,4 +201,26 @@ export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: st
       store.dispatch(new RouterNav({ path: ['applications'] }));
     })
   ).subscribe();
+}
+
+export function canUpdateOrgSpaceRoles(
+  perms: CurrentUserPermissionsService,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string): Observable<boolean> {
+  return combineLatest(
+    perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
+    perms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+  ).pipe(
+    map((checks: boolean[]) => checks.some(check => check))
+  );
+}
+
+export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
+  return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
+    filter(cf => cf && cf.state.initialised),
+    first(),
+    publishReplay(1),
+    refCount(),
+  );
 }

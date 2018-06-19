@@ -8,13 +8,17 @@ import {
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
+import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
   hideRefresh: boolean;
   allowSelection: boolean;
-  constructor(store: Store<AppState>, appService: ApplicationService, private _datePipe: DatePipe) {
-    super(store, appService, _datePipe);
+  constructor(store: Store<AppState>,
+    appService: ApplicationService,
+    private _datePipe: DatePipe,
+    private currentUserPermissionService: CurrentUserPermissionsService) {
+    super(store, appService, _datePipe, currentUserPermissionService);
 
     this.getGlobalActions = () => null;
     this.getMultiActions = () => null;

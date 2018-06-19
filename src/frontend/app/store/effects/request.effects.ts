@@ -1,5 +1,5 @@
 
-import {catchError,  first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -115,7 +115,7 @@ export class RequestEffect {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
           return [
-            new APISuccessOrFailedAction(apiAction.actions[2], apiAction),
+            new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
             new WrapperRequestActionFailed(
               error.message,
               apiAction,
@@ -148,7 +148,7 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction));
+        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
         actions.push(new WrapperRequestActionSuccess(
           apiResponse.response,
           apiAction,

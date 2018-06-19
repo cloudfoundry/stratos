@@ -3,6 +3,7 @@ import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
@@ -20,8 +21,8 @@ describe('Endpoints', () => {
 
     beforeAll(() => {
       e2e.setup(ConsoleUserType.user)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry();
+        .clearAllEndpoints()
+        .registerDefaultCloudFoundry();
     });
 
     describe('endpoint `Connect` -', () => {
@@ -89,7 +90,8 @@ describe('Endpoints', () => {
           return menu.getItemMap().then(items => {
             expect(items['connect']).not.toBeDefined();
             expect(items['disconnect']).toBeDefined();
-            expect(items['unregister']).toBeDefined();
+            // Only admins can unregister
+            expect(items['unregister']).not.toBeDefined();
             return menu.close();
           });
 
@@ -134,12 +136,13 @@ describe('Endpoints', () => {
             expect(items['connect']).not.toBeDefined();
             expect(items['disconnect']).toBeDefined();
             items['disconnect'].click();
+            ConfirmDialogComponent.expectDialogAndConfirm('Disconnect', 'Disconnect Endpoint');
 
             // Wait for snackbar
             const snackBar = new SnackBarComponent();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
-
+            
             endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
               expect(data.connected).toBeFalsy();
             });

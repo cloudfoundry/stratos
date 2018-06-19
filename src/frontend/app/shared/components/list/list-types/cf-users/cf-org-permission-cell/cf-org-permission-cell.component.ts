@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
@@ -11,6 +13,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
@@ -22,9 +25,11 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
   constructor(
     public store: Store<AppState>,
-    public cfUserService: CfUserService
+    public cfUserService: CfUserService,
+    private userPerms: CurrentUserPermissionsService,
+    confirmDialog: ConfirmationDialogService
   ) {
-    super();
+    super(confirmDialog);
   }
 
   protected setChipConfig(row: APIResource<CfUser>) {
@@ -45,6 +50,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         ...perm,
         name: orgPerms.name,
         guid: orgPerms.orgGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,
@@ -53,7 +59,9 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
           entityFactory(organizationSchemaKey)
         ).getUpdatingSection(updatingKey).pipe(
           map(update => update.busy)
-        )
+        ),
+        cfGuid: row.entity.cfGuid,
+        orgGuid: orgPerms.orgGuid
       };
     });
   }
@@ -67,4 +75,9 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
       false
     ));
   }
+
+  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
+    this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
+
+
 }

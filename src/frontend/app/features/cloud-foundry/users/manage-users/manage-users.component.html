@@ -2,7 +2,7 @@
   <span *ngIf="(singleUser$ | async); else multiUser">Manage Roles: {{(singleUser$ | async).username }}</span>
   <ng-template #multiUser>Manage User Roles</ng-template>
 </app-page-header>
-<app-steppers cancel="{{defaultCancelUrl}}">
+<app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
   <app-step *ngIf="(initialUsers$ | async)?.length === 0" title="Select Users" [blocked]="select.cfRolesService.loading$ | async" [onNext]="select.onNext" [valid]="select.valid$ | async">
     <app-manage-users-select #select></app-manage-users-select>
   </app-step>

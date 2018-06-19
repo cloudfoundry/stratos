@@ -1,17 +1,19 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Applications</h1>
   <div class="page-header-right">
-    <ng-container *appUserPermission="canCreateApplication">
-      <button mat-icon-button [routerLink]="'/applications/new/'">
-        <mat-icon>add</mat-icon>
-      </button>
-      <button mat-icon-button [routerLink]="'/applications/deploy/'">
-        <mat-icon>file_upload</mat-icon>
-      </button>
+    <ng-container *ngIf="(haveConnectedCf$ | async)">
+      <ng-container *appUserPermission="canCreateApplication">
+        <button mat-icon-button [routerLink]="'/applications/new/'">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-icon-button [routerLink]="'/applications/deploy/'">
+          <mat-icon>file_upload</mat-icon>
+        </button>
+      </ng-container>
     </ng-container>
   </div>
 </app-page-header>
-<app-endpoints-missing #appEndpointsMissing></app-endpoints-missing>
+<app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 <!-- <p *ngIf="error">We're sorry, we couldn't fetch all of your applications. Please try again later.</p> -->
 
 <ng-template #noEntriesForCurrentFilter>

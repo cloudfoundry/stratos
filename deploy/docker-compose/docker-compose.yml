@@ -1,4 +1,4 @@
-version: '2'
+version: '2.3'
 services:
 
   mariadb:
@@ -6,8 +6,8 @@ services:
     env_file:
       ../mariadb.env
 
-  goose:
-    image: splatform/stratos-dc-goose:latest
+  db-migrator:
+    image: splatform/stratos-dc-db-migrator:latest
     env_file:
       ../mariadb.env
     links:
@@ -15,14 +15,14 @@ services:
     ports:
     - "3306:3306"
 
-  proxy:
-    image: splatform/stratos-dc-proxy:latest
+  jetstream:
+    image: splatform/stratos-dc-jetstream:latest
     ports:
       - "3003:3003"
     env_file:
       ../proxy.env
     links:
-      - goose:goose
+      - db-migrator:db-migrator
       - uaa:uaa
       - mariadb:mariadb
 
@@ -32,7 +32,7 @@ services:
       - 80:80
       - 443:443
     links:
-      - proxy:proxy
+      - jetstream:jetstream
 
   uaa:
     extends:

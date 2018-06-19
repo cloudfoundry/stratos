@@ -22,6 +22,16 @@ import (
 // API Host Prefix to replace if the custom header is supplied
 const apiPrefix = "api."
 
+type PassthroughErrorStatus struct {
+	StatusCode int    `json:"statusCode"`
+	Status     string `json:"status"`
+}
+
+type PassthroughError struct {
+	Error         *PassthroughErrorStatus `json:"error"`
+	ErrorResponse *json.RawMessage        `json:"errorResponse"`
+}
+
 func getEchoURL(c echo.Context) url.URL {
 	log.Debug("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
@@ -83,30 +93,57 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 	for _, guid := range cnsiList {
 		var response []byte
 		cnsiResponse, ok := responses[guid]
+		var errorStatus = &PassthroughErrorStatus{
+			StatusCode: -1,
+		}
+		var errorResponse []byte
 		switch {
 		case !ok:
-			response = []byte(`{"error": {"statusCode": 500, "status": "Request timed out"}}`)
+			errorStatus.StatusCode = 500
+			errorStatus.Status = "Request timed out"
 		case cnsiResponse.Error != nil:
-			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": "%q"}}`, cnsiResponse.Error.Error()))
+			errorStatus.StatusCode = 500
+			errorStatus.Status = cnsiResponse.Error.Error()
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
 		// Check the HTTP Status code to make sure that it is actually a valid response
 		if cnsiResponse.StatusCode >= 400 {
-			errorJson, err := json.Marshal(cnsiResponse)
-			if err != nil {
-				errorJson = []byte(fmt.Sprintf(`{"statusCode": 500, "status": "Failed to proxy request"}"`))
+			errorStatus.Status = cnsiResponse.Status
+			errorStatus.StatusCode = cnsiResponse.StatusCode
+			if errorStatus.StatusCode <= 0 {
+				errorStatus.StatusCode = 500
+				errorStatus.Status = "Failed to proxy request"
 			}
-			response = []byte(fmt.Sprintf(`{"error": %s, "errorResponse": %s}`, errorJson, string(cnsiResponse.Response)))
+			// Check that the error response was valid json - convert to string otherwise
+			if !isValidJSON(cnsiResponse.Response) {
+				errorResponse = []byte(fmt.Sprintf("%q", cnsiResponse.Response))
+			} else {
+				errorResponse = cnsiResponse.Response
+			}
 		}
 		if len(response) > 0 {
 			jsonResponse[guid] = (*json.RawMessage)(&response)
+		} else if errorStatus.StatusCode >= 0 {
+			passthroughError := &PassthroughError{
+				Error:         errorStatus,
+				ErrorResponse: (*json.RawMessage)(&errorResponse),
+			}
+			res, _ := json.Marshal(passthroughError)
+			jsonResponse[guid] = (*json.RawMessage)(&res)
 		} else {
 			jsonResponse[guid] = nil
 		}
 	}
 
 	return jsonResponse
+}
+
+// When we move to goland 1.9 we can use json.isValid()
+func isValidJSON(data []byte) bool {
+	var res interface{}
+	err := json.Unmarshal(data, res)
+	return err == nil
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (interfaces.CNSIRequest, error) {
@@ -276,7 +313,10 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 		c.Response().WriteHeader(res.StatusCode)
 
 		// we don't care if this fails
-		_, _ = c.Response().Write(res.Response)
+		_, err := c.Response().Write(res.Response)
+		if err != nil {
+			log.Errorf("Failed to write passthrough response %v", err)
+		}
 
 		return nil
 	}
@@ -334,6 +374,7 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 
 	if err != nil {
 		cnsiRequest.StatusCode = 500
+		cnsiRequest.Status = "Error proxing request"
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
@@ -341,6 +382,15 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		cnsiRequest.Status = res.Status
 		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
+	}
+
+	// If Status Code >=400, log this as a warning
+	if cnsiRequest.StatusCode >= 400 {
+		contentType := res.Header.Get("Content-Type")
+		log.Warnf("Passthrough response: URL: %s, Status Code: %d, Status: %s, Content Type: %s, Length: %d",
+			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, res.ContentLength)
+		log.Warn(string(cnsiRequest.Response))
+
 	}
 
 	if done != nil {

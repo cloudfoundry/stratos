@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
-import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { IServiceInstance, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -10,6 +10,10 @@ import { ServiceActionHelperService } from '../../../../../data-services/service
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -20,51 +24,110 @@ import { CardCell } from '../../../list.types';
   ]
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> implements OnInit {
+  serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
 
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
+  entityConfig: ComponentEntityMonitorConfig;
+
+  @Input('row')
+  set row(row) {
+    if (row) {
+      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
+      this.serviceInstanceEntity = row;
+      this.serviceInstanceTags = row.entity.tags.map(t => ({
+        value: t
+      }));
+      this.cfGuid = row.entity.cfGuid;
+      this.hasMultipleBindings.next(!(row.entity.service_bindings.length > 0));
+    }
+  }
 
   constructor(
-    private store: Store<AppState>,
-    private servicesWallService: ServicesWallService,
-    private serviceActionHelperService: ServiceActionHelperService
+    private serviceActionHelperService: ServiceActionHelperService,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super();
-
-    this.cardMenu = [
-      {
-        label: 'Detach',
-        action: this.detach,
-        disabled: this.hasMultipleBindings
-      },
-      {
-        label: 'Delete',
-        action: this.delete
-      }
-    ];
-
   }
 
   ngOnInit() {
-
-    this.serviceInstanceTags = this.row.entity.tags.map(t => ({
+    this.serviceInstanceTags = this.serviceInstanceEntity.entity.tags.map(t => ({
       value: t
     }));
 
-    this.cfGuid = this.row.entity.cfGuid;
-    this.hasMultipleBindings.next(!(this.row.entity.service_bindings.length > 0));
-
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      },
+      {
+        label: 'Unbind',
+        action: this.detach,
+        disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      },
+      {
+        label: 'Delete',
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      }
+    ];
   }
-
-
   detach = () => {
-    const serviceBindingGuid = this.row.entity.service_bindings[0].metadata.guid;
-    this.serviceActionHelperService.detachServiceBinding(serviceBindingGuid, this.row.metadata.guid, this.row.entity.cfGuid);
+    this.serviceActionHelperService.detachServiceBinding
+      (this.serviceInstanceEntity.entity.service_bindings,
+      this.serviceInstanceEntity.metadata.guid,
+      this.serviceInstanceEntity.entity.cfGuid);
   }
 
+  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+    this.serviceInstanceEntity.metadata.guid,
+    this.serviceInstanceEntity.entity.cfGuid
+  )
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(this.row.metadata.guid, this.row.entity.cfGuid);
+  edit = () => this.serviceActionHelperService.editServiceBinding(
+    this.serviceInstanceEntity.metadata.guid,
+    this.serviceInstanceEntity.entity.cfGuid
+  )
+
+  getServiceName = () => {
+    const serviceEntity = this.serviceInstanceEntity.entity.service_plan.entity.service;
+    let extraInfo: IServiceExtra = null;
+    try {
+      extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
+    } catch (e) { }
+    let displayName = serviceEntity.entity.label;
+    if (extraInfo && extraInfo.displayName) {
+      displayName = extraInfo.displayName;
+    }
+    return displayName;
+  }
+
+  getSpaceName = () => this.serviceInstanceEntity.entity.space.entity.name;
+  getSpaceURL = () => [
+    '/cloud-foundry',
+     this.serviceInstanceEntity.entity.cfGuid,
+     'organizations',
+     this.serviceInstanceEntity.entity.space.entity.organization_guid,
+     'spaces',
+     this.serviceInstanceEntity.entity.space_guid,
+     'summary'
+    ]
+    getSpaceBreadcrumbs = () => ({ 'breadcrumbs': 'services-wall'});
 
 }

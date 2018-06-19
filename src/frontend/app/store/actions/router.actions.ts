@@ -8,15 +8,16 @@ export const RouterActions = {
   GO: '[Router] Go To',
 };
 
+export interface RouterQueryParams {
+  [key: string]: any;
+}
 export class RouterNav implements Action, LoggerAction {
   public logLevel: LogLevel.INFO;
   public message: string;
   type = RouterActions.GO;
   constructor(public payload: {
     path: string[] | string;
-    query?: {
-      [key: string]: any
-    };
+    query?: RouterQueryParams;
     extras?: NavigationExtras;
   }, public redirect?: RouterRedirect) {
     const path = payload.path as string[];

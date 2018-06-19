@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -44,14 +45,23 @@ const CFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
-// SessionExpiresAfterHeader Custom header for communicating the session expiry time to clients
+// ClientRequestDateHeader Custom header for getting date form client
 const ClientRequestDateHeader = "X-Cap-Request-Date"
 
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
+// XSRFTokenHeader - XSRF Token Header name
+const XSRFTokenHeader = "X-Xsrf-Token"
+
+// XSRFTokenCookie - XSRF Token Cookie name
+const XSRFTokenCookie = "XSRF-TOKEN"
+
+// XSRFTokenSessionName - XSRF Token Session name
+const XSRFTokenSessionName = "xsrf_token"
+
 func (p *portalProxy) getUAAIdentityEndpoint() string {
-	log.Info("getUAAIdentityEndpoint")
+	log.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
 }
 
@@ -129,6 +139,9 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
 
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
@@ -436,6 +449,9 @@ func (p *portalProxy) logout(c echo.Context) error {
 
 	p.removeEmptyCookie(c)
 
+	// Remove the XSRF Token from the session
+	p.unsetSessionValue(c, XSRFTokenSessionName)
+
 	err := p.clearSession(c)
 	if err != nil {
 		log.Errorf("Unable to clear session: %v", err)
@@ -493,6 +509,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		log.Warnf("%v+", err)
 		return nil, interfaces.LogHTTPError(res, err)
 	}
 
@@ -674,12 +691,51 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
 	err = c.JSON(http.StatusOK, info)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
+func (p *portalProxy) ensureXSRFToken(c echo.Context) {
+	token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
+	if err != nil || len(token) == 0 {
+		// Need a new token
+		tokenBytes, err := generateRandomBytes(32)
+		if err == nil {
+			token = base64.StdEncoding.EncodeToString(tokenBytes)
+		} else {
+			token = ""
+		}
+		sessionValues := make(map[string]interface{})
+		sessionValues[XSRFTokenSessionName] = token
+		p.setSessionValues(c, sessionValues)
+	}
+
+	if len(token) > 0 {
+		c.Response().Header().Set(XSRFTokenHeader, token)
+	}
+}
+
+// See: https://github.com/gorilla/csrf/blob/a8abe8abf66db8f4a9750d76ba95b4021a354757/helpers.go
+// generateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random number generator fails to function correctly.
+func generateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	// err == nil only if len(b) == n
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+
 }
 
 func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
@@ -755,7 +811,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
-		log.Error(msg)
+		log.Debug(msg)
 		return nil, nil, false
 	}
 

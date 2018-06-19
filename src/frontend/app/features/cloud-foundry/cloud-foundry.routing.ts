@@ -117,16 +117,15 @@ const cloudFoundry: Routes = [{
         },
         {
           path: '',
-          // Root for Tabs
-          component: CloudFoundryTabsBaseComponent,
           data: {
             uiFullView: true
           },
+          component: CloudFoundryTabsBaseComponent,
           children: [
             {
               path: '',
               redirectTo: 'summary',
-              pathMatch: 'full'
+              pathMatch: 'full',
             },
             {
               path: 'summary',
@@ -137,8 +136,41 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryOrganizationsComponent,
             },
             {
+              path: 'users',
+              component: CloudFoundryUsersComponent
+            },
+            {
+              path: 'firehose',
+              component: CloudFoundryFirehoseComponent
+            },
+            {
+              path: 'feature-flags',
+              component: CloudFoundryFeatureFlagsComponent
+            },
+            {
+              path: 'build-packs',
+              component: CloudFoundryBuildPacksComponent
+            },
+            {
+              path: 'stacks',
+              component: CloudFoundryStacksComponent
+            },
+            {
+              path: 'security-groups',
+              component: CloudFoundrySecurityGroupsComponent
+            }
+          ]
+        },
+        {
+          path: '',
+          // Root for Tabs
+          children: [
+            {
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,
+              data: {
+                uiFullView: true
+              },
               children: [
                 {
                   path: '',
@@ -160,6 +192,9 @@ const cloudFoundry: Routes = [{
             },
             {
               path: 'organizations/:orgId/spaces/:spaceId',
+              data: {
+                uiFullView: true
+              },
               component: CloudFoundrySpaceBaseComponent,
               children: [
                 {
@@ -189,30 +224,6 @@ const cloudFoundry: Routes = [{
                 }
               ]
             },
-            {
-              path: 'users',
-              component: CloudFoundryUsersComponent
-            },
-            {
-              path: 'firehose',
-              component: CloudFoundryFirehoseComponent
-            },
-            {
-              path: 'feature-flags',
-              component: CloudFoundryFeatureFlagsComponent
-            },
-            {
-              path: 'build-packs',
-              component: CloudFoundryBuildPacksComponent
-            },
-            {
-              path: 'stacks',
-              component: CloudFoundryStacksComponent
-            },
-            {
-              path: 'security-groups',
-              component: CloudFoundrySecurityGroupsComponent
-            }
           ]
         }]
     },

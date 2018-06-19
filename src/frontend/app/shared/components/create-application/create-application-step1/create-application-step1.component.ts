@@ -1,14 +1,18 @@
-
-import {of as observableOf,  Observable } from 'rxjs';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { ISpace } from '../../../../core/cf-api.types';
+import { PermissionStrings } from '../../../../core/current-user-permissions.config';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
-
+import {
+  getSpacesFromOrgWithRole,
+} from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -17,12 +21,16 @@ import { AppState } from '../../../../store/app-state';
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  @Input('isServiceInstanceMode')
-  isServiceInstanceMode: boolean;
+  @Input('isMarketplaceMode')
+  isMarketplaceMode: boolean;
   constructor(
     private store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService
   ) { }
+
+  public spaces$: Observable<ISpace[]>;
+  public hasSpaces$: Observable<boolean>;
+  public hasOrgs$: Observable<boolean>;
 
   cfValid$: Observable<boolean>;
 
@@ -36,7 +44,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @Input('stepperText')
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetCFDetails({
       cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
       org: this.cfOrgSpaceService.org.select.getValue(),
@@ -46,10 +54,18 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
+    this.spaces$ = this.getSpacesFromPermissions();
+    this.hasOrgs$ = this.cfOrgSpaceService.org.list$.pipe(
+      map(o => o && o.length > 0)
+    );
+    this.hasSpaces$ = this.spaces$.pipe(
+      map(spaces => !!spaces.length)
+    );
     if (this.isRedeploy) {
       this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
     }
-    if (this.isServiceInstanceMode) {
+
+    if (this.isMarketplaceMode) {
       this.stepperText = 'Select an organization and space for the service instance.';
     }
   }
@@ -62,4 +78,24 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     );
   }
 
+  private getSpacesFromPermissions() {
+    return this.cfOrgSpaceService.org.select.pipe(
+      withLatestFrom(this.cfOrgSpaceService.cf.select),
+      switchMap(([orgGuid, endpointGuid]) => {
+        return this.store.select(getSpacesFromOrgWithRole(endpointGuid, orgGuid, PermissionStrings.SPACE_DEVELOPER));
+      }),
+      switchMap((spacesOrAll => {
+        if (spacesOrAll === 'all') {
+          return this.cfOrgSpaceService.space.list$;
+        }
+        const spaceIds = spacesOrAll as string[];
+        return this.cfOrgSpaceService.space.list$.pipe(
+          map(spaces => {
+            const filteredSpaces = spaces.filter(space => spaceIds.find(spaceGuid => spaceGuid === space.guid));
+            return filteredSpaces;
+          })
+        );
+      }))
+    );
+  }
 }

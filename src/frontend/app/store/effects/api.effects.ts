@@ -10,23 +10,23 @@ import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 
 import { LoggerService } from '../../core/logger.service';
+import { SendEventAction } from '../actions/internal-events.actions';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { listEntityRelations } from '../helpers/entity-relations';
+import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
+import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAction } from '../types/request.types';
+import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import { APIResource, NormalizedResponse, instanceOfAPIResource } from './../types/api.types';
+import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
-import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
-import { listEntityRelations } from '../helpers/entity-relations';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { SendEventAction } from '../actions/internal-events.actions';
-import { InternalEventSeverity, APIEventState } from '../types/internal-events.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -127,9 +127,10 @@ export class APIEffect {
         errors.forEach(error => {
           if (error.error) {
             const fakedAction = { ...actionClone, endpointGuid: error.guid };
-            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
+            const errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
+            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction, errorMessage));
             this.store.dispatch(new WrapperRequestActionFailed(
-              error.errorCode,
+              errorMessage,
               { ...actionClone, endpointGuid: error.guid },
               requestType
             ));
@@ -162,7 +163,7 @@ export class APIEffect {
           }
         })));
         return [
-          new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
+          new APISuccessOrFailedAction(actionClone.actions[2], actionClone, error.message),
           new WrapperRequestActionFailed(
             error.message,
             actionClone,
@@ -221,13 +222,21 @@ export class APIEffect {
         const endpoint = resData ? resData[cfGuid] as JetStreamError : null;
         const succeeded = !endpoint || !endpoint.error;
         const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
-        const errorResponse = endpoint ? endpoint.errorResponse : { code: 0, description: 'Unknown', error_code: '0' };
+        let errorResponse = null;
+        if (!succeeded) {
+          errorResponse = endpoint && (typeof endpoint.errorResponse !== 'string') ?
+            endpoint.errorResponse : {} as JetStreamCFErrorResponse;
+          // Use defaults if values are not provided
+          errorResponse.code = errorResponse.code || 0;
+          errorResponse.description = errorResponse.description || 'Unknown';
+          errorResponse.error_code = errorResponse.error_code || '0';
+        }
         return {
           error: !succeeded,
           errorCode: succeeded ? '200' : errorCode,
           guid: cfGuid,
           url: action.options.url,
-          errorResponse: succeeded ? null : errorResponse,
+          errorResponse: errorResponse,
         };
       });
   }

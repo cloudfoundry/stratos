@@ -22,7 +22,7 @@ export function roleInfoFromSessionReducer(
 ): ICurrentUserRolesState {
   const { user, endpoints } = action.sessionData;
   const cfRoles = propagateEndpointsAdminPermissions(state.cf, Object.values(endpoints.cf));
-  return finishInternalRoles(state, cfRoles, user);
+  return applyInternalScopes(state, cfRoles, user);
 }
 
 export function updateNewlyConnectedEndpoint(
@@ -39,16 +39,16 @@ export function updateNewlyConnectedEndpoint(
   }]);
   return {
     ...state,
-    cf: cfRoles,
+    cf: cfRoles
   };
 }
 
-function finishInternalRoles(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
+function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
-    const isAdmin = internalRoles.scopes.includes(ScopeStrings.STRATOS_ADMIN);
-    internalRoles.isAdmin = isAdmin;
+    // The admin scope is configurable - so look at the flag provided by the backend
+    internalRoles.isAdmin = user.admin;
   }
 
   return {

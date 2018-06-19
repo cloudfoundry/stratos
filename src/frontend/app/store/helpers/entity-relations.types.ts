@@ -1,5 +1,6 @@
 import { Action } from '@ngrx/store';
 
+import { getPaginationKey } from '../actions/pagination.actions';
 import { IRequestAction } from '../types/request.types';
 import { EntitySchema } from './entity-factory';
 
@@ -72,8 +73,8 @@ export function isEntityInlineParentAction(action: Action) {
 
 export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
 
-export function createEntityRelationPaginationKey(schemaKey: string, guid: string, childSchemaRelation?: string) {
-  let key = `${schemaKey}-${guid}`;
+export function createEntityRelationPaginationKey(parentSchemaKey: string, parentGuid = 'all', childSchemaRelation?: string) {
+  let key = getPaginationKey(parentSchemaKey, parentGuid);
   // Usually, the above is enough to be unique, however in situations where there is more than one child with the same type we need to
   // expand this to include this child relation text
   // For instance
