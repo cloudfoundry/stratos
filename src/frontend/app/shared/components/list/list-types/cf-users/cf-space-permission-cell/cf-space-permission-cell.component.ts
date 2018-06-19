@@ -6,7 +6,7 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
+import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -25,12 +25,12 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRoleNames> {
 
   constructor(
-    public store: Store<AppState>,
+    store: Store<AppState>,
     public cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
-    super(confirmDialog);
+    super(store, confirmDialog);
   }
 
   protected setChipConfig(row: APIResource<CfUser>) {
@@ -43,7 +43,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
 
   private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>) {
     return getSpaceRoles(spacePerms.permissions).map(perm => {
-      const updatingKey = RemoveUserPermission.generateUpdatingKey(
+      const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
         row.metadata.guid
       );
@@ -68,13 +68,14 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     });
   }
 
-  public removePermission(cellPermission: ICellPermissionList<SpaceUserRoleNames>) {
-    this.store.dispatch(new RemoveUserPermission(
+  public removePermission(cellPermission: ICellPermissionList<SpaceUserRoleNames>, updateConnectedUser: boolean) {
+    this.store.dispatch(new RemoveUserRole(
       this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       cellPermission.userGuid,
       cellPermission.guid,
       cellPermission.key,
-      true
+      true,
+      updateConnectedUser
     ));
   }
 
