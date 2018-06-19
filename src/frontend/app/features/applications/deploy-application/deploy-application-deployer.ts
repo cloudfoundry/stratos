@@ -158,14 +158,11 @@ export class DeployApplicationDeployer {
   }
 
   sendProjectInfo = (appSource: DeployApplicationSource) => {
-    if (appSource.type.id === 'git') {
-      if (appSource.type.subType === 'github') {
+    if (appSource.type.id === 'github') {
         return this.sendGitHubSourceMetadata(appSource);
-      }
-      if (appSource.type.subType === 'giturl') {
+    } else if (appSource.type.id === 'giturl') {
         return this.sendGitUrlSourceMetadata(appSource);
-      }
-    } else if (appSource.type.id === 'fs') {
+    } else if (appSource.type.id === 'file' || appSource.type.id === 'folder') {
       return this.sendLocalSourceMetadata();
     }
     return '';
@@ -175,7 +172,7 @@ export class DeployApplicationDeployer {
     const github = {
       project: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.subType,
+      type: appSource.type.id,
       commit: appSource.commit
     };
 
@@ -191,7 +188,7 @@ export class DeployApplicationDeployer {
     const gitUrl = {
       url: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.subType
+      type: appSource.type.id
     };
 
     const msg = {
@@ -248,7 +245,13 @@ export class DeployApplicationDeployer {
           'Failed to deploy app!');
         break;
       case SocketEventTypes.SOURCE_REQUIRED:
-        this.inputStream.next(this.sendProjectInfo(this.applicationSource));
+        const sourceInfo = this.sendProjectInfo(this.applicationSource);
+        if (!sourceInfo) {
+          this.onClose(log, 'Deploy Failed - Unknown source type',
+          'Failed to deploy the app - unknown source type');
+        } else {
+          this.inputStream.next(sourceInfo);
+        }
         break;
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:

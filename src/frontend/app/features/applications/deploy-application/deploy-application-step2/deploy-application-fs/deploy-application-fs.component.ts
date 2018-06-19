@@ -22,6 +22,8 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   private propagateChange: Function;
   constructor() { }
 
+  @Input('sourceType') sourceType: string;
+
   sourceData$ = new BehaviorSubject<FileScannerInfo>(undefined);
 
   // Handle result of a file input form field selection

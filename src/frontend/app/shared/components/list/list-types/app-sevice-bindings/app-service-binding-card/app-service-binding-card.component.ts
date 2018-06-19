@@ -1,10 +1,9 @@
-
 import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
+
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
@@ -12,17 +11,21 @@ import { EntityServiceFactory } from '../../../../../../core/entity-service-fact
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { GetService } from '../../../../../../store/actions/service.actions';
-import { AppState } from '../../../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import {
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceSchemaKey,
+} from '../../../../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
-import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+
 
 
 interface EnvVarData {
@@ -54,19 +57,30 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
-    this.cardMenu = [{
-      label: 'Unbind',
-      action: this.detach,
-      can: this.appService.waitForAppEntity$.pipe(
-        switchMap(app => this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_BINDING_EDIT,
-          this.appService.cfGuid,
-          app.entity.entity.space_guid
-        )))
-    }];
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.appService.waitForAppEntity$.pipe(
+          switchMap(app => this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            this.appService.cfGuid,
+            app.entity.entity.space_guid
+          )))
+      },
+      {
+        label: 'Unbind',
+        action: this.detach,
+        can: this.appService.waitForAppEntity$.pipe(
+          switchMap(app => this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            this.appService.cfGuid,
+            app.entity.entity.space_guid
+          )))
+      }];
   }
   ngOnInit(): void {
-    this.entityConfig = new ComponentEntityMonitorConfig(this.row.entity.service_instance_guid, entityFactory(serviceInstancesSchemaKey));
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(serviceBindingSchemaKey));
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesSchemaKey,
       entityFactory(serviceInstancesSchemaKey),
@@ -143,4 +157,11 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.appService.cfGuid
     );
   }
+
+  edit = () => this.serviceActionHelperService.editServiceBinding(
+    this.row.entity.service_instance_guid,
+    this.appService.cfGuid,
+    { 'appId': this.appService.appGuid }
+  )
+
 }

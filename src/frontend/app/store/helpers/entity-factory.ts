@@ -107,7 +107,22 @@ entityCache[appEventSchemaKey] = EventSchema;
 const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[stackSchemaKey] = StackSchema;
 
-const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
+  idAttribute: getAPIResourceGuid,
+  // Work around for an issue where router_group_type can come back null from one API call but
+  // for shared_domains call it is correctly populated - the null values can overwrite the
+  // correct values - so remove them to avoid this
+  processStrategy: (value) => {
+    const newValue = {
+      entity: {...value.entity},
+      metadata: {...value.metadata}
+    };
+    if (newValue.entity.router_group_type === null) {
+      delete newValue.entity.router_group_type;
+    }
+    return newValue;
+  }
+ });
 entityCache[domainSchemaKey] = DomainSchema;
 
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {
@@ -259,7 +274,7 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    space: SpaceSchema
+    space: SpaceSchema.withEmptyDefinition()
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;
@@ -293,6 +308,7 @@ const ApplicationEntitySchema = new EntitySchema(
         entity: {
           ...coreSpaceSchemaParams,
           routes: [RouteNoAppsSchema],
+          service_instances: [ServiceInstancesWithNoBindingsSchema],
           organization: OrganizationsWithoutSpaces,
         }
       }, { idAttribute: getAPIResourceGuid }),

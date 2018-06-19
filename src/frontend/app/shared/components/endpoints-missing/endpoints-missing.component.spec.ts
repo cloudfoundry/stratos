@@ -1,4 +1,3 @@
-import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 import { CoreModule } from '../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 

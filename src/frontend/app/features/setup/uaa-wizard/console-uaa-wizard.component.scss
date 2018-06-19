@@ -7,9 +7,14 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    > p {
-      margin: 0 0 12px;
-    }
+  }
+  &__form-block {
+    display: flex;
+    flex-direction: column;
+    margin-left: 36px;
+  }
+  &__form-section {
+    margin: 12px 0 6px;
   }
   &__intro {
     font-size: 18px;
@@ -19,6 +24,10 @@
   form {
     min-width: 400px;
     width: 100%;
+
+    mat-checkbox {
+      padding: 6px 0;
+    }
   }
   app-steppers {
     display: flex;

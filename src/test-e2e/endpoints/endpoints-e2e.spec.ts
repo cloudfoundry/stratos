@@ -67,9 +67,7 @@ describe('Endpoints', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
           const snackBar = new SnackBarComponent();
           expect(snackBar.isDisplayed()).toBeTruthy();
-          expect(snackBar.hasMessage(
-            'There are no connected Cloud Foundry endpoints, connect with your personal credentials to get started.')
-          ).toBeTruthy();
+          expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
           snackBar.close();
         });
       });
