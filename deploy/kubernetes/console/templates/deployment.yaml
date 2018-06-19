@@ -182,8 +182,7 @@ spec:
         - name: SKIP_SSL_VALIDATION 
           value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
         {{- end }}
-        {{- if .Values.console.cookieDomain }}  
-        {{ if ne .Values.console.cookieDomain "-" }}
+        {{- if .Values.console.cookieDomain }}{{ if ne .Values.console.cookieDomain "-" }}
         - name: COOKIE_DOMAIN
           value: {{.Values.console.cookieDomain}}
         {{- end }}
