@@ -25,11 +25,11 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
   constructor(
     public store: Store<AppState>,
-    public cfUserService: CfUserService,
+    cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
-    super(confirmDialog);
+    super(confirmDialog, cfUserService);
   }
 
   protected setChipConfig(row: APIResource<CfUser>) {
@@ -76,8 +76,9 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     ));
   }
 
-  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
+  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) => {
+    return this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
+  }
 
 
 }

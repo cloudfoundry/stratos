@@ -32,6 +32,8 @@ import {
   IUserPermissionInSpace,
   UserRoleInOrg,
   UserRoleInSpace,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
@@ -129,6 +131,39 @@ export class CfUserService {
     this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
     this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
     return res;
+  }
+
+  // Helper to determine if user has roles other than Org User
+  hasRoles(user: CfUser, excludeOrgUser = true): boolean {
+
+    const orgRoles = this.getOrgRolesFromUser(user);
+    const spaceRoles = this.getSpaceRolesFromUser(user);
+
+    let hasRoles = false;
+    orgRoles.forEach(roles => {
+      const permissions = roles.permissions;
+      hasRoles = !!(hasRoles ||
+      (
+        permissions[OrgUserRoleNames.MANAGER] ||
+        permissions[OrgUserRoleNames.BILLING_MANAGERS] ||
+        permissions[OrgUserRoleNames.AUDITOR]
+      ));
+
+      if (!excludeOrgUser) {
+        hasRoles = !!(hasRoles || permissions[OrgUserRoleNames.USER]);
+      }
+    });
+    spaceRoles.forEach(roles => {
+      const permissions = roles.permissions;
+      hasRoles = !!(hasRoles ||
+      (
+        permissions[SpaceUserRoleNames.MANAGER] ||
+        permissions[SpaceUserRoleNames.AUDITOR] ||
+        permissions[SpaceUserRoleNames.DEVELOPER]
+
+      ));
+    });
+    return hasRoles;
   }
 
   getUserRoleInOrg = (

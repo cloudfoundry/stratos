@@ -26,11 +26,11 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
 
   constructor(
     public store: Store<AppState>,
-    public cfUserService: CfUserService,
+    cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
-    super(confirmDialog);
+    super(confirmDialog, cfUserService);
   }
 
   protected setChipConfig(row: APIResource<CfUser>) {
