@@ -1,19 +1,19 @@
-
-import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { UsersRolesActions, UsersRolesExecuteChanges, UsersRolesClear, UsersRolesClearUpdateState } from '../actions/users-roles.actions';
+import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
 import { AddUserPermission, ChangeUserPermission, RemoveUserPermission } from '../actions/users.actions';
 import { AppState } from '../app-state';
-import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../helpers/entity-factory';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
-import { CfRoleChange } from '../types/users-roles.types';
-import { UpdateCfAction, ICFAction } from '../types/request.types';
+import { ICFAction, UpdateCfAction } from '../types/request.types';
 import { OrgUserRoleNames } from '../types/user.types';
+import { CfRoleChange } from '../types/users-roles.types';
+
 
 @Injectable()
 export class UsersRolesEffects {
@@ -94,10 +94,10 @@ export class UsersRolesEffects {
     changes.forEach(change => {
       const action = this.createAction(cfGuid, change);
       this.store.dispatch(action);
-      // const obs = this.createActionObs(action);
       observables.push(this.createActionObs(action));
     });
-    return observableCombineLatest(...observables).pipe(
+    const allObservables = observables.length === 0 ? observableOf([true]) : observableCombineLatest(...observables);
+    return allObservables.pipe(
       first()
     );
   }
