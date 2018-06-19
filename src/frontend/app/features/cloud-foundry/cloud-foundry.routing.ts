@@ -7,7 +7,7 @@ import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-ba
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
-import { ManageUsersComponent } from './manage-users/manage-users.component';
+import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
@@ -55,151 +55,180 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 
+const usersRoles = [
+  {
+    path: 'users/manage',
+    component: UsersRolesComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'organizations/:orgId/users/manage',
+    component: UsersRolesComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'organizations/:orgId/spaces/:spaceId/users/manage',
+    component: UsersRolesComponent,
+    pathMatch: 'full'
+  },
+];
+
 const cloudFoundry: Routes = [{
   path: '',
   component: CloudFoundryComponent
 },
 {
   path: ':cfId',
-  children: [{
-    path: 'add-org',
-    component: AddOrganizationComponent
-  },
-  {
-    path: 'organizations/:orgId/add-space',
-    component: AddSpaceComponent
-  },
-  {
-    path: 'manage-users',
-    component: ManageUsersComponent
-  },
-  {
-    path: '',
-    // Root for attaching CF wide actions (i.e assignments, tabs)
-    component: CloudFoundryBaseComponent,
-    children: [
-      {
-        path: 'organizations/:orgId/edit-org',
-        component: EditOrganizationComponent
-      },
-      {
-        path: 'organizations/:orgId/spaces/:spaceId/edit-space',
-        component: EditSpaceComponent
-      },
-      {
-        path: 'cli',
-        component: CliInfoCloudFoundryComponent,
-      },
-      {
-        path: 'organizations/:orgId/cli',
-        component: CliInfoCloudFoundryComponent,
-        pathMatch: 'full'
-      },
-      {
-        path: 'organizations/:orgId/spaces/:spaceId/cli',
-        component: CliInfoCloudFoundryComponent,
-        pathMatch: 'full'
-      },
-      {
-        path: '',
-        // Root for Tabs
-        component: CloudFoundryTabsBaseComponent,
-        data: {
-          uiFullView: true
+  children: [
+    {
+      path: 'add-org',
+      component: AddOrganizationComponent
+    },
+    {
+      path: 'organizations/:orgId/add-space',
+      component: AddSpaceComponent
+    },
+    {
+      path: '',
+      // Root for attaching CF wide actions (i.e assignments, tabs)
+      component: CloudFoundryBaseComponent,
+      children: [
+        {
+          path: 'organizations/:orgId/edit-org',
+          component: EditOrganizationComponent
         },
-        children: [{
-          path: '',
-          redirectTo: 'summary',
+        {
+          path: 'organizations/:orgId/spaces/:spaceId/edit-space',
+          component: EditSpaceComponent
+        },
+        {
+          path: 'cli',
+          component: CliInfoCloudFoundryComponent,
+        },
+        {
+          path: 'organizations/:orgId/cli',
+          component: CliInfoCloudFoundryComponent,
           pathMatch: 'full'
         },
         {
-          path: 'summary',
-          component: CloudFoundrySummaryTabComponent
+          path: 'organizations/:orgId/spaces/:spaceId/cli',
+          component: CliInfoCloudFoundryComponent,
+          pathMatch: 'full'
         },
         {
-          path: 'organizations',
-          component: CloudFoundryOrganizationsComponent,
-        },
-        {
-          path: 'organizations/:orgId',
-          component: CloudFoundryOrganizationBaseComponent,
+          path: '',
+          data: {
+            uiFullView: true
+          },
+          component: CloudFoundryTabsBaseComponent,
           children: [
             {
               path: '',
               redirectTo: 'summary',
-              pathMatch: 'full'
+              pathMatch: 'full',
             },
             {
               path: 'summary',
-              component: CloudFoundryOrganizationSummaryComponent
+              component: CloudFoundrySummaryTabComponent
             },
             {
-              path: 'spaces',
-              component: CloudFoundryOrganizationSpacesComponent,
-            },
-            {
-              path: 'users',
-              component: CloudFoundryOrganizationUsersComponent
-            }]
-        },
-        {
-          path: 'organizations/:orgId/spaces/:spaceId',
-          component: CloudFoundrySpaceBaseComponent,
-          children: [
-            {
-              path: '',
-              redirectTo: 'summary',
-              pathMatch: 'full'
-            },
-            {
-              path: 'summary',
-              component: CloudFoundrySpaceSummaryComponent
-            },
-            {
-              path: 'apps',
-              component: CloudFoundrySpaceAppsComponent
-            },
-            {
-              path: 'service-instances',
-              component: CloudFoundrySpaceServiceInstancesComponent
-            },
-            {
-              path: 'routes',
-              component: CloudFoundrySpaceRoutesComponent
+              path: 'organizations',
+              component: CloudFoundryOrganizationsComponent,
             },
             {
               path: 'users',
-              component: CloudFoundrySpaceUsersComponent
+              component: CloudFoundryUsersComponent
+            },
+            {
+              path: 'firehose',
+              component: CloudFoundryFirehoseComponent
+            },
+            {
+              path: 'feature-flags',
+              component: CloudFoundryFeatureFlagsComponent
+            },
+            {
+              path: 'build-packs',
+              component: CloudFoundryBuildPacksComponent
+            },
+            {
+              path: 'stacks',
+              component: CloudFoundryStacksComponent
+            },
+            {
+              path: 'security-groups',
+              component: CloudFoundrySecurityGroupsComponent
             }
           ]
         },
         {
-          path: 'users',
-          component: CloudFoundryUsersComponent
-        },
-        {
-          path: 'firehose',
-          component: CloudFoundryFirehoseComponent
-        },
-        {
-          path: 'feature-flags',
-          component: CloudFoundryFeatureFlagsComponent
-        },
-        {
-          path: 'build-packs',
-          component: CloudFoundryBuildPacksComponent
-        },
-        {
-          path: 'stacks',
-          component: CloudFoundryStacksComponent
-        },
-        {
-          path: 'security-groups',
-          component: CloudFoundrySecurityGroupsComponent
-        }
-        ]
-      }]
-  }]
+          path: '',
+          // Root for Tabs
+          children: [
+            {
+              path: 'organizations/:orgId',
+              component: CloudFoundryOrganizationBaseComponent,
+              data: {
+                uiFullView: true
+              },
+              children: [
+                {
+                  path: '',
+                  redirectTo: 'summary',
+                  pathMatch: 'full'
+                },
+                {
+                  path: 'summary',
+                  component: CloudFoundryOrganizationSummaryComponent
+                },
+                {
+                  path: 'spaces',
+                  component: CloudFoundryOrganizationSpacesComponent,
+                },
+                {
+                  path: 'users',
+                  component: CloudFoundryOrganizationUsersComponent
+                }]
+            },
+            {
+              path: 'organizations/:orgId/spaces/:spaceId',
+              data: {
+                uiFullView: true
+              },
+              component: CloudFoundrySpaceBaseComponent,
+              children: [
+                {
+                  path: '',
+                  redirectTo: 'summary',
+                  pathMatch: 'full'
+                },
+                {
+                  path: 'summary',
+                  component: CloudFoundrySpaceSummaryComponent
+                },
+                {
+                  path: 'apps',
+                  component: CloudFoundrySpaceAppsComponent
+                },
+                {
+                  path: 'service-instances',
+                  component: CloudFoundrySpaceServiceInstancesComponent
+                },
+                {
+                  path: 'routes',
+                  component: CloudFoundrySpaceRoutesComponent
+                },
+                {
+                  path: 'users',
+                  component: CloudFoundrySpaceUsersComponent
+                }
+              ]
+            },
+          ]
+        }]
+    },
+    ...usersRoles
+  ]
 }];
 
 @NgModule({

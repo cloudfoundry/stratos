@@ -1,8 +1,9 @@
+
+import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -110,11 +111,11 @@ export class RequestEffect {
             independentUpdates
           )];
         })
-      ).catch(error => {
+      ).pipe(catchError(error => {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
           return [
-            new APISuccessOrFailedAction(apiAction.actions[2], apiAction),
+            new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
             new WrapperRequestActionFailed(
               error.message,
               apiAction,
@@ -125,7 +126,7 @@ export class RequestEffect {
           this.update(apiAction, false, error.message);
           return [];
         }
-      });
+      }));
     })
   );
 
@@ -147,7 +148,7 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction));
+        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
         actions.push(new WrapperRequestActionSuccess(
           apiResponse.response,
           apiAction,
@@ -188,7 +189,7 @@ export class RequestEffect {
       if (busy) {
         newAction.updatingKey = rootUpdatingKey;
       }
-      this.store.dispatch(new UpdateCfAction(newAction, error));
+      this.store.dispatch(new UpdateCfAction(newAction, busy, error));
     }
   }
 

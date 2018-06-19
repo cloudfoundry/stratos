@@ -1,27 +1,37 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { first, map, switchMap, tap, withLatestFrom, filter } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { DeleteAppServiceBinding } from '../../../../../../store/actions/application-service-routes.actions';
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { GetService } from '../../../../../../store/actions/service.actions';
-import { AppState } from '../../../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import {
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceSchemaKey,
+} from '../../../../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
-import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
-import { DatePipe } from '@angular/common';
 
+
+
+interface EnvVarData {
+  key: string;
+  value: string;
+}
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
@@ -29,31 +39,48 @@ import { DatePipe } from '@angular/common';
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 
+  envVarsAvailable$: Observable<EnvVarData>;
   listData: IListRowCellData[];
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance>[]>;
+  entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
-    private store: Store<AppState>,
+    private dialog: MatDialog,
+    private datePipe: DatePipe,
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
-    private dialog: MatDialog,
-    private confirmDialog: ConfirmationDialogService,
-    private datePipe: DatePipe
+    private serviceActionHelperService: ServiceActionHelperService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
     this.cardMenu = [
       {
-        icon: 'settings',
-        label: 'Detach',
-        action: this.detach
-      }
-    ];
+        label: 'Edit',
+        action: this.edit,
+        can: this.appService.waitForAppEntity$.pipe(
+          switchMap(app => this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            this.appService.cfGuid,
+            app.entity.entity.space_guid
+          )))
+      },
+      {
+        label: 'Unbind',
+        action: this.detach,
+        can: this.appService.waitForAppEntity$.pipe(
+          switchMap(app => this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            this.appService.cfGuid,
+            app.entity.entity.space_guid
+          )))
+      }];
   }
   ngOnInit(): void {
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(serviceBindingSchemaKey));
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesSchemaKey,
       entityFactory(serviceInstancesSchemaKey),
@@ -88,7 +115,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       },
       {
         label: 'Date Created On',
-        data$: Observable.of(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
+        data$: observableOf(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
       }
     ];
 
@@ -96,44 +123,45 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       map(o => o.entity.entity.tags.map(t => ({ value: t })))
     );
     this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
-  }
 
-  showEnvVars = () => {
-
-    Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+    this.envVarsAvailable$ = observableCombineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
-        withLatestFrom(),
-        map(([[service, serviceInstance, allEnvVars]]) => {
+        map(([service, serviceInstance, allEnvVars]) => {
           const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
           const serviceInstanceName = (serviceInstance as EntityInfo<APIResource<IServiceInstance>>).entity.entity.name;
           const serviceLabel = (service as EntityInfo<APIResource<IService>>).entity.entity.label;
+
           if (systemEnvJson['VCAP_SERVICES'][serviceLabel]) {
             return {
               key: serviceInstanceName,
               value: systemEnvJson['VCAP_SERVICES'][serviceLabel].find(s => s.name === serviceInstanceName)
             };
           }
+          return null;
         }),
-        tap(data => {
-          this.dialog.open(EnvVarViewComponent, {
-            data: data,
-            disableClose: false
-          });
-        }),
-        first()
-      ).subscribe();
+        filter(p => !!p),
+    );
+  }
 
+  showEnvVars = (envVarData: EnvVarData) => {
+    this.dialog.open(EnvVarViewComponent, {
+      data: envVarData,
+      disableClose: false
+    });
   }
 
   detach = () => {
-    const confirmation = new ConfirmationDialogConfig(
-      'Detach Service Instance',
-      'Are you sure you want to detach the application from the service?',
-      'Detach',
-      true
-    );
-    this.confirmDialog.open(confirmation, () =>
-      this.store.dispatch(new DeleteAppServiceBinding(this.appService.appGuid, this.row.metadata.guid, this.appService.cfGuid))
+    this.serviceActionHelperService.detachServiceBinding(
+      [this.row],
+      this.row.entity.service_instance_guid,
+      this.appService.cfGuid
     );
   }
+
+  edit = () => this.serviceActionHelperService.editServiceBinding(
+    this.row.entity.service_instance_guid,
+    this.appService.cfGuid,
+    { 'appId': this.appService.appGuid }
+  )
+
 }

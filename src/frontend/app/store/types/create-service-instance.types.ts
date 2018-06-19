@@ -8,4 +8,8 @@ export interface CreateServiceInstanceState {
   tags?: string[];
   bindAppGuid?: string;
   serviceInstanceGuid?: string;
+  spaceScoped: boolean;
+  cfGuid?: string;
+  serviceGuid?: string;
+  bindAppParams?: {};
 }

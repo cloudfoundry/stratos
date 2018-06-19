@@ -8,19 +8,17 @@ export function updateApplicationRoutesReducer() {
     switch (action.type) {
       case ASSIGN_ROUTE_SUCCESS:
         const assignAction: AssociateRouteWithAppApplication = action.apiAction as AssociateRouteWithAppApplication;
-        return deleteApplicationRoutes(state, assignAction.guid, assignAction.routeGuid);
+        return addApplicationRoutes(state, assignAction.guid, assignAction.routeGuid);
       case RouteEvents.DELETE_SUCCESS:
       case RouteEvents.UNMAP_ROUTE_SUCCESS:
         const routeAction: BaseRouteAction = action.apiAction as BaseRouteAction;
-        return deleteApplicationRoutes(state, routeAction.appGuid, routeAction.guid);
+        return removeApplicationRoute(state, routeAction.appGuid, routeAction.guid);
     }
     return state;
   };
 }
-function deleteApplicationRoutes(state: APIResource, appGuid: string, routeGuid: string) {
-  if (!appGuid) {
-    return state;
-  }
+
+function applyNewRoutes(state: APIResource, appGuid: string, routeGuid: string, newRoutes: any[]) {
   const oldEntities = Object.values(state);
   const entities = {};
   oldEntities.forEach(app => {
@@ -29,7 +27,7 @@ function deleteApplicationRoutes(state: APIResource, appGuid: string, routeGuid:
         ...app,
         entity: {
           ...app.entity,
-          routes: null
+          routes: newRoutes
         }
       };
       entities[app.metadata.guid] = newApp;
@@ -38,4 +36,21 @@ function deleteApplicationRoutes(state: APIResource, appGuid: string, routeGuid:
     }
   });
   return entities;
+}
+
+function addApplicationRoutes(state: APIResource, appGuid: string, routeGuid: string) {
+  if (!appGuid || !state[appGuid]) {
+    return state;
+  }
+  const oldRoutes = state[appGuid].entity.routes || [];
+  return applyNewRoutes(state, appGuid, routeGuid, [...oldRoutes, routeGuid]);
+}
+
+function removeApplicationRoute(state: APIResource, appGuid: string, routeGuid: string) {
+  if (!appGuid || !state[appGuid]) {
+    return state;
+  }
+  const oldRoutes = state[appGuid].entity.routes || [];
+  const newRoutes = oldRoutes.filter(route => route !== routeGuid);
+  return applyNewRoutes(state, appGuid, routeGuid, [...newRoutes]);
 }

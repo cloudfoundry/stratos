@@ -2,7 +2,11 @@
   $status-colors: map-get($app-theme, status);
   $error-color: map-get($status-colors, danger);
   $text-color: map-get($status-colors, text);
+  $primary: map-get($theme, primary);
+  $primary-color: mat-color($primary);
+  $foreground: map-get($theme, foreground);
   .table-row {
+    border-bottom-color: mat-color($foreground, divider);
     &__error {
       background-color: $error-color;
       color: $text-color;
@@ -18,6 +22,10 @@
       .table-row {
         background-color: transparentize($error-color, .9);
       }
+    }
+    &__highlighted {
+      background-color: transparentize($primary-color, .95);
+      border-left-color: $primary-color;
     }
   }
 }

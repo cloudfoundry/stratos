@@ -1,11 +1,10 @@
+
+import { of as observableOf, BehaviorSubject, OperatorFunction, Observable, Subscription, ReplaySubject } from 'rxjs';
+
+import { tap, distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { OperatorFunction } from 'rxjs/interfaces';
-import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
@@ -16,7 +15,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { tag } from 'rxjs-spy/operators';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -68,7 +67,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public transformedEntities: Array<T>;
 
   // Misc
-  public isLoadingPage$: Observable<boolean> = Observable.of(false);
+  public isLoadingPage$: Observable<boolean> = observableOf(false);
 
   // ------------- Private
   private entities$: Observable<T>;
@@ -126,7 +125,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     const dataFunctions = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
-    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
+    this.transformedEntitiesSubscription = transformedEntities$.pipe(
+      tap(items => this.transformedEntities = items)
+    ).subscribe();
 
     const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
       const validPagesCountChange = this.transformEntity;
@@ -141,7 +142,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
-    this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
+    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
   }
@@ -157,12 +158,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.transformEntity = config.transformEntity;
     this.isLocal = config.isLocal || false;
     this.transformEntities = config.transformEntities;
-    this.rowsState = config.rowsState ? config.rowsState.pipe(
-      publishReplay(1), refCount()
-    ) : Observable.of({}).first();
+    this.rowsState = config.rowsState;
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+    if (!this.isLocal && this.config.listConfig) {
+      // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
+      // (one for the page size in the action and another when the initial page size is set)
+      this.action.initialParams = this.action.initialParams || {};
+      this.action.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+    }
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
@@ -172,20 +177,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return config.refresh ? config.refresh : () => {
       this.store.dispatch(this.action);
     };
-  }
-  /**
-   * Will return the row state with default values filled in.
-   * @param row The data for the current row
-   */
-  getRowState(row: T) {
-    return this.rowsState.pipe(
-      map(state => ({
-        ...getDefaultRowState(),
-        ...(state[this.getRowUniqueId(row)] || {})
-      })),
-      distinctUntilChanged(),
-      publishReplay(1), refCount()
-    );
   }
 
   disconnect() {
@@ -259,21 +250,20 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
 
-  attachTransformEntity(entities$, entityLettable) {
+  attachTransformEntity(entities$, entityLettable): Observable<T[]> {
     if (entityLettable) {
       return entities$.pipe(
         this.transformEntity
       );
     } else {
-      return entities$.pipe(
-        map(res => res as T[])
-      );
+      return entities$;
     }
   }
 
   connect(): Observable<T[]> {
-    return this.page$
-      .tag('actual-page-obs');
+    return this.page$.pipe(
+      tag('actual-page-obs')
+    );
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

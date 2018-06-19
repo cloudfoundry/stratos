@@ -104,7 +104,9 @@ spec:
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS
-          value: "20"
+          value: "30"
+        - name: HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS
+          value: "120"
         - name: SKIP_TLS_VERIFICATION
           value: "false"
         - name: CONSOLE_PROXY_TLS_ADDRESS
@@ -181,6 +183,10 @@ spec:
           value: {{.Values.uaa.consoleAdminIdentifier}}
         - name: SKIP_SSL_VALIDATION 
           value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
+        {{- end }}
+        {{- if .Values.env.DOMAIN }}  
+        - name: X_COOKIE_DOMAIN
+          value: {{.Values.env.DOMAIN}}
         {{- end }}
         ports:
         - containerPort: 3003

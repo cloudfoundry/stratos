@@ -6,16 +6,22 @@
 
 ## Frontend Development
 
-### Setup/Install Dependencies
+### Intro to V2 stack
 
-* Setup Stratos backend - The frontend cannot run without a backend. The Stratos backend is still to be ported over from
-  [V1](https://github.com/SUSE/stratos-ui), so head on over to the
-  [deploy section](https://github.com/SUSE/stratos-ui/blob/master/deploy/README.md), choose a deployment method and bring one up. These will
-  bring up the entire backend, including api service and database along with V1 of the frontend.
+Have a look through the [Env + Tech](developers-guide-env-tech.md) page to get acquainted with some of the new technologies used in v2.
+These include video's, tutorials and examples of Angular 2+, Typescript and Redux. There's also some advice on helpful plugins to use if
+using Visual Studio Code. If you feel comfortable with these and are happy with your dev environment please skip straight to
+[Set up Dependencies](#set-up-dependencies)
+
+### Set up Dependencies
+
+* Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo. To set up a backend
+  run through the [deploy section](https://github.com/SUSE/stratos-ui/blob/master/deploy/README.md), choose a deployment method and bring
+  one up. These deployments will bring up the entire backend, including api service and database along with a V2 frontend.
 * Install [NodeJs](https://nodejs.org) (mininum version v8.6.0)
 * Install [Angular CLI](https://cli.angular.io/) - `npm install -g @angular/cli`
 
-## Configuration
+### Configuration
 
 Configuration information can be found in two places
 
@@ -44,23 +50,26 @@ Configuration information can be found in two places
 
 ## Run the frontend
 
-1. (First time only) Copy `./proxy.conf.templage.js` to `./proxy.conf.js` and update with required portal-proxy url (see above for more info)
+1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required portal-proxy url (see above for more info)
 1. Run `npm install`
-1. Run `npm start` for a dev server.
+1. Run `npm start` for a dev server. (the app will automatically reload if you change any of the source files)
 1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the portal-proxy the console points at. Please refer
-   to the guides used when setting up. the portal-proxy for more information
-
-The app will automatically reload if you change any of the source files.
-
-## Creating angular items via angular cli
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate <directive|pipe|service|class|guard|interface|enum|module> <name>`.
+   to the guides used when setting up the backend for more information
 
 ## Build
 
-Run `npm huild` to build the project.
+Run `npm build` to build the project.
 
-The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+The build artefacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+
+## Creating angular items via angular cli
+
+To create a new angular component run `ng generate component component-name`. You can use a similar command to create other types of angular
+items `ng generate <directive|pipe|service|class|guard|interface|enum|module> <name>`.
+
+## Theming
+
+We use the angular material theming mechanism. See [here](https://material.angular.io/guide/theming-your-components) for more information about theming new components added to stratos.
 
 ## Test
 

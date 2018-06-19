@@ -93,10 +93,11 @@ type VCapApplicationData struct {
 }
 
 type LoginRes struct {
-	Account     string   `json:"account"`
-	TokenExpiry int64    `json:"token_expiry"`
-	APIEndpoint *url.URL `json:"api_endpoint"`
-	Admin       bool     `json:"admin"`
+	Account     string         `json:"account"`
+	TokenExpiry int64          `json:"token_expiry"`
+	APIEndpoint *url.URL       `json:"api_endpoint"`
+	Admin       bool           `json:"admin"`
+	User        *ConnectedUser `json:"user"`
 }
 
 type LoginHookFunc func(c echo.Context) error
@@ -118,9 +119,10 @@ type SessionStorer interface {
 
 // ConnectedUser - details about the user connected to a specific service or UAA
 type ConnectedUser struct {
-	GUID  string `json:"guid"`
-	Name  string `json:"name"`
-	Admin bool   `json:"admin"`
+	GUID   string   `json:"guid"`
+	Name   string   `json:"name"`
+	Admin  bool     `json:"admin"`
+	Scopes []string `json:"scopes"`
 }
 
 type JWTUserTokenInfo struct {
@@ -181,29 +183,31 @@ type CNSIRequest struct {
 }
 
 type PortalConfig struct {
-	HTTPClientTimeoutInSecs     int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
-	HTTPConnectionTimeoutInSecs int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	TLSAddress                  string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
-	TLSCert                     string   `configName:"CONSOLE_PROXY_CERT"`
-	TLSCertKey                  string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	TLSCertPath                 string   `configName:"CONSOLE_PROXY_CERT_PATH"`
-	TLSCertKeyPath              string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
-	CFClient                    string   `configName:"CF_CLIENT"`
-	CFClientSecret              string   `configName:"CF_CLIENT_SECRET"`
-	AllowedOrigins              []string `configName:"ALLOWED_ORIGINS"`
-	SessionStoreSecret          string   `configName:"SESSION_STORE_SECRET"`
-	EncryptionKeyVolume         string   `configName:"ENCRYPTION_KEY_VOLUME"`
-	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
-	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
-	AutoRegisterCFUrl           string   `configName:"AUTO_REG_CF_URL"`
-	CFAdminIdentifier           string
-	CloudFoundryInfo            *CFInfo
-	HTTPS                       bool
-	EncryptionKeyInBytes        []byte
-	ConsoleVersion              string
-	IsCloudFoundry              bool
-	LoginHook                   LoginHookFunc
-	SessionStore                SessionStorer
-	ConsoleConfig               *ConsoleConfig
-	PluginConfig                map[string]string
+	HTTPClientTimeoutInSecs         int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
+	HTTPClientTimeoutMutatingInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
+	HTTPConnectionTimeoutInSecs     int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
+	TLSAddress                      string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
+	TLSCert                         string   `configName:"CONSOLE_PROXY_CERT"`
+	TLSCertKey                      string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                     string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath                  string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	CFClient                        string   `configName:"CF_CLIENT"`
+	CFClientSecret                  string   `configName:"CF_CLIENT_SECRET"`
+	AllowedOrigins                  []string `configName:"ALLOWED_ORIGINS"`
+	SessionStoreSecret              string   `configName:"SESSION_STORE_SECRET"`
+	EncryptionKeyVolume             string   `configName:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
+	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
+	CFAdminIdentifier               string
+	CloudFoundryInfo                *CFInfo
+	HTTPS                           bool
+	EncryptionKeyInBytes            []byte
+	ConsoleVersion                  string
+	IsCloudFoundry                  bool
+	LoginHook                       LoginHookFunc
+	SessionStore                    SessionStorer
+	ConsoleConfig                   *ConsoleConfig
+	PluginConfig                    map[string]string
 }

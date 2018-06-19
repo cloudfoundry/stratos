@@ -1,9 +1,16 @@
 
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 import { getActions } from './action.helper';
 import { entityFactory, serviceBindingSchemaKey } from '../helpers/entity-factory';
 
+export const DELETE_SERVICE_BINDING_ACTION = '[ Service Instances ] Delete Service Binding';
+export const DELETE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Delete Service Binding success';
+export const DELETE_SERVICE_BINDING_ACTION_FAILURE = '[ Service Instances ] Delete Service Binding failure';
+
+export const CREATE_SERVICE_BINDING_ACTION = '[ Service Instances ] Create Service Binding';
+export const CREATE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Create Service Binding success';
+export const CREATE_SERVICE_BINDING_ACTION_FAILURE = '[ Service Instances ] Create Service Binding failure';
 export class CreateServiceBinding extends CFStartAction implements ICFAction {
   constructor(
     public endpointGuid: string,
@@ -19,11 +26,36 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
     this.options.body = {
       app_guid: appGuid,
       service_instance_guid: serviceInstanceGuid,
-      parameters: params,
+      parameters: params ? params : null,
     };
   }
-  actions = getActions('Service Bindings', 'Create Service Binding');
+  actions = [
+    CREATE_SERVICE_BINDING_ACTION,
+    CREATE_SERVICE_BINDING_ACTION_SUCCESS,
+    CREATE_SERVICE_BINDING_ACTION_FAILURE
+  ];  entity = [entityFactory(serviceBindingSchemaKey)];
+  entityKey = serviceBindingSchemaKey;
+  options: RequestOptions;
+}
+
+export class DeleteServiceBinding extends CFStartAction implements ICFAction {
+  constructor(public endpointGuid: string, public guid: string, public serviceInstanceGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_bindings/${guid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.set('async', 'false');
+    // Note: serviceInstanceGuid is used by the reducer to update the relevant serviceInstanceGuid, its not required for the action itself.
+
+  }
+  actions = [
+    DELETE_SERVICE_BINDING_ACTION,
+    DELETE_SERVICE_BINDING_ACTION_SUCCESS,
+    DELETE_SERVICE_BINDING_ACTION_FAILURE
+  ];
   entity = [entityFactory(serviceBindingSchemaKey)];
   entityKey = serviceBindingSchemaKey;
   options: RequestOptions;
+  removeEntityOnDelete = true;
 }

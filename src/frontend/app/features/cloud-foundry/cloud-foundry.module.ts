@@ -1,5 +1,3 @@
-
-/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -17,6 +15,7 @@ import {
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
@@ -25,7 +24,6 @@ import { EditOrganizationStepComponent } from './edit-organization/edit-organiza
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
-import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
@@ -40,6 +38,7 @@ import {
 import {
   CloudFoundrySpaceBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component';
+/* tslint:disable:max-line-length */
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
@@ -70,7 +69,15 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
-import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
+import { UsersRolesModifyComponent } from './users/manage-users/manage-users-modify/manage-users-modify.component';
+import {
+  SpaceRolesListWrapperComponent,
+} from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
+import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { CfRolesService } from './users/manage-users/cf-roles.service';
+import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
+import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
+
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
@@ -87,7 +94,7 @@ import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,
     AddOrganizationComponent,
-    ManageUsersComponent,
+    UsersRolesComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
     CloudFoundryOrganizationUsersComponent,
@@ -105,12 +112,22 @@ import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-
     CreateOrganizationStepComponent,
     EditOrganizationComponent,
     EditOrganizationStepComponent,
-    CliInfoCloudFoundryComponent
+    CliInfoCloudFoundryComponent,
+    UsersRolesModifyComponent,
+    SpaceRolesListWrapperComponent,
+    UsersRolesSelectComponent,
+    UsersRolesConfirmComponent,
   ],
   providers: [
     CFEndpointsListConfigService,
     EndpointsListConfigService,
-    CloudFoundryOrganizationService
-  ]
+    {
+      provide: ActiveRouteCfOrgSpace,
+      useValue: {}
+    },
+    CloudFoundryOrganizationService,
+    CloudFoundryEndpointService,
+    CfRolesService
+  ],
 })
 export class CloudFoundryModule { }

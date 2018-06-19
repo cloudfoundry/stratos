@@ -5,6 +5,8 @@ import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { of } from 'rxjs';
 
 
 @Component({
@@ -16,6 +18,8 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
     useClass: EndpointsListConfigService,
   }]
 })
+
 export class EndpointsPageComponent {
+  public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   constructor(public endpointsService: EndpointsService) { }
 }

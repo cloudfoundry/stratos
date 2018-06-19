@@ -1,5 +1,55 @@
 # Change Log
 
+# 2.0.0 Beta 1
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...v2.0.0-beta-001)
+
+This is the first Beta release of Version 2 of Stratos. This is a major release.
+
+The main focus of this release is a new version of the front-end UI in Angular (Version 1 used AngularJS). The UI has undergone numerous updates and we have switched out our own UI component set in favour of Material Design.
+
+Highlights of version 2:
+
+- Adoption of Angular in place of AngularJS
+- User of the Angular Material component library and an adoption of Material Design
+- Largely feature complete with version 1 (see below)
+- Improved Services support with Services and Marketplace now shown at the top-level of the UI
+- Improved UI throughout with card layouts used to improve readability
+- Added ability to re-deploy applications from GitHub
+- Improved Application UI - Instances and Routes information is now shown on separate tabs and the instances view has been improved
+
+The following features in version 1 are not currently available in version 2:
+
+- i18n - V2 supports US English only. This will be addressed as soon as the Angular platform supports string translation outside of templates.
+- Extensions/Plugins - The ability to extend the UI at various points will be added in the next minor version.
+- Drag and Drop for Application Deployment - You can not drag and drop a file/folder or url onto the application deployment UI - you have to use the browse UI.
+
+# 1.1.0 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...1.1.0)
+
+**Improvements:**
+
+- Added support for SUSE Cloud Foundry 1.1 configuration values to the Helm chart [\#1950](https://github.com/cloudfoundry-incubator/stratos/pull/1950)
+
+**Fixes:**
+
+- Fix width of top nav bar menu's bottom border [\#1739](https://github.com/cloudfoundry-incubator/stratos/pull/1739)
+
+## 1.0.2 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.0...1.0.2)
+
+**Improvements:**
+
+- Added Confirmation prompts for stopping and restarting apps [\#1437](https://github.com/SUSE/stratos-ui/pull/1437)
+
+**Fixes:**
+
+- Memory and disk usage should respect the number of app instances [\#1625](https://github.com/SUSE/stratos-ui/pull/1625)
+- Fix issue around apps and routes missing from space entity [\#1447](https://github.com/SUSE/stratos-ui/pull/1447)
+- Fix minor localisation issue [\#1596](https://github.com/cloudfoundry-incubator/stratos/pull/1596)
+
 ## 1.0.0 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.9...1.0.0)

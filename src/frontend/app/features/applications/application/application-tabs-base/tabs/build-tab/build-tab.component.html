@@ -31,7 +31,7 @@
                 <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}</app-metadata-item>
                 <app-metadata-item icon="developer_board" label="Services">{{(applicationService.appSummary$| async)?.entity?.entity.services?.length || '0' }}</app-metadata-item>
                 <app-metadata-item icon="http" label="Routes">{{(applicationService.appSummary$| async)?.entity?.entity?.routes?.length || '0' }}</app-metadata-item>
-                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ appSvc.app.entity.enable_ssh ? 'Yes' : 'No' }}</app-metadata-item>
+                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ sshStatus$ | async }}</app-metadata-item>
               </div>
             </div>
           </mat-card-content>
@@ -82,7 +82,7 @@
           <mat-card-content>
             <span [ngSwitch]="deploySource.type">
                 <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                    <div matTooltip="{{ deploySource.branch + ' ' + deploySource.commit | slice:0:8}}"
+                    <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
                     [matTooltipHideDelay]="1500">
 		    {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
@@ -96,7 +96,7 @@
                   <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
                     Deployed from local folder
                   </app-metadata-item>
-                  <app-metadata-item *ngSwitchCase="'filefolder'" icon="insert_driev_file" label="File">
+                  <app-metadata-item *ngSwitchCase="'archive'" icon="insert_drive_file" label="File">
                     Deployed from local file
                   </app-metadata-item>
                 </span>

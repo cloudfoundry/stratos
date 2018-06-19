@@ -7,14 +7,9 @@ import { Component, OnInit, AfterContentInit } from '@angular/core';
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss']
 })
-export class HomePageComponent implements OnInit, AfterContentInit {
+export class HomePageComponent implements OnInit {
 
   constructor(private store: Store<AppState>) { }
 
-  ngOnInit() {
-  }
-
-  ngAfterContentInit() {
-  }
-
+  ngOnInit() { }
 }

@@ -1,6 +1,8 @@
-import { userInfo } from 'os';
+import { browser, by, element, promise, protractor } from 'protractor';
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { element, by, browser, promise, protractor } from 'protractor';
+
+const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
+const until = protractor.ExpectedConditions;
 
 export class LoginPage {
 
@@ -38,12 +40,42 @@ export class LoginPage {
     this.navigateTo();
     this.enterLogin(username, password);
     this.loginButton().click();
-    // Wait for the backend to catch up
-    this.waitForLoggedIn();
+
+    browser.wait(() => {
+      return browser.getCurrentUrl().then(function (url) {
+        return !url.endsWith('/login');
+      });
+    }, 10000, 'timed out waiting for login');
+
+    // Wait for the page to be ready
+    return browser.getCurrentUrl().then((url: string) => {
+      if (url.endsWith('/noendpoints')) {
+        return this.waitForNoEndpoints();
+      } else {
+        return this.waitForApplicationPage();
+      }
+    });
   }
 
   waitForLoggedIn() {
-    const until = protractor.ExpectedConditions;
-    return browser.wait(until.presenceOf(element(by.css('app-dashboard-base'))), 5000);
+    return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
   }
+
+  isLoginError() {
+    return this.getLoginError().then(text => text === LOGIN_FAIL_MSG);
+  }
+
+  // Wait until an application page is shown (one that uses the dashboard base)
+  waitForApplicationPage() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
+  }
+
+  waitForLogin() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-login-page'))), 10000);
+  }
+
+  waitForNoEndpoints() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
+  }
+
 }

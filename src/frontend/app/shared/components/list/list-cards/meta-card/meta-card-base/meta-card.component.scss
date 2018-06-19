@@ -3,6 +3,23 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  &__deleting-overlay {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    &-inner {
+      width: 50%;
+    }
+  }
+  &__deleting-text {
+    margin-bottom: 5px;
+    text-align: center;
+  }
   &__header {
     align-content: center;
     display: flex;

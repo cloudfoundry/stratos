@@ -1,6 +1,6 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -31,9 +31,6 @@ export interface VariableTabAllEnvVarType {
 })
 export class VariablesTabComponent implements OnInit {
 
-
-
-
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
@@ -51,10 +48,10 @@ export class VariablesTabComponent implements OnInit {
   allEnvVars$: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
-    this.envVars$ = this.appService.waitForAppEntity$.map(app => ({
+    this.envVars$ = this.appService.waitForAppEntity$.pipe(map(app => ({
       names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
       values: app.entity.entity.environment_json || {}
-    }));
+    })));
     this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
       map(allEnvVars => {
         if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {

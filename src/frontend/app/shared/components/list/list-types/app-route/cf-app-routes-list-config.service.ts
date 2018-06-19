@@ -8,24 +8,15 @@ import { GetAppRoutes } from '../../../../../store/actions/application-service-r
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
-import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-  ListConfig,
-} from '../../list.component.types';
+import { IGlobalListAction, IListAction, IMultiListAction, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 
 @Injectable()
 export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
@@ -51,9 +42,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'delete',
     label: 'Delete',
-    description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Unmap and delete routes'
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -76,25 +65,19 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'block',
     label: 'Unmap',
-    description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Unmap routes'
   };
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
-    description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Unmap and delete route'
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
-    description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: ''
   };
 
   private listActionAdd: IGlobalListAction<APIResource> = {
@@ -122,9 +105,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'add',
     label: 'Add',
-    description: 'Add new route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Add new route'
   };
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -158,14 +139,6 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     noEntries: 'There are no routes'
   };
   isLocal = true;
-
-  static createAction(appGuid: string, cfGuid: string) {
-    return new GetAppRoutes(
-      appGuid,
-      cfGuid,
-      createEntityRelationPaginationKey(applicationSchemaKey, appGuid),
-    );
-  }
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
@@ -203,8 +176,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      CfAppRoutesListConfigService.createAction(appService.appGuid, appService.cfGuid),
-      createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
+      new GetAppRoutes(appService.appGuid, appService.cfGuid),
       this
     );
   }

@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
@@ -23,7 +22,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
+import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
@@ -36,6 +35,13 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
       columnId: 'radio',
       headerCell: () => '',
       cellComponent: TableCellRadioComponent,
+      cellConfig: {
+        isDisabled: (row): boolean => {
+          return row && row.entity && row.entity.apps && row.entity.apps.find(
+            a => a.metadata.guid === this.appService.appGuid
+          );
+        }
+      },
       class: 'table-column-select',
       cellFlex: '1'
     },
@@ -81,22 +87,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
   };
   isLocal = true;
 
-  dispatchDeleteAction(route) {
-    return this.store.dispatch(
-      new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
-    );
-  }
-
-  dispatchUnmapAction(route) {
-    return this.store.dispatch(
-      new UnmapRoute(
-        route.metadata.guid,
-        this.routesDataSource.appGuid,
-        this.routesDataSource.cfGuid
-      )
-    );
-  }
-
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];
@@ -109,18 +99,18 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService,
     private activatedRoute: ActivatedRoute,
-    private snackBar: MatSnackBar
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
+    const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
+      createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+    ]);
+    action.initialParams['order-direction-field'] = 'route';
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
-        createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-        createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
-      ]),
-      createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
+      action,
       this
     );
   }

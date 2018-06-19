@@ -1,30 +1,24 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, tap, share, publishReplay, refCount } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
+import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
 import { AppState } from '../../store/app-state';
 import { applicationSchemaKey } from '../../store/helpers/entity-factory';
-import { APIResource } from '../../store/types/api.types';
-import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { takeWhile, takeUntil, filter, first, tap, skipUntil } from 'rxjs/operators';
-import { PaginationState, PaginationEntityState } from '../../store/types/pagination.types';
-import { getPath } from '../../helper';
-import { pathGet } from '../../core/utils.service';
+import { APIResource } from '../../store/types/api.types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
+import { CfUser, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { UserRoleLabels } from '../../store/types/users-roles.types';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ICfRolesState } from '../../store/types/current-user-roles.types';
+import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 
-export enum OrgUserRoles {
-  MANAGER = 'manager',
-  BILLING_MANAGERS = 'billing_manager',
-  AUDITOR = 'auditor',
-  USER = 'user'
-}
-export enum SpaceUserRoles {
-  MANAGER = 'manager',
-  AUDITOR = 'auditor',
-  DEVELOPER = 'developer'
-}
 
 export interface IUserRole<T> {
   string: string;
@@ -33,85 +27,85 @@ export interface IUserRole<T> {
 
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;
-  if (userRolesInOrg.orgManager) {
-    roles = 'Manager';
+  if (userRolesInOrg[OrgUserRoleNames.MANAGER]) {
+    roles = UserRoleLabels.org.short[OrgUserRoleNames.MANAGER];
   }
-  if (userRolesInOrg.billingManager) {
-    roles = assignRole(roles, 'Billing Manager');
+  if (userRolesInOrg[OrgUserRoleNames.BILLING_MANAGERS]) {
+    roles = assignRole(roles, UserRoleLabels.org.short[OrgUserRoleNames.BILLING_MANAGERS]);
   }
-  if (userRolesInOrg.auditor) {
-    roles = assignRole(roles, 'Auditor');
+  if (userRolesInOrg[OrgUserRoleNames.AUDITOR]) {
+    roles = assignRole(roles, UserRoleLabels.org.short[OrgUserRoleNames.AUDITOR]);
 
   }
-  if (userRolesInOrg.user && !userRolesInOrg.orgManager) {
-    roles = assignRole(roles, 'User');
+  if (userRolesInOrg[OrgUserRoleNames.USER] && !userRolesInOrg[OrgUserRoleNames.MANAGER]) {
+    roles = assignRole(roles, UserRoleLabels.org.short[OrgUserRoleNames.USER]);
   }
 
   return roles ? roles : 'None';
 }
 export function getSpaceRolesString(userRolesInSpace: UserRoleInSpace): string {
   let roles = null;
-  if (userRolesInSpace.manager) {
-    roles = 'Manager';
+  if (userRolesInSpace[SpaceUserRoleNames.MANAGER]) {
+    roles = UserRoleLabels.space.short[SpaceUserRoleNames.MANAGER];
   }
-  if (userRolesInSpace.auditor) {
-    roles = assignRole(roles, 'Auditor');
+  if (userRolesInSpace[SpaceUserRoleNames.AUDITOR]) {
+    roles = assignRole(roles, UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR]);
 
   }
-  if (userRolesInSpace.developer) {
-    roles = assignRole(roles, 'Developer');
+  if (userRolesInSpace[SpaceUserRoleNames.DEVELOPER]) {
+    roles = assignRole(roles, UserRoleLabels.space.short[SpaceUserRoleNames.DEVELOPER]);
   }
 
   return roles ? roles : 'None';
 }
 
-export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IUserRole<OrgUserRoles>[] {
+export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IUserRole<OrgUserRoleNames>[] {
   const roles = [];
-  if (userRolesInOrg.orgManager) {
+  if (userRolesInOrg[OrgUserRoleNames.MANAGER]) {
     roles.push({
-      string: 'Manager',
-      key: OrgUserRoles.MANAGER
+      string: UserRoleLabels.org.short[OrgUserRoleNames.MANAGER],
+      key: OrgUserRoleNames.MANAGER
     });
   }
-  if (userRolesInOrg.billingManager) {
+  if (userRolesInOrg[OrgUserRoleNames.BILLING_MANAGERS]) {
     roles.push({
-      string: 'Billing Manager',
-      key: OrgUserRoles.BILLING_MANAGERS
+      string: UserRoleLabels.org.short[OrgUserRoleNames.BILLING_MANAGERS],
+      key: OrgUserRoleNames.BILLING_MANAGERS
     });
   }
-  if (userRolesInOrg.auditor) {
+  if (userRolesInOrg[OrgUserRoleNames.AUDITOR]) {
     roles.push({
-      string: 'Auditor',
-      key: OrgUserRoles.AUDITOR
+      string: UserRoleLabels.org.short[OrgUserRoleNames.AUDITOR],
+      key: OrgUserRoleNames.AUDITOR
     });
   }
-  if (userRolesInOrg.user) {
+  if (userRolesInOrg[OrgUserRoleNames.USER]) {
     roles.push({
-      string: 'User',
-      key: OrgUserRoles.USER
+      string: UserRoleLabels.org.short[OrgUserRoleNames.USER],
+      key: OrgUserRoleNames.USER
     });
   }
   return roles;
 }
 
-export function getSpaceRoles(userRolesInSpace: UserRoleInSpace): IUserRole<SpaceUserRoles>[] {
+export function getSpaceRoles(userRolesInSpace: UserRoleInSpace): IUserRole<SpaceUserRoleNames>[] {
   const roles = [];
-  if (userRolesInSpace.manager) {
+  if (userRolesInSpace[SpaceUserRoleNames.MANAGER]) {
     roles.push({
-      string: 'Manager',
-      key: SpaceUserRoles.MANAGER
+      string: UserRoleLabels.space.short[SpaceUserRoleNames.MANAGER],
+      key: SpaceUserRoleNames.MANAGER
     });
   }
-  if (userRolesInSpace.auditor) {
+  if (userRolesInSpace[SpaceUserRoleNames.AUDITOR]) {
     roles.push({
-      string: 'Auditor',
-      key: SpaceUserRoles.AUDITOR
+      string: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
+      key: SpaceUserRoleNames.AUDITOR
     });
   }
-  if (userRolesInSpace.developer) {
+  if (userRolesInSpace[SpaceUserRoleNames.DEVELOPER]) {
     roles.push({
-      string: 'Developer',
-      key: SpaceUserRoles.DEVELOPER
+      string: UserRoleLabels.space.short[SpaceUserRoleNames.DEVELOPER],
+      key: SpaceUserRoleNames.DEVELOPER
     });
   }
   return roles;
@@ -153,7 +147,7 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
 function hasRole(user: CfUser, guid: string, roleType: string) {
   if (user[roleType]) {
     const roles = user[roleType] as APIResource[];
-    return !!roles.find(o => o.metadata.guid === guid);
+    return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
 }
@@ -207,4 +201,26 @@ export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: st
       store.dispatch(new RouterNav({ path: ['applications'] }));
     })
   ).subscribe();
+}
+
+export function canUpdateOrgSpaceRoles(
+  perms: CurrentUserPermissionsService,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string): Observable<boolean> {
+  return combineLatest(
+    perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
+    perms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+  ).pipe(
+    map((checks: boolean[]) => checks.some(check => check))
+  );
+}
+
+export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
+  return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
+    filter(cf => cf && cf.state.initialised),
+    first(),
+    publishReplay(1),
+    refCount(),
+  );
 }

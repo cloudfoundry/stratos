@@ -5,6 +5,7 @@ import {
   MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfStacksCardComponent } from './cf-stacks-card.component';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 
 describe('CfStacksCardComponent', () => {
   let component: CfStacksCardComponent;
@@ -14,6 +15,9 @@ describe('CfStacksCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CfStacksCardComponent, MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
+      providers: [
+        EntityMonitorFactory
+      ]
     })
       .compileComponents();
   }));

@@ -1,28 +1,20 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
-import { Component, OnDestroy, HostBinding } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, filter, first, tap, withLatestFrom, map } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
+import { Component, OnDestroy } from '@angular/core';
 
-import { EndpointsService } from '../../../core/endpoints.service';
-import {
-  distinctPageUntilChanged,
-  ListDataSource,
-} from '../../../shared/components/list/data-sources-controllers/list-data-source';
+import { Store } from '@ngrx/store';
+
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
+import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { APIResource } from '../../../store/types/api.types';
-import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { Observable } from 'rxjs/Observable';
+
+import { map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-application-wall',
@@ -49,62 +41,36 @@ import { Observable } from 'rxjs/Observable';
 export class ApplicationWallComponent implements OnDestroy {
 
   public cfIds$: Observable<string[]>;
-  private statsSub: Subscription;
   private initCfOrgSpaceService: Subscription;
+
+  public canCreateApplication: string;
+
+  public haveConnectedCf$: Observable<boolean>;
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
     private store: Store<AppState>,
-    private appListConfig: ListConfig<APIResource>,
-    private cfOrgSpaceService: CfOrgSpaceDataService
+    private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
-    const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+      map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
-    this.statsSub = dataSource.page$.pipe(
-      // The page observable will fire often, here we're only interested in updating the stats on actual page changes
-      distinctUntilChanged(distinctPageUntilChanged(dataSource)),
-      withLatestFrom(dataSource.pagination$),
-      // Ensure we keep pagination smooth
-      debounceTime(250),
-      tap(([page, pagination]) => {
-        if (!page) {
-          return;
-        }
-        page.forEach(app => {
-          const appState = app.entity.state;
-          const appGuid = app.metadata.guid;
-          const cfGuid = app.entity.cfGuid;
-          const dispatching = false;
-          if (appState === 'STARTED') {
-            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-          }
-        });
-      }),
-      tag('stat-obs')).subscribe();
+    this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
 
-    this.initCfOrgSpaceService = this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
-      filter((pag) => !!pag),
-      first(),
-      tap(pag => {
-        if (pag.clientPagination.filter.items.cf) {
-          this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
-        }
-        if (pag.clientPagination.filter.items.org) {
-          this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
-        }
-        if (pag.clientPagination.filter.items.space) {
-          this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
-        }
-      })
-    ).subscribe();
+    this.haveConnectedCf$ = cloudFoundryService.cFEndpoints$.pipe(
+      map(endpoints => endpoints.map(endpoint => endpoint.connectionStatus === 'connected')),
+      map(connected => connected.reduce((a, v) => a || v, false))
+    );
+
+    this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
+      this.cfOrgSpaceService,
+      applicationSchemaKey,
+      CfAppsDataSource.paginationKey).subscribe();
   }
 
   cardComponent = CardAppComponent;
 
   ngOnDestroy(): void {
-    this.statsSub.unsubscribe();
     this.initCfOrgSpaceService.unsubscribe();
   }
 }

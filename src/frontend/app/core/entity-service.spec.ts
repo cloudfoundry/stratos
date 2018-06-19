@@ -43,8 +43,9 @@ describe('EntityServiceService', () => {
   it('should poll', (done) => {
     inject([EntityService, XHRBackend], (service: EntityService, mockBackend: MockBackend) => {
       const sub = service.poll(1).subscribe(a => {
-        done();
         sub.unsubscribe();
+        expect(sub.closed).toBeTruthy();
+        done();
       });
     })();
   });

@@ -1,13 +1,18 @@
-import { NgModule, ModuleWithProviders } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { AboutPageComponent } from './about-page/about-page.component';
+import { EulaPageComponent } from './eula-page/eula-page.component';
 
 const about: Routes = [
   {
     path: '',
-    component: AboutPageComponent,
-  }];
+    component: AboutPageComponent
+  },
+  {
+    path: 'eula',
+    component: EulaPageComponent
+  }
+];
 
 @NgModule({
   imports: [

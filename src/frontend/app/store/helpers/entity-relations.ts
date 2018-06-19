@@ -1,7 +1,8 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { filter, first, map, mergeMap, pairwise, skipWhile, withLatestFrom, tap } from 'rxjs/operators';
+import { filter, first, map, mergeMap, pairwise, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { isEntityBlocked } from '../../core/entity-service';
 import { pathGet } from '../../core/utils.service';
@@ -13,7 +14,7 @@ import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../sele
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
+import { IRequestAction, UpdateCfAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { EntitySchema } from './entity-factory';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -279,7 +280,19 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
   let results = [];
   if (childEntities) {
     if (!childRelation.isArray) {
-      results = [].concat(results, createActionsForExistingEntities(config));
+      // We've already got the missing entity in the store, we just need to associate it with it's parent. We can do this via two actions
+      // 1) a pretend 'request finished' event which handles the request data side of things
+      const connectEntityWithParent = createActionsForExistingEntities(config);
+      // 2) a pretend update which changes the entity's request info state in order for the entity service to emit the updated entity.
+      // This won't be fired often (missing single entities are rare, as opposed to missing lists of entities + also should only occur once
+      // per entity)
+      const notifyParentListenersOfChange: ValidateEntityResult = {
+        action: new UpdateCfAction({
+          ...config.action,
+          updatingKey: `AssociatedChildAt:${new Date()}`
+        }, false, '')
+      };
+      results = [].concat(results, connectEntityWithParent, notifyParentListenersOfChange);
     }
   } else {
     if (populateMissing) {
@@ -327,10 +340,8 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
           const guids = childEntitiesAsGuids(childEntitiesAsArray);
 
           childEntities = [];
-          let allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
-          let newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
-          allEntitiesOfType = allEntities || {};
-          newEntitiesOfType = newEntities || {};
+          const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] || {} : {};
+          const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] || {} : {};
 
           for (let i = 0; i < guids.length; i++) {
             const guid = guids[i];
@@ -455,7 +466,7 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  */
 export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
   if (!isEntityInlineChildAction(action) || !action.flattenPagination) {
-    return Observable.of(null);
+    return observableOf(null);
   }
   const parentEntitySchema = action['parentEntitySchema'] as EntitySchema;
   const parentGuid = action['parentGuid'];
@@ -466,7 +477,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     first(),
     mergeMap(entity => {
       if (!entity) {
-        return Observable.of(null);
+        return observableOf(null);
       }
       return store.select(selectRequestInfo(parentEntitySchema.key, parentGuid));
     }),

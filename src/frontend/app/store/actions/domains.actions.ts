@@ -27,7 +27,7 @@ export class FetchDomain extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 export class FetchAllDomains extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string) {
+  constructor(public endpointGuid: string, public flattenPagination = true) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'shared_domains';
@@ -40,4 +40,7 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
   entityKey = domainSchemaKey;
   options: RequestOptions;
   paginationKey = 'all-domains';
+  initialParams = {
+    'results-per-page': 100,
+  };
 }

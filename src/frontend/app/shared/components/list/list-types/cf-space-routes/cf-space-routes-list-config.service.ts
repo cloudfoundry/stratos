@@ -1,6 +1,8 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { take, tap } from 'rxjs/operators';
+import { take, tap, map } from 'rxjs/operators';
 
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
@@ -18,10 +20,13 @@ import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { DatePipe } from '@angular/common';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
-  dataSource: CfSpaceRoutesDataSource;
+  private dataSource: CfSpaceRoutesDataSource;
+  private canEditApp$: Observable<boolean>;
 
   private multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
@@ -43,8 +48,6 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -68,24 +71,21 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
   };
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    createVisible: () => this.canEditApp$,
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => row.entity.apps && row.entity.apps.length
+    createVisible: () => this.canEditApp$,
+    createEnabled: (row$: Observable<APIResource>) => row$.pipe(map(row => row.entity.apps && row.entity.apps.length))
   };
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -137,7 +137,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         new UnmapRoute(
           route.metadata.guid,
           p,
-          this.dataSource.cfGuid
+          this.dataSource.cfGuid,
+          false// We don't want to just remove the entity, we want to clear entities of this type forcing all to refresh
         )
       )
     );
@@ -157,34 +158,42 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private cfSpaceService: CloudFoundrySpaceService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    public currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.dataSource = new CfSpaceRoutesDataSource(
       this.store,
       this,
       this.cfSpaceService.spaceGuid,
-      this.cfSpaceService.cfGuid
+      this.cfSpaceService.cfGuid,
     );
+    this.canEditApp$ = this.currentUserPermissionsService.can(
+      CurrentUserPermissions.APPLICATION_EDIT,
+      this.cfSpaceService.cfGuid,
+      this.cfSpaceService.spaceGuid
+    );
+    this.multiListActionDelete.visible$ = this.canEditApp$;
+    this.multiListActionUnmap.visible$ = this.canEditApp$;
   }
 
   private deleteSingleRoute(item: APIResource) {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-      take(1),
-      tap(domain => {
-        const routeUrl = getRoute(item, false, false, domain);
-        const confirmation = new ConfirmationDialogConfig(
-          'Delete Route',
-          `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
-          'Delete',
-          true
-        );
-        this.confirmDialog.open(confirmation, () => {
-          this.dispatchDeleteAction(item);
-          this.getDataSource().selectClear();
-        });
-      })
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialogConfig(
+            'Delete Route',
+            `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
+            'Delete',
+            true
+          );
+          this.confirmDialog.open(confirmation, () => {
+            this.dispatchDeleteAction(item);
+            this.getDataSource().selectClear();
+          });
+        })
       )
       .subscribe();
   }
@@ -193,20 +202,20 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-      take(1),
-      tap(domain => {
-        const routeUrl = getRoute(item, false, false, domain);
-        const confirmation = new ConfirmationDialogConfig(
-          'Unmap Route from Application',
-          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-          'Unmap',
-          true
-        );
-        this.confirmDialog.open(confirmation, () => {
-          this.dispatchUnmapAction(item);
-          this.getDataSource().selectClear();
-        });
-      })
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialogConfig(
+            'Unmap Route from Application',
+            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+            'Unmap',
+            true
+          );
+          this.confirmDialog.open(confirmation, () => {
+            this.dispatchUnmapAction(item);
+            this.getDataSource().selectClear();
+          });
+        })
       )
       .subscribe();
   }

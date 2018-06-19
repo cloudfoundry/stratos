@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
@@ -68,7 +68,7 @@ export class CloudFoundryEndpointService {
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
-      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
+      : createEntityRelationPaginationKey(endpointSchemaKey);
     return new GetAllOrganizations(
       paginationKey,
       cfGuid, [
@@ -78,6 +78,16 @@ export class CloudFoundryEndpointService {
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
         // lots of spaces it saves n x routes requests
+      ]);
+  }
+  static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
+    const paginationKey = cfGuid ?
+      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
+      : createEntityRelationPaginationKey(endpointSchemaKey);
+    return new GetAllOrganizations(
+      paginationKey,
+      cfGuid, [
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
       ]);
   }
 

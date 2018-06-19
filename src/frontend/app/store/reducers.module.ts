@@ -11,6 +11,7 @@ import { requestDataReducer, requestReducer } from './reducers/api-request-reduc
 import { authReducer } from './reducers/auth.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
+import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
@@ -19,6 +20,7 @@ import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
 
 export function logger(reducer) {
@@ -40,7 +42,9 @@ export const appReducers = {
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
-  internalEvents: internalEventReducer
+  manageUsersRoles: UsersRolesReducer,
+  internalEvents: internalEventReducer,
+  currentUserRoles: currentUserRolesReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];

@@ -15,6 +15,7 @@ import { CfUserService } from '../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CardCfOrgUserDetailsComponent } from './card-cf-org-user-details.component';
+import { CapitalizeFirstPipe } from '../../../pipes/capitalizeFirstLetter.pipe';
 
 describe('CardCfOrgUserDetailsComponent', () => {
   let component: CardCfOrgUserDetailsComponent;
@@ -22,7 +23,7 @@ describe('CardCfOrgUserDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardCfOrgUserDetailsComponent, ...MetadataCardTestComponents],
+      declarations: [CardCfOrgUserDetailsComponent, ...MetadataCardTestComponents, CapitalizeFirstPipe],
       imports: [...BaseTestModulesNoShared],
       providers: [
         CfUserService,
