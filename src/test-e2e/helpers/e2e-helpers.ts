@@ -4,6 +4,7 @@ import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
 
+
 export enum ConsoleUserType {
   admin = 1,
   user = 2
@@ -11,9 +12,14 @@ export enum ConsoleUserType {
 
 export class E2EHelpers {
 
+  static e2eItemPrefix = 'acceptance.e2e.';
+
   secrets = new SecretsHelpers();
 
   constructor() { }
+
+  // This makes identification of acceptance test apps easier in case they leak
+  static createCustomName = (prefix: string, isoTime?: string) => prefix + '.' + (isoTime || (new Date()).toISOString());
 
   getHost(): string {
     return browser.baseUrl;
@@ -145,5 +151,7 @@ export class E2EHelpers {
     browser.wait(until.presenceOf(element), 10000);
     return element.click();
   }
+
+
 
 }

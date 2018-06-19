@@ -313,7 +313,10 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 		c.Response().WriteHeader(res.StatusCode)
 
 		// we don't care if this fails
-		_, _ = c.Response().Write(res.Response)
+		_, err := c.Response().Write(res.Response)
+		if err != nil {
+			log.Errorf("Failed to write passthrough response %v", err)
+		}
 
 		return nil
 	}
