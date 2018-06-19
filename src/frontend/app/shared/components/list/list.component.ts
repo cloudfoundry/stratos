@@ -30,6 +30,7 @@ import {
   publishReplay,
   refCount,
   startWith,
+  switchMap,
   takeWhile,
   tap,
   withLatestFrom,
@@ -41,7 +42,7 @@ import { entityFactory } from '../../../store/helpers/entity-factory';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ListView } from './../../../store/actions/list.actions';
-import { getDefaultRowState, IListDataSource, RowsState, RowState } from './data-sources-controllers/list-data-source-types';
+import { getDefaultRowState, IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
@@ -56,6 +57,7 @@ import {
   ListConfig,
   ListViewTypes,
 } from './list.component.types';
+
 
 
 @Component({
@@ -436,8 +438,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
       distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      withLatestFrom(this.dataSource.pagination$),
-      map(([loading, page]) => page),
+      switchMap(() => this.dataSource.pagination$),
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
