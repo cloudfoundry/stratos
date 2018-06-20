@@ -186,14 +186,14 @@ describe('SchemaTreeTraversal', () => {
       },
       [child1Key]: {
         [childId]: {
+          id: childId,
           entity: {
-            id: childId,
             [grandChild1]: [grandchildId, grandchild2Id]
           }
         },
         [child2Id]: {
+          id: child2Id,
           entity: {
-            id: child2Id,
             [grandChild1]: [grandchildId, grandchild2Id]
           }
         }

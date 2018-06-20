@@ -1,7 +1,7 @@
 import { RecursiveDelete } from '../effects/recusive-entity-delete.effect';
 import { IRequestDataState } from '../types/entity.types';
 import { schema, denormalize, Schema } from 'normalizr';
-import { EntitySchema } from './entity-factory';
+import { EntitySchema, appEnvVarsSchemaKey } from './entity-factory';
 
 interface IFlatTree {
   [entityKey: string]: Set<string>;
@@ -15,10 +15,21 @@ export class EntitySchemaTreeBuilder {
   }
 
   private build(schema: EntitySchema, entity: any, flatTree: IFlatTree = {}): IFlatTree {
+    if (Array.isArray(schema)) {
+      schema = schema[0];
+    }
+    if (!schema || !entity) {
+      return flatTree;
+    }
     const keys = schema.definition ? Object.keys(schema.definition) : null;
     if (Array.isArray(entity)) {
-      return entity.reduce((newflatTree, newEntity) => {
-        return this.applySchemaToTree(keys, schema, newEntity, newflatTree);
+      return entity.reduce((newFlatTree, newEntity) => {
+        return this.applySchemaToTree(keys, schema, newEntity, newFlatTree);
+      }, flatTree);
+    }
+    if (!(schema instanceof EntitySchema)) {
+      return Object.keys(schema).reduce((newflatTree, key) => {
+        return this.build(schema[key], entity[key], newflatTree);
       }, flatTree);
     }
     return this.applySchemaToTree(keys, schema, entity, flatTree);
@@ -29,6 +40,9 @@ export class EntitySchemaTreeBuilder {
       return flatTree;
     }
     const { definition } = schema;
+    if (!schema.getId) {
+      return this.build(schema[schema.key], schema[schema.key], flatTree);
+    }
     flatTree[schema.key] = this.addIdToTree(flatTree[schema.key], schema.getId(entity));
     if (!keys) {
       return flatTree;
@@ -39,9 +53,7 @@ export class EntitySchemaTreeBuilder {
       if (Array.isArray(newEntity)) {
         return this.build(entityDefinition, newEntity, fullFlatTree);
       }
-      if (!entityDefinition.getId) {
-        return this.build(entityDefinition[key], newEntity[key], fullFlatTree);
-      }
+
       return this.handleSingleChildEntity(entityDefinition, newEntity, fullFlatTree, key);
     }, flatTree);
   }
@@ -60,10 +72,19 @@ export class EntitySchemaTreeBuilder {
     return definition;
   }
 
-  private handleSingleChildEntity(entityDefinition, entity, flatTree: IFlatTree, key: string) {
+  private handleSingleChildEntity(entityDefinition: EntitySchema, entity, flatTree: IFlatTree, key: string) {
+    if (!entity) {
+      return flatTree;
+    }
+    if (!(entityDefinition instanceof EntitySchema)) {
+      return this.build(entityDefinition, entity, flatTree);
+    }
     const id = entityDefinition.getId(entity);
     const entityKeys = flatTree[key];
-    if (!id || !entity || (entityKeys && entityKeys.has(id))) {
+    if (!id || (entityKeys && entityKeys.has(id))) {
+      if (entityDefinition.definition) {
+        return this.build(entityDefinition.definition as EntitySchema, entity, flatTree);
+      }
       return flatTree;
     }
     flatTree[key] = this.addIdToTree(flatTree[key], id);
