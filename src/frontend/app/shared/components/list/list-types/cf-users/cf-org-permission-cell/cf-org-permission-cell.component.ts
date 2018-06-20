@@ -42,15 +42,18 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     );
   }
 
-  private setChipConfig(row: APIResource<CfUser>, org: APIResource<IOrganization>): AppChip<ICellPermissionList<OrgUserRoleNames>>[] {
+  private setChipConfig(row: APIResource<CfUser>, org?: APIResource<IOrganization>): AppChip<ICellPermissionList<OrgUserRoleNames>>[] {
     const userRoles = this.cfUserService.getOrgRolesFromUser(row.entity, org);
     const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList<OrgUserRoleNames>>(
-      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
+      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row, !org))
     );
     return this.getChipConfig(userOrgPermInfo);
   }
 
-  private getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>): ICellPermissionList<OrgUserRoleNames>[] {
+  private getOrgPermissions(
+    orgPerms: IUserPermissionInOrg,
+    row: APIResource<CfUser>,
+    showName: boolean): ICellPermissionList<OrgUserRoleNames>[] {
     return getOrgRoles(orgPerms.permissions).map(perm => {
       const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
@@ -58,7 +61,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
       );
       return {
         ...perm,
-        name: orgPerms.name,
+        name: showName ? orgPerms.name : null,
         guid: orgPerms.orgGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,

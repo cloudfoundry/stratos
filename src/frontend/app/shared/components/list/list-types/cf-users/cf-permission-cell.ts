@@ -56,7 +56,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
     return cellPermissionList.map(perm => {
       const chipConfig = new AppChip<ICellPermissionList<T>>();
       chipConfig.key = perm;
-      chipConfig.value = `${perm.name}: ${perm.string}`;
+      chipConfig.value = perm.name ? `${perm.name}: ${perm.string}` : perm.string;
       chipConfig.busy = perm.busy;
       chipConfig.clearAction = chip => {
         const permission = chip.key;

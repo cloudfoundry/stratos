@@ -77,14 +77,14 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
   }
 
-  private createPermissions(row: APIResource<CfUser>, spaces: APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
+  private createPermissions(row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
     const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity, spaces);
     return arrayHelper.flatten<ICellPermissionList<SpaceUserRoleNames>>(
-      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row))
+      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row, spaces))
     );
   }
 
-  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>) {
+  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]) {
     return getSpaceRoles(spacePerms.permissions).map(perm => {
       const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
@@ -92,7 +92,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       );
       return {
         ...perm,
-        name: spacePerms.name,
+        name: !spaces || spaces.length > 1 ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
