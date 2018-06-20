@@ -36,7 +36,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     super(store, confirmDialog, cfUserService);
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),
-      this.configSubject.asObservable().pipe(switchMap(config => config.org$))
+      this.config$.pipe(switchMap(config => config.org$))
     ).pipe(
       map(([user, org]: [APIResource<CfUser>, APIResource<IOrganization>]) => this.setChipConfig(user, org))
     );

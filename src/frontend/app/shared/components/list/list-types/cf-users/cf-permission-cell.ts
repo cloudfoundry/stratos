@@ -1,7 +1,7 @@
 import { Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, map, switchMap, first } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../store/app-state';
@@ -50,7 +50,10 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   protected guid: string;
 
   protected rowSubject = new BehaviorSubject<APIResource<CfUser>>(null);
-  protected configSubject = new BehaviorSubject<any>(null);
+  private configSubject = new BehaviorSubject<any>(null);
+  protected config$ = this.configSubject.asObservable().pipe(
+    filter(config => !!config)
+  );
 
   constructor(
     public store: Store<AppState>,
