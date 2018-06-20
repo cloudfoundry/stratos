@@ -160,35 +160,52 @@ export class CfUserService {
   }
 
   // Helper to determine if user has roles other than Org User
-  hasRoles(user: CfUser, excludeOrgUser = true): boolean {
+  hasRolesInOrg(user: CfUser, orgGuid: string, excludeOrgUser = true): boolean {
 
-    const orgRoles = this.getOrgRolesFromUser(user);
-    const spaceRoles = this.getSpaceRolesFromUser(user);
+    const orgRoles = this.getOrgRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
+    const spaceRoles = this.getSpaceRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
 
     let hasRoles = false;
-    orgRoles.forEach(roles => {
+    for (const roleKey in orgRoles) {
+      if (!orgRoles.hasOwnProperty(roleKey)) {
+        continue;
+      }
+      const roles = orgRoles[roleKey];
       const permissions = roles.permissions;
       hasRoles = !!(hasRoles ||
-      (
-        permissions[OrgUserRoleNames.MANAGER] ||
-        permissions[OrgUserRoleNames.BILLING_MANAGERS] ||
-        permissions[OrgUserRoleNames.AUDITOR]
-      ));
+        (
+          permissions[OrgUserRoleNames.MANAGER] ||
+          permissions[OrgUserRoleNames.BILLING_MANAGERS] ||
+          permissions[OrgUserRoleNames.AUDITOR]
+        ));
 
       if (!excludeOrgUser) {
         hasRoles = !!(hasRoles || permissions[OrgUserRoleNames.USER]);
       }
-    });
-    spaceRoles.forEach(roles => {
+      if (hasRoles) {
+        break;
+      }
+    }
+
+    for (const roleKey in spaceRoles) {
+      if (!orgRoles.hasOwnProperty(roleKey)) {
+        continue;
+      }
+      const roles = spaceRoles[roleKey];
       const permissions = roles.permissions;
       hasRoles = !!(hasRoles ||
-      (
-        permissions[SpaceUserRoleNames.MANAGER] ||
-        permissions[SpaceUserRoleNames.AUDITOR] ||
-        permissions[SpaceUserRoleNames.DEVELOPER]
+        (
+          permissions[SpaceUserRoleNames.MANAGER] ||
+          permissions[SpaceUserRoleNames.AUDITOR] ||
+          permissions[SpaceUserRoleNames.DEVELOPER]
 
-      ));
-    });
+        ));
+      if (hasRoles) {
+        break;
+      }
+    }
+
+
     return hasRoles;
   }
 

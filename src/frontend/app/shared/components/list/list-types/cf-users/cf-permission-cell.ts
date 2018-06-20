@@ -1,6 +1,6 @@
 import { Input } from '@angular/core';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -11,7 +11,6 @@ import { AppChip } from '../../../chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellCustom } from '../../list.types';
-import { IOrganization } from '../../../../../core/cf-api.types';
 
 
 export interface ICellPermissionList<T> extends IUserRole<T> {
@@ -67,17 +66,21 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
         const permission = chip.key;
         this.removePermissionWarn(permission);
       };
-      if (perm.string === UserRoleLabels.org.short.users) {
-        // If there are other roles than Org User, disable clear button
-        chipConfig.hideClearButton$ = this.userEntity.pipe(
-          filter(p => !!p),
-          map((entity: CfUser) => this.cfUserService.hasRoles(entity))
-        );
-      } else {
-        chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
-          map(can => !can),
-        );
-      }
+      chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
+        map(can => !can),
+        switchMap(can => {
+          if (!can) {
+            if (perm.string === UserRoleLabels.org.short.users) {
+              // If there are other roles than Org User, disable clear button
+              return this.userEntity.pipe(
+                filter(p => !!p),
+                map((entity: CfUser) => this.cfUserService.hasRolesInOrg(entity, perm.orgGuid)),
+              );
+            }
+          }
+          return observableOf(can);
+        })
+      );
       return chipConfig;
     });
   }
