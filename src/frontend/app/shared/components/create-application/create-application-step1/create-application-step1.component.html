@@ -14,7 +14,7 @@
         <span>{{ org.name }}</span>
       </mat-option>
     </mat-select>
-    <mat-error *ngIf="!(hasSpaces$ | async)">
+    <mat-error *ngIf="!(hasOrgs$ | async)">
       There are no organizations in this Cloud Foundry
     </mat-error>
   </mat-form-field>

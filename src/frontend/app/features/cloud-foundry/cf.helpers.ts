@@ -149,7 +149,7 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
 function hasRole(user: CfUser, guid: string, roleType: string) {
   if (user[roleType]) {
     const roles = user[roleType] as APIResource[];
-    return !!roles.find(o => o.metadata.guid === guid);
+    return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
 }

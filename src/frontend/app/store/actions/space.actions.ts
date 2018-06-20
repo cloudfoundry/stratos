@@ -90,7 +90,8 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     public endpointGuid: string,
     public paginationKey: string,
     public includeRelations = [],
-    public populateMissing = true
+    public populateMissing = true,
+    public flattenPagination = true
   ) {
     super();
     this.options = new RequestOptions();
@@ -113,7 +114,6 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   entity = entityFactory(routeSchemaKey);
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  flattenPagination = true;
   parentEntitySchema = entityFactory(spaceSchemaKey);
 }
 

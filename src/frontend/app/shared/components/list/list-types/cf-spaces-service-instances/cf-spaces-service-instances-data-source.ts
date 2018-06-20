@@ -11,6 +11,7 @@ import {
   servicePlanSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -27,12 +28,13 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
       createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-    ]);
+    ], true, false);
     super({
       store,
       action,
-      schema: entityFactory(serviceInstancesSchemaKey),
+      schema: entityFactory(serviceInstancesWithSpaceSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       // This would normally be fetched inline, however some of the SI's children will be missing if the SI was fetched by the org

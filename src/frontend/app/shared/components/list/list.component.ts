@@ -14,6 +14,7 @@ import {
   takeWhile,
   tap,
   withLatestFrom,
+  switchMap,
 } from 'rxjs/operators';
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
@@ -34,7 +35,7 @@ import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../.
 import { AppState } from '../../../store/app-state';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { ListView } from './../../../store/actions/list.actions';
-import { IListDataSource } from './data-sources-controllers/list-data-source-types';
+import { IListDataSource, RowsState, RowState, getDefaultRowState } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
@@ -49,6 +50,9 @@ import {
   ListViewTypes,
   IOptionalAction,
 } from './list.component.types';
+import { entityFactory } from '../../../store/helpers/entity-factory';
+import { EntityMonitor } from '../../monitors/entity-monitor';
+import { schema } from 'normalizr';
 
 
 @Component({
@@ -214,6 +218,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.singleActions = this.config.getSingleActions();
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
+    if (!this.dataSource.getRowState) {
+      const schema = entityFactory(this.dataSource.entityKey);
+      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
+    }
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
     // Create convenience observables that make the html clearer
@@ -423,8 +431,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
       distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      withLatestFrom(this.dataSource.pagination$),
-      map(([loading, page]) => page),
+      switchMap(() => this.dataSource.pagination$),
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
@@ -530,5 +537,22 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       });
     }
     return actions;
+  }
+
+  private getRowStateGeneratorFromEntityMonitor(entitySchema: schema.Entity, dataSource: IListDataSource<T>) {
+    return (row) => {
+      if (!entitySchema || !row) {
+        return observableOf(getDefaultRowState());
+      }
+      const entityMonitor = new EntityMonitor(this.store, dataSource.getRowUniqueId(row), dataSource.entityKey, entitySchema);
+      return entityMonitor.entityRequest$.pipe(
+        distinctUntilChanged(),
+        map(requestInfor => ({
+          deleting: requestInfor.deleting.busy,
+          error: requestInfor.deleting.error,
+          message: requestInfor.deleting.error ? `Sorry, deletion failed` : null
+        }))
+      );
+    };
   }
 }

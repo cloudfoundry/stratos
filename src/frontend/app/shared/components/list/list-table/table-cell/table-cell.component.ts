@@ -99,6 +99,7 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+import { TableCellSpaceNameComponent } from '../../list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 
 
 /* tslint:enable:max-line-length */
@@ -138,6 +139,7 @@ export const listTableCells = [
   TableCellSelectOrgComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
+  TableCellSpaceNameComponent
   TableCellAppCfOrgSpaceHeaderComponent,
   TableCellAppCfOrgSpaceComponent
 ];

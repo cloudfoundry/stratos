@@ -36,7 +36,8 @@ import { FetchAllDomains } from '../../../../store/actions/domains.actions';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
-
+const hostPattern = '^([\\w\\-\\.]*)$';
+const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
@@ -87,8 +88,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     });
 
     this.addHTTPRoute = new FormGroup({
-      host: new FormControl('', [<any>Validators.required]),
-      path: new FormControl('')
+      host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern)]),
+      path: new FormControl('', [Validators.pattern(pathPattern)])
     });
     this.addRouteMode = this.addRouteModes[0];
 

@@ -1,8 +1,9 @@
-import { browser, promise, protractor } from 'protractor';
 import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
+
+import { browser, promise, protractor } from 'protractor';
 
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
@@ -92,6 +93,11 @@ export class E2ESetup {
     this.loginUserType = null;
   }
 
+  // Ensure that an admin session is created, even if it is not needed by the setup process
+  requireAdminSession() {
+    this.needAdminSession = true;
+  }
+
   /**
    * Reset the backend so that there are no registered endpoints§
    */
@@ -123,7 +129,7 @@ export class E2ESetup {
    * Connect all registered endpoints
    */
   connectAllEndpoints(userType: ConsoleUserType = ConsoleUserType.admin) {
-    return this.addSetupOp(this.resetsHelper.connectAllEndpoints.bind(this.resetsHelper, this.getReq(), userType),
+    return this.addSetupOp(this.resetsHelper.connectAllEndpoints.bind(this.resetsHelper, this.getReq(userType), userType),
       'Connect all endpoints');
   }
 
@@ -131,7 +137,7 @@ export class E2ESetup {
    * Connect the named endpoint
    */
   connectEndpoint(endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
-    return this.addSetupOp(this.resetsHelper.connectEndpoint.bind(this.resetsHelper, this.getReq(), endpointName, userType),
+    return this.addSetupOp(this.resetsHelper.connectEndpoint.bind(this.resetsHelper, this.getReq(userType), endpointName, userType),
       'Connect endpoint: ' + endpointName);
   }
 
@@ -144,13 +150,13 @@ export class E2ESetup {
     });
   }
 
-  private getReq() {
-    if (this.userType === ConsoleUserType.admin) {
+  private getReq(userType: ConsoleUserType) {
+    if (userType === ConsoleUserType.admin) {
       this.needAdminSession = true;
     } else {
       this.needUserSession = true;
     }
-    return this.userType === ConsoleUserType.admin ? this.adminReq : this.userReq;
+    return userType === ConsoleUserType.admin ? this.adminReq : this.userReq;
   }
 
   private doSetup() {

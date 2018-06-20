@@ -1,8 +1,8 @@
-
-import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+
 import { AppState } from '../store/app-state';
 import {
   CHECKER_GROUPS,
@@ -18,7 +18,6 @@ import {
   PermissionConfigType,
   PermissionTypes,
 } from './current-user-permissions.config';
-
 
 interface ICheckCombiner {
   checks: Observable<boolean>[];

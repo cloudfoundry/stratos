@@ -16,8 +16,15 @@ run:
     - -exc
     - |
       cd stratos
+
       LATEST_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | tail -1)
+      if [ -z ${NIGHTLY_BUILD} ]; then
+        LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
+      fi
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
       FILENAME="release-${LATEST_TAG}"
-      tar -cf ${FILENAME}.tar v2-alpha-tag
+      cat > build-args << EOF
+      stratos_version="${LATEST_TAG}"
+      EOF
+      tar -cf ${FILENAME}.tar v2-alpha-tag build-args
