@@ -34,7 +34,8 @@ export class GetServicesInstancesInSpace
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
     ],
-    public populateMissing = true
+    public populateMissing = true,
+    public flattenPagination = true
   ) {
     super();
     this.options = new RequestOptions();
@@ -55,7 +56,6 @@ export class GetServicesInstancesInSpace
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);
-  flattenPagination = true;
 }
 
 export class GetServiceInstances

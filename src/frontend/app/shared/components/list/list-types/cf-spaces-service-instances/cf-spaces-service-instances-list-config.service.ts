@@ -37,7 +37,6 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
     };
   }
 
-  getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 
 }
