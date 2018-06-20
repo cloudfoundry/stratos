@@ -23,6 +23,7 @@ export class EntitySchemaTreeBuilder {
     }
     return this.applySchemaToTree(keys, schema, entity, flatTree);
   }
+
   private applySchemaToTree(keys: string[], schema: EntitySchema, entity: any, flatTree: IFlatTree = {}) {
     if (!entity) {
       return flatTree;
@@ -37,6 +38,9 @@ export class EntitySchemaTreeBuilder {
       const entityDefinition = this.getDefinition(definition[key]);
       if (Array.isArray(newEntity)) {
         return this.build(entityDefinition, newEntity, fullFlatTree);
+      }
+      if (!entityDefinition.getId) {
+        return this.build(entityDefinition[key], newEntity[key], fullFlatTree);
       }
       return this.handleSingleChildEntity(entityDefinition, newEntity, fullFlatTree, key);
     }, flatTree);
