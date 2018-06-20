@@ -274,7 +274,7 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    space: SpaceSchema
+    space: SpaceSchema.withEmptyDefinition()
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;

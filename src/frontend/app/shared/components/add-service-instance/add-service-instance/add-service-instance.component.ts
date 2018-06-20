@@ -62,7 +62,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   displaySelectServiceStep: boolean;
   displaySelectCfStep: boolean;
   title$: Observable<string>;
-  serviceInstancesUrl: string;
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
@@ -96,7 +95,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     } else if (this.modeService.isServicesWallMode()) {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
-      this.serviceInstancesUrl = `/services`;
       this.title$ = observableOf(`Create Service Instance`);
     }
 
@@ -138,7 +136,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     const appId = getIdFromRoute(this.activatedRoute, 'id');
     const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
     this.appId = appId;
-    this.serviceInstancesUrl = `/applications/${cfId}/${appId}/services`;
     this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
       applicationSchemaKey,
@@ -163,7 +160,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private configureForEditServiceInstanceMode() {
     const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
     const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
-    this.serviceInstancesUrl = `/services`;
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
       tap(serviceInstance => {
@@ -236,7 +232,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     }
     this.store.dispatch(cfDetails);
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
-    this.serviceInstancesUrl = `/marketplace/${cfId}/${serviceId}/instances`;
     this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
     this.marketPlaceMode = true;
     return this.cfOrgSpaceService.cf.list$.pipe(

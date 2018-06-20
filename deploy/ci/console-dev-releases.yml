@@ -14,7 +14,7 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
-    tag_filter: "v2*"
+    tag_filter: "2*"
 - name: stratos-master
   type: git
   source:
@@ -95,6 +95,7 @@ jobs:
           build: stratos/
           target_name:  prod-build
           tag: image-tag/v2-alpha-tag
+          build_args_file: image-tag/build-args
       - put: postflight-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk

@@ -1,4 +1,4 @@
-import { browser, by, element, promise } from 'protractor';
+import { browser, by, element, promise, ElementFinder } from 'protractor';
 import { ElementArrayFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { MenuComponent } from './menu.po';
@@ -33,8 +33,12 @@ export class PageHeader extends Component {
     return this.getIconButton(iconName).then(btn => btn && btn.isDisplayed());
   }
 
-  getTitle(): promise.Promise<string> {
-    return this.locator.element(by.css('.page-header h1')).getText();
+  getTitle(): ElementFinder {
+    return this.locator.element(by.css('.page-header h1'));
+  }
+
+  getTitleText(): promise.Promise<string> {
+    return this.getTitle().getText();
   }
 
   logout(): promise.Promise<any> {

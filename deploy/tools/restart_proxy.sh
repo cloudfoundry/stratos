@@ -19,11 +19,14 @@ pushd "${DEPLOYDIR}"
 ls
 env_vars
 
+PACKAGE_JSON_VERSION=$(cat ${DEPLOYDIR}/../package.json | grep version | grep -Po "([0-9\.]?)*")
+STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
+BUILD_ARG=" --build-arg stratos_version=${STRATOS_VERSION}"
 docker-compose -f docker-compose.development.yml stop nginx
-docker-compose -f docker-compose.development.yml stop proxy
+docker-compose -f docker-compose.development.yml  stop proxy
 docker-compose -f docker-compose.development.yml rm -f proxy
 
-docker-compose -f docker-compose.development.yml build proxy
+docker-compose -f docker-compose.development.yml build  ${BUILD_ARG} proxy
 
 docker-compose -f docker-compose.development.yml up -d nginx
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
@@ -33,6 +33,7 @@ import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { CfUser } from '../../../store/types/user.types';
+import { EntitiesPipelineActionTypes } from '../../../store/actions/request.actions';
 
 @Injectable()
 export class CloudFoundryOrganizationService {
@@ -96,7 +97,14 @@ export class CloudFoundryOrganizationService {
 
   private initialiseObservables() {
     this.org$ = this.orgEntityService.entityObs$.pipe(
-      filter(o => !!o && !!o.entity)
+      filter(o => !!o && !!o.entity),
+      switchMap(() => combineLatest(
+        this.orgEntityService.entityMonitor.entity$,
+        this.orgEntityService.entityMonitor.entityRequest$)),
+        map(([entity, entityRequestInfo]) => ({
+          entityRequestInfo,
+          entity
+        }))
     );
 
     this.initialiseOrgObservables();

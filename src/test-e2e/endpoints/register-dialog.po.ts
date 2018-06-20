@@ -12,16 +12,16 @@ export class RegisterDialog extends Page {
 
   public stepper = new StepperComponent();
 
-  public name = this.form.getFormField('name');
-
-  public address = this.form.getFormField('url');
-
   constructor() {
     super('/endpoints/register');
   }
 
   isRegisterDialog(): promise.Promise<boolean> {
-    return this.header.getTitle().then(title => title === 'Register new Endpoint');
+    return this.header.getTitleText().then(title => title === 'Register new Endpoint');
   }
+
+  getName = () => this.form.getFormField('name');
+
+  getAddress = () => this.form.getFormField('url');
 
 }

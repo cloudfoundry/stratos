@@ -16,6 +16,6 @@
       </button>
   </div>
 </app-page-header>
-<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving space'">
+<app-loading-page [entityId]="cfSpaceService.spaceGuid" [entitySchema]="schema" deleteText="Deleting space" text="Retrieving space">
   <router-outlet></router-outlet>
 </app-loading-page>
