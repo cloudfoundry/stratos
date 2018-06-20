@@ -21,6 +21,7 @@ import {
   GetUserCfRelations,
 } from '../../actions/permissions.actions';
 import { DELETE_SPACE_SUCCESS } from '../../actions/space.actions';
+import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../actions/users.actions';
 import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';
@@ -29,6 +30,7 @@ import {
   currentUserRolesRequestStateReducer,
 } from './current-user-request-state.reducers';
 import { roleInfoFromSessionReducer, updateNewlyConnectedEndpoint } from './current-user-role-session.reducer';
+import { updateAfterRoleChange } from './current-user-roles-changed.reducers';
 import { addEndpoint, removeEndpointRoles, removeOrgRoles, removeSpaceRoles } from './current-user-roles-clear.reducers';
 
 const getDefaultState = () => ({
@@ -60,6 +62,10 @@ export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefau
       return removeOrgRoles(state, action as APISuccessOrFailedAction);
     case DELETE_SPACE_SUCCESS:
       return removeSpaceRoles(state, action as APISuccessOrFailedAction);
+    case ADD_ROLE_SUCCESS:
+      return updateAfterRoleChange(state, true, action as APISuccessOrFailedAction);
+    case REMOVE_ROLE_SUCCESS:
+      return updateAfterRoleChange(state, false, action as APISuccessOrFailedAction);
     case GET_CURRENT_USER_RELATIONS:
     case GET_CURRENT_USER_RELATIONS_SUCCESS:
     case GET_CURRENT_USER_RELATIONS_FAILED:
