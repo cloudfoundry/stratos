@@ -3,7 +3,7 @@ import { IRequestDataState } from '../types/entity.types';
 import { schema, denormalize, Schema } from 'normalizr';
 import { EntitySchema, appEnvVarsSchemaKey } from './entity-factory';
 
-interface IFlatTree {
+export interface IFlatTree {
   [entityKey: string]: Set<string>;
 }
 type TEntityIds = Set<string>;

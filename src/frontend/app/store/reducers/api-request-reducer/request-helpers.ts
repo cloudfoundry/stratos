@@ -5,6 +5,7 @@ import { RequestMethod } from '@angular/http';
 import { getDefaultActionState, defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { IRequestTypeState } from '../../app-state';
 import { pathGet } from '../../../core/utils.service';
+import { IRequestDataState } from '../../types/entity.types';
 
 
 export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {
@@ -115,7 +116,7 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
 export function generateDefaultState(keys: Array<string>, initialSections?: {
   [key: string]: string[];
 }) {
-  const defaultState = {};
+  const defaultState = {} as IRequestDataState;
 
   keys.forEach(key => {
     defaultState[key] = {};
