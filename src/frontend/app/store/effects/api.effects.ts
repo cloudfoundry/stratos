@@ -1,17 +1,14 @@
-
-import { of as observableOf, Observable, forkJoin } from 'rxjs';
-
-import { catchError, withLatestFrom, map, mergeMap } from 'rxjs/operators';
-
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
+import { forkJoin, Observable, of as observableOf } from 'rxjs';
+import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations';
 import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
@@ -27,6 +24,8 @@ import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.acti
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
+import { RecursiveDelete, RecursiveDeleteComplete } from './recursive-entity-delete.effect';
+
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -71,11 +70,13 @@ export class APIEffect {
 
   private doApiRequest(action, state) {
     const actionClone = { ...action };
-    const paramsObject = {};
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
     const requestType = getRequestTypeFromMethod(apiAction);
+    if (requestType === 'delete') {
+      this.store.dispatch(new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)));
+    }
 
     this.store.dispatch(new StartRequestAction(actionClone, requestType));
     this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
@@ -139,6 +140,9 @@ export class APIEffect {
         const hasError = errors.findIndex(error => error.error) >= 0;
         if (hasError) {
           return [];
+        }
+        if (requestType === 'delete') {
+          this.store.dispatch(new RecursiveDeleteComplete(apiAction.guid, entityFactory(apiAction.entityKey)));
         }
         return [new ValidateEntitiesStart(
           actionClone,

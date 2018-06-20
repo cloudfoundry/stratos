@@ -1,40 +1,60 @@
-import { SetTreeDeleting } from '../../effects/recusive-entity-delete.effect';
+import { SetTreeDeleting } from '../../effects/recursive-entity-delete.effect';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
 import { IRequestDataState } from '../../types/entity.types';
-import { RequestInfoState } from './types';
+import { RequestInfoState, getDefaultRequestState, DeleteActionState } from './types';
+
+export function setChildEntitiesAsDeleting(state: IRequestDataState, action: SetTreeDeleting) {
+  const { tree } = action;
+  return Object.keys(tree).reduce(reduceTreeToRequestState(tree, { busy: true }), { ...state });
+}
 
 export function setChildEntitiesAsDeleted(state: IRequestDataState, action: SetTreeDeleting) {
   const { tree } = action;
-  return Object.keys(tree).reduce(reduceTreeToRequestState(tree), { ...state });
+  console.log(tree)
+  return Object.keys(tree).reduce(reduceTreeToRequestState(tree, { busy: false, deleted: true }), { ...state });
 }
 
-function reduceTreeToRequestState(tree: IFlatTree) {
+export function resetChildEntities(state: IRequestDataState, action: SetTreeDeleting) {
+  const { tree } = action;
+  return Object.keys(tree).reduce(reduceTreeToRequestState(tree, { busy: false, deleted: false }), { ...state });
+}
+
+
+
+function reduceTreeToRequestState(tree: IFlatTree, deleteObject: Partial<DeleteActionState>) {
   return (state: IRequestDataState, entityKey: string) => {
     const ids = Array.from(tree[entityKey]);
-    return ids.reduce(reduceEntityIdsToRequestState(entityKey), state);
+    return ids.reduce(reduceEntityIdsToRequestState(entityKey, deleteObject), state);
   };
 }
 
-function reduceEntityIdsToRequestState(entityKey: string) {
+function reduceEntityIdsToRequestState(entityKey: string, deleteObject: Partial<DeleteActionState>) {
   return (state: IRequestDataState, entityId: string) => {
-    return setEntityRequestToDeleting(
+    return setEntityRequestToObject(
       entityKey,
       entityId,
-      state
+      state,
+      deleteObject
     );
   };
 }
 
-function setEntityRequestToDeleting(entityKey: string, entityId: string, state: IRequestDataState): IRequestDataState {
-  if (!state[entityKey] || !state[entityKey][entityId]) {
+function setEntityRequestToObject(
+  entityKey: string,
+  entityId: string,
+  state: IRequestDataState,
+  deleteObject: Partial<DeleteActionState>
+): IRequestDataState {
+  if (!state[entityKey]) {
     return state;
   }
-  const entityRequest = { ...state[entityKey][entityId] } as RequestInfoState;
+
+  const entityRequest = { ...getDefaultRequestState(), ...state[entityKey][entityId] } as RequestInfoState;
   const newEntityRequest = {
     ...entityRequest,
     deleting: {
       ...entityRequest.deleting,
-      busy: true
+      ...deleteObject
     }
   };
   return {

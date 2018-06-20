@@ -40,7 +40,7 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
       const entState = getEntityRequestState(state, { entityKey, guid } as SingleEntityAction);
       entState.fetching = false;
       entState.error = false;
-      entState.deleting = { ...defaultDeletingActionState };
+      entState.deleting = { ...defaultDeletingActionState, ...(entState.deleting || {}) };
       newState = setEntityRequestState(newState, entState, { entityKey, guid } as IRequestAction);
     });
   });

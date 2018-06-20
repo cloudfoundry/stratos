@@ -1,14 +1,15 @@
-import { RecursiveDelete } from '../effects/recusive-entity-delete.effect';
+import { denormalize } from 'normalizr';
+
+import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { IRequestDataState } from '../types/entity.types';
-import { schema, denormalize, Schema } from 'normalizr';
-import { EntitySchema, appEnvVarsSchemaKey } from './entity-factory';
+import { EntitySchema } from './entity-factory';
 
 export interface IFlatTree {
   [entityKey: string]: Set<string>;
 }
 type TEntityIds = Set<string>;
 export class EntitySchemaTreeBuilder {
-  public getFlatTree(treeDefinition: RecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
+  public getFlatTree(treeDefinition: IRecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
     return this.build(schema, denormed);

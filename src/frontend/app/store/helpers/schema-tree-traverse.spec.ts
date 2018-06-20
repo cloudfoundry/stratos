@@ -1,6 +1,6 @@
+import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
+import { EntitySchema } from './entity-factory';
 import { EntitySchemaTreeBuilder } from './schema-tree-traverse';
-import { entityFactory, organizationSchemaKey, EntitySchema } from './entity-factory';
-import { RecursiveDelete } from '../effects/recusive-entity-delete.effect';
 
 
 describe('SchemaTreeTraversal', () => {

@@ -4,8 +4,8 @@ import { startRequest } from './start-request';
 import { succeedRequest } from './succeed-request';
 import { IRequestArray } from './types';
 import { updateRequest } from './update-request';
-import { RECURSIVE_ENTITY_SET_DELETING } from '../../effects/recusive-entity-delete.effect';
-import { setChildEntitiesAsDeleted } from './deleting-child-entities';
+import { RECURSIVE_ENTITY_SET_DELETING, RECURSIVE_ENTITY_SET_DELETED } from '../../effects/recursive-entity-delete.effect';
+import { setChildEntitiesAsDeleting, setChildEntitiesAsDeleted } from './deleting-child-entities';
 
 export function requestReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction, updateAction] = actions;
@@ -21,6 +21,8 @@ export function requestReducerFactory(entityList = [], actions: IRequestArray) {
       case updateAction:
         return updateRequest(state, action);
       case RECURSIVE_ENTITY_SET_DELETING:
+        return setChildEntitiesAsDeleting(state, action);
+      case RECURSIVE_ENTITY_SET_DELETED:
         return setChildEntitiesAsDeleted(state, action);
       default:
         return state;
