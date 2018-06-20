@@ -11,6 +11,7 @@ import { AppChip } from '../../../chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellCustom } from '../../list.types';
+import { IOrganization } from '../../../../../core/cf-api.types';
 
 
 export interface ICellPermissionList<T> extends IUserRole<T> {
@@ -55,8 +56,6 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   ) {
     super();
   }
-
-  protected setChipConfig(user: APIResource<CfUser>) { }
 
   protected getChipConfig(cellPermissionList: ICellPermissionList<T>[]) {
     return cellPermissionList.map(perm => {
