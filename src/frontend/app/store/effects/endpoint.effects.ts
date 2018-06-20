@@ -2,6 +2,7 @@
 import {catchError,  mergeMap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
@@ -94,6 +95,7 @@ export class EndpointsEffect {
           ...<any>action.authValues,
           'cnsi_guid': action.guid,
           'connect_type': action.authType,
+          'system_shared': action.systemShared,
         },
         // Fix for #angular/18261
         encoder: new BrowserStandardEncoder()

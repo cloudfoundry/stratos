@@ -40,7 +40,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		return nil, errors.New("Could not find session user_id")
 	}
 
-	uaaUser, err := p.getUAAUser(userGUID)
+	uaaUser, err := p.GetUAAUser(userGUID)
 	if err != nil {
 		return nil, errors.New("Could not load session user data")
 	}
@@ -68,14 +68,16 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	for _, cnsi := range cnsiList {
 		// Extend the CNSI record
 		endpoint := &interfaces.EndpointDetail{
-			CNSIRecord: cnsi,
-			Metadata:   make(map[string]string),
+			CNSIRecord:        cnsi,
+			Metadata:          make(map[string]string),
+			SystemSharedToken: false,
 		}
 		// try to get the user info for this cnsi for the user
 		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
 			endpoint.TokenMetadata = token.Metadata
+			endpoint.SystemSharedToken = token.SystemShared
 		}
 		cnsiType := cnsi.CNSIType
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
