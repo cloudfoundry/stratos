@@ -12,6 +12,7 @@ import {
   VERIFY_SESSION,
 } from './../actions/auth.actions';
 import { RouterRedirect } from './routing.reducer';
+import { AppState } from '../app-state';
 
 export interface AuthUser {
   guid: string;
@@ -86,5 +87,5 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
 }
 
 export function selectSessionData() {
-  return (state) => state.auth.sessionData;
+  return (state: AppState) => state.auth.sessionData;
 }

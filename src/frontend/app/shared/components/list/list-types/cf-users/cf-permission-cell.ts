@@ -1,8 +1,11 @@
 import { Input } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, first } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
+import { AppState } from '../../../../../store/app-state';
+import { selectSessionData } from '../../../../../store/reducers/auth.reducer';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
@@ -50,6 +53,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   protected configSubject = new BehaviorSubject<any>(null);
 
   constructor(
+    public store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     public cfUserService: CfUserService
   ) {
@@ -94,11 +98,17 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      this.removePermission(cellPermission);
+      this.store.select(selectSessionData()).pipe(
+        first()
+      ).subscribe(sessionData => {
+        const cfSession = sessionData.endpoints.cf[cellPermission.cfGuid];
+        const updateConnectedUser = !cfSession.user.admin && cellPermission.userGuid === cfSession.user.guid;
+        this.removePermission(cellPermission, updateConnectedUser);
+      });
     });
   }
 
-  protected removePermission(cellPermission: ICellPermissionList<T>) {
+  protected removePermission(cellPermission: ICellPermissionList<T>, updateConnectedUser: boolean) {
 
   }
 

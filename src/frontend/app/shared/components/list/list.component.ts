@@ -1,21 +1,3 @@
-
-import { of as observableOf, BehaviorSubject, Observable, combineLatest as observableCombineLatest, Subscription } from 'rxjs';
-
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  pairwise,
-  publishReplay,
-  refCount,
-  startWith,
-  takeWhile,
-  tap,
-  withLatestFrom,
-  switchMap,
-} from 'rxjs/operators';
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
@@ -30,12 +12,37 @@ import {
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { schema } from 'normalizr';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  pairwise,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  takeWhile,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
+import { entityFactory } from '../../../store/helpers/entity-factory';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
+import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ListView } from './../../../store/actions/list.actions';
-import { IListDataSource, RowsState, RowState, getDefaultRowState } from './data-sources-controllers/list-data-source-types';
+import { getDefaultRowState, IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
@@ -46,13 +53,11 @@ import {
   IListConfig,
   IListMultiFilterConfig,
   IMultiListAction,
+  IOptionalAction,
   ListConfig,
   ListViewTypes,
-  IOptionalAction,
 } from './list.component.types';
-import { entityFactory } from '../../../store/helpers/entity-factory';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { schema } from 'normalizr';
+
 
 
 @Component({
@@ -218,7 +223,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.singleActions = this.config.getSingleActions();
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
-    if (!this.dataSource.getRowState) {
+    if (this.dataSource.rowsState) {
+      this.dataSource.getRowState = this.getRowStateFromRowsState;
+    } else if (!this.dataSource.getRowState) {
       const schema = entityFactory(this.dataSource.entityKey);
       this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
     }
@@ -547,12 +554,16 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       const entityMonitor = new EntityMonitor(this.store, dataSource.getRowUniqueId(row), dataSource.entityKey, entitySchema);
       return entityMonitor.entityRequest$.pipe(
         distinctUntilChanged(),
-        map(requestInfor => ({
-          deleting: requestInfor.deleting.busy,
-          error: requestInfor.deleting.error,
-          message: requestInfor.deleting.error ? `Sorry, deletion failed` : null
+        map(requestInfo => ({
+          deleting: requestInfo.deleting.busy,
+          error: requestInfo.deleting.error,
+          message: requestInfo.deleting.error ? `Sorry, deletion failed` : null
         }))
       );
     };
   }
+
+  private getRowStateFromRowsState = (row: T): Observable<RowState> =>
+    this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
+
 }
