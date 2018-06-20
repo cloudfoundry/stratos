@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
