@@ -20,7 +20,12 @@ import (
 
 const cfSessionCookieName = "JSESSIONID"
 
-func handleSessionError(err error, doNotLog bool) error {
+func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool) error {
+	// Add header so front-end knows SSO login is enabled
+	if config.SSOLogin {
+		c.Response().Header().Set("x-stratos-sso-login", "true")
+	}
+
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(
 			http.StatusServiceUnavailable,
@@ -54,7 +59,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 		// Don't log an error if we are verifying the session, as a failure is not an error
 		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
-		return handleSessionError(err, isVerify)
+		return handleSessionError(p.Config, c, err, isVerify)
 	}
 }
 
@@ -126,7 +131,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		return handleSessionError(err, false)
+		return handleSessionError(p.Config, c, err, false)
 	}
 }
 

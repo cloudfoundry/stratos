@@ -34,6 +34,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   verifying: boolean;
   error: boolean;
 
+  ssoLogin: boolean;
+
   busy$: Observable<boolean>;
 
   redirect: RouterRedirect;
@@ -43,6 +45,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   ngOnInit() {
+    this.ssoLogin = false;
     this.store.dispatch(new VerifySession());
     const auth$ = this.store.select(s => ({ auth: s.auth, endpoints: s.endpoints }));
     this.busy$ = auth$.pipe(
@@ -73,6 +76,16 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   login() {
+    if (this.ssoLogin) {
+        const returnUrl = encodeURI(window.location.protocol + '//' + window.location.hostname +
+            (window.location.port ? ':' + window.location.port : ''));
+        window.open('/pp/v1/auth/sso_login?state=' + returnUrl , '_self');
+        this.busy$ = new Observable<boolean>((observer) => {
+          observer.next(true);
+          observer.complete();
+        });
+        return;
+    }
     this.message = '';
     this.store.dispatch(new Login(this.username, this.password));
   }
@@ -92,6 +105,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.loggedIn = auth.loggedIn;
     this.loggingIn = auth.loggingIn;
     this.verifying = auth.verifying;
+    this.ssoLogin = auth.sessionData && auth.sessionData.isSSOLogin;
 
     // Upgrade in progress
     if (auth.sessionData && auth.sessionData.upgradeInProgress) {
@@ -109,7 +123,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
     // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
     // a valid session
-    this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid);
+    this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid) && !this.ssoLogin;
 
     if (this.error) {
       if (auth.error && auth.errorResponse && auth.errorResponse === 'Invalid session') {
