@@ -31,7 +31,7 @@ type PortalProxy interface {
 	SaveConsoleConfig(consoleConfig *ConsoleConfig, consoleRepoInterface interface{}) error
 
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
-	DoLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes, error)
+	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
 	GetCNSIRecordByEndpoint(endpoint string) (CNSIRecord, error)
@@ -50,6 +50,7 @@ type PortalProxy interface {
 	GetUsername(userid string) (string, error)
 	RefreshUAALogin(username, password string, store bool) error
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
+	GetUAAUser(userGUID string) (*ConnectedUser, error)
 
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)

@@ -18,6 +18,7 @@ import (
 
 	"github.com/SUSE/stratos-ui/repository/crypto"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/tokens"
 
 	"github.com/SUSE/stratos-ui/plugins/cloudfoundry"
 )
@@ -63,6 +64,7 @@ const mockCNSIGUID = "some-guid-1234"
 const mockCFGUID = "some-cf-guid-1234"
 const mockCEGUID = "some-hce-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
+const mockAdminGUID = tokens.SystemSharedUserGuid
 
 const mockURLString = "http://localhost:9999/some/fake/url/"
 
@@ -168,15 +170,15 @@ func expectCFAndCERows() sqlmock.Rows {
 }
 
 func expectTokenRow() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
-		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "")
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid"}).
+		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID)
 }
 
 func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
 
 	encryptedUaaToken, _ := crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
-		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "")
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid"}).
+		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID)
 }
 
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
