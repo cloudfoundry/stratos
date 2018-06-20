@@ -29,12 +29,12 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRoleNames> {
 
   constructor(
-    store: Store<AppState>,
-    public cfUserService: CfUserService,
+    public store: Store<AppState>,
+    cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
-    super(store, confirmDialog);
+    super(store, confirmDialog, cfUserService);
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),
       this.configSubject.asObservable().pipe(switchMap(config => config.org$)),
