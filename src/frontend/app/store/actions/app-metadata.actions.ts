@@ -1,9 +1,15 @@
 import { RequestOptions } from '@angular/http';
 
-import { appEnvVarsSchemaKey, appStatsSchemaKey, appSummarySchemaKey, entityFactory } from '../helpers/entity-factory';
+import {
+  appEnvVarsSchemaKey,
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  entityFactory,
+} from '../helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction, RequestEntityLocation } from '../types/request.types';
-import { getPaginationKey } from './pagination.actions';
 
 export enum AppMetadataTypes {
   STATS,
@@ -23,7 +29,7 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
       url: `apps/${guid}/stats`,
       method: 'get'
     });
-    this.paginationKey = getPaginationKey(this.entityKey, endpointGuid, guid);
+    this.paginationKey = createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
   entity = [entityFactory(appStatsSchemaKey)];
   entityKey = appStatsSchemaKey;
@@ -52,7 +58,7 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
       url: `apps/${guid}/env`,
       method: 'get'
     });
-    this.paginationKey = getPaginationKey(this.entityKey, endpointGuid, guid);
+    this.paginationKey = createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
   entity = [entityFactory(appEnvVarsSchemaKey)];
   entityKey = appEnvVarsSchemaKey;

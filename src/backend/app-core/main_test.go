@@ -10,7 +10,7 @@ import (
 
 // DO NOT DELETE - this is necessary for thr HTTP Client used during unit tests
 func init() {
-	initializeHTTPClients(10, 10)
+	initializeHTTPClients(10, 10, 10)
 }
 
 /* type echoContextMock struct{}
@@ -62,6 +62,7 @@ func TestLoadPortalConfig(t *testing.T) {
 
 	os.Unsetenv("DATABASE_PROVIDER")
 	os.Setenv("HTTP_CLIENT_TIMEOUT_IN_SECS", "10")
+	os.Setenv("HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS", "35")
 	os.Setenv("SKIP_SSL_VALIDATION", "true")
 	os.Setenv("CONSOLE_PROXY_TLS_ADDRESS", ":8080")
 	os.Setenv("CONSOLE_CLIENT", "portal-proxy")
@@ -82,6 +83,10 @@ func TestLoadPortalConfig(t *testing.T) {
 
 	if result.HTTPClientTimeoutInSecs != 10 {
 		t.Error("Unable to get HTTPClientTimeoutInSecs from config")
+	}
+
+	if result.HTTPClientTimeoutMutatingInSecs != 35 {
+		t.Error("Unable to get HTTPClientTimeoutMutatingInSecs from config")
 	}
 
 	if result.TLSAddress != ":8080" {

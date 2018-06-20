@@ -39,8 +39,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {
-        if (appSource && appSource.type && appSource.type) {
-          return appSource.type.id === 'git' && appSource.type.subType === 'giturl';
+        if (appSource && appSource.type) {
+          return appSource.type.id === 'giturl';
         }
         return false;
       })

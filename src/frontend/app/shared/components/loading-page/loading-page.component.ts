@@ -1,9 +1,11 @@
 
-import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
+import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
-import { RouterState, Router, RouterStateSnapshot, ActivatedRoute } from '@angular/router';
-import { filter, first } from 'rxjs/operators';
+import { filter, first, startWith, map } from 'rxjs/operators';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { schema } from 'normalizr';
+import { EntityMonitor } from '../../monitors/entity-monitor';
 
 @Component({
   selector: 'app-loading-page',
@@ -22,19 +24,30 @@ import { filter, first } from 'rxjs/operators';
 })
 export class LoadingPageComponent implements OnInit {
 
-  constructor() { }
+
+  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
   @Input('isLoading')
-  isLoading: Observable<boolean> = observableOf(false)
-    .pipe(
-      first()
-    );
+  isLoading: Observable<boolean>;
 
   @Input('text')
   text = 'Retrieving your data';
 
+  @Input('deleteText')
+  deleteText = 'Deleting data';
+
   @Input('alert')
   alert = '';
+
+  @Input('entityId')
+  private entityId: string;
+
+  @Input('entitySchema')
+  private entitySchema: schema.Entity;
+
+  public isDeleting: Observable<boolean>;
+
+  public text$: Observable<string>;
 
   ngOnInit() {
     if (this.isLoading) {
@@ -43,6 +56,29 @@ export class LoadingPageComponent implements OnInit {
           filter(loading => !loading),
           first()
         );
+      this.isDeleting = observableOf(false);
+    } else if (this.entityId && this.entitySchema) {
+      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema.key, this.entitySchema));
+    } else {
+      this.isLoading = this.isDeleting = observableOf(false);
     }
+    this.text$ = combineLatest(
+      this.isLoading.pipe(startWith(false)),
+      this.isDeleting.pipe(startWith(false))
+    ).pipe(
+      map(([isLoading, isDeleting]) => {
+        if (isDeleting) {
+          return this.deleteText;
+        } else if (isLoading) {
+          return this.text;
+        }
+        return '';
+      })
+    );
+  }
+
+  private buildFromMonitor(monitor: EntityMonitor) {
+    this.isLoading = monitor.isFetchingEntity$;
+    this.isDeleting = monitor.isDeletingEntity$;
   }
 }

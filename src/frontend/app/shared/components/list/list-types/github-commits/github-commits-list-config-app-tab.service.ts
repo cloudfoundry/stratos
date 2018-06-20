@@ -46,9 +46,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       // Set Source type
       this.store.dispatch(
         new SetAppSourceDetails({
-          name: 'Git',
-          id: 'git',
-          subType: 'github'
+          name: 'GitHub',
+          id: 'github'
         })
       );
       // Set branch

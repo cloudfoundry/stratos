@@ -1,6 +1,7 @@
 import { by, element, promise } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
+import { MetaCard } from './meta-card.po';
 
 /**
  * Page Object for the List component
@@ -15,17 +16,17 @@ export class ListComponent extends Component {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.cards = new ListCardComponent(locator);
-   }
+  }
 
-   isTableView(): promise.Promise<boolean> {
-     const listElement = this.locator.element(by.css('.list-component'));
-     return this.hasClass('list-component__table', listElement);
+  isTableView(): promise.Promise<boolean> {
+    const listElement = this.locator.element(by.css('.list-component'));
+    return this.hasClass('list-component__table', listElement);
   }
 
   isCardsView(): promise.Promise<boolean> {
     const listElement = this.locator.element(by.css('.list-component'));
     return this.hasClass('list-component__cards', listElement);
- }
+  }
 
 }
 
@@ -34,7 +35,7 @@ export class ListTableComponent extends Component {
 
   constructor(locator: ElementFinder) {
     super(locator);
-   }
+  }
 
   getRows(): ElementArrayFinder {
     return this.locator.all(by.css('.app-table__row'));
@@ -52,9 +53,13 @@ export class ListCardComponent extends Component {
 
   constructor(locator: ElementFinder) {
     super(locator);
-   }
+  }
 
   getCards(): ElementArrayFinder {
     return this.locator.all(by.tagName('app-card'));
+  }
+
+  getCard(index: number): MetaCard {
+    return new MetaCard(this.getCards().get(index));
   }
 }

@@ -1,5 +1,4 @@
-import { browser } from 'protractor';
-import { promise } from 'protractor/built';
+import { browser, promise } from 'protractor';
 import { CFPage } from '../po/cf-page.po';
 import { ListComponent } from '../po/list.po';
 

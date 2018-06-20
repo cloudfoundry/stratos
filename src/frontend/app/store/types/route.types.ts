@@ -1,5 +1,5 @@
-import { APIResource } from './api.types';
 import { IApp } from '../../core/cf-api.types';
+import { APIResource } from './api.types';
 
 export class Route {
   constructor(
@@ -8,7 +8,6 @@ export class Route {
     public host?: string,
     public path?: string,
     public port?: number,
-    public isTCP: boolean = false
   ) { }
 }
 
