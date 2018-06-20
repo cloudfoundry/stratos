@@ -12,7 +12,7 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
-import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
+import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { tag } from 'rxjs-spy/operators';
@@ -68,6 +68,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Misc
   public isLoadingPage$: Observable<boolean> = observableOf(false);
+  public rowsState: Observable<RowsState>;
+  public getRowState: (row: T) => Observable<RowState> = null;
 
   // ------------- Private
   private entities$: Observable<T>;
@@ -83,7 +85,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private transformEntity: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
   public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[];
-  public rowsState?: Observable<RowsState>;
 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
@@ -159,6 +160,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isLocal = config.isLocal || false;
     this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState;
+    this.getRowState = config.getRowState;
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;

@@ -6,10 +6,10 @@ import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
+  domainSchemaKey,
   entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
-  domainSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
