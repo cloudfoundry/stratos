@@ -139,7 +139,7 @@ export const listTableCells = [
   TableCellSelectOrgComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
-  TableCellSpaceNameComponent
+  TableCellSpaceNameComponent,
   TableCellAppCfOrgSpaceHeaderComponent,
   TableCellAppCfOrgSpaceComponent
 ];
