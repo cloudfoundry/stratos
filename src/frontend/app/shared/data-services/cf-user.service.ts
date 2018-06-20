@@ -30,6 +30,8 @@ import {
   createUserRoleInSpace,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
   UserRoleInOrg,
   UserRoleInSpace,
 } from '../../store/types/user.types';
@@ -80,12 +82,16 @@ export class CfUserService {
     );
   }
 
-  getOrgRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
-    // User must be an 'org user' aka in the organizations collection, so loop through to get all orgs user might be in
-    const role = user['organizations'] as APIResource<IOrganization>[];
-    return role.map(org => {
-      const orgGuid = org.metadata.guid;
-      return {
+  private parseOrgRole(user: CfUser,
+    processedOrgs: Set<string>,
+    orgsToProcess: APIResource<IOrganization>[],
+    result: IUserPermissionInOrg[]) {
+    orgsToProcess.forEach(org => {
+      const orgGuid = org.entity.guid;
+      if (processedOrgs.has(orgGuid)) {
+        return;
+      }
+      result.push({
         name: org.entity.name as string,
         orgGuid: org.metadata.guid,
         permissions: createUserRoleInOrg(
@@ -94,8 +100,25 @@ export class CfUserService {
           isOrgAuditor(user, orgGuid),
           isOrgUser(user, orgGuid)
         )
-      };
+      });
+      processedOrgs.add(orgGuid);
     });
+  }
+
+  getOrgRolesFromUser(user: CfUser, org?: APIResource<IOrganization>): IUserPermissionInOrg[] {
+    const res: IUserPermissionInOrg[] = [];
+    const orgGuids = new Set<string>();
+    if (org) {
+      // Discover user's roles in this specific org
+      this.parseOrgRole(user, orgGuids, [org], res);
+    } else {
+      // Discover user's roles for each org via each of the 4 org role types
+      this.parseOrgRole(user, orgGuids, user.organizations, res);
+      this.parseOrgRole(user, orgGuids, user.audited_organizations, res);
+      this.parseOrgRole(user, orgGuids, user.billing_managed_organizations, res);
+      this.parseOrgRole(user, orgGuids, user.managed_organizations, res);
+    }
+    return res;
   }
 
   private parseSpaceRole(user: CfUser,
@@ -121,14 +144,59 @@ export class CfUserService {
     });
   }
 
-  getSpaceRolesFromUser(user: CfUser): IUserPermissionInSpace[] {
+  getSpaceRolesFromUser(user: CfUser, spaces?: APIResource<ISpace>[]): IUserPermissionInSpace[] {
     const res: IUserPermissionInSpace[] = [];
     const spaceGuids = new Set<string>();
-    // User might have unique spaces in any of the space role collections, so loop through each
-    this.parseSpaceRole(user, spaceGuids, user.spaces, res);
-    this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
-    this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+    if (spaces) {
+      // Discover user's roles in this specific space
+      this.parseSpaceRole(user, spaceGuids, spaces, res);
+    } else {
+      // User might have unique spaces in any of the space role collections, so loop through each
+      this.parseSpaceRole(user, spaceGuids, user.spaces, res);
+      this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
+      this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+    }
     return res;
+  }
+
+  /**
+   * Helper to determine if user has roles other than Org User
+   */
+  hasRolesInOrg(user: CfUser, orgGuid: string, excludeOrgUser = true): boolean {
+
+    const orgRoles = this.getOrgRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
+    const spaceRoles = this.getSpaceRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
+
+    for (const roleKey in orgRoles) {
+      if (!orgRoles.hasOwnProperty(roleKey)) {
+        continue;
+      }
+
+      const permissions = orgRoles[roleKey].permissions;
+      if (
+        permissions[OrgUserRoleNames.MANAGER] ||
+        permissions[OrgUserRoleNames.BILLING_MANAGERS] ||
+        permissions[OrgUserRoleNames.AUDITOR]
+      ) {
+        return true;
+      }
+      if (!excludeOrgUser && permissions[OrgUserRoleNames.USER]) {
+        return true;
+      }
+    }
+
+    for (const roleKey in spaceRoles) {
+      if (!spaceRoles.hasOwnProperty(roleKey)) {
+        continue;
+      }
+
+      const permissions = spaceRoles[roleKey].permissions;
+      if (permissions[SpaceUserRoleNames.MANAGER] ||
+        permissions[SpaceUserRoleNames.AUDITOR] ||
+        permissions[SpaceUserRoleNames.DEVELOPER]) {
+        return true;
+      }
+    }
   }
 
   getUserRoleInOrg = (

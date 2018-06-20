@@ -136,9 +136,10 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
 		if err != nil {
 			log.Warnf("Could not use console UAA token to login to auto-registered endpoint: %s", err.Error())
-			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
+			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
 			return err
 		}
+		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
 		return err
 	}
 

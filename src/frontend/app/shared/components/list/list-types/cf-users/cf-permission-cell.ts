@@ -1,14 +1,19 @@
 import { Input } from '@angular/core';
-import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
+import { AppState } from '../../../../../store/app-state';
+import { selectSessionData } from '../../../../../store/reducers/auth.reducer';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
+import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
+import { CfUserService } from '../../../../data-services/cf-user.service';
 import { AppChip } from '../../../chips/chips.component';
-import { TableCellCustom } from '../../list.types';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { TableCellCustom } from '../../list.types';
 
 
 export interface ICellPermissionList<T> extends IUserRole<T> {
@@ -27,28 +32,42 @@ interface ICellPermissionUpdates {
 }
 
 export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<CfUser>> {
+  userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
+
   @Input('row')
   set row(row: APIResource<CfUser>) {
-    this.setChipConfig(row);
+    this.rowSubject.next(row);
     this.guid = row.metadata.guid;
+    this.userEntity.next(row.entity);
   }
-  public chipsConfig: AppChip<ICellPermissionList<T>>[];
+
+  @Input('config')
+  set config(config: any) {
+    this.configSubject.next(config);
+  }
+
+  public chipsConfig$: Observable<AppChip<ICellPermissionList<T>>[]>;
   protected guid: string;
 
+  protected rowSubject = new BehaviorSubject<APIResource<CfUser>>(null);
+  private configSubject = new BehaviorSubject<any>(null);
+  protected config$ = this.configSubject.asObservable().pipe(
+    filter(config => !!config)
+  );
 
-  constructor(private confirmDialog: ConfirmationDialogService) {
+  constructor(
+    public store: Store<AppState>,
+    private confirmDialog: ConfirmationDialogService,
+    public cfUserService: CfUserService
+  ) {
     super();
-  }
-
-  protected setChipConfig(user: APIResource<CfUser>) {
-
   }
 
   protected getChipConfig(cellPermissionList: ICellPermissionList<T>[]) {
     return cellPermissionList.map(perm => {
       const chipConfig = new AppChip<ICellPermissionList<T>>();
       chipConfig.key = perm;
-      chipConfig.value = `${perm.name}: ${perm.string}`;
+      chipConfig.value = perm.name ? `${perm.name}: ${perm.string}` : perm.string;
       chipConfig.busy = perm.busy;
       chipConfig.clearAction = chip => {
         const permission = chip.key;
@@ -56,6 +75,18 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
       };
       chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
         map(can => !can),
+        switchMap(can => {
+          if (!can) {
+            if (perm.string === UserRoleLabels.org.short.users) {
+              // If there are other roles than Org User, disable clear button
+              return this.userEntity.pipe(
+                filter(p => !!p),
+                map((entity: CfUser) => this.cfUserService.hasRolesInOrg(entity, perm.orgGuid)),
+              );
+            }
+          }
+          return observableOf(can);
+        })
       );
       return chipConfig;
     });
@@ -70,11 +101,17 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      this.removePermission(cellPermission);
+      this.store.select(selectSessionData()).pipe(
+        first()
+      ).subscribe(sessionData => {
+        const cfSession = sessionData.endpoints.cf[cellPermission.cfGuid];
+        const updateConnectedUser = !cfSession.user.admin && cellPermission.userGuid === cfSession.user.guid;
+        this.removePermission(cellPermission, updateConnectedUser);
+      });
     });
   }
 
-  protected removePermission(cellPermission: ICellPermissionList<T>) {
+  protected removePermission(cellPermission: ICellPermissionList<T>, updateConnectedUser: boolean) {
 
   }
 

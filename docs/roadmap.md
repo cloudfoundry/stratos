@@ -4,7 +4,7 @@ Last Updated: 15 June 2018
 
 # Version 2 Timeline
 
-The current foucs is on releasing V2 of Stratos. The current timeline is:
+The current focus is on releasing V2 of Stratos. The current timeline is:
 
 |Date|Milestone|
 |---|---|
@@ -13,7 +13,7 @@ The current foucs is on releasing V2 of Stratos. The current timeline is:
 |25 June|RC 1|
 |20 July|2.0.0|
 
-
+Post 2.0 is released we will be working towards a regular recycle cycle each Sprint - we may start with Monthly releases and finally to releases each 2 weeks.
 
 ## Agile
 

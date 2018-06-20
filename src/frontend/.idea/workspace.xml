@@ -2,19 +2,96 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a75f00f7-2524-4a39-8b1b-b2dccb4f34db" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/../../package-lock.json" afterPath="$PROJECT_DIR$/../../package-lock.json" />
-      <change beforePath="$PROJECT_DIR$/../backend/app-core/config/config.go" afterPath="$PROJECT_DIR$/../backend/app-core/config/config.go" />
-      <change beforePath="$PROJECT_DIR$/../backend/app-core/glide.lock" afterPath="$PROJECT_DIR$/../backend/app-core/glide.lock" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/TableCellAppCfOrgSpaceBase.ts" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component.html" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component.scss" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component.spec.ts" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component.ts" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component.html" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component.scss" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component.spec.ts" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component.ts" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/app/store/reducers/current-user-roles-reducer/current-user-roles-changed.reducers.ts" />
+      <change beforePath="$PROJECT_DIR$/../../README.md" afterPath="$PROJECT_DIR$/../../README.md" />
+      <change beforePath="$PROJECT_DIR$/../../docs/roadmap.md" afterPath="$PROJECT_DIR$/../../docs/roadmap.md" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../backend/app-core/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/auth.go" afterPath="$PROJECT_DIR$/../backend/app-core/auth.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/info.go" afterPath="$PROJECT_DIR$/../backend/app-core/info.go" />
       <change beforePath="$PROJECT_DIR$/../backend/app-core/middleware.go" afterPath="$PROJECT_DIR$/../backend/app-core/middleware.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/mock_server_test.go" afterPath="$PROJECT_DIR$/../backend/app-core/mock_server_test.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/oauth_requests_test.go" afterPath="$PROJECT_DIR$/../backend/app-core/oauth_requests_test.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/passthrough.go" afterPath="$PROJECT_DIR$/../backend/app-core/passthrough.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/passthrough_test.go" afterPath="$PROJECT_DIR$/../backend/app-core/passthrough_test.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/repository/interfaces/portal_proxy.go" afterPath="$PROJECT_DIR$/../backend/app-core/repository/interfaces/portal_proxy.go" />
       <change beforePath="$PROJECT_DIR$/../backend/app-core/repository/interfaces/structs.go" afterPath="$PROJECT_DIR$/../backend/app-core/repository/interfaces/structs.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/repository/tokens/pgsql_tokens.go" afterPath="$PROJECT_DIR$/../backend/app-core/repository/tokens/pgsql_tokens.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/repository/tokens/pgsql_tokens_test.go" afterPath="$PROJECT_DIR$/../backend/app-core/repository/tokens/pgsql_tokens_test.go" />
+      <change beforePath="$PROJECT_DIR$/../backend/app-core/repository/tokens/tokens.go" afterPath="$PROJECT_DIR$/../backend/app-core/repository/tokens/tokens.go" />
       <change beforePath="$PROJECT_DIR$/../backend/cloudfoundry/main.go" afterPath="$PROJECT_DIR$/../backend/cloudfoundry/main.go" />
-      <change beforePath="$PROJECT_DIR$/app/features/login/login-page/login-page.component.html" afterPath="$PROJECT_DIR$/app/features/login/login-page/login-page.component.html" />
-      <change beforePath="$PROJECT_DIR$/app/features/login/login-page/login-page.component.scss" afterPath="$PROJECT_DIR$/app/features/login/login-page/login-page.component.scss" />
-      <change beforePath="$PROJECT_DIR$/app/features/login/login-page/login-page.component.ts" afterPath="$PROJECT_DIR$/app/features/login/login-page/login-page.component.ts" />
-      <change beforePath="$PROJECT_DIR$/app/store/actions/auth.actions.ts" afterPath="$PROJECT_DIR$/app/store/actions/auth.actions.ts" />
-      <change beforePath="$PROJECT_DIR$/app/store/effects/auth.effects.ts" afterPath="$PROJECT_DIR$/app/store/effects/auth.effects.ts" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/app/core/current-user-permissions.checker.ts" afterPath="$PROJECT_DIR$/app/core/current-user-permissions.checker.ts" />
+      <change beforePath="$PROJECT_DIR$/app/core/current-user-permissions.service.ts" afterPath="$PROJECT_DIR$/app/core/current-user-permissions.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/applications/application-delete/application-delete.component.ts" afterPath="$PROJECT_DIR$/app/features/applications/application-delete/application-delete.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/applications/application.service.ts" afterPath="$PROJECT_DIR$/app/features/applications/application.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/cf.helpers.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/cf.helpers.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/services/cloud-foundry-organization.service.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/services/cloud-foundry-organization.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-users/cloud-foundry-space-users.component.spec.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-users/cloud-foundry-space-users.component.spec.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-users/cloud-foundry-users.component.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/tabs/cloud-foundry-users/cloud-foundry-users.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/cloud-foundry/users/manage-users/manage-users-confirm/manage-users-confirm.component.ts" afterPath="$PROJECT_DIR$/app/features/cloud-foundry/users/manage-users/manage-users-confirm/manage-users-confirm.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.html" afterPath="$PROJECT_DIR$/app/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.scss" afterPath="$PROJECT_DIR$/app/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.scss" />
+      <change beforePath="$PROJECT_DIR$/app/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.ts" afterPath="$PROJECT_DIR$/app/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/features/endpoints/endpoint-helpers.ts" afterPath="$PROJECT_DIR$/app/features/endpoints/endpoint-helpers.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/data-sources-controllers/list-data-source-config.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/data-sources-controllers/list-data-source-config.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/data-sources-controllers/list-data-source.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/data-sources-controllers/list-data-source.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-table/table-cell/table-cell.component.html" afterPath="$PROJECT_DIR$/app/shared/components/list/list-table/table-cell/table-cell.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-table/table-cell/table-cell.component.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-table/table-cell/table-cell.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-table/table-row/table-row.component.html" afterPath="$PROJECT_DIR$/app/shared/components/list/list-table/table-row/table-row.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/app/card/card-app.component.html" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/card/card-app.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/app/card/card-app.component.spec.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/card/card-app.component.spec.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/app/card/card-app.component.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/card/card-app.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/app/cf-app-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/app/cf-app-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component.spec.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component.spec.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-org-users/cf-org-users-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-org-users/cf-org-users-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-services/cf-service-instances-list-config.base.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-services/cf-service-instances-list-config.base.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-routes/cf-space-route-row-state.helper.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-routes/cf-space-route-row-state.helper.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service.spec.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service.spec.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-spaces-service-instances/cf-spaces-service-instances-data-source.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-spaces-service-instances/cf-spaces-service-instances-data-source.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-spaces-service-instances/cf-spaces-service-instances-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-spaces-service-instances/cf-spaces-service-instances-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component.html" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-permission-cell.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-permission-cell.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component.html" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-user-list-config.service.spec.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-user-list-config.service.spec.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-user-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/cf-users/cf-user-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/endpoints-data-source.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/endpoints-data-source.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/endpoints-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/endpoints-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component.html" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component.html" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component.scss" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component.scss" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/github-commits/github-commits-data-source.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/github-commits/github-commits-data-source.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/service-instances/service-instances-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/service-instances/service-instances-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list-types/services-wall/service-instances-wall-list-config.service.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list-types/services-wall/service-instances-wall-list-config.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/components/list/list.component.ts" afterPath="$PROJECT_DIR$/app/shared/components/list/list.component.ts" />
+      <change beforePath="$PROJECT_DIR$/app/shared/data-services/cf-user.service.ts" afterPath="$PROJECT_DIR$/app/shared/data-services/cf-user.service.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/actions/endpoint.actions.ts" afterPath="$PROJECT_DIR$/app/store/actions/endpoint.actions.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/actions/service-instances.actions.ts" afterPath="$PROJECT_DIR$/app/store/actions/service-instances.actions.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/actions/space.actions.ts" afterPath="$PROJECT_DIR$/app/store/actions/space.actions.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/actions/users.actions.ts" afterPath="$PROJECT_DIR$/app/store/actions/users.actions.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/effects/endpoint.effects.ts" afterPath="$PROJECT_DIR$/app/store/effects/endpoint.effects.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/effects/users-roles.effects.ts" afterPath="$PROJECT_DIR$/app/store/effects/users-roles.effects.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/effects/users.effects.ts" afterPath="$PROJECT_DIR$/app/store/effects/users.effects.ts" />
       <change beforePath="$PROJECT_DIR$/app/store/reducers/auth.reducer.ts" afterPath="$PROJECT_DIR$/app/store/reducers/auth.reducer.ts" />
-      <change beforePath="$PROJECT_DIR$/app/store/types/auth.types.ts" afterPath="$PROJECT_DIR$/app/store/types/auth.types.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/reducers/current-user-roles-reducer/current-user-role-session.reducer.ts" afterPath="$PROJECT_DIR$/app/store/reducers/current-user-roles-reducer/current-user-role-session.reducer.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/reducers/current-user-roles-reducer/current-user-roles.reducer.ts" afterPath="$PROJECT_DIR$/app/store/reducers/current-user-roles-reducer/current-user-roles.reducer.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/reducers/users.reducer.ts" afterPath="$PROJECT_DIR$/app/store/reducers/users.reducer.ts" />
+      <change beforePath="$PROJECT_DIR$/app/store/types/endpoint.types.ts" afterPath="$PROJECT_DIR$/app/store/types/endpoint.types.ts" />
+      <change beforePath="$PROJECT_DIR$/app/test-framework/store-test-helper.ts" afterPath="$PROJECT_DIR$/app/test-framework/store-test-helper.ts" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -31,8 +108,8 @@
       <file leaf-file-name="login-page.component.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/features/login/login-page/login-page.component.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="931">
-              <caret line="99" column="6" lean-forward="false" selection-start-line="99" selection-start-column="6" selection-end-line="99" selection-end-column="6" />
+            <state relative-caret-position="586">
+              <caret line="76" column="0" lean-forward="true" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
               <folding>
                 <element signature="e#0#61#0" expanded="true" />
               </folding>
@@ -94,7 +171,7 @@
         <entry file="file://$PROJECT_DIR$/app/store/effects/auth.effects.ts">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="471">
-              <caret line="53" column="21" lean-forward="true" selection-start-line="53" selection-start-column="21" selection-end-line="53" selection-end-column="21" />
+              <caret line="53" column="21" lean-forward="false" selection-start-line="53" selection-start-column="21" selection-end-line="53" selection-end-column="21" />
               <folding>
                 <element signature="e#0#75#0" expanded="true" />
               </folding>
@@ -115,8 +192,8 @@
       <file leaf-file-name="auth.reducer.ts" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/store/reducers/auth.reducer.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="885">
-              <caret line="72" column="12" lean-forward="false" selection-start-line="72" selection-start-column="12" selection-end-line="72" selection-end-column="12" />
+            <state relative-caret-position="900">
+              <caret line="73" column="12" lean-forward="false" selection-start-line="73" selection-start-column="12" selection-end-line="73" selection-end-column="12" />
               <folding />
             </state>
           </provider>
@@ -285,12 +362,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1529444344672</updated>
-      <workItem from="1529444346821" duration="9745000" />
+      <workItem from="1529444346821" duration="9887000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9745000" />
+    <option name="totallyTimeSpent" value="9887000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="2560" height="1440" extended-state="0" />
@@ -368,7 +445,7 @@
         <state relative-caret-position="255">
           <caret line="17" column="21" lean-forward="false" selection-start-line="17" selection-start-column="21" selection-end-line="17" selection-end-column="21" />
           <folding>
-            <element signature="e#0#47#0" expanded="true" />
+            <element signature="e#0#47#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -463,8 +540,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/store/reducers/auth.reducer.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="885">
-          <caret line="72" column="12" lean-forward="false" selection-start-line="72" selection-start-column="12" selection-end-line="72" selection-end-column="12" />
+        <state relative-caret-position="900">
+          <caret line="73" column="12" lean-forward="false" selection-start-line="73" selection-start-column="12" selection-end-line="73" selection-end-column="12" />
           <folding />
         </state>
       </provider>
@@ -480,7 +557,7 @@
     <entry file="file://$PROJECT_DIR$/app/store/effects/auth.effects.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="471">
-          <caret line="53" column="21" lean-forward="true" selection-start-line="53" selection-start-column="21" selection-end-line="53" selection-end-column="21" />
+          <caret line="53" column="21" lean-forward="false" selection-start-line="53" selection-start-column="21" selection-end-line="53" selection-end-column="21" />
           <folding>
             <element signature="e#0#75#0" expanded="true" />
           </folding>
@@ -489,8 +566,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/features/login/login-page/login-page.component.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="931">
-          <caret line="99" column="6" lean-forward="false" selection-start-line="99" selection-start-column="6" selection-end-line="99" selection-end-column="6" />
+        <state relative-caret-position="586">
+          <caret line="76" column="0" lean-forward="true" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
           <folding>
             <element signature="e#0#61#0" expanded="true" />
           </folding>

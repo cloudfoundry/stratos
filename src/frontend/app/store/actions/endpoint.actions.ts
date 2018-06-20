@@ -1,8 +1,8 @@
 import { Action } from '@ngrx/store';
 
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { EndpointModel, EndpointType, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { EndpointType, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -88,6 +88,7 @@ export class ConnectEndpoint extends EndpointAction {
     public endpointType: EndpointType,
     public authType: string,
     public authValues: AuthParams,
+    public systemShared: boolean,
     public body: string,
   ) {
     super();

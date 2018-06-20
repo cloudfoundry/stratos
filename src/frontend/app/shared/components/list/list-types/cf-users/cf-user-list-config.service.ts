@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -11,7 +12,7 @@ import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../fea
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
 import { AppState } from './../../../../../store/app-state';
-import { APIResource } from './../../../../../store/types/api.types';
+import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';
 import { IListAction, IMultiListAction, ListConfig, ListViewTypes } from './../../list.component.types';
@@ -104,9 +105,14 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private cfUserService: CfUserService,
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CurrentUserPermissionsService,
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {
     super();
+
+    this.assignColumnConfig(org$, space$);
+
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       tap(cf => {
         const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
@@ -115,6 +121,34 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       map(cf => cf && cf.state.initialised),
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
+  }
+
+  /**
+   * Assign the org and/or spaces obs to the cell configs. These will be used to determine which org or space roles to show
+   *
+   * @private
+   * @memberof CfUserListConfigService
+   */
+  private assignColumnConfig = (
+    org$: Observable<EntityInfo<APIResource<IOrganization>>> = observableOf(null),
+    space$: Observable<EntityInfo<APIResource<ISpace>>> = observableOf(null)) => {
+    this.columns.find(column => column.columnId === 'roles').cellConfig = {
+      org$: org$.pipe(map(org => org ? org.entity : null))
+    };
+    this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
+      org$: org$.pipe(map(org => org ? org.entity : null)),
+      spaces$: combineLatest(org$, space$ || observableOf(null)).pipe(
+        map(([org, space]) => {
+          if (space) {
+            return [space.entity];
+          } else if (org && org.entity.entity.spaces && org.entity.entity.spaces.length) {
+            return org.entity.entity.spaces;
+          } else {
+            return null;
+          }
+        })
+      )
+    };
   }
 
   private createCanUpdateOrgSpaceRoles = () => canUpdateOrgSpaceRoles(

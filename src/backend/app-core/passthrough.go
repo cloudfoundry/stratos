@@ -386,9 +386,14 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 
 	// If Status Code >=400, log this as a warning
 	if cnsiRequest.StatusCode >= 400 {
-		contentType := res.Header.Get("Content-Type")
+		var contentType = "Unknown"
+		var contentLength int64 = -1
+		if res != nil {
+			contentType = res.Header.Get("Content-Type")
+			contentLength = res.ContentLength
+		}
 		log.Warnf("Passthrough response: URL: %s, Status Code: %d, Status: %s, Content Type: %s, Length: %d",
-			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, res.ContentLength)
+			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, contentLength)
 		log.Warn(string(cnsiRequest.Response))
 
 	}
