@@ -41,9 +41,9 @@
       // Skip glide install if ...
       // .. we're in test mode and we've found a common test dependency
       // .. we're building the backend and we've found a common dependency
-      var folder = prepareBuild.getBuildTest()
-        ? path.join(env.GOPATH, 'src', 'github.com', 'smartystreets', 'goconvey', 'convey')
-        : path.join(env.GOPATH, 'src', 'github.com', 'labstack', 'echo');
+      var folder = prepareBuild.getBuildTest() ?
+        path.join(env.GOPATH, 'src', 'github.com', 'smartystreets', 'goconvey', 'convey') :
+        path.join(env.GOPATH, 'src', 'github.com', 'labstack', 'echo');
       return fs.existsSync(folder);
     }
     return false;
@@ -116,7 +116,10 @@
   function getVersion() {
     var deferred = Q.defer();
     var version = nodePackageFile.version;
-    if (version) {
+    // If environment variable has been set, use that for the version
+    if (process.env.stratos_version) {
+      deferred.resolve(process.env.stratos_version);
+    } else if (version) {
       var args = ['log', '-1', '--format="%h"'];
       childProcess.execFile('git', args, function (error, stdout) {
         if (error === null) {

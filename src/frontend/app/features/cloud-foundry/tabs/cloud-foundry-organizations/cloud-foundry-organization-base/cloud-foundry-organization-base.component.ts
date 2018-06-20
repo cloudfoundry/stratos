@@ -38,8 +38,6 @@ export class CloudFoundryOrganizationBaseComponent {
     {
       link: 'users',
       label: 'Users',
-      // Hide the users tab unless we are in development
-      hidden: observableOf(environment.production)
     }
   ];
 

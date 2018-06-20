@@ -6,7 +6,6 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem, SideNavigation } from '../po/side-nav.po';
 
 describe('CF Endpoints Dashboard', () => {
-  const endpointsPage = new EndpointsPage();
   const cloudFoundry = new CloudFoundryPage();
   const nav = new SideNavigation();
   const cfEndpoint = e2e.secrets.getDefaultCFEndpoint();
@@ -14,7 +13,7 @@ describe('CF Endpoints Dashboard', () => {
   describe('No endpoints', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints();
+        .clearAllEndpoints();
     });
 
     beforeEach(() => {
@@ -22,7 +21,7 @@ describe('CF Endpoints Dashboard', () => {
     });
 
     it('should be the CF Endpoints page', () => {
-     expect(cloudFoundry.isActivePage()).toBeTruthy();
+      expect(cloudFoundry.isActivePage()).toBeTruthy();
     });
 
     it('should show the `no registered endpoints` message', () => {
@@ -34,9 +33,9 @@ describe('CF Endpoints Dashboard', () => {
     beforeAll(() => {
       // Only register and connect a single Cloud Foundry endpoint
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry()
-      .connectAllEndpoints();
+        .clearAllEndpoints()
+        .registerDefaultCloudFoundry()
+        .connectAllEndpoints();
     });
 
     beforeEach(() => {
@@ -48,28 +47,29 @@ describe('CF Endpoints Dashboard', () => {
     });
 
     it('should not have any breadcrumbs', () => {
-      expect(cloudFoundry.header.getTitle()).toBe(cfEndpoint.name);
-      expect(cloudFoundry.breadcrumbs.isPresent()).toBeFalsy();
+      expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
+      expect(cloudFoundry.breadcrumbs.waitUntilNotShown());
     });
   });
 
   describe('Multiple endpoints', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerMultipleCloudFoundries()
-      .connectAllEndpoints();
+        .clearAllEndpoints()
+        .registerMultipleCloudFoundries()
+        .connectAllEndpoints();
     });
 
     beforeEach(() => {
       nav.goto(SideNavMenuItem.CloudFoundry);
+      cloudFoundry.waitForPage();
     });
 
     it('should be the CF Endpoints page', () => {
       cloudFoundry.list.cards.getCards().then(cards => {
         expect(cards.length).toBeGreaterThan(1);
         cards[0].click();
-        expect(cloudFoundry.header.getTitle()).toBe(cfEndpoint.name);
+        expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
       });
     });
   });

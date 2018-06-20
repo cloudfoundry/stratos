@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
+import { IOrganization } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
@@ -13,8 +15,10 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
+import { AppChip } from '../../../../chips/chips.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -30,14 +34,20 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     confirmDialog: ConfirmationDialogService
   ) {
     super(confirmDialog, cfUserService);
+    this.chipsConfig$ = combineLatest(
+      this.rowSubject.asObservable(),
+      this.configSubject.asObservable().pipe(switchMap(config => config.org$))
+    ).pipe(
+      map(([user, org]: [APIResource<CfUser>, APIResource<IOrganization>]) => this.setChipConfig(user, org))
+    );
   }
 
-  protected setChipConfig(row: APIResource<CfUser>) {
-    const userRoles = this.cfUserService.getOrgRolesFromUser(row.entity);
+  private setChipConfig(row: APIResource<CfUser>, org: APIResource<IOrganization>): AppChip<ICellPermissionList<OrgUserRoleNames>>[] {
+    const userRoles = this.cfUserService.getOrgRolesFromUser(row.entity, org);
     const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList<OrgUserRoleNames>>(
       userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
     );
-    this.chipsConfig = this.getChipConfig(userOrgPermInfo);
+    return this.getChipConfig(userOrgPermInfo);
   }
 
   private getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>): ICellPermissionList<OrgUserRoleNames>[] {

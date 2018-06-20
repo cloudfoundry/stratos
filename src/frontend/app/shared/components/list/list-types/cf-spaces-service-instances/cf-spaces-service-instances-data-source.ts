@@ -30,7 +30,7 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
       createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-    ]);
+    ], true, false);
     super({
       store,
       action,

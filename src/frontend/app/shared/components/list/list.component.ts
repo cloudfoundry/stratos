@@ -14,6 +14,7 @@ import {
   takeWhile,
   tap,
   withLatestFrom,
+  switchMap,
 } from 'rxjs/operators';
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
@@ -430,8 +431,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
       distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      withLatestFrom(this.dataSource.pagination$),
-      map(([loading, page]) => page),
+      switchMap(() => this.dataSource.pagination$),
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
