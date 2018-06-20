@@ -7,7 +7,7 @@ import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { ListViewTypes } from '../../list.component.types';
+import { defaultPaginationPageSizeOptionsCards, ListViewTypes } from '../../list.component.types';
 import { createListFilterConfig } from '../../list.helper';
 import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
@@ -33,6 +33,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   defaultView = 'cards' as ListView;
   cardComponent = ServiceInstanceCardComponent;
   viewType = ListViewTypes.BOTH;
+  pageSizeOptions = defaultPaginationPageSizeOptionsCards;
 
   constructor(store: Store<AppState>,
     datePipe: DatePipe,
@@ -56,7 +57,6 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     };
   }
 
-  getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 
 }

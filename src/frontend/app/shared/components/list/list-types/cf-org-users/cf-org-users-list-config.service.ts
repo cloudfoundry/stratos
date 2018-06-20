@@ -9,7 +9,6 @@ import {
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { AppState } from '../../../../../store/app-state';
 import { CfUserService } from '../../../../data-services/cf-user.service';
-import { CfUserDataSourceService } from '../cf-users/cf-user-data-source.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
 
 @Injectable()
@@ -22,8 +21,7 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
-    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms);
-    this.dataSource = new CfUserDataSourceService(store, cfOrgService.allOrgUsersAction, this);
+    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfOrgService.org$);
   }
 
 }

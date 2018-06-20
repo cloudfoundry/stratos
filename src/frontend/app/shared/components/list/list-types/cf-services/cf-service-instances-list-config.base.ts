@@ -13,7 +13,7 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { defaultPaginationPageSizeOptionsTable, IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
@@ -26,16 +26,18 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { TableCellSpaceNameComponent } from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
+import {
+  TableCellSpaceNameComponent,
+} from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
 }
 
 @Injectable()
-export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
-  implements IListConfig<APIResource<IServiceInstance>>  {
+export class CfServiceInstancesListConfigBase implements IListConfig<APIResource<IServiceInstance>> {
   viewType = ListViewTypes.TABLE_ONLY;
+  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource>;
   defaultView = 'table' as ListView;
   text = {
@@ -153,7 +155,6 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService
   ) {
-    super();
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
@@ -172,5 +173,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
   getMultiActions = () => [];
   getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
+  getColumns = () => this.serviceInstanceColumns;
+  getDataSource = () => null;
 
 }
