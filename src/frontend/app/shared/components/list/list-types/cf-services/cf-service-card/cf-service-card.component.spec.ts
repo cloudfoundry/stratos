@@ -8,6 +8,7 @@ import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean
 import { AppChipsComponent } from '../../../../chips/chips.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { CfServiceCardComponent } from './cf-service-card.component';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 
 describe('CfServiceCardComponent', () => {
   let component: CfServiceCardComponent;
@@ -22,7 +23,10 @@ describe('CfServiceCardComponent', () => {
         AppChipsComponent,
         ServiceIconComponent
       ],
-      imports: [...BaseTestModulesNoShared]
+      imports: [...BaseTestModulesNoShared],
+      providers: [
+        EntityMonitorFactory
+      ]
     })
       .compileComponents();
   }));

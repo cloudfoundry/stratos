@@ -33,6 +33,12 @@ import {
   TableCellEditVariableComponent,
 } from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
 import {
+  TableCellAppCfOrgSpaceComponent,
+} from '../../list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component';
+import {
+  TableCellAppCfOrgSpaceHeaderComponent,
+} from '../../list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import {
   TableCellAppInstancesComponent,
 } from '../../list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
@@ -93,6 +99,7 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+import { TableCellSpaceNameComponent } from '../../list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 
 
 /* tslint:enable:max-line-length */
@@ -131,7 +138,10 @@ export const listTableCells = [
   TableCellRoleOrgSpaceComponent,
   TableCellSelectOrgComponent,
   TableCellCommitAuthorComponent,
-  TableCellRequestMonitorIconComponent
+  TableCellRequestMonitorIconComponent,
+  TableCellSpaceNameComponent,
+  TableCellAppCfOrgSpaceHeaderComponent,
+  TableCellAppCfOrgSpaceComponent
 ];
 
 @Component({

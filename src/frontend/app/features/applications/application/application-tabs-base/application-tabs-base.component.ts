@@ -14,7 +14,7 @@ import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { appStatsSchemaKey } from '../../../../store/helpers/entity-factory';
+import { appStatsSchemaKey, entityFactory, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
@@ -52,7 +52,7 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
-
+  public schema = entityFactory(applicationSchemaKey);
 
   constructor(
     private route: ActivatedRoute,
@@ -107,7 +107,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
-  appActions$: Observable<{[key: string]: boolean}>;
+  appActions$: Observable<{ [key: string]: boolean }>;
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }

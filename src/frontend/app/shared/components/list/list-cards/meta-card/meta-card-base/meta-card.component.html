@@ -1,10 +1,16 @@
 <mat-card class="meta-card" [ngClass]="clickAction ? 'meta-card-pointer' : ''" (click)="clickAction ? clickAction() : null">
+  <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
+    <div class="meta-card__deleting-overlay-inner">
+      <div class="meta-card__deleting-text">Deleting</div>
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+  </div>
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
     <ng-container *ngTemplateOutlet="title.content"></ng-container>
     <div *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
-      <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu">
+      <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu" [disabled]="isDeleting$ | async">
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu">

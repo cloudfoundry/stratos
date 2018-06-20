@@ -1,8 +1,11 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
 import { PageHeader } from './page-header.po';
 import { SideNavigation } from './side-nav.po';
+
+const until = protractor.ExpectedConditions;
 
 /**
  * Base Page Object can be inherited by appropriate pages
@@ -21,7 +24,7 @@ export abstract class Page {
   // Helpers
   public helpers = new E2EHelpers();
 
-  constructor(public navLink?: string) {}
+  constructor(public navLink?: string) { }
 
   navigateTo(): promise.Promise<any> {
     return browser.get(this.navLink);
@@ -29,14 +32,20 @@ export abstract class Page {
 
   isActivePage(): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
-      return url === browser.baseUrl + this.navLink;
+      return url === this.getUrl();
     });
   }
 
   isActivePageOrChildPage(): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
-      return url.startsWith(browser.baseUrl + this.navLink);
+      return url.startsWith(this.getUrl());
     });
   }
 
+  waitForPage() {
+    expect(this.navLink.startsWith('/')).toBeTruthy();
+    browser.wait(until.urlIs(this.getUrl()), 20000);
+  }
+
+  private getUrl = () => browser.baseUrl + this.navLink;
 }

@@ -1,5 +1,4 @@
 import {
-  SET_APP_SOURCE_SUB_TYPE,
   PROJECT_EXISTS,
   PROJECT_DOESNT_EXIST,
   CHECK_PROJECT_EXISTS,
@@ -33,10 +32,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
       return {
         ...state, applicationSource: { ...state.applicationSource, type: action.sourceType }
       };
-    case SET_APP_SOURCE_SUB_TYPE:
-      const sourceType = { ...state.applicationSource.type, subType: action.subType.id };
-      const appSource = { ...state.applicationSource, type: sourceType };
-      return { ...state, applicationSource: appSource };
     case SET_DEPLOY_CF_SETTINGS:
       return {
         ...state, cloudFoundryDetails: action.cloudFoundryDetails

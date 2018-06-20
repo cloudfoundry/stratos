@@ -33,7 +33,7 @@ export class ListActionConfig<T> {
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-  getRowState?(row: T): Observable<RowsState>;
+  getRowState?(row: T): Observable<RowState>;
   trackBy(index: number, item: T);
 }
 
@@ -88,6 +88,7 @@ export interface RowState {
   message?: string;
   blocked?: boolean;
   highlighted?: boolean;
+  deleting?: boolean;
   [customState: string]: any;
 }
 
@@ -95,5 +96,6 @@ export const getDefaultRowState = (): RowState => ({
   busy: false,
   error: false,
   blocked: false,
+  deleting: false,
   message: null
 });

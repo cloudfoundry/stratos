@@ -1,5 +1,5 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { ADD_PERMISSION_SUCCESS, ChangeUserPermission, REMOVE_PERMISSION_SUCCESS } from '../actions/users.actions';
+import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -22,16 +22,16 @@ const properties = {
 
 export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
-    case ADD_PERMISSION_SUCCESS:
-    case REMOVE_PERMISSION_SUCCESS:
+    case ADD_ROLE_SUCCESS:
+    case REMOVE_ROLE_SUCCESS:
       // Ensure that a user's roles collections are updated when we call add/remove
-      const permAction = action.apiAction as ChangeUserPermission;
+      const permAction = action.apiAction as ChangeUserRole;
       const { entityGuid, isSpace, permissionTypeKey, userGuid } = permAction;
       return {
         ...state,
         [userGuid]: {
           ...state[userGuid],
-          entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_PERMISSION_SUCCESS),
+          entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_ROLE_SUCCESS),
         }
       };
   }
@@ -41,13 +41,13 @@ export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<API
   if (action.endpointType === 'cf') {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
-      const cfGuid = action.guid;
-      // remove users that belong to this CF
-      const newUsers = {};
-      Object.values(state)
-      .filter(u => u.entity.cfGuid !== cfGuid)
-      .forEach(u => newUsers[u.metadata.guid] = u);
-      return newUsers;
+        const cfGuid = action.guid;
+        // remove users that belong to this CF
+        const newUsers = {};
+        Object.values(state)
+          .filter(u => u.entity.cfGuid !== cfGuid)
+          .forEach(u => newUsers[u.metadata.guid] = u);
+        return newUsers;
     }
   }
   return state;
@@ -76,18 +76,18 @@ interface StateEntities<T> { [guid: string]: APIResource<StateEntity>; }
 export function userSpaceOrgReducer<T extends StateEntity>(isSpace: boolean) {
   return function (state: StateEntities<T>, action: APISuccessOrFailedAction) {
     switch (action.type) {
-      case ADD_PERMISSION_SUCCESS:
-      case REMOVE_PERMISSION_SUCCESS:
+      case ADD_ROLE_SUCCESS:
+      case REMOVE_ROLE_SUCCESS:
         // Ensure that an org or space's roles lists are updated when we call add/remove
-        const permAction = action.apiAction as ChangeUserPermission;
-        const isAdd = action.type === ADD_PERMISSION_SUCCESS ? true : false;
+        const permAction = action.apiAction as ChangeUserRole;
+        const isAdd = action.type === ADD_ROLE_SUCCESS ? true : false;
         return (isSpace && !!permAction.isSpace) || (!isSpace && !permAction.isSpace) ? newEntityState<T>(state, permAction, isAdd) : state;
     }
     return state;
   };
 }
 
-function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: ChangeUserPermission, add: boolean): StateEntities<T> {
+function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: ChangeUserRole, add: boolean): StateEntities<T> {
   const apiResource: APIResource<StateEntity> = state[action.guid];
   if (!apiResource) {
     return state;
