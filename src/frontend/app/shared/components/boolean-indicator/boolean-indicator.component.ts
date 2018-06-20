@@ -6,6 +6,7 @@ export enum BooleanIndicatorType {
   lockedUnlocked = 'locked-unlocked',
   unlockedLocked = 'unlocked-locked',
   yesNo = 'yes-no',
+  yesNoSubtlt = 'yes-no',
   trueFalse = 'true-false'
 }
 
@@ -19,6 +20,9 @@ export class BooleanIndicatorComponent implements OnInit {
 
   @Input('isTrue') isTrue: boolean;
   @Input('type') type: BooleanIndicatorType;
+
+  // Should we use a subtle display - this won't show the No option as dandger (typically red)
+  @Input('subtle') subtle: boolean;
 
   private icons = {
     Yes: 'check_circle',
