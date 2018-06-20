@@ -80,12 +80,16 @@ export class CfUserService {
     );
   }
 
-  getOrgRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
-    // User must be an 'org user' aka in the organizations collection, so loop through to get all orgs user might be in
-    const role = user['organizations'] as APIResource<IOrganization>[];
-    return role.map(org => {
-      const orgGuid = org.metadata.guid;
-      return {
+  private parseOrgRole(user: CfUser,
+    processedOrgs: Set<string>,
+    orgsToProcess: APIResource<IOrganization>[],
+    result: IUserPermissionInOrg[]) {
+    orgsToProcess.forEach(org => {
+      const orgGuid = org.entity.guid;
+      if (processedOrgs.has(orgGuid)) {
+        return;
+      }
+      result.push({
         name: org.entity.name as string,
         orgGuid: org.metadata.guid,
         permissions: createUserRoleInOrg(
@@ -94,8 +98,20 @@ export class CfUserService {
           isOrgAuditor(user, orgGuid),
           isOrgUser(user, orgGuid)
         )
-      };
+      });
+      processedOrgs.add(orgGuid);
     });
+  }
+
+  getOrgRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
+    // Discover user's roles for each org via each of the 4 org role types
+    const res: IUserPermissionInOrg[] = [];
+    const orgGuids = new Set<string>();
+    this.parseOrgRole(user, orgGuids, user.organizations, res);
+    this.parseOrgRole(user, orgGuids, user.audited_organizations, res);
+    this.parseOrgRole(user, orgGuids, user.billing_managed_organizations, res);
+    this.parseOrgRole(user, orgGuids, user.managed_organizations, res);
+    return res;
   }
 
   private parseSpaceRole(user: CfUser,
