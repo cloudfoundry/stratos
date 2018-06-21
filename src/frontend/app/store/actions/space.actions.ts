@@ -260,7 +260,7 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginationA
 
 
 export class GetServiceInstancesForSpace
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public spaceGuid: string,
     public endpointGuid: string,
@@ -285,6 +285,7 @@ export class GetServiceInstancesForSpace
     if (q) {
       this.initialParams['q'] = q;
     }
+    this.parentGuid = spaceGuid;
   }
   actions = getActions('Space', 'Get all service instances');
   entity = [entityFactory(serviceInstancesSchemaKey)];
@@ -296,7 +297,8 @@ export class GetServiceInstancesForSpace
     'order-direction': 'desc',
     'order-direction-field': 'creation',
   };
-
+  parentGuid: string;
+  parentEntitySchema = entityFactory(spaceSchemaKey);
 }
 
 export class GetServicesForSpace
