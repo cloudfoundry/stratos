@@ -32,6 +32,7 @@ import {
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
+const DOMAIN_HEADER = 'x-stratos-domain';
 const SSO_HEADER = 'x-stratos-sso-login';
 
 @Injectable()
@@ -89,7 +90,9 @@ export class AuthEffect {
             isUpgrading = err.headers.has(UPGRADE_HEADER);
           }
 
-          return action.login ? [new InvalidSession(setupMode, isUpgrading, isSSO)] : [new ResetAuth()];
+          // Check for cookie domain mismatch with the requesting URL
+          const isDomainMismatch = this.isDomainMismatch(err.headers);
+          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, isSSO)] : [new ResetAuth()];
         }));
     }));
 
@@ -119,4 +122,12 @@ export class AuthEffect {
       window.location.assign(window.location.origin);
     }));
 
+  private isDomainMismatch(headers): boolean {
+    if (headers.has(DOMAIN_HEADER)) {
+      const expectedDomain = headers.get(DOMAIN_HEADER);
+      const okay = window.location.hostname.endsWith(expectedDomain);
+      return !okay;
+    }
+    return false;
+  }
 }

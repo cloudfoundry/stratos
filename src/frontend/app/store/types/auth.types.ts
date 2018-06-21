@@ -36,4 +36,5 @@ export interface SessionData {
   upgradeInProgress?: boolean;
   isSSOLogin?: boolean;
   sessionExpiresOn: number;
+  domainMismatch?: boolean;
 }

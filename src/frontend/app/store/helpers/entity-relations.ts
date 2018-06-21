@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { filter, first, map, mergeMap, pairwise, skipWhile, withLatestFrom } from 'rxjs/operators';
@@ -490,7 +490,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     withLatestFrom(store.select(getAPIRequestDataState)),
     map(([entityState, allEntities]) => {
       const [entityInfo, entity] = entityState;
-      if (!entity) {
+      if (!entityInfo || !entity) {
         return;
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
