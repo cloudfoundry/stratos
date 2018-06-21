@@ -35,8 +35,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	// Now get the URL of the request and remove the path to give the path of the API that is being requested
 	target := c.Request().URL().Path()
 	target = target[(len(path) - 1):]
-	targetQueryParams := c.Request().URL().QueryString()
-	url := fmt.Sprintf("%s/%s?%s", uaaEndpoint, target, targetQueryParams)
+	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
 
 	username, err := userInfo.portalProxy.GetUsername(sessionUser)
 	if err != nil {
