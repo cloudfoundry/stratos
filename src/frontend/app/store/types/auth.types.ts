@@ -34,5 +34,7 @@ export interface SessionData {
   valid: boolean;
   uaaError?: boolean;
   upgradeInProgress?: boolean;
+  isSSOLogin?: boolean;
   sessionExpiresOn: number;
+  domainMismatch?: boolean;
 }

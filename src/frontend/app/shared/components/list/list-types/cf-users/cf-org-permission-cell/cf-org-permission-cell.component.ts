@@ -28,29 +28,32 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
   constructor(
-    store: Store<AppState>,
-    public cfUserService: CfUserService,
+    public store: Store<AppState>,
+    cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
-    super(store, confirmDialog);
+    super(store, confirmDialog, cfUserService);
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),
-      this.configSubject.asObservable().pipe(switchMap(config => config.org$))
+      this.config$.pipe(switchMap(config => config.org$))
     ).pipe(
       map(([user, org]: [APIResource<CfUser>, APIResource<IOrganization>]) => this.setChipConfig(user, org))
     );
   }
 
-  private setChipConfig(row: APIResource<CfUser>, org: APIResource<IOrganization>): AppChip<ICellPermissionList<OrgUserRoleNames>>[] {
+  private setChipConfig(row: APIResource<CfUser>, org?: APIResource<IOrganization>): AppChip<ICellPermissionList<OrgUserRoleNames>>[] {
     const userRoles = this.cfUserService.getOrgRolesFromUser(row.entity, org);
     const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList<OrgUserRoleNames>>(
-      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
+      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row, !org))
     );
     return this.getChipConfig(userOrgPermInfo);
   }
 
-  private getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>): ICellPermissionList<OrgUserRoleNames>[] {
+  private getOrgPermissions(
+    orgPerms: IUserPermissionInOrg,
+    row: APIResource<CfUser>,
+    showName: boolean): ICellPermissionList<OrgUserRoleNames>[] {
     return getOrgRoles(orgPerms.permissions).map(perm => {
       const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
@@ -58,7 +61,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
       );
       return {
         ...perm,
-        name: orgPerms.name,
+        name: showName ? orgPerms.name : null,
         guid: orgPerms.orgGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
@@ -89,6 +92,5 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
     this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
-
 
 }

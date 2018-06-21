@@ -29,16 +29,16 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRoleNames> {
 
   constructor(
-    store: Store<AppState>,
-    public cfUserService: CfUserService,
+    public store: Store<AppState>,
+    cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
-    super(store, confirmDialog);
+    super(store, confirmDialog, cfUserService);
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),
-      this.configSubject.asObservable().pipe(switchMap(config => config.org$)),
-      this.configSubject.asObservable().pipe(switchMap(config => config.spaces$))
+      this.config$.pipe(switchMap(config => config.org$)),
+      this.config$.pipe(switchMap(config => config.spaces$))
     ).pipe(
       switchMap(([user, org, spaces]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[]]) => {
         const permissionList = this.createPermissions(user, spaces && spaces.length ? spaces : null);
@@ -77,14 +77,14 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
   }
 
-  private createPermissions(row: APIResource<CfUser>, spaces: APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
+  private createPermissions(row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
     const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity, spaces);
     return arrayHelper.flatten<ICellPermissionList<SpaceUserRoleNames>>(
-      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row))
+      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row, spaces))
     );
   }
 
-  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>) {
+  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]) {
     return getSpaceRoles(spacePerms.permissions).map(perm => {
       const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
@@ -92,7 +92,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       );
       return {
         ...perm,
-        name: spacePerms.name,
+        name: !spaces || spaces.length > 1 ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,

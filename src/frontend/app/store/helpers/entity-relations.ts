@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { filter, first, map, mergeMap, pairwise, skipWhile, withLatestFrom } from 'rxjs/operators';
@@ -152,13 +152,14 @@ function createSingleAction(config: HandleRelationsConfig) {
 
 function createPaginationAction(config: HandleRelationsConfig) {
   const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
+  const parentGuid = parentEntity.metadata ? parentEntity.metadata.guid : parentEntity.entity.guid;
   return new FetchRelationPaginatedAction(
     cfGuid,
-    parentEntity.metadata.guid,
+    parentGuid,
     parentRelation,
     childRelation,
     includeRelations,
-    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid, childRelation.entity.relationKey),
+    createEntityRelationPaginationKey(parentRelation.entityKey, parentGuid, childRelation.entity.relationKey),
     populateMissing,
     childEntitiesUrl
   );
