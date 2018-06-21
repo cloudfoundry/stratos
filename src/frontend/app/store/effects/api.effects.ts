@@ -124,6 +124,9 @@ export class APIEffect {
       }),
       mergeMap(response => {
         const { entities, totalResults, totalPages, errors = [] } = response;
+        if (requestType === 'fetch' && (errors && errors.length > 0)) {
+          this.handleApiEvents(errors);
+        }
         errors.forEach(error => {
           if (error.error) {
             const fakedAction = { ...actionClone, endpointGuid: error.guid };
@@ -370,10 +373,7 @@ export class APIEffect {
     totalPages,
     errors: APIErrorCheck[]
   } {
-    const endpointChecks = this.checkForErrors(resData, apiAction);
-    if (endpointChecks) {
-      this.handleApiEvents(endpointChecks);
-    }
+    const errors = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
     let totalPages = 0;
@@ -395,7 +395,7 @@ export class APIEffect {
       entities,
       totalResults,
       totalPages,
-      errors: endpointChecks
+      errors
     };
   }
 
