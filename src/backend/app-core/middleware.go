@@ -65,7 +65,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
 		}
-		return handleSessionError(p.Config, err, isVerify)
+		return handleSessionError(p.Config, c, err, isVerify)
 	}
 }
 
