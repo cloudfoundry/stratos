@@ -23,7 +23,8 @@
       margin-right: 2px;
       text-decoration: none;
       width: 16px;
-      &:focus, &:active {
+      &:focus,
+      &:active {
         text-decoration: none;
       }
     }

@@ -31,7 +31,8 @@
   padding-top: 10px;
 }
 
-.meta-card-item-long-text, .meta-card-item-long-text-fixed {
+.meta-card-item-long-text,
+.meta-card-item-long-text-fixed {
   padding-top: 10px;
   .meta-card-item__value {
     padding-bottom: 10px;
@@ -49,14 +50,14 @@
     height: 3.6em;
     position: relative;
     &:after {
-      content: "";
-      text-align: right;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 25%;
-      height: 1.2em;
       background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
+      bottom: 0;
+      content: '';
+      height: 1.2em;
+      position: absolute;
+      right: 0;
+      text-align: right;
+      width: 25%;
     }
   }
 }

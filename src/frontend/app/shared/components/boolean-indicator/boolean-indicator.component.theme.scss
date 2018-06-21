@@ -7,7 +7,7 @@
       &__icon-true {
         color: map-get($status, success);
         &.boolean-indicator__container__icon-subtle {
-          color: mat-color($primary)
+          color: mat-color($primary);
         }
       }
       &__icon-false {
