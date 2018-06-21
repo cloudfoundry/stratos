@@ -13,13 +13,13 @@ import { APIResource } from './../../../../../store/types/api.types';
 import { CfUser } from './../../../../../store/types/user.types';
 
 
-function setupStateManager(paginationMonitor: PaginationMonitor<APIResource<CfUser>>) {
+export function setupCfUserStateManager(paginationMonitor: PaginationMonitor<APIResource<CfUser>>) {
   const rowStateManager = new TableRowStateManager();
   const sub = paginationMonitor.currentPage$.pipe(
     tap(users => {
       users.forEach(user => {
         rowStateManager.setRowState(user.metadata.guid, {
-          blocked: !user.entity.username
+          blocked: user.metadata.guid === 'hcf_auto_config' || user.metadata.guid === 'scf_auto_config'
         });
       });
     })
@@ -34,8 +34,7 @@ export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>>
   constructor(store: Store<AppState>, action: PaginatedAction, listConfigService: ListConfig<APIResource<CfUser>>) {
     const { paginationKey } = action;
     const paginationMonitor = new PaginationMonitor<APIResource<CfUser>>(store, paginationKey, entityFactory(cfUserSchemaKey));
-
-    const { sub, rowStateManager } = setupStateManager(paginationMonitor);
+    const { sub, rowStateManager } = setupCfUserStateManager(paginationMonitor);
 
     super({
       store,
