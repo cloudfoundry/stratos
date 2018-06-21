@@ -22,7 +22,12 @@ const cfSessionCookieName = "JSESSIONID"
 
 const StratosDomainHeader = "x-stratos-domain"
 
-func handleSessionError(err error, doNotLog bool) error {
+func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool) error {
+	// Add header so front-end knows SSO login is enabled
+	if config.SSOLogin {
+		c.Response().Header().Set("x-stratos-sso-login", "true")
+	}
+
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(
 			http.StatusServiceUnavailable,
@@ -60,7 +65,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
 		}
-		return handleSessionError(err, isVerify)
+		return handleSessionError(p.Config, c, err, isVerify)
 	}
 }
 
@@ -132,7 +137,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		return handleSessionError(err, false)
+		return handleSessionError(p.Config, c, err, false)
 	}
 }
 

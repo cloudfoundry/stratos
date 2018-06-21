@@ -133,6 +133,12 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previsouly disoconnected). ", cfAPI)
 	} else {
 		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
+		err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
+		if err != nil {
+			log.Warnf("Could not use console UAA token to login to auto-registered endpoint: %s", err.Error())
+			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
+			return err
+		}
 		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
 		return err
 	}

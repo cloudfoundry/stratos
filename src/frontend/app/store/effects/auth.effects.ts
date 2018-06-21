@@ -33,6 +33,7 @@ import {
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
 const DOMAIN_HEADER = 'x-stratos-domain';
+const SSO_HEADER = 'x-stratos-sso-login';
 
 @Injectable()
 export class AuthEffect {
@@ -83,6 +84,7 @@ export class AuthEffect {
         catchError((err, caught) => {
           let setupMode = false;
           let isUpgrading = false;
+          const isSSO = err.headers.has(SSO_HEADER);
           if (err.status === 503) {
             setupMode = err.headers.has(SETUP_HEADER);
             isUpgrading = err.headers.has(UPGRADE_HEADER);
@@ -90,7 +92,7 @@ export class AuthEffect {
 
           // Check for cookie domain mismatch with the requesting URL
           const isDomainMismatch = this.isDomainMismatch(err.headers);
-          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch)] : [new ResetAuth()];
+          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, isSSO)] : [new ResetAuth()];
         }));
     }));
 
