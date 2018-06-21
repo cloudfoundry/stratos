@@ -294,7 +294,7 @@ export class ApplicationService {
         }
         return null;
       }),
-      filter(entRoute => entRoute.entity && entRoute.entity.domain),
+      filter(entRoute => !!entRoute && !!entRoute.entity && !!entRoute.entity.domain),
       map(entRoute => getRoute(entRoute, true, false, {
         entityRequestInfo: undefined,
         entity: entRoute.entity.domain
