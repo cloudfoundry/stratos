@@ -2,4 +2,10 @@
   display: flex;
   height: 100%;
   width: 100%;
+  &__fixed-panel {
+    flex: 0 0 auto;
+  }
+  &__panel-apps {
+    min-height: 200px;
+  }
 }
