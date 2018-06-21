@@ -24,7 +24,7 @@ import { GetServiceInstancesForSpace } from '../../../../../store/actions/space.
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
-    const action = new GetServiceInstancesForSpace(spaceGuid, cfGuid , paginationKey, null,[
+    const action = new GetServiceInstancesForSpace(spaceGuid, cfGuid , paginationKey, null, [
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
