@@ -133,7 +133,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previsouly disoconnected). ", cfAPI)
 	} else {
 		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
-		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
+		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
 		return err
 	}
 

@@ -107,6 +107,13 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       return false;
     }
 
+    // Cookie domain mismatch (user won't be able to login)
+    if (auth.sessionData && auth.sessionData.domainMismatch) {
+      this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
+      this.store.dispatch(new RouterNav({ path: ['/domainMismatch'], extras: { skipLocationChange: true } }));
+      return false;
+    }
+
     // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
     // a valid session
     this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid);

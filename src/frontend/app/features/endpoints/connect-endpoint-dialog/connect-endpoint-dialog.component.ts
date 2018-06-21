@@ -1,10 +1,8 @@
-
-import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
+
 import { Store } from '@ngrx/store';
-import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -15,6 +13,11 @@ import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { getCanShareTokenForEndpointType } from '../endpoint-helpers';
+
+import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -54,6 +57,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   private hasAttemptedConnect: boolean;
   private authTypesForEndpoint = [];
 
+  private canShareEndpointToken = false;
+
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
   // and end up with an empty list where we should have results.
@@ -77,11 +82,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       }
     });
 
+    // Not all endpoint types might allow token sharing - typically types like metrics do
+    this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
+
     // Create the endpoint form
     const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
     this.endpointForm = this.fb.group({
       authType: [autoSelected.value || '', Validators.required],
-      authValues: this.fb.group(autoSelected.form || {})
+      authValues: this.fb.group(autoSelected.form || {}),
+      systemShared: false
     });
 
     this.setupObservables();
@@ -191,12 +200,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   submit(event) {
     this.hasAttemptedConnect = true;
-    const { guid, authType, authValues } = this.endpointForm.value;
+    const { guid, authType, authValues, systemShared } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,
       authType,
       authValues,
+      systemShared,
       this.bodyContent,
     ));
   }

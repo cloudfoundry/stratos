@@ -122,9 +122,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 				errorResponse = cnsiResponse.Response
 			}
 		}
-		if len(response) > 0 {
-			jsonResponse[guid] = (*json.RawMessage)(&response)
-		} else if errorStatus.StatusCode >= 0 {
+		if errorStatus.StatusCode >= 0 {
 			passthroughError := &PassthroughError{
 				Error:         errorStatus,
 				ErrorResponse: (*json.RawMessage)(&errorResponse),
@@ -132,7 +130,11 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 			res, _ := json.Marshal(passthroughError)
 			jsonResponse[guid] = (*json.RawMessage)(&res)
 		} else {
-			jsonResponse[guid] = nil
+			if len(response) > 0 {
+				jsonResponse[guid] = (*json.RawMessage)(&response)
+			} else {
+				jsonResponse[guid] = nil
+			}
 		}
 	}
 
@@ -142,7 +144,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 // When we move to goland 1.9 we can use json.isValid()
 func isValidJSON(data []byte) bool {
 	var res interface{}
-	err := json.Unmarshal(data, res)
+	err := json.Unmarshal(data, &res)
 	return err == nil
 }
 
@@ -395,7 +397,6 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		log.Warnf("Passthrough response: URL: %s, Status Code: %d, Status: %s, Content Type: %s, Length: %d",
 			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, contentLength)
 		log.Warn(string(cnsiRequest.Response))
-
 	}
 
 	if done != nil {

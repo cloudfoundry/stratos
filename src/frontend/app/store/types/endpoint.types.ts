@@ -1,6 +1,6 @@
-import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
-import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ScopeStrings } from '../../core/current-user-permissions.config';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 
 export interface INewlyConnectedEndpointInfo {
   account: string;
@@ -43,6 +43,7 @@ export interface EndpointModel {
   metadata?: {
     metrics: string
   };
+  system_shared_token: boolean;
   // These are generated client side when we login
   registered?: boolean;
   connectionStatus?: endpointConnectionStatus;

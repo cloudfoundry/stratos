@@ -35,4 +35,5 @@ export interface SessionData {
   uaaError?: boolean;
   upgradeInProgress?: boolean;
   sessionExpiresOn: number;
+  domainMismatch?: boolean;
 }
