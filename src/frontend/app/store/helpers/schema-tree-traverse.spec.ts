@@ -45,9 +45,6 @@ describe('SchemaTreeTraversal', () => {
     const action = new RecursiveDelete(parentId, schema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
-      [parentKey]: new Set([
-        parentId
-      ]),
       [child1Key]: new Set([
         childId
       ]),
@@ -91,9 +88,6 @@ describe('SchemaTreeTraversal', () => {
     const action = new RecursiveDelete(parentId, schema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
-      [parentKey]: new Set([
-        parentId
-      ]),
       [child1Key]: new Set([
         childId
       ]),
@@ -148,9 +142,6 @@ describe('SchemaTreeTraversal', () => {
     const action = new RecursiveDelete(parentId, schema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
-      [parentKey]: new Set([
-        parentId
-      ]),
       [child1Key]: new Set([
         childId,
         child2Id
@@ -162,7 +153,7 @@ describe('SchemaTreeTraversal', () => {
     });
   });
 
-  fit('should get tree with object', () => {
+  it('should get tree with object', () => {
     const parentId = '1';
     const childId = '2';
     const child2Id = '5';
@@ -212,9 +203,6 @@ describe('SchemaTreeTraversal', () => {
     const action = new RecursiveDelete(parentId, schema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
-      [parentKey]: new Set([
-        parentId
-      ]),
       [child1Key]: new Set([
         childId,
         child2Id
