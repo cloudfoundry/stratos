@@ -152,13 +152,14 @@ function createSingleAction(config: HandleRelationsConfig) {
 
 function createPaginationAction(config: HandleRelationsConfig) {
   const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
+  const parentGuid = parentEntity.metadata ? parentEntity.metadata.guid : parentEntity.entity.guid;
   return new FetchRelationPaginatedAction(
     cfGuid,
-    parentEntity.metadata.guid,
+    parentGuid,
     parentRelation,
     childRelation,
     includeRelations,
-    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid, childRelation.entity.relationKey),
+    createEntityRelationPaginationKey(parentRelation.entityKey, parentGuid, childRelation.entity.relationKey),
     populateMissing,
     childEntitiesUrl
   );
@@ -490,7 +491,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     withLatestFrom(store.select(getAPIRequestDataState)),
     map(([entityState, allEntities]) => {
       const [entityInfo, entity] = entityState;
-      if (!entityInfo || !entity) {
+      if (!entity) {
         return;
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
