@@ -6,7 +6,6 @@ export enum BooleanIndicatorType {
   lockedUnlocked = 'locked-unlocked',
   unlockedLocked = 'unlocked-locked',
   yesNo = 'yes-no',
-  yesNoSubtlt = 'yes-no',
   trueFalse = 'true-false'
 }
 
