@@ -142,7 +142,11 @@ export class APIEffect {
           return [];
         }
         if (requestType === 'delete') {
-          this.store.dispatch(new RecursiveDeleteComplete(apiAction.guid, entityFactory(apiAction.entityKey)));
+          this.store.dispatch(new RecursiveDeleteComplete(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey))
+          );
         }
         return [new ValidateEntitiesStart(
           actionClone,

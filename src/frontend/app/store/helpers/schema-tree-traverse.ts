@@ -12,10 +12,10 @@ export class EntitySchemaTreeBuilder {
   public getFlatTree(treeDefinition: IRecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
-    return this.build(schema, denormed);
+    return this.build(schema, denormed, undefined, true);
   }
 
-  private build(schema: EntitySchema, entity: any, flatTree: IFlatTree = {}): IFlatTree {
+  private build(schema: EntitySchema, entity: any, flatTree: IFlatTree = {}, root = false): IFlatTree {
     if (Array.isArray(schema)) {
       schema = schema[0];
     }
@@ -33,10 +33,10 @@ export class EntitySchemaTreeBuilder {
         return this.build(schema[key], entity[key], newflatTree);
       }, flatTree);
     }
-    return this.applySchemaToTree(keys, schema, entity, flatTree);
+    return this.applySchemaToTree(keys, schema, entity, flatTree, root);
   }
 
-  private applySchemaToTree(keys: string[], schema: EntitySchema, entity: any, flatTree: IFlatTree = {}) {
+  private applySchemaToTree(keys: string[], schema: EntitySchema, entity: any, flatTree: IFlatTree = {}, root = false) {
     if (!entity) {
       return flatTree;
     }
@@ -44,7 +44,10 @@ export class EntitySchemaTreeBuilder {
     if (!schema.getId) {
       return this.build(schema[schema.key], schema[schema.key], flatTree);
     }
-    flatTree[schema.key] = this.addIdToTree(flatTree[schema.key], schema.getId(entity));
+    // Don't add the root element to the tree to avoid duplication actions whe consuming tree
+    if (!root) {
+      flatTree[schema.key] = this.addIdToTree(flatTree[schema.key], schema.getId(entity));
+    }
     if (!keys) {
       return flatTree;
     }

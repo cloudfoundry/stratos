@@ -5,11 +5,13 @@ import { schema } from 'normalizr';
 import { map, withLatestFrom, mergeMap } from 'rxjs/operators';
 
 import { AppState } from '../app-state';
-import { EntitySchema } from '../helpers/entity-factory';
+import { EntitySchema, applicationSchemaKey } from '../helpers/entity-factory';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { IRequestDataState } from '../types/entity.types';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
+import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
+import { DELETE_SUCCESS, DeleteApplication } from '../actions/application.actions';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
@@ -29,7 +31,7 @@ export class RecursiveDelete implements Action, IRecursiveDelete {
 
 export class RecursiveDeleteComplete implements Action, IRecursiveDelete {
   public type = RECURSIVE_ENTITY_DELETE_COMPLETE;
-  constructor(public guid: string, public schema: EntitySchema) { }
+  constructor(public guid: string, public endpointGuid: string, public schema: EntitySchema) { }
 }
 
 export class SetTreeDeleting implements Action {
@@ -50,12 +52,17 @@ export class RecursiveDeleteEffect {
     private store: Store<AppState>
   ) { }
 
+  private deleteSuccessApiActionGenerators = {
+    application: (guid: string, endpointGuid: string) => {
+      return new APISuccessOrFailedAction(DELETE_SUCCESS, new DeleteApplication(guid, endpointGuid) as ICFAction);
+    }
+  };
+
   @Effect()
   delete$ = this.actions$.ofType<RecursiveDelete>(RECURSIVE_ENTITY_DELETE).pipe(
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);
-      console.log(tree);
       return new SetTreeDeleting(action.guid, tree);
     })
   );
@@ -65,9 +72,14 @@ export class RecursiveDeleteEffect {
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     mergeMap(([action, state]) => {
       const tree = this.getTree(action, state);
-      const actions = Object.keys(tree).map<Action>(key => {
-        return new ClearPaginationOfType(key);
-      });
+      const actions = new Array<Action>().concat(...Object.keys(tree).map<Action[]>(key => {
+        const keyActions = [];
+        if (this.deleteSuccessApiActionGenerators[key]) {
+          keyActions.push(this.deleteSuccessApiActionGenerators[key](action.guid, action.endpointGuid));
+        }
+        keyActions.push(new ClearPaginationOfType(key));
+        return keyActions;
+      }));
       actions.unshift(new SetTreeDeleted(action.guid, tree));
       return actions;
     })
@@ -79,4 +91,5 @@ export class RecursiveDeleteEffect {
       new EntitySchemaTreeBuilder().getFlatTree(action, state);
     return this.entityTreeCache[action.guid] = tree;
   }
+
 }
