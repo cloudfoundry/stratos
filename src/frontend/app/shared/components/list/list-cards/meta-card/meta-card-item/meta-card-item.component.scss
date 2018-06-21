@@ -47,7 +47,8 @@
 
 .meta-card-item-long-text-fixed {
   .meta-card-item__value {
-    height: 3.6em;
+    height: 54px;
+    line-height: 18px;
     position: relative;
     &::after {
       background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
