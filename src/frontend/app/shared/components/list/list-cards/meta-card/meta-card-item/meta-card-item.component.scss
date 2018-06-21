@@ -49,7 +49,7 @@
   .meta-card-item__value {
     height: 3.6em;
     position: relative;
-    &:after {
+    &::after {
       background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
       bottom: 0;
       content: '';
