@@ -71,6 +71,7 @@ type TokenRecord struct {
 	Disconnected bool
 	AuthType     string
 	Metadata     string
+	SystemShared bool
 }
 
 type CFInfo struct {
@@ -144,9 +145,10 @@ type Info struct {
 // Extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
-	User          *ConnectedUser    `json:"user"`
-	Metadata      map[string]string `json:"metadata,omitempty"`
-	TokenMetadata string            `json:"-"`
+	User              *ConnectedUser    `json:"user"`
+	Metadata          map[string]string `json:"metadata,omitempty"`
+	TokenMetadata     string            `json:"-"`
+	SystemSharedToken bool              `json:"system_shared_token"`
 }
 
 // Versions - response returned to caller from a getVersions action
@@ -199,6 +201,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	SSOLogin						bool	 `configName:"SSO_LOGIN"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	CFAdminIdentifier               string
 	CloudFoundryInfo                *CFInfo

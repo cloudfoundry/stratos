@@ -70,7 +70,8 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
       const sessionInvalid: InvalidSession = action;
       return {
         ...state,
-        sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress, sessionExpiresOn: null },
+        sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
+            isSSOLogin: action.isSSOLogin, sessionExpiresOn: null },
         verifying: false
       };
     case RouterActions.GO:
