@@ -274,7 +274,8 @@ export class GetServiceInstancesForSpace
       createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
       createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
     ],
-    public populateMissing = true
+    public populateMissing = true,
+    public flattenPagination = true
   ) {
     super();
     this.options = new RequestOptions();
@@ -295,7 +296,7 @@ export class GetServiceInstancesForSpace
     'order-direction': 'desc',
     'order-direction-field': 'creation',
   };
-  flattenPagination = true;
+
 }
 
 export class GetServicesForSpace
