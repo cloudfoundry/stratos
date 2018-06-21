@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { map, withLatestFrom } from 'rxjs/operators';
+import { map, withLatestFrom, mergeMap } from 'rxjs/operators';
 
 import { AppState } from '../app-state';
 import { EntitySchema } from '../helpers/entity-factory';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { IRequestDataState } from '../types/entity.types';
+import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
@@ -59,11 +60,16 @@ export class RecursiveDeleteEffect {
     })
   );
 
+  @Effect()
   deleteComplete$ = this.actions$.ofType<RecursiveDeleteComplete>(RECURSIVE_ENTITY_DELETE_COMPLETE).pipe(
     withLatestFrom(this.store.select(getAPIRequestDataState)),
-    map(([action, state]) => {
+    mergeMap(([action, state]) => {
       const tree = this.getTree(action, state);
-      return new SetTreeDeleted(action.guid, tree);
+      const actions = Object.keys(tree).map<Action>(key => {
+        return new ClearPaginationOfType(key);
+      });
+      actions.unshift(new SetTreeDeleted(action.guid, tree));
+      return actions;
     })
   );
 

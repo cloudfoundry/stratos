@@ -10,7 +10,6 @@ export function setChildEntitiesAsDeleting(state: IRequestDataState, action: Set
 
 export function setChildEntitiesAsDeleted(state: IRequestDataState, action: SetTreeDeleting) {
   const { tree } = action;
-  console.log(tree)
   return Object.keys(tree).reduce(reduceTreeToRequestState(tree, { busy: false, deleted: true }), { ...state });
 }
 
@@ -18,8 +17,6 @@ export function resetChildEntities(state: IRequestDataState, action: SetTreeDele
   const { tree } = action;
   return Object.keys(tree).reduce(reduceTreeToRequestState(tree, { busy: false, deleted: false }), { ...state });
 }
-
-
 
 function reduceTreeToRequestState(tree: IFlatTree, deleteObject: Partial<DeleteActionState>) {
   return (state: IRequestDataState, entityKey: string) => {
