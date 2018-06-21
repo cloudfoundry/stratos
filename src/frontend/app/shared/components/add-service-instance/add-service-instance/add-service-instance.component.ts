@@ -124,6 +124,10 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     return observableOf({ success: true });
   }
 
+  resetStoreData = () => {
+    this.store.dispatch(new ResetCreateServiceInstanceState());
+  }
+
   private getIdsFromRoute() {
     const serviceId = getIdFromRoute(this.activatedRoute, 'serviceId');
     const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
