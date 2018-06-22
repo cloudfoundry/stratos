@@ -12,10 +12,10 @@
         <mat-icon>delete</mat-icon>
       </button>
       <div *ngIf="appActions$ | async as appActions" class="app-page-header__actions">
-      <button mat-icon-button name="restart" *ngIf="appActions.restart" (click)="restartApplication()" matTooltip="Restart">
+        <button mat-icon-button name="restart" *ngIf="appActions.restart" (click)="restartApplication()" matTooltip="Restart">
         <mat-icon>settings_backup_restore</mat-icon>
        </button>
-      <span>
+        <span>
         <button mat-icon-button name="stop" *ngIf="appActions.stop" (click)="stopApplication()" matTooltip="Stop">
           <mat-icon>stop</mat-icon>
         </button>
@@ -23,13 +23,13 @@
           <mat-icon>play_arrow</mat-icon>
         </button>
       </span>
-      <button mat-icon-button name="cli" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/cli" matTooltip="CLI Info">
+        <button mat-icon-button name="cli" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/cli" matTooltip="CLI Info">
         <mat-icon>keyboard</mat-icon>
       </button>
+      </div>
     </div>
   </div>
-</div>
 </app-page-header>
-<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving application'" class="router-component">
+<app-loading-page [entityId]="applicationService.appGuid" [entitySchema]="schema" [text]="'Retrieving application'" class="router-component">
   <router-outlet></router-outlet>
 </app-loading-page>

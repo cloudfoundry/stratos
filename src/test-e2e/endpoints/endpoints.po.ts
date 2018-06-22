@@ -14,7 +14,7 @@ export function resetToLoggedIn(stateSetter, isAdmin) {
     });
 }
 
-const NONE_CONNECTED_MSG = 'There are no connected Cloud Foundry endpoints, connect with your personal credentials to get started.';
+const NONE_CONNECTED_MSG = 'There are no connected endpoints, connect with your personal credentials to get started.';
 
 export class EndpointsPage extends Page {
   helpers = new E2EHelpers();
@@ -39,7 +39,13 @@ export class EndpointsPage extends Page {
   }
 
   isWelcomeMessageAdmin() {
-    return this.checkWelcomeMessageText('There are no registered Cloud Foundry endpoints');
+    return this.isWelcomeMessageNonAdmin().then(okay => {
+      return okay ? this.isWelcomePromptAdmin() : false;
+    });
+  }
+
+  isWelcomePromptAdmin() {
+    return this.checkWelcomePromptText('Use the Endpoints view to register');
   }
 
   isWelcomeMessageNonAdmin() {
@@ -51,7 +57,15 @@ export class EndpointsPage extends Page {
   }
 
   private checkWelcomeMessageText(msg: string) {
-    const textEl = this.getWelcomeMessage().element(by.css('.first-line'));
+    return this.checkWelcomeText('.first-line', msg);
+  }
+
+  private checkWelcomePromptText(msg: string) {
+    return this.checkWelcomeText('.second-line', msg);
+  }
+
+  private checkWelcomeText(css: string, msg: string) {
+    const textEl = this.getWelcomeMessage().element(by.css(css));
     return textEl.getText().then((text) => {
       return text.trim().indexOf(msg) === 0;
     });

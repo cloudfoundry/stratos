@@ -13,6 +13,7 @@ dbProvider: mysql
 useLb: false
 console:
   port: 443
+  cookieDomain:
 # externalIP: 127.0.0.1
 images:
   console: stratos-console

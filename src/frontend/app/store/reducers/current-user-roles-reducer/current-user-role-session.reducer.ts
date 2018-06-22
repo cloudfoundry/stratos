@@ -1,16 +1,15 @@
+import { ScopeStrings } from '../../../core/current-user-permissions.config';
 import { VerifiedSession } from '../../actions/auth.actions';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
+import { SessionUser } from '../../types/auth.types';
 import {
-  ICurrentUserRolesState,
+  getDefaultEndpointRoles,
   IAllCfRolesState,
   ICfRolesState,
-  getDefaultEndpointRoles,
-  IStratosRolesState,
-  IGlobalRolesState
+  ICurrentUserRolesState,
+  IGlobalRolesState,
 } from '../../types/current-user-roles.types';
-import { SessionData, SessionDataEndpoint, SessionEndpoints, SessionUser, SessionEndpoint } from '../../types/auth.types';
-import { ScopeStrings } from '../../../core/current-user-permissions.config';
-import { EndpointActionComplete } from '../../actions/endpoint.actions';
-import { EndpointModel, INewlyConnectedEndpointInfo, EndpointUser } from '../../types/endpoint.types';
+import { EndpointUser, INewlyConnectedEndpointInfo } from '../../types/endpoint.types';
 
 interface PartialEndpoint {
   user: EndpointUser | SessionUser;
@@ -48,8 +47,8 @@ function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRoles
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
-    const isAdmin = internalRoles.scopes.includes(ScopeStrings.STRATOS_ADMIN);
-    internalRoles.isAdmin = isAdmin;
+    // The admin scope is configurable - so look at the flag provided by the backend
+    internalRoles.isAdmin = user.admin;
   }
 
   return {

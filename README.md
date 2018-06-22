@@ -13,10 +13,9 @@
 > If you are looking for the Stable, V1 version of Stratos, this is in the
 > [master](https://github.com/cloudfoundry-incubator/stratos/tree/master) branch.
 >
-> Development effort has switched over to Version 2. This is being developed in the v2-master branch which is set to be the GitHub project default.
+> Development effort has switched over to Version 2. This is being developed in the v2-master branch which is set as the GitHub project default.
 >
-> Version 2 does not currently have feature parity with the Version 1 - see the 
-> [Development Roadmap](docs/roadmap.md) for more information. Development efforts are focused on getting to a release of V2.
+> Version 2 is now feature complete and will be released in July - see the [Development Roadmap](docs/roadmap.md) for more information.
 ---
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.

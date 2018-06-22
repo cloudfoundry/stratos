@@ -31,7 +31,8 @@
   padding-top: 10px;
 }
 
-.meta-card-item-long-text {
+.meta-card-item-long-text,
+.meta-card-item-long-text-fixed {
   padding-top: 10px;
   .meta-card-item__value {
     padding-bottom: 10px;
@@ -41,5 +42,23 @@
   }
   .meta-card-item__key {
     display: none;
+  }
+}
+
+.meta-card-item-long-text-fixed {
+  .meta-card-item__value {
+    height: 54px;
+    line-height: 18px;
+    position: relative;
+    &::after {
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
+      bottom: 0;
+      content: '';
+      height: 1.2em;
+      position: absolute;
+      right: 0;
+      text-align: right;
+      width: 25%;
+    }
   }
 }

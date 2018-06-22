@@ -1,4 +1,5 @@
 import { ModuleWithProviders } from '@angular/core';
+
 import { StoreModule } from '@ngrx/store';
 
 import { AppState } from '../store/app-state';
@@ -579,7 +580,8 @@ const testInitialStoreState: AppState = {
     serviceInstance: {},
     serviceBinding: {},
     service: {},
-    githubCommits: {}
+    githubCommits: {},
+    domain: {}
   },
   dashboard: {
     sidenavOpen: true,
@@ -21732,6 +21734,7 @@ const testInitialStoreState: AppState = {
         },
         connectionStatus: 'connected',
         registered: true,
+        system_shared_token: false,
         metricsAvailable: false
       },
     },

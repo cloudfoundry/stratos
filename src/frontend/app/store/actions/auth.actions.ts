@@ -43,7 +43,8 @@ export class VerifiedSession implements Action {
 }
 
 export class InvalidSession implements Action {
-  constructor(public uaaError: boolean = false, public upgradeInProgress = false) { }
+  constructor(public uaaError: boolean = false, public upgradeInProgress = false,
+    public domainMismatch = false, public isSSOLogin = false) { }
   type = SESSION_INVALID;
 }
 

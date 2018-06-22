@@ -34,6 +34,5 @@ export class ServiceInstancesListConfigService extends CfServiceInstancesListCon
     };
   }
 
-  getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 }

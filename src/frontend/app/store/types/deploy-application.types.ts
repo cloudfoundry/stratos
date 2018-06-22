@@ -6,7 +6,6 @@ import { GithubCommit, GitBranch } from './github.types';
 export interface SourceType {
   name: string;
   id: string;
-  subType?: string;
 }
 
 export enum DeployState {

@@ -1,4 +1,3 @@
-
 import {
   of as observableOf,
   combineLatest as observableCombineLatest,
@@ -61,10 +60,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
     private http: HttpClient,
   ) {
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, http);
-    this.initDeployer();
-  }
-
-  private initDeployer() {
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
@@ -77,11 +72,13 @@ export class DeployApplicationStep3Component implements OnDestroy {
           return validated || status.error;
         })
       );
+    this.initDeployer();
+  }
+
+  private initDeployer() {
     this.deploySub = this.deployer.status$.pipe(
       filter(status => status.deploying),
-    ).subscribe(deploying => {
-      // Deploying
-    });
+    ).subscribe();
   }
 
   private destroyDeployer() {
@@ -118,6 +115,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Take user to applications
     const { cfGuid } = this.deployer;
     this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
+    if (this.appGuid) {
+      this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+    }
     return observableOf({ success: true });
   }
 

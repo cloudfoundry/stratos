@@ -12,6 +12,7 @@ import {
   VERIFY_SESSION,
 } from './../actions/auth.actions';
 import { RouterRedirect } from './routing.reducer';
+import { AppState } from '../app-state';
 
 export interface AuthUser {
   guid: string;
@@ -69,7 +70,8 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
       const sessionInvalid: InvalidSession = action;
       return {
         ...state,
-        sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress, sessionExpiresOn: null },
+        sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
+          domainMismatch: action.domainMismatch, isSSOLogin: action.isSSOLogin, sessionExpiresOn: null },
         verifying: false
       };
     case RouterActions.GO:
@@ -86,5 +88,5 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
 }
 
 export function selectSessionData() {
-  return (state) => state.auth.sessionData;
+  return (state: AppState) => state.auth.sessionData;
 }

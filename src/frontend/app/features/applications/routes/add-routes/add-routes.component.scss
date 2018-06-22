@@ -15,7 +15,7 @@
     display: flex;
     margin-bottom: 24px;
     margin-top: 24px;
-    &__btn {
+    &-btn {
       &:not(:first-of-type) {
         margin-left: 24px;
       }
@@ -29,25 +29,30 @@
       flex: 1;
       flex-direction: column;
     }
-    &__maptable {
+    &-maptable {
       min-width: 100%;
     }
-    &__message {
+    &-message {
       margin-bottom: 24px;
     }
-    &__toggle {
+    &-toggle {
       margin-bottom: 10px;
       margin-top: 24px;
       mat-checkbox {
         margin-left: 12px;
       }
     }
-    &__fields {
+    &-fields {
       display: flex;
       flex: 1;
       flex-direction: column;
+
+      mat-checkbox {
+        display: inline-block;
+        margin-top: 24px;
+      }
     }
-    &__buttons {
+    &-buttons {
       display: flex;
       justify-content: flex-end;
       margin-top: 24px;

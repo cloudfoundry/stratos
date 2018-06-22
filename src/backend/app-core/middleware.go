@@ -20,7 +20,14 @@ import (
 
 const cfSessionCookieName = "JSESSIONID"
 
-func handleSessionError(err error, doNotLog bool) error {
+const StratosDomainHeader = "x-stratos-domain"
+
+func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool) error {
+	// Add header so front-end knows SSO login is enabled
+	if config.SSOLogin {
+		c.Response().Header().Set("x-stratos-sso-login", "true")
+	}
+
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(
 			http.StatusServiceUnavailable,
@@ -54,7 +61,11 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 		// Don't log an error if we are verifying the session, as a failure is not an error
 		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
-		return handleSessionError(err, isVerify)
+		if isVerify {
+			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
+			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
+		}
+		return handleSessionError(p.Config, c, err, isVerify)
 	}
 }
 
@@ -116,7 +127,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		if err == nil {
 
 			// check their admin status in UAA
-			u, err := p.getUAAUser(userID.(string))
+			u, err := p.GetUAAUser(userID.(string))
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
@@ -126,7 +137,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		return handleSessionError(err, false)
+		return handleSessionError(p.Config, c, err, false)
 	}
 }
 

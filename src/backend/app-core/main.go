@@ -49,8 +49,12 @@ const (
 var appVersion string
 
 var (
+	// Standard clients
 	httpClient        = http.Client{}
 	httpClientSkipSSL = http.Client{}
+	// Clients to use typically for mutating operations - typically allow a longer request timeout
+	httpClientMutating        = http.Client{}
+	httpClientMutatingSkipSSL = http.Client{}
 )
 
 func cleanup(dbc *sql.DB, ss HttpSessionStore) {
@@ -102,7 +106,7 @@ func main() {
 	log.Infof("Stratos Version: %s", portalConfig.ConsoleVersion)
 
 	// Initialize the HTTP client
-	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
+	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPClientTimeoutMutatingInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
 	log.Info("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
@@ -366,6 +370,11 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	pc.HTTPS = true
 	pc.PluginConfig = make(map[string]string)
 
+	// Default to standard timeout if the mutating one is not configured
+	if pc.HTTPClientTimeoutMutatingInSecs == 0 {
+		pc.HTTPClientTimeoutMutatingInSecs = pc.HTTPClientTimeoutInSecs
+	}
+
 	return pc, nil
 }
 
@@ -441,7 +450,7 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 	return pp
 }
 
-func initializeHTTPClients(timeout int64, connectionTimeout int64) {
+func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeout int64) {
 	log.Debug("initializeHTTPClients")
 
 	// Common KeepAlive dialer shared by both transports
@@ -471,6 +480,11 @@ func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 	httpClientSkipSSL.Transport = trSkipSSL
 	httpClientSkipSSL.Timeout = time.Duration(timeout) * time.Second
 
+	// Clients with longer timeouts (use for mutating operations)
+	httpClientMutating.Transport = tr
+	httpClientMutating.Timeout = time.Duration(timeoutMutating) * time.Second
+	httpClientMutatingSkipSSL.Transport = trSkipSSL
+	httpClientMutatingSkipSSL.Timeout = time.Duration(timeoutMutating) * time.Second
 }
 
 func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
@@ -552,11 +566,28 @@ func (p *portalProxy) GetEndpointTypeSpec(typeName string) (interfaces.EndpointP
 }
 
 func (p *portalProxy) GetHttpClient(skipSSLValidation bool) http.Client {
+	return p.getHttpClient(skipSSLValidation, false)
+}
+
+func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client {
+	isMutating := req.Method != "GET" && req.Method != "HEAD"
+	return p.getHttpClient(skipSSLValidation, isMutating)
+}
+
+func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.Client {
 	var client http.Client
-	if skipSSLValidation {
-		client = httpClientSkipSSL
+	if !mutating {
+		if skipSSLValidation {
+			client = httpClientSkipSSL
+		} else {
+			client = httpClient
+		}
 	} else {
-		client = httpClient
+		if skipSSLValidation {
+			client = httpClientMutatingSkipSSL
+		} else {
+			client = httpClientMutating
+		}
 	}
 	return client
 }
@@ -592,6 +623,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
 	pp.POST("/v1/auth/logout", p.logout)
+
+	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
+	pp.GET("/v1/auth/sso_login_callback", p.loginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)

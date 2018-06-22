@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { combineLatest ,  Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';

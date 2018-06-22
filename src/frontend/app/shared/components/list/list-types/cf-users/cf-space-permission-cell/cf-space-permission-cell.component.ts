@@ -1,19 +1,24 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map, tap } from 'rxjs/operators';
+import { combineLatest, of as observableOf } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
+import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
-import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -25,30 +30,71 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
 
   constructor(
     public store: Store<AppState>,
-    public cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService
+    cfUserService: CfUserService,
+    private userPerms: CurrentUserPermissionsService,
+    confirmDialog: ConfirmationDialogService
   ) {
-    super();
-  }
-
-  protected setChipConfig(row: APIResource<CfUser>) {
-    const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity);
-    const userPermInfo = arrayHelper.flatten<ICellPermissionList<SpaceUserRoleNames>>(
-      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row))
+    super(store, confirmDialog, cfUserService);
+    this.chipsConfig$ = combineLatest(
+      this.rowSubject.asObservable(),
+      this.config$.pipe(switchMap(config => config.org$)),
+      this.config$.pipe(switchMap(config => config.spaces$))
+    ).pipe(
+      switchMap(([user, org, spaces]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[]]) => {
+        const permissionList = this.createPermissions(user, spaces && spaces.length ? spaces : null);
+        // If we're showing spaces from multiple orgs prefix the org name to the space name
+        return org ? observableOf(this.getChipConfig(permissionList)) : this.prefixOrgName(permissionList);
+      })
     );
-    this.chipsConfig = this.getChipConfig(userPermInfo);
   }
 
-  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>) {
+  private prefixOrgName(permissionList) {
+    // Find all unique org guids
+    const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
+    // Find names of all orgs
+    const orgNames$ = combineLatest(
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)))
+    ).pipe(
+      map((orgs: APIResource<IOrganization>[]) => {
+        const orgNames: { [orgGuid: string]: string } = {};
+        orgs.forEach(org => {
+          orgNames[org.metadata.guid] = org.entity.name;
+        });
+        return orgNames;
+      })
+    );
+    return combineLatest(
+      observableOf(permissionList),
+      orgNames$
+    ).pipe(
+      map(([permissions, orgNames]) => {
+        // Prefix permission name with org name
+        permissions.forEach(permission => {
+          permission.name = `${orgNames[permission.orgGuid]}: ${permission.name}`;
+        });
+        return this.getChipConfig(permissions);
+      })
+    );
+  }
+
+  private createPermissions(row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
+    const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity, spaces);
+    return arrayHelper.flatten<ICellPermissionList<SpaceUserRoleNames>>(
+      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row, spaces))
+    );
+  }
+
+  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]) {
     return getSpaceRoles(spacePerms.permissions).map(perm => {
-      const updatingKey = RemoveUserPermission.generateUpdatingKey(
+      const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
         row.metadata.guid
       );
       return {
         ...perm,
-        name: spacePerms.name,
+        name: !spaces || spaces.length > 1 ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
+        userName: row.entity.username,
         userGuid: row.metadata.guid,
         busy: new EntityMonitor(
           this.store,
@@ -65,13 +111,14 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     });
   }
 
-  public removePermission(cellPermission: ICellPermissionList<SpaceUserRoleNames>) {
-    this.store.dispatch(new RemoveUserPermission(
+  public removePermission(cellPermission: ICellPermissionList<SpaceUserRoleNames>, updateConnectedUser: boolean) {
+    this.store.dispatch(new RemoveUserRole(
       this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       cellPermission.userGuid,
       cellPermission.guid,
       cellPermission.key,
-      true
+      true,
+      updateConnectedUser
     ));
   }
 

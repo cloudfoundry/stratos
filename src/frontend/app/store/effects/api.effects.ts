@@ -124,6 +124,9 @@ export class APIEffect {
       }),
       mergeMap(response => {
         const { entities, totalResults, totalPages, errors = [] } = response;
+        if (requestType === 'fetch' && (errors && errors.length > 0)) {
+          this.handleApiEvents(errors);
+        }
         errors.forEach(error => {
           if (error.error) {
             const fakedAction = { ...actionClone, endpointGuid: error.guid };
@@ -222,13 +225,21 @@ export class APIEffect {
         const endpoint = resData ? resData[cfGuid] as JetStreamError : null;
         const succeeded = !endpoint || !endpoint.error;
         const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
-        const errorResponse = endpoint ? endpoint.errorResponse : { code: 0, description: 'Unknown', error_code: '0' };
+        let errorResponse = null;
+        if (!succeeded) {
+          errorResponse = endpoint && (!!endpoint.errorResponse && typeof endpoint.errorResponse !== 'string') ?
+            endpoint.errorResponse : {} as JetStreamCFErrorResponse;
+          // Use defaults if values are not provided
+          errorResponse.code = errorResponse.code || 0;
+          errorResponse.description = errorResponse.description || 'Unknown';
+          errorResponse.error_code = errorResponse.error_code || '0';
+        }
         return {
           error: !succeeded,
           errorCode: succeeded ? '200' : errorCode,
           guid: cfGuid,
           url: action.options.url,
-          errorResponse: succeeded ? null : errorResponse,
+          errorResponse: errorResponse,
         };
       });
   }
@@ -362,10 +373,7 @@ export class APIEffect {
     totalPages,
     errors: APIErrorCheck[]
   } {
-    const endpointChecks = this.checkForErrors(resData, apiAction);
-    if (endpointChecks) {
-      this.handleApiEvents(endpointChecks);
-    }
+    const errors = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
     let totalPages = 0;
@@ -387,7 +395,7 @@ export class APIEffect {
       entities,
       totalResults,
       totalPages,
-      errors: endpointChecks
+      errors
     };
   }
 

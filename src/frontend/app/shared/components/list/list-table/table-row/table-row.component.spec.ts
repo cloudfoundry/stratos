@@ -1,13 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TableRowComponent } from './table-row.component';
-import { Observable, of as observableOf } from 'rxjs';
-import { CoreModule } from '../../../../../core/core.module';
-import { SharedModule } from '../../../../shared.module';
 import { CdkTableModule } from '@angular/cdk/table';
-import { setTimeout } from 'timers';
 import { Component } from '@angular/core';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { of as observableOf } from 'rxjs';
+import { CoreModule } from '../../../../../core/core.module';
+import { TableRowComponent } from './table-row.component';
+
 
 describe('TableRowComponent', () => {
 

@@ -19,13 +19,13 @@ export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
 export const GET_ALL_FAILED = '[Users] Get all failed';
 
-export const REMOVE_PERMISSION = '[Users] Remove Permission';
-export const REMOVE_PERMISSION_SUCCESS = '[Users]  Remove Permission success';
-export const REMOVE_PERMISSION_FAILED = '[Users]  Remove Permission failed';
+export const REMOVE_ROLE = '[Users] Remove role';
+export const REMOVE_ROLE_SUCCESS = '[Users]  Remove role success';
+export const REMOVE_ROLE_FAILED = '[Users]  Remove role failed';
 
-export const ADD_PERMISSION = '[Users] Add Permission';
-export const ADD_PERMISSION_SUCCESS = '[Users]  Add Permission success';
-export const ADD_PERMISSION_FAILED = '[Users]  Add Permission failed';
+export const ADD_ROLE = '[Users] Add role';
+export const ADD_ROLE_SUCCESS = '[Users]  Add role success';
+export const ADD_ROLE_FAILED = '[Users]  Add role failed';
 
 const defaultUserRelations = [
   createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
@@ -101,7 +101,7 @@ export class GetCFUser extends CFStartAction implements IRequestAction {
   options: RequestOptions;
 }
 
-export class ChangeUserPermission extends CFStartAction implements IRequestAction {
+export class ChangeUserRole extends CFStartAction implements IRequestAction {
   constructor(
     public endpointGuid: string,
     public userGuid: string,
@@ -110,10 +110,11 @@ export class ChangeUserPermission extends CFStartAction implements IRequestActio
     public permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     public entityGuid: string,
     public isSpace = false,
+    public updateConnectedUser = false
   ) {
     super();
     this.guid = entityGuid;
-    this.updatingKey = ChangeUserPermission.generateUpdatingKey(permissionTypeKey, userGuid);
+    this.updatingKey = ChangeUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
     this.options = new RequestOptions();
     this.options.url = `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`;
     this.options.method = method;
@@ -132,42 +133,46 @@ export class ChangeUserPermission extends CFStartAction implements IRequestActio
   }
 }
 
-export class AddUserPermission extends ChangeUserPermission {
+export class AddUserRole extends ChangeUserRole {
   constructor(
     endpointGuid: string,
     userGuid: string,
     entityGuid: string,
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
-    isSpace = false
+    isSpace = false,
+    updateConnectedUser = false
   ) {
     super(
       endpointGuid,
       userGuid,
       'put',
-      [ADD_PERMISSION, ADD_PERMISSION_SUCCESS, ADD_PERMISSION_FAILED],
+      [ADD_ROLE, ADD_ROLE_SUCCESS, ADD_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
-      isSpace
+      isSpace,
+      updateConnectedUser,
     );
   }
 }
 
-export class RemoveUserPermission extends ChangeUserPermission {
+export class RemoveUserRole extends ChangeUserRole {
   constructor(
     endpointGuid: string,
     userGuid: string,
     entityGuid: string,
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
-    isSpace = false
+    isSpace = false,
+    updateConnectedUser = false
   ) {
     super(
       endpointGuid,
       userGuid,
       'delete',
-      [REMOVE_PERMISSION, REMOVE_PERMISSION_SUCCESS, REMOVE_PERMISSION_FAILED],
+      [REMOVE_ROLE, REMOVE_ROLE_SUCCESS, REMOVE_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
-      isSpace
+      isSpace,
+      updateConnectedUser
     );
   }
 }

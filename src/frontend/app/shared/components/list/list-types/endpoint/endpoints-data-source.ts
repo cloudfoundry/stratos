@@ -1,5 +1,4 @@
 import { Store } from '@ngrx/store';
-import { pairwise, tap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
@@ -13,6 +12,8 @@ import { DataFunctionDefinition, ListDataSource } from '../../data-sources-contr
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from './endpoint-data-source.helpers';
+
+import { pairwise, tap } from 'rxjs/operators';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -61,6 +62,7 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       getRowUniqueId: object => object.guid,
       getEmptyType: () => ({
         name: '',
+        system_shared_token: false,
         metricsAvailable: false
       }),
       paginationKey: GetAllEndpoints.storeKey,
