@@ -127,19 +127,20 @@ export class APIEffect {
 
         let fakedAction, errorMessage;
         errors.forEach(error => {
-          // Dispatch a specific error action for the endpoint that's failed
-          fakedAction = { ...actionClone, endpointGuid: error.guid };
-          errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
-          this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction, errorMessage));
+          if (error.error) {
+            // Dispatch a error action for the specific endpoint that's failed
+            fakedAction = { ...actionClone, endpointGuid: error.guid };
+            errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
+            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction, errorMessage));
+          }
         });
 
-        // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid future validation.
+        // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
-        const error = errors[0];
-        if (errors.length === 1 && error.error) {
+        if (errors.length === 1 && errors[0].error) {
           this.store.dispatch(new WrapperRequestActionFailed(
             errorMessage,
-            { ...actionClone, endpointGuid: error.guid },
+            { ...actionClone, endpointGuid: errors[0].guid },
             requestType
           ));
           return [];
