@@ -12,7 +12,6 @@ The main focus of this release are bug fixes and hardening for a first release c
 - SSO Login Support [\#2491](https://github.com/cloudfoundry-incubator/stratos/pull/2491),  [\#2495](https://github.com/cloudfoundry-incubator/stratos/pull/2495)
 - Add No Javascript message [\#2444](https://github.com/cloudfoundry-incubator/stratos/issues/2444)
 - Show users without usernames [\#2496](https://github.com/cloudfoundry-incubator/stratos/pull/2496)
-- Support OAuth login to console - V2 [\#2479](https://github.com/cloudfoundry-incubator/stratos/pull/2479)
 - Add support for longer timeout for mutating operations \(POST etc\) [\#2401](https://github.com/cloudfoundry-incubator/stratos/pull/2401)
 - Add Cookie Domain support [\#2432](https://github.com/cloudfoundry-incubator/stratos/pull/2432)
 - Minor UI improvements [\#2384](https://github.com/cloudfoundry-incubator/stratos/pull/2384), [\#2383](https://github.com/cloudfoundry-incubator/stratos/pull/2383), [\#2378](https://github.com/cloudfoundry-incubator/stratos/pull/2378), [\#2499](https://github.com/cloudfoundry-incubator/stratos/pull/2499), [\#2482](https://github.com/cloudfoundry-incubator/stratos/pull/2482), [\#2481](https://github.com/cloudfoundry-incubator/stratos/pull/2481), [\#2394](https://github.com/cloudfoundry-incubator/stratos/pull/2394),  [\#2457](https://github.com/cloudfoundry-incubator/stratos/issues/2457), [\#2447](https://github.com/cloudfoundry-incubator/stratos/issues/2447)
