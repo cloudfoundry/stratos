@@ -41,7 +41,6 @@ The main focus of this release are bug fixes and hardening for a first release c
 - Fix layout on summary pages [\#2482](https://github.com/cloudfoundry-incubator/stratos/pull/2482)
 - Fix error shown when cancelling out of a freshly loaded create space stepper [\#2478](https://github.com/cloudfoundry-incubator/stratos/pull/2478)
 - Users tables: Only show org/space name in pills when needed [\#2443](https://github.com/cloudfoundry-incubator/stratos/pull/2443)
-- Update v2 info on readme, fix typo in roadmap doc [\#2442](https://github.com/cloudfoundry-incubator/stratos/pull/2442)
 - Fix issue where space count is wrong after deleting a space [\#2439](https://github.com/cloudfoundry-incubator/stratos/pull/2439)
 - Update the connected user roles section of store on roles change [\#2435](https://github.com/cloudfoundry-incubator/stratos/pull/2435)
 - Fix list state \(deleting/etc\) [\#2434](https://github.com/cloudfoundry-incubator/stratos/pull/2434)
