@@ -60,7 +60,7 @@ The main focus of this release are bug fixes and hardening for a first release c
 - Fix various application deploy bugs [\#2372](https://github.com/cloudfoundry-incubator/stratos/pull/2372)
 
 
-# 2.0.0 Beta 1
+## 2.0.0 Beta 1
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...v2.0.0-beta-001)
 
@@ -84,7 +84,7 @@ The following features in version 1 are not currently available in version 2:
 - Extensions/Plugins - The ability to extend the UI at various points will be added in the next minor version.
 - Drag and Drop for Application Deployment - You can not drag and drop a file/folder or url onto the application deployment UI - you have to use the browse UI.
 
-# 1.1.0 Release
+## 1.1.0 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...1.1.0)
 
