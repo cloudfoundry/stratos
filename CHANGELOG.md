@@ -27,7 +27,7 @@ The main focus of this release are bug fixes and hardening for a first release c
 - Exception on create space stepper when you cancel out [\#2454](https://github.com/cloudfoundry-incubator/stratos/issues/2454)
 - Error when creating a Space with a space character in the name [\#2451](https://github.com/cloudfoundry-incubator/stratos/issues/2451)
 - Fix backend error logging [\#2484](https://github.com/cloudfoundry-incubator/stratos/pull/2484), [\#2407](https://github.com/cloudfoundry-incubator/stratos/pull/2407), [\#2413](https://github.com/cloudfoundry-incubator/stratos/pull/2413)
-- Fix for panic when res is not set in error logging [\#2441] (https://github.com/cloudfoundry-incubator/stratos/pull/2441)
+- Fix for panic when res is not set in error logging [\#2441](https://github.com/cloudfoundry-incubator/stratos/pull/2441)
 - Firefox rendering - focus border on drop-down menu items [\#2446](https://github.com/cloudfoundry-incubator/stratos/issues/2446)
 - Users Permissions: Removing the last role \(Org User\) results in an exception [\#2438](https://github.com/cloudfoundry-incubator/stratos/issues/2438)
 - Users Permissions: Assigning a role to a user that has none results in an exception [\#2428](https://github.com/cloudfoundry-incubator/stratos/issues/2428)
