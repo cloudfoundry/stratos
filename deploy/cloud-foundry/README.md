@@ -2,7 +2,7 @@
 
 ## Deployment Steps
 
-The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
+The quickest way to install Stratos is to deploy it as a Cloud Foundry application. To do so, clone the `stratos` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
 
 ```
 git clone https://github.com/cloudfoundry-incubator/stratos
@@ -63,11 +63,11 @@ cf logs console --recent | tee cfconsole.log
 
 ### Application Security Groups
 
-If you have problems when deploying Stratos UI as a CLoud Foundry application, check that the Application Security Group you have will allow the Stratos UI to communicate with the Cloud Foundry API.
+If you have problems when deploying Stratos UI as a Cloud Foundry application, check that the Application Security Group you have will allow Stratos to communicate with the Cloud Foundry API.
 
 For information on the default ASGs, see [here](https://docs.cloudfoundry.org/concepts/asg.html#default-asg).
 
-To configure a new ASG for the organization and space that are using for the Stratos UI, first create a new ASG definition, for example:
+To configure a new ASG for the organization and space that are using Stratos, first create a new ASG definition, for example:
 
 ```
 [
@@ -102,7 +102,7 @@ cf bind-security-group NAME ORG SPACE
 
 ### Console fails to start
 
-The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.  
+The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.  
 To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`. 
 
 ```
