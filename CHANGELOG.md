@@ -15,7 +15,7 @@ The main focus of this release are bug fixes and hardening for a first release c
 - Support OAuth login to console - V2 [\#2479](https://github.com/cloudfoundry-incubator/stratos/pull/2479)
 - Add support for longer timeout for mutating operations \(POST etc\) [\#2401](https://github.com/cloudfoundry-incubator/stratos/pull/2401)
 - Add Cookie Domain support [\#2432](https://github.com/cloudfoundry-incubator/stratos/pull/2432)
-- Minor UI improvements [\#2384](https://github.com/cloudfoundry-incubator/stratos/pull/2384), [\#2383](https://github.com/cloudfoundry-incubator/stratos/pull/2383), [\#2378](https://github.com/cloudfoundry-incubator/stratos/pull/2378), [\#2499](https://github.com/cloudfoundry-incubator/stratos/pull/2499), [\#2482](https://github.com/cloudfoundry-incubator/stratos/pull/2482), [\#2481](https://github.com/cloudfoundry-incubator/stratos/pull/2481), [\#2394](https://github.com/cloudfoundry-incubator/stratos/pull/2394),  [\#2457](https://github.com/cloudfoundry-incubator/stratos/issues/2457)
+- Minor UI improvements [\#2384](https://github.com/cloudfoundry-incubator/stratos/pull/2384), [\#2383](https://github.com/cloudfoundry-incubator/stratos/pull/2383), [\#2378](https://github.com/cloudfoundry-incubator/stratos/pull/2378), [\#2499](https://github.com/cloudfoundry-incubator/stratos/pull/2499), [\#2482](https://github.com/cloudfoundry-incubator/stratos/pull/2482), [\#2481](https://github.com/cloudfoundry-incubator/stratos/pull/2481), [\#2394](https://github.com/cloudfoundry-incubator/stratos/pull/2394),  [\#2457](https://github.com/cloudfoundry-incubator/stratos/issues/2457), [\#2447](https://github.com/cloudfoundry-incubator/stratos/issues/2447)
 
 **Fixes:**
 
@@ -29,7 +29,6 @@ The main focus of this release are bug fixes and hardening for a first release c
 - Fix backend error logging [\#2484](https://github.com/cloudfoundry-incubator/stratos/pull/2484)
 - Fix for panic when res is not set in error logging [\#2441], [\#2407](https://github.com/cloudfoundry-incubator/stratos/pull/2407), [\#2413](https://github.com/cloudfoundry-incubator/stratos/pull/2413)(https://github.com/cloudfoundry-incubator/stratos/pull/2441)
 - Firefox rendering - focus border on drop-down menu items [\#2446](https://github.com/cloudfoundry-incubator/stratos/issues/2446)
-- Cf in Cf/org/space should be all caps [\#2447](https://github.com/cloudfoundry-incubator/stratos/issues/2447)
 - Users Permissions: Removing the last role \(Org User\) results in an exception [\#2438](https://github.com/cloudfoundry-incubator/stratos/issues/2438)
 - Users Permissions: Assigning a role to a user that has none results in an exception [\#2428](https://github.com/cloudfoundry-incubator/stratos/issues/2428)
 - Exception thrown when adding space to empty org [\#2418](https://github.com/cloudfoundry-incubator/stratos/issues/2418)
