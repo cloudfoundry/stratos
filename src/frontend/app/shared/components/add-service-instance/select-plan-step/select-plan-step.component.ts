@@ -72,8 +72,6 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   servicePlans: ServicePlan[];
 
-  servicePlanVisibilitySub: Subscription;
-  changeSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
   stepperForm: FormGroup;
@@ -170,8 +168,6 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.subscription);
-    safeUnsubscribe(this.changeSubscription);
-    safeUnsubscribe(this.servicePlanVisibilitySub);
   }
 
   getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {

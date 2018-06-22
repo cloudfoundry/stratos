@@ -109,7 +109,17 @@ function populateParentEntity(state, successAction) {
   const childRelation = parentEntityTree.rootRelation.childRelations.find(rel => rel.entityKey === successAction.apiAction.entityKey);
   const entityParamName = childRelation.paramName;
 
-  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || {};
+  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state);
+  if (!newParentEntity) {
+    // We haven't yet fetched the parent entity so create one to store this list in. This can be used to fetch the child list in the future.
+    // NOTE - This should not contain the metadata property as the lack thereof forces the entity to fail validation and to be fetched
+    // properly with all it's properties
+    newParentEntity = {
+      entity: {
+        guid: parentGuid,
+      }
+    };
+  }
   newParentEntity = {
     ...newParentEntity,
     entity: {

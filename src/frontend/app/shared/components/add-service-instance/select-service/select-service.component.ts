@@ -50,6 +50,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       combineLatest(
         this.store.select(selectCreateServiceInstanceCfGuid),
         this.store.select(selectCreateServiceInstanceSpaceGuid)
+      ).pipe(
+       filter(([p, q]) => !!p && !!q)
       );
     const schema = entityFactory(serviceSchemaKey);
     this.isFetching$ = cfSpaceGuid$.pipe(

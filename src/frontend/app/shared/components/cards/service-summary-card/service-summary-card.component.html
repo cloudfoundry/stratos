@@ -8,20 +8,22 @@
   <app-meta-card-item customStyle="long-text">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
-      {{ servicesService.getServiceDescription() | async }}
+      <span class="service-summary__description">
+        {{ servicesService.getServiceDescription() | async }}
+      </span>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Active</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.active" type="yes-no">
+      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.active" type="yes-no" subtle="true">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Bindable</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.bindable" type="yes-no">
+      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.bindable" type="yes-no" subtle="true">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>

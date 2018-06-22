@@ -9,6 +9,8 @@ import { IService, IServiceExtra } from '../../../core/cf-api-svc.types';
 })
 export class ServiceIconComponent implements OnInit {
 
+  image = '';
+
   extraInfo: IServiceExtra;
   @Input('service') service: APIResource<IService>;
 
@@ -18,19 +20,13 @@ export class ServiceIconComponent implements OnInit {
   ngOnInit() {
     if (this.service) {
       this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
+      if (this.extraInfo && this.extraInfo.imageUrl) {
+        this.image = this.extraInfo.imageUrl;
+      }
     }
   }
 
-  hasImage() {
-    return !!(this.getImageUrl());
-  }
-
-  getImageUrl() {
-
-    let image = '';
-    if (this.extraInfo && this.extraInfo.imageUrl) {
-      image = this.extraInfo.imageUrl;
-    }
-    return image;
+  imageLoadError() {
+    this.image = '';
   }
 }

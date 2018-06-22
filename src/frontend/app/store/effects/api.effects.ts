@@ -125,22 +125,32 @@ export class APIEffect {
       }),
       mergeMap(response => {
         const { entities, totalResults, totalPages, errors = [] } = response;
+        if (requestType === 'fetch' && (errors && errors.length > 0)) {
+          this.handleApiEvents(errors);
+        }
+
+        let fakedAction, errorMessage;
         errors.forEach(error => {
           if (error.error) {
-            const fakedAction = { ...actionClone, endpointGuid: error.guid };
-            const errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
+            // Dispatch a error action for the specific endpoint that's failed
+            fakedAction = { ...actionClone, endpointGuid: error.guid };
+            errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
             this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction, errorMessage));
-            this.store.dispatch(new WrapperRequestActionFailed(
-              errorMessage,
-              { ...actionClone, endpointGuid: error.guid },
-              requestType
-            ));
           }
         });
-        const hasError = errors.findIndex(error => error.error) >= 0;
-        if (hasError) {
+
+        // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
+        // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
+        if (errors.length === 1 && errors[0].error) {
+          this.store.dispatch(new WrapperRequestActionFailed(
+            errorMessage,
+            { ...actionClone, endpointGuid: errors[0].guid },
+            requestType
+          ));
+          // TODO: RC What happens if we fail delete... the child entities will remain as 'deleting'?
           return [];
         }
+
         if (requestType === 'delete') {
           this.store.dispatch(new RecursiveDeleteComplete(
             apiAction.guid,
@@ -148,6 +158,7 @@ export class APIEffect {
             entityFactory(apiAction.entityKey))
           );
         }
+
         return [new ValidateEntitiesStart(
           actionClone,
           entities.result,
@@ -232,7 +243,7 @@ export class APIEffect {
         const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
         let errorResponse = null;
         if (!succeeded) {
-          errorResponse = endpoint && (typeof endpoint.errorResponse !== 'string') ?
+          errorResponse = endpoint && (!!endpoint.errorResponse && typeof endpoint.errorResponse !== 'string') ?
             endpoint.errorResponse : {} as JetStreamCFErrorResponse;
           // Use defaults if values are not provided
           errorResponse.code = errorResponse.code || 0;
@@ -270,7 +281,7 @@ export class APIEffect {
     });
   }
 
-  getEntities(apiAction: IRequestAction, data): {
+  getEntities(apiAction: IRequestAction, data, errors: APIErrorCheck[]): {
     entities: NormalizedResponse
     totalResults: number,
     totalPages: number,
@@ -278,7 +289,7 @@ export class APIEffect {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
-      .filter(guid => data[guid] !== null)
+      .filter(guid => data[guid] !== null && !errors.findIndex(error => error.guid === guid))
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
@@ -378,16 +389,13 @@ export class APIEffect {
     totalPages,
     errors: APIErrorCheck[]
   } {
-    const endpointChecks = this.checkForErrors(resData, apiAction);
-    if (endpointChecks) {
-      this.handleApiEvents(endpointChecks);
-    }
+    const errors = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
     let totalPages = 0;
 
     if (resData) {
-      const entityData = this.getEntities(apiAction, resData);
+      const entityData = this.getEntities(apiAction, resData, errors);
       entities = entityData.entities;
       totalResults = entityData.totalResults;
       totalPages = entityData.totalPages;
@@ -403,7 +411,7 @@ export class APIEffect {
       entities,
       totalResults,
       totalPages,
-      errors: endpointChecks
+      errors
     };
   }
 

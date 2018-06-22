@@ -14,7 +14,7 @@
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item *ngIf="multipleConnectedEndpoints$ | async; else singleEndpoint">
-    <app-meta-card-key>Cf/Org/Space</app-meta-card-key>
+    <app-meta-card-key>CF/Org/Space</app-meta-card-key>
     <app-meta-card-value>
       {{endpointName$ | async }}/{{ row.entity.space.entity.organization.entity.name }}/{{ row.entity.space.entity.name }}
     </app-meta-card-value>

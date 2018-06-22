@@ -33,6 +33,20 @@ Note:
 ## Associate Cloud Foundry database service
 Follow instructions [here](db-migration/README.md).
 
+## Use SSO Login
+
+By default Stratos will present its own login UI and only supports username and password authentication with your UAA. You can configure Stratos to use UAA's login UI by specifying the  the `SSO_LOGIN` environment variable in the manifest, for example:
+
+```
+applications:
+- name: console
+  ... memory, disk settings here
+  env:
+    SSO_LOGIN: true
+```
+
+When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
+
 ## Troubleshooting
 
 ### Creating logs for recent deployments
@@ -152,3 +166,4 @@ applications:
   env:
     CF_API_FORCE_SECURE: true
 ```
+
