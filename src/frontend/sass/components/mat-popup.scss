@@ -1,4 +1,4 @@
 // Remove inner focus border on Firefoc
-button.mat-menu-item::-moz-focus-inner {
+.mat-menu-item::-moz-focus-inner {
   border: 0;
 }
