@@ -8,10 +8,44 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <noscript>
+    <style>
+      .stratos {
+        height: 100vh;
+        margin: 0;
+        width: 100vw;
+      }
+      .no-javascript {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+      }
+      .message {
+        font-family: Arial, Helvetica;
+        font-size: 24px;
+        margin-bottom: 24px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+      }
+    </style>
+  </noscript>
+
 </head>
 
 <body class="stratos">
   <app-root></app-root>
+  <noscript>
+    <div class="no-javascript">
+      <div class="message title">STRATOS</div>
+      <div class="message">Javascript is required to run Stratos</div>
+      <div class="message">Please enable Javascript in your browser and refresh this page</div>
+    </div>
+  </noscript>
 </body>
 
 </html>
