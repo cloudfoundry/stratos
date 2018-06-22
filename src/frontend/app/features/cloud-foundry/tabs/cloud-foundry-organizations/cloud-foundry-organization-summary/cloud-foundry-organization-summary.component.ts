@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-
-import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { goToAppWall } from '../../../cf.helpers';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+
 import { AppState } from '../../../../../store/app-state';
-import { RecursiveDelete } from '../../../../../store/effects/recursive-entity-delete.effect';
-import { entityFactory, organizationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { goToAppWall } from '../../../cf.helpers';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',

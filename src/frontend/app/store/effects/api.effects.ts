@@ -147,7 +147,6 @@ export class APIEffect {
             { ...actionClone, endpointGuid: errors[0].guid },
             requestType
           ));
-          // TODO: RC What happens if we fail delete... the child entities will remain as 'deleting'?
           return [];
         }
 
