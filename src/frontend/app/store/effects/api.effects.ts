@@ -227,7 +227,7 @@ export class APIEffect {
         const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
         let errorResponse = null;
         if (!succeeded) {
-          errorResponse = endpoint && (typeof endpoint.errorResponse !== 'string') ?
+          errorResponse = endpoint && (!!endpoint.errorResponse && typeof endpoint.errorResponse !== 'string') ?
             endpoint.errorResponse : {} as JetStreamCFErrorResponse;
           // Use defaults if values are not provided
           errorResponse.code = errorResponse.code || 0;
