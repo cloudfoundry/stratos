@@ -5,6 +5,7 @@ metadata:
   namespace: stratos
   annotations:
     nginx.org/ssl-services: "stratos-ui-ext"
+    nginx.org/websocket-services: "stratos-ui-ext"
 spec:
   rules:
   - host: stratos.127.0.0.1.xip.io
