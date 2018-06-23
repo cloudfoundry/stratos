@@ -67,7 +67,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
     return cellPermissionList.map(perm => {
       const chipConfig = new AppChip<ICellPermissionList<T>>();
       chipConfig.key = perm;
-      chipConfig.value = perm.name ? `${perm.name}: ${perm.string}` : perm.string;
+      chipConfig.value = this.permissionString(perm);
       chipConfig.busy = perm.busy;
       chipConfig.clearAction = chip => {
         const permission = chip.key;
@@ -95,7 +95,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   protected removePermissionWarn(cellPermission: ICellPermissionList<T>) {
     const confirmation = new ConfirmationDialogConfig(
       'Remove Permission',
-      `Are you sure you want to remove permission '${cellPermission.name}: ${cellPermission.string}'` +
+      `Are you sure you want to remove permission '${this.permissionString(cellPermission)}'` +
       ` from user '${cellPermission.userName}'?`,
       'Delete',
       true
@@ -109,6 +109,10 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
         this.removePermission(cellPermission, updateConnectedUser);
       });
     });
+  }
+
+  private permissionString(perm: ICellPermissionList<T>): string {
+    return perm.name ? `${perm.name}: ${perm.string}` : perm.string;
   }
 
   protected removePermission(cellPermission: ICellPermissionList<T>, updateConnectedUser: boolean) {
