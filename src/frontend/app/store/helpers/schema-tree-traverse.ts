@@ -36,7 +36,7 @@ export class EntitySchemaTreeBuilder {
     if (Array.isArray(schema)) {
       schema = schema[0];
     }
-    if (!schema || !entity) {
+    if (!schema || !entity || this.entityExcludes.includes(schema.key)) {
       return flatTree;
     }
     const keys = schema.definition ? Object.keys(schema.definition) : null;
@@ -80,9 +80,6 @@ export class EntitySchemaTreeBuilder {
   }
 
   private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    if (this.entityExcludes.includes(key)) {
-      return flatTree;
-    }
     const ids = flatTree[key] || new Set<string>();
     flatTree[key] = ids.add(newId);
     return flatTree;
