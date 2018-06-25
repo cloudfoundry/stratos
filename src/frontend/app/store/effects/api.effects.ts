@@ -120,13 +120,13 @@ export class APIEffect {
         return this.handleMultiEndpoints(response, actionClone);
       }),
       mergeMap(response => {
-        const { entities, totalResults, totalPages, errors = [] } = response;
-        if (requestType === 'fetch' && (errors && errors.length > 0)) {
-          this.handleApiEvents(errors);
+        const { entities, totalResults, totalPages, errorsCheck = [] } = response;
+        if (requestType === 'fetch' && (errorsCheck && errorsCheck.length > 0)) {
+          this.handleApiEvents(errorsCheck);
         }
 
         let fakedAction, errorMessage;
-        errors.forEach(error => {
+        errorsCheck.forEach(error => {
           if (error.error) {
             // Dispatch a error action for the specific endpoint that's failed
             fakedAction = { ...actionClone, endpointGuid: error.guid };
@@ -137,10 +137,10 @@ export class APIEffect {
 
         // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
-        if (errors.length === 1 && errors[0].error) {
+        if (errorsCheck.length === 1 && errorsCheck[0].error) {
           this.store.dispatch(new WrapperRequestActionFailed(
             errorMessage,
-            { ...actionClone, endpointGuid: errors[0].guid },
+            { ...actionClone, endpointGuid: errorsCheck[0].guid },
             requestType
           ));
           return [];
@@ -268,7 +268,7 @@ export class APIEffect {
     });
   }
 
-  getEntities(apiAction: IRequestAction, data, errors: APIErrorCheck[]): {
+  getEntities(apiAction: IRequestAction, data, errorCheck: APIErrorCheck[]): {
     entities: NormalizedResponse
     totalResults: number,
     totalPages: number,
@@ -276,7 +276,7 @@ export class APIEffect {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
-      .filter(guid => data[guid] !== null && !errors.findIndex(error => error.guid === guid))
+      .filter(guid => data[guid] !== null && errorCheck.findIndex(error => error.guid === guid && !error.error) >= 0)
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
@@ -374,15 +374,15 @@ export class APIEffect {
     entities,
     totalResults,
     totalPages,
-    errors: APIErrorCheck[]
+    errorsCheck: APIErrorCheck[]
   } {
-    const errors = this.checkForErrors(resData, apiAction);
+    const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
     let totalPages = 0;
 
     if (resData) {
-      const entityData = this.getEntities(apiAction, resData, errors);
+      const entityData = this.getEntities(apiAction, resData, errorsCheck);
       entities = entityData.entities;
       totalResults = entityData.totalResults;
       totalPages = entityData.totalPages;
@@ -398,7 +398,7 @@ export class APIEffect {
       entities,
       totalResults,
       totalPages,
-      errors
+      errorsCheck
     };
   }
 
