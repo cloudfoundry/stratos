@@ -5,7 +5,7 @@ resources:
     branch: {{stratos-branch}}
     uri: git@github.com:((github-organization))((github-repository))
     private_key: {{github-private-key}}
-    tag_filter: "[0-9]*"
+    # tag_filter: "[0-9]*"
 - name: helm-chart-values-sle
   type: s3
   source:
@@ -44,7 +44,7 @@ jobs:
 - name: build-sle-helm-images
   plan:
   - get: stratos
-    trigger: true
+    # trigger: true
   - do:
     - task: generete-certs
       timeout: 2m
