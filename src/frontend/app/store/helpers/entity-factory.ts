@@ -191,21 +191,16 @@ entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
 const BuildpackSchema = new EntitySchema(buildpackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[buildpackSchemaKey] = BuildpackSchema;
 
-const coreRouteSchemaParams = {
-  entity: {
-    domain: DomainSchema
-  }
-};
 const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
-    ...coreRouteSchemaParams,
+    domain: DomainSchema,
     apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
 const RouteNoAppsSchema = new EntitySchema(routeSchemaKey, {
   entity: {
-    ...coreRouteSchemaParams,
+    domain: DomainSchema,
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
