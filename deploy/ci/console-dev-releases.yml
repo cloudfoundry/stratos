@@ -14,7 +14,7 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
-    # tag_filter: "2*"
+    tag_filter: "2*"
 - name: stratos-master
   type: git
   source:
@@ -70,7 +70,7 @@ jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
-    # trigger: true
+    trigger: true
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
