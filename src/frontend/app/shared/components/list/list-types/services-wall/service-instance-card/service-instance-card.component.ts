@@ -106,7 +106,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    const serviceEntity = this.serviceInstanceEntity.entity.service_plan.entity.service;
+    const serviceEntity = this.serviceInstanceEntity.entity.service;
     let extraInfo: IServiceExtra = null;
     try {
       extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;

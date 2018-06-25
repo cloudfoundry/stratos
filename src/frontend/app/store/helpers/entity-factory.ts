@@ -183,7 +183,8 @@ entityCache[serviceBindingNoBindingsSchemaKey] = ServiceBindingsNoBindingsSchema
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
     service_plan: ServicePlanSchema,
-    service_bindings: [ServiceBindingsSchema]
+    service_bindings: [ServiceBindingsSchema],
+    service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
@@ -276,7 +277,8 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    space: SpaceSchema.withEmptyDefinition()
+    space: SpaceSchema.withEmptyDefinition(),
+    service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;

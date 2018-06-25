@@ -23,20 +23,21 @@ import { getActions } from './action.helper';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
+export const getServiceInstanceRelations =  [
+    createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+    createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+    createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
+    createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
+    createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+    createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+  ];
 
 export class GetServiceInstances
   extends CFStartAction implements PaginationAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true
   ) {
     super();
@@ -56,16 +57,14 @@ export class GetServiceInstances
     'order-direction-field': 'creation',
   };
   flattenPagination = true;
+  
 }
 export class GetServiceInstance
   extends CFStartAction implements EntityInlineParentAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true
   ) {
     super();
@@ -75,7 +74,7 @@ export class GetServiceInstance
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get particular instance');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
 }
