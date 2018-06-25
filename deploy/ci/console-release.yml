@@ -6,33 +6,6 @@ resources:
     uri: git@github.com:((github-organization))((github-repository))
     private_key: {{github-private-key}}
     tag_filter: "[0-9]*"
-- name: helm-chart-values
-  type: s3
-  source:
-    bucket: concourse-stratos-ui
-    endpoint: {{minio-server-endpoint}}
-    regexp: temp-artifacts/values.yaml-(?P<version>.*)
-    access_key_id: {{minio-access-key}}
-    secret_access_key: {{minio-secret-access-key}}
-    region_name: eu-central-1
-- name: helm-chart-Chart
-  type: s3
-  source:
-    bucket: concourse-stratos-ui
-    endpoint: {{minio-server-endpoint}}
-    regexp: temp-artifacts/Chart.yaml-(?P<version>.*)
-    access_key_id: {{minio-access-key}}
-    secret_access_key: {{minio-secret-access-key}}
-    region_name: eu-central-1
-- name: helm-chart-tarball
-  type: s3
-  source:
-    bucket: concourse-stratos-ui
-    endpoint: {{minio-server-endpoint}}
-    regexp: temp-artifacts/console-(?P<version>.*).tgz
-    access_key_id: {{minio-access-key}}
-    secret_access_key: {{minio-secret-access-key}}
-    region_name: eu-central-1
 - name: helm-chart-values-sle
   type: s3
   source:
