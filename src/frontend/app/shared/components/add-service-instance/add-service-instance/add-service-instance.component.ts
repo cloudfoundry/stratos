@@ -50,7 +50,8 @@ import { CsiModeService } from '../csi-mode.service';
     CreateServiceInstanceHelperServiceFactory,
     TitleCasePipe,
     CsiGuidsService,
-    CsiModeService
+    CsiModeService,
+    CfOrgSpaceDataService
   ]
 })
 export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {

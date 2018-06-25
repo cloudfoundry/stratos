@@ -31,7 +31,7 @@ Configuration information can be found in two places
   * If the backend is deployed via the instructions above this will be the same address as the V1 console's frontend address. For instance
   `https://localhost` would translate to
 
-     ```const PROXY_CONFIG = {
+    ```const PROXY_CONFIG = {
       "/pp": {
         "target": {
         "host": "localhost",
