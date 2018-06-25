@@ -84,7 +84,7 @@ export class AuthEffect {
         catchError((err, caught) => {
           let setupMode = false;
           let isUpgrading = false;
-          const isSSO = err.headers.has(SSO_HEADER);
+          const ssoOptions = err.headers.get(SSO_HEADER);
           if (err.status === 503) {
             setupMode = err.headers.has(SETUP_HEADER);
             isUpgrading = err.headers.has(UPGRADE_HEADER);
@@ -92,7 +92,7 @@ export class AuthEffect {
 
           // Check for cookie domain mismatch with the requesting URL
           const isDomainMismatch = this.isDomainMismatch(err.headers);
-          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, isSSO)] : [new ResetAuth()];
+          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
         }));
     }));
 
@@ -112,14 +112,20 @@ export class AuthEffect {
   @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT).pipe(
     switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {}).pipe(
-        mergeMap(data => [new LogoutSuccess(), new ResetAuth()]),
+        mergeMap(data => [new LogoutSuccess(), new ResetAuth(data)]),
         catchError((err, caught) => [new LogoutFailed(err)]), );
     }));
 
   @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH).pipe(
-    tap(() => {
+    tap((action) => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
-      window.location.assign(window.location.origin);
+      // If this was an SSO login, then redirect to the SSO logout page
+      if (action.data && action.data.isSSO) {
+        const returnUrl = encodeURI(window.location.origin);
+        window.open('/pp/v1/auth/sso_logout?state=' + returnUrl , '_self');
+      } else {
+        window.location.assign(window.location.origin);
+      }
     }));
 
   private isDomainMismatch(headers): boolean {

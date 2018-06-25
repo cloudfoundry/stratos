@@ -60,6 +60,10 @@ const XSRFTokenCookie = "XSRF-TOKEN"
 // XSRFTokenSessionName - XSRF Token Session name
 const XSRFTokenSessionName = "xsrf_token"
 
+type LogoutResponse struct {
+	IsSSO bool `json:"isSSO"`
+}
+
 func (p *portalProxy) getUAAIdentityEndpoint() string {
 	log.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
@@ -88,9 +92,24 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 }
 
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login not enabled",
+			"SSO Login not enabled")
+		return err
+	}
+
 	state := c.QueryParam("state")
-	redirectUrl := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectUri(state)))
-	c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
+	if len(state) == 0 {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
+		return err
+	}
+	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectUri(state)))
+	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 
 	return nil
 }
@@ -99,16 +118,72 @@ func getSSORedirectUri(state string) string {
 	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", state, url.QueryEscape(state))
 }
 
+func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
+	state := c.QueryParam("state")
+
+	state = fmt.Sprintf("%s/pp/v1/auth/sso_logout_callback?state=%s", state, url.QueryEscape(state))
+	state = fmt.Sprintf("%s/pp/v1/auth/sso_logout_callback", state)
+	log.Warn(state)
+	logoutURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(state))
+	log.Info(logoutURL)
+	return c.Redirect(http.StatusTemporaryRedirect, logoutURL)
+}
+
+func (p *portalProxy) ssoLogoutOfUAARedirect(c echo.Context) error {
+
+	log.Info("SSO Logout callback invoked")
+	return c.Redirect(http.StatusTemporaryRedirect, "/")
+}
+func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login not enabled",
+			"SSO Login not enabled")
+		return err
+	}
+
+	state := c.QueryParam("state")
+
+	_, err := p.doLoginToUAA(c)
+	if err != nil {
+		// Send error as query string param
+		state = fmt.Sprintf("%s/login?SSO_Error=%s", state, url.QueryEscape(err.Error()))
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, state)
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
+	resp, err := p.doLoginToUAA(c)
+	if err != nil {
+		return err
+	}
 
+	jsonString, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
+
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+
+	return nil
+}
+
+func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
+	log.Debug("loginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
 		err = interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"Access Denied",
 			"Access Denied: %v", err)
-		return err
+		return nil, err
 	}
 
 	sessionValues := make(map[string]interface{})
@@ -119,17 +194,17 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	req := c.Request().(*standard.Request).Request
 	req.Header.Set("Cookie", "")
 	if err = p.setSessionValues(c, sessionValues); err != nil {
-		return err
+		return nil, err
 	}
 
 	err = p.handleSessionExpiryHeader(c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if p.Config.LoginHook != nil {
@@ -140,29 +215,13 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	}
 
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
-
 	resp := &interfaces.LoginRes{
 		Account:     u.UserName,
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: nil,
 		Admin:       uaaAdmin,
 	}
-	jsonString, err := json.Marshal(resp)
-	if err != nil {
-		return err
-	}
-
-	if c.Request().Method() == http.MethodGet {
-		state := c.QueryParam("state")
-		return c.Redirect(http.StatusTemporaryRedirect, state)
-	}
-	// Add XSRF Token
-	p.ensureXSRFToken(c)
-
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-
-	return nil
+	return resp, nil
 }
 
 // Connect to the given Endpoint
@@ -513,7 +572,12 @@ func (p *portalProxy) logout(c echo.Context) error {
 		log.Errorf("Unable to clear session: %v", err)
 	}
 
-	return err
+	// Send JSON document
+	resp := &LogoutResponse{
+		IsSSO: p.Config.SSOLogin,
+	}
+
+	return c.JSON(http.StatusOK, resp)
 }
 
 func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string) (*UAAResponse, error) {

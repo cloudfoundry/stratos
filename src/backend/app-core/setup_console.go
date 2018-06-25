@@ -103,7 +103,6 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			"Console configuration data storage failed due to %s", err)
 	}
 	c.JSON(http.StatusOK, userTokenInfo)
-	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
 	return nil
 }
 

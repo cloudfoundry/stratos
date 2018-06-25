@@ -44,11 +44,12 @@ export class VerifiedSession implements Action {
 
 export class InvalidSession implements Action {
   constructor(public uaaError: boolean = false, public upgradeInProgress = false,
-    public domainMismatch = false, public isSSOLogin = false) { }
+    public domainMismatch = false, public ssoOptions = '') { }
   type = SESSION_INVALID;
 }
 
 export class ResetAuth implements Action {
+  constructor(public data: any = {}) { }
   type = RESET_AUTH;
 }
 
