@@ -52,7 +52,7 @@ Modified to include some extra icons for Stratos
   font-family: "stratos-icons";
   font-style: normal;
   font-weight: normal;
-  src: url('$stratos-icons-font-path/stratos-icons.eot');
+  src: url('#{$stratos-icons-font-path}/stratos-icons.eot');
   src: url('#{$stratos-icons-font-path}/stratos-icons.eot?#iefix') format("embedded-opentype"),
 		url('#{$stratos-icons-font-path}/stratos-icons.woff2') format("woff2"),
 		url('#{$stratos-icons-font-path}/stratos-icons.woff') format("woff"),
