@@ -2,7 +2,23 @@ import { denormalize } from 'normalizr';
 
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { IRequestDataState } from '../types/entity.types';
-import { EntitySchema, spaceSchemaKey, organizationSchemaKey, applicationSchemaKey, routeSchemaKey } from './entity-factory';
+import {
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  cfUserSchemaKey,
+  domainSchemaKey,
+  EntitySchema,
+  organizationSchemaKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+  spaceSchemaKey,
+  stackSchemaKey,
+} from './entity-factory';
 
 export interface IFlatTree {
   [entityKey: string]: Set<string>;
@@ -14,12 +30,52 @@ interface IExcludes {
 
 export class EntitySchemaTreeBuilder {
   private excludes: IExcludes = {
-    [spaceSchemaKey]: [
-      organizationSchemaKey
+    // Delete org
+    [organizationSchemaKey]: [
+      domainSchemaKey,
+      quotaDefinitionSchemaKey,
+      privateDomainsSchemaKey,
     ],
+    // Delete space
+    [spaceSchemaKey]: [
+      domainSchemaKey,
+      // Service instance related
+      serviceSchemaKey,
+      servicePlanSchemaKey,
+      // App Related
+      stackSchemaKey
+    ],
+    // Delete app
     [applicationSchemaKey]: [
-      organizationSchemaKey,
+      stackSchemaKey,
+      spaceSchemaKey,
       routeSchemaKey,
+      serviceInstancesSchemaKey
+    ],
+    // Terminate app instance
+    [appStatsSchemaKey]: [],
+    // Delete route, unbind route
+    [routeSchemaKey]: [
+      domainSchemaKey,
+      applicationSchemaKey
+    ],
+    // Undbind service instance
+    [serviceBindingSchemaKey]: [
+      applicationSchemaKey,
+      serviceInstancesSchemaKey,
+      serviceSchemaKey
+    ],
+    // Delete service instance
+    [serviceInstancesSchemaKey]: [
+      servicePlanSchemaKey,
+      // Service bindings
+      applicationSchemaKey,
+      serviceInstancesSchemaKey,
+      serviceSchemaKey
+    ],
+    // Remove a user role
+    [cfUserSchemaKey]: [
+      organizationSchemaKey,
       spaceSchemaKey
     ]
   };
