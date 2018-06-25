@@ -201,7 +201,7 @@ export class CloudFoundryEndpointService {
     statMetric: string
   ): number {
     return apps ? apps
-      .filter(a => a.entity.state !== CfApplicationState.STOPPED)
+      .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
   }
