@@ -57,7 +57,6 @@ export class GetServiceInstances
     'order-direction-field': 'creation',
   };
   flattenPagination = true;
-  
 }
 export class GetServiceInstance
   extends CFStartAction implements EntityInlineParentAction {
