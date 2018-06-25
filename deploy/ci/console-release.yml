@@ -1,9 +1,9 @@
 resources:
-- name: stratos-ui
+- name: stratos
   type: git
   source:
-    branch: {{stratos-ui-branch}}
-    uri: git@github.com:SUSE/stratos.git
+    branch: {{stratos-branch}}
+    uri: git@github.com:((github-organization))((github-repository))
     private_key: {{github-private-key}}
     tag_filter: "[0-9]*"
 - name: helm-charts-repository
