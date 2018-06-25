@@ -161,7 +161,6 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     const endpointPassthroughHeader = 'x-cap-passthrough';
     this.options.headers.set(endpointPassthroughHeader, 'true');
     this.options.params = new URLSearchParams();
-    this.options.params.set('recursive', 'true');
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
   entity = [applicationEntitySchema];
