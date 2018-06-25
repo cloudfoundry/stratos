@@ -60,7 +60,7 @@ export class EntitySchemaTreeBuilder {
       domainSchemaKey,
       applicationSchemaKey
     ],
-    // Undbind service instance
+    // Unbind service instance
     [serviceBindingSchemaKey]: [
       applicationSchemaKey,
       serviceInstancesSchemaKey,
