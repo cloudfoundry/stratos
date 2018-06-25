@@ -3,5 +3,8 @@
     flex: 1;
     font-weight: 500;
     margin-bottom: 16px;
+    &.meta-card__title-nomargin {
+      margin-bottom: 0;
+    }
   }
 }
