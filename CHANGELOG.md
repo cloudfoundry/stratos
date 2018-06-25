@@ -1,6 +1,66 @@
 # Change Log
 
-# 2.0.0 Beta 1
+## 2.0.0 Beta 2
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/v2.0.0-beta-001...2.0.0-beta-002)
+
+This is the second Beta release of Version 2 of Stratos. This is a major release.
+
+The main focus of this release are bug fixes and hardening for a first release candidate.
+
+**Improvements:**
+
+- SSO Login Support [\#2491](https://github.com/cloudfoundry-incubator/stratos/pull/2491),  [\#2495](https://github.com/cloudfoundry-incubator/stratos/pull/2495)
+- Add No Javascript message [\#2444](https://github.com/cloudfoundry-incubator/stratos/issues/2444)
+- Show users without usernames [\#2496](https://github.com/cloudfoundry-incubator/stratos/pull/2496)
+- Add support for longer timeout for mutating operations \(POST etc\) [\#2401](https://github.com/cloudfoundry-incubator/stratos/pull/2401)
+- Add Cookie Domain support [\#2432](https://github.com/cloudfoundry-incubator/stratos/pull/2432)
+- Minor UI improvements [\#2384](https://github.com/cloudfoundry-incubator/stratos/pull/2384), [\#2383](https://github.com/cloudfoundry-incubator/stratos/pull/2383), [\#2378](https://github.com/cloudfoundry-incubator/stratos/pull/2378), [\#2499](https://github.com/cloudfoundry-incubator/stratos/pull/2499), [\#2482](https://github.com/cloudfoundry-incubator/stratos/pull/2482), [\#2481](https://github.com/cloudfoundry-incubator/stratos/pull/2481), [\#2394](https://github.com/cloudfoundry-incubator/stratos/pull/2394),  [\#2457](https://github.com/cloudfoundry-incubator/stratos/issues/2457), [\#2447](https://github.com/cloudfoundry-incubator/stratos/issues/2447)
+
+**Fixes:**
+
+- Error logged in console when reloading to app routes page [\#2493](https://github.com/cloudfoundry-incubator/stratos/issues/2493)
+- Deal with non CF Jetstream failed requests [\#2497](https://github.com/cloudfoundry-incubator/stratos/pull/2497)
+- Error after disconnecting an endpoint [\#2460](https://github.com/cloudfoundry-incubator/stratos/issues/2460)
+- All endpoints are incorrectly shown to be in error state [\#2459](https://github.com/cloudfoundry-incubator/stratos/issues/2459)
+- When one CF fails, we don't show data for those that succeed. [\#2456](https://github.com/cloudfoundry-incubator/stratos/issues/2456)
+- Exception on create space stepper when you cancel out [\#2454](https://github.com/cloudfoundry-incubator/stratos/issues/2454)
+- Error when creating a Space with a space character in the name [\#2451](https://github.com/cloudfoundry-incubator/stratos/issues/2451)
+- Fix backend error logging [\#2484](https://github.com/cloudfoundry-incubator/stratos/pull/2484), [\#2407](https://github.com/cloudfoundry-incubator/stratos/pull/2407), [\#2413](https://github.com/cloudfoundry-incubator/stratos/pull/2413)
+- Fix for panic when res is not set in error logging [\#2441](https://github.com/cloudfoundry-incubator/stratos/pull/2441)
+- Firefox rendering - focus border on drop-down menu items [\#2446](https://github.com/cloudfoundry-incubator/stratos/issues/2446)
+- Users Permissions: Removing the last role \(Org User\) results in an exception [\#2438](https://github.com/cloudfoundry-incubator/stratos/issues/2438)
+- Users Permissions: Assigning a role to a user that has none results in an exception [\#2428](https://github.com/cloudfoundry-incubator/stratos/issues/2428)
+- Exception thrown when adding space to empty org [\#2418](https://github.com/cloudfoundry-incubator/stratos/issues/2418)
+- Warn if cookie domain does not match Stratos URL [\#2414](https://github.com/cloudfoundry-incubator/stratos/issues/2414)
+- Add commit SHA to version when built for Kubernetes/Docker Compose [\#2410](https://github.com/cloudfoundry-incubator/stratos/issues/2410)
+- Ensure we only raise internal errors on fetch api requests [\#2494](https://github.com/cloudfoundry-incubator/stratos/pull/2494)
+- Fix failure to update commit info on redeploy [\#2492](https://github.com/cloudfoundry-incubator/stratos/pull/2492)
+- Fix issue timing issue resulting in  invalid Space Service request [\#2489](https://github.com/cloudfoundry-incubator/stratos/pull/2489)
+- Improved fix for exception on org screen after fresh load on create space [\#2487](https://github.com/cloudfoundry-incubator/stratos/pull/2487)
+- Fix layout on summary pages [\#2482](https://github.com/cloudfoundry-incubator/stratos/pull/2482)
+- Fix error shown when cancelling out of a freshly loaded create space stepper [\#2478](https://github.com/cloudfoundry-incubator/stratos/pull/2478)
+- Users tables: Only show org/space name in pills when needed [\#2443](https://github.com/cloudfoundry-incubator/stratos/pull/2443)
+- Fix issue where space count is wrong after deleting a space [\#2439](https://github.com/cloudfoundry-incubator/stratos/pull/2439)
+- Update the connected user roles section of store on roles change [\#2435](https://github.com/cloudfoundry-incubator/stratos/pull/2435)
+- Fix list state \(deleting/etc\) [\#2434](https://github.com/cloudfoundry-incubator/stratos/pull/2434)
+- Fix exception when a space is added to an empty org [\#2433](https://github.com/cloudfoundry-incubator/stratos/pull/2433)
+- Fix exception thrown when only assign an org user role [\#2430](https://github.com/cloudfoundry-incubator/stratos/pull/2430)
+- Fix pagination of space level routes and service instance tables [\#2429](https://github.com/cloudfoundry-incubator/stratos/pull/2429)
+- Disable removal of `org user` role if user has others [\#2427](https://github.com/cloudfoundry-incubator/stratos/pull/2427)
+- Show an overlay and deleting message when deleting from a card or table action. [\#2415](https://github.com/cloudfoundry-incubator/stratos/pull/2415)
+- Fix errors when multiple cf's are connected as both admin and non-admin users [\#2409](https://github.com/cloudfoundry-incubator/stratos/pull/2409)
+- Fix not detecting admin user is admin scope is not stratos.admin [\#2403](https://github.com/cloudfoundry-incubator/stratos/pull/2403)
+- Table loading init [\#2412](https://github.com/cloudfoundry-incubator/stratos/pull/2412)
+- Users Table: Restrict org/space roles and prefix space name with org... depending on depth [\#2402](https://github.com/cloudfoundry-incubator/stratos/pull/2402)
+- CfOrgSpace Selector: Fix overzealous `no orgs` error message [\#2397](https://github.com/cloudfoundry-incubator/stratos/pull/2397)
+- Org space list - Deleting causes exceptions in other parts of the org page. [\#2393](https://github.com/cloudfoundry-incubator/stratos/pull/2393)
+- Fix infinite user list's loading indicator when connected as user with no roles [\#2390](https://github.com/cloudfoundry-incubator/stratos/pull/2390)
+- Fix TCP route creation and improve UI [\#2388](https://github.com/cloudfoundry-incubator/stratos/pull/2388)
+- Add global deleting overlay for entity summary pages [\#2373](https://github.com/cloudfoundry-incubator/stratos/pull/2373)
+- Fix various application deploy bugs [\#2372](https://github.com/cloudfoundry-incubator/stratos/pull/2372)
+
+
+## 2.0.0 Beta 1
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...v2.0.0-beta-001)
 
@@ -24,7 +84,7 @@ The following features in version 1 are not currently available in version 2:
 - Extensions/Plugins - The ability to extend the UI at various points will be added in the next minor version.
 - Drag and Drop for Application Deployment - You can not drag and drop a file/folder or url onto the application deployment UI - you have to use the browse UI.
 
-# 1.1.0 Release
+## 1.1.0 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...1.1.0)
 
