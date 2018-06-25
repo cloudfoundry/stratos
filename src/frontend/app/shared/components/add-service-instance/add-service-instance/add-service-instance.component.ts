@@ -100,7 +100,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     }
 
     this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid), 
+      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
       switchMap(createServiceInstance => {
       const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
       return getPaginationObservables<APIResource<IApp>>({
