@@ -50,6 +50,7 @@ export class EntitySchemaTreeBuilder {
       stackSchemaKey,
       spaceSchemaKey,
       routeSchemaKey,
+      serviceBindingSchemaKey,
       serviceInstancesSchemaKey
     ],
     // Terminate app instance

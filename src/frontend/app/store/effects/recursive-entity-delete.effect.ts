@@ -75,7 +75,6 @@ export class RecursiveDeleteEffect {
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);
-      console.log(tree);
       return new SetTreeDeleting(action.guid, tree);
     })
   );
