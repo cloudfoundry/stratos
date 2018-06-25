@@ -41,10 +41,7 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
       entState.fetching = false;
       entState.error = false;
       const busy = entState.deleting ? entState.deleting.busy : false;
-      entState.deleting = {
-        ...defaultDeletingActionState,
-        busy
-      };
+      entState.deleting = { ...defaultDeletingActionState, busy };
       newState = setEntityRequestState(newState, entState, { entityKey, guid } as IRequestAction);
     });
   });

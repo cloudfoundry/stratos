@@ -2,16 +2,33 @@ import { denormalize } from 'normalizr';
 
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { IRequestDataState } from '../types/entity.types';
-import { EntitySchema } from './entity-factory';
+import { EntitySchema, spaceSchemaKey, organizationSchemaKey, applicationSchemaKey, routeSchemaKey } from './entity-factory';
 
 export interface IFlatTree {
   [entityKey: string]: Set<string>;
 }
-type TEntityIds = Set<string>;
+
+interface IExcludes {
+  [entityKey: string]: string[];
+}
+
 export class EntitySchemaTreeBuilder {
+  private excludes: IExcludes = {
+    [spaceSchemaKey]: [
+      organizationSchemaKey
+    ],
+    [applicationSchemaKey]: [
+      organizationSchemaKey,
+      routeSchemaKey,
+      spaceSchemaKey
+    ]
+  };
+
+  private entityExcludes: string[];
   public getFlatTree(treeDefinition: IRecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
+    this.entityExcludes = this.excludes[schema.key] || [];
     return this.build(schema, denormed, undefined, true);
   }
 
@@ -46,7 +63,7 @@ export class EntitySchemaTreeBuilder {
     }
     // Don't add the root element to the tree to avoid duplication actions whe consuming tree
     if (!root) {
-      flatTree[schema.key] = this.addIdToTree(flatTree[schema.key], schema.getId(entity));
+      flatTree = this.addIdToTree(flatTree, schema.key, schema.getId(entity));
     }
     if (!keys) {
       return flatTree;
@@ -62,11 +79,13 @@ export class EntitySchemaTreeBuilder {
     }, flatTree);
   }
 
-  private addIdToTree(ids: TEntityIds, newId: string) {
-    if (!ids) {
-      ids = new Set<string>();
+  private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
+    if (this.entityExcludes.includes(key)) {
+      return flatTree;
     }
-    return ids.add(newId);
+    const ids = flatTree[key] || new Set<string>();
+    flatTree[key] = ids.add(newId);
+    return flatTree;
   }
 
   private getDefinition(definition) {
@@ -91,7 +110,7 @@ export class EntitySchemaTreeBuilder {
       }
       return flatTree;
     }
-    flatTree[key] = this.addIdToTree(flatTree[key], id);
+    flatTree = this.addIdToTree(flatTree, key, id);
     const subKeys = Object.keys(entityDefinition);
     if (subKeys.length > 0) {
       return this.build(entityDefinition, entity, flatTree);

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -24,7 +24,7 @@ import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.acti
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
-import { RecursiveDelete, RecursiveDeleteComplete } from './recursive-entity-delete.effect';
+import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -180,7 +180,7 @@ export class APIEffect {
             url: error.url || apiAction.options.url
           }
         })));
-        return [
+        const errorActions: Action[] = [
           new APISuccessOrFailedAction(actionClone.actions[2], actionClone, error.message),
           new WrapperRequestActionFailed(
             error.message,
@@ -188,6 +188,14 @@ export class APIEffect {
             requestType
           )
         ];
+        if (requestType === 'delete') {
+          errorActions.push(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey)
+          ));
+        }
+        return errorActions;
       }));
   }
 

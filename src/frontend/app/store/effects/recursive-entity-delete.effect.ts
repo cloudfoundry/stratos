@@ -1,21 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { schema } from 'normalizr';
-import { map, withLatestFrom, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { DELETE_SUCCESS, DeleteApplication } from '../actions/application.actions';
+import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
-import { EntitySchema, applicationSchemaKey } from '../helpers/entity-factory';
+import { EntitySchema } from '../helpers/entity-factory';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { IRequestDataState } from '../types/entity.types';
-import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
 import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
-import { DELETE_SUCCESS, DeleteApplication } from '../actions/application.actions';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
 export const RECURSIVE_ENTITY_DELETE_COMPLETE = '[Entity] Recursive entity delete complete';
+export const RECURSIVE_ENTITY_DELETE_FAILED = '[Entity] Recursive entity delete failed';
+
+export const RECURSIVE_ENTITY_RESET = '[Entity] Recursive entity reset';
 export const RECURSIVE_ENTITY_SET_DELETING = '[Entity] Recursive entity set deleting';
 export const RECURSIVE_ENTITY_SET_DELETED = '[Entity] Recursive entity set deleted';
 
@@ -34,6 +36,11 @@ export class RecursiveDeleteComplete implements Action, IRecursiveDelete {
   constructor(public guid: string, public endpointGuid: string, public schema: EntitySchema) { }
 }
 
+export class RecursiveDeleteFailed implements Action, IRecursiveDelete {
+  public type = RECURSIVE_ENTITY_DELETE_FAILED;
+  constructor(public guid: string, public endpointGuid: string, public schema: EntitySchema) { }
+}
+
 export class SetTreeDeleting implements Action {
   public type = RECURSIVE_ENTITY_SET_DELETING;
   constructor(public parentGuid: string, public tree: IFlatTree) { }
@@ -41,6 +48,11 @@ export class SetTreeDeleting implements Action {
 
 export class SetTreeDeleted implements Action {
   public type = RECURSIVE_ENTITY_SET_DELETED;
+  constructor(public parentGuid: string, public tree: IFlatTree) { }
+}
+
+export class ResetTreeDelete implements Action {
+  public type = RECURSIVE_ENTITY_RESET;
   constructor(public parentGuid: string, public tree: IFlatTree) { }
 }
 
@@ -63,6 +75,7 @@ export class RecursiveDeleteEffect {
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);
+      console.log(tree);
       return new SetTreeDeleting(action.guid, tree);
     })
   );
@@ -82,6 +95,15 @@ export class RecursiveDeleteEffect {
       }));
       actions.unshift(new SetTreeDeleted(action.guid, tree));
       return actions;
+    })
+  );
+
+  @Effect()
+  deleteFailed$ = this.actions$.ofType<RecursiveDeleteFailed>(RECURSIVE_ENTITY_DELETE_FAILED).pipe(
+    withLatestFrom(this.store.select(getAPIRequestDataState)),
+    map(([action, state]) => {
+      const tree = this.getTree(action, state);
+      return new ResetTreeDelete(action.guid, tree);
     })
   );
 
