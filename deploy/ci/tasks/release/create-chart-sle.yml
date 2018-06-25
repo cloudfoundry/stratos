@@ -1,7 +1,7 @@
 ---
 platform: linux
 inputs:
-- name: stratos-ui
+- name: stratos
 - name: helm-chart-Chart-sle
 - name: helm-chart-values-sle
 outputs:
@@ -24,7 +24,7 @@ run:
       helm init || true
       ROOT_DIR=$PWD
       BASE_IMAGE=${BASE_IMAGE:-opensuse}
-      STRATOS_UI=${ROOT_DIR}/stratos-ui
+      STRATOS_UI=${ROOT_DIR}/stratos
       cd ${STRATOS_UI}/deploy/kubernetes/
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       SHORT_GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"

@@ -1,7 +1,7 @@
 ---
 platform: linux
 inputs:
-- name: stratos-ui
+- name: stratos
 - name: dev-certs-output
 outputs:
 - name: helm-build
@@ -24,8 +24,8 @@ run:
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${STAGING_REPOSITORY};
       ROOT_DIR=${PWD}
       # Move dev-certs
-      mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
-      cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
+      mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos/dev-certs
+      cd ${ROOT_DIR}/stratos/deploy/kubernetes
 
       STRATOS_BOWER=""
 
