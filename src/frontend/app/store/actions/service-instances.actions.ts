@@ -24,40 +24,6 @@ import { getActions } from './action.helper';
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
 
-export class GetServicesInstancesInSpace
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public endpointGuid: string,
-    public spaceGuid: string,
-    public paginationKey: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
-    ],
-    public populateMissing = true,
-    public flattenPagination = true
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `spaces/${spaceGuid}/service_instances`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.parentGuid = spaceGuid;
-  }
-  actions = getActions('Service Instances', 'Get all in Space');
-  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
-  entityKey = serviceInstancesSchemaKey;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'creation',
-  };
-  parentGuid: string;
-  parentEntitySchema = entityFactory(spaceSchemaKey);
-}
-
 export class GetServiceInstances
   extends CFStartAction implements PaginationAction, EntityInlineParentAction {
   constructor(

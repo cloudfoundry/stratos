@@ -1,7 +1,6 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetServicesInstancesInSpace } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -20,17 +19,19 @@ import {
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { GetServiceInstancesForSpace } from '../../../../../store/actions/space.actions';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
-    const action = new GetServicesInstancesInSpace(cfGuid, spaceGuid, paginationKey, [
+    const action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, null, [
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
       createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
     ], true, false);
+    action.entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
     super({
       store,
       action,

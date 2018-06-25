@@ -71,7 +71,7 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
       return {
         ...state,
         sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
-            isSSOLogin: action.isSSOLogin, sessionExpiresOn: null },
+          domainMismatch: action.domainMismatch, isSSOLogin: action.isSSOLogin, sessionExpiresOn: null },
         verifying: false
       };
     case RouterActions.GO:
