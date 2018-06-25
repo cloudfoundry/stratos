@@ -3,7 +3,7 @@ resources:
   type: git
   source:
     branch: {{stratos-branch}}
-    uri: git@github.com:((github-organization))((github-repository))
+    uri: git@github.com:((github-organization))/((github-repository))
     private_key: {{github-private-key}}
     # tag_filter: "[0-9]*"
 - name: helm-chart-values-sle
