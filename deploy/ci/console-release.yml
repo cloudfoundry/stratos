@@ -6,12 +6,6 @@ resources:
     uri: git@github.com:((github-organization))((github-repository))
     private_key: {{github-private-key}}
     tag_filter: "[0-9]*"
-- name: helm-charts-repository
-  type: git
-  source:
-    branch: master
-    private_key: {{github-private-key}}
-    uri: {{release-helm-repo}}
 - name: helm-chart-values
   type: s3
   source:
