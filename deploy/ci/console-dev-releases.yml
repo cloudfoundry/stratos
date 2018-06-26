@@ -18,8 +18,8 @@ resources:
 - name: helm-repo
   type: git
   source:
-    uri: git@github.com:((helm-repo.github-organization))/((helm-repo.github-repository))
-    branch: ((helm-repo.branch))
+    uri: git@github.com:((helm-repo-github-organization))/((helm-repo-github-repository))
+    branch: ((helm-repo-branch))
     private_key: ((github-private-key))
 # Docker Images
 - name: jetstream-image
@@ -144,7 +144,7 @@ jobs:
         GIT_PRIVATE_KEY: ((github-private-key))
         DOCKER_ORG: ((artifact-docker-organization))
         DOCKER_REGISTRY: ((artifact-docker-registry))
-        HELM_REPO_PATH: ((helm-repo.path))
+        HELM_REPO_PATH: ((helm-repo-path))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
@@ -167,8 +167,8 @@ jobs:
       file: stratos/deploy/ci/tasks/dev-releases/update-gh-release.yml
       params:
         GITHUB_TOKEN: ((github-access-token))
-        GITHUB_USER: ((github-artifact.organization))
-        GITHUB_REPO: ((github-artifact.repository))
+        GITHUB_USER: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
