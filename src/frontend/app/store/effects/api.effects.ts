@@ -142,6 +142,13 @@ export class APIEffect {
         // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
         if (errorsCheck.length === 1 && errorsCheck[0].error) {
+          if (requestType === 'delete') {
+            this.store.dispatch(new RecursiveDeleteFailed(
+              apiAction.guid,
+              apiAction.endpointGuid,
+              entityFactory(apiAction.entityKey)
+            ));
+          }
           this.store.dispatch(new WrapperRequestActionFailed(
             errorMessage,
             { ...actionClone, endpointGuid: errorsCheck[0].guid },
