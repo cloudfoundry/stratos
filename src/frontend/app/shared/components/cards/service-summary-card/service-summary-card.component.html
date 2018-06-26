@@ -43,6 +43,12 @@
       </a>
     </app-meta-card-value>
   </app-meta-card-item>
+  <app-meta-card-item *ngIf="servicesService.getServiceProviderName() | async as providerName">
+    <app-meta-card-key>Provider</app-meta-card-key>
+    <app-meta-card-value>
+        {{ servicesService.getServiceProviderName() | async }}
+    </app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
