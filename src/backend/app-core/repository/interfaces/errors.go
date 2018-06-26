@@ -9,8 +9,9 @@ import (
 )
 
 type ErrHTTPShadow struct {
-	HTTPError  *echo.HTTPError
-	LogMessage string
+	HTTPError       *echo.HTTPError
+	LogMessage      string
+	UserFacingError string
 }
 
 type ErrHTTPRequest struct {
@@ -20,12 +21,14 @@ type ErrHTTPRequest struct {
 }
 
 func (e ErrHTTPShadow) Error() string {
-	return fmt.Sprintf("HTTP Error: %v\nLog Message: %s", e.HTTPError, e.LogMessage)
+	//return fmt.Sprintf("HTTP Error: %v\nLog Message: %s", e.HTTPError, e.LogMessage)
+	return e.HTTPError.Message
 }
 
 func NewHTTPShadowError(status int, userFacingError string, fmtString string, args ...interface{}) error {
 	shadowError := ErrHTTPShadow{
-		HTTPError: echo.NewHTTPError(status, fmt.Sprintf(`{"error":%q}`, userFacingError)),
+		UserFacingError: userFacingError,
+		HTTPError:       echo.NewHTTPError(status, fmt.Sprintf(`{"error":%q}`, userFacingError)),
 	}
 	if len(fmtString) > 0 {
 		shadowError.LogMessage = fmt.Sprintf(fmtString, args...)

@@ -28,6 +28,8 @@ import {
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
+  ResetSSOAuth,
+  RESET_SSO_AUTH,
 } from './../actions/auth.actions';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -84,7 +86,7 @@ export class AuthEffect {
         catchError((err, caught) => {
           let setupMode = false;
           let isUpgrading = false;
-          const ssoOptions = err.headers.get(SSO_HEADER);
+          const ssoOptions = err.headers.get(SSO_HEADER) as string;
           if (err.status === 503) {
             setupMode = err.headers.has(SETUP_HEADER);
             isUpgrading = err.headers.has(UPGRADE_HEADER);
@@ -112,21 +114,28 @@ export class AuthEffect {
   @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT).pipe(
     switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {}).pipe(
-        mergeMap(data => [new LogoutSuccess(), new ResetAuth(data)]),
+        mergeMap((data: any) => {
+          if (data.isSSO) {
+            return [new LogoutSuccess(), new ResetSSOAuth()];
+          } else {
+            return [new LogoutSuccess(), new ResetAuth()];
+          }
+        }),
         catchError((err, caught) => [new LogoutFailed(err)]), );
     }));
 
   @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH).pipe(
-    tap((action) => {
+    tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
-      // If this was an SSO login, then redirect to the SSO logout page
-      if (action.data && action.data.isSSO) {
+      window.location.assign(window.location.origin);
+    }));
+
+    @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.ofType<ResetSSOAuth>(RESET_SSO_AUTH).pipe(
+      tap((action) => {
+        // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
         const returnUrl = encodeURI(window.location.origin);
         window.open('/pp/v1/auth/sso_logout?state=' + returnUrl , '_self');
-      } else {
-        window.location.assign(window.location.origin);
-      }
-    }));
+      }));
 
   private isDomainMismatch(headers): boolean {
     if (headers.has(DOMAIN_HEADER)) {

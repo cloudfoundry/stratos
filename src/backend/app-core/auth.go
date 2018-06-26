@@ -91,15 +91,8 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 	return u.UserName, nil
 }
 
+// Login via UAA
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
-	if !p.Config.SSOLogin {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"SSO Login not enabled",
-			"SSO Login not enabled")
-		return err
-	}
-
 	state := c.QueryParam("state")
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
@@ -108,47 +101,55 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectUri(state)))
+	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state)))
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-
 	return nil
 }
 
-func getSSORedirectUri(state string) string {
-	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", state, url.QueryEscape(state))
+func getSSORedirectURI(base string, state string) string {
+	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", base, url.QueryEscape(state))
 }
 
+// Logout of the UAA
 func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 	state := c.QueryParam("state")
-
-	state = fmt.Sprintf("%s/pp/v1/auth/sso_logout_callback?state=%s", state, url.QueryEscape(state))
-	state = fmt.Sprintf("%s/pp/v1/auth/sso_logout_callback", state)
-	log.Warn(state)
-	logoutURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(state))
-	log.Info(logoutURL)
-	return c.Redirect(http.StatusTemporaryRedirect, logoutURL)
-}
-
-func (p *portalProxy) ssoLogoutOfUAARedirect(c echo.Context) error {
-
-	log.Info("SSO Logout callback invoked")
-	return c.Redirect(http.StatusTemporaryRedirect, "/")
-}
-func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
-	if !p.Config.SSOLogin {
+	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
-			"SSO Login not enabled",
-			"SSO Login not enabled")
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
+		return err
+	}
+	redirectURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout"))
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+}
+
+// Callback - invoked after the UAA login flow has completed and during logout
+// We use a single callback so this can be whitelisted in the client
+func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
+	state := c.QueryParam("state")
+	if len(state) == 0 {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
 		return err
 	}
 
-	state := c.QueryParam("state")
-
+	if state == "logout" {
+		return c.Redirect(http.StatusTemporaryRedirect, "/login?SSO_Message=You+have+been+logged+out")
+	}
 	_, err := p.doLoginToUAA(c)
 	if err != nil {
 		// Send error as query string param
-		state = fmt.Sprintf("%s/login?SSO_Error=%s", state, url.QueryEscape(err.Error()))
+		msg := err.Error()
+		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
+			msg = httpError.UserFacingError
+		}
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			msg = httpError.Response
+		}
+		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, state)
@@ -588,7 +589,7 @@ func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, c
 	body.Set("code", code)
 	body.Set("client_id", client)
 	body.Set("client_secret", clientSecret)
-	body.Set("redirect_uri", getSSORedirectUri(state))
+	body.Set("redirect_uri", getSSORedirectURI(state))
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
