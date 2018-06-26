@@ -74,6 +74,8 @@ jobs:
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        TAG_SUFFIX: ((tag-suffix))
     - put: image-tag
       params:
         file: image-tag/*.tar
