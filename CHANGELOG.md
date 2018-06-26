@@ -3,6 +3,10 @@
 ## 2.0.0 Release Candidate 1
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-beta-002...2.0.0-RC-1)
 
+This is the first release candidate of Version 2 of Stratos.
+
+The main focus of this release are bug fixes for release.
+
 **Improvements:**
 - Add ingress example and docs for kubernetes deloyment [\#2510](https://github.com/cloudfoundry-incubator/stratos/pull/2510)
 
