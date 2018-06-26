@@ -21,9 +21,9 @@ import {
   entityFactory,
   organizationSchemaKey,
   quotaDefinitionSchemaKey,
+  routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
