@@ -213,7 +213,7 @@ export class CreateServiceInstanceHelperService {
     }
     return getPaginationObservables<APIResource<IServiceInstance>>({
       store: this.store,
-      action: action,
+      action,
       paginationMonitor: this.paginationMonitorFactory.create(
         paginationKey,
         entityFactory(serviceInstancesSchemaKey)
