@@ -39,6 +39,7 @@ import { routeReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
+import { applicationAddRemoveReducer } from './application-add-remove-reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -134,6 +135,7 @@ export function requestDataReducer(state, action) {
     ],
     [spaceSchemaKey]: [
       endpointDisconnectApplicationReducer('space'),
+      applicationAddRemoveReducer('space'),
       userSpaceOrgReducer(true)
     ],
     [organizationSchemaKey]: [

@@ -9,6 +9,7 @@ import {
   SET_SERVICE_INSTANCE_SVC_GUID,
   SET_SERVICE_INSTANCE_APP,
   RESET_CREATE_SERVICE_INSTANCE_STATE,
+  RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE,
 } from '../actions/create-service-instance.actions';
 import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
@@ -64,6 +65,12 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return setCreateServiceInstanceCfDetails(state, action);
     case RESET_CREATE_SERVICE_INSTANCE_STATE:
       return defaultState;
+    case RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE:
+      return {
+        ...state,
+        spaceGuid: null,
+        orgGuid: null
+      };
     default:
       return state;
   }

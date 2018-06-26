@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { first, map, publishReplay, refCount } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -32,6 +32,7 @@ import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { selectEntity } from '../../../store/selectors/api.selectors';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -138,20 +139,8 @@ export class CloudFoundryEndpointService {
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
     this.allApps$ = this.orgs$.pipe(
-      map(p => {
-        return p
-          .filter(o => !!o.entity.spaces)
-          .map(o => {
-            return o.entity.spaces.map(space => space.entity.apps || []);
-          });
-      }),
-      map(a => {
-        let flatArray = [];
-        a.forEach(
-          appsInSpace => (flatArray = flatArray.concat(...appsInSpace))
-        );
-        return flatArray;
-      })
+      map(orgs => [].concat(...orgs.map(org => org.entity.spaces))),
+      map((spaces: APIResource<ISpace>[]) => [].concat(...spaces.map(space => space.entity.apps)))
     );
 
     this.fetchDomains();
@@ -209,7 +198,7 @@ export class CloudFoundryEndpointService {
     statMetric: string
   ): number {
     return apps ? apps
-      .filter(a => a.entity.state !== CfApplicationState.STOPPED)
+      .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
   }
