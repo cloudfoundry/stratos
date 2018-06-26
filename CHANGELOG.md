@@ -16,6 +16,7 @@ The main focus of this release are bug fixes for release.
 - Fixed an issue where we failed to store response from 1 or more endpoints [\#2513](https://github.com/cloudfoundry-incubator/stratos/pull/2513)
 - Ensure `Remove User` confirmation modal contains correct role prefix [\#2508](https://github.com/cloudfoundry-incubator/stratos/pull/2508)
 - Fix route schema [\#2506](https://github.com/cloudfoundry-incubator/stratos/pull/2506)
+- Fixes state reset issue when creating a service instance from different modes [\#2515](https://github.com/cloudfoundry-incubator/stratos/pull/2515)
 
 ## 2.0.0 Beta 2
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/v2.0.0-beta-001...2.0.0-beta-002)
