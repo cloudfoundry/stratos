@@ -50,12 +50,10 @@ export class InvalidSession implements Action {
 }
 
 export class ResetAuth implements Action {
-  constructor() { }
   type = RESET_AUTH;
 }
 
 export class ResetSSOAuth implements Action {
-  constructor() { }
   type = RESET_SSO_AUTH;
 }
 export class GetInfo implements Action {
