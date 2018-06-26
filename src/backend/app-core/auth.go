@@ -120,7 +120,7 @@ func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	redirectURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout"))
+	redirectURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout")))
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
@@ -589,7 +589,7 @@ func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, c
 	body.Set("code", code)
 	body.Set("client_id", client)
 	body.Set("client_secret", clientSecret)
-	body.Set("redirect_uri", getSSORedirectURI(state))
+	body.Set("redirect_uri", getSSORedirectURI(state, state))
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
