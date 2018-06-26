@@ -74,6 +74,8 @@ jobs:
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        TAG_SUFFIX: ((tag-suffix))
     - put: image-tag
       params:
         file: image-tag/*.tar
@@ -139,8 +141,8 @@ jobs:
       params:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
-        GITHUB_ORG: ((github-organization))
-        GITHUB_REPO: ((github-repository))
+        GITHUB_ORG: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
         GIT_PRIVATE_KEY: ((github-private-key))
         DOCKER_ORG: ((artifact-docker-organization))
         DOCKER_REGISTRY: ((artifact-docker-registry))
