@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.0.0 Release Candidate 1
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-beta-002...2.0.0-RC-1)
+
+**Improvements:**
+- Add ingress example and docs for kubernetes deloyment [\#2510](https://github.com/cloudfoundry-incubator/stratos/pull/2510)
+
+**Fixed bugs:**
+- Fix for app count being stuck after add in org card [\#2511](https://github.com/cloudfoundry-incubator/stratos/pull/2511)
+- Create service instance after connecting did not get orgs [\#2472](https://github.com/cloudfoundry-incubator/stratos/issues/2472)
+- Fixed issue where we failed to store response from 1 or more endpoints [\#2513](https://github.com/cloudfoundry-incubator/stratos/pull/2513)
+- Ensure remove user confirmation modal contains correct role prefix [\#2508](https://github.com/cloudfoundry-incubator/stratos/pull/2508)
+- Fix route schema [\#2506](https://github.com/cloudfoundry-incubator/stratos/pull/2506)
+
 ## 2.0.0 Beta 2
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/v2.0.0-beta-001...2.0.0-beta-002)
 
