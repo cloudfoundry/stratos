@@ -140,9 +140,6 @@ export class CloudFoundryEndpointService {
 
     this.allApps$ = this.orgs$.pipe(
       map(orgs => [].concat(...orgs.map(org => org.entity.spaces))),
-      switchMap((spaces: APIResource<ISpace>[]) =>
-        combineLatest(spaces.map(space => this.store.select(selectEntity(spaceSchemaKey, space.metadata.guid))))
-      ),
       map((spaces: APIResource<ISpace>[]) => [].concat(...spaces.map(space => space.entity.apps)))
     );
 
