@@ -213,4 +213,64 @@ describe('SchemaTreeTraversal', () => {
       ])
     });
   });
+  it('should exclude entity', () => {
+    entitySchemaTreeBuilder = new EntitySchemaTreeBuilder({
+      [parentKey]: [
+        grandChild1
+      ]
+    });
+    const parentId = '1';
+    const childId = '2';
+    const child2Id = '5';
+    const grandchildId = '3';
+    const grandchild2Id = '4';
+    const schema = new EntitySchema(parentKey, {
+      [child1Key]: new EntitySchema(child1Key, {
+        entity: {
+          [grandChild1]: [new EntitySchema(grandChild1, {
+            [child1Key]: [new EntitySchema(child1Key)]
+          })]
+        }
+      })
+    });
+    const state = {
+      [parentKey]: {
+        [parentId]: {
+          id: parentId,
+          [child1Key]: childId
+        }
+      },
+      [child1Key]: {
+        [childId]: {
+          id: childId,
+          entity: {
+            [grandChild1]: [grandchildId, grandchild2Id]
+          }
+        },
+        NOPE: {
+          id: 'NOPE',
+          entity: {
+            [grandChild1]: [grandchildId, grandchild2Id]
+          }
+        }
+      },
+      [grandChild1]: {
+        [grandchildId]: {
+          id: grandchildId,
+          [child1Key]: ['NOPE']
+        },
+        [grandchild2Id]: {
+          id: grandchild2Id,
+          [child1Key]: [childId, child2Id]
+        }
+      }
+    };
+    const action = new RecursiveDelete(parentId, schema);
+    const build = entitySchemaTreeBuilder.getFlatTree(action, state);
+    expect(build).toEqual({
+      [child1Key]: new Set([
+        childId
+      ])
+    });
+  });
 });

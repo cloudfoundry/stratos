@@ -27,9 +27,8 @@ export interface IFlatTree {
 interface IExcludes {
   [entityKey: string]: string[];
 }
-
 export class EntitySchemaTreeBuilder {
-  private excludes: IExcludes = {
+  constructor(private excludes: IExcludes = {
     // Delete org
     [organizationSchemaKey]: [
       domainSchemaKey,
@@ -79,7 +78,7 @@ export class EntitySchemaTreeBuilder {
       organizationSchemaKey,
       spaceSchemaKey
     ]
-  };
+  }) { }
 
   private entityExcludes: string[];
   public getFlatTree(treeDefinition: IRecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
