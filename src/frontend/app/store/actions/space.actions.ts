@@ -21,6 +21,7 @@ import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { RouteEvents } from './route.actions';
 import { GetAllOrgUsers } from './organization.actions';
+import { getServiceInstanceRelations } from './service-instances.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -266,14 +267,7 @@ export class GetServiceInstancesForSpace
     public endpointGuid: string,
     public paginationKey: string,
     public q: QParam[] = null,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public flattenPagination = true
   ) {
