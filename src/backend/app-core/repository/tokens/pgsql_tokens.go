@@ -161,7 +161,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
-		log.Errorf(msg, err)
+		log.Debugf(msg, err)
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
