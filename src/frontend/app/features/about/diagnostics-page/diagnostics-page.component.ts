@@ -39,6 +39,7 @@ export class DiagnosticsPageComponent implements OnInit {
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
       filter(auth => !!(auth && auth.sessionData)),
+      filter(auth => !!(auth.sessionData.diagnostics)),
       map((auth: AuthState) => auth.sessionData)
     );
 
