@@ -285,7 +285,6 @@ export class ApplicationService {
     ), startWith(false), publishReplay(1), refCount(), );
 
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
-      tap(o => console.log(`New Entity emitted! ${JSON.stringify(o)}`)),
       map(({ entity }) => entity),
       map(app => {
         const routes = app && app.entity.routes ? app.entity.routes : [];
@@ -295,13 +294,19 @@ export class ApplicationService {
         }
         return null;
       }),
-      filter(entRoute => !!entRoute && !!entRoute.entity && !!entRoute.entity.domain),
-      map(entRoute => getRoute(entRoute, true, false, {
-        entityRequestInfo: undefined,
-        entity: entRoute.entity.domain
-      }))
-    );
-  }
+      map(entRoute => {
+          if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
+           return  getRoute(entRoute, true, false, {
+              entityRequestInfo: undefined,
+              entity: entRoute.entity.domain
+            });
+          } else {
+            return null;
+          }
+      })
+  );
+}
+
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
