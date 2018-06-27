@@ -45,6 +45,7 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
     text-decoration: none;
     mat-icon {
       margin-right: $side-nav-mat-icon-padding-right;
+      text-align: center;
     }
   }
   &__logo {
