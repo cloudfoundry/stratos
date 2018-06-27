@@ -12,6 +12,7 @@ export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright 
 export interface SideNavItem {
   text: string;
   matIcon: string;
+  matIconFont?: string;
   link: string;
   hidden?: Observable<boolean>;
 }
