@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store, compose } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval, Observable, combineLatest } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, tap, withLatestFrom, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, share, tap, withLatestFrom, switchMap, first } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
@@ -110,30 +110,36 @@ export class EntityService<T = any> {
   waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
-
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: Function
   ): Observable<EntityInfo> => {
+    const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
-      tap(([entityRequestInfo, entity]) => {
+      map(([entityRequestInfo, entity]) => {
         if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
           actionDispatch();
+          return true;
         }
       }),
-      switchMap(() => combineLatest(
-        entityMonitor.entity$,
-        entityMonitor.entityRequest$
-      ).pipe(
-        filter((entityRequestInfo) => {
-          return !!entityRequestInfo;
-        }),
-        map(([entity, entityRequestInfo]) => ({
-          entityRequestInfo,
-          entity
-        }))
-      ))
+      first(),
+      switchMap(() => cleanEntityInfo$)
+    );
+  }
+
+  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
+    return combineLatest(
+      entityMonitor.entity$,
+      entityMonitor.entityRequest$
+    ).pipe(
+      filter((entityRequestInfo) => {
+        return !!entityRequestInfo;
+      }),
+      map(([entity, entityRequestInfo]) => ({
+        entityRequestInfo,
+        entity
+      }))
     );
   }
 
