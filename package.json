@@ -35,6 +35,7 @@
     "customize": "gulp customize",
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
+    "store-git-metadata": "gulp store-git-metadata",
     "postinstall": "npm run customize"
   },
   "author": "",
