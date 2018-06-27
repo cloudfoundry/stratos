@@ -159,6 +159,10 @@ spec:
         {{- if .Values.socksProxy }}
           value: {{.Values.socksProxy}}
         {{- end }}
+        - name: LOG_LEVEL
+        {{- if .Values.console.backendLogLevel }}
+          value: {{.Values.console.backendLogLevel}}
+        {{- end }}
         {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
