@@ -13,8 +13,10 @@ You will need to have installed Docker, see:
 To build the container, change directory to the root of the project and open a command prompt:
 
 ```
-docker build -f deploy/all-in-one/Dockerfile . -t stratos
+docker build -f deploy/Dockerfile.all-in-one . -t stratos
 ```
+
+> Note: The Dockerfile for all-in-one is in the `deploy` folder and not the `deploy/all-in-one` folder.
 
 Bring up the container with:
 

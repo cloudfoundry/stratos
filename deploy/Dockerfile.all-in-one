@@ -1,12 +1,12 @@
 FROM splatform/stratos-aio-base:opensuse
 
-COPY *.json ./
-COPY gulpfile.js ./
-COPY src ./src
-COPY build ./build/
-COPY deploy/tools/generate_cert.sh generate_cert.sh
-COPY deploy/db deploy/db
-COPY deploy/all-in-one/config.all-in-one.properties config.properties
+COPY --chown=stratos:users *.json ./
+COPY --chown=stratos:users gulpfile.js ./
+COPY --chown=stratos:users src ./src
+COPY --chown=stratos:users build ./build/
+COPY --chown=stratos:users deploy/tools/generate_cert.sh generate_cert.sh
+COPY --chown=stratos:users deploy/db deploy/db
+COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
 RUN npm install \
     && npm run build \
