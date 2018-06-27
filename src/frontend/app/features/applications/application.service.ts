@@ -1,7 +1,7 @@
 
 import { of as observableOf, Observable } from 'rxjs';
 
-import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap } from 'rxjs/operators';
+import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap, tap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -285,6 +285,7 @@ export class ApplicationService {
     ), startWith(false), publishReplay(1), refCount(), );
 
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
+      tap(o => console.log(`New Entity emitted! ${JSON.stringify(o)}`)),
       map(({ entity }) => entity),
       map(app => {
         const routes = app && app.entity.routes ? app.entity.routes : [];

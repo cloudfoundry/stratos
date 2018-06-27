@@ -62,9 +62,9 @@ export class DeleteRoute extends BaseRouteAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
+    appGuid?: string,
     public async: boolean = false,
-    public recursive: boolean = true,
-    appGuid?: string
+    public recursive: boolean = true
   ) {
     super(guid, endpointGuid, appGuid);
     this.options = new RequestOptions();
