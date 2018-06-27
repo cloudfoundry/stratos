@@ -14,7 +14,7 @@ RUN npm install \
     && npm run deploy-cf
 
 # Generate dev-certs
-RUN CERTS_PATH=/go/dev-certs ./generate_cert.sh \
+RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
     && chmod +x portal-proxy
 
 EXPOSE 443
