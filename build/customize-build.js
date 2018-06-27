@@ -10,25 +10,35 @@
   var path = require('path');
   var fs = require('fs-extra');
   var yaml = require('js-yaml');
+  var replace = require('replace-in-file');
+  var execSync = require('child_process').execSync;
 
   const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/misc/custom/custom.yaml');
+
+  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
+  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
+
+  const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
 
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
   gulp.task('customize', function (cb) {
     doCustomize(false);
+    doGenerateIndexHtml(true);
     cb();
   });
 
   // Apply defaults instead of any customizations that are available in custom-src
   gulp.task('customize-default', function (cb) {
     doCustomize(true);
+    doGenerateIndexHtml(false);
     cb();
   });
 
   // Remove all customizations (removes all symlinks as if customize had not been run)
   gulp.task('customize-reset', function (cb) {
     doCustomize(true, true);
+    doGenerateIndexHtml(false);
     cb();
   });
 
@@ -138,6 +148,49 @@
         fs.symlinkSync(srcFolder, destFolder);
       }
     })
+  }
+
+  // Generate index.html from template
+  function doGenerateIndexHtml(customize) {
+    // Copy the default
+    fs.copySync(INDEX_TEMPLATE, INDEX_HTML);
+
+    if (!customize) {
+      return;
+    }
+
+    // Patch 
+    var metadata = {};
+    if (fs.existsSync(CUSTOM_METADATA)) {
+      try {
+        metadata = yaml.safeLoad(fs.readFileSync(CUSTOM_METADATA, 'utf8'));
+      } catch (e) {
+        console.log('Could not read stratos.yaml file');
+        console.log(e);
+        process.exit(1);
+      }
+    }
+
+    // Patch different page title if there is one
+    var title = metadata.title || 'Stratos';
+    replace.sync({ files: INDEX_HTML, from: /@@TITLE@@/g, to: title });
+
+    // Git Information
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_git_project@@', to: execGit('git config --get remote.origin.url') });
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_git_branch@@', to: execGit('git rev-parse --abbrev-ref HEAD') });
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_git_commit@@', to: execGit('git rev-parse HEAD') });
+
+    // Date and Time that the build was made (approximately => it is when this script is run)
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_build_date@@', to: new Date() });
+  }
+
+  function execGit(cmd) {
+    try {
+      var response = execSync(cmd + ' 2> /dev/null');
+      return response.toString().trim();
+    } catch (e) {
+      return '';
+    }
   }
 
 })();

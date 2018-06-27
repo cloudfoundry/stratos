@@ -133,6 +133,25 @@ type JWTUserTokenInfo struct {
 	Scope       []string `json:"scope"`
 }
 
+// Diagnostics - Diagnostic metadata
+type Diagnostics struct {
+	DeploymentType   string                  `json:"deploymentType"`
+	GitClientVersion string                  `json:"gitClientVersion"`
+	DBMigrations     []*GooseDBVersionRecord `json:"databaseMigrations"`
+	HelmName         string                  `json:"helmName,omitempty"`
+	HelmRevision     string                  `json:"helmRevision,omitempty"`
+	HelmChartVersion string                  `json:"helmChartVersion,omitempty"`
+	HelmLastModified string                  `json:"helmLastModified,omitempty"`
+}
+
+// GooseDBVersionRecord - the version record in the database that Goose reads/writes
+type GooseDBVersionRecord struct {
+	ID        int64  `json:"id"`
+	VersionID int64  `json:"version_id"`
+	IsApplied bool   `json:"is_applied"`
+	Timestamp string `json:"timestamp"`
+}
+
 // Info - this represents user specific info
 type Info struct {
 	Versions     *Versions                             `json:"version"`
@@ -140,6 +159,7 @@ type Info struct {
 	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
 	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
 	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
+	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }
 
 // Extends CNSI Record and adds the user
@@ -201,7 +221,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
-	SSOLogin						bool	 `configName:"SSO_LOGIN"`
+	SSOLogin                        bool     `configName:"SSO_LOGIN"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	CFAdminIdentifier               string
 	CloudFoundryInfo                *CFInfo

@@ -14,6 +14,7 @@ type portalProxy struct {
 	SessionStore           interfaces.SessionStorer
 	SessionStoreOptions    *sessions.Options
 	Plugins                map[string]interfaces.StratosPlugin
+	Diagnostics            *interfaces.Diagnostics
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

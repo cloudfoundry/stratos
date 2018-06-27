@@ -108,6 +108,7 @@
     "ngrx-store-freeze": "^0.2.3",
     "protractor": "^5.3.2",
     "q": "^1.4.1",
+    "replace-in-file": "^3.4.0",
     "request-promise-native": "^1.0.5",
     "rxjs-tslint": "^0.1.4",
     "sass-lint": "^1.12.1",

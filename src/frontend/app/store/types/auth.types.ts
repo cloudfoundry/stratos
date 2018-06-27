@@ -37,4 +37,14 @@ export interface SessionData {
   isSSOLogin?: boolean;
   sessionExpiresOn: number;
   domainMismatch?: boolean;
+  diagnostics?: Diagnostics;
+}
+export interface Diagnostics {
+  deploymentType?: string;
+  gitClientVersion?: string;
+  databaseMigrations?: any;
+  helmName?: string;
+  helmRevision?: string;
+  helmChartVersion?: string;
+  helmLastModified?: string;
 }

@@ -52,6 +52,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		Endpoints:    make(map[string]map[string]*interfaces.EndpointDetail),
 		CloudFoundry: p.Config.CloudFoundryInfo,
 		PluginConfig: p.Config.PluginConfig,
+		Diagnostics:  p.Diagnostics,
 	}
 	// initialize the Endpoints maps
 	for _, plugin := range p.Plugins {
