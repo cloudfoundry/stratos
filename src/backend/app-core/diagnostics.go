@@ -27,9 +27,11 @@ func (p *portalProxy) StoreDiagnostics() {
 		}
 	}
 
-	dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(p.DatabaseConnectionPool)
-	if versions, err := dbVersionRepo.List(); err == nil {
-		diagnostics.DBMigrations = versions
+	if p.DatabaseConnectionPool != nil {
+		dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(p.DatabaseConnectionPool)
+		if versions, err := dbVersionRepo.List(); err == nil {
+			diagnostics.DBMigrations = versions
+		}
 	}
 
 	// Deployment information - when deployed via Helm
