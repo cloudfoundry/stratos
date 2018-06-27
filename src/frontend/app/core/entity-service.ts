@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store, compose } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
-import { interval ,  Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, tap, withLatestFrom } from 'rxjs/operators';
+import { interval, Observable, combineLatest } from 'rxjs';
+import { filter, map, publishReplay, refCount, share, tap, withLatestFrom, switchMap } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
@@ -122,15 +122,19 @@ export class EntityService<T = any> {
           actionDispatch();
         }
       }),
-      filter((entityRequestInfo) => {
-        return !!entityRequestInfo;
-      }),
-      map(([entityRequestInfo, entity]) => {
-        return {
+      switchMap(() => combineLatest(
+        entityMonitor.entity$,
+        entityMonitor.entityRequest$
+      ).pipe(
+        filter((entityRequestInfo) => {
+          return !!entityRequestInfo;
+        }),
+        map(([entity, entityRequestInfo]) => ({
           entityRequestInfo,
-          entity: entity ? entity : null
-        };
-      }), );
+          entity
+        }))
+      ))
+    );
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
