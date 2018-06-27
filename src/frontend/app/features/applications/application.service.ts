@@ -300,9 +300,8 @@ export class ApplicationService {
               entityRequestInfo: undefined,
               entity: entRoute.entity.domain
             });
-          } else {
-            return null;
           }
+          return null;
       })
   );
 }

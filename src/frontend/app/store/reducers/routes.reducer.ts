@@ -33,43 +33,41 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>
   }
 }
 export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<APIResource<IAppSummary>>, action: APISuccessOrFailedAction) {
- 
   let currentState, routeGuid;
   switch (action.type) {
     case RouteEvents.UNMAP_ROUTE_SUCCESS:
       const unmapRouteAction = action.apiAction as UnmapRoute;
       currentState = state[unmapRouteAction.appGuid];
       routeGuid = unmapRouteAction.routeGuid;
-      return newState(currentState, unmapRouteAction.appGuid, routeGuid);
+      return newState(currentState, unmapRouteAction.appGuid, routeGuid, state);
     case RouteEvents.DELETE_SUCCESS:
       const deleteAction = action.apiAction as DeleteRoute;
       currentState = state[deleteAction.appGuid];
       routeGuid = deleteAction.guid;
-      return newState(currentState, deleteAction.appGuid, routeGuid);
+      return newState(currentState, deleteAction.appGuid, routeGuid, state);
     default:
       return state;
   }
 
-  function  newState(currentState: APIResource<IAppSummary>, appGuid: string, routeGuid: string) {
-    return {
-      ...state,
-      [appGuid]: {
-        ...currentState,
-        entity: {
-          ...currentState.entity,
-          routes: currentState.entity.routes.filter(r => r.entity.guid != routeGuid)
-        }
+}
+function newState(
+  currentState: APIResource<IAppSummary>,
+  appGuid: string,
+  routeGuid: string,
+  state: IRequestEntityTypeState<APIResource<IAppSummary>>
+) {
+  return {
+    ...state,
+    [appGuid]: {
+      ...currentState,
+      entity: {
+        ...currentState.entity,
+        routes: currentState.entity.routes.filter(r => r.entity.guid !== routeGuid)
       }
-    };
-  }
+    }
+  };
 }
 
-function getRoute(action: APISuccessOrFailedAction): APIResource<IRoute>{
-  if (action.response && action.response.entities && action.response.entities.route){
-    return action.response.entities.route[0];
-  }
-  return null;
-}
 function addAppFromRoute(entity: IRoute, appGuid: string) {
   const oldApps = entity.apps ? entity.apps : [];
   return {
