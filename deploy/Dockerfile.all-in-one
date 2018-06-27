@@ -9,7 +9,7 @@ COPY --chown=stratos:users deploy/db deploy/db
 COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
 RUN npm install \
-    && npm run build \
+    && npm run build-cf \
     && npm run build-backend \
     && npm run deploy-cf
 
@@ -18,5 +18,8 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
     && chmod +x portal-proxy
 
 EXPOSE 443
+
+# Need to be root to bind to port 443
+USER root
 
 ENTRYPOINT ["./portal-proxy"]

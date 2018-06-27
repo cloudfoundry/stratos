@@ -28,4 +28,4 @@ Stratos should now be accessible at the following URL:
 
 https://localhost:4443
 
-To login use the following credentials detailed [here](../../docs/access.md).
+You will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials.
