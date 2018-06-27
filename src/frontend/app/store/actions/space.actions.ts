@@ -282,7 +282,7 @@ export class GetServiceInstancesForSpace
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Space', 'Get all service instances');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
   initialParams = {
