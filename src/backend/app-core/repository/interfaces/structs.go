@@ -223,6 +223,7 @@ type PortalConfig struct {
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
+	LogLevel                        string   `configName:"LOG_LEVEL"`
 	CFAdminIdentifier               string
 	CloudFoundryInfo                *CFInfo
 	HTTPS                           bool

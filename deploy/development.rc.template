@@ -5,6 +5,9 @@
 # Note: stand-up-dev-env.sh will try to use it if it's present.
 
 
+# Enable Debug logging for Jetstream
+#export LOG_LEVEL=debug
+
 ###################
 # Corporate Proxy #
 ###################
