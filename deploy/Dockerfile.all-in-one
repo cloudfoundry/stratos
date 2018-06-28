@@ -1,5 +1,7 @@
+# Docker build for all-in-one Stratios
 FROM splatform/stratos-aio-base:opensuse
 
+COPY --chown=stratos:users .stratos-git-metadata.json .stratos-git-metadata.json
 COPY --chown=stratos:users *.json ./
 COPY --chown=stratos:users gulpfile.js ./
 COPY --chown=stratos:users src ./src
