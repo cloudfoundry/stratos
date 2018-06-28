@@ -33,12 +33,12 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-org))/stratos-dc-jetstream
-- name: postflight-dc-image
+- name: dc-db-migrator-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-dc-postflight-job
+    repository: ((docker-org))/stratos-dc-db-migrator
 - name: mariadb-dc-image
   type: docker-image
   source:
@@ -51,34 +51,73 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-org))/stratos-dc-console
+- name: jetstream-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-jetstream
+- name: postflight-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-postflight-job
+- name: mariadb-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-mariadb
+- name: ui-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-console
 
 groups:
 - name: tests
   jobs:
-  # - build-helm-images
+  - build-helm-images
   - build-dc-images
   - build-aio-image
 
 jobs:
-# - name: build-helm-images
-#   plan:
-#   - get: stratos
-#   - get: after-midnight
-#     trigger: true
-#   - do:
-#     - task: generete-certs
-#       timeout: 2m
-#       file: stratos/deploy/ci/tasks/build-images/generate-certs.yml
-#     - task: build
-#       privileged: true
-#       timeout: 30m
-#       file: stratos/deploy/ci/tasks/build-images/build-helm.yml
-#       params:
-#         DOCKER_USERNAME: ((docker-username))
-#         DOCKER_PASSWORD: ((docker-password))
+- name: build-helm-images
+  plan:
+  - get: stratos
+  - get: after-midnight
+    trigger: true
+  - aggregate:
+    - do:
+      - put: jetstream-helm-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  prod-build
+          tag_as_latest: true
+      - put: postflight-helm-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  postflight-job
+          tag_as_latest: true
+      - put: mariadb-helm-image
+        params:
+          dockerfile: stratos/deploy/db/Dockerfile.mariadb
+          build: stratos/deploy/db
+          tag_as_latest: true
+      - put: ui-helm-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.ui
+          build: stratos/
+          target_name: prod-build
+          tag_as_latest: true
 - name: build-dc-images
   plan:
   - get: stratos
+  - get: after-midnight
     trigger: true
   - aggregate:
     - do:
@@ -88,11 +127,11 @@ jobs:
           build: stratos/
           target_name:  dev-build
           tag_as_latest: true
-      - put: postflight-dc-image
+      - put: dc-db-migrator-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk
           build: stratos/
-          target_name:  postflight-job
+          target_name:  db-migrator
           tag_as_latest: true
       - put: mariadb-dc-image
         params:
