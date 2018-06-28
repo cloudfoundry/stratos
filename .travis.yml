@@ -7,6 +7,12 @@ services:
 - docker
 addons:
   chrome: stable
+  artifacts:
+    paths:
+    - ./e2e-reports
+    target_paths:
+    - e2e
+    debug: true
 before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
@@ -64,12 +70,3 @@ jobs:
 notifications:
   slack:
     secure: s5SFnFKwzfxLrjGR5lJ2AJG1FSWCKtHdQi8K2Kmx5ZhrYL/7P+KLc/ks18WnzCPoy705LbHCBSULcnWbLjqCpnkKxNjsFAyFl2nZZPxBjl2/mHpulbr3gmultDOrMDbmYL4oWPKBlxKResElz9nQwknlLWZ/L94AIx8zuMfRIWdEt1bJBDAQts4fx2D4cIEx0yZUq7JGAKjSiXKR9eDyMWFb+SWw6mvr5WtFM8uq35rPvRVEfm56LIgSuMUpVeYtnYiY2JP7W8iKX0gD+54wAiSXRZiQVCLJq606/TlJo7j8Na9Dn1Q5XDkX3b3XzcgmEZThoO1GFtv3yNYOVxv+50p2tSnc8CT0VEVOYOGJuz17AESZAYK+AyjEmeZmDiroj1czmIq8/ZYKbmvDYSZgGuDcSkQurX/6BPac6ra69WmSQmwv0tS3A/IzDw7X+CuC+3QubQ7GfaiVe25PUU+tRSEDM4PMUJY8QRF5Q+oeN5NjjWmJBqf/ic2TO2xTU1j+qysdqK34qIV1qyVcPMUIiYW+5ltH71qiy05TSvvfGS+oatRBMzINRl3zl2gOV1CKNU801XehRKCx9XDCw5NL1HSx5HD5psOyBRpAMYYBOqa+rv9VAza9MsfpslCoibg5rdrq4rZqqUgRhayNp/LKzlhe/g62+qbGNT+iFuHtB+Y=
-deploy:
-  provider: s3
-  access_key_id:
-    secure: nlnis4WttYgh55yMRtskmGVPQBB8N4EaobkkGKsha+QDCIQ/t+AvwEAWG7/IHfmvzBcNFDV8ZZP2fzLcfu38I4E1ChPbRVfo0eFAY+vFvjztOLB/7WVVf5hv1yj+SVDzqsdDK2/oLc90ZvQ3/spe5j3ka22PjaTrTsqjxNYqz/a1lpoIdu2JpW4qxE7DD7rckxxArk1bY3KK0F/AeoTyTq1T3pwiPJtSeixwZmmN/puX43Axcpok7ITT4AvrQNAH0ZVQAKHGGaQUqUsojcole+B2WDiELgc06e7ALWbvcohVgEjZPtUDanJK6CfzeL/W2Fe2z3qR+d++5eV2qTw7Td+IfQ3jzkFL+yO0yxuab3JswbXfq1d8ko929XCrgV5FPv9cBt3GuO4OkW/IkNKhHiDgw9/jLPdHNuXnjCD3iCUO6A936HjnduXMpD1hF+hHftamgc9FdSl5RBOsXo1CXOZWU5MSZHJnJlvZ4k+AZbGJxT56plylm+tryswG9HiiEo4ukKUzP7CaR0r0bAIvJ0cQZYpi1gG5lUkroMsUItnUcjW7fNT/Nrrps0DzTOHkTdF7w4QyUk+fPvhER6RetlxxLSmxr+d0xV7nTafdvr99FufKMsHynSFQY5ERJYyUf+rMqSUW/qc2aDp7CR2W5JUvYTgU8+33QNP1fAebWXg=
-  secret_access_key:
-    secure: E6Pt7++ntbVGvBy5WcKR5lg6/lMYUd7iFGeqZrDSY0w2tEFGbd/kg4QqMrjJMKA2xjfwBInK/6U3r+So2eMJIJ1pz8GRX5/sms2pOQPv5BbHRB0VaEg2bKPkXc12h6+LzJDuiojlp4zoO7T0F8GqeG43CGYOBg7bAQGyiPo2WMQc3IMpfigLh0hDDx8AFTZD+DJsleKAjfBPywG19mmM1kpNzwt9b3Wxxgn0puurng7P8FCvRHznpzdlDcMdjb0qLIQjrYNsrPemK4ZlfMRGwiBLDkmllwqJnrigiBDXy0h6kKYk/A6GxTBHG73T/ms/kjZNssOtHOVnfpO9v96YFkgzmW3siWDJlWvIg5nJ/YlBGgvz0yEF0lSvLMB2DyqsnZQcNglfiP9rdKKCrQ4UuqhdyZBKrXCn8zTbqoH5RfxBFlC/or0+Tw1baQUtqoHvfRqepcVtucDM6ebpDdbuk0BbkFENxFl9DFVZr92F9L7Qd/n+e7xQXQkbo+YNfjUf4V0y/P9dmYPJyQtyLe8L2n4szL5OZF68VrWkqWsUB7Tcd4uHoLIuSUm+pMTSDQc4EwkhrooI1+uLeTgjxiRPgnmI8PxYXrKLxdl7QcHOqSCyC05yAmGOE4VRRaUN+hCMGHeFPIb1n0p2/F3snZZLT7ZxvXE3SctcnpJhflRlH4M=
-  bucket: stratos-e2e
-  local_dir: e2e-reports
-  upload-dir: e2e
