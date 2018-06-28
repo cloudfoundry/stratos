@@ -95,6 +95,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
+	if portalConfig.LogLevel != "" {
+		log.Infof("Setting log level to: %s", portalConfig.LogLevel)
+		level, _ := log.ParseLevel(portalConfig.LogLevel)
+		log.SetLevel(level)
+	}
+
 	log.Info("Configuration loaded.")
 	isUpgrading := isConsoleUpgrading()
 

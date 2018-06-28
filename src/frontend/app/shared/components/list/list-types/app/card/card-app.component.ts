@@ -7,7 +7,7 @@ import { IApp } from '../../../../../../core/cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/app-state';
-import { endpointSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
@@ -17,6 +17,7 @@ import {
   CardStatus,
 } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 
 @Component({
   selector: 'app-card-app',
@@ -31,6 +32,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   appStatus$: Observable<CardStatus>;
   endpointName$: Observable<string>;
   multipleConnectedEndpoints$: Observable<boolean>;
+  entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
     private store: Store<AppState>,
@@ -40,6 +42,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   }
 
   ngOnInit() {
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(applicationSchemaKey));
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
 
     this.endpointName$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.row.entity.cfGuid)).pipe(

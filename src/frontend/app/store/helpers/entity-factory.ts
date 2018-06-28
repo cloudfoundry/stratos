@@ -53,6 +53,7 @@ const entityCache: {
  */
 export class EntitySchema extends schema.Entity {
   schema: Schema;
+  public getId: (input, parent?, key?) => string;
   /**
    * @param {string} entityKey As per schema.Entity ctor
    * @param {Schema} [definition] As per schema.Entity ctor
@@ -62,7 +63,7 @@ export class EntitySchema extends schema.Entity {
    */
   constructor(
     private entityKey: string,
-    private definition?: Schema,
+    public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
   ) {
@@ -183,7 +184,8 @@ entityCache[serviceBindingNoBindingsSchemaKey] = ServiceBindingsNoBindingsSchema
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
     service_plan: ServicePlanSchema,
-    service_bindings: [ServiceBindingsSchema]
+    service_bindings: [ServiceBindingsSchema],
+    service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
@@ -191,21 +193,16 @@ entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
 const BuildpackSchema = new EntitySchema(buildpackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[buildpackSchemaKey] = BuildpackSchema;
 
-const coreRouteSchemaParams = {
-  entity: {
-    domain: DomainSchema
-  }
-};
 const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
-    ...coreRouteSchemaParams,
+    domain: DomainSchema,
     apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
 const RouteNoAppsSchema = new EntitySchema(routeSchemaKey, {
   entity: {
-    ...coreRouteSchemaParams,
+    domain: DomainSchema,
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
@@ -254,6 +251,7 @@ const OrganizationsWithoutSpaces = new EntitySchema(organizationSchemaKey, {
     ...coreOrgSchemaParams,
   }
 }, { idAttribute: getAPIResourceGuid });
+
 const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
@@ -276,7 +274,8 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    space: SpaceSchema.withEmptyDefinition()
+    space: SpaceSchema.withEmptyDefinition(),
+    service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;

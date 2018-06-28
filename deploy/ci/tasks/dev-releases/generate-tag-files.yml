@@ -1,3 +1,4 @@
+
 ---
 platform: linux
 inputs:
@@ -22,6 +23,12 @@ run:
       else
         LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
       fi
+
+      if [ ! -z ${TAG_SUFFIX} ]; then
+        LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+      fi
+
+
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
       FILENAME="release-${LATEST_TAG}"

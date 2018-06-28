@@ -11,6 +11,9 @@ import { deepMergeState } from '../../helpers/reducer.helper';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
+import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
+import { IRequestDataState } from '../../types/entity.types';
+import { IFlatTree } from '../../helpers/schema-tree-traverse';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -28,9 +31,37 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
           return deepMergeState(state, entities);
         }
         return state;
+      case RECURSIVE_ENTITY_SET_DELETED:
+        return cleanStateFromFlatTree(state, action as SetTreeDeleted);
       default:
         return state;
     }
+  };
+}
+
+function cleanStateFromFlatTree(state: IRequestDataState, action: SetTreeDeleted): IRequestDataState {
+  const { tree } = action;
+  return Object.keys(tree).reduce(reduceTreeToState(tree), { ...state });
+}
+
+function reduceTreeToState(tree: IFlatTree) {
+  return (state: IRequestDataState, entityKey: string) => {
+    const ids = tree[entityKey];
+    return Array.from(ids).reduce(reduceIdsToState(entityKey), state);
+  };
+}
+
+function reduceIdsToState(entityKey: string) {
+  return (state: IRequestDataState, id: string) => {
+    const {
+      [id]: omit,
+      ...newState
+    } = state[entityKey];
+
+    return {
+      ...state,
+      [entityKey]: newState
+    };
   };
 }
 
