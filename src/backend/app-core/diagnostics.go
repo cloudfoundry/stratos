@@ -15,7 +15,7 @@ func (p *portalProxy) StoreDiagnostics() {
 
 	diagnostics := &interfaces.Diagnostics{}
 
-	log.Warn("Storing Diagnostics")
+	log.Info("Storing Diagnostics")
 
 	// Git Client Version
 	cmdName := "git"
