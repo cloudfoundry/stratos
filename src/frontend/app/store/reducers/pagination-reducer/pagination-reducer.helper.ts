@@ -168,8 +168,12 @@ function getObservables<T = any>(
             ));
           }
         }),
-        switchMap(() => paginationMonitor.currentPage$),
-    );
+        switchMap(() => paginationMonitor.currentPage$.pipe(
+          tap(e => {
+            // console.log(action.actions[0]);
+            // console.log(e);
+          })
+        )));
 
   return {
     pagination$: pagination$.pipe(
