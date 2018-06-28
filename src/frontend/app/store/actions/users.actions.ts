@@ -1,19 +1,22 @@
-import { RequestOptions, RequestMethod } from '@angular/http';
+import { RequestOptions } from '@angular/http';
 
 import {
   cfUserSchemaKey,
+  endpointSchemaKey,
   entityFactory,
   EntitySchema,
   organizationSchemaKey,
   spaceSchemaKey,
-  endpointSchemaKey,
 } from '../helpers/entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction, createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
-import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { CFStartAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
-import { getActions } from './action.helper';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
+} from '../helpers/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, IRequestAction } from '../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-import { Action } from '@ngrx/store';
+import { getActions } from './action.helper';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -110,7 +113,8 @@ export class ChangeUserRole extends CFStartAction implements IRequestAction {
     public permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     public entityGuid: string,
     public isSpace = false,
-    public updateConnectedUser = false
+    public updateConnectedUser = false,
+    public orgGuid?: string
   ) {
     super();
     this.guid = entityGuid;
@@ -140,7 +144,8 @@ export class AddUserRole extends ChangeUserRole {
     entityGuid: string,
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
-    updateConnectedUser = false
+    updateConnectedUser = false,
+    orgGuid?: string
   ) {
     super(
       endpointGuid,
@@ -151,6 +156,7 @@ export class AddUserRole extends ChangeUserRole {
       entityGuid,
       isSpace,
       updateConnectedUser,
+      orgGuid
     );
   }
 }
@@ -162,7 +168,8 @@ export class RemoveUserRole extends ChangeUserRole {
     entityGuid: string,
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
-    updateConnectedUser = false
+    updateConnectedUser = false,
+    orgGuid?: string
   ) {
     super(
       endpointGuid,
@@ -172,7 +179,8 @@ export class RemoveUserRole extends ChangeUserRole {
       permissionTypeKey,
       entityGuid,
       isSpace,
-      updateConnectedUser
+      updateConnectedUser,
+      orgGuid
     );
   }
 }
