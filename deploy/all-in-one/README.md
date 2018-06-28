@@ -18,6 +18,8 @@ docker build -f deploy/Dockerfile.all-in-one . -t stratos
 
 > Note: The Dockerfile for all-in-one is in the `deploy` folder and not the `deploy/all-in-one` folder.
 
+> Note: If you are using Docker for Macand you get an error 137 when building, you should increase the memory available to Docker (via Preferences > Advanced) and try again.
+
 Bring up the container with:
 
 ```
