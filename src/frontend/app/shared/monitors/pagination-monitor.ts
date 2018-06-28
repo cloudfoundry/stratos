@@ -44,7 +44,7 @@ export class PaginationMonitor<T = any> {
    * Is the current page ready?
    * @param pagination
    */
-  private hasPage(pagination: PaginationEntityState, schema) {
+  private hasPage(pagination: PaginationEntityState) {
     if (!pagination) {
       return false;
     }
@@ -52,8 +52,8 @@ export class PaginationMonitor<T = any> {
     const hasPageIds = !!currentPage;
     const requestInfo = pagination.pageRequests[pagination.clientPagination.currentPage];
     const hasPageRequestInfo = !!requestInfo;
-    const hasPage = hasPageIds && hasPageRequestInfo && requestInfo.busy;
-    return !hasPage;
+    const hasPage = hasPageIds && hasPageRequestInfo && !requestInfo.busy;
+    return hasPage;
   }
 
   /**
@@ -118,18 +118,18 @@ export class PaginationMonitor<T = any> {
     schema: schema.Entity
   ) {
     return pagination$.pipe(
-      filter((pagination) => this.hasPage(pagination, schema)),
-      distinctUntilChanged(this.isPageSameIsh),
-      withLatestFrom(this.store.select(getAPIRequestDataState)),
       // Improve efficiency
       observeOn(asapScheduler),
+      filter((pagination) => this.hasPage(pagination)),
+      distinctUntilChanged(this.isPageSameIsh),
+      withLatestFrom(this.store.select(getAPIRequestDataState)),
       map(([pagination, allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
       tag('de-norming ' + schema.key),
       publishReplay(1),
-      refCount()
+      refCount(),
     );
   }
 
