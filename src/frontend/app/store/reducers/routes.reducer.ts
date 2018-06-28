@@ -42,9 +42,22 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<API
       return newState(currentState, unmapRouteAction.appGuid, routeGuid, state);
     case RouteEvents.DELETE_SUCCESS:
       const deleteAction = action.apiAction as DeleteRoute;
-      currentState = state[deleteAction.appGuid];
       routeGuid = deleteAction.guid;
-      return newState(currentState, deleteAction.appGuid, routeGuid, state);
+      if (deleteAction.appGuids) {
+        // Mutate state for each App
+        let mutatedState = state;
+        deleteAction.appGuids.forEach(appGuid => {
+          currentState = state[appGuid];
+          if (!currentState) {
+            return;
+          }
+          mutatedState = newState(currentState, appGuid, routeGuid, mutatedState);
+        });
+        return mutatedState;
+      } else if (deleteAction.appGuid) {
+        return newState(currentState, deleteAction.appGuid, routeGuid, state);
+      }
+      return state;
     default:
       return state;
   }
