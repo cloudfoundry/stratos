@@ -117,13 +117,11 @@ export class EntityService<T = any> {
     const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
-      map(([entityRequestInfo, entity]) => {
+      tap(([entityRequestInfo, entity]) => {
         if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
           actionDispatch();
-          return true;
         }
       }),
-      first(),
       switchMap(() => cleanEntityInfo$)
     );
   }
