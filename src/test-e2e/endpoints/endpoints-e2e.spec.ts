@@ -50,11 +50,13 @@ describe('Endpoints', () => {
 
         it('Should show application wall with \'no clusters\' message', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.Applications);
+          applications.waitForPage();
           expect(applications.hasNoCloudFoundryMesasge()).toBeTruthy();
         });
 
         it('Should show services view with \'no clusters\' message', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.Services);
+          services.waitForPage();
           expect(services.hasNoCloudFoundryMesasge()).toBeTruthy();
         });
 
