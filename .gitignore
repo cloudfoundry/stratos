@@ -90,6 +90,7 @@ src/backend/app-core/load_plugins.go
 *.bak
 secrets.yaml
 build/dev_config.json
+.stratos-git-metadata.json
 
 # Customisations
 
@@ -102,3 +103,4 @@ src/frontend/app/custom.module.ts
 src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom
+src/frontend/index.html
