@@ -106,12 +106,12 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    const serviceEntity = this.serviceInstanceEntity.entity.service_plan.entity.service;
+    const serviceEntity = this.serviceInstanceEntity.entity.service;
     let extraInfo: IServiceExtra = null;
     try {
       extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
     } catch (e) { }
-    let displayName = serviceEntity.entity.label;
+    let displayName = serviceEntity.entity ? serviceEntity.entity.label : '';
     if (extraInfo && extraInfo.displayName) {
       displayName = extraInfo.displayName;
     }
@@ -121,13 +121,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   getSpaceName = () => this.serviceInstanceEntity.entity.space.entity.name;
   getSpaceURL = () => [
     '/cloud-foundry',
-     this.serviceInstanceEntity.entity.cfGuid,
-     'organizations',
-     this.serviceInstanceEntity.entity.space.entity.organization_guid,
-     'spaces',
-     this.serviceInstanceEntity.entity.space_guid,
-     'summary'
-    ]
-    getSpaceBreadcrumbs = () => ({ 'breadcrumbs': 'services-wall'});
+    this.serviceInstanceEntity.entity.cfGuid,
+    'organizations',
+    this.serviceInstanceEntity.entity.space.entity.organization_guid,
+    'spaces',
+    this.serviceInstanceEntity.entity.space_guid,
+    'summary'
+  ]
+  getSpaceBreadcrumbs = () => ({ 'breadcrumbs': 'services-wall' });
 
 }

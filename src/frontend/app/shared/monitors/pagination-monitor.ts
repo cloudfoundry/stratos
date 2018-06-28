@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
-import { Observable ,  combineLatest } from 'rxjs';
-import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish ,  withLatestFrom } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish, withLatestFrom } from 'rxjs/operators';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
@@ -108,7 +108,7 @@ export class PaginationMonitor<T = any> {
   ) {
     return combineLatest(
       pagination$,
-      this.store.select(selectEntities<T>(this.schema.key)),
+      this.store.select(selectEntities<T>(this.schema.key)).pipe(distinctUntilChanged()),
     ).pipe(
       filter(([pagination, entities]) => this.hasPage(pagination)),
       withLatestFrom(this.store.select(getAPIRequestDataState)),

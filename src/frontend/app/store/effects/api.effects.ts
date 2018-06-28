@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations';
 import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
@@ -24,6 +24,8 @@ import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.acti
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
+import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -68,11 +70,13 @@ export class APIEffect {
 
   private doApiRequest(action, state) {
     const actionClone = { ...action };
-    const paramsObject = {};
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
     const requestType = getRequestTypeFromMethod(apiAction);
+    if (requestType === 'delete') {
+      this.store.dispatch(new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)));
+    }
 
     this.store.dispatch(new StartRequestAction(actionClone, requestType));
     this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
@@ -120,13 +124,13 @@ export class APIEffect {
         return this.handleMultiEndpoints(response, actionClone);
       }),
       mergeMap(response => {
-        const { entities, totalResults, totalPages, errors = [] } = response;
-        if (requestType === 'fetch' && (errors && errors.length > 0)) {
-          this.handleApiEvents(errors);
+        const { entities, totalResults, totalPages, errorsCheck = [] } = response;
+        if (requestType === 'fetch' && (errorsCheck && errorsCheck.length > 0)) {
+          this.handleApiEvents(errorsCheck);
         }
 
         let fakedAction, errorMessage;
-        errors.forEach(error => {
+        errorsCheck.forEach(error => {
           if (error.error) {
             // Dispatch a error action for the specific endpoint that's failed
             fakedAction = { ...actionClone, endpointGuid: error.guid };
@@ -137,13 +141,28 @@ export class APIEffect {
 
         // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
-        if (errors.length === 1 && errors[0].error) {
+        if (errorsCheck.length === 1 && errorsCheck[0].error) {
+          if (requestType === 'delete') {
+            this.store.dispatch(new RecursiveDeleteFailed(
+              apiAction.guid,
+              apiAction.endpointGuid,
+              entityFactory(apiAction.entityKey)
+            ));
+          }
           this.store.dispatch(new WrapperRequestActionFailed(
             errorMessage,
-            { ...actionClone, endpointGuid: errors[0].guid },
+            { ...actionClone, endpointGuid: errorsCheck[0].guid },
             requestType
           ));
           return [];
+        }
+
+        if (requestType === 'delete') {
+          this.store.dispatch(new RecursiveDeleteComplete(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey))
+          );
         }
 
         return [new ValidateEntitiesStart(
@@ -168,7 +187,7 @@ export class APIEffect {
             url: error.url || apiAction.options.url
           }
         })));
-        return [
+        const errorActions: Action[] = [
           new APISuccessOrFailedAction(actionClone.actions[2], actionClone, error.message),
           new WrapperRequestActionFailed(
             error.message,
@@ -176,6 +195,14 @@ export class APIEffect {
             requestType
           )
         ];
+        if (requestType === 'delete') {
+          errorActions.push(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey)
+          ));
+        }
+        return errorActions;
       }));
   }
 
@@ -268,7 +295,7 @@ export class APIEffect {
     });
   }
 
-  getEntities(apiAction: IRequestAction, data, errors: APIErrorCheck[]): {
+  getEntities(apiAction: IRequestAction, data, errorCheck: APIErrorCheck[]): {
     entities: NormalizedResponse
     totalResults: number,
     totalPages: number,
@@ -276,7 +303,7 @@ export class APIEffect {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
-      .filter(guid => data[guid] !== null && !errors.findIndex(error => error.guid === guid))
+      .filter(guid => data[guid] !== null && errorCheck.findIndex(error => error.guid === guid && !error.error) >= 0)
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
@@ -374,15 +401,15 @@ export class APIEffect {
     entities,
     totalResults,
     totalPages,
-    errors: APIErrorCheck[]
+    errorsCheck: APIErrorCheck[]
   } {
-    const errors = this.checkForErrors(resData, apiAction);
+    const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
     let totalPages = 0;
 
     if (resData) {
-      const entityData = this.getEntities(apiAction, resData, errors);
+      const entityData = this.getEntities(apiAction, resData, errorsCheck);
       entities = entityData.entities;
       totalResults = entityData.totalResults;
       totalPages = entityData.totalPages;
@@ -398,7 +425,7 @@ export class APIEffect {
       entities,
       totalResults,
       totalPages,
-      errors
+      errorsCheck
     };
   }
 
