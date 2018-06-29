@@ -90,6 +90,7 @@ src/backend/app-core/load_plugins.go
 *.bak
 secrets.yaml
 build/dev_config.json
+e2e-reports/
 
 # Customisations
 

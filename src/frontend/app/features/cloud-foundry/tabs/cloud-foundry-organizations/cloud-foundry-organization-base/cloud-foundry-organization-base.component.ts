@@ -12,6 +12,7 @@ import { getActiveRouteCfOrgSpaceProvider, canUpdateOrgSpaceRoles } from '../../
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
+import { organizationSchemaKey, entityFactory, EntitySchema } from '../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -45,23 +46,20 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public name$: Observable<string>;
 
-  public isFetching$: Observable<boolean>;
-
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
 
   public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
   public permsSpaceCreate = CurrentUserPermissions.SPACE_CREATE;
   public canUpdateRoles$: Observable<boolean>;
+  public schema: EntitySchema;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    this.isFetching$ = cfOrgService.org$.pipe(
-      map(org => org.entityRequestInfo.fetching)
-    );
+    this.schema = entityFactory(organizationSchemaKey);
 
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),

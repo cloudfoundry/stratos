@@ -1,8 +1,8 @@
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { Observable, of as observableOf, asapScheduler } from 'rxjs';
+import { map, startWith, switchMap, withLatestFrom, observeOn } from 'rxjs/operators';
 
 import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
@@ -31,8 +31,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   public spaces$: Observable<ISpace[]>;
   public hasSpaces$: Observable<boolean>;
   public hasOrgs$: Observable<boolean>;
-
-  cfValid$: Observable<boolean>;
 
   @ViewChild('cfForm')
   cfForm: NgForm;
@@ -72,9 +70,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngAfterContentInit() {
     this.validate = this.cfForm.statusChanges.pipe(
-      map(() => {
-        return this.cfForm.valid || this.isRedeploy;
-      })
+      startWith(this.cfForm.valid || this.isRedeploy),
+      map(() => this.cfForm.valid || this.isRedeploy),
+      observeOn(asapScheduler)
     );
   }
 

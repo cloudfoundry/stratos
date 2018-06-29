@@ -29,7 +29,7 @@ import {
 } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
-import { CreateServiceInstance, UpdateServiceInstance } from '../../../../store/actions/service-instances.actions';
+import { CreateServiceInstance, UpdateServiceInstance, GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
@@ -38,7 +38,7 @@ import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource, NormalizedResponse } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { StepOnNextResult } from '../../stepper/step/step.component';
@@ -46,6 +46,8 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { GetSpace } from '../../../../store/actions/space.actions';
+import { APIResponse } from '../../../../store/actions/request.actions';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -171,7 +173,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
             if (alreadyBound) {
               const updatedSvc: APIResource<IServiceInstance> = {
                 entity: { ...svc.entity },
-                metadata: {...svc.metadata}
+                metadata: { ...svc.metadata }
               };
               updatedSvc.entity.name += ' (Already bound)';
               updatedSvc.metadata.guid = null;
@@ -269,6 +271,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           return observableOf({
             creating: false,
             error: false,
+            fetching: false,
             response: {
               result: []
             }
@@ -277,7 +280,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           return this.createServiceInstance(p, this.modeService.isEditServiceInstanceMode());
         }
       }),
-      filter(s => !s.creating),
+      filter(s => !s.creating && !s.fetching),
       combineLatest(this.store.select(selectCreateServiceInstance)),
       first(),
       switchMap(([request, state]) => {
@@ -345,7 +348,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     let newServiceInstanceGuid;
 
     if (!this.modeService.isEditServiceInstanceMode()) {
-
       newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
     } else {
       newServiceInstanceGuid = this.serviceInstanceGuid;
@@ -358,7 +360,24 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       action = new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
     }
     this.store.dispatch(action);
-    return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
+    const create$ = this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
+    return create$.pipe(
+      filter(a => !a.creating),
+      switchMap(a => {
+        if (a.error) {
+          return create$;
+        }
+        const response = a.response as NormalizedResponse;
+        const guid = response.result[0];
+        this.store.dispatch(new GetServiceInstance(guid, cfGuid));
+        return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, guid)).pipe(map(ri => ({
+          ...ri,
+          response: {
+            result: [guid]
+          }
+        })));
+      })
+    );
   }
 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {

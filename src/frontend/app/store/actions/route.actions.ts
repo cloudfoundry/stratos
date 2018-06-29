@@ -62,9 +62,10 @@ export class DeleteRoute extends BaseRouteAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
+    appGuid?: string,
+    public appGuids?: string[],
     public async: boolean = false,
-    public recursive: boolean = true,
-    appGuid?: string
+    public recursive: boolean = true
   ) {
     super(guid, endpointGuid, appGuid);
     this.options = new RequestOptions();
@@ -81,7 +82,6 @@ export class DeleteRoute extends BaseRouteAction {
   ];
   removeEntityOnDelete = true;
 }
-
 export class UnmapRoute extends BaseRouteAction {
   constructor(
     public routeGuid: string,

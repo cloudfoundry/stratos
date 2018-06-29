@@ -1,5 +1,5 @@
 FROM {{BASE_IMAGE}}
-RUN zypper in -y ca-certificates git && \
+RUN zypper in -y ca-certificates && \
     mkdir -p /srv && \
     mkdir -p /root/.npm-global
 # Install latest git from devel/tools/scm repository

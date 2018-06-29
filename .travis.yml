@@ -7,10 +7,16 @@ services:
 - docker
 addons:
   chrome: stable
+  artifacts:
+    paths:
+    - ./e2e-reports
+    target_paths:
+    - e2e
+    debug: true
 before_install:
- - export DISPLAY=:99.0
- - sh -e /etc/init.d/xvfb start
- - sleep 3 # give xvfb some time to start  
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3 # give xvfb some time to start  
 install:
 - npm install npm@5.6.0 -g
 - npm install
@@ -19,19 +25,20 @@ branches:
   only:
   - master
   - v2-master
+  - e2e-tests
 cache:
   directories:
   - "$HOME/.npm"
   - "$HOME/.cache"
   - node_modules
 stages:
-  - Frontend Lint
-  - Frontend Unit Tests
-  - Backend
-  - name: E2E tests
-    if: type != pull_request
-  - name: E2E tests quick
-    if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
+- Frontend Lint
+- Frontend Unit Tests
+- Backend
+- name: E2E tests
+  if: type != pull_request
+- name: E2E tests quick
+  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
 jobs:
   include:
   - stage: Frontend Lint

@@ -1,4 +1,46 @@
 # Change Log
+## 2.0.0 Release Candidate 2
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-rc1...2.0.0-rc2)
+
+**Improvements:**
+- Use consistent icons [\#2517](https://github.com/cloudfoundry-incubator/stratos/pull/2517)
+- Allow configuration of backend log level [\#2533](https://github.com/cloudfoundry-incubator/stratos/pull/2533)
+
+
+**Fixes:**
+- CF/Org/Space selector widget with 1 org and 1 space - user can not proceed [\#2467](https://github.com/cloudfoundry-incubator/stratos/issues/2467)
+- Error after creating a service instance [\#2473](https://github.com/cloudfoundry-incubator/stratos/issues/2473)
+- Visit App button never appears when a route is mapped/created [\#2518](https://github.com/cloudfoundry-incubator/stratos/issues/2518)
+- Cannot create service instance from marketplace or service pages [\#2519](https://github.com/cloudfoundry-incubator/stratos/issues/2519)
+- Upgrading from v1 to v2 via helm disconnects connected endpoints [\#2527](https://github.com/cloudfoundry-incubator/stratos/issues/2527)
+- Failed to deploy app due to invalid client ID [\#2532](https://github.com/cloudfoundry-incubator/stratos/issues/2532)
+- Exception thrown when creating space [\#2560](https://github.com/cloudfoundry-incubator/stratos/issues/2560)
+- Helm deployment: Upgrade notice can appear for some time if db takes a while to become ready [\#2546](https://github.com/cloudfoundry-incubator/stratos/issues/2546)
+- Fix assign role for non-admin connected user [\#2562](https://github.com/cloudfoundry-incubator/stratos/pull/2562)
+- Fix client and client secret issues when pushing apps [\#2553](https://github.com/cloudfoundry-incubator/stratos/pull/2553)
+- Fix Docker All-in-one image build [\#2552](https://github.com/cloudfoundry-incubator/stratos/pull/2552)
+- Clean entity service [\#2551](https://github.com/cloudfoundry-incubator/stratos/pull/2551)
+- Remove base git package to address CVE 2018-11235 [\#2530](https://github.com/cloudfoundry-incubator/stratos/pull/2530)
+- Entity deletion: Remove child entities [\#2486](https://github.com/cloudfoundry-incubator/stratos/pull/2486)
+
+
+## 2.0.0 Release Candidate 1
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-beta-002...2.0.0-RC-1)
+
+This is the first release candidate of Version 2 of Stratos.
+
+The main focus of this release are bug fixes for release.
+
+**Improvements:**
+- Add ingress example and docs for kubernetes deloyment [\#2510](https://github.com/cloudfoundry-incubator/stratos/pull/2510)
+
+**Fixed bugs:**
+- Fix for app count being stuck after adding an app in org card [\#2511](https://github.com/cloudfoundry-incubator/stratos/pull/2511)
+- Create service instance after connecting a new endpoint did not fetch organisation [\#2472](https://github.com/cloudfoundry-incubator/stratos/issues/2472)
+- Fixed an issue where we failed to store response from 1 or more endpoints [\#2513](https://github.com/cloudfoundry-incubator/stratos/pull/2513)
+- Ensure `Remove User` confirmation modal contains correct role prefix [\#2508](https://github.com/cloudfoundry-incubator/stratos/pull/2508)
+- Fix route schema [\#2506](https://github.com/cloudfoundry-incubator/stratos/pull/2506)
+- Fixes state reset issue when creating a service instance from different modes [\#2515](https://github.com/cloudfoundry-incubator/stratos/pull/2515)
 
 ## 2.0.0 Beta 2
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/v2.0.0-beta-001...2.0.0-beta-002)

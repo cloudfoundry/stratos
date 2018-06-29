@@ -53,6 +53,7 @@ const entityCache: {
  */
 export class EntitySchema extends schema.Entity {
   schema: Schema;
+  public getId: (input, parent?, key?) => string;
   /**
    * @param {string} entityKey As per schema.Entity ctor
    * @param {Schema} [definition] As per schema.Entity ctor
@@ -62,7 +63,7 @@ export class EntitySchema extends schema.Entity {
    */
   constructor(
     private entityKey: string,
-    private definition?: Schema,
+    public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
   ) {
@@ -250,6 +251,7 @@ const OrganizationsWithoutSpaces = new EntitySchema(organizationSchemaKey, {
     ...coreOrgSchemaParams,
   }
 }, { idAttribute: getAPIResourceGuid });
+
 const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,

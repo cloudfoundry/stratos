@@ -1,6 +1,6 @@
 import { IRoute } from './cf-api.types';
 import { APIResource } from '../store/types/api.types';
-import { IServiceBinding } from './cf-api-svc.types';
+import { IServiceBinding, IService } from './cf-api-svc.types';
 
 export interface IRoute {
   host: string;
@@ -254,4 +254,41 @@ export interface IUpdateOrganization {
   status?: string;
   quota_definition_guid?: string;
   default_isolation_segment_guid?: string;
+}
+
+export interface IAppSummary {
+  guid: string;
+  name: string;
+  routes: APIResource<IRoute>[];
+  running_instances: number;
+  services: IService[];
+  available_domains: IDomain[];
+  production: boolean;
+  space_guid: string;
+  stack_guid: string;
+  buildpack?: any;
+  detected_buildpack: string;
+  detected_buildpack_guid: string;
+  environment_json: {};
+  memory: number;
+  instances: number;
+  disk_quota: number;
+  state: string;
+  version: string;
+  command?: any;
+  console: boolean;
+  debug?: any;
+  staging_task_id: string;
+  package_state: string;
+  health_check_type: string;
+  health_check_timeout?: any;
+  health_check_http_endpoint: string;
+  staging_failed_reason?: any;
+  staging_failed_description?: any;
+  diego: boolean;
+  docker_image?: any;
+  package_updated_at: Date;
+  detected_start_command: string;
+  enable_ssh: boolean;
+  ports?: any;
 }

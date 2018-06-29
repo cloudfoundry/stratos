@@ -114,8 +114,8 @@ export class UsersRolesEffects {
     const isSpace = !!change.spaceGuid;
     const entityGuid = isSpace ? change.spaceGuid : change.orgGuid;
     return change.add ?
-      new AddUserRole(cfGuid, change.userGuid, entityGuid, change.role, isSpace, updateConnectedUser) :
-      new RemoveUserRole(cfGuid, change.userGuid, entityGuid, change.role, isSpace, updateConnectedUser);
+      new AddUserRole(cfGuid, change.userGuid, entityGuid, change.role, isSpace, updateConnectedUser, change.orgGuid) :
+      new RemoveUserRole(cfGuid, change.userGuid, entityGuid, change.role, isSpace, updateConnectedUser, change.orgGuid);
   }
 
   private createActionObs(action: ChangeUserRole): Observable<boolean> {
