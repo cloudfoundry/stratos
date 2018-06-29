@@ -25,6 +25,7 @@ import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
+import { AppEffects } from './effects/app.effects';
 import { UsersEffects } from './effects/users.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 
@@ -57,7 +58,8 @@ import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect'
       PermissionsEffects,
       PermissionEffects,
       UsersEffects,
-      RecursiveDeleteEffect
+      RecursiveDeleteEffect,
+      AppEffects
     ])
   ]
 })

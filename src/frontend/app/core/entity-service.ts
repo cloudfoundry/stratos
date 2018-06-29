@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Store, compose } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators/tag';
-import { interval, Observable, combineLatest } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, tap, withLatestFrom, switchMap, first, distinctUntilChanged } from 'rxjs/operators';
+import { compose, Store } from '@ngrx/store';
+import { combineLatest, interval, Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
@@ -17,7 +16,6 @@ import {
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
-import { composeFn } from './../store/helpers/reducer.helper';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 
