@@ -12,7 +12,6 @@ import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/da
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
-import { endpointsRegisteredCFEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 
 @Component({
   selector: 'app-services-wall',
