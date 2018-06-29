@@ -537,6 +537,8 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	repo := coreconfig.NewRepositoryFromFilepath(filePath, func(error) {})
 
 	repo.SetAuthenticationEndpoint(cnsiRecord.AuthorizationEndpoint)
+	repo.SetUAAOAuthClient(cfAppPush.portalProxy.GetConfig().CFClient)
+	repo.SetUAAOAuthClientSecret(cfAppPush.portalProxy.GetConfig().CFClientSecret)
 	repo.SetAPIEndpoint(cnsiRecord.APIEndpoint.String())
 	repo.SetDopplerEndpoint(cnsiRecord.DopplerLoggingEndpoint)
 	repo.SetSSLDisabled(cnsiRecord.SkipSSLValidation)

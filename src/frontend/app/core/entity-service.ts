@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, interval, Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
@@ -120,19 +120,20 @@ export class EntityService<T = any> {
           actionDispatch();
         }
       }),
+      first(),
       switchMap(() => cleanEntityInfo$)
     );
   }
 
   private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
     return combineLatest(
-      entityMonitor.entity$,
-      entityMonitor.entityRequest$
+      entityMonitor.entityRequest$,
+      entityMonitor.entity$
     ).pipe(
-      filter((entityRequestInfo) => {
+      filter(([entityRequestInfo]) => {
         return !!entityRequestInfo;
       }),
-      map(([entity, entityRequestInfo]) => ({
+      map(([entityRequestInfo, entity]) => ({
         entityRequestInfo,
         entity
       }))

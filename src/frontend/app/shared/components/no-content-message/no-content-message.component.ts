@@ -8,6 +8,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class NoContentMessageComponent implements OnInit {
 
   @Input('icon') icon: string;
+  @Input('iconFont') iconFont: string;
   @Input('firstLine') firstLine: string;
   @Input('secondLine') secondLine: {
     link?: string;

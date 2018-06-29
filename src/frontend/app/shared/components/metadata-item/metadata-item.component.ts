@@ -11,6 +11,8 @@ export class MetadataItemComponent implements OnInit {
 
   @Input('icon') private icon: string;
 
+  @Input('iconFont') private iconFont: string;
+
   @Input('label') private label: string;
 
   @Input('tooltip') private tooltip: string;
