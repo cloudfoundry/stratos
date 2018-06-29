@@ -3,6 +3,8 @@ import { ChangeUserRole } from '../../actions/users.actions';
 import { ICfRolesState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
+import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
+import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
 
 export function updateAfterRoleChange(
   state: ICurrentUserRolesState,
@@ -17,12 +19,10 @@ export function updateAfterRoleChange(
   const entityType = changePerm.isSpace ? 'spaces' : 'organizations';
 
   const cf = state.cf[changePerm.endpointGuid];
-  const entity = cf[entityType][changePerm.entityGuid];
-
+  const entity = cf[entityType][changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
   const permissionType = userRoleNameToPermissionName(changePerm.permissionTypeKey);
-  const currentValue = entity[permissionType];
 
-  if (currentValue === isAdd) {
+  if (entity && entity[permissionType] === isAdd) {
     // No change, just return the state. Unlikely to happen
     return state;
   }
@@ -38,6 +38,15 @@ export function updateAfterRoleChange(
     }
   };
   return spreadState(state, changePerm.endpointGuid, newCf);
+}
+
+function createEmptyState(isSpace: boolean, orgId?: string) {
+  return isSpace ? {
+    ...defaultUserSpaceRoleState,
+    orgId
+  } : {
+      ...defaultUserOrgRoleState,
+    };
 }
 
 function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRoleNames): PermissionStrings {

@@ -118,7 +118,8 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       cellPermission.guid,
       cellPermission.key,
       true,
-      updateConnectedUser
+      updateConnectedUser,
+      cellPermission.orgGuid
     ));
   }
 
