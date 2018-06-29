@@ -12,11 +12,11 @@ addons:
     - ./e2e-reports
     target_paths:
     - e2e
-    debug: true
+    debug: true  
 before_install:
-- export DISPLAY=:99.0
-- sh -e /etc/init.d/xvfb start
-- sleep 3 # give xvfb some time to start  
+ - export DISPLAY=:99.0
+ - sh -e /etc/init.d/xvfb start
+ - sleep 3 # give xvfb some time to start  
 install:
 - npm install npm@5.6.0 -g
 - npm install
@@ -25,43 +25,44 @@ branches:
   only:
   - master
   - v2-master
+  - e2e-tests
 cache:
   directories:
   - "$HOME/.npm"
   - "$HOME/.cache"
   - node_modules
 stages:
- - Frontend Lint
- - Frontend Unit Tests
- - Backend
- - name: E2E tests
-   if: type != pull_request
- - name: E2E tests quick
-   if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
+  - Frontend Lint
+  - Frontend Unit Tests
+  - Backend
+  - name: E2E tests
+    if: type != pull_request
+  - name: E2E tests quick
+    if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
 jobs:
   include:
-   - stage: Frontend Lint
-     script:
-     - npm run lint
-   - stage: Frontend Unit Tests
-     env:
-     - CI_ENV=true
-     script:
-     - npm test
-     - npm run codecov
-   - stage: Backend
-     before_script:
-     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-     - chmod +x ~/bin/gimme
-     - eval "$(gimme 1.9)"
-     - curl https://glide.sh/get | sh
-     script:
-     - npm run test-backend
-   - stage: E2E tests
-     before_script:
-     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
-     script:
-     - "./deploy/ci/travis/run-e2e-tests.sh"
+  - stage: Frontend Lint
+    script:
+    - npm run lint
+  - stage: Frontend Unit Tests
+    env:
+    - CI_ENV=true
+    script:
+    - npm test
+    - npm run codecov
+  - stage: Backend
+    before_script:
+    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+    - chmod +x ~/bin/gimme
+    - eval "$(gimme 1.9)"
+    - curl https://glide.sh/get | sh
+    script:
+    - npm run test-backend
+  - stage: E2E tests
+    before_script:
+    - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
+    script:
+    - "./deploy/ci/travis/run-e2e-tests.sh"
   - stage: E2E tests quick
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
