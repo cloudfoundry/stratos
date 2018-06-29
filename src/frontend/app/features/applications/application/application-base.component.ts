@@ -10,9 +10,10 @@ import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { CF_GUID, APP_GUID } from '../../../shared/entity.tokens';
 
 
-function applicationServiceFactory(
+export function applicationServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
@@ -32,7 +33,7 @@ function applicationServiceFactory(
   );
 }
 
-function entityServiceFactory(
+export function entityServiceFactory(
   _entityServiceFactory: EntityServiceFactory,
   activatedRoute: ActivatedRoute
 ) {
@@ -46,6 +47,16 @@ function entityServiceFactory(
   );
 }
 
+export function getGuids(type?: string) {
+  return (activatedRoute: ActivatedRoute) => {
+    const { id, cfId } = activatedRoute.snapshot.params;
+    if (type) {
+      return cfId;
+    }
+    return id;
+  };
+}
+
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
@@ -53,9 +64,19 @@ function entityServiceFactory(
   providers: [
     ApplicationService,
     {
+      provide: CF_GUID,
+      useFactory: getGuids('cf'),
+      deps: [ActivatedRoute]
+    },
+    {
+      provide: APP_GUID,
+      useFactory: getGuids(),
+      deps: [ActivatedRoute]
+    },
+    {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [Store, ActivatedRoute, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService, PaginationMonitorFactory]
+      deps: [CF_GUID, APP_GUID, Store, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService, PaginationMonitorFactory]
     },
     {
       provide: EntityService,

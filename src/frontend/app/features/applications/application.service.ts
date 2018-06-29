@@ -1,25 +1,15 @@
 
-import { of as observableOf, Observable } from 'rxjs';
-
-import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-
+import { Observable } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../shared/components/application-state/application-state.service';
+import { ApplicationStateData, ApplicationStateService } from '../../shared/components/application-state/application-state.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import {
-  AppMetadataTypes,
-  GetAppEnvVarsAction,
-  GetAppStatsAction,
-  GetAppSummaryAction,
-} from '../../store/actions/app-metadata.actions';
+import { AppMetadataTypes, GetAppEnvVarsAction, GetAppStatsAction, GetAppSummaryAction } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
 import {
@@ -33,7 +23,7 @@ import {
   routeSchemaKey,
   serviceBindingSchemaKey,
   spaceSchemaKey,
-  stackSchemaKey,
+  stackSchemaKey
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
@@ -45,13 +35,16 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
-  PaginationObservables,
+  PaginationObservables
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   ApplicationEnvVarsService,
-  EnvVarStratosProject,
+  EnvVarStratosProject
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { CF_GUID, APP_GUID } from '../../shared/entity.tokens';
+
+
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -81,8 +74,8 @@ export class ApplicationService {
   private appSummaryEntityService: EntityService;
 
   constructor(
-    public cfGuid: string,
-    public appGuid: string,
+    @Inject(CF_GUID) public cfGuid,
+    @Inject(APP_GUID) public appGuid,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,

@@ -1,23 +1,19 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
-
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
 import { ServicesService } from '../services.service';
 
 
-function servicesServiceFactory(
+
+export function servicesServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   paginationMonitorFactory: PaginationMonitorFactory
 ) {
-  const { id, cfId } = activatedRoute.snapshot.params;
   return new ServicesService(store, entityServiceFactory, activatedRoute, paginationMonitorFactory);
 }
 

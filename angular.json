@@ -34,7 +34,7 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": false,
+              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": false,
@@ -48,6 +48,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
+            "aot": true,
             "sslCert": "dev-ssl/server.crt",
             "proxyConfig": "proxy.conf.js",
             "ssl": true,

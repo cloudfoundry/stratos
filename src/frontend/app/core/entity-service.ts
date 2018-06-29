@@ -1,23 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Store, compose } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators/tag';
-import { interval, Observable, combineLatest } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, tap, withLatestFrom, switchMap } from 'rxjs/operators';
-
+import { compose, Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
-import {
-  ActionState,
-  RequestInfoState,
-  RequestSectionKeys,
-  TRequestTypeKeys,
-  UpdatingSection,
-} from '../store/reducers/api-request-reducer/types';
+import { ActionState, RequestInfoState, RequestSectionKeys, TRequestTypeKeys, UpdatingSection } from '../store/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
-import { composeFn } from './../store/helpers/reducer.helper';
+
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 
@@ -123,16 +115,16 @@ export class EntityService<T = any> {
         }
       }),
       switchMap(() => combineLatest(
-	entityMonitor.entity$,
-	entityMonitor.entityRequest$
+        entityMonitor.entity$,
+        entityMonitor.entityRequest$
       ).pipe(
-	filter((entityRequestInfo) => {
-	  return !!entityRequestInfo;
-	}),
-	map(([entity, entityRequestInfo]) => ({
+        filter((entityRequestInfo) => {
+          return !!entityRequestInfo;
+        }),
+        map(([entity, entityRequestInfo]) => ({
           entityRequestInfo,
-	  entity
-	}))
+          entity
+        }))
       ))
     );
   }
