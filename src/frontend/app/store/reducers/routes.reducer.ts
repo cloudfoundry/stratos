@@ -48,13 +48,11 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<API
         let mutatedState = state;
         deleteAction.appGuids.forEach(appGuid => {
           currentState = state[appGuid];
-          if (!currentState) {
-            return;
-          }
           mutatedState = newState(currentState, appGuid, routeGuid, mutatedState);
         });
         return mutatedState;
       } else if (deleteAction.appGuid) {
+        currentState = state[deleteAction.appGuid];
         return newState(currentState, deleteAction.appGuid, routeGuid, state);
       }
       return state;
@@ -69,6 +67,10 @@ function newState(
   routeGuid: string,
   state: IRequestEntityTypeState<APIResource<IAppSummary>>
 ) {
+
+  if (!currentState) {
+    return state;
+  }
   return {
     ...state,
     [appGuid]: {
