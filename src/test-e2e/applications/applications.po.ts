@@ -13,6 +13,6 @@ export class ApplicationsPage extends CFPage {
   }
 
   clickCreateApp(): any {
-    this.helpers.waitForElementAndClick(element(by.id('appwall-create-application"]')));
+    this.helpers.waitForElementAndClick(element(by.id('appwall-create-application')));
   }
 }
