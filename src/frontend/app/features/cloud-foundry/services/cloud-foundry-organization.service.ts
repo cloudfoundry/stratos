@@ -97,14 +97,7 @@ export class CloudFoundryOrganizationService {
 
   private initialiseObservables() {
     this.org$ = this.orgEntityService.entityObs$.pipe(
-      filter(o => !!o && !!o.entity),
-      switchMap(() => combineLatest(
-        this.orgEntityService.entityMonitor.entity$,
-        this.orgEntityService.entityMonitor.entityRequest$)),
-        map(([entity, entityRequestInfo]) => ({
-          entityRequestInfo,
-          entity
-        }))
+      filter(o => !!o && !!o.entity)
     );
 
     this.initialiseOrgObservables();
