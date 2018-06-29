@@ -58,7 +58,6 @@
     flex-direction: column;
     justify-content: center;
     margin-left: 24px;
-    height: 260px;
   }
   &__form {
     display: flex;
@@ -92,39 +91,41 @@
     margin: 24px 0;
   }
   &__form-outer {
-    $cubic: cubic-bezier(.215, .61, .355, 1);
-    $time: 250ms;
-    height: 200px;
     max-width: 400px;
     opacity: 1;
-    transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
+    transition: opacity 250ms linear;
   }
   &__form-title {
     color: $suse-text;
     font-size: 30px;
     font-weight: 300;
     margin-bottom: 24px;
+    transition: opacity 250ms linear;
   }
   &__loading {
     display: none;
+    margin-top: 24px;
     max-width: 400px;
+    opacity: 0;
+    transition: opacity 250ms linear;
   }
   &__busy {
     .suse-login__form-title {
-      display: none;
+      opacity: 0.5;
     }
     .suse-login__form-outer {
-      height: 0;
-      opacity: 0;
+      opacity: 0.5;
     }
     .suse-login__loading {
       display: block;
+      opacity: 1;
     }
   }
   &__message {
     font-size: 18px;
     font-weight: 300;
     height: 20px;
+    max-width: 400px;
     padding-top: 20px;
   }
 }
