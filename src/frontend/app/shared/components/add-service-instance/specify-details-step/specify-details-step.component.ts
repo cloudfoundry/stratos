@@ -37,7 +37,7 @@ import { APIResource, NormalizedResponse } from '../../../../store/types/api.typ
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 
@@ -79,7 +79,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createNewInstanceForm: FormGroup;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  cSIHelperService: CreateServiceInstanceHelperService;
+  cSIHelperService: CreateServiceInstanceHelper;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   allServiceInstanceNames: string[];

@@ -38,7 +38,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 
@@ -59,7 +59,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   initialisedService$: Observable<boolean>;
   skipApps$: Observable<boolean>;
   marketPlaceMode: boolean;
-  cSIHelperService: CreateServiceInstanceHelperService;
+  cSIHelperService: CreateServiceInstanceHelper;
   displaySelectServiceStep: boolean;
   displaySelectCfStep: boolean;
   title$: Observable<string>;

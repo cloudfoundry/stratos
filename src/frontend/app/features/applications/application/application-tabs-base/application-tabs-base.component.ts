@@ -1,5 +1,5 @@
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest as observableCombineLatest, of as observableOf } from 'rxjs';
@@ -20,6 +20,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 
 
 // Confirmation dialogs
@@ -58,7 +59,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     public applicationService: ApplicationService,
-    private entityService: EntityService<APIResource>,
+    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService

@@ -1,8 +1,6 @@
-import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, publishReplay, refCount, tap } from 'rxjs/operators';
-
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -12,8 +10,6 @@ import { CfUserService } from '../../../../data-services/cf-user.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
-
-@Injectable()
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSelectUsersDataSourceService;
@@ -40,7 +36,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   }];
   private initialised: Observable<boolean>;
 
-  constructor(private store: Store<AppState>, private cfGuid: string) {
+  constructor(private store: Store<AppState>, cfGuid: string) {
     this.initialised = waitForCFPermissions(store, cfGuid).pipe(
       first(),
       tap(cf => {

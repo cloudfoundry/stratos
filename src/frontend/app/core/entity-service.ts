@@ -5,7 +5,13 @@ import { filter, map, publishReplay, refCount, switchMap, tap, withLatestFrom } 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
-import { ActionState, RequestInfoState, RequestSectionKeys, TRequestTypeKeys, UpdatingSection } from '../store/reducers/api-request-reducer/types';
+import {
+  ActionState,
+  RequestInfoState,
+  RequestSectionKeys,
+  TRequestTypeKeys,
+  UpdatingSection
+} from '../store/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
@@ -27,7 +33,6 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
 /**
  * Designed to be used in a service factory provider
  */
-@Injectable()
 export class EntityService<T = any> {
 
   constructor(
