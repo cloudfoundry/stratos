@@ -1,7 +1,7 @@
 
-import {combineLatest as observableCombineLatest,  Observable ,  Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 
-import {tap} from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -49,7 +49,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('dataSource') dataSource: ITableListDataSource<T>;
   @Input('paginationController') paginationController = null as IListPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
-  private columnNames: string[];
+  public columnNames: string[];
 
   @Input('fixedRowHeight') fixedRowHeight = false;
 

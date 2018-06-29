@@ -7,7 +7,7 @@ import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/
   styleUrls: ['./card-cf-usage.component.scss']
 })
 export class CardCfUsageComponent implements OnInit {
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 }

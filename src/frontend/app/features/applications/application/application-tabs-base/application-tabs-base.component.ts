@@ -57,7 +57,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private applicationService: ApplicationService,
+    public applicationService: ApplicationService,
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,

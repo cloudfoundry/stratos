@@ -12,7 +12,7 @@ import { map } from 'rxjs/operators';
 export class CardCfSpaceDetailsComponent {
   allowSshStatus$: Observable<string>;
 
-  constructor(private cfSpaceService: CloudFoundrySpaceService) {
+  constructor(public cfSpaceService: CloudFoundrySpaceService) {
     this.allowSshStatus$ = cfSpaceService.allowSsh$.pipe(
       map(status => status === 'false' ? 'Disabled' : 'Enabled')
     );

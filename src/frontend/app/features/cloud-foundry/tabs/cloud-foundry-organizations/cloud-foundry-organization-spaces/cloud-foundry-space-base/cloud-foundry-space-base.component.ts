@@ -73,7 +73,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfSpaceService: CloudFoundrySpaceService,
-    private cfOrgService: CloudFoundryOrganizationService,
+    public cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
     currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService

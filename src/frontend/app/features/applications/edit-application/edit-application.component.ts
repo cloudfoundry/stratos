@@ -33,7 +33,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   constructor(
-    private applicationService: ApplicationService,
+    public applicationService: ApplicationService,
     private entityService: EntityService,
     private store: Store<AppState>,
     private fb: FormBuilder,
