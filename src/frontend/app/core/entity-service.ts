@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
@@ -15,7 +14,6 @@ import {
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
-
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 
@@ -107,11 +105,11 @@ export class EntityService<T = any> {
   waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
-
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: Function
   ): Observable<EntityInfo> => {
+    const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
       tap(([entityRequestInfo, entity]) => {
@@ -119,18 +117,23 @@ export class EntityService<T = any> {
           actionDispatch();
         }
       }),
-      switchMap(() => combineLatest(
-        entityMonitor.entity$,
-        entityMonitor.entityRequest$
-      ).pipe(
-        filter((entityRequestInfo) => {
-          return !!entityRequestInfo;
-        }),
-        map(([entity, entityRequestInfo]) => ({
-          entityRequestInfo,
-          entity
-        }))
-      ))
+      first(),
+      switchMap(() => cleanEntityInfo$)
+    );
+  }
+
+  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
+    return combineLatest(
+      entityMonitor.entityRequest$,
+      entityMonitor.entity$
+    ).pipe(
+      filter(([entityRequestInfo]) => {
+        return !!entityRequestInfo;
+      }),
+      map(([entityRequestInfo, entity]) => ({
+        entityRequestInfo,
+        entity
+      }))
     );
   }
 
