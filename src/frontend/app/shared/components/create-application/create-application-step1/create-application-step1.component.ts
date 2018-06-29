@@ -1,8 +1,8 @@
-import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
@@ -19,7 +19,7 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
 })
-export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
+export class CreateApplicationStep1Component implements OnInit, AfterContentInit, OnDestroy {
 
   @Input('isMarketplaceMode')
   isMarketplaceMode: boolean;
@@ -37,7 +37,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   @Input('isRedeploy') isRedeploy = false;
 
-  validate: Observable<boolean>;
+  valid = false;
+  private validSub: Subscription;
 
   @Input('stepperText')
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
@@ -69,10 +70,15 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngAfterContentInit() {
-    this.validate = this.cfForm.statusChanges.pipe(
+    this.validSub = this.cfForm.statusChanges.pipe(
       startWith(this.cfForm.valid || this.isRedeploy),
       map(() => this.cfForm.valid || this.isRedeploy),
-    );
+      tap((valid) => setTimeout(() => this.valid = valid))
+    ).subscribe();
+  }
+
+  ngOnDestroy(): void {
+    this.validSub.unsubscribe();
   }
 
   private getSpacesFromPermissions() {
