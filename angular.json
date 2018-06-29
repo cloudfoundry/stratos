@@ -69,6 +69,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "preserveSymlinks": true,
             "sourceMap": false,
             "main": "src/frontend/test.ts",
             "karmaConfig": "./karma.conf.js",
@@ -89,6 +90,7 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
+            "preserveSymlinks": true,
             "typeCheck": true,
             "format": "stylish",
             "tsConfig": [
