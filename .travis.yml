@@ -7,6 +7,12 @@ services:
 - docker
 addons:
   chrome: stable
+  artifacts:
+    paths:
+    - ./e2e-reports
+    target_paths:
+    - e2e
+    debug: true  
 before_install:
  - export DISPLAY=:99.0
  - sh -e /etc/init.d/xvfb start
