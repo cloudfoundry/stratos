@@ -12,6 +12,7 @@ import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/da
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
+import { endpointsRegisteredCFEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 
 @Component({
   selector: 'app-services-wall',
@@ -36,7 +37,10 @@ export class ServicesWallComponent implements OnDestroy {
 
     this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+      map(endpoints => endpoints
+        .filter(endpoint => endpoint.connectionStatus === 'connected')
+        .map(endpoint => endpoint.guid)
+      )
     );
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
