@@ -90,7 +90,6 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "preserveSymlinks": true,
             "typeCheck": true,
             "format": "stylish",
             "tsConfig": [
