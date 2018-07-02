@@ -1,20 +1,9 @@
 
-import {interval as observableInterval,  combineLatest ,  Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
+import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import {
-  distinctUntilChanged,
-  filter,
-  map,
-  publishReplay,
-  refCount,
-  share,
-  startWith,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
-
+import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
 import { AppState } from './../../store/app-state';
@@ -23,7 +12,7 @@ import {
   getDefaultActionState,
   getDefaultRequestState,
   RequestInfoState,
-  UpdatingSection,
+  UpdatingSection
 } from './../../store/reducers/api-request-reducer/types';
 
 export class EntityMonitor<T = any> {
@@ -113,7 +102,7 @@ export class EntityMonitor<T = any> {
       }),
       withLatestFrom(entities$),
       map(([
-        [entity, entityRequestInfo],
+        [entity],
         entities
       ]) => {
         return entity ? denormalize(entity, schema, entities) : null;
