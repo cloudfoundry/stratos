@@ -20,7 +20,10 @@ do
  esac 
 done 
 
+echo "Creating $COUNT routes in org '$ORG' space '$SPACE' app '$APP'"
+
 counter=0
+COUNT=$(expr $COUNT - 1)
 while [ $counter -le $COUNT ]
 do
     cf map-route $APP $DOMAIN --hostname $ROUTE_PREFIX-$counter
