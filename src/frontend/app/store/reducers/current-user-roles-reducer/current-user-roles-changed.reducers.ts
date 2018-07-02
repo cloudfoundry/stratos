@@ -28,37 +28,19 @@ export function updateAfterRoleChange(
   }
 
   // For space... update the space role AND org space guids list... for org just update the org role
-  const spaceGuids = changePerm.isSpace ? cf.organizations[changePerm.orgGuid].spaceGuids : null;
-  const newCf = spaceGuids && spaceGuids.indexOf(changePerm.entityGuid) < 0 ? {
-    ...cf,
-    organizations: {
-      ...cf.organizations,
-      [changePerm.orgGuid]: {
-        ...cf.organizations[changePerm.orgGuid],
-        spaceGuids: [
-          ...spaceGuids,
-          changePerm.entityGuid
-        ]
-      }
-    },
-    spaces: {
-      ...cf.spaces,
-      [changePerm.entityGuid]: {
-        ...entity as ISpaceRoleState,
-        [permissionType]: isAdd
-      }
-    }
-  } : {
-      ...cf,
-      [entityType]: {
-        ...cf[entityType],
-        [changePerm.entityGuid]: {
-          ...entity,
-          [permissionType]: isAdd
-        }
-      }
-    };
-  return spreadState(state, changePerm.endpointGuid, newCf);
+  if (changePerm.isSpace) {
+    return handleSpaceRoleChange(
+      state,
+      changePerm.endpointGuid,
+      cf,
+      changePerm.orgGuid,
+      changePerm.entityGuid,
+      entity as ISpaceRoleState,
+      permissionType,
+      isAdd);
+  } else {
+    return handleOrgRoleChange(state, changePerm.endpointGuid, cf, changePerm.entityGuid, entity as IOrgRoleState, permissionType, isAdd);
+  }
 }
 
 function createEmptyState(isSpace: boolean, orgId?: string): ISpaceRoleState | IOrgRoleState {
@@ -87,6 +69,69 @@ function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRole
     case SpaceUserRoleNames.MANAGER:
       return PermissionStrings.SPACE_MANAGER;
   }
+}
+
+function handleOrgRoleChange(
+  state: ICurrentUserRolesState,
+  endpointGuid: string,
+  cf: ICfRolesState,
+  orgGuid: string,
+  orgState: IOrgRoleState,
+  permType: string,
+  isAdd: boolean) {
+  return spreadState(state, endpointGuid, {
+    ...cf,
+    organizations: {
+      ...cf.organizations,
+      [orgGuid]: {
+        ...orgState,
+        [permType]: isAdd
+      }
+    }
+  });
+}
+/**
+ * Update the space role AND org space guids list
+ */
+function handleSpaceRoleChange(
+  state: ICurrentUserRolesState,
+  endpointGuid: string,
+  cf: ICfRolesState,
+  orgGuid: string,
+  spaceGuid: string,
+  spaceState: ISpaceRoleState,
+  permType: string,
+  isAdd: boolean) {
+  const spacePermissions = {
+    ...spaceState,
+    [permType]: isAdd
+  };
+  let spaceGuids = cf.organizations[orgGuid].spaceGuids;
+  const spaceGuidIndex = spaceGuids.indexOf(spaceGuid);
+  if (isAdd && spaceGuidIndex < 0) {
+    // Add the space guid to the org's space guid list
+    spaceGuids = [...spaceGuids, spaceGuid];
+  } else if (
+    !isAdd &&
+    spaceGuidIndex >= 0 &&
+    !spacePermissions.isAuditor && !spacePermissions.isDeveloper && !spacePermissions.isManager) {
+    // Remove the space guid from the org's space guid list
+    spaceGuids = spaceGuids.filter(guid => guid !== spaceGuid);
+  }
+  return spreadState(state, endpointGuid, {
+    ...cf,
+    organizations: {
+      ...cf.organizations,
+      [orgGuid]: {
+        ...cf.organizations[orgGuid],
+        spaceGuids
+      }
+    },
+    spaces: {
+      ...cf.spaces,
+      [spaceGuid]: spacePermissions
+    }
+  });
 }
 
 function spreadState(state: ICurrentUserRolesState, cfGuid: string, cf: ICfRolesState): ICurrentUserRolesState {
