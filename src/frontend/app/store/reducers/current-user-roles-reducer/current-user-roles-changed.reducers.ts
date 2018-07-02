@@ -1,6 +1,6 @@
 import { PermissionStrings } from '../../../core/current-user-permissions.config';
 import { ChangeUserRole } from '../../actions/users.actions';
-import { ICfRolesState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
+import { ICfRolesState, ICurrentUserRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
 import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
@@ -27,20 +27,41 @@ export function updateAfterRoleChange(
     return state;
   }
 
-  const newCf = {
+  // For space... update the space role AND org space guids list... for org just update the org role
+  const spaceGuids = changePerm.isSpace ? cf.organizations[changePerm.orgGuid].spaceGuids : null;
+  const newCf = spaceGuids && spaceGuids.indexOf(changePerm.entityGuid) < 0 ? {
     ...cf,
-    [entityType]: {
-      ...cf[entityType],
+    organizations: {
+      ...cf.organizations,
+      [changePerm.orgGuid]: {
+        ...cf.organizations[changePerm.orgGuid],
+        spaceGuids: [
+          ...spaceGuids,
+          changePerm.entityGuid
+        ]
+      }
+    },
+    spaces: {
+      ...cf.spaces,
       [changePerm.entityGuid]: {
-        ...entity,
+        ...entity as ISpaceRoleState,
         [permissionType]: isAdd
       }
     }
-  };
+  } : {
+      ...cf,
+      [entityType]: {
+        ...cf[entityType],
+        [changePerm.entityGuid]: {
+          ...entity,
+          [permissionType]: isAdd
+        }
+      }
+    };
   return spreadState(state, changePerm.endpointGuid, newCf);
 }
 
-function createEmptyState(isSpace: boolean, orgId?: string) {
+function createEmptyState(isSpace: boolean, orgId?: string): ISpaceRoleState | IOrgRoleState {
   return isSpace ? {
     ...defaultUserSpaceRoleState,
     orgId
