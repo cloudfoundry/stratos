@@ -109,7 +109,7 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.Toke
 	var count int
 	err = p.db.QueryRow(countAuthTokens, userGUID).Scan(&count)
 	if err != nil {
-		log.Debugf("Unknown error attempting to find UAA token: %v", err)
+		log.Errorf("Unknown error attempting to find UAA token: %v", err)
 	}
 
 	switch count {
@@ -226,7 +226,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	var count int
 	err = p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
 	if err != nil {
-		log.Debugf("Unknown error attempting to find CNSI token: %v", err)
+		log.Errorf("Unknown error attempting to find CNSI token: %v", err)
 	}
 
 	switch count {
@@ -316,7 +316,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	if err != nil {
 		msg := "Unable to Find CNSI token: %v"
-		log.Debugf(msg, err)
+		log.Errorf(msg, err)
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Store, compose } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators/tag';
-import { interval ,  Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, tap, withLatestFrom } from 'rxjs/operators';
+import { compose, Store } from '@ngrx/store';
+import { combineLatest, interval, Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
@@ -17,7 +16,6 @@ import {
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
-import { composeFn } from './../store/helpers/reducer.helper';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 
@@ -110,11 +108,11 @@ export class EntityService<T = any> {
   waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
-
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: Function
   ): Observable<EntityInfo> => {
+    const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
       tap(([entityRequestInfo, entity]) => {
@@ -122,15 +120,24 @@ export class EntityService<T = any> {
           actionDispatch();
         }
       }),
-      filter((entityRequestInfo) => {
+      first(),
+      switchMap(() => cleanEntityInfo$)
+    );
+  }
+
+  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
+    return combineLatest(
+      entityMonitor.entityRequest$,
+      entityMonitor.entity$
+    ).pipe(
+      filter(([entityRequestInfo]) => {
         return !!entityRequestInfo;
       }),
-      map(([entityRequestInfo, entity]) => {
-        return {
-          entityRequestInfo,
-          entity: entity ? entity : null
-        };
-      }), );
+      map(([entityRequestInfo, entity]) => ({
+        entityRequestInfo,
+        entity
+      }))
+    );
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {

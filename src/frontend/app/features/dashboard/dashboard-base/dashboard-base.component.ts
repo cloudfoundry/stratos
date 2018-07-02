@@ -70,12 +70,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     },
     {
       text: 'Services',
-      matIcon: 'library_books',
+      matIcon: 'service',
+      matIconFont: 'stratos-icons',
       link: '/services'
     },
     {
       text: 'Cloud Foundry',
-      matIcon: 'cloud',
+      matIcon: 'cloud_foundry',
+      matIconFont: 'stratos-icons',
       link: '/cloud-foundry'
     },
     {

@@ -1,7 +1,22 @@
 #!/bin/bash
-set -e
+echo "=== Stratos Postlight Job ==="
 echo "Running postflight job"
-MYSQL_CMD="mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e"
+
+# mysql commands will timeout after 5 seconds
+MYSQL_CMD="mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD --connect_timeout 5 -e"
+
+echo "Checking if DB Server is ready"
+dbServerVersion=$(${MYSQL_CMD} "SELECT VERSION();" --skip-column-names)
+if [ $? -eq 1 ]; then
+  echo "Failed to connect to database server - it is not ready yet .. bailing for now..."
+  exit 1
+fi
+
+echo "Database Server is ready"
+echo $dbServerVersion
+
+set -e
+
 echo "Checking if DB exists..."
 stratosDbExists=$(${MYSQL_CMD}  "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$DB_DATABASE_NAME';")
 DBCONF_KEY=mariadb-k8s

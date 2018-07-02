@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest } from 'rxjs';
-import { first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -21,9 +21,9 @@ import {
   entityFactory,
   organizationSchemaKey,
   quotaDefinitionSchemaKey,
+  routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -32,7 +32,6 @@ import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { selectEntity } from '../../../store/selectors/api.selectors';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -140,7 +139,7 @@ export class CloudFoundryEndpointService {
 
     this.allApps$ = this.orgs$.pipe(
       map(orgs => [].concat(...orgs.map(org => org.entity.spaces))),
-      map((spaces: APIResource<ISpace>[]) => [].concat(...spaces.map(space => space.entity.apps)))
+      map((spaces: APIResource<ISpace>[]) => [].concat(...spaces.map(space => space ? space.entity.apps : [])))
     );
 
     this.fetchDomains();

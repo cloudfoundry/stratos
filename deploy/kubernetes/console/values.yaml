@@ -15,6 +15,7 @@ console:
   port: 443
   cookieDomain:
 # externalIP: 127.0.0.1
+  backendLogLevel: info
 images:
   console: stratos-console
   proxy: stratos-jetstream

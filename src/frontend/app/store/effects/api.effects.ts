@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations';
 import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
@@ -24,6 +24,8 @@ import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.acti
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
+import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -68,11 +70,13 @@ export class APIEffect {
 
   private doApiRequest(action, state) {
     const actionClone = { ...action };
-    const paramsObject = {};
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
     const requestType = getRequestTypeFromMethod(apiAction);
+    if (requestType === 'delete') {
+      this.store.dispatch(new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)));
+    }
 
     this.store.dispatch(new StartRequestAction(actionClone, requestType));
     this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
@@ -138,12 +142,27 @@ export class APIEffect {
         // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
         if (errorsCheck.length === 1 && errorsCheck[0].error) {
+          if (requestType === 'delete') {
+            this.store.dispatch(new RecursiveDeleteFailed(
+              apiAction.guid,
+              apiAction.endpointGuid,
+              entityFactory(apiAction.entityKey)
+            ));
+          }
           this.store.dispatch(new WrapperRequestActionFailed(
             errorMessage,
             { ...actionClone, endpointGuid: errorsCheck[0].guid },
             requestType
           ));
           return [];
+        }
+
+        if (requestType === 'delete') {
+          this.store.dispatch(new RecursiveDeleteComplete(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey))
+          );
         }
 
         return [new ValidateEntitiesStart(
@@ -168,7 +187,7 @@ export class APIEffect {
             url: error.url || apiAction.options.url
           }
         })));
-        return [
+        const errorActions: Action[] = [
           new APISuccessOrFailedAction(actionClone.actions[2], actionClone, error.message),
           new WrapperRequestActionFailed(
             error.message,
@@ -176,6 +195,14 @@ export class APIEffect {
             requestType
           )
         ];
+        if (requestType === 'delete') {
+          errorActions.push(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey)
+          ));
+        }
+        return errorActions;
       }));
   }
 

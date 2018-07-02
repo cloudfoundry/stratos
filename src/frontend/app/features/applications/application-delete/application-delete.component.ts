@@ -297,7 +297,7 @@ export class ApplicationDeleteComponent<T> {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
             this.selectedRoutes.forEach(route => {
-              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid));
             });
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {

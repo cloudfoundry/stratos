@@ -35,7 +35,7 @@ import { appStatsReducer } from './app-stats-request.reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
-import { routeReducer } from './routes.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
@@ -129,6 +129,7 @@ export function requestDataReducer(state, action) {
     [routeSchemaKey]: [routeReducer],
     [serviceInstancesSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
+    [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
     [applicationSchemaKey]: [
       updateApplicationRoutesReducer(),
       endpointDisconnectApplicationReducer('application')
