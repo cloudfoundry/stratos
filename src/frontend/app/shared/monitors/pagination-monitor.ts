@@ -1,13 +1,14 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
-import { Observable, combineLatest } from 'rxjs';
-import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish, withLatestFrom } from 'rxjs/operators';
-
-import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
+import { asapScheduler, Observable } from 'rxjs';
+import { tag } from 'rxjs-spy/operators';
+import { distinctUntilChanged, filter, map, observeOn, publishReplay, refCount, withLatestFrom } from 'rxjs/operators';
+import { getAPIRequestDataState } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { AppState } from './../../store/app-state';
 import { ActionState } from './../../store/reducers/api-request-reducer/types';
 import { PaginationEntityState } from './../../store/types/pagination.types';
+
 
 export class PaginationMonitor<T = any> {
   /**
@@ -44,7 +45,14 @@ export class PaginationMonitor<T = any> {
    * @param pagination
    */
   private hasPage(pagination: PaginationEntityState) {
-    const hasPage = pagination && pagination.ids[pagination.currentPage];
+    if (!pagination) {
+      return false;
+    }
+    const currentPage = pagination.ids[pagination.currentPage];
+    const hasPageIds = !!currentPage;
+    const requestInfo = pagination.pageRequests[pagination.clientPagination.currentPage];
+    const hasPageRequestInfo = !!requestInfo;
+    const hasPage = hasPageIds && hasPageRequestInfo && !requestInfo.busy;
     return hasPage;
   }
 
@@ -84,7 +92,6 @@ export class PaginationMonitor<T = any> {
       paginationKey
     );
     this.currentPage$ = this.createPageObservable(
-      store,
       this.pagination$,
       schema
     );
@@ -98,25 +105,40 @@ export class PaginationMonitor<T = any> {
     paginationKey: string
   ) {
     return store.select(selectPaginationState(entityKey, paginationKey))
-      .pipe(distinctUntilChanged(), filter(pag => !!pag));
+      .pipe(
+        distinctUntilChanged(),
+        filter(pag => !!pag)
+      );
   }
 
+
+
   private createPageObservable(
-    store: Store<AppState>,
     pagination$: Observable<PaginationEntityState>,
     schema: schema.Entity
   ) {
-    return combineLatest(
-      pagination$,
-      this.store.select(selectEntities<T>(this.schema.key)).pipe(distinctUntilChanged()),
-    ).pipe(
-      filter(([pagination, entities]) => this.hasPage(pagination)),
+    return pagination$.pipe(
+      // Improve efficiency
+      observeOn(asapScheduler),
+      filter((pagination) => this.hasPage(pagination)),
+      distinctUntilChanged(this.isPageSameIsh),
       withLatestFrom(this.store.select(getAPIRequestDataState)),
-      map(([[pagination, entities], allEntities]) => {
+      map(([pagination, allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
-      })
+      }),
+      tag('de-norming ' + schema.key),
+      publishReplay(1),
+      refCount(),
     );
+  }
+
+  private isPageSameIsh(x: PaginationEntityState, y: PaginationEntityState) {
+    const samePage = x.currentPage === y.currentPage;
+    // It's possible that we need to compare the whole page request object but busy will do for now.
+    const samePageBusyState = samePage && x.pageRequests[x.currentPage].busy === y.pageRequests[y.currentPage].busy;
+    const samePageIdList = samePage && x.ids[x.currentPage] === y.ids[y.currentPage];
+    return samePageIdList && samePageBusyState;
   }
 
   private createErrorObservable(pagination$: Observable<PaginationEntityState>) {

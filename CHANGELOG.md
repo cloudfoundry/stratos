@@ -1,4 +1,28 @@
 # Change Log
+## 2.0.0 Release Candidate 2
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-rc1...2.0.0-rc2)
+
+**Improvements:**
+- Use consistent icons [\#2517](https://github.com/cloudfoundry-incubator/stratos/pull/2517)
+- Allow configuration of backend log level [\#2533](https://github.com/cloudfoundry-incubator/stratos/pull/2533)
+
+
+**Fixes:**
+- CF/Org/Space selector widget with 1 org and 1 space - user can not proceed [\#2467](https://github.com/cloudfoundry-incubator/stratos/issues/2467)
+- Error after creating a service instance [\#2473](https://github.com/cloudfoundry-incubator/stratos/issues/2473)
+- Visit App button never appears when a route is mapped/created [\#2518](https://github.com/cloudfoundry-incubator/stratos/issues/2518)
+- Cannot create service instance from marketplace or service pages [\#2519](https://github.com/cloudfoundry-incubator/stratos/issues/2519)
+- Upgrading from v1 to v2 via helm disconnects connected endpoints [\#2527](https://github.com/cloudfoundry-incubator/stratos/issues/2527)
+- Failed to deploy app due to invalid client ID [\#2532](https://github.com/cloudfoundry-incubator/stratos/issues/2532)
+- Exception thrown when creating space [\#2560](https://github.com/cloudfoundry-incubator/stratos/issues/2560)
+- Helm deployment: Upgrade notice can appear for some time if db takes a while to become ready [\#2546](https://github.com/cloudfoundry-incubator/stratos/issues/2546)
+- Fix assign role for non-admin connected user [\#2562](https://github.com/cloudfoundry-incubator/stratos/pull/2562)
+- Fix client and client secret issues when pushing apps [\#2553](https://github.com/cloudfoundry-incubator/stratos/pull/2553)
+- Fix Docker All-in-one image build [\#2552](https://github.com/cloudfoundry-incubator/stratos/pull/2552)
+- Clean entity service [\#2551](https://github.com/cloudfoundry-incubator/stratos/pull/2551)
+- Remove base git package to address CVE 2018-11235 [\#2530](https://github.com/cloudfoundry-incubator/stratos/pull/2530)
+- Entity deletion: Remove child entities [\#2486](https://github.com/cloudfoundry-incubator/stratos/pull/2486)
+
 
 ## 2.0.0 Release Candidate 1
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-beta-002...2.0.0-RC-1)
