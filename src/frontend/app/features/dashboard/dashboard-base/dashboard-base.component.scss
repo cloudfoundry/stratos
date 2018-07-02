@@ -18,3 +18,10 @@ $app-header-height: 56px;
     margin-top: $app-header-height * 2;
   }
 }
+
+.routing-indicator {
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: 999;
+}
