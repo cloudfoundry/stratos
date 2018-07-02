@@ -101,10 +101,19 @@ export class APIEffect {
     }
 
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
-    options.headers = this.addBaseHeaders(
-      apiAction.endpointGuid ||
-      state.requestData.endpoint, options.headers
-    );
+
+    const availableEndpoints = apiAction.endpointGuid || state.requestData.endpoint;
+    if (typeof availableEndpoints !== 'string') {
+      // Filter out endpoints that are currently being disconnected
+      const disconnectedEndpoints = Object.keys(availableEndpoints).
+        filter(endpointGuid => {
+          const updating = state.request.endpoint[endpointGuid].updating;
+          return !!updating.disconnecting && updating.disconnecting.busy;
+        });
+      disconnectedEndpoints.forEach(guid => delete availableEndpoints[guid]);
+    }
+
+    options.headers = this.addBaseHeaders(availableEndpoints, options.headers);
 
     if (paginatedAction.flattenPagination) {
       options.params.set('page', '1');
