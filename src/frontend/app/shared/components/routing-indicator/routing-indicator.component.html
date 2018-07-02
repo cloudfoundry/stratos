@@ -1,3 +1,1 @@
-<p>
-  routing-indicator works!
-</p>
+<mat-progress-bar *ngIf="value$ | async as value" mode="determinate" [value]="value"></mat-progress-bar>

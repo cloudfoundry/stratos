@@ -323,7 +323,8 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
     CreateApplicationStep1Component,
     BindAppsStepComponent,
     CapitalizeFirstPipe,
-    CfEndpointsMissingComponent
+    CfEndpointsMissingComponent,
+    RoutingIndicatorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

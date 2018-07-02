@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel } from '@angular/router';
-import { Observable } from 'rxjs'; import { map } from 'rxjs/operators';
-;
+import { Observable, interval, of as observableOf } from 'rxjs'; import { map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-routing-indicator',
@@ -10,21 +9,34 @@ import { Observable } from 'rxjs'; import { map } from 'rxjs/operators';
 })
 export class RoutingIndicatorComponent implements OnInit {
 
-  constructor(private router: Router) { }
-  public isRouting: Observable<number>;
-  ngOnInit() {
-    this.router.events.pipe(
-      map(event => {
+  constructor(private router: Router) {
+    this.value$ = this.router.events.pipe(
+      switchMap(event => {
         if (event instanceof NavigationStart) {
-          return 0;
-        } else if (
-          event instanceof NavigationEnd ||
-          event instanceof NavigationCancel
-        ) {
-          return false;
+          return this.getValueEmitter();
         }
+        return observableOf(0);
       })
     );
+  }
+  public value$: Observable<number>;
+  ngOnInit() {
+
+  }
+
+  private getValueEmitter() {
+    const getValue = this.getValue();
+    return interval(2000).pipe(
+      map(() => getValue())
+    );
+  }
+
+  private getValue(startWith: number = 10, i: number = 4) {
+    startWith = Math.max(startWith - i, 0);
+    return () => {
+      startWith = Math.min(startWith + i, 100);
+      return startWith;
+    };
   }
 
 }
