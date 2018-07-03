@@ -65,7 +65,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
   selectClear();
 
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table

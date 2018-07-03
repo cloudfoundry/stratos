@@ -95,8 +95,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    // Note - normal optional parameter notation won't work with injectable
-    this.selectMode = this.selectMode;
     this.createCf();
     this.init();
     this.createOrg();
