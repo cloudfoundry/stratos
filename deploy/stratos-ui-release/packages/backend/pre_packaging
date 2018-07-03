@@ -10,6 +10,7 @@ build/tools/get-glide.sh
 
 # Build backend
 npm install
+npm run customize
 export PATH=$PATH:$PWD/node_modules/.bin
 npm run bosh-build-backend
 
