@@ -5,5 +5,5 @@ dependencies:
 - nginx
 
 files:
-- stratos/{package.json,package-lock.json,plugins.json,gulpfile.js}
+- stratos/{package.json,angular.json,package-lock.json,plugins.json,gulpfile.js}
 - stratos/{build,src}/**/*
