@@ -1,12 +1,12 @@
 # abort script on any command that exits with a non zero value
 set -ex
 export GOPATH=${PWD}/go
-#mkdir -p $GOPATH/bin
-#export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-#cd ${BUILD_DIR}/stratos
+mkdir -p $GOPATH/bin
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+cd ${BUILD_DIR}/stratos
 
 # Install Glide
-#build/tools/get-glide.sh
+build/tools/get-glide.sh
 
 # Build backend
 #npm install
