@@ -89,7 +89,9 @@ function populateParentEntity(state, successAction) {
 
   const action: EntityInlineChildAction = successAction.apiAction as EntityInlineChildAction;
   const response = successAction.response;
-  const entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
+  const entityKey = successAction.apiAction.entityKey;
+  const entity = successAction.apiAction.entity;
+  const entities = pathGet(`entities.${entityKey}`, response) || {};
   if (!Object.values(entities)) {
     return;
   }
@@ -103,10 +105,12 @@ function populateParentEntity(state, successAction) {
     type: '',
     entity: action.parentEntitySchema,
     entityKey: parentEntityKey,
-    includeRelations: [createEntityRelationKey(parentEntityKey, successAction.apiAction.entityKey)],
+    includeRelations: [createEntityRelationKey(parentEntityKey, entityKey)],
     populateMissing: null,
   });
-  const childRelation = parentEntityTree.rootRelation.childRelations.find(rel => rel.entityKey === successAction.apiAction.entityKey);
+  const relationKey = entity.length ? entity[0].relationKey : entity.relationKey;
+  const childRelation = parentEntityTree.rootRelation.childRelations.find(rel =>
+    relationKey ? rel.paramName === relationKey : rel.entityKey === entityKey);
   const entityParamName = childRelation.paramName;
 
   let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state);
