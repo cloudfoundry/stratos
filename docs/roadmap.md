@@ -1,6 +1,6 @@
 # Stratos Roadmap
 
-Last Updated: 15 June 2018
+Last Updated: 2 June 2018
 
 # Version 2 Timeline
 
@@ -37,12 +37,3 @@ The high-level features that we schedule into the roadmap are identified by the 
 |5|Support per-endpoint Client ID and Client Secret|[\#2220](https://github.com/cloudfoundry-incubator/stratos/issues/2220)||
 |6|Bring Orgs and Spaces view to top-level|[\#2619](https://github.com/cloudfoundry-incubator/stratos/issues/2619)||
 |7|Deploy application: Enable deploying from private Git repositories|[\#1442](https://github.com/cloudfoundry-incubator/stratos/issues/1442)||
-
-
-## Schedule
-
-We are currently focused on completing out the core features to get V2 on par with V1.
-
-We will shortly review progress and the remaining work and publish a tentative schedule.
-
-Beyond the release of V2, we expect to move to a sprit-based release schedule, publishing a new release every 2 weeks.
