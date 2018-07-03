@@ -42,12 +42,17 @@ try {
 
 exports.config = {
   allScriptsTimeout: 11000,
-  specs: [
-    './src/test-e2e/**/*-e2e.spec.ts',
-  ],
-  exclude: [
-    './src/test-e2e/dashboard/dashboard-e2e.spec.ts',
-  ],
+  suites: {
+    e2e: [
+      './src/test-e2e/login/*-e2e.spec.ts',
+      './src/test-e2e/endpoints/*-e2e.spec.ts',
+      './src/test-e2e/application/*-e2e.spec.ts',
+      './src/test-e2e/applications/*-e2e.spec.ts',
+      './src/test-e2e/cloud-foundry/*-e2e.spec.ts',
+    ],
+    check: './src/test-e2e/check/*-e2e.spec.ts',
+  },
+  suite: 'e2e',
   capabilities: {
     'browserName': 'chrome',
     chromeOptions: {
