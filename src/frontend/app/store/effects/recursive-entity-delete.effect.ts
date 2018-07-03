@@ -107,6 +107,7 @@ export class RecursiveDeleteEffect {
   );
 
   private getTree(action: IRecursiveDelete, state: IRequestDataState) {
+    console.log(action);
     const tree = this.entityTreeCache[action.guid] ?
       this.entityTreeCache[action.guid] :
       new EntitySchemaTreeBuilder().getFlatTree(action, state);
