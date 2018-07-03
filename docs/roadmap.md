@@ -35,7 +35,7 @@ The high-level features that we schedule into the roadmap are identified by the 
 |3|Add support for Application and CF Metrics|[\#1985](https://github.com/cloudfoundry-incubator/stratos/issues/1985)|[Notes](planning/metrics.md)|
 |4|Support UAA login UX directly (SSO)|[\#1384](https://github.com/cloudfoundry-incubator/stratos/issues/1384)||
 |5|Support per-endpoint Client ID and Client Secret|[\#2220](https://github.com/cloudfoundry-incubator/stratos/issues/2220)||
-|6|Bring Orgs and Spaces view to top-level|[\#2619]https://github.com/cloudfoundry-incubator/stratos/issues/2619||
+|6|Bring Orgs and Spaces view to top-level|[\#2619](https://github.com/cloudfoundry-incubator/stratos/issues/2619)||
 |7|Deploy application: Enable deploying from private Git repositories|[\#1442](https://github.com/cloudfoundry-incubator/stratos/issues/1442)||
 
 
