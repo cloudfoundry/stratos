@@ -5,17 +5,22 @@ import (
 	"fmt"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
+	"strings"
 )
 
 func (s *StratosMigrations) Up_20180627111300(txn *sql.Tx, conf *goose.DBConf) {
 
-	updateMetadata := "ALTER TABLE tokens modify meta_data TEXT DEFAULT ''"
-	_, err := txn.Exec(updateMetadata)
-	if err != nil {
-		fmt.Printf("Failed to migrate due to: %v", err)
+	if !strings.Contains(conf.Driver.Name, "sqlite3") {
+		// SQLite does not support MODIFY on ALTER TABLE
+		updateMetadata := "ALTER TABLE tokens modify meta_data TEXT DEFAULT ''"
+		_, err := txn.Exec(updateMetadata)
+		if err != nil {
+			fmt.Printf("Failed to migrate due to: %v", err)
+		}
 	}
-	updateMetadata = "UPDATE tokens SET meta_data='' where meta_data is NULL"
-	_, err = txn.Exec(updateMetadata)
+
+	updateMetadata := "UPDATE tokens SET meta_data='' where meta_data is NULL"
+	_, err := txn.Exec(updateMetadata)
 	if err != nil {
 		fmt.Printf("Failed to migrate due to: %v", err)
 	}

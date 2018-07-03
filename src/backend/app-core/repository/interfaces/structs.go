@@ -29,6 +29,8 @@ type CNSIRecord struct {
 	TokenEndpoint          string   `json:"token_endpoint"`
 	DopplerLoggingEndpoint string   `json:"doppler_logging_endpoint"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
+	ClientId			   string 	`json:"client_id"`
+	ClientSecret 		   string 	`json:"-"`
 }
 
 // ConnectedEndpoint
@@ -147,7 +149,7 @@ type EndpointDetail struct {
 	*CNSIRecord
 	User              *ConnectedUser    `json:"user"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
-	TokenMetadata     string            `json:"-"`
+	TokenMetadata     string            `json:"mmmetadata"`
 	SystemSharedToken bool              `json:"system_shared_token"`
 }
 

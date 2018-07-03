@@ -15,7 +15,7 @@ func (s *StratosMigrations) Up_20171108102900(txn *sql.Tx, conf *goose.DBConf) {
 		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
-	createTokens = "ALTER TABLE tokens ADD meta_data TEXT"
+	createTokens = "ALTER TABLE tokens ADD meta_data TEXT DEFAULT ''"
 	_, err = txn.Exec(createTokens)
 	if err != nil {
 		fmt.Printf("Failed to migrate due to: %v", err)
