@@ -33,7 +33,7 @@ disk_pools:
   cloud_properties: {type: standard}
 
 releases:
-- name: stratos-ui
+- name: stratos
   version: latest
 
 update:
