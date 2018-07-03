@@ -124,16 +124,24 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previsouly disoconnected). ", cfAPI)
 	} else {
 		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
-		err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
-		if err != nil {
-			log.Warnf("Could not use console UAA token to login to auto-registered endpoint: %s", err.Error())
-			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
-			return err
-		}
-		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
-		return err
-	}
 
+		// If using SSO login, then copy the tokens, else connect with the same credentials
+		if c.portalProxy.GetConfig().SSOLogin {
+			log.Info("Auto-connecting to the auto-registered endpoint with the UAA token")
+			err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
+			if err != nil {
+				log.Warnf("Could not use console UAA token to login to auto-registered endpoint: %s", err.Error())
+				return err
+			}
+		} else {
+			log.Info("Auto-connecting to the auto-registered endpoint with credentials")
+			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
+			if err != nil {
+				log.Warnf("Could not auto-connect using credentials to auto-registered endpoint: %s", err.Error())
+				return err
+			}
+		}
+	}
 	return nil
 }
 
