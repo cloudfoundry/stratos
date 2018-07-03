@@ -58,7 +58,8 @@ export class EntitySchema extends schema.Entity {
    * @param {string} entityKey As per schema.Entity ctor
    * @param {Schema} [definition] As per schema.Entity ctor
    * @param {schema.EntityOptions} [options] As per schema.Entity ctor
-   * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity
+   * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
+   * spaces, manager spaces, auditor space, etc
    * @memberof EntitySchema
    */
   constructor(
@@ -339,14 +340,14 @@ const orgUserEntity = {
   }
 };
 const OrganizationUserSchema = new EntitySchema(
-  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'users_organizations');
+  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'organizations');
 const OrganizationAuditedSchema = new EntitySchema(
   organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'audited_organizations');
 const OrganizationManagedSchema = new EntitySchema(
   organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'managed_organizations');
 const OrganizationBillingSchema = new EntitySchema(
   organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'billing_managed_organizations');
-const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users_spaces');
+const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'spaces');
 const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces');
 const SpaceAuditedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');
 

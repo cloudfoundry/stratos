@@ -159,44 +159,31 @@ export class CfUserService {
     return res;
   }
 
+  private populatedArray(array?: Array<any>): boolean {
+    return array && !!array.length;
+  }
+
   /**
    * Helper to determine if user has roles other than Org User
    */
   hasRolesInOrg(user: CfUser, orgGuid: string, excludeOrgUser = true): boolean {
 
-    const orgRoles = this.getOrgRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
-    const spaceRoles = this.getSpaceRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
-
-    for (const roleKey in orgRoles) {
-      if (!orgRoles.hasOwnProperty(roleKey)) {
-        continue;
-      }
-
-      const permissions = orgRoles[roleKey].permissions;
-      if (
-        permissions[OrgUserRoleNames.MANAGER] ||
-        permissions[OrgUserRoleNames.BILLING_MANAGERS] ||
-        permissions[OrgUserRoleNames.AUDITOR]
-      ) {
-        return true;
-      }
-      if (!excludeOrgUser && permissions[OrgUserRoleNames.USER]) {
-        return true;
-      }
+    // Check org roles
+    if (this.populatedArray(user.audited_organizations) ||
+      this.populatedArray(user.billing_managed_organizations) ||
+      this.populatedArray(user.managed_organizations) ||
+      (!excludeOrgUser && this.populatedArray(user.organizations))) {
+      return true;
     }
 
-    for (const roleKey in spaceRoles) {
-      if (!spaceRoles.hasOwnProperty(roleKey)) {
-        continue;
-      }
-
-      const permissions = spaceRoles[roleKey].permissions;
-      if (permissions[SpaceUserRoleNames.MANAGER] ||
-        permissions[SpaceUserRoleNames.AUDITOR] ||
-        permissions[SpaceUserRoleNames.DEVELOPER]) {
-        return true;
-      }
+    // Check space roles
+    if (this.populatedArray(user.audited_spaces) ||
+      this.populatedArray(user.managed_spaces) ||
+      this.populatedArray(user.spaces)) {
+      return true;
     }
+
+    return false;
   }
 
   getUserRoleInOrg = (
