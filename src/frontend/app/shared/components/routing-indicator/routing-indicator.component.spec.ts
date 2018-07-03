@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RoutingIndicatorComponent } from './routing-indicator.component';
+import { CoreModule } from '../../../core/core.module';
+import { MatProgressBarModule } from '@angular/material';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('RoutingIndicatorComponent', () => {
   let component: RoutingIndicatorComponent;
@@ -8,9 +11,16 @@ describe('RoutingIndicatorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RoutingIndicatorComponent ]
+      declarations: [
+        RoutingIndicatorComponent
+      ],
+      imports: [
+        RouterTestingModule,
+        CoreModule,
+        MatProgressBarModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
