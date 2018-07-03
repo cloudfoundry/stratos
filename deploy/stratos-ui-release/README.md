@@ -23,7 +23,7 @@ The rest of the instruction assume that a BOSH lite environment is being used to
 
     ```
     $ cd deploy/stratos-ui-release/src
-    $ ln -s ../../../ stratos-ui
+    $ ln -s ../../../ stratos
     ```
 
 4. Build the Stratos UI BOSH release from `deploy/stratos-ui/release`
