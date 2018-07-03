@@ -1,6 +1,6 @@
 # Stratos Roadmap
 
-Last Updated: 2 June 2018
+Last Updated: 2 July 2018
 
 # Version 2 Timeline
 
