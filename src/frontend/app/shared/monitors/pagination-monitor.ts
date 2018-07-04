@@ -2,13 +2,22 @@ import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { asapScheduler, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { distinctUntilChanged, filter, map, observeOn, publishReplay, refCount, withLatestFrom } from 'rxjs/operators';
-import { getAPIRequestDataState } from '../../store/selectors/api.selectors';
+import {
+  combineLatest as combineLatestOperator,
+  distinctUntilChanged,
+  filter,
+  map,
+  observeOn,
+  publishReplay,
+  refCount,
+  withLatestFrom,
+} from 'rxjs/operators';
+
+import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { AppState } from './../../store/app-state';
 import { ActionState } from './../../store/reducers/api-request-reducer/types';
 import { PaginationEntityState } from './../../store/types/pagination.types';
-
 
 export class PaginationMonitor<T = any> {
   /**
@@ -122,8 +131,9 @@ export class PaginationMonitor<T = any> {
       observeOn(asapScheduler),
       filter((pagination) => this.hasPage(pagination)),
       distinctUntilChanged(this.isPageSameIsh),
+      combineLatestOperator(this.store.select(selectEntities<T>(this.schema.key)).pipe(distinctUntilChanged())),
       withLatestFrom(this.store.select(getAPIRequestDataState)),
-      map(([pagination, allEntities]) => {
+      map(([[pagination, entities], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
