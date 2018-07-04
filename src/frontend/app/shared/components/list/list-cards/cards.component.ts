@@ -9,6 +9,13 @@ import { CardCell } from '../list.types';
   styleUrls: ['./cards.component.scss']
 })
 export class CardsComponent<T> {
+  public columns = CardCell.columns;
   @Input('dataSource') dataSource: IListDataSource<T>;
-  @Input('component') component: CardCell<T>;
+  private _component: CardCell<T>;
+  @Input('component')
+  get component() { return this._component; }
+  set component(cardCell) {
+    this._component = cardCell;
+    this.columns = cardCell['columns'];
+  }
 }
