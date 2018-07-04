@@ -76,7 +76,7 @@ npm run ${E2E_TARGET}
 RESULT=$?
 set -e
 
-if [ "${TRAVIS_EVENT_TYPE}" != "pull_request"]; then
+if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
   pushd deploy/ci/travis
   # Uncomment to copy logs to the travis log
   #docker-compose stop
