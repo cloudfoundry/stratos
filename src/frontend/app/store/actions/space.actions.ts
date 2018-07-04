@@ -221,13 +221,13 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     this.options.url = `spaces/${guid}/user_roles`;
   }
   actions = getActions('Spaces', 'List all user roles');
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'username',
-  };
-  flattenPagination = true;
+  // initialParams = {
+  //   page: 1,
+  //   'results-per-page': 100,
+  //   'order-direction': 'desc',
+  //   'order-direction-field': 'username',
+  // };
+  // flattenPagination = true;
 }
 
 

@@ -81,7 +81,10 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          return validateEntityRelations({
+          return apiAction.skipValidation ? {
+            started: false,
+            completed: Promise.resolve([])
+          } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,

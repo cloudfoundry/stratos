@@ -339,14 +339,14 @@ const orgUserEntity = {
   }
 };
 const OrganizationUserSchema = new EntitySchema(
-  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'users_organizations');
+  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'organizations');
 const OrganizationAuditedSchema = new EntitySchema(
   organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'audited_organizations');
 const OrganizationManagedSchema = new EntitySchema(
   organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'managed_organizations');
 const OrganizationBillingSchema = new EntitySchema(
   organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'billing_managed_organizations');
-const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users_spaces');
+const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'spaces');
 const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces');
 const SpaceAuditedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');
 
