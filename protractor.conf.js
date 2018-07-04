@@ -40,6 +40,7 @@ try {
   process.exit(1);
 }
 
+
 exports.config = {
   allScriptsTimeout: 11000,
   suites: {
@@ -92,6 +93,8 @@ exports.config = {
   }
 };
 
-if (secrets.headless) {
+// Should we run e2e tests in headless Chrome?
+const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
+if (headless) {
   exports.config.capabilities.chromeOptions.args = ['--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox'];
 }
