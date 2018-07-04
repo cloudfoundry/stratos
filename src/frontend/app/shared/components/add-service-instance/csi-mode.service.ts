@@ -31,7 +31,7 @@ export class CsiModeService {
 
   private mode: string;
   public viewDetail: ViewDetail;
-  private cancelUrl: string;
+  public cancelUrl: string;
   // This property is only used when launching the Create Service Instance Wizard from the Marketplace
   spaceScopedDetails: SpaceScopedService = { isSpaceScoped: false };
 
