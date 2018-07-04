@@ -74,7 +74,7 @@ export class APIEffect {
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
     const requestType = getRequestTypeFromMethod(apiAction);
-    if (this.shouldRecusivlyDelete(requestType, apiAction)) {
+    if (this.shouldRecursivelyDelete(requestType, apiAction)) {
       this.store.dispatch(new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)));
     }
 
@@ -151,7 +151,7 @@ export class APIEffect {
         // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
         if (errorsCheck.length === 1 && errorsCheck[0].error) {
-          if (this.shouldRecusivlyDelete(requestType, apiAction)) {
+          if (this.shouldRecursivelyDelete(requestType, apiAction)) {
             this.store.dispatch(new RecursiveDeleteFailed(
               apiAction.guid,
               apiAction.endpointGuid,
@@ -166,7 +166,7 @@ export class APIEffect {
           return [];
         }
 
-        if (this.shouldRecusivlyDelete(requestType, apiAction)) {
+        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteComplete(
             apiAction.guid,
             apiAction.endpointGuid,
@@ -204,7 +204,7 @@ export class APIEffect {
             requestType
           )
         ];
-        if (this.shouldRecusivlyDelete(requestType, apiAction)) {
+        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           errorActions.push(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
@@ -508,7 +508,7 @@ export class APIEffect {
       }
     }
   }
-  private shouldRecusivlyDelete(requestType: string, apiAction: ICFAction) {
+  private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
     return requestType === 'delete' && !apiAction.updatingKey;
   }
 }
