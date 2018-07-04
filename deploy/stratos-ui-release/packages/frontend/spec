@@ -5,5 +5,5 @@ dependencies:
 - nginx
 
 files:
-- stratos-ui/{package.json,plugins.json,bower.json,gulpfile.js}
-- stratos-ui/{build,components}/**/*
+- stratos/{package.json,angular.json,package-lock.json,plugins.json,gulpfile.js}
+- stratos/{build,src}/**/*

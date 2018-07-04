@@ -1,5 +1,5 @@
 ---
-name: stratos-ui
+name: stratos
 
 networks:
 - name: stratos-net
@@ -33,7 +33,7 @@ disk_pools:
   cloud_properties: {type: standard}
 
 releases:
-- name: stratos-ui
+- name: stratos
   version: latest
 
 update:
@@ -48,7 +48,7 @@ instance_groups:
   resource_pool: stratos_rp1
   jobs:
   - name: frontend
-    release: stratos-ui
+    release: stratos
     properties:
       stratos_ui:
         frontend:
@@ -114,7 +114,7 @@ instance_groups:
   persistent_disk_pool: upgrade-volume
   jobs:
   - name: backend
-    release: stratos-ui
+    release: stratos
     properties:
       stratos_ui:
         backend:
