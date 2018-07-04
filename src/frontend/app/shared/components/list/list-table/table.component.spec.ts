@@ -15,39 +15,66 @@ import { TableComponent } from './table.component';
 
 fdescribe('TableComponent', () => {
 
-  function getTestHostComponent() {
-
-  }
   const column1Id = '123123';
   const column2Id = 'dsftq34ge';
   const column3Id = 'egsdnyyyydnygvvv';
+  const columns = [
+    {
+      columnId: column1Id,
+      headerCell: () => 'Header 1'
+    },
+    {
+      columnId: column2Id,
+      headerCell: () => 'Header 1'
+    },
+    {
+      columnId: column3Id,
+      headerCell: () => 'Header 1'
+    }
+  ];
   @Component({
     selector: `app-host-component`,
     template: `
     <app-table
-    [columns]="columns"
-    [paginationController]="paginationController"
-    [dataSource]="dataSource"
-    [addSelect]="addSelect">
+      #basicColumnsTable
+      [columns]="columns"
+      [paginationController]="paginationController"
+      [dataSource]="dataSource"
+    >
+    </app-table>
+    ----------------------------------------
+    <app-table
+      #selectionColumnsTable
+      [columns]="columns"
+      [paginationController]="paginationController"
+      [dataSource]="dataSource"
+      [addSelect]="true"
+    >
+    </app-table>
+    ----------------------------------------
+    <app-table
+      #actionColumnsTable
+      [columns]="columns"
+      [paginationController]="paginationController"
+      [dataSource]="dataSource"
+      [addActions]="true"
+    >
+    </app-table>
+    ----------------------------------------
+    <app-table
+      #actionAndSelectionColumnsTable
+      [columns]="columns"
+      [paginationController]="paginationController"
+      [dataSource]="dataSource"
+      [addActions]="true"
+      [addSelect]="true"
+    >
     </app-table>
     `
   })
   class TableHostComponent {
     public addSelect = false;
-    public columns: ITableColumn<any>[] = [
-      {
-        columnId: column1Id,
-        headerCell: () => 'Header 1'
-      },
-      {
-        columnId: column2Id,
-        headerCell: () => 'Header 1'
-      },
-      {
-        columnId: column3Id,
-        headerCell: () => 'Header 1'
-      }
-    ];
+    public columns = columns;
     // new Array<ITableColumn<any>>();
     public paginationController = {
       sort$: observableOf({} as ListSort)
@@ -58,16 +85,16 @@ fdescribe('TableComponent', () => {
       disconnect: () => null,
       isTableLoading$: observableOf(false)
     };
-    @ViewChild(TableComponent)
-    public table: TableComponent<any>;
-    // @Input('hideTable') hideTable = false;
-    // @Input('addSelect') addSelect = false;
-    // @Input('addActions') addActions = false;
-    // @Input('dataSource') dataSource: ITableListDataSource<T>;
-    // @Input('paginationController') paginationController = null as IListPaginationController<T>;
-    // @Input('columns') columns: ITableColumn<T>[];
+    @ViewChild('basicColumnsTable')
+    public basicColumnsTable: TableComponent<any>;
+    @ViewChild('selectionColumnsTable')
+    public selectionColumnsTable: TableComponent<any>;
+    @ViewChild('actionColumnsTable')
+    public actionColumnsTable: TableComponent<any>;
+    @ViewChild('actionAndSelectionColumnsTable')
+    public actionAndSelectionColumnsTable: TableComponent<any>;
   }
-  let component: TableComponent<any>;
+  let component: TableHostComponent;
   let fixture: ComponentFixture<TableHostComponent>;
 
   beforeEach(async(() => {
@@ -91,7 +118,7 @@ fdescribe('TableComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent<TableHostComponent>(TableHostComponent);
-    component = fixture.componentInstance.table;
+    component = fixture.componentInstance;
 
 
     fixture.detectChanges();
@@ -102,6 +129,22 @@ fdescribe('TableComponent', () => {
   });
 
   it('should get base column ids', () => {
-    expect(component.columnNames).toEqual([column1Id, column2Id, column3Id]);
+    const { basicColumnsTable } = component;
+    expect(basicColumnsTable.columnNames).toEqual([column1Id, column2Id, column3Id]);
+  });
+
+  it('should get base column ids + selection', () => {
+    const { selectionColumnsTable } = component;
+    expect(selectionColumnsTable.columnNames).toEqual(['select', column1Id, column2Id, column3Id]);
+  });
+
+  it('should get base column ids + actions', () => {
+    const { actionColumnsTable } = component;
+    expect(actionColumnsTable.columnNames).toEqual([column1Id, column2Id, column3Id, 'actions']);
+  });
+
+  it('should get base column ids + actions + selection', () => {
+    const { actionAndSelectionColumnsTable } = component;
+    expect(actionAndSelectionColumnsTable.columnNames).toEqual(['select', column1Id, column2Id, column3Id, 'actions']);
   });
 });
