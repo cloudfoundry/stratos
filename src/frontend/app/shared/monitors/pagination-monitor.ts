@@ -11,6 +11,7 @@ import {
   publishReplay,
   refCount,
   withLatestFrom,
+  tap,
 } from 'rxjs/operators';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
@@ -126,14 +127,16 @@ export class PaginationMonitor<T = any> {
     pagination$: Observable<PaginationEntityState>,
     schema: schema.Entity
   ) {
+    const entityObservable$ = this.store.select(selectEntities<T>(this.schema.key)).pipe(distinctUntilChanged());
+    const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
     return pagination$.pipe(
       // Improve efficiency
       observeOn(asapScheduler),
       filter((pagination) => this.hasPage(pagination)),
       distinctUntilChanged(this.isPageSameIsh),
-      combineLatestOperator(this.store.select(selectEntities<T>(this.schema.key)).pipe(distinctUntilChanged())),
-      withLatestFrom(this.store.select(getAPIRequestDataState)),
-      map(([[pagination, entities], allEntities]) => {
+      combineLatestOperator(entityObservable$),
+      withLatestFrom(allEntitiesObservable$),
+      map(([[pagination], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
