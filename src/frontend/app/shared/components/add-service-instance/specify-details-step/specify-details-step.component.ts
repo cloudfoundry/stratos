@@ -33,7 +33,7 @@ import { CreateServiceInstance, UpdateServiceInstance, GetServiceInstance } from
 import { AppState } from '../../../../store/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid,
@@ -354,22 +354,36 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
 
     let action;
+    let checkUpdate$ = observableOf(null);
     if (this.modeService.isEditServiceInstanceMode()) {
       action = new UpdateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+      const actionState = selectUpdateInfo(serviceInstancesSchemaKey,
+        newServiceInstanceGuid,
+        UpdateServiceInstance.updateServiceInstance);
+      checkUpdate$ = this.store.select(actionState).pipe(
+        filter(i => !i.busy),
+      );
     } else {
       action = new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
     }
-    this.store.dispatch(action);
     const create$ = this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
-    return create$.pipe(
+    this.store.dispatch(action);
+    return checkUpdate$.pipe(
+      switchMap(o => create$),
       filter(a => !a.creating),
       switchMap(a => {
         if (a.error) {
           return create$;
         }
-        const response = a.response as NormalizedResponse;
-        const guid = response.result[0];
-        this.store.dispatch(new GetServiceInstance(guid, cfGuid));
+
+        let guid = newServiceInstanceGuid;
+        if (!this.modeService.isEditServiceInstanceMode()) {
+          // We need to re-fetch the Service Instance
+          // incase of creation because the entity returned is incomplete
+          const response = a.response as NormalizedResponse;
+          guid = response.result[0];
+          this.store.dispatch(new GetServiceInstance(guid, cfGuid));
+        }
         return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, guid)).pipe(map(ri => ({
           ...ri,
           response: {
