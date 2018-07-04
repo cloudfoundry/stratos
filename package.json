@@ -19,6 +19,7 @@
     "build-dev": "ng build --dev --preserve-symlinks",
     "ng": "ng",
     "start": "npm run customize && ng serve",
+    "start-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
     "start-prod": "ng serve --prod --source-map=true",
     "test": "ng test --code-coverage",
     "test-debug": "ng test --watch=true --source-map=true",
