@@ -316,7 +316,11 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	if err != nil {
 		msg := "Unable to Find CNSI token: %v"
-		log.Errorf(msg, err)
+		if err == sql.ErrNoRows {
+			log.Debugf(msg, err)
+		} else {
+			log.Errorf(msg, err)
+		}
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
