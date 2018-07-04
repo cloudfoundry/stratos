@@ -1,39 +1,74 @@
-import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { CdkTableModule } from '@angular/cdk/table';
+import { Component, ViewChild } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatPaginatorIntl } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Observable, of as observableOf, empty } from 'rxjs';
+import { empty, of as observableOf } from 'rxjs';
 
 import { CoreModule } from '../../../../core/core.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
-import { ValuesPipe } from '../../../pipes/values.pipe';
-import { EventTabActorIconPipe } from '../list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import { TableCellComponent, listTableCells } from './table-cell/table-cell.component';
-import { TableComponent } from './table.component';
-import { ITableColumn } from './table.types';
-import { ApplicationStateComponent } from '../../application-state/application-state.component';
-import {
-  ApplicationStateIconComponent
-} from '../../application-state/application-state-icon/application-state-icon.component';
-import {
-  ApplicationStateIconPipe
-} from '../../application-state/application-state-icon/application-state-icon.pipe';
-import { ListSort } from '../../../../store/actions/list.actions';
-import { ListAppEnvVar } from '../list-types/app-variables/cf-app-variables-data-source';
-import { PercentagePipe } from '../../../pipes/percentage.pipe';
 import { UtilsService } from '../../../../core/utils.service';
-import { UsageGaugeComponent } from '../../usage-gauge/usage-gauge.component';
-import { CdkTableModule } from '@angular/cdk/table';
-import { TableRowComponent } from './table-row/table-row.component';
-import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
-import { IListConfig } from '../list.component.types';
+import { ListSort } from '../../../../store/actions/list.actions';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../shared.module';
+import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { ITableColumn } from './table.types';
+import { TableComponent } from './table.component';
 
+fdescribe('TableComponent', () => {
 
-describe('TableComponent', () => {
-  let component: TableComponent<ListAppEnvVar>;
-  let fixture: ComponentFixture<TableComponent<ListAppEnvVar>>;
+  function getTestHostComponent() {
+
+  }
+  const column1Id = '123123';
+  const column2Id = 'dsftq34ge';
+  const column3Id = 'egsdnyyyydnygvvv';
+  @Component({
+    selector: `app-host-component`,
+    template: `
+    <app-table
+    [columns]="columns"
+    [paginationController]="paginationController"
+    [dataSource]="dataSource"
+    [addSelect]="addSelect">
+    </app-table>
+    `
+  })
+  class TableHostComponent {
+    public addSelect = false;
+    public columns: ITableColumn<any>[] = [
+      {
+        columnId: column1Id,
+        headerCell: () => 'Header 1'
+      },
+      {
+        columnId: column2Id,
+        headerCell: () => 'Header 1'
+      },
+      {
+        columnId: column3Id,
+        headerCell: () => 'Header 1'
+      }
+    ];
+    // new Array<ITableColumn<any>>();
+    public paginationController = {
+      sort$: observableOf({} as ListSort)
+    } as IListPaginationController<any>;
+    public dataSource = {
+      trackBy: () => '1',
+      connect: () => empty(),
+      disconnect: () => null,
+      isTableLoading$: observableOf(false)
+    };
+    @ViewChild(TableComponent)
+    public table: TableComponent<any>;
+    // @Input('hideTable') hideTable = false;
+    // @Input('addSelect') addSelect = false;
+    // @Input('addActions') addActions = false;
+    // @Input('dataSource') dataSource: ITableListDataSource<T>;
+    // @Input('paginationController') paginationController = null as IListPaginationController<T>;
+    // @Input('columns') columns: ITableColumn<T>[];
+  }
+  let component: TableComponent<any>;
+  let fixture: ComponentFixture<TableHostComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -44,6 +79,9 @@ describe('TableComponent', () => {
         createBasicStoreModule(),
         SharedModule
       ],
+      declarations: [
+        TableHostComponent
+      ],
       providers: [
         UtilsService,
       ]
@@ -52,24 +90,18 @@ describe('TableComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent<TableComponent<ListAppEnvVar>>(TableComponent);
-    component = fixture.componentInstance;
+    fixture = TestBed.createComponent<TableHostComponent>(TableHostComponent);
+    component = fixture.componentInstance.table;
 
-    const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
-    component.columns = new Array<ITableColumn<any>>();
-    component.paginationController = {
-      sort$: observableOf({} as ListSort)
-    } as IListPaginationController<any>;
-    component.dataSource = {
-      trackBy: () => '1',
-      connect: () => empty(),
-      disconnect: () => null,
-      isTableLoading$: observableOf(false)
-    };
+
     fixture.detectChanges();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should get base column ids', () => {
+    expect(component.columnNames).toEqual([column1Id, column2Id, column3Id]);
   });
 });
