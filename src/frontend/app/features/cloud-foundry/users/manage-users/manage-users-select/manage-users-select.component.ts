@@ -7,6 +7,7 @@ import {
   CfSelectUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
+import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -23,10 +24,11 @@ import { CfRolesService } from '../cf-roles.service';
       provide: ListConfig,
       useFactory: (
         store: Store<AppState>,
-        activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) => {
-        return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid);
+        activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+        paginationMonitorFactory: PaginationMonitorFactory) => {
+        return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace, paginationMonitorFactory);
       },
-      deps: [Store, ActiveRouteCfOrgSpace]
+      deps: [Store, ActiveRouteCfOrgSpace, PaginationMonitorFactory]
     }
   ],
 })

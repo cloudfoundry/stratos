@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
@@ -11,6 +11,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
@@ -106,6 +107,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
+    private paginationMonitorFactory: PaginationMonitorFactory,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {
@@ -114,11 +116,22 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignColumnConfig(org$, space$);
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
+      switchMap(cf =>
+        combineLatest(
+          observableOf(cf),
+          CfUserService.createPaginationAction(
+            activeRouteCfOrgSpace.cfGuid,
+            cf.global.isAdmin,
+            this.activeRouteCfOrgSpace.orgGuid,
+            store,
+            paginationMonitorFactory)
+        )
+      ),
+      tap(([cf, action]) => {
+        console.log('cf user create DS');
         this.dataSource = new CfUserDataSourceService(store, action, this);
       }),
-      map(cf => cf && cf.state.initialised),
+      map(([cf, action]) => cf && cf.state.initialised)
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
   }

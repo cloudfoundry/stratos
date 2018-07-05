@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap, startWith } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -18,11 +18,12 @@ import { AppState } from './../../../store/app-state';
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
   static firehose = 'firehose';
+  static users = 'users';
 
   tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'organizations', label: 'Organizations' },
-    { link: 'users', label: 'Users' },
+    { link: CloudFoundryTabsBaseComponent.users, label: 'Users' },
     { link: CloudFoundryTabsBaseComponent.firehose, label: 'Firehose' },
     { link: 'feature-flags', label: 'Feature Flags' },
     { link: 'build-packs', label: 'Build Packs' },
@@ -47,6 +48,10 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       this.currentUserPermissionsService.can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid).pipe(
         map(visible => !visible)
       );
+    this.tabLinks.find(tabLink => tabLink.link === CloudFoundryTabsBaseComponent.users).hidden = cfEndpointService.users$.pipe(
+      startWith(null),
+      map(users => !users),
+    );
   }
 
   ngOnInit() {

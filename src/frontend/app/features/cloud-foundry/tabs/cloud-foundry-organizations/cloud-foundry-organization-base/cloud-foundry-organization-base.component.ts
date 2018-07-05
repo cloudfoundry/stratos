@@ -13,6 +13,7 @@ import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-end
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { organizationSchemaKey, entityFactory, EntitySchema } from '../../../../../store/helpers/entity-factory';
+import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -20,6 +21,7 @@ import { organizationSchemaKey, entityFactory, EntitySchema } from '../../../../
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
+    CfUserService,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService
   ]

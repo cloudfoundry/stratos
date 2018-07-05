@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { AppState } from '../../../../store/app-state';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-cloud-foundry-users',
@@ -20,7 +21,8 @@ import { AppState } from '../../../../store/app-state';
       router: Router,
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
       userPerms: CurrentUserPermissionsService,
-    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
+      paginationMonitorFactory: PaginationMonitorFactory
+    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, paginationMonitorFactory),
     deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
   }]
 })

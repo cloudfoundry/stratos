@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { first, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
@@ -40,14 +42,28 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   }];
   private initialised: Observable<boolean>;
 
-  constructor(private store: Store<AppState>, private cfGuid: string) {
-    this.initialised = waitForCFPermissions(store, cfGuid).pipe(
-      first(),
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(cfGuid, cf.global.isAdmin);
+  constructor(
+    private store: Store<AppState>,
+    private cfGuid: string,
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private paginationMonitorFactory: PaginationMonitorFactory
+  ) {
+    this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+      switchMap(cf =>
+        combineLatest(
+          observableOf(cf),
+          CfUserService.createPaginationAction(
+            activeRouteCfOrgSpace.cfGuid,
+            cf.global.isAdmin,
+            this.activeRouteCfOrgSpace.orgGuid,
+            store,
+            paginationMonitorFactory)
+        )
+      ),
+      tap(([cf, action]) => {
         this.dataSource = new CfSelectUsersDataSourceService(cfGuid, this.store, action, this);
       }),
-      map(cf => cf && cf.state.initialised),
+      map(([cf, action]) => cf && cf.state.initialised),
       publishReplay(1),
       refCount(),
     );

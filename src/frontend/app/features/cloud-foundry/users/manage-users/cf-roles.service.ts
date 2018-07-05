@@ -1,3 +1,4 @@
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -22,7 +23,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { GetAllOrganizations, GetOrganization } from '../../../../store/actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey, endpointSchemaKey } from '../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -94,8 +95,10 @@ export class CfRolesService {
     private cfUserService: CfUserService,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CurrentUserPermissionsService,
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
+    console.log('asd');
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectUsersRolesCf)),
       filter(([users, cfGuid]) => !!cfGuid),
@@ -239,7 +242,7 @@ export class CfRolesService {
 
   fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
     if (!this.cfOrgs[cfGuid]) {
-      const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, cfGuid);
+      const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
       const orgs$ = getPaginationObservables<APIResource<IOrganization>>({
         store: this.store,
         action: new GetAllOrganizations(paginationKey, cfGuid, [
