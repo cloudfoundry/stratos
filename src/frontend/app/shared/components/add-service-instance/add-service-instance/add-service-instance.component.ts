@@ -3,7 +3,7 @@ import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, first, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../core/cf-api.types';
@@ -41,6 +41,8 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { endpointsEntityRequestSelector } from '../../../../store/selectors/endpoint.selectors';
+import { selectRequestInfo, selectEntity } from '../../../../store/selectors/api.selectors';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -102,15 +104,15 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
       switchMap(createServiceInstance => {
-      const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
-      return getPaginationObservables<APIResource<IApp>>({
-        store: this.store,
-        action: new GetAllAppsInSpace(createServiceInstance.cfGuid, createServiceInstance.spaceGuid, paginationKey),
-        paginationMonitor: this.paginationMonitorFactory.create(paginationKey, entityFactory(applicationSchemaKey))
-      }, true).entities$;
-    }),
-    map(apps => apps.length === 0)
-  );
+        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
+        return getPaginationObservables<APIResource<IApp>>({
+          store: this.store,
+          action: new GetAllAppsInSpace(createServiceInstance.cfGuid, createServiceInstance.spaceGuid, paginationKey),
+          paginationMonitor: this.paginationMonitorFactory.create(paginationKey, entityFactory(applicationSchemaKey))
+        }, true).entities$;
+      }),
+      map(apps => apps.length === 0)
+    );
   }
 
   onNext = () => {
@@ -166,6 +168,11 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private configureForEditServiceInstanceMode() {
     const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
     const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
+    // tslint:disable-next-line:max-line-length
+    // this.store.select(selectRequestInfo(serviceInstancesSchemaKey, serviceInstanceId)).subscribe(a => a ? console.log(`--- actual fetching: ${a.fetching}`) : null);
+    // this.store.select(selectEntity(serviceInstancesSchemaKey, serviceInstanceId)).subscribe(a => a ? console.log(`actual entity: ${JSON.stringify(a.metadata)} ---`) : null);
+
+    // entityService.entityMonitor.entityRequest$.pipe(withLatestFrom(entityService.entityMonitor.entity$)).subscribe(a => console.log(`actual fetching: ${a[0].fetching}`));
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
       tap(serviceInstance => {
@@ -173,28 +180,32 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         this.csiGuidsService.cfGuid = cfId;
         this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
         const serviceGuid = serviceInstance.entity.entity.service_guid;
-        this.csiGuidsService.serviceGuid = serviceGuid;
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceGuid);
-        this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-        this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
-        this.store.dispatch(new SetCreateServiceInstance(
-          serviceInstanceEntity.name,
-          serviceInstanceEntity.space_guid,
-          serviceInstanceEntity.tags,
-          ''
-        ));
-        const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, cfId);
-        spaceEntityService.waitForEntity$.pipe(
-          filter(p => !!p),
-          tap(spaceEntity => {
-            this.store.dispatch(new SetCreateServiceInstanceCFDetails(
-              cfId,
-              spaceEntity.entity.entity.organization_guid,
-              spaceEntity.entity.metadata.guid)
-            );
-          }),
-          take(1)
-        ).subscribe();
+        if (serviceGuid) {
+          this.csiGuidsService.serviceGuid = serviceGuid;
+          this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceGuid);
+          this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+          this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
+          this.store.dispatch(new SetCreateServiceInstance(
+            serviceInstanceEntity.name,
+            serviceInstanceEntity.space_guid,
+            serviceInstanceEntity.tags,
+            ''
+          ));
+          const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, cfId);
+          spaceEntityService.waitForEntity$.pipe(
+            filter(p => !!p),
+            tap(spaceEntity => {
+              this.store.dispatch(new SetCreateServiceInstanceCFDetails(
+                cfId,
+                spaceEntity.entity.entity.organization_guid,
+                spaceEntity.entity.metadata.guid)
+              );
+            }),
+            take(1)
+          ).subscribe();
+        } else {
+          // console.log(serviceGuid);
+        }
       }),
       take(1),
       map(o => false),

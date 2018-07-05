@@ -3,7 +3,17 @@ import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  publishReplay,
+  refCount,
+  share,
+  startWith,
+  tap,
+  withLatestFrom
+} from 'rxjs/operators';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
 import { AppState } from './../../store/app-state';
@@ -94,20 +104,23 @@ export class EntityMonitor<T = any> {
     entities$: Observable<IRequestDataState>
   ): Observable<T> => {
     return combineLatest(
-      entitySelect$,
-      entityRequestSelect$
+      entitySelect$.pipe(startWith(null), tap(console.log)),
+      entityRequestSelect$.pipe(startWith(null))
     ).pipe(
-      filter(([entity, entityRequestInfo]) => {
-        return !!entityRequestInfo && !!entity;
+      filter(([entity, info]) => {
+        return !!entity || !!info;
       }),
+      map(([entity]) => entity),
+      distinctUntilChanged(),
       withLatestFrom(entities$),
       map(([
-        [entity],
+        entity,
         entities
       ]) => {
+        console.log('here')
+        console.log(entity)
         return entity ? denormalize(entity, schema, entities) : null;
       }),
-      distinctUntilChanged(),
       startWith(null)
     );
   }

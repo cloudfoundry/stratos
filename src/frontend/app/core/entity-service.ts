@@ -1,7 +1,17 @@
 import { Injectable } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, interval, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  switchMap,
+  tap,
+  withLatestFrom,
+  combineLatest as combineLatestOperator
+} from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
@@ -67,6 +77,11 @@ export class EntityService<T = any> {
       refCount(),
       filter(entityInfo => !entityInfo || entityInfo.entity),
       tap((entityInfo: EntityInfo) => {
+        if (this.action.entityKey === 'serviceInstance') {
+          // console.log(this.action.entityKey);
+          // console.log(`What we get entity: ${entityInfo.entity ? JSON.stringify(entityInfo.entity.metadata) : entityInfo.entity}`);
+          // console.log(`What we get: ${entityInfo.entityRequestInfo.fetching}`);
+        }
         if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo)) {
           return;
         }
@@ -86,6 +101,11 @@ export class EntityService<T = any> {
 
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
+        // if (this.action.entityKey === 'serviceInstance') {
+        //   console.log(this.action.entityKey);
+        //   console.log(`What we get entity: ${JSON.stringify(entity.metadata)}`);
+        //   console.log(`What we get: ${entityRequestInfo.fetching}`);
+        // }
         const { entityRequestInfo, entity } = ent;
         return this.isEntityAvailable(entity, entityRequestInfo);
       }),
@@ -126,13 +146,11 @@ export class EntityService<T = any> {
   }
 
   private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
-    return combineLatest(
-      entityMonitor.entityRequest$,
-      entityMonitor.entity$
-    ).pipe(
-      filter(([entityRequestInfo]) => {
+    return entityMonitor.entityRequest$.pipe(
+      filter((entityRequestInfo) => {
         return !!entityRequestInfo;
       }),
+      combineLatestOperator(entityMonitor.entity$.pipe(tap(console.log))),
       map(([entityRequestInfo, entity]) => ({
         entityRequestInfo,
         entity
