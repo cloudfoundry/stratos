@@ -45,6 +45,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   constructor(
     private store: Store<AppState>,
     private cfGuid: string,
+    private cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
@@ -52,12 +53,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          CfUserService.createPaginationAction(
-            activeRouteCfOrgSpace.cfGuid,
-            cf.global.isAdmin,
-            this.activeRouteCfOrgSpace.orgGuid,
-            store,
-            paginationMonitorFactory)
+          cfUserService.createPaginationAction(cf.global.isAdmin)
         )
       ),
       tap(([cf, action]) => {

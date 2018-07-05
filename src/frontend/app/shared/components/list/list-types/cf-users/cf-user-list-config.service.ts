@@ -119,12 +119,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          CfUserService.createPaginationAction(
-            activeRouteCfOrgSpace.cfGuid,
-            cf.global.isAdmin,
-            this.activeRouteCfOrgSpace.orgGuid,
-            store,
-            paginationMonitorFactory)
+          cfUserService.createPaginationAction(cf.global.isAdmin)
         )
       ),
       tap(([cf, action]) => {
