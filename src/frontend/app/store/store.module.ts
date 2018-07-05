@@ -27,7 +27,6 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
 import { AppEffects } from './effects/app.effects';
 import { UsersEffects } from './effects/users.effects';
-import { RouteEffect } from './effects/route.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 
 @NgModule({
@@ -60,8 +59,7 @@ import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect'
       PermissionEffects,
       UsersEffects,
       RecursiveDeleteEffect,
-      AppEffects,
-      RouteEffect,
+      AppEffects
     ])
   ]
 })
