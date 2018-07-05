@@ -58,7 +58,8 @@ export class EntitySchema extends schema.Entity {
    * @param {string} entityKey As per schema.Entity ctor
    * @param {Schema} [definition] As per schema.Entity ctor
    * @param {schema.EntityOptions} [options] As per schema.Entity ctor
-   * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity
+   * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
+   * spaces, manager spaces, auditor space, etc
    * @memberof EntitySchema
    */
   constructor(
