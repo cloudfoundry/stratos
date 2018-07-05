@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, combineLatest as hmmm } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, withLatestFrom, combineLatest } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { environment } from '../../../environments/environment';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -15,15 +17,10 @@ import {
   isSpaceManager,
   waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllOrganizations, GetAllOrgUsers } from '../../store/actions/organization.actions';
+import { GetAllOrgUsers } from '../../store/actions/organization.actions';
 import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import {
-  cfUserSchemaKey,
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-} from '../../store/helpers/entity-factory';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import {
   getPaginationObservables,
@@ -37,68 +34,18 @@ import {
   createUserRoleInSpace,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
-  OrgUserRoleNames,
-  SpaceUserRoleNames,
   UserRoleInOrg,
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
-import { selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
+
+const { proxyAPIVersion, cfAPIVersion } = environment;
 
 @Injectable()
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  // public static createPaginationAction(
-  //   endpointGuid: string,
-  //   isAdmin: boolean,
-  //   orgGuid?: string,
-  //   store?: Store<AppState>,
-  //   paginationMonitorFactory?: PaginationMonitorFactory
-  // ): Observable<PaginatedAction> {
-  //   if (isAdmin) {
-  //     return observableOf(new GetAllUsersAsAdmin(endpointGuid));
-  //   }
-  //   return CfUserService.canFetchAllUsers(store, paginationMonitorFactory, endpointGuid).pipe(
-  //     map(canFetchAllUsers => {
-  //       if (canFetchAllUsers) {
-  //         return new GetAllUsersAsNonAdmin(endpointGuid);
-  //       } else if (!orgGuid) {
-  //         // Danger! If there's no org guid and there's a ton of orgs this will be an expensive action.
-  //         console.log('DANGER');
-  //         return new GetAllUsersAsNonAdmin(endpointGuid);
-  //       } else {
-  //         const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
-  //         return new GetAllOrgUsers(orgGuid, usersPaginationKey, endpointGuid);
-  //       }
-  //     })
-  //   );
-  // }
-
-  // private static canFetchAllUsers = (
-  //   store: Store<AppState>,
-  //   paginationMonitorFactory: PaginationMonitorFactory,
-  //   endpointGuid: string): Observable<boolean> => {
-  //   // TODO: RC Comment
-  //   const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
-  //   const orgsObs = getPaginationObservables<APIResource<IOrganization>>({
-  //     store,
-  //     action: new GetAllOrganizations(getAllOrgsPaginationKey, endpointGuid),
-  //     paginationMonitor: paginationMonitorFactory.create(
-  //       getAllOrgsPaginationKey,
-  //       entityFactory(organizationSchemaKey)
-  //     )
-  //   });
-
-
-
-  //   return orgsObs.entities$.pipe(
-  //     filter(entities => !!entities),
-  //     map(entities => entities.length < 20),
-  //     first()
-  //   );
-  // }
   users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
 
   constructor(
@@ -106,64 +53,46 @@ export class CfUserService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private entityServiceFactory: EntityServiceFactory,
+    private http: Http,
   ) { }
 
-  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
+  getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>
     this.getAllUsers(endpointGuid).pipe(
       switchMap(paginationObservables => paginationObservables.entities$),
       publishReplay(1),
       refCount(),
       filter(p => {
-        return !!p;
+        return filterEmpty ? !!p : true;
       }),
       map(users => {
-        return users.filter(p => p.entity.cfGuid === endpointGuid);
+        return filterEmpty ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
       }),
       filter(p => {
-        return p.length > 0;
+        return filterEmpty ? p.length > 0 : true;
       }),
     )
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
-    // hmmm(
-    //   this.store.select(selectRequestInfo(cfUserSchemaKey, 'ec7c596c-1b75-4e66-aad8-2376e03dccce')),
-    //   this.store.select(selectEntity(cfUserSchemaKey, 'ec7c596c-1b75-4e66-aad8-2376e03dccce'))
-    // ).subscribe(([ri, rd]) => {
-    //   console.log(ri, rd);
-    // });
-    this.store.select(selectRequestInfo(cfUserSchemaKey, userGuid)).subscribe(ri => console.log(ri));
-    // const user$ = this.store.select(selectEntity(cfUserSchemaKey, userGuid)).pipe(
-    //   filter(entity => !!entity && !!entity.metadata)
-    // );
-    // return user$;
-    // return observableOf({
-    //   entity: {},
-    //   metadata: {}
-    // });
-    if (!this.users[userGuid]) {
-      this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
-        cfUserSchemaKey,
-        entityFactory(cfUserSchemaKey),
-        userGuid,
-        new GetUser(endpointGuid, userGuid),
-        true
-      ).waitForEntity$.pipe(
-        filter(entity => !!entity),
-        map(entity => entity.entity)
-      );
-    }
-    return this.users[userGuid];
-    // return this.entityServiceFactory.create<APIResource<CfUser>>(
-    //   cfUserSchemaKey,
-    //   entityFactory(cfUserSchemaKey),
-    //   userGuid,
-    //   new GetUser(endpointGuid, userGuid),
-    //   true
-    // ).waitForEntity$.pipe(
-    //   filter(entity => !!entity && !!entity.entity && !!entity.entity.metadata),
-    //   map(entity => entity.entity)
-    // );
-
+    return this.getUsers(endpointGuid, false).pipe(
+      switchMap(users => {
+        // TODO: Test
+        if (users) {
+          return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
+        }
+        if (!this.users[userGuid]) {
+          this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
+            cfUserSchemaKey,
+            entityFactory(cfUserSchemaKey),
+            userGuid,
+            new GetUser(endpointGuid, userGuid),
+            true
+          ).waitForEntity$.pipe(
+            filter(entity => !!entity),
+            map(entity => entity.entity)
+          );
+        }
+        return this.users[userGuid];
+      }));
   }
 
   private parseOrgRole(user: CfUser,
@@ -275,14 +204,9 @@ export class CfUserService {
     orgGuid: string,
     cfGuid: string
   ): Observable<UserRoleInOrg> => {
-
-    // return this.getUsers(cfGuid).pipe(
-    //         this.getUserFromUsers(userGuid),
-
     return this.getUser(cfGuid, userGuid).pipe(
       filter(user => !!user && !!user.metadata),
       map(user => {
-        console.log('user2 ', user);
         return createUserRoleInOrg(
           isOrgManager(user.entity, orgGuid),
           isOrgBillingManager(user.entity, orgGuid),
@@ -292,19 +216,6 @@ export class CfUserService {
       }),
       first()
     );
-
-    // return this.getUsers(cfGuid).pipe(
-    //   this.getUserFromUsers(userGuid),
-    //   map(user => {
-    //     return createUserRoleInOrg(
-    //       isOrgManager(user.entity, orgGuid),
-    //       isOrgBillingManager(user.entity, orgGuid),
-    //       isOrgAuditor(user.entity, orgGuid),
-    //       isOrgUser(user.entity, orgGuid)
-    //     );
-    //   }),
-    //   first()
-    // );
   }
 
   getUserRoleInSpace = (
@@ -330,7 +241,8 @@ export class CfUserService {
         map(cf => cf.global.isAdmin),
         combineLatest(this.canFetchAllUsers()),
         switchMap(([isAdmin, canFetchAllUsers]) => {
-          if (isAdmin || canFetchAllUsers) {
+          // TODO: RC comment
+          if (isAdmin || canFetchAllUsers || this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid) {
             return this.createPaginationAction(isAdmin).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
                 store: this.store,
@@ -370,8 +282,8 @@ export class CfUserService {
         if (canFetchAllUsers) {
           return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
         } else if (!this.activeRouteCfOrgSpace.orgGuid) {
-          // Danger! If there's no org guid and there's a ton of orgs this will be an expensive action.
-          console.log('DANGER');
+          // Danger! This path should never be hit, for non-admin we should always have a guid and go through the else block below
+          // which will avoid fetching users per * lots of orgs.
           return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
         } else {
           const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.orgGuid);
@@ -382,23 +294,26 @@ export class CfUserService {
   }
 
   private canFetchAllUsers = (): Observable<boolean> => {
-    // TODO: RC Comment
-    const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.activeRouteCfOrgSpace.cfGuid);
-    const orgsObs = getPaginationObservables<APIResource<IOrganization>>({
-      store: this.store,
-      action: new GetAllOrganizations(getAllOrgsPaginationKey, this.activeRouteCfOrgSpace.cfGuid),
-      paginationMonitor: this.paginationMonitorFactory.create(
-        getAllOrgsPaginationKey,
-        entityFactory(organizationSchemaKey)
-      )
-    });
+    // // TODO: RC Comment
+    // Do pre-fetch empty orgs that miss a lot of data
+    const options = new RequestOptions();
+    options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/organizations`;
+    options.params = new URLSearchParams('');
+    options.params.set('results-per-page', '1');
+    options.method = 'get';
+    options.headers = new Headers();
+    options.headers.set('x-cap-cnsi-list', this.activeRouteCfOrgSpace.cfGuid);
+    options.headers.set('x-cap-passthrough', 'true');
+    return this.http.request(new Request(options)).pipe(
+      map(response => {
+        let resData;
+        try {
+          resData = response.json();
+        } catch (e) {
+          resData = { total_results: Number.MAX_SAFE_INTEGER };
+        }
+        return resData.total_results < 20;
+      }));
 
-
-
-    return orgsObs.entities$.pipe(
-      filter(entities => !!entities),
-      map(entities => entities.length < 20),
-      first()
-    );
   }
 }

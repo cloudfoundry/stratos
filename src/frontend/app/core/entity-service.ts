@@ -141,7 +141,7 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
-    return entity && !isEntityBlocked(entityRequestInfo);
+    return entity && (entity.entity ? entity.metadata : true) && !isEntityBlocked(entityRequestInfo);
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
