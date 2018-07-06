@@ -10,7 +10,6 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
@@ -47,7 +46,6 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     private cfGuid: string,
     private cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(cf =>

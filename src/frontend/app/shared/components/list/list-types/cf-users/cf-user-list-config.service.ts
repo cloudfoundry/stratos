@@ -11,7 +11,6 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
@@ -107,7 +106,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {
@@ -123,7 +121,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         )
       ),
       tap(([cf, action]) => {
-        console.log('cf user create DS');
         this.dataSource = new CfUserDataSourceService(store, action, this);
       }),
       map(([cf, action]) => cf && cf.state.initialised)

@@ -75,7 +75,6 @@ export class CfUserService {
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
     return this.getUsers(endpointGuid, false).pipe(
       switchMap(users => {
-        // TODO: Test
         if (users) {
           return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
         }
@@ -241,7 +240,8 @@ export class CfUserService {
         map(cf => cf.global.isAdmin),
         combineLatest(this.canFetchAllUsers()),
         switchMap(([isAdmin, canFetchAllUsers]) => {
-          // TODO: RC comment
+          // Note - This service is used at cf, org and space level of the cf pages.
+          // TODO: RC comment, move this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid into canFetch?
           if (isAdmin || canFetchAllUsers || this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid) {
             return this.createPaginationAction(isAdmin).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({

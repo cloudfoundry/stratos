@@ -27,14 +27,8 @@ import { CfRolesService } from '../cf-roles.service';
       useFactory: (
         store: Store<AppState>,
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-        paginationMonitorFactory: PaginationMonitorFactory,
         cfUserService: CfUserService) => {
-        return new CfSelectUsersListConfigService(
-          store,
-          activeRouteCfOrgSpace.cfGuid,
-          cfUserService,
-          activeRouteCfOrgSpace,
-          paginationMonitorFactory);
+        return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid, cfUserService, activeRouteCfOrgSpace);
       },
       deps: [Store, ActiveRouteCfOrgSpace, PaginationMonitorFactory, CfUserService]
     }

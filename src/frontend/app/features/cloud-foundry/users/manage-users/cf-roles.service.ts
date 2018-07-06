@@ -98,7 +98,6 @@ export class CfRolesService {
     private userPerms: CurrentUserPermissionsService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    console.log('asd');
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectUsersRolesCf)),
       filter(([users, cfGuid]) => !!cfGuid),
