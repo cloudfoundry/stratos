@@ -12,6 +12,7 @@ import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory
 
 @Injectable()
 export class CloudFoundryService {
+  static EndpointList = 'endpoint-list';
   hasRegisteredCFEndpoints$: Observable<boolean>;
   hasConnectedCFEndpoints$: Observable<boolean>;
   connectedCFEndpoints$: Observable<EndpointModel[]>;
@@ -24,7 +25,7 @@ export class CloudFoundryService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    this.cfEndpointsMonitor = new PaginationMonitor(store, 'endpoint-list', entityFactory(endpointSchemaKey));
+    this.cfEndpointsMonitor = new PaginationMonitor(store, CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey));
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
       map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))

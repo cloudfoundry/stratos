@@ -19,7 +19,7 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
     {
       provide: ListConfig,
       useClass: CFEndpointsListConfigService,
-    }, 
+    },
     CloudFoundryService
   ]
 })

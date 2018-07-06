@@ -48,7 +48,6 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
-  static EndpointList = 'endpoint-list';
 
   constructor(
     private http: HttpClient,
@@ -133,12 +132,6 @@ export class EndpointsEffect {
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
       );
-    }));
-
-  @Effect({dispatch: false}) resetEndpointsList$ = this.actions$.ofType<EndpointActionComplete>(
-    DISCONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_SUCCESS).pipe(
-    tap(action => {
-      this.store.dispatch(new ResetPagination(endpointSchemaKey, EndpointsEffect.EndpointList));
     }));
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS).pipe(
