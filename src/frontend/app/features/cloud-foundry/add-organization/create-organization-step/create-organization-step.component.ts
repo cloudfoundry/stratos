@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -68,10 +68,12 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.validate(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+      !this.validateNameTaken(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
   }
 
-  validate = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
+  validateNameTaken = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
+
+  validate = () => !!this.addOrg && this.addOrg.valid;
 
   submit: StepOnNextFunction = () => {
     const orgName = this.addOrg.value['orgName'];
