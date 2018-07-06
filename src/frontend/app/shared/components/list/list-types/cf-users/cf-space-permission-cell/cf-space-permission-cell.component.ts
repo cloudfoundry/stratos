@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, of as observableOf } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, first, filter } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -55,6 +55,8 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     const orgNames$ = combineLatest(
       orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)))
     ).pipe(
+      filter(org => !!org),
+      first(),
       map((orgs: APIResource<IOrganization>[]) => {
         const orgNames: { [orgGuid: string]: string } = {};
         orgs.forEach(org => {
