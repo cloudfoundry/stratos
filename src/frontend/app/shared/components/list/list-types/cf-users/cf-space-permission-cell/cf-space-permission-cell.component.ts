@@ -52,8 +52,8 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
-    const orgNames$ = orgGuids.length ? observableOf([]) : combineLatest(
-      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)))
+    const orgNames$ = orgGuids.length ? combineLatest(
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)).pipe(first()))
     ).pipe(
       filter(org => !!org),
       first(),
@@ -64,7 +64,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         });
         return orgNames;
       })
-    );
+    ) : observableOf([]);
     return combineLatest(
       observableOf(permissionList),
       orgNames$
