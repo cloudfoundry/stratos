@@ -1,9 +1,8 @@
-
-import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -26,6 +25,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+
 
 @Injectable()
 export class RequestEffect {
@@ -81,12 +81,18 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          return validateEntityRelations({
+          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
+          const entities = apiResponse ? apiResponse.response.entities : null;
+          return apiAction.skipValidation ? {
+            apiResponse,
+            started: false,
+            completed: Promise.resolve(new Array<boolean>())
+          } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
             allPagination,
-            newEntities: apiResponse ? apiResponse.response.entities : null,
+            apiResponse,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
             populateMissing: true,
@@ -105,7 +111,7 @@ export class RequestEffect {
         mergeMap(({ independentUpdates, validation }) => {
           return [new EntitiesPipelineCompleted(
             apiAction,
-            apiResponse,
+            validation.apiResponse,
             validateAction,
             validation,
             independentUpdates
@@ -159,7 +165,7 @@ export class RequestEffect {
 
         if (
           !apiAction.updatingKey &&
-          ( apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
+          (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
           if (apiAction.removeEntityOnDelete) {
