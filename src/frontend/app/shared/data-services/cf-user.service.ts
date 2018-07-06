@@ -42,7 +42,7 @@ import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.ty
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  public static createPaginationAction(endpointGuid: string, isAdmin: boolean): PaginatedAction {
+  public static createPaginationAction(endpointGuid: string, isAdmin: boolean): GetAllUsersAsAdmin | GetAllUsersAsNonAdmin {
     return isAdmin ? new GetAllUsersAsAdmin(endpointGuid) : new GetAllUsersAsNonAdmin(endpointGuid);
   }
 
@@ -113,10 +113,10 @@ export class CfUserService {
       this.parseOrgRole(user, orgGuids, [org], res);
     } else {
       // Discover user's roles for each org via each of the 4 org role types
-      this.parseOrgRole(user, orgGuids, user.organizations, res);
-      this.parseOrgRole(user, orgGuids, user.audited_organizations, res);
-      this.parseOrgRole(user, orgGuids, user.billing_managed_organizations, res);
-      this.parseOrgRole(user, orgGuids, user.managed_organizations, res);
+      this.parseOrgRole(user, orgGuids, user.organizations || [], res);
+      this.parseOrgRole(user, orgGuids, user.audited_organizations || [], res);
+      this.parseOrgRole(user, orgGuids, user.billing_managed_organizations || [], res);
+      this.parseOrgRole(user, orgGuids, user.managed_organizations || [], res);
     }
     return res;
   }
@@ -152,9 +152,9 @@ export class CfUserService {
       this.parseSpaceRole(user, spaceGuids, spaces, res);
     } else {
       // User might have unique spaces in any of the space role collections, so loop through each
-      this.parseSpaceRole(user, spaceGuids, user.spaces, res);
-      this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
-      this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+      this.parseSpaceRole(user, spaceGuids, user.spaces || [], res);
+      this.parseSpaceRole(user, spaceGuids, user.audited_spaces || [], res);
+      this.parseSpaceRole(user, spaceGuids, user.managed_spaces || [], res);
     }
     return res;
   }
