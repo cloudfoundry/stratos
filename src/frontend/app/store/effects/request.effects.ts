@@ -83,11 +83,7 @@ export class RequestEffect {
         map(([allEntities, allPagination]) => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
-          return apiAction.skipValidation ? {
-            apiResponse,
-            started: false,
-            completed: Promise.resolve(new Array<boolean>())
-          } : validateEntityRelations({
+          return validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
