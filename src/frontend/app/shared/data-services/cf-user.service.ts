@@ -42,7 +42,7 @@ import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.ty
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  public static createPaginationAction(endpointGuid: string, isAdmin: boolean): PaginatedAction {
+  public static createPaginationAction(endpointGuid: string, isAdmin: boolean): GetAllUsersAsAdmin | GetAllUsersAsNonAdmin {
     return isAdmin ? new GetAllUsersAsAdmin(endpointGuid) : new GetAllUsersAsNonAdmin(endpointGuid);
   }
 
@@ -113,10 +113,10 @@ export class CfUserService {
       this.parseOrgRole(user, orgGuids, [org], res);
     } else {
       // Discover user's roles for each org via each of the 4 org role types
-      this.parseOrgRole(user, orgGuids, user.organizations, res);
-      this.parseOrgRole(user, orgGuids, user.audited_organizations, res);
-      this.parseOrgRole(user, orgGuids, user.billing_managed_organizations, res);
-      this.parseOrgRole(user, orgGuids, user.managed_organizations, res);
+      this.parseOrgRole(user, orgGuids, user.organizations || [], res);
+      this.parseOrgRole(user, orgGuids, user.audited_organizations || [], res);
+      this.parseOrgRole(user, orgGuids, user.billing_managed_organizations || [], res);
+      this.parseOrgRole(user, orgGuids, user.managed_organizations || [], res);
     }
     return res;
   }
@@ -152,11 +152,15 @@ export class CfUserService {
       this.parseSpaceRole(user, spaceGuids, spaces, res);
     } else {
       // User might have unique spaces in any of the space role collections, so loop through each
-      this.parseSpaceRole(user, spaceGuids, user.spaces, res);
-      this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
-      this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+      this.parseSpaceRole(user, spaceGuids, user.spaces || [], res);
+      this.parseSpaceRole(user, spaceGuids, user.audited_spaces || [], res);
+      this.parseSpaceRole(user, spaceGuids, user.managed_spaces || [], res);
     }
     return res;
+  }
+
+  private populatedArray(array?: Array<any>): boolean {
+    return array && !!array.length;
   }
 
   /**
@@ -164,39 +168,22 @@ export class CfUserService {
    */
   hasRolesInOrg(user: CfUser, orgGuid: string, excludeOrgUser = true): boolean {
 
-    const orgRoles = this.getOrgRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
-    const spaceRoles = this.getSpaceRolesFromUser(user).filter(o => o.orgGuid === orgGuid);
-
-    for (const roleKey in orgRoles) {
-      if (!orgRoles.hasOwnProperty(roleKey)) {
-        continue;
-      }
-
-      const permissions = orgRoles[roleKey].permissions;
-      if (
-        permissions[OrgUserRoleNames.MANAGER] ||
-        permissions[OrgUserRoleNames.BILLING_MANAGERS] ||
-        permissions[OrgUserRoleNames.AUDITOR]
-      ) {
-        return true;
-      }
-      if (!excludeOrgUser && permissions[OrgUserRoleNames.USER]) {
-        return true;
-      }
+    // Check org roles
+    if (this.populatedArray(user.audited_organizations) ||
+      this.populatedArray(user.billing_managed_organizations) ||
+      this.populatedArray(user.managed_organizations) ||
+      (!excludeOrgUser && this.populatedArray(user.organizations))) {
+      return true;
     }
 
-    for (const roleKey in spaceRoles) {
-      if (!spaceRoles.hasOwnProperty(roleKey)) {
-        continue;
-      }
-
-      const permissions = spaceRoles[roleKey].permissions;
-      if (permissions[SpaceUserRoleNames.MANAGER] ||
-        permissions[SpaceUserRoleNames.AUDITOR] ||
-        permissions[SpaceUserRoleNames.DEVELOPER]) {
-        return true;
-      }
+    // Check space roles
+    if (this.populatedArray(user.audited_spaces) ||
+      this.populatedArray(user.managed_spaces) ||
+      this.populatedArray(user.spaces)) {
+      return true;
     }
+
+    return false;
   }
 
   getUserRoleInOrg = (

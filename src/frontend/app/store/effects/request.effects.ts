@@ -81,7 +81,10 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          return validateEntityRelations({
+          return apiAction.skipValidation ? {
+            started: false,
+            completed: Promise.resolve([])
+          } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
@@ -159,8 +162,8 @@ export class RequestEffect {
 
         if (
           !apiAction.updatingKey &&
-          apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
-          apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
+          ( apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
+            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));

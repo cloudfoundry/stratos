@@ -101,6 +101,7 @@ export class UpdateCfAction extends RequestUpdateAction implements IUpdateReques
 export interface ICFAction extends IRequestAction {
   options: RequestOptions;
   actions: string[];
+  skipValidation?: boolean;
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {

@@ -5,18 +5,12 @@ const {
   SpecReporter
 } = require('jasmine-spec-reporter');
 
-var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
+const HtmlReporter = require('stratos-protractor-reporter');
+const moment = require('moment');
 
-var reportFolderName = 'stratos-e2e-' + new Date();
+var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
 
-var screenshotReporter = new HtmlScreenshotReporter({
-  dest: './e2e-reports/' + reportFolderName,
-  filename: 'index.html',
-  captureOnlyFailedSpecs: true,
-  reportTitle: 'Stratos E2E Test Report: ' + new Date(),
-  inlineImages: true,
-  reportFailedUrl: true  
-});
+var reportFolderName = 'stratos-e2e-' + timestamp;
 
 const SECRETS_FILE = 'secrets.yaml';
 
@@ -60,18 +54,6 @@ exports.config = {
       args: ['--no-sandbox']
     }
   },
-  // Setup the report before any tests start
-  beforeLaunch: function() {
-    return new Promise(function(resolve){
-      screenshotReporter.beforeLaunch(resolve);
-    });
-  },
-  // Close the report after all tests finish
-  afterLaunch: function(exitCode) {
-    return new Promise(function(resolve){
-      screenshotReporter.afterLaunch(resolve.bind(this, exitCode));
-    });
-  },
   directConnect: true,
   framework: 'jasmine',
   jasmineNodeOpts: {
@@ -84,7 +66,15 @@ exports.config = {
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
-    jasmine.getEnv().addReporter(screenshotReporter);
+    jasmine.getEnv().addReporter(new HtmlReporter({
+      baseDirectory: './e2e-reports/' + reportFolderName,
+      takeScreenShotsOnlyForFailedSpecs: true,
+      docTitle: 'E2E Test Report: ' + timestamp,
+      docName: 'index.html',
+      logIgnore: [
+        /\/auth\/session\/verify - Failed to load resource/g
+      ]
+   }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
         displayStacktrace: true

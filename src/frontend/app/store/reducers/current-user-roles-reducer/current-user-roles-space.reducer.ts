@@ -3,7 +3,7 @@ import { UserRelationTypes } from '../../actions/permissions.actions';
 import { APIResource } from '../../types/api.types';
 import { ISpaceRoleState } from '../../types/current-user-roles.types';
 
-export const defaultUserSpaceRoleState = {
+export const defaultUserSpaceRoleState: ISpaceRoleState = {
   orgId: null,
   isManager: false,
   isAuditor: false,

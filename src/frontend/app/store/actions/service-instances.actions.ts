@@ -23,14 +23,14 @@ import { getActions } from './action.helper';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
-export const getServiceInstanceRelations =  [
-    createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-    createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-    createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-    createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
-    createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-    createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
-  ];
+export const getServiceInstanceRelations = [
+  createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+  createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+  createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
+  createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
+  createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+  createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+];
 
 export class GetServiceInstances
   extends CFStartAction implements PaginationAction, EntityInlineParentAction {
@@ -124,6 +124,7 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
 }
 
 export class UpdateServiceInstance extends CreateServiceInstance {
+  static updateServiceInstance = 'Updating-Service-Instance';
   constructor(
     public endpointGuid: string,
     public guid: string,
@@ -136,9 +137,9 @@ export class UpdateServiceInstance extends CreateServiceInstance {
     super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags);
     this.options.method = 'put';
     this.options.url = `${this.options.url}/${this.guid}`;
-
     this.actions = getActions('Service Instances', 'Update Service Instance');
   }
+  updatingKey = UpdateServiceInstance.updateServiceInstance;
 }
 
 export class ListServiceBindingsForInstance
