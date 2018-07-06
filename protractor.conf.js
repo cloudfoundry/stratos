@@ -14,6 +14,8 @@ var reportFolderName = 'stratos-e2e-' + timestamp;
 
 const SECRETS_FILE = 'secrets.yaml';
 
+const E2E_REPORT_FOLDER = process.env['E2E_REPORT_FOLDER'] || './e2e-reports/' + reportFolderName;
+
 var fs = require('fs');
 var path = require('path');
 var yaml = require('js-yaml');
@@ -67,7 +69,7 @@ exports.config = {
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
     jasmine.getEnv().addReporter(new HtmlReporter({
-      baseDirectory: './e2e-reports/' + reportFolderName,
+      baseDirectory: E2E_REPORT_FOLDER,
       takeScreenShotsOnlyForFailedSpecs: true,
       docTitle: 'E2E Test Report: ' + timestamp,
       docName: 'index.html',
