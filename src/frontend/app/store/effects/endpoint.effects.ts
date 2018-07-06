@@ -1,5 +1,5 @@
 
-import {catchError,  mergeMap } from 'rxjs/operators';
+import {catchError,  mergeMap, map, tap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
@@ -27,7 +27,7 @@ import {
   UnregisterEndpoint,
   EndpointActionComplete,
 } from '../actions/endpoint.actions';
-import { ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { ClearPaginationOfEntity, ResetPagination } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
@@ -38,7 +38,9 @@ import {
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
+  APISuccessOrFailedAction,
 } from '../types/request.types';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 
 @Injectable()
 export class EndpointsEffect {
@@ -46,6 +48,7 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
+  static EndpointList = 'endpoint-list';
 
   constructor(
     private http: HttpClient,
@@ -130,6 +133,12 @@ export class EndpointsEffect {
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
       );
+    }));
+
+  @Effect({dispatch: false}) resetEndpointsList$ = this.actions$.ofType<EndpointActionComplete>(
+    DISCONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_SUCCESS).pipe(
+    tap(action => {
+      this.store.dispatch(new ResetPagination(endpointSchemaKey, EndpointsEffect.EndpointList));
     }));
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS).pipe(
