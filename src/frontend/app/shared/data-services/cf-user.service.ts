@@ -75,6 +75,9 @@ export class CfUserService {
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
     return this.getUsers(endpointGuid, false).pipe(
       switchMap(users => {
+        // `users` will be null if we can't handle the fetch (connected as non-admin with lots of orgs). For those case fall back on the
+        // user entity. Why not just use the user entity? There's a lot of these requests.. in parallel if we're fetching a list of users
+        // at the same time
         if (users) {
           return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
         }
@@ -241,7 +244,7 @@ export class CfUserService {
         combineLatest(this.canFetchAllUsers()),
         switchMap(([isAdmin, canFetchAllUsers]) => {
           // Note - This service is used at cf, org and space level of the cf pages.
-          // TODO: RC comment, move this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid into canFetch?
+          // We shouldn't attempt to fetch all users if at the cf level and there's more than x orgs
           if (isAdmin || canFetchAllUsers || this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid) {
             return this.createPaginationAction(isAdmin).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
@@ -283,7 +286,7 @@ export class CfUserService {
           return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
         } else if (!this.activeRouteCfOrgSpace.orgGuid) {
           // Danger! This path should never be hit, for non-admin we should always have a guid and go through the else block below
-          // which will avoid fetching users per * lots of orgs.
+          // which will avoid making a `fetch users` request * lots of orgs.
           return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
         } else {
           const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.orgGuid);
@@ -294,8 +297,8 @@ export class CfUserService {
   }
 
   private canFetchAllUsers = (): Observable<boolean> => {
-    // // TODO: RC Comment
-    // Do pre-fetch empty orgs that miss a lot of data
+    // Make a separate request to count orgs. If we do this via the normal pagination orgs call we fail to fill many orgs with their
+    // required properties. This leads to a LOT of request to fill them in when we validate the orgs later on
     const options = new RequestOptions();
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/organizations`;
     options.params = new URLSearchParams('');
@@ -312,8 +315,7 @@ export class CfUserService {
         } catch (e) {
           resData = { total_results: Number.MAX_SAFE_INTEGER };
         }
-        return resData.total_results < 20;
+        return resData.total_results < 10;
       }));
-
   }
 }

@@ -22,12 +22,6 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
-    super(store,
-      cfUserService,
-      router,
-      activeRouteCfOrgSpace,
-      userPerms,
-      cfOrgService.org$,
-      cfSpaceService.space$);
+    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfOrgService.org$, cfSpaceService.space$);
   }
 }

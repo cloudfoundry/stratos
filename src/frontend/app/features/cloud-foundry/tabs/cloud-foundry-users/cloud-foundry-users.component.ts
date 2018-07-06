@@ -24,7 +24,7 @@ import { ListConfig } from './../../../../shared/components/list/list.component.
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
       userPerms: CurrentUserPermissionsService,
     ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace]
+    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
   }]
 })
 export class CloudFoundryUsersComponent { }

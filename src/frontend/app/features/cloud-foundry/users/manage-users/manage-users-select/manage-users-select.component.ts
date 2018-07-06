@@ -30,7 +30,7 @@ import { CfRolesService } from '../cf-roles.service';
         cfUserService: CfUserService) => {
         return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid, cfUserService, activeRouteCfOrgSpace);
       },
-      deps: [Store, ActiveRouteCfOrgSpace, PaginationMonitorFactory, CfUserService]
+      deps: [Store, ActiveRouteCfOrgSpace, CfUserService]
     }
   ],
 })
