@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';

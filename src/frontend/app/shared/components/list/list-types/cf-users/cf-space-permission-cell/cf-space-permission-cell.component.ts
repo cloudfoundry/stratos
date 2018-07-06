@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, of as observableOf } from 'rxjs';
+import { combineLatest, of as observableOf, never, empty } from 'rxjs';
 import { map, switchMap, first, filter } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
@@ -48,12 +48,12 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
   }
 
-  private prefixOrgName(permissionList) {
+  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]) {
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
-    const orgNames$ = combineLatest(
-      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)))
+    const orgNames$ = orgGuids.length ? combineLatest(
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)).pipe(first()))
     ).pipe(
       filter(org => !!org),
       first(),
@@ -64,7 +64,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         });
         return orgNames;
       })
-    );
+    ) : observableOf([]);
     return combineLatest(
       observableOf(permissionList),
       orgNames$
