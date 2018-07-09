@@ -6,7 +6,7 @@ Weekly status updates are published here.
 
 This week the focus has been on further testing and refinement of Release Candidate 2.
 
-We've been identifying and fixing issues - see: [Merge PRs](
+We've been identifying and fixing issues - see: [Merged PRs](
 https://github.com/cloudfoundry-incubator/stratos/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+updated%3A%3E%3D2018-07-02+).
 
 ## 29 June 2018
