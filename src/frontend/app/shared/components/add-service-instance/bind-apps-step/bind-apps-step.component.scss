@@ -3,27 +3,28 @@
   flex: 1;
 }
 
-.display-json {
-  white-space: -moz-pre-wrap;
-  white-space: -pre-wrap;
-  white-space: -o-pre-wrap;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.json-schema {
-  display: flex;
-  flex-direction: column;
-  @include breakpoint(laptop) {
+@mixin json-schema-component() {
+  .display-json {
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .json-schema {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    @include breakpoint(laptop) {
+      flex-direction: row;
+    }
+  }
+  .json-schema-data,
+  .json-schema-form {
+    width: 100%;
+    @include breakpoint(laptop) {
+      width: 50%;
+    }
   }
 }
 
-.json-schema-data,
-.json-schema-form {
-  width: 100%;
-  @include breakpoint(laptop) {
-    width: 50%;
-  }
-}
+@include json-schema-component();
