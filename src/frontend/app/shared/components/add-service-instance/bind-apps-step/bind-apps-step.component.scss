@@ -12,16 +12,17 @@
 }
 
 .json-schema {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
   @include breakpoint(laptop) {
     display: flex;
     flex-direction: row;
   }
 }
 
-.json-schema-data,.json-schema-form {
-    width: 100%;
+.json-schema-data,
+.json-schema-form {
+  width: 100%;
   @include breakpoint(laptop) {
     width: 50%;
   }
