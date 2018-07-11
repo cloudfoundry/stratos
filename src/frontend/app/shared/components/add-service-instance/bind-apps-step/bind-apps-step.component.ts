@@ -96,13 +96,15 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   onEnter = (selectedService$?) => {
-    this.selectedServiceSubscription = selectedService$
-      .subscribe(selectedService => {
-        this.schemas = {
-          serviceBinding: this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters),
-          serviceInstances: this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters),
-        };
-      });
+    if (selectedService$ instanceof Observable) {
+      this.selectedServiceSubscription = selectedService$
+        .subscribe(selectedService => {
+          this.schemas = {
+            serviceBinding: this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters),
+            serviceInstances: this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters),
+          };
+        });
+    }
   }
 
   private filterSchema = (schema: any): any => {
