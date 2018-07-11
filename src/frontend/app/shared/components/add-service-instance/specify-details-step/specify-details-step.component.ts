@@ -18,7 +18,7 @@ import {
   take,
   tap
 } from 'rxjs/operators';
-import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { IServiceInstance, IServicePlanSchemas } from '../../../../core/cf-api-svc.types';
 import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
@@ -92,6 +92,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   spaceScopeSub: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
+  schemas: IServicePlanSchemas;
+  showJsonSchema: boolean;
+  jsonFormOptions: any = { addSubmit: false };
 
   static isValidJsonValidatorFn = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
@@ -179,7 +182,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  onEnter = () => {
+  onEnter = (schemas) => {
+    this.schemas = schemas;
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
@@ -251,6 +255,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   ngAfterContentInit() {
     this.setupValidate();
+  }
+
+  onFormChange(jsonData) {
+    if (!!jsonData) {
+      const stringData = JSON.stringify(jsonData);
+      this.createNewInstanceForm.get('params').setValue(stringData);
+    }
   }
 
   onNext = (): Observable<StepOnNextResult> => {

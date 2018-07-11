@@ -169,7 +169,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   onNext = (): Observable<StepOnNextResult> => {
     this.store.dispatch(new SetCreateServiceInstanceServicePlan(this.stepperForm.controls.servicePlans.value));
-    return observableOf({ success: true });
+    return observableOf({ success: true, data: this.selectedService$ });
   }
 
   ngOnDestroy(): void {

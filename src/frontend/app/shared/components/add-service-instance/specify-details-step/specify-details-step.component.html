@@ -37,6 +37,25 @@
         <mat-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid" [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-
   </form>
+  <div *ngIf="schemas?.serviceInstances" class="json-schema">
+    <mat-card class="json-schema-form">
+      <mat-card-header>
+        <mat-card-title>Generated Form<button mat-button color="accent" (click)="showJsonSchema=!showJsonSchema">Json schema</button>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <json-schema-form loadExternalAssets="true" [options]="jsonFormOptions" [schema]="schemas.serviceInstances" [framework]="selectedFramework" (onChanges)="onFormChange($event)">
+        </json-schema-form>
+      </mat-card-content>
+    </mat-card>
+    <mat-card *ngIf="showJsonSchema" class="json-schema-data">
+      <mat-card-header>
+        <mat-card-title>Json schema</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <pre class="display-json">{{schemas.serviceInstances | json}} </pre>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

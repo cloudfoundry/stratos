@@ -67,12 +67,19 @@ export interface IServicePlan {
   service?: APIResource<IService>;
   guid?: string;
   cfGuid?: string;
+  schemas?: IServicePlanSchemas;
 }
 
 export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
 }
+
+export interface IServicePlanSchemas {
+  serviceBinding: any;
+  serviceInstances: any;
+}
+
 export interface IService {
   label: string;
   description: string;

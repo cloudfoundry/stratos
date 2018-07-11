@@ -18,6 +18,8 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
+import { IServicePlanSchemas } from '../../../../core/cf-api-svc.types';
+import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -35,6 +37,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   stepperForm: FormGroup;
   apps$: Observable<APIResource<IApp>[]>;
   guideText = 'Specify the application to bind (Optional)';
+
+  selectedFramework = 'material-design';
+  schemas: IServicePlanSchemas;
+  showJsonSchema: boolean;
+  jsonFormOptions: any = { addSubmit: false };
+  selectedServiceSubscription: Subscription;
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
@@ -50,6 +58,13 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       this.stepperForm.controls.apps.setValue(this.boundAppId);
       this.stepperForm.controls.apps.disable();
       this.guideText = 'Specify binding params (optional)';
+    }
+  }
+
+  onFormChange(jsonData) {
+    if (!!jsonData) {
+      const stringData = JSON.stringify(jsonData);
+      this.stepperForm.get('params').setValue(stringData);
     }
   }
 
@@ -80,9 +95,26 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.setBoundApp();
   }
 
+  onEnter = (selectedService$?) => {
+    this.selectedServiceSubscription = selectedService$
+      .subscribe(selectedService => {
+        this.schemas = {
+          serviceBinding: this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters),
+          serviceInstances: this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters),
+        };
+      });
+  }
+
+  private filterSchema = (schema: any): any => {
+    return Object.keys(schema).reduce((obj, key) => {
+      if (key !== '$schema') { obj[key] = schema[key]; }
+      return obj;
+    }, {});
+  }
+
   submit = (): Observable<StepOnNextResult> => {
     this.setApp();
-    return observableOf({ success: true });
+    return observableOf({ success: true, data: this.schemas });
   }
 
   setApp = () => this.store.dispatch(
@@ -91,6 +123,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   ngOnDestroy(): void {
     this.validateSubscription.unsubscribe();
+    safeUnsubscribe(this.selectedServiceSubscription);
   }
 
 }
