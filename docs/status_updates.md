@@ -2,6 +2,12 @@
 
 Weekly status updates are published here.
 
+## 13 July 2018
+
+The SUSE team has been participating in SUSE Hack Week, so there is no change in status this week.
+
+Work resumes next week on getting a first 2.0 release published.
+
 ## 06 July 2018
 
 This week the focus has been on further testing and refinement of Release Candidate 2.
