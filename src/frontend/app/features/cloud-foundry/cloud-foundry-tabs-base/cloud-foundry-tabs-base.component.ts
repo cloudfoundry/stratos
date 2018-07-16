@@ -16,11 +16,11 @@ import { AppState } from './../../../store/app-state';
   templateUrl: './cloud-foundry-tabs-base.component.html',
   styleUrls: ['./cloud-foundry-tabs-base.component.scss']
 })
-export class CloudFoundryTabsBaseComponent implements OnInit {
+export class CloudFoundryTabsBaseComponent {
   static firehose = 'firehose';
   static users = 'users';
 
-  tabLinks: ISubHeaderTabs[] = [
+  public tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'organizations', label: 'Organizations' },
     { link: CloudFoundryTabsBaseComponent.users, label: 'Users' },
@@ -41,22 +41,34 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<AppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    this.tabLinks.find(tabLink => tabLink.link === CloudFoundryTabsBaseComponent.firehose).hidden =
-      this.currentUserPermissionsService.can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid).pipe(
-        map(visible => !visible)
-      );
-    this.tabLinks.find(tabLink => tabLink.link === CloudFoundryTabsBaseComponent.users).hidden = cfEndpointService.users$.pipe(
-      startWith(null),
-      map(users => !users),
-    );
-  }
+    const firehoseHidden$ = this.currentUserPermissionsService
+      .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
+      .pipe(map(visible => !visible));
 
-  ngOnInit() {
-    this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
-    this.canUpdateRoles$ = canUpdateOrgSpaceRoles(this.currentUserPermissionsService, this.cfEndpointService.cfGuid);
+    const usersHidden$ = cfEndpointService.users$.pipe(
+      startWith(null),
+      map(users => !users)
+    );
+
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'organizations', label: 'Organizations' },
+      {
+        link: CloudFoundryTabsBaseComponent.users,
+        label: 'Users',
+        hidden: usersHidden$
+      },
+      {
+        link: CloudFoundryTabsBaseComponent.firehose,
+        label: 'Firehose',
+        hidden: firehoseHidden$
+      },
+      { link: 'feature-flags', label: 'Feature Flags' },
+      { link: 'build-packs', label: 'Build Packs' },
+      { link: 'stacks', label: 'Stacks' },
+      { link: 'security-groups', label: 'Security Groups' }
+    ];
   }
 }
