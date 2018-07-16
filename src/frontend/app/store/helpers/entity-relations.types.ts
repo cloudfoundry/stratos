@@ -1,10 +1,14 @@
 import { Action } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { getPaginationKey } from '../actions/pagination.actions';
 import { APIResponse } from '../actions/request.actions';
+import { ActionState } from '../reducers/api-request-reducer/types';
+import { selectPaginationState } from '../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
 import { EntitySchema } from './entity-factory';
-
 
 export class EntityTree {
   rootRelation: EntityTreeRelation;
@@ -48,12 +52,18 @@ export class EntityTreeRelation {
  * @interface EntityInlineChildAction
  */
 export interface EntityInlineChildAction {
+  entityKey: string;
   parentGuid: string;
   parentEntitySchema: EntitySchema;
+  child?: EntityTreeRelation; // Not required on base actions
+  endpointGuid: string;
 }
 
-export function isEntityInlineChildAction(action: Action) {
-  return action && !!action['parentGuid'] && !!action['parentEntitySchema'];
+export function isEntityInlineChildAction(anything): EntityInlineChildAction {
+  return anything &&
+    !!anything['parentGuid'] &&
+    !!anything['parentEntitySchema'] &&
+    !!anything['child'] ? anything as EntityInlineChildAction : null;
 }
 
 /**
@@ -117,4 +127,30 @@ export class ValidationResult {
    * @memberof ValidationResult
    */
   apiResponse?: APIResponse;
+}
+
+export interface ValidateResultFetchingState {
+  fetching: boolean;
+}
+
+/**
+ * An object to represent the action and status of a missing inline depth/entity relation.
+ * @export
+ * @interface ValidateEntityResult
+ */
+export interface ValidateEntityResult {
+  action: Action;
+  fetchingState$?: Observable<ValidateResultFetchingState>;
+  abortDispatch?: boolean;
+}
+
+export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
+  Observable<ValidateResultFetchingState> {
+  return store.select(selectPaginationState(paramPaginationAction.entityKey, paramPaginationAction.paginationKey)).pipe(
+    map((paginationState: PaginationEntityState) => {
+      const pageRequest: ActionState =
+        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+      return { fetching: pageRequest ? pageRequest.busy : true };
+    })
+  );
 }

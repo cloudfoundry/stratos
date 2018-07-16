@@ -8,7 +8,12 @@ import { IOrganization } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
-import { GET_CF_USERS_BY_ORG, GetAllUsersAsNonAdmin } from '../actions/users.actions';
+import {
+  GET_CF_ROLES_AS_NON_ADMIN,
+  GET_CF_USERS_BY_ORG,
+  GetAllUsersAsNonAdmin,
+  GetRolesAsNonAdmin,
+} from '../actions/users.actions';
 import { AppState } from '../app-state';
 import { cfUserSchemaKey, endpointSchemaKey, entityFactory, organizationSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
@@ -31,6 +36,24 @@ export class UsersEffects {
     private entityServiceFactory: EntityServiceFactory,
   ) { }
 
+  @Effect() fetchRolesByOrgSpace = this.actions$.ofType<GetRolesAsNonAdmin>(GET_CF_ROLES_AS_NON_ADMIN).pipe(
+    switchMap((action: GetRolesAsNonAdmin) => {
+      const mockRequestType: ApiRequestTypes = 'fetch';
+      const mockPaginationAction: PaginatedAction = {
+        entityKey: action.entityKey,
+        type: action.type,
+        paginationKey: action.paginationKey,
+        actions: null,
+      };
+
+      // START the 'list' fetch
+      this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
+
+      if (action.entityKey)
+        const allOrganisations$ = this.fetchAllOrgs(action.cfGuid);
+    })
+  );
+
   /**
    * Fetch users from each organisation. This is used when the user connected to cf is non-admin and cannot access the global users/ list
    */
@@ -47,19 +70,7 @@ export class UsersEffects {
       // START the 'list' fetch
       this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
 
-      // Discover all the orgs. In most cases we will already have this
-      const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, action.cfGuid);
-      const allOrganisations$ = getPaginationObservables<APIResource<IOrganization>>({
-        store: this.store,
-        action: new GetAllOrganizations(getAllOrgsPaginationKey, action.cfGuid),
-        paginationMonitor: this.paginationMonitorFactory.create(
-          getAllOrgsPaginationKey,
-          entityFactory(organizationSchemaKey)
-        )
-      }).entities$.pipe(
-        filter(entities => !!entities),
-        first(),
-      );
+      const allOrganisations$ = this.fetchAllOrgs(action.cfGuid);
 
       // Loop through orgs fetching users associated with each
       return allOrganisations$.pipe(
@@ -73,7 +84,7 @@ export class UsersEffects {
 
   );
 
-  fetchRolesPerOrg(
+  private fetchRolesPerOrg(
     organisations: APIResource<IOrganization>[],
     action: GetAllUsersAsNonAdmin,
     mockPaginationAction: PaginatedAction,
@@ -158,7 +169,7 @@ export class UsersEffects {
     );
   }
 
-  handleNoOrgs(action: GetAllUsersAsNonAdmin, mockPaginationAction: PaginatedAction, mockRequestType: ApiRequestTypes): Observable<any> {
+  private handleNoOrgs(action: GetAllUsersAsNonAdmin, mockPaginationAction: PaginatedAction, mockRequestType: ApiRequestTypes): Observable<any> {
     // There's no orgs to fetch users from, instead create a mock user entity for the signed in user. This avoids some ugly 'no user' type
     // messages and '-' shown for user count and improves the general experience for those who may be visiting for the first time.
     return this.store.select(endpointsEntityRequestDataSelector(action.cfGuid)).pipe(
@@ -201,6 +212,22 @@ export class UsersEffects {
         mappedData.result = [userGuid];
         return new WrapperRequestActionSuccess(mappedData, mockPaginationAction, mockRequestType);
       })
+    );
+  }
+
+  private fetchAllOrgs(cfGuid: string) {
+    // Discover all the orgs. In most cases we will already have this
+    const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+    return getPaginationObservables<APIResource<IOrganization>>({
+      store: this.store,
+      action: new GetAllOrganizations(getAllOrgsPaginationKey, cfGuid),
+      paginationMonitor: this.paginationMonitorFactory.create(
+        getAllOrgsPaginationKey,
+        entityFactory(organizationSchemaKey)
+      )
+    }).entities$.pipe(
+      filter(entities => !!entities),
+      first(),
     );
   }
 }

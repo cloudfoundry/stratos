@@ -1,28 +1,39 @@
+import { ICfRolesState } from '../types/current-user-roles.types';
+import { IRequestDataState } from '../types/entity.types';
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { isEntityBlocked } from '../../core/entity-service';
-import { pathGet, pathSet } from '../../core/utils.service';
+import { pathGet } from '../../core/utils.service';
 import { SetInitialParams } from '../actions/pagination.actions';
-import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { APIResponse } from '../actions/request.actions';
 import { AppState } from '../app-state';
-import { ActionState, RequestInfoState } from '../reducers/api-request-reducer/types';
+import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
+import {
+  getCurrentUserCFEndpointRolesState,
+  selectCurrentUserCFEndpointRolesState,
+} from '../selectors/current-user-roles-permissions-selectors/role.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
 import { EntitySchema } from './entity-factory';
+import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
+  createValidationPaginationWatcher,
+  EntityInlineChildAction,
   EntityInlineParentAction,
   EntityTreeRelation,
   isEntityInlineChildAction,
+  ValidateEntityResult,
+  ValidateResultFetchingState,
   ValidationResult,
 } from './entity-relations.types';
 import { pick } from './reducer.helper';
@@ -32,21 +43,6 @@ class AppStoreLayout {
   [entityKey: string]: {
     [guid: string]: any;
   }
-}
-
-interface ValidateResultFetchingState {
-  fetching: boolean;
-}
-
-/**
- * An object to represent the action and status of a missing inline depth/entity relation.
- * @export
- * @interface ValidateEntityResult
- */
-interface ValidateEntityResult {
-  action: FetchRelationAction;
-  fetchingState$?: Observable<ValidateResultFetchingState>;
-  abortDispatch?: boolean;
 }
 
 class ValidateEntityRelationsConfig {
@@ -107,6 +103,8 @@ class ValidateEntityRelationsConfig {
    * @memberof ValidateEntityRelationsConfig
    */
   apiResponse: APIResponse;
+  // TODO: RC
+  isEndpointAdmin: boolean;
 }
 
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
@@ -173,17 +171,6 @@ function createPaginationAction(config: HandleRelationsConfig) {
   );
 }
 
-function createPaginationWatcher(store, paramAction, paramPaginationAction: FetchRelationPaginatedAction):
-  Observable<ValidateResultFetchingState> {
-  return store.select(selectPaginationState(paramAction.entityKey, paramPaginationAction.paginationKey)).pipe(
-    map((paginationState: PaginationEntityState) => {
-      const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return { fetching: pageRequest ? pageRequest.busy : true };
-    })
-  );
-}
-
 function createEntityWatcher(store, paramAction, guid: string): Observable<ValidateResultFetchingState> {
   return store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
     map((requestInfo: RequestInfoState) => {
@@ -232,11 +219,17 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
  * @returns {ValidateEntityResult[]}
  */
 function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
-  const { store, childRelation, childEntitiesUrl } = config;
+  const { store, childRelation, childEntitiesUrl, cfGuid, isEndpointAdmin, parentRelation } = config;
 
   if (!childEntitiesUrl) {
     // There might genuinely be no entity. In those cases the url will be blank
     return [];
+  }
+
+  const valResult = fetchEntityRelationAltAction(store, cfGuid, isEndpointAdmin, parentRelation, childRelation);
+
+  if (valResult) {
+    return [valResult];
   }
 
   const paramAction = createAction(config);
@@ -246,14 +239,14 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
     const paramPaginationAction = paramAction as FetchRelationPaginatedAction;
     // Why do we add this? Strictly speaking we don't want to retain or care about the pagination section AFTER the validation process is
     // finished (we want to track the result and handle the flatten whilst making the api/validation request). The only list we now care
-    // about wil be in the parent entity.
+    // about will be in the parent entity.
     paramPaginationAction.paginationKey += '-relation';
     results = [].concat(results, [{
       action: new SetInitialParams(paramAction.entityKey, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
     },
     {
       action: paramAction,
-      fetchingState$: createPaginationWatcher(store, paramAction, paramPaginationAction)
+      fetchingState$: createValidationPaginationWatcher(store, paramPaginationAction)
     }
     ]);
   } else {
@@ -288,7 +281,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
       // We've already got the missing entity in the store or current response, we just need to associate it with it's parent
       const connectEntityWithParent: ValidateEntityResult = {
         action: createSingleAction(config),
-        abortDispatch: true // Don't need to make the request.. it's either in the store or as part of apiResource with be
+        abortDispatch: true // Don't need to make the request.. it's either in the store or in the apiResource
       };
       results = [].concat(results, connectEntityWithParent);
     }
@@ -377,18 +370,18 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   return results;
 }
 
-function associateChildWithParent(store, action: FetchRelationAction, apiResponse: APIResponse): Observable<boolean> {
+function associateChildWithParent(store, action: EntityInlineChildAction, apiResponse: APIResponse): Observable<boolean> {
   let childValue;
   // Fetch the child value to associate with parent. Will either be a guid or a list of guids
   if (action.child.isArray) {
-    const paginationAction = action as FetchRelationPaginatedAction;
-    childValue = store.select(selectPaginationState(action.entityKey, paginationAction.paginationKey)).pipe(
+    const { paginationKey } = action as FetchRelationPaginatedAction;
+    childValue = store.select(selectPaginationState(action.entityKey, paginationKey)).pipe(
       first(),
       map((paginationSate: PaginationEntityState) => paginationSate.ids[1] || [])
     );
   } else {
-    const entityAction = action as FetchRelationSingleAction;
-    childValue = observableOf(entityAction.guid);
+    const { guid } = action as FetchRelationSingleAction;
+    childValue = observableOf(guid);
   }
 
   return childValue.pipe(
@@ -452,7 +445,8 @@ function handleValidationLoopResults(store: Store<AppState>, results: ValidateEn
     // Associate the missing parameter with it's parent
     const associatedObs = obs.pipe(
       switchMap(() => {
-        const action: FetchRelationAction = FetchRelationAction.is(request.action);
+        const action: EntityInlineChildAction = isEntityInlineChildAction(request.action);
+        // const action: FetchRelationAction = FetchRelationAction.is(request.action);
         return action ? associateChildWithParent(store, action, apiResponse) : observableOf(true);
       }),
     ).toPromise();
@@ -549,10 +543,12 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     }),
     first(),
     // At this point we should know that the parent entity is ready to be checked
-    withLatestFrom(store.select(selectEntity(parentEntitySchema.key, parentGuid))),
-    withLatestFrom(store.select(getAPIRequestDataState)),
-    map(([entityState, allEntities]) => {
-      const [entityInfo, entity] = entityState;
+    withLatestFrom(
+      store.select(selectEntity<any>(parentEntitySchema.key, parentGuid)),
+      store.select(getAPIRequestDataState),
+      store.select(getCurrentUserCFEndpointRolesState(action.endpointGuid))
+    ),
+    map(([entityInfo, entity, allEntities, connectedUserState]: [RequestInfoState, any, IRequestDataState, ICfRolesState]) => {
       if (!entity) {
         return;
       }
@@ -585,7 +581,8 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             parentEntity: entity,
             childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
             childEntitiesUrl: '',
-            populateMissing: true
+            populateMissing: true,
+            isEndpointAdmin: connectedUserState.global.isAdmin
           };
           return createActionsForExistingEntities(config)[0];
         }

@@ -1,3 +1,4 @@
+import { getCurrentUserCFEndpointRolesState } from '../selectors/current-user-roles-permissions-selectors/role.selectors';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -78,9 +79,12 @@ export class RequestEffect {
       const apiResponse = validateAction.apiResponse;
 
       return this.store.select(getAPIRequestDataState).pipe(
-        withLatestFrom(this.store.select(getPaginationState)),
+        withLatestFrom(
+          this.store.select(getPaginationState),
+          this.store.select(getCurrentUserCFEndpointRolesState(apiAction.endpointGuid))
+        ),
         first(),
-        map(([allEntities, allPagination]) => {
+        map(([allEntities, allPagination, connectedUserState]) => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
@@ -96,6 +100,7 @@ export class RequestEffect {
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
             populateMissing: true,
+            isEndpointAdmin: connectedUserState ? connectedUserState.global.isAdmin : false
           });
         }),
         mergeMap(validation => {
