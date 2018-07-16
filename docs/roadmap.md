@@ -1,6 +1,6 @@
 # Stratos Roadmap
 
-Last Updated: 15 June 2018
+Last Updated: 2 July 2018
 
 # Version 2 Timeline
 
@@ -11,6 +11,7 @@ The current focus is on releasing V2 of Stratos. The current timeline is:
 |15 June|Beta 1|
 |20 June|Beta 2|
 |25 June|RC 1|
+|29 June|RC 2|
 |20 July|2.0.0|
 
 Post 2.0 is released we will be working towards a regular recycle cycle each Sprint - we may start with Monthly releases and finally to releases each 2 weeks.
@@ -32,14 +33,7 @@ The high-level features that we schedule into the roadmap are identified by the 
 |1|Technology Refresh (AngularJS => Angular)|[\#1972](https://github.com/cloudfoundry-incubator/stratos/issues/1972)|[Notes](planning/angular.md)|
 |2|1st class support for service plan & service instance|[\#1391](https://github.com/cloudfoundry-incubator/stratos/issues/1391)|[Notes](planning/services.md)|
 |3|Add support for Application and CF Metrics|[\#1985](https://github.com/cloudfoundry-incubator/stratos/issues/1985)|[Notes](planning/metrics.md)|
-|4|Support UAA login UX directly|[\#1384](https://github.com/cloudfoundry-incubator/stratos/issues/1384)||
-|5|Deploy application: Enable deploying from private Git repositories|[\#1442](https://github.com/cloudfoundry-incubator/stratos/issues/1442)||
-
-
-## Schedule
-
-We are currently focused on completing out the core features to get V2 on par with V1.
-
-We will shortly review progress and the remaining work and publish a tentative schedule.
-
-Beyond the release of V2, we expect to move to a sprit-based release schedule, publishing a new release every 2 weeks.
+|4|Support UAA login UX directly (SSO)|[\#1384](https://github.com/cloudfoundry-incubator/stratos/issues/1384)||
+|5|Support per-endpoint Client ID and Client Secret|[\#2220](https://github.com/cloudfoundry-incubator/stratos/issues/2220)||
+|6|Bring Orgs and Spaces view to top-level|[\#2619](https://github.com/cloudfoundry-incubator/stratos/issues/2619)||
+|7|Deploy application: Enable deploying from private Git repositories|[\#1442](https://github.com/cloudfoundry-incubator/stratos/issues/1442)||

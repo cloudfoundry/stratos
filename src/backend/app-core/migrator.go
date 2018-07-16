@@ -229,7 +229,7 @@ func exportDatabaseConfig(dbConfig datastore.DatabaseConfig) {
 	exportString(DB_PASSWORD, dbConfig.Password)
 	exportString(DB_DATABASE_NAME, dbConfig.Database)
 
-	if dbConfig.DatabaseProvider == "psql" {
+	if dbConfig.DatabaseProvider == "pgsql" {
 		exportString(DB_TYPE, TYPE_POSTGRES)
 	} else if dbConfig.DatabaseProvider == "mysql" {
 		exportString(DB_TYPE, TYPE_MYSQL)

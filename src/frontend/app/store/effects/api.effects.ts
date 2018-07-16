@@ -74,7 +74,7 @@ export class APIEffect {
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
     const requestType = getRequestTypeFromMethod(apiAction);
-    if (requestType === 'delete') {
+    if (this.shouldRecursivelyDelete(requestType, apiAction)) {
       this.store.dispatch(new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)));
     }
 
@@ -101,10 +101,19 @@ export class APIEffect {
     }
 
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
-    options.headers = this.addBaseHeaders(
-      apiAction.endpointGuid ||
-      state.requestData.endpoint, options.headers
-    );
+
+    const availableEndpoints = apiAction.endpointGuid || state.requestData.endpoint;
+    if (typeof availableEndpoints !== 'string') {
+      // Filter out endpoints that are currently being disconnected
+      const disconnectedEndpoints = Object.keys(availableEndpoints).
+        filter(endpointGuid => {
+          const updating = state.request.endpoint[endpointGuid].updating;
+          return !!updating.disconnecting && updating.disconnecting.busy;
+        });
+      disconnectedEndpoints.forEach(guid => delete availableEndpoints[guid]);
+    }
+
+    options.headers = this.addBaseHeaders(availableEndpoints, options.headers);
 
     if (paginatedAction.flattenPagination) {
       options.params.set('page', '1');
@@ -142,7 +151,7 @@ export class APIEffect {
         // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
         // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
         if (errorsCheck.length === 1 && errorsCheck[0].error) {
-          if (requestType === 'delete') {
+          if (this.shouldRecursivelyDelete(requestType, apiAction)) {
             this.store.dispatch(new RecursiveDeleteFailed(
               apiAction.guid,
               apiAction.endpointGuid,
@@ -157,7 +166,7 @@ export class APIEffect {
           return [];
         }
 
-        if (requestType === 'delete') {
+        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteComplete(
             apiAction.guid,
             apiAction.endpointGuid,
@@ -195,7 +204,7 @@ export class APIEffect {
             requestType
           )
         ];
-        if (requestType === 'delete') {
+        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           errorActions.push(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
@@ -498,6 +507,9 @@ export class APIEffect {
         requestParams.set(key, params[key] as string);
       }
     }
+  }
+  private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
+    return requestType === 'delete' && !apiAction.updatingKey;
   }
 }
 
