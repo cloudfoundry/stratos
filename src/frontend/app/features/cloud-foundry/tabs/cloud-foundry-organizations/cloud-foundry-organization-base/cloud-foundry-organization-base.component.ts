@@ -1,18 +1,18 @@
-
-import { of as observableOf, Observable } from 'rxjs';
 import { Component } from '@angular/core';
-import { first, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
+import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
-import { getActiveRouteCfOrgSpaceProvider, canUpdateOrgSpaceRoles } from '../../../cf.helpers';
+import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
-import { organizationSchemaKey, entityFactory, EntitySchema } from '../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -20,11 +20,11 @@ import { organizationSchemaKey, entityFactory, EntitySchema } from '../../../../
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
+    CfUserService,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService
   ]
 })
-
 export class CloudFoundryOrganizationBaseComponent {
 
   tabLinks: ISubHeaderTabs[] = [
@@ -63,6 +63,7 @@ export class CloudFoundryOrganizationBaseComponent {
 
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
+      filter(name => !!name),
       first()
     );
     this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(

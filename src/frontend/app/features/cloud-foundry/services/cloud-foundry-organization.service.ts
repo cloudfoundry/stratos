@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
@@ -10,11 +10,12 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetOrganization, GetAllOrgUsers } from '../../../store/actions/organization.actions';
+import { GetAllOrgUsers, GetOrganization } from '../../../store/actions/organization.actions';
 import { DeleteSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
+  cfUserSchemaKey,
   domainSchemaKey,
   entityFactory,
   organizationSchemaKey,
@@ -23,17 +24,18 @@ import {
   routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  cfUserSchemaKey,
-  endpointSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { CfUser } from '../../../store/types/user.types';
-import { EntitiesPipelineActionTypes } from '../../../store/actions/request.actions';
+
 
 @Injectable()
 export class CloudFoundryOrganizationService {

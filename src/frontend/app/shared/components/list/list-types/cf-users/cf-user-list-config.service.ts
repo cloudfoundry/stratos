@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
@@ -114,11 +114,16 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignColumnConfig(org$, space$);
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
+      switchMap(cf =>
+        combineLatest(
+          observableOf(cf),
+          cfUserService.createPaginationAction(cf.global.isAdmin)
+        )
+      ),
+      tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this);
       }),
-      map(cf => cf && cf.state.initialised),
+      map(([cf, action]) => cf && cf.state.initialised)
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
   }
