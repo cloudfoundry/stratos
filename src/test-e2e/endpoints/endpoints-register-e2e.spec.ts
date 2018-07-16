@@ -17,6 +17,8 @@ describe('Endpoints', () => {
 
   const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
 
+  // If there is an endpoint named 'selfsignecf' use that for self signed cert test - otherwise use default
+  const selfSignedEndpoint = e2e.secrets.getEndpointByName('selfsignedcf') || validEndpoint;
 
   describe('Register Endpoints -', () => {
 
@@ -144,8 +146,8 @@ describe('Endpoints', () => {
 
       it('Should hint at SSL errors', () => {
         register.form.fill({
-          name: validEndpoint.name,
-          url: validEndpoint.url,
+          name: selfSignedEndpoint.name,
+          url: selfSignedEndpoint.url,
           skipsll: false
         });
         register.stepper.next();

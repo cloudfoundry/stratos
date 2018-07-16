@@ -82,9 +82,11 @@ export class ResetsHelpers {
         fail('You must configure multiple Cloud Foundry endpoints in secrets.yaml');
       }
       endpointsOfType.forEach((ep) => {
-        p.then(() => reqHelpers.sendRequest(
-          req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
-        ));
+        if (!ep.skip) {
+          p.then(() => reqHelpers.sendRequest(
+            req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
+          ));
+        }
       });
     });
     return p;
