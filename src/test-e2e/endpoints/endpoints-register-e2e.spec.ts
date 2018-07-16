@@ -154,6 +154,7 @@ describe('Endpoints', () => {
         snackBar.waitUntilShown();
         /* tslint:disable-line:max-line-length*/
         expect(snackBar.hasMessage(`SSL error - x509: certificate signed by unknown authority. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"`));
+        snackBar.close();
       });
 
       it('Successful register', () => {
@@ -162,6 +163,8 @@ describe('Endpoints', () => {
           url: validEndpoint.url,
           skipsll: true
         });
+
+        expect(register.stepper.canNext()).toBeTruthy();
         register.stepper.next();
 
         expect(endpointsPage.isActivePage()).toBeTruthy();
