@@ -1,9 +1,8 @@
-
-import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -16,6 +15,7 @@ import {
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations';
+import { ValidationResult } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
@@ -26,6 +26,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+
 
 @Injectable()
 export class RequestEffect {
@@ -80,16 +81,19 @@ export class RequestEffect {
       return this.store.select(getAPIRequestDataState).pipe(
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
-        map(([allEntities, allPagination]) => {
+        map(([allEntities, allPagination]): ValidationResult => {
+          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
+          const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
             started: false,
-            completed: Promise.resolve([])
+            completed: Promise.resolve([]),
+            apiResponse
           } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
             allPagination,
-            newEntities: apiResponse ? apiResponse.response.entities : null,
+            apiResponse,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
             populateMissing: true,
@@ -108,7 +112,7 @@ export class RequestEffect {
         mergeMap(({ independentUpdates, validation }) => {
           return [new EntitiesPipelineCompleted(
             apiAction,
-            apiResponse,
+            validation.apiResponse,
             validateAction,
             validation,
             independentUpdates
@@ -162,7 +166,7 @@ export class RequestEffect {
 
         if (
           !apiAction.updatingKey &&
-          ( apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
+          (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
           if (apiAction.removeEntityOnDelete) {
