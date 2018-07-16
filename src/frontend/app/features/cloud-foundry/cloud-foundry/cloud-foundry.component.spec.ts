@@ -9,6 +9,7 @@ import {
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 describe('CloudFoundryComponent', () => {
   let component: CloudFoundryComponent;
@@ -19,7 +20,7 @@ describe('CloudFoundryComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryComponent],
         imports: [...BaseTestModules, BrowserAnimationsModule],
-        providers: [PaginationMonitorFactory, generateTestCfServiceProvider()]
+        providers: [PaginationMonitorFactory, CloudFoundryService, generateTestCfServiceProvider()]
       }).compileComponents();
     })
   );
