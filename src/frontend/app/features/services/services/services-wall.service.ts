@@ -20,7 +20,6 @@ export class ServicesWallService {
 
   constructor(
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.services$ = this.initServicesObservable();
