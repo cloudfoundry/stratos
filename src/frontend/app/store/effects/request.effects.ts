@@ -15,6 +15,7 @@ import {
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations';
+import { ValidationResult } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
@@ -80,7 +81,7 @@ export class RequestEffect {
       return this.store.select(getAPIRequestDataState).pipe(
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
-        map(([allEntities, allPagination]) => {
+        map(([allEntities, allPagination]): ValidationResult => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {

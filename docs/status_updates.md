@@ -2,6 +2,19 @@
 
 Weekly status updates are published here.
 
+## 13 July 2018
+
+The SUSE team has been participating in SUSE Hack Week, so there is no change in status this week.
+
+Work resumes next week on getting a first 2.0 release published.
+
+## 06 July 2018
+
+This week the focus has been on further testing and refinement of Release Candidate 2.
+
+We've been identifying and fixing issues - see: [Merged PRs](
+https://github.com/cloudfoundry-incubator/stratos/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+updated%3A%3E%3D2018-07-02+).
+
 ## 29 June 2018
 
 This week the focus has been on creating a Release Candidate of Version 2.
