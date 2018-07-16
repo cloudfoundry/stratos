@@ -24,7 +24,18 @@
     <app-meta-card-key>Last Updated</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity?.entity.last_operation?.updated_at | date:'medium' }} </app-meta-card-value>
   </app-meta-card-item>
-
+  <app-meta-card-item>
+    <app-meta-card-key>Dashboard URL</app-meta-card-key>
+    <app-meta-card-value>
+      <div *ngIf="!!serviceInstanceEntity?.entity.dashboard_url ; then dashboardUrl; else none"></div>
+      <ng-template #dashboardUrl>
+        <a [href]="serviceInstanceEntity.entity.dashboard_url" target="_blank" appClickStopPropagation>
+          <mat-icon>launch</mat-icon>
+        </a>
+      </ng-template>
+      <ng-template #none>None</ng-template>
+    </app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>

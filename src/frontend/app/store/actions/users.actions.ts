@@ -53,10 +53,11 @@ const createGetAllUsersInitialParams = () => ({
   'order-direction-field': 'username',
 });
 
-export class GetAllUsersAsNonAdmin implements PaginatedAction {
+export class GetAllUsersAsNonAdmin implements PaginatedAction, EntityInlineParentAction {
   type = GET_CF_USERS_BY_ORG;
   paginationKey: string;
   actions: string[] = [];
+  entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
   constructor(
     public cfGuid: string,

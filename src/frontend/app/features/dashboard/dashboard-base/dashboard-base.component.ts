@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
