@@ -51,6 +51,9 @@ function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpC
     }
   ).pipe(
     map(data => {
+      if (data[action.endpointGuid]['error']) {
+        return false;
+      }
       store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data[action.endpointGuid].resources));
       return true;
     }),

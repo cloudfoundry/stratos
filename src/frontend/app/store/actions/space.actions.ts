@@ -209,13 +209,13 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     public endpointGuid: string,
     public isAdmin: boolean,
     public includeRelations: string[] = [
-      createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
+      // createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
+      // createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
+      // createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
+      // createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
+      // createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
+      // createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
+      // createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
     ]) {
     super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
     this.options.url = `spaces/${guid}/user_roles`;

@@ -95,7 +95,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       cfSpaceService.orgGuid,
       cfSpaceService.spaceGuid);
 
-    this.deleteRedirectSub = this.cfSpaceService.spaceEntityService.entityObs$.pipe(
+    this.deleteRedirectSub = this.cfSpaceService.space$.pipe(
       tap(({ entityRequestInfo }) => {
         if (entityRequestInfo.deleting.deleted) {
           this.store.dispatch(new RouterNav({

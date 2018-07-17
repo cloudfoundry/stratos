@@ -1,10 +1,10 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../actions/endpoint.actions';
 import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, EndpointAction } from '../actions/endpoint.actions';
 
 const properties = {
   org: {

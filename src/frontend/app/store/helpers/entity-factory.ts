@@ -232,14 +232,14 @@ const coreSpaceSchemaParams = {
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
+  developers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'developers')],
+  managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managers')],
+  auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'auditors')]
 };
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
-    apps: [ApplicationWithoutSpaceEntitySchema],
-    developers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'developers')],
-    managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managers')],
-    auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'auditors')]
+    apps: [ApplicationWithoutSpaceEntitySchema]
   }
 }, {
     idAttribute: getAPIResourceGuid

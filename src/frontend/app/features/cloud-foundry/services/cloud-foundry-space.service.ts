@@ -58,7 +58,6 @@ export class CloudFoundrySpaceService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  spaceEntityService: EntityService<APIResource<ISpace>>;
   allSpaceUsers$: Observable<APIResource<CfUser>[]>;
   // allSpaceUsersAction: GetAllSpaceUsers;
   usersPaginationKey: string;
@@ -77,24 +76,8 @@ export class CloudFoundrySpaceService {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
-    this.spaceEntityService = this.entityServiceFactory.create(
-      spaceSchemaKey,
-      entityFactory(spaceWithOrgKey),
-      this.spaceGuid,
-      new GetSpace(this.spaceGuid, this.cfGuid, [
-        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
-        createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
-        createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
-      ]),
-      true
-    );
 
     this.initialiseObservables();
-
   }
 
   private initialiseObservables() {
@@ -115,7 +98,37 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    this.space$ = this.spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
+    this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+      switchMap(isAdmin => {
+        const relations = [
+          createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
+          createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+          createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+          createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
+        ];
+        if (!isAdmin) {
+          relations.push(
+            createEntityRelationKey(spaceSchemaKey, 'developers'),
+            createEntityRelationKey(spaceSchemaKey, 'managers'),
+            createEntityRelationKey(spaceSchemaKey, 'auditors'),
+          );
+        }
+        const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
+          spaceSchemaKey,
+          entityFactory(spaceWithOrgKey),
+          this.spaceGuid,
+          new GetSpace(this.spaceGuid, this.cfGuid, relations),
+          true
+        );
+        return spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
+      })
+    );
+
+
+
     this.serviceInstances$ = this.space$.pipe(map(o => o.entity.entity.service_instances));
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));

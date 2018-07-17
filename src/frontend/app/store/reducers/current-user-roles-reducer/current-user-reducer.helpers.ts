@@ -18,7 +18,9 @@ export function addNewRoles<T>(
   action: GetCurrentUserRelationsComplete,
   reducer: roleFinalReducer<T>
 ) {
-  console.log('dsfdsf');
+  if (!action.data) {
+    console.log('dsfdsf');
+  }
   return action.data.reduce((config, data) => {
     const currentState = config.newState;
     return {

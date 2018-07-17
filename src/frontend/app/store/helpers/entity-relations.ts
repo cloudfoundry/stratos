@@ -1,3 +1,4 @@
+import { validationPostProcessor } from './entity-relations-post-processor';
 import { ICfRolesState } from '../types/current-user-roles.types';
 import { IRequestDataState } from '../types/entity.types';
 import { Action, Store } from '@ngrx/store';
@@ -22,7 +23,7 @@ import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
 import { EntitySchema, cfUserSchemaKey } from './entity-factory';
-import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
+// import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
   createEntityRelationKey,
@@ -226,11 +227,12 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
     return [];
   }
 
-  const valResult = fetchEntityRelationAltAction(store, cfGuid, isEndpointAdmin, parentRelation, childRelation);
+  // const valResult = fetchEntityRelationAltAction(store, cfGuid, isEndpointAdmin, parentRelation, childRelation);
 
-  if (valResult) {
-    return [valResult];
-  }
+  // if (valResult) {
+  //   return [valResult];
+  // }
+
 
   const paramAction = createAction(config);
   let results: ValidateEntityResult[] = [];
@@ -437,8 +439,10 @@ function associateChildWithParent(store, action: EntityInlineChildAction, apiRes
   );
 }
 
-function handleValidationLoopResults(store: Store<AppState>, results: ValidateEntityResult[], apiResponse: APIResponse): ValidationResult {
+function handleValidationLoopResults(store: Store<AppState>, results: ValidateEntityResult[], apiResponse: APIResponse, action, allEntities): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
+
+  results = [].concat(validationPostProcessor(store, action, apiResponse, allEntities));
 
   results.forEach(request => {
     // Fetch any missing data
@@ -457,12 +461,12 @@ function handleValidationLoopResults(store: Store<AppState>, results: ValidateEn
     const associatedObs = obs.pipe(
       switchMap(() => {
         const action: EntityInlineChildAction = isEntityInlineChildAction(request.action);
-        // const action: FetchRelationAction = FetchRelationAction.is(request.action);
         return action ? associateChildWithParent(store, action, apiResponse) : observableOf(true);
       }),
     ).toPromise();
     paginationFinished.push(associatedObs);
   });
+
   return {
     started: !!(paginationFinished.length),
     completed: Promise.all(paginationFinished),
@@ -512,7 +516,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
     parentRelation: entityTree.rootRelation,
   });
 
-  return handleValidationLoopResults(store, results, config.apiResponse);
+  return handleValidationLoopResults(store, results, config.apiResponse, action, allEntities);
 }
 
 export function listEntityRelations(action: EntityInlineParentAction) {
