@@ -52,8 +52,8 @@ export class CloudFoundryOrganizationService {
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   orgEntityService: EntityService<APIResource<IOrganization>>;
-  allOrgUsers: PaginationObservables<APIResource<CfUser>>;
-  allOrgUsersAction: GetAllOrgUsers;
+  allOrgUsers$: Observable<APIResource<CfUser>[]>;
+  // allOrgUsersAction: GetAllOrgUsers;
   usersPaginationKey: string;
 
   constructor(
@@ -68,11 +68,7 @@ export class CloudFoundryOrganizationService {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid);
-    this.allOrgUsersAction = new GetAllOrgUsers(
-      activeRouteCfOrgSpace.orgGuid,
-      this.usersPaginationKey,
-      activeRouteCfOrgSpace.cfGuid
-    );
+
     this.orgEntityService = this.entityServiceFactory.create(
       organizationSchemaKey,
       entityFactory(organizationSchemaKey),
@@ -137,14 +133,34 @@ export class CloudFoundryOrganizationService {
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
 
-    this.allOrgUsers = getPaginationObservables({
-      store: this.store,
-      action: this.allOrgUsersAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.usersPaginationKey,
-        entityFactory(cfUserSchemaKey)
-      )
-    });
+
+    this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+      switchMap(isAdmin => {
+        const action = new GetAllOrgUsers(this.orgGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
+        return getPaginationObservables<APIResource<CfUser>>({
+          store: this.store,
+          action,
+          paginationMonitor: this.paginationMonitorFactory.create(
+            this.usersPaginationKey,
+            entityFactory(cfUserSchemaKey)
+          )
+        }).entities$;
+      })
+    );
+    // this.allOrgUsersAction = new GetAllOrgUsers(
+    //   activeRouteCfOrgSpace.orgGuid,
+    //   this.usersPaginationKey,
+    //   activeRouteCfOrgSpace.cfGuid
+    // );
+
+    // this.allOrgUsers = getPaginationObservables({
+    //   store: this.store,
+    //   action: this.allOrgUsersAction,
+    //   paginationMonitor: this.paginationMonitorFactory.create(
+    //     this.usersPaginationKey,
+    //     entityFactory(cfUserSchemaKey)
+    //   )
+    // });
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {

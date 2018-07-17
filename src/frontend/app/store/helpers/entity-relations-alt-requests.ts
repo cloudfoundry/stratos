@@ -10,10 +10,10 @@ function createNonAdminFetchRole(store, cfGuid, isAdmin, relationKey): ValidateE
   if (isAdmin) {
     return null;
   }
-  const action = new GetRolesAsNonAdmin(cfGuid, relationKey);
+  const action = { type: '123' }; // GetRolesAsNonAdmin(cfGuid, relationKey);
   return {
     action,
-    fetchingState$: createValidationPaginationWatcher(store, action)
+    // fetchingState$: createValidationPaginationWatcher(store, action)
   };
 }
 
@@ -41,7 +41,8 @@ export function fetchEntityRelationAltAction(
   isAdmin: boolean,
   parent: EntityTreeRelation,
   child: EntityTreeRelation): ValidateEntityResult {
-  const key = `${parent.entityKey}-${child.entityKey}-${child.paramName}`;
-  const func = alts[`${parent.entityKey}-${child.entityKey}-${child.paramName}`];
-  return func ? func(store, cfGuid, isAdmin) : null;
+  return null;
+  // const key = `${parent.entityKey}-${child.entityKey}-${child.paramName}`;
+  // const func = alts[`${parent.entityKey}-${child.entityKey}-${child.paramName}`];
+  // return func ? func(store, cfGuid, isAdmin) : null;
 }

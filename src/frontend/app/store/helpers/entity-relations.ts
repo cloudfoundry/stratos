@@ -21,7 +21,7 @@ import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
-import { EntitySchema } from './entity-factory';
+import { EntitySchema, cfUserSchemaKey } from './entity-factory';
 import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -121,7 +121,7 @@ class ValidateLoopConfig extends ValidateEntityRelationsConfig {
    * @type {any[]}
    * @memberof ValidateLoopConfig
    */
-  entities: any[];
+  entities: APIResource[];
   /**
    * Parent entity relation of children in the entities param
    *
@@ -289,6 +289,11 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
     if (populateMissing) {
       // The values are missing and we want them, go fetch
       results = [].concat(results, createActionsForMissingEntities(config));
+    } else {
+      parentEntity.metadata.invalidFields = parentEntity.metadata.invalidFields || [];
+      if (parentEntity.metadata.invalidFields.indexOf(childRelation.paramName) < 0) {
+        parentEntity.metadata.invalidFields.push(childRelation.paramName);
+      }
     }
   }
 
@@ -314,6 +319,12 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
         childEntities = childRelation.isArray ? childEntities : [childEntities];
+        // // Clear it
+        // const invalidFields = entity.metadata.invalidFields || [];
+        // const paramIndex = invalidFields.indexOf(childRelation.paramName);
+        // if (paramIndex >= 0) {
+        //   entity.metadata.invalidFields = entity.metadata.invalidFields.splice(paramIndex, 1);
+        // }
       } else {
         let childEntitiesAsArray;
 
@@ -474,6 +485,10 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
   const { action, populateMissing, newEntities, allEntities, store } = config;
   let { parentEntities } = config;
+
+  if (action.entityKey === cfUserSchemaKey) {
+    console.log('aa');
+  }
 
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {

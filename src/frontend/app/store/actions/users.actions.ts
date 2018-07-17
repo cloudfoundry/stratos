@@ -59,10 +59,12 @@ export class GetRolesAsNonAdmin implements PaginatedAction, EntityInlineParentAc
   type = GET_CF_ROLES_AS_NON_ADMIN;
   paginationKey: string;
   actions: string[] = [];
-  entity = [entityFactory(cfUserSchemaKey)];
-  entityKey = cfUserSchemaKey;
+  // entity = [entityFactory(cfUserSchemaKey)];
+  // entityKey = cfUserSchemaKey;
   constructor(
     public cfGuid: string,
+    public entity: [EntitySchema],
+    public entityKey: string,
     public relationKey: string,
     public includeRelations: string[] = [],
     public populateMissing = true,
@@ -78,11 +80,13 @@ export class GetAllUsersAsNonAdmin implements PaginatedAction, EntityInlineParen
   actions: string[] = [];
   entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
+  populateMissing = false;
+  includeRelations: string[] = defaultUserRelations;
   constructor(
     public cfGuid: string,
-    public includeRelations: string[] = defaultUserRelations,
-    public populateMissing = true
+    public skipValidation = false
   ) {
+    this.skipValidation = true;
     this.paginationKey = createGetAllUsersPaginationKey(cfGuid);
   }
   initialParams = createGetUsersInitialParams();

@@ -26,6 +26,7 @@ export interface APIResourceMetadata {
   guid: string;
   updated_at: string;
   url: string;
+  invalidFields?: string[];
 }
 
 export interface NormalizedResponse {

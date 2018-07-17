@@ -39,6 +39,10 @@ import {
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import {
+  getCurrentUserCFGlobalState,
+  getCurrentUserCFGlobalStates,
+} from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -246,7 +250,7 @@ export class CfUserService {
           // Note - This service is used at cf, org and space level of the cf pages.
           // We shouldn't attempt to fetch all users if at the cf level and there's more than x orgs
           if (isAdmin || canFetchAllUsers || this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid) {
-            return this.createPaginationAction(isAdmin).pipe(
+            return this.createPaginationAction(isAdmin, !!this.activeRouteCfOrgSpace.spaceGuid).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
                 store: this.store,
                 action: allUsersAction,
@@ -276,21 +280,21 @@ export class CfUserService {
     });
   }
 
-  public createPaginationAction(isAdmin: boolean): Observable<PaginatedAction> {
+  public createPaginationAction(isAdmin: boolean, isSpace: boolean): Observable<PaginatedAction> {
     if (isAdmin) {
       return observableOf(new GetAllUsersAsAdmin(this.activeRouteCfOrgSpace.cfGuid));
     }
     return this.canFetchAllUsers().pipe(
       map(canFetchAllUsers => {
         if (canFetchAllUsers) {
-          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
+          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid, !isSpace);
         } else if (!this.activeRouteCfOrgSpace.orgGuid) {
           // Danger! This path should never be hit, for non-admin we should always have a guid and go through the else block below
           // which will avoid making a `fetch users` request * lots of orgs.
-          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
+          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid, !isSpace);
         } else {
           const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.orgGuid);
-          return new GetAllOrgUsers(this.activeRouteCfOrgSpace.orgGuid, usersPaginationKey, this.activeRouteCfOrgSpace.cfGuid);
+          return new GetAllOrgUsers(this.activeRouteCfOrgSpace.orgGuid, usersPaginationKey, this.activeRouteCfOrgSpace.cfGuid, false);
         }
       })
     );
@@ -318,4 +322,7 @@ export class CfUserService {
         return resData.total_results < 10;
       }));
   }
+
+  public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
+    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(map(state => state.isAdmin))
 }

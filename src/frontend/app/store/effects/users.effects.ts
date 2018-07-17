@@ -46,11 +46,13 @@ export class UsersEffects {
         actions: null,
       };
 
-      // START the 'list' fetch
-      this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
+      // // START the 'list' fetch
+      // this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
 
-      if (action.entityKey)
-        const allOrganisations$ = this.fetchAllOrgs(action.cfGuid);
+      // if (action.entityKey)
+      //   const allOrganisations$ = this.fetchAllOrgs(action.cfGuid);
+      return [];
+
     })
   );
 
@@ -101,8 +103,8 @@ export class UsersEffects {
         organisation.metadata.guid,
         createEntityRelationPaginationKey(organizationSchemaKey, organisation.metadata.guid),
         action.cfGuid,
+        false, // By definition this is a non-admin block
         action.includeRelations,
-        action.populateMissing
       );
       // We're not interested if each set of users associated with an org is valid. Leave that up to whoever dispatched the action
       // to validate.

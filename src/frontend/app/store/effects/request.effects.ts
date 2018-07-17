@@ -87,6 +87,9 @@ export class RequestEffect {
         map(([allEntities, allPagination, connectedUserState]) => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
+          if (entities && entities.user) {
+            console.log('sdfdsf');
+          }
           return apiAction.skipValidation ? {
             apiResponse,
             started: false,
@@ -104,6 +107,9 @@ export class RequestEffect {
           });
         }),
         mergeMap(validation => {
+          if (validation.apiResponse && validation.apiResponse.response.entities.user) {
+            console.log('sdfdsf');
+          }
           const independentUpdates = !validateAction.apiRequestStarted && validation.started;
           if (independentUpdates) {
             this.update(apiAction, true, null);
@@ -114,6 +120,9 @@ export class RequestEffect {
           }));
         }),
         mergeMap(({ independentUpdates, validation }) => {
+          if (validation.apiResponse && validation.apiResponse.response.entities.user) {
+            console.log('sdfdsf');
+          }
           return [new EntitiesPipelineCompleted(
             apiAction,
             validation.apiResponse,
@@ -179,6 +188,10 @@ export class RequestEffect {
             actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
           }
         }
+      }
+
+      if (completeAction.apiResponse && completeAction.apiResponse.response.entities.user) {
+        console.log('sdfdsf');
       }
 
       return actions;

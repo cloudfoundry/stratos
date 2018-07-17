@@ -11,6 +11,9 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
+import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { ListRowSateHelper } from '../../list.helper';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
@@ -19,6 +22,7 @@ import { IListAction, IMultiListAction, ListConfig, ListViewTypes } from './../.
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
+import { cfUserHasAllRoleProperties, cfUserRowStateSetUpManager } from './cf-user-list-helper';
 
 
 @Injectable()
@@ -70,7 +74,11 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     },
     label: 'Manage',
     description: `Change Roles`,
-    createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
+    createVisible: (row$: Observable<APIResource<CfUser>>) => {
+      return combineLatest(this.createCanUpdateOrgSpaceRoles(), row$).pipe(
+        map(([canUpdate, row]) => canUpdate && cfUserHasAllRoleProperties(row))
+      );
+    }
   };
 
   manageMultiUserAction: IMultiListAction<APIResource<CfUser>> = {
@@ -88,7 +96,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Change Roles`,
   };
 
-  createManagerUsersUrl(user: APIResource<CfUser> = null): string {
+  private createManagerUsersUrl(user: APIResource<CfUser> = null): string {
     let route = `/cloud-foundry/${this.cfUserService.activeRouteCfOrgSpace.cfGuid}`;
     if (this.activeRouteCfOrgSpace.orgGuid) {
       route += `/organizations/${this.activeRouteCfOrgSpace.orgGuid}`;
@@ -106,6 +114,8 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private entityMonitorFactory: EntityMonitorFactory,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {
@@ -117,11 +127,21 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          cfUserService.createPaginationAction(cf.global.isAdmin)
+          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space)))
         )
       ),
       tap(([cf, action]) => {
-        this.dataSource = new CfUserDataSourceService(store, action, this);
+        const rowStateHelper = new ListRowSateHelper();
+        const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
+          paginationMonitorFactory,
+          entityMonitorFactory,
+          action.paginationKey,
+          action.entityKey,
+          cfUserRowStateSetUpManager
+        );
+        this.dataSource = new CfUserDataSourceService(store, action, this, rowStateManager, () => {
+          sub.unsubscribe();
+        });
       }),
       map(([cf, action]) => cf && cf.state.initialised)
     );

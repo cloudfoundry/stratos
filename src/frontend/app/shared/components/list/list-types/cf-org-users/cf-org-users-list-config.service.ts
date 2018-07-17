@@ -1,3 +1,5 @@
+import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -20,8 +22,10 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     cfUserService: CfUserService,
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    userPerms: CurrentUserPermissionsService) {
-    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfOrgService.org$);
+    userPerms: CurrentUserPermissionsService,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    entityMonitorFactory: EntityMonitorFactory) {
+    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, paginationMonitorFactory, entityMonitorFactory, cfOrgService.org$);
   }
 
 }

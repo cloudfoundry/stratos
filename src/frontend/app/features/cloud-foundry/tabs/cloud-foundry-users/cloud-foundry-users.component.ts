@@ -1,3 +1,5 @@
+import { EntityMonitorFactory } from '../../../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -23,8 +25,10 @@ import { ListConfig } from './../../../../shared/components/list/list.component.
       router: Router,
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
       userPerms: CurrentUserPermissionsService,
-    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+      paginationMonitorFactory: PaginationMonitorFactory,
+      entityMonitorFactory: EntityMonitorFactory
+    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, paginationMonitorFactory, entityMonitorFactory),
+    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService, PaginationMonitorFactory, EntityMonitorFactory]
   }]
 })
 export class CloudFoundryUsersComponent { }

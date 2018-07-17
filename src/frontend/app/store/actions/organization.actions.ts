@@ -165,6 +165,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     public guid: string,
     public paginationKey: string,
     public endpointGuid: string,
+    public isAdmin: boolean,
     public includeRelations: string[] = [
       createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
       createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
@@ -173,12 +174,13 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
       createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
       createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
       createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
-    ],
-    public populateMissing = true) {
+    ]) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations/${guid}/users`;
     this.options.method = 'get';
+    // Only admin's or connected user can use the url supplied when params are missing
+    this.skipValidation = !isAdmin;
   }
   actions = getActions('Organizations', 'List all users');
   entity = [entityFactory(cfUserSchemaKey)];
@@ -191,5 +193,6 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  skipValidation = false;
+  skipValidation;
+  populateMissing = true;
 }
