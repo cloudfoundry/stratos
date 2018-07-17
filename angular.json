@@ -69,6 +69,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "preserveSymlinks": true,
             "sourceMap": false,
             "main": "src/frontend/test.ts",
             "karmaConfig": "./karma.conf.js",
