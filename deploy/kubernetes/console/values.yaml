@@ -61,7 +61,7 @@ uaa:
   consoleClientSecret: 
   consoleAdminIdentifier: 
   skipSSLValidation: false
- # SCF values compatability 
+# SCF values compatability 
 env:
   DOMAIN:
   UAA_HOST: 
@@ -76,3 +76,5 @@ kube:
     username:
     password:
     email: default
+services:
+  loadbalanced: false
