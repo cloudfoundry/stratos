@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -13,7 +14,8 @@ describe('CfRolesService', () => {
       imports: [
         createBasicStoreModule(),
         SharedModule,
-        CloudFoundryModule
+        CloudFoundryModule,
+        HttpModule
       ],
       providers: [
         CfRolesService,

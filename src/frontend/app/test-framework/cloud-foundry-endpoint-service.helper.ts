@@ -1,4 +1,4 @@
-import { Http } from '@angular/http';
+import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
@@ -35,6 +35,7 @@ import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
 import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
+import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -59,6 +60,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
       provide: ActiveRouteCfOrgSpace,
       useFactory: () => new BaseCFMock(guid)
     },
+    CfUserServiceTestProvider,
     CloudFoundryEndpointService
   ];
 }
@@ -111,7 +113,8 @@ export const BaseTestModulesNoShared = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
-  NoopAnimationsModule
+  NoopAnimationsModule,
+  HttpModule
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 
