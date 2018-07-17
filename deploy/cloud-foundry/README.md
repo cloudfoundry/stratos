@@ -30,6 +30,13 @@ Note:
 3. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
 4. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
+### Memory Usage
+
+The Stratos Cloud Foundry `manifest.yml` states that the application requires
+`1512MB` of memory. This is required during the build process of the
+application since building an angular2 app is a memory intensive process. The
+memory limit can be scaled down after the app has been pushed, using the cf CLI.
+
 ## Associate Cloud Foundry database service
 Follow instructions [here](db-migration/README.md).
 
