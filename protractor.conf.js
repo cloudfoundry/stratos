@@ -54,7 +54,8 @@ exports.config = {
     'browserName': 'chrome',
     chromeOptions: {
       args: ['--no-sandbox', '--disable-dev-shm-usage']
-    }
+    },
+    acceptInsecureCerts: true
   },
   directConnect: true,
   framework: 'jasmine',
