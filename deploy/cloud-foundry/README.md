@@ -59,7 +59,7 @@ To create a log file of recent console output
 ```
 cf logs console --recent | tee cfconsole.log
 ```
->**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement 
+>**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement
 
 ### Application Security Groups
 
@@ -102,17 +102,17 @@ cf bind-security-group NAME ORG SPACE
 
 ### Console fails to start
 
-The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.  
-To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`. 
+The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.
+To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`.
 
 ```
 $ cf env console
 Getting env variables for app console in org SUSE / space dev as admin...
 OK
- 
+
 System-Provided:
- 
- 
+
+
  {
   "VCAP_APPLICATION": {
    "application_id": ...,
@@ -122,7 +122,7 @@ System-Provided:
    "cf_api": "http://api.cf-dev.io",
    ...
  }
- 
+
  No user-defined env variables have been set
  ...
 ```
