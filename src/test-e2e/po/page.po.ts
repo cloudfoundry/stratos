@@ -4,6 +4,7 @@ import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
 import { PageHeader } from './page-header.po';
 import { SideNavigation } from './side-nav.po';
+import { PageSubHeaderComponent } from './page-subheader.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -17,6 +18,9 @@ export abstract class Page {
 
   // Top header bar (if present)
   public header = new PageHeader();
+
+  // Subheader (if present)
+  public subHeader = new PageSubHeaderComponent();
 
   // Breadcrumbs (if present)
   public breadcrumbs = new BreadcrumbsComponent();
@@ -46,6 +50,12 @@ export abstract class Page {
     expect(this.navLink.startsWith('/')).toBeTruthy();
     browser.wait(until.urlIs(this.getUrl()), 20000);
   }
+
+  waitForPageOrChildPage() {
+    expect(this.navLink.startsWith('/')).toBeTruthy();
+    browser.wait(until.urlContains(this.getUrl()), 20000);
+  }
+
 
   private getUrl = () => browser.baseUrl + this.navLink;
 }

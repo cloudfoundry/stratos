@@ -16,6 +16,9 @@ export class E2E {
   // General helpers
   public helper = new E2EHelpers();
 
+  // Stratos Info from the backend
+  public info: any = {};
+
   // Access to the secrets configuration
   public secrets = new SecretsHelpers();
 
@@ -140,6 +143,15 @@ export class E2ESetup {
     return this.addSetupOp(this.resetsHelper.connectEndpoint.bind(this.resetsHelper, this.getReq(userType), endpointName, userType),
       'Connect endpoint: ' + endpointName);
   }
+
+  /**
+   * Retrieve info from backend
+   */
+  getInfo(userType: ConsoleUserType = ConsoleUserType.admin) {
+    return this.addSetupOp(this.resetsHelper.getInfo.bind(this.resetsHelper, this.getReq(userType), e2e),
+      'Get Info');
+  }
+
 
   // NOTE: You don't need to explictly call createSession
   // Create a new session with Stratos so that we can make API requests
