@@ -1,12 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 
-import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
 import {
-  BaseTestModules,
-  generateTestCfEndpointServiceProvider
+  generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { SharedModule } from '../../../../../shared.module';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { SharedModule } from '../../../../../shared.module';
+import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
 
 describe('CfUserPermissionCellComponent', () => {
   let component: CfOrgPermissionCellComponent;
@@ -19,7 +19,8 @@ describe('CfUserPermissionCellComponent', () => {
       ],
       imports: [
         SharedModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        HttpModule
       ]
     })
       .compileComponents();
