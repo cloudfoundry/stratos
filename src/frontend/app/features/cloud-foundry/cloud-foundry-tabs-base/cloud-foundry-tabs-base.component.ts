@@ -16,20 +16,11 @@ import { AppState } from './../../../store/app-state';
   templateUrl: './cloud-foundry-tabs-base.component.html',
   styleUrls: ['./cloud-foundry-tabs-base.component.scss']
 })
-export class CloudFoundryTabsBaseComponent {
+export class CloudFoundryTabsBaseComponent implements OnInit {
   static firehose = 'firehose';
   static users = 'users';
 
-  public tabLinks: ISubHeaderTabs[] = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'organizations', label: 'Organizations' },
-    { link: CloudFoundryTabsBaseComponent.users, label: 'Users' },
-    { link: CloudFoundryTabsBaseComponent.firehose, label: 'Firehose' },
-    { link: 'feature-flags', label: 'Feature Flags' },
-    { link: 'build-packs', label: 'Build Packs' },
-    { link: 'stacks', label: 'Stacks' },
-    { link: 'security-groups', label: 'Security Groups' }
-  ];
+  public tabLinks: ISubHeaderTabs[];
 
   // Used to hide tab that is not yet implemented when in production
   isDevEnvironment = !environment.production;
@@ -71,4 +62,11 @@ export class CloudFoundryTabsBaseComponent {
       { link: 'security-groups', label: 'Security Groups' }
     ];
   }
+
+  ngOnInit() {
+    this.isFetching$ = observableOf(false);
+    this.canAddOrg$ = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    this.canUpdateRoles$ = canUpdateOrgSpaceRoles(this.currentUserPermissionsService, this.cfEndpointService.cfGuid);
+  }
+
 }
