@@ -16,9 +16,10 @@
   display: block;
   margin: 5px 0;
   &__limit {
-    cursor: pointer;
     padding: 0 5px;
-    font-weight: unset;
+    cursor: pointer;
+    font-weight: 300;
+    min-width: 0;
   }
 }
 
