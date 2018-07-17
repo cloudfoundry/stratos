@@ -1,3 +1,4 @@
+import { OrganizationEffects } from './effects/organization.effects';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
@@ -62,6 +63,7 @@ import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect'
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
+      OrganizationEffects
     ])
   ]
 })

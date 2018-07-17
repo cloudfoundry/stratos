@@ -179,7 +179,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     this.options = new RequestOptions();
     this.options.url = `organizations/${guid}/users`;
     this.options.method = 'get';
-    // Only admin's or connected user can use the url supplied when params are missing
+    // Only admin's can use the url supplied when params are missing
     this.skipValidation = !isAdmin;
   }
   actions = getActions('Organizations', 'List all users');

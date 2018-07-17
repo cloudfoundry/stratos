@@ -4,6 +4,7 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser } from '../types/user.types';
+import { CfUserService } from '../../shared/data-services/cf-user.service';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -236,6 +237,9 @@ const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
     apps: [ApplicationWithoutSpaceEntitySchema],
+    developers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'developers')],
+    managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managers')],
+    auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'auditors')]
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -260,6 +264,10 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
+    users: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users')],
+    managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managers')],
+    billing_managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'billing_managers')],
+    auditors_managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'auditors_managers')]
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;
@@ -358,7 +366,7 @@ const orgUserEntity = {
 // }
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
-  const schema = new EntitySchema(organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'organizations');
+  const schema = new EntitySchema(organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, relationKey);
   // schema.altFetch = (store, cfGuid) => createNonAdminFetchRole(store, cfGuid, schema);
   return schema;
 }
@@ -403,22 +411,6 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
     processStrategy: userProcessStrategy
   });
 entityCache[cfUserSchemaKey] = CFUserSchema;
-
-// const CFOrgUserSchema = new EntitySchema(cfUserSchemaKey, {
-//   entity: {
-//     organizations: [OrganizationUserSchema],
-//     audited_organizations: [OrganizationAuditedSchema],
-//     managed_organizations: [OrganizationManagedSchema],
-//     billing_managed_organizations: [OrganizationBillingSchema],
-//     spaces: [SpaceUserSchema],
-//     managed_spaces: [SpaceManagedSchema],
-//     audited_spaces: [SpaceAuditedSchema],
-//   }
-// }, {
-//     idAttribute: getAPIResourceGuid,
-//     processStrategy: userProcessStrategy
-//   });
-// entityCache[cfUserSchemaKey] = CFUserSchema;
 
 
 

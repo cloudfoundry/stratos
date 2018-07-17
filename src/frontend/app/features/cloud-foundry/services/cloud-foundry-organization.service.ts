@@ -51,7 +51,6 @@ export class CloudFoundryOrganizationService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
-  orgEntityService: EntityService<APIResource<IOrganization>>;
   allOrgUsers$: Observable<APIResource<CfUser>[]>;
   // allOrgUsersAction: GetAllOrgUsers;
   usersPaginationKey: string;
@@ -69,23 +68,6 @@ export class CloudFoundryOrganizationService {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid);
 
-    this.orgEntityService = this.entityServiceFactory.create(
-      organizationSchemaKey,
-      entityFactory(organizationSchemaKey),
-      this.orgGuid,
-      new GetOrganization(this.orgGuid, this.cfGuid, [
-        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, cfUserSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
-      ]),
-      true
-    );
-
     this.initialiseObservables();
   }
 
@@ -94,8 +76,37 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.orgEntityService.entityObs$.pipe(
-      filter(o => !!o && !!o.entity)
+    this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+      switchMap(isAdmin => {
+        const relations = [
+          createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+          createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
+          createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
+          createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
+          createEntityRelationKey(organizationSchemaKey, cfUserSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+        ];
+        if (!isAdmin) {
+          relations.push(
+            createEntityRelationKey(organizationSchemaKey, 'users'),
+            createEntityRelationKey(organizationSchemaKey, 'managers'),
+            createEntityRelationKey(organizationSchemaKey, 'billing_managers'),
+            createEntityRelationKey(organizationSchemaKey, 'auditors_managers'),
+          );
+        }
+        const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
+          organizationSchemaKey,
+          entityFactory(organizationSchemaKey),
+          this.orgGuid,
+          new GetOrganization(this.orgGuid, this.cfGuid, relations),
+          true
+        );
+        return orgEntityService.entityObs$.pipe(
+          filter(o => !!o && !!o.entity)
+        );
+      })
     );
 
     this.initialiseOrgObservables();
