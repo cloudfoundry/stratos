@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, of as observableOf } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -18,7 +18,6 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
-
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -48,13 +47,15 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
   }
 
-  private prefixOrgName(permissionList) {
+  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]) {
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
-    const orgNames$ = combineLatest(
-      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)))
+    const orgNames$ = orgGuids.length ? combineLatest(
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)).pipe(first()))
     ).pipe(
+      filter(org => !!org),
+      first(),
       map((orgs: APIResource<IOrganization>[]) => {
         const orgNames: { [orgGuid: string]: string } = {};
         orgs.forEach(org => {
@@ -62,7 +63,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         });
         return orgNames;
       })
-    );
+    ) : observableOf([]);
     return combineLatest(
       observableOf(permissionList),
       orgNames$

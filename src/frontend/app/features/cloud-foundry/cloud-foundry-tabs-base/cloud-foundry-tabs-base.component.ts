@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap, startWith } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -16,13 +16,14 @@ import { AppState } from './../../../store/app-state';
   templateUrl: './cloud-foundry-tabs-base.component.html',
   styleUrls: ['./cloud-foundry-tabs-base.component.scss']
 })
-export class CloudFoundryTabsBaseComponent implements OnInit {
+export class CloudFoundryTabsBaseComponent {
   static firehose = 'firehose';
+  static users = 'users';
 
-  tabLinks: ISubHeaderTabs[] = [
+  public tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'organizations', label: 'Organizations' },
-    { link: 'users', label: 'Users' },
+    { link: CloudFoundryTabsBaseComponent.users, label: 'Users' },
     { link: CloudFoundryTabsBaseComponent.firehose, label: 'Firehose' },
     { link: 'feature-flags', label: 'Feature Flags' },
     { link: 'build-packs', label: 'Build Packs' },
@@ -40,18 +41,34 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<AppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    this.tabLinks.find(tabLink => tabLink.link === CloudFoundryTabsBaseComponent.firehose).hidden =
-      this.currentUserPermissionsService.can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid).pipe(
-        map(visible => !visible)
-      );
-  }
+    const firehoseHidden$ = this.currentUserPermissionsService
+      .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
+      .pipe(map(visible => !visible));
 
-  ngOnInit() {
-    this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
-    this.canUpdateRoles$ = canUpdateOrgSpaceRoles(this.currentUserPermissionsService, this.cfEndpointService.cfGuid);
+    const usersHidden$ = cfEndpointService.users$.pipe(
+      startWith(null),
+      map(users => !users)
+    );
+
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'organizations', label: 'Organizations' },
+      {
+        link: CloudFoundryTabsBaseComponent.users,
+        label: 'Users',
+        hidden: usersHidden$
+      },
+      {
+        link: CloudFoundryTabsBaseComponent.firehose,
+        label: 'Firehose',
+        hidden: firehoseHidden$
+      },
+      { link: 'feature-flags', label: 'Feature Flags' },
+      { link: 'build-packs', label: 'Build Packs' },
+      { link: 'stacks', label: 'Stacks' },
+      { link: 'security-groups', label: 'Security Groups' }
+    ];
   }
 }

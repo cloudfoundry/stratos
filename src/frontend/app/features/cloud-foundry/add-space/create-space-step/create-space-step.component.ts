@@ -40,12 +40,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     });
   }
 
-  validate = (spaceName: string = null) =>
+  validateNameTaken = (spaceName: string = null) =>
     this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true
+
+  validate = () => !!this.createSpaceForm && this.createSpaceForm.valid;
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.validate(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
+      !this.validateNameTaken(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
   }
 
   submit: StepOnNextFunction = () => {

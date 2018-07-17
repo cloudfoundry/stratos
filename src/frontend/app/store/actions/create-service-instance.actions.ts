@@ -13,7 +13,7 @@ export const SET_SERVICE_INSTANCE_APP = '[Create SI] Set Service Instance App';
 export const RESET_CREATE_SERVICE_INSTANCE_STATE = '[Create SI] Reset State';
 export const RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE = '[Create SI] Reset Partial Org Space State';
 
-export class SetServicePlan implements Action {
+export class SetCreateServiceInstanceServicePlan implements Action {
   constructor(public servicePlanGuid: string) { }
   type = SET_SERVICE_PLAN;
 }
