@@ -1,7 +1,10 @@
+import { HttpClient } from '@angular/common/http';
 import { Http, Request, RequestOptions } from '@angular/http';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
+
 import { CFResponse } from '../types/api.types';
+
 
 export interface IPaginationFlattener<T> {
   getTotalPages: (res: T) => number;
@@ -10,8 +13,28 @@ export interface IPaginationFlattener<T> {
   buildFetchParams: (i: number) => any[];
 }
 
-export class BaseFetcher {
-  constructor(private http: Http) { }
+export class BaseHttpClientFetcher {
+  constructor(private httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }, private pageUrlParam: string) { }
+  public fetch(url: string, options: { [key: string]: any }) {
+    return this.httpClient.get<CFResponse>(
+      url,
+      options
+    );
+  }
+  public buildFetchParams(i: number) {
+    const requestOption = {
+      ...this.requestOptions,
+      params: {
+        ...(this.requestOptions.params || {}),
+        [this.pageUrlParam]: i.toString()
+      }
+    };
+    return [this.url, requestOption];
+  }
+}
+
+export class BaseHttpFetcher {
+  constructor(private http: Http, private requestOptions: RequestOptions, private pageUrlParam: string) { }
   public fetch(options: RequestOptions): Observable<any> {
     return this.http.request(new Request(options)).pipe(
       map(response => {
@@ -25,14 +48,20 @@ export class BaseFetcher {
       }),
     );
   }
+  public buildFetchParams(i: number) {
+    const requestOption = { ...this.requestOptions } as RequestOptions;
+    requestOption.params.set(this.pageUrlParam, i.toString());
+    return [requestOption];
+  }
 }
 
-export class CfAPIFlattener extends BaseFetcher
+export class CfAPIFlattener extends BaseHttpFetcher
   implements IPaginationFlattener<CFResponse> {
-  constructor(http: Http, public requestOptions: RequestOptions) {
-    super(http);
+  static pageUrlParam = 'page';
+
+  constructor(http: Http, requestOptions: RequestOptions) {
+    super(http, requestOptions, CfAPIFlattener.pageUrlParam);
   }
-  public pageUrlParam = 'page';
   public getTotalPages = res =>
     Object.keys(res).reduce((max, endpointGuid) => {
       const endpoint = res[endpointGuid];
@@ -55,11 +84,6 @@ export class CfAPIFlattener extends BaseFetcher
       });
     }
     return newResData;
-  }
-  public buildFetchParams(i: number) {
-    const requestOption = { ...this.requestOptions } as RequestOptions;
-    requestOption.params.set(this.pageUrlParam, i.toString());
-    return [requestOption];
   }
 }
 
