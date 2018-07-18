@@ -4,7 +4,7 @@ import { first, map, mergeMap } from 'rxjs/operators';
 import { CFResponse } from '../types/api.types';
 
 export class BaseFetcher {
-  constructor(private http: Http) {}
+  constructor(private http: Http) { }
   public fetch(options: RequestOptions): Observable<any> {
     return this.http.request(new Request(options)).pipe(
       map(response => {
@@ -21,7 +21,7 @@ export class BaseFetcher {
 }
 
 export class CfAPIFlattener extends BaseFetcher
-  implements IPaginationFlattener<CFResponse, CFResponse> {
+  implements IPaginationFlattener<CFResponse> {
   constructor(http: Http, public requestOptions: RequestOptions) {
     super(http);
   }
@@ -30,7 +30,7 @@ export class CfAPIFlattener extends BaseFetcher
     Object.keys(res).reduce((max, endpointGuid) => {
       const endpoint = res[endpointGuid];
       return max < endpoint.total_pages ? endpoint.total_pages : max;
-    }, 0);
+    }, 0)
   public mergePages = (responses: CFResponse[]) => {
     // Merge all responses into the first page
     const newResData = responses[0];
@@ -49,19 +49,23 @@ export class CfAPIFlattener extends BaseFetcher
     }
     return newResData;
   }
+  public buildFetchParams(i: number) {
+    const requestOption = { ...this.requestOptions } as RequestOptions;
+    requestOption.params.set(this.pageUrlParam, i.toString());
+    return [requestOption];
+  }
 }
 
-export interface IPaginationFlattener<T, Q> {
+export interface IPaginationFlattener<T> {
   getTotalPages: (res: T) => number;
-  requestOptions: RequestOptions;
-  pageUrlParam: string;
-  mergePages: (res: T[]) => Q;
-  fetch: (options: RequestOptions) => Observable<T>;
+  mergePages: (res: T[]) => T;
+  fetch: (...args) => Observable<T>;
+  buildFetchParams: (i: number) => any[];
 }
 
-export function flattenPagination<T, Q>(
+export function flattenPagination<T>(
   firstRequest: Observable<T>,
-  flattener: IPaginationFlattener<T, Q>,
+  flattener: IPaginationFlattener<T>,
 ) {
   return firstRequest.pipe(
     first(),
@@ -73,9 +77,8 @@ export function flattenPagination<T, Q>(
       requests.push(observableOf(firstResData)); // Already made the first request, don't repeat it
       for (let i = 2; i <= maxRequests; i++) {
         // Make any additional page requests
-        const requestOption = { ...flattener.requestOptions } as RequestOptions;
-        requestOption.params.set(flattener.pageUrlParam, i.toString());
-        requests.push(flattener.fetch(requestOption));
+        const requestOptions = flattener.buildFetchParams(i);
+        requests.push(flattener.fetch(...requestOptions));
       }
       return forkJoin(requests);
     }),
