@@ -36,7 +36,7 @@ class PermissionFlattener implements IPaginationFlattener<CFResponse> {
   public pageUrlParam = 'page';
   public getTotalPages = (res: CFResponse<any>) => {
     return res.total_pages;
-  };
+  }
   public mergePages = (res: CFResponse[]) => {
     const firstRes = res.shift();
     const final = res.reduce((finalRes, currentRes) => {
