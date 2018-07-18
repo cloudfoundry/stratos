@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, first, map, share, switchMap, withLatestFrom, mergeMap, tap } from 'rxjs/operators';
+import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import {
   createCfFeatureFlagFetchAction,
 } from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -24,17 +25,20 @@ import {
   UserRelationTypes,
 } from '../actions/permissions.actions';
 import { AppState } from '../app-state';
+import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-import { EndpointActionComplete, CONNECT_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
-import { IPaginationFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
 
-class PermissionFlattener implements IPaginationFlattener<CFResponse> {
-  constructor(public httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) { }
-  public pageUrlParam = 'page';
+class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFlattener<CFResponse> {
+  static pageUrlParam = 'page';
+
+  constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {
+    super(httpClient, requestOptions, url, PermissionFlattener.pageUrlParam);
+  }
   public getTotalPages = (res: CFResponse<any>) => {
+    console.log(res.total_pages);
     return res.total_pages;
   }
   public mergePages = (res: CFResponse[]) => {
@@ -44,30 +48,10 @@ class PermissionFlattener implements IPaginationFlattener<CFResponse> {
         ...finalRes.resources,
         ...currentRes.resources
       ];
-
       return finalRes;
     }, firstRes);
     return final;
   }
-
-  public fetch = (url: string, options: { [key: string]: any }) => {
-    return this.httpClient.get<CFResponse>(
-      url,
-      options
-    );
-  }
-
-  public buildFetchParams(i: number) {
-    const requestOption = {
-      ...this.requestOptions,
-      params: {
-        ...(this.requestOptions.params || {}),
-        [this.pageUrlParam]: i.toString()
-      }
-    };
-    return [this.url, requestOption];
-  }
-
 }
 
 interface CfsRequestState {
@@ -88,6 +72,9 @@ function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpC
     headers: {
       'x-cap-cnsi-list': action.endpointGuid,
       'x-cap-passthrough': 'true'
+    },
+    params: {
+      'results-per-page': '100'
     }
   };
   const get$ = httpClient.get<CFResponse>(
