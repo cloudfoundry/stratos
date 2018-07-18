@@ -13,7 +13,7 @@ import { IListPaginationController } from '../data-sources-controllers/list-pagi
 import { ITableColumn } from './table.types';
 import { TableComponent } from './table.component';
 
-fdescribe('TableComponent', () => {
+describe('TableComponent', () => {
 
   const column1Id = '123123';
   const column2Id = 'dsftq34ge';

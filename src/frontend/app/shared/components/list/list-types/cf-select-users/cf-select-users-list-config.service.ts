@@ -19,7 +19,8 @@ import { cfUserRowStateSetUpManager } from '../cf-users/cf-user-list-helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
 @Injectable()
-export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
+export class CfSelectUsersListConfigService
+  implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSelectUsersDataSourceService;
   defaultView = 'table' as ListView;
@@ -29,20 +30,22 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     filter: 'Search by name',
     noEntries: 'There are no users'
   };
-  columns: ITableColumn<APIResource<CfUser>>[] = [{
-    columnId: 'username',
-    headerCell: () => 'Username',
-    cellFlex: '10',
-    cellAlignSelf: 'baseline',
-    cellDefinition: {
-      getValue: row => row.entity.username || row.metadata.guid
-    },
-    sort: {
-      type: 'sort',
-      orderKey: 'username',
-      field: 'entity.username'
+  columns: ITableColumn<APIResource<CfUser>>[] = [
+    {
+      columnId: 'username',
+      headerCell: () => 'Username',
+      cellFlex: '10',
+      cellAlignSelf: 'baseline',
+      cellDefinition: {
+        getValue: row => row.entity.username || row.metadata.guid
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'username',
+        field: 'entity.username'
+      }
     }
-  }];
+  ];
   private initialised: Observable<boolean>;
 
   constructor(
@@ -53,7 +56,10 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory
   ) {
-    this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+    this.initialised = waitForCFPermissions(
+      store,
+      activeRouteCfOrgSpace.cfGuid
+    ).pipe(
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
@@ -73,19 +79,21 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
           sub.unsubscribe();
         });
       }),
-      map(([cf, action]) => cf && cf.state.initialised),
+      map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
-      refCount(),
+      refCount()
     );
   }
 
   getColumns = () => this.columns;
   getGlobalActions = () => [];
-  getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [{
-    label: 'delete me',
-    description: '',
-    action: (items: APIResource<CfUser>[]) => false
-  }]
+  getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [
+    {
+      label: 'delete me',
+      description: '',
+      action: (items: APIResource<CfUser>[]) => false
+    }
+  ]
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
   getDataSource = () => this.dataSource;

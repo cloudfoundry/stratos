@@ -1,21 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CfUserServiceTestProvider } from '../../../../test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from './cf-roles.service';
+import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
 import { UsersRolesModifyComponent } from './manage-users-modify/manage-users-modify.component';
 import {
   SpaceRolesListWrapperComponent,
 } from './manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './manage-users.component';
-import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
 
 describe('UsersRolesComponent', () => {
   let component: UsersRolesComponent;
@@ -29,6 +30,7 @@ describe('UsersRolesComponent', () => {
         createBasicStoreModule(),
         NoopAnimationsModule,
         RouterTestingModule,
+        HttpModule
       ],
       providers: [
         {
@@ -41,7 +43,7 @@ describe('UsersRolesComponent', () => {
           }
         },
         ActiveRouteCfOrgSpace,
-        CfUserService,
+        CfUserServiceTestProvider,
         CfRolesService,
       ],
       declarations: [

@@ -17,7 +17,7 @@
     };
 
     this.onRunComplete = function (browser, result) {
-      if (process.env['CI_ENV'] === 'true' && this.skipped !== 0) {
+      if (process.env['CHECK_TESTS'] === 'true' && this.skipped !== 0) {
         result.exitCode = 1;
         console.log('\x1b[41m\x1b[97m\x1b[1m');
         console.log('');

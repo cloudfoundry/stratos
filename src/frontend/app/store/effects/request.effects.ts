@@ -15,6 +15,7 @@ import {
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations';
+import { ValidationResult } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';

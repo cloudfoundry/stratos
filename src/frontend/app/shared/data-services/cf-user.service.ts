@@ -249,7 +249,15 @@ export class CfUserService {
         switchMap(([isAdmin, canFetchAllUsers]) => {
           // Note - This service is used at cf, org and space level of the cf pages.
           // We shouldn't attempt to fetch all users if at the cf level and there's more than x orgs
-          if (isAdmin || canFetchAllUsers || this.activeRouteCfOrgSpace.orgGuid || this.activeRouteCfOrgSpace.spaceGuid) {
+          if (
+            this.activeRouteCfOrgSpace.cfGuid &&
+            (
+              isAdmin ||
+              canFetchAllUsers ||
+              this.activeRouteCfOrgSpace.orgGuid ||
+              this.activeRouteCfOrgSpace.spaceGuid
+            )
+          ) {
             return this.createPaginationAction(isAdmin, !!this.activeRouteCfOrgSpace.spaceGuid).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
                 store: this.store,
@@ -287,10 +295,6 @@ export class CfUserService {
     return this.canFetchAllUsers().pipe(
       map(canFetchAllUsers => {
         if (canFetchAllUsers) {
-          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid, !isSpace);
-        } else if (!this.activeRouteCfOrgSpace.orgGuid) {
-          // Danger! This path should never be hit, for non-admin we should always have a guid and go through the else block below
-          // which will avoid making a `fetch users` request * lots of orgs.
           return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid, !isSpace);
         } else {
           const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.orgGuid);
