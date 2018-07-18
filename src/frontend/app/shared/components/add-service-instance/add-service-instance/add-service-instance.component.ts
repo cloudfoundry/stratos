@@ -168,7 +168,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
     const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
     return entityService.waitForEntity$.pipe(
-      filter(p => !!p),
+      filter(p => !!p && !!p.entity.entity && !!p.entity.metadata ),
       tap(serviceInstance => {
         const serviceInstanceEntity = serviceInstance.entity.entity;
         this.csiGuidsService.cfGuid = cfId;
