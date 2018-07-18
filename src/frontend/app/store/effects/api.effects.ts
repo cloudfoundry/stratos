@@ -18,7 +18,7 @@ import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
+import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
@@ -132,7 +132,7 @@ export class APIEffect {
       map(response => {
         return this.handleMultiEndpoints(response, actionClone);
       }),
-      mergeMap(response => {
+      mergeMap<any, Action>(response => {
         const { entities, totalResults, totalPages, errorsCheck = [] } = response;
         if (requestType === 'fetch' && (errorsCheck && errorsCheck.length > 0)) {
           this.handleApiEvents(errorsCheck);
@@ -173,16 +173,27 @@ export class APIEffect {
             entityFactory(apiAction.entityKey))
           );
         }
-
+        const res = {
+          response: entities,
+          totalResults,
+          totalPages
+        };
+        if (totalResults === 0) {
+          return [
+            new APISuccessOrFailedAction(apiAction.actions[1], apiAction, res.response),
+            new WrapperRequestActionSuccess(
+              res.response,
+              apiAction,
+              requestType,
+              res.totalResults,
+              res.totalPages
+            )];
+        }
         return [new ValidateEntitiesStart(
           actionClone,
           entities.result,
           true,
-          {
-            response: entities,
-            totalResults,
-            totalPages
-          }
+          res
         )];
       }),
       catchError(error => {
