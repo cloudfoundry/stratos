@@ -26,9 +26,49 @@ import {
 import { AppState } from '../app-state';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
-import { APIResource } from '../types/api.types';
+import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { EndpointActionComplete, CONNECT_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
+import { IPaginationFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
+
+class PermissionFlattener implements IPaginationFlattener<CFResponse> {
+  constructor(public httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) { }
+  public pageUrlParam = 'page';
+  public getTotalPages = (res: CFResponse<any>) => {
+    return res.total_pages;
+  };
+  public mergePages = (res: CFResponse[]) => {
+    const firstRes = res.shift();
+    const final = res.reduce((finalRes, currentRes) => {
+      finalRes.resources = [
+        ...finalRes.resources,
+        ...currentRes.resources
+      ];
+
+      return finalRes;
+    }, firstRes);
+    return final;
+  }
+
+  public fetch = (url: string, options: { [key: string]: any }) => {
+    return this.httpClient.get<CFResponse>(
+      url,
+      options
+    );
+  }
+
+  public buildFetchParams(i: number) {
+    const requestOption = {
+      ...this.requestOptions,
+      params: {
+        ...(this.requestOptions.params || {}),
+        [this.pageUrlParam]: i.toString()
+      }
+    };
+    return [this.url, requestOption];
+  }
+
+}
 
 interface CfsRequestState {
   [cfGuid: string]: Observable<boolean>[];
@@ -43,15 +83,20 @@ const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
 
 function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
-  return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(
-    `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`, {
-      headers: {
-        'x-cap-cnsi-list': action.endpointGuid
-      }
+  const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
+  const params = {
+    headers: {
+      'x-cap-cnsi-list': action.endpointGuid,
+      'x-cap-passthrough': 'true'
     }
-  ).pipe(
+  };
+  const get$ = httpClient.get<CFResponse>(
+    url,
+    params
+  );
+  return flattenPagination(get$, new PermissionFlattener(httpClient, url, params)).pipe(
     map(data => {
-      store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data[action.endpointGuid].resources));
+      store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;
     }),
     first(),
