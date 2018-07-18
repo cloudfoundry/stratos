@@ -501,7 +501,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
 
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
-      apiResponse: config.apiResponse,
       started: false,
       completed: Promise.resolve(config.apiResponse)
     };
