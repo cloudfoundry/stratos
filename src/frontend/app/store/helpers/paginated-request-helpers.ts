@@ -3,6 +3,13 @@ import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 import { CFResponse } from '../types/api.types';
 
+export interface IPaginationFlattener<T> {
+  getTotalPages: (res: T) => number;
+  mergePages: (res: T[]) => T;
+  fetch: (...args) => Observable<T>;
+  buildFetchParams: (i: number) => any[];
+}
+
 export class BaseFetcher {
   constructor(private http: Http) { }
   public fetch(options: RequestOptions): Observable<any> {
@@ -56,12 +63,6 @@ export class CfAPIFlattener extends BaseFetcher
   }
 }
 
-export interface IPaginationFlattener<T> {
-  getTotalPages: (res: T) => number;
-  mergePages: (res: T[]) => T;
-  fetch: (...args) => Observable<T>;
-  buildFetchParams: (i: number) => any[];
-}
 
 export function flattenPagination<T>(
   firstRequest: Observable<T>,
