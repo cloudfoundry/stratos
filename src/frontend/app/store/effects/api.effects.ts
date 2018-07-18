@@ -18,7 +18,13 @@ import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
+import {
+  APISuccessOrFailedAction,
+  ICFAction,
+  IRequestAction,
+  RequestEntityLocation,
+  WrapperRequestActionSuccess
+} from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
