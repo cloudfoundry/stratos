@@ -112,21 +112,13 @@ export class ValidationResult {
    */
   started: boolean;
   /**
-   * Promise that fires when the api requests kicked off to fetch missing data have all completed
+   * Promise that fires when the api requests kicked off to fetch missing data have all completed. Contains the new apiResponse (for the
+   * case of validating api calls this might be updated to ensure parent entities are associated with missing children).
    *
-   * @type {Promise<boolean[]>}
+   * @type {Promise<APIResponse>}
    * @memberof ValidationResult
    */
-  completed: Promise<boolean[]>;
-
-  /**
-   * The new apiResponse. For the case of validating api calls this might be updated to ensure parent entities are associated with missing
-   * children.
-   *
-   * @type {APIResponse}
-   * @memberof ValidationResult
-   */
-  apiResponse?: APIResponse;
+  completed: Promise<APIResponse>;
 }
 
 export interface ValidateResultFetchingState {

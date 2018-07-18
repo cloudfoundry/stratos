@@ -1,7 +1,12 @@
-import { selectPaginationState } from '../selectors/pagination.selectors';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
+
 import { GET_ORGANIZATION } from '../actions/organization.actions';
 import { ApiActionTypes, APIResponse } from '../actions/request.actions';
 import { GET_SPACE } from '../actions/space.actions';
+import { AppState } from '../app-state';
+import { selectPaginationState } from '../selectors/pagination.selectors';
+import { IRequestDataState } from '../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from './entity-factory';
@@ -9,16 +14,14 @@ import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,
   ValidateResultFetchingState,
-  ValidationResult,
 } from './entity-relations.types';
 import { deepMergeState, mergeEntity } from './reducer.helper';
-import { map } from 'rxjs/operators';
 
-class AppStoreLayout {
-  [entityKey: string]: {
-    [guid: string]: any;
-  }
-}
+// class AppStoreLayout {
+//   [entityKey: string]: {
+//     [guid: string]: any;
+//   }
+// }
 
 function updateUserFromOrgSpaceArray(
   existingUsers: { [guid: string]: any },
@@ -49,10 +52,14 @@ function updateUserFromOrgSpaceArray(
   return newUsers;
 }
 
-function orgSpacePostProcess(store, action: IRequestAction, apiResponse: APIResponse, allEntities: AppStoreLayout): ValidateEntityResult[] {
+function orgSpacePostProcess(
+  store: Store<AppState>,
+  action: IRequestAction,
+  apiResponse: APIResponse,
+  allEntities: IRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
   const orgOrSpace = entities[action.entityKey][action.guid];
-  const users = entities[cfUserSchemaKey]; // changes to store??
+  const users = entities[cfUserSchemaKey];
 
   const newUsers = {};
   if (action.entityKey === organizationSchemaKey) {
@@ -67,12 +74,14 @@ function orgSpacePostProcess(store, action: IRequestAction, apiResponse: APIResp
   }
 
   if (!Object.keys(newUsers).length) {
-    return [];
+    return;
   }
   if (apiResponse) {
+    // The apiResponse will make it into the store, as this is an api.effect validation
     apiResponse.response.entities = deepMergeState(apiResponse.response.entities, { [cfUserSchemaKey]: newUsers });
-    return [];
+    return;
   } else {
+    // The apiResponse will NOT make it into the store, as this is a general validation. So create a mock event to push to store
     const response = {
       entities: {
         [cfUserSchemaKey]: newUsers
@@ -90,7 +99,7 @@ function orgSpacePostProcess(store, action: IRequestAction, apiResponse: APIResp
     };
 
     const successAction = new WrapperRequestActionSuccess(response, paginatedAction, 'fetch', 1, 1);
-    return [{
+    return {
       action: successAction,
       fetchingState$: store.select(selectPaginationState(paginatedAction.entityKey, paginatedAction.paginationKey)).pipe(
         map((state: PaginationEntityState) => {
@@ -100,11 +109,15 @@ function orgSpacePostProcess(store, action: IRequestAction, apiResponse: APIResp
           return res;
         })
       )
-    }];
+    };
   }
 }
 
-export function validationPostProcessor(store, action: IRequestAction, apiResponse: APIResponse, allEntities: AppStoreLayout): ValidateEntityResult[] {
+export function validationPostProcessor(
+  store: Store<AppState>,
+  action: IRequestAction,
+  apiResponse: APIResponse,
+  allEntities: IRequestDataState): ValidateEntityResult {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     switch (action['actions'][0]) {
       case GET_ORGANIZATION:
@@ -112,5 +125,4 @@ export function validationPostProcessor(store, action: IRequestAction, apiRespon
         return orgSpacePostProcess(store, action, apiResponse, allEntities);
     }
   }
-  return [];
 }

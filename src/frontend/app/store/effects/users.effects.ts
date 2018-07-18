@@ -8,11 +8,7 @@ import { IOrganization } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
-import {
-  GET_CF_USERS_BY_ORG,
-  GetAllUsersAsNonAdmin,
-  GetRolesAsNonAdmin,
-} from '../actions/users.actions';
+import { GET_CF_USERS_BY_ORG, GetAllUsersAsNonAdmin } from '../actions/users.actions';
 import { AppState } from '../app-state';
 import { cfUserSchemaKey, endpointSchemaKey, entityFactory, organizationSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';

@@ -11,14 +11,12 @@ import { APIResponse } from '../actions/request.actions';
 import { AppState } from '../app-state';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
-import { getCurrentUserCFEndpointRolesState } from '../selectors/current-user-roles-permissions-selectors/role.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
-import { ICfRolesState } from '../types/current-user-roles.types';
 import { IRequestDataState } from '../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
-import { cfUserSchemaKey, EntitySchema } from './entity-factory';
+import { EntitySchema } from './entity-factory';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -55,10 +53,10 @@ class ValidateEntityRelationsConfig {
   /**
    * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
    *
-   * @type {AppStoreLayout}
+   * @type {IRequestDataState}
    * @memberof ValidateEntityRelationsConfig
    */
-  allEntities: AppStoreLayout;
+  allEntities: IRequestDataState;
   /**
    * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
    * and quicker
@@ -433,13 +431,13 @@ function associateChildWithParent(store, action: EntityInlineChildAction, apiRes
   );
 }
 
-function handleValidationLoopResults(store: Store<AppState>, results: ValidateEntityResult[], apiResponse: APIResponse, action, allEntities): ValidationResult {
+function handleValidationLoopResults(
+  store: Store<AppState>,
+  results: ValidateEntityResult[],
+  apiResponse: APIResponse,
+  action: IRequestAction,
+  allEntities: IRequestDataState): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
-
-  // TODO: RC needs to happen once all 'results[x].fetchingState$' have finished. This will mean we've fetched any missing params (fetch
-  // org and it's managers, more then 50 managers so we independtly fetch list, need to ensure that the apiResonse/allEntities here contains
-  // the list that's been fetched)
-  results = [].concat(validationPostProcessor(store, action, apiResponse, allEntities));
 
   results.forEach(request => {
     // Fetch any missing data
@@ -457,8 +455,8 @@ function handleValidationLoopResults(store: Store<AppState>, results: ValidateEn
     // Associate the missing parameter with it's parent
     const associatedObs = obs.pipe(
       switchMap(() => {
-        const action: EntityInlineChildAction = isEntityInlineChildAction(request.action);
-        return action ? associateChildWithParent(store, action, apiResponse) : observableOf(true);
+        const inlineChildAction: EntityInlineChildAction = isEntityInlineChildAction(request.action);
+        return inlineChildAction ? associateChildWithParent(store, inlineChildAction, apiResponse) : observableOf(true);
       }),
     ).toPromise();
     paginationFinished.push(associatedObs);
@@ -466,8 +464,18 @@ function handleValidationLoopResults(store: Store<AppState>, results: ValidateEn
 
   return {
     started: !!(paginationFinished.length),
-    completed: Promise.all(paginationFinished),
-    apiResponse
+    completed: Promise.all(paginationFinished)
+      .then(() => store.select(getAPIRequestDataState).pipe(first()).toPromise())
+      .then(entities => {
+        // Post processor needs to run once all 'results[x].fetchingState$' have finished. This will mean we've fetched any missing params
+        // (fetch org and it's managers, more then 50 managers so we independently fetch list, need to ensure that the
+        // apiResponse/allEntities here contains the list that's been fetched)
+        const request = validationPostProcessor(store, action, apiResponse, entities);
+        if (request && !request.abortDispatch && request.action) {
+          store.dispatch(request.action);
+        }
+        return apiResponse;
+      }),
   };
 }
 
@@ -494,7 +502,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
       started: false,
-      completed: Promise.resolve([])
+      completed: Promise.resolve(config.apiResponse)
     };
   }
 

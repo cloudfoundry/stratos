@@ -88,9 +88,8 @@ export class RequestEffect {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
-            apiResponse,
             started: false,
-            completed: Promise.resolve(new Array<boolean>()),
+            completed: Promise.resolve(apiResponse),
           } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
@@ -111,18 +110,19 @@ export class RequestEffect {
           if (independentUpdates) {
             this.update(apiAction, true, null);
           }
-          return validation.completed.then(() => ({
+          return validation.completed.then(validatedApiResponse => ({
+            validatedApiResponse,
             independentUpdates,
             validation
           }));
         }),
-        mergeMap(({ independentUpdates, validation }) => {
+        mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
           // if (validation.apiResponse && validation.apiResponse.response.entities.user) { // TODO: RC Remove
           //   console.log('sdfdsf');
           // }
           return [new EntitiesPipelineCompleted(
             apiAction,
-            validation.apiResponse,
+            validatedApiResponse,
             validateAction,
             validation,
             independentUpdates
