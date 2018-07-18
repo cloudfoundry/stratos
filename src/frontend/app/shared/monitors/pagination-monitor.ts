@@ -155,7 +155,15 @@ export class PaginationMonitor<T = any> {
     // It's possible that we need to compare the whole page request object but busy will do for now.
     const samePageBusyState =
       samePage &&
-      x.pageRequests[x.currentPage].busy === y.pageRequests[y.currentPage].busy;
+      (
+        x.pageRequests[x.currentPage]
+        &&
+        x.pageRequests[x.currentPage].busy
+      ) === (
+        y.pageRequests[y.currentPage]
+        &&
+        y.pageRequests[y.currentPage].busy
+      );
     const samePageIdList =
       samePage && x.ids[x.currentPage] === y.ids[y.currentPage];
     return samePageIdList && samePageBusyState;
