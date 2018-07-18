@@ -158,20 +158,6 @@ export class CloudFoundryOrganizationService {
         }).entities$;
       })
     );
-    // this.allOrgUsersAction = new GetAllOrgUsers(
-    //   activeRouteCfOrgSpace.orgGuid,
-    //   this.usersPaginationKey,
-    //   activeRouteCfOrgSpace.cfGuid
-    // );
-
-    // this.allOrgUsers = getPaginationObservables({
-    //   store: this.store,
-    //   action: this.allOrgUsersAction,
-    //   paginationMonitor: this.paginationMonitorFactory.create(
-    //     this.usersPaginationKey,
-    //     entityFactory(cfUserSchemaKey)
-    //   )
-    // });
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {

@@ -62,7 +62,7 @@ export class EntitySchema extends schema.Entity {
    * @param {schema.EntityOptions} [options] As per schema.Entity ctor
    * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
    * spaces, manager spaces, auditor space, etc
-   * @param {(args: any?) => Action} [altFetch] //TODO: RC
+   * @param {(args: any?) => Action} [altFetch] // TODO: RC remove if not using fetchEntityRelationAltAction
    * @memberof EntitySchema
    */
   constructor(
@@ -70,7 +70,7 @@ export class EntitySchema extends schema.Entity {
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
-    // public altFetch?: (store: Store<AppState>, cfGuid: string) => Observable<ValidateEntityResult>
+    // public altFetch?: (store: Store<AppState>, cfGuid: string) => Observable<ValidateEntityResult> // TODO: RC remove if not using fetchEntityRelationAltAction
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
@@ -367,7 +367,7 @@ const orgUserEntity = {
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
   const schema = new EntitySchema(organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, relationKey);
-  // schema.altFetch = (store, cfGuid) => createNonAdminFetchRole(store, cfGuid, schema);
+  // schema.altFetch = (store, cfGuid) => createNonAdminFetchRole(store, cfGuid, schema);// TODO: RC remove if not using fetchEntityRelationAltAction
   return schema;
 }
 

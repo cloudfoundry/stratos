@@ -1,4 +1,3 @@
-import { getCurrentUserCFEndpointRolesState } from '../selectors/current-user-roles-permissions-selectors/role.selectors';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -81,15 +80,13 @@ export class RequestEffect {
       return this.store.select(getAPIRequestDataState).pipe(
         withLatestFrom(
           this.store.select(getPaginationState),
-          this.store.select(getCurrentUserCFEndpointRolesState(apiAction.endpointGuid))
+          // this.store.select(getCurrentUserCFEndpointRolesState(apiAction.endpointGuid))
         ),
         first(),
-        map(([allEntities, allPagination, connectedUserState]) => {
+        // map(([allEntities, allPagination, connectedUserState]) => {
+        map(([allEntities, allPagination]) => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
-          if (entities && entities.user) {
-            console.log('sdfdsf');
-          }
           return apiAction.skipValidation ? {
             apiResponse,
             started: false,
@@ -103,13 +100,13 @@ export class RequestEffect {
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
             populateMissing: true,
-            isEndpointAdmin: connectedUserState ? connectedUserState.global.isAdmin : false
+            // isEndpointAdmin: connectedUserState ? connectedUserState.global.isAdmin : false //TODO: RC remove if not using fetchEntityRelationAltAction
           });
         }),
         mergeMap(validation => {
-          if (validation.apiResponse && validation.apiResponse.response.entities.user) {
-            console.log('sdfdsf');
-          }
+          // if (validation.apiResponse && validation.apiResponse.response.entities.user) { // TODO: RC Remove
+          //   console.log('sdfdsf');
+          // }
           const independentUpdates = !validateAction.apiRequestStarted && validation.started;
           if (independentUpdates) {
             this.update(apiAction, true, null);
@@ -120,9 +117,9 @@ export class RequestEffect {
           }));
         }),
         mergeMap(({ independentUpdates, validation }) => {
-          if (validation.apiResponse && validation.apiResponse.response.entities.user) {
-            console.log('sdfdsf');
-          }
+          // if (validation.apiResponse && validation.apiResponse.response.entities.user) { // TODO: RC Remove
+          //   console.log('sdfdsf');
+          // }
           return [new EntitiesPipelineCompleted(
             apiAction,
             validation.apiResponse,
@@ -190,9 +187,9 @@ export class RequestEffect {
         }
       }
 
-      if (completeAction.apiResponse && completeAction.apiResponse.response.entities.user) {
-        console.log('sdfdsf');
-      }
+      // if (completeAction.apiResponse && completeAction.apiResponse.response.entities.user) { // TODO: RC Remove
+      //   console.log('sdfdsf');
+      // }
 
       return actions;
     }));

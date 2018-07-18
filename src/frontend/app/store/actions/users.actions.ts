@@ -45,8 +45,6 @@ export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
 export const GET_CF_USERS_BY_ORG = '[Users] Get cf users by org ';
 
-export const GET_CF_ROLES_AS_NON_ADMIN = '[Users] Get roles as non-admin';
-
 const createGetAllUsersPaginationKey = cfGuid => createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
 const createGetUsersInitialParams = () => ({
   page: 1,
@@ -54,25 +52,6 @@ const createGetUsersInitialParams = () => ({
   'order-direction': 'desc',
   'order-direction-field': 'username',
 });
-
-export class GetRolesAsNonAdmin implements PaginatedAction, EntityInlineParentAction {
-  type = GET_CF_ROLES_AS_NON_ADMIN;
-  paginationKey: string;
-  actions: string[] = [];
-  // entity = [entityFactory(cfUserSchemaKey)];
-  // entityKey = cfUserSchemaKey;
-  constructor(
-    public cfGuid: string,
-    public entity: [EntitySchema],
-    public entityKey: string,
-    public relationKey: string,
-    public includeRelations: string[] = [],
-    public populateMissing = true,
-  ) {
-    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid, relationKey);
-  }
-  initialParams = createGetUsersInitialParams();
-}
 
 export class GetAllUsersAsNonAdmin implements PaginatedAction, EntityInlineParentAction {
   type = GET_CF_USERS_BY_ORG;

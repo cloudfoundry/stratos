@@ -9,7 +9,6 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
 import {
-  GET_CF_ROLES_AS_NON_ADMIN,
   GET_CF_USERS_BY_ORG,
   GetAllUsersAsNonAdmin,
   GetRolesAsNonAdmin,
@@ -35,26 +34,6 @@ export class UsersEffects {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityServiceFactory: EntityServiceFactory,
   ) { }
-
-  @Effect() fetchRolesByOrgSpace = this.actions$.ofType<GetRolesAsNonAdmin>(GET_CF_ROLES_AS_NON_ADMIN).pipe(
-    switchMap((action: GetRolesAsNonAdmin) => {
-      const mockRequestType: ApiRequestTypes = 'fetch';
-      const mockPaginationAction: PaginatedAction = {
-        entityKey: action.entityKey,
-        type: action.type,
-        paginationKey: action.paginationKey,
-        actions: null,
-      };
-
-      // // START the 'list' fetch
-      // this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
-
-      // if (action.entityKey)
-      //   const allOrganisations$ = this.fetchAllOrgs(action.cfGuid);
-      return [];
-
-    })
-  );
 
   /**
    * Fetch users from each organisation. This is used when the user connected to cf is non-admin and cannot access the global users/ list

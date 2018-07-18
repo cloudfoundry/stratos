@@ -1,6 +1,3 @@
-import { validationPostProcessor } from './entity-relations-post-processor';
-import { ICfRolesState } from '../types/current-user-roles.types';
-import { IRequestDataState } from '../types/entity.types';
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
@@ -14,16 +11,15 @@ import { APIResponse } from '../actions/request.actions';
 import { AppState } from '../app-state';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
-import {
-  getCurrentUserCFEndpointRolesState,
-  selectCurrentUserCFEndpointRolesState,
-} from '../selectors/current-user-roles-permissions-selectors/role.selectors';
+import { getCurrentUserCFEndpointRolesState } from '../selectors/current-user-roles-permissions-selectors/role.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
+import { ICfRolesState } from '../types/current-user-roles.types';
+import { IRequestDataState } from '../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
-import { EntitySchema, cfUserSchemaKey } from './entity-factory';
-// import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
+import { cfUserSchemaKey, EntitySchema } from './entity-factory';
+import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
   createEntityRelationKey,
@@ -39,6 +35,7 @@ import {
 } from './entity-relations.types';
 import { pick } from './reducer.helper';
 
+// import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -104,8 +101,8 @@ class ValidateEntityRelationsConfig {
    * @memberof ValidateEntityRelationsConfig
    */
   apiResponse: APIResponse;
-  // TODO: RC
-  isEndpointAdmin: boolean;
+  // TODO: RC remove if not using fetchEntityRelationAltAction
+  // isEndpointAdmin: boolean;
 }
 
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
@@ -220,15 +217,16 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
  * @returns {ValidateEntityResult[]}
  */
 function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
-  const { store, childRelation, childEntitiesUrl, cfGuid, isEndpointAdmin, parentRelation } = config;
+  const { store, childRelation, childEntitiesUrl, cfGuid, parentRelation } = config;
+  // const { store, childRelation, childEntitiesUrl, cfGuid, isEndpointAdmin, parentRelation } = config;// TODO: RC remove if not using fetchEntityRelationAltAction
 
   if (!childEntitiesUrl) {
     // There might genuinely be no entity. In those cases the url will be blank
     return [];
   }
 
+  // TODO: RC remove if not using fetchEntityRelationAltAction
   // const valResult = fetchEntityRelationAltAction(store, cfGuid, isEndpointAdmin, parentRelation, childRelation);
-
   // if (valResult) {
   //   return [valResult];
   // }
@@ -291,12 +289,14 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
     if (populateMissing) {
       // The values are missing and we want them, go fetch
       results = [].concat(results, createActionsForMissingEntities(config));
-    } else {
-      parentEntity.metadata.invalidFields = parentEntity.metadata.invalidFields || [];
-      if (parentEntity.metadata.invalidFields.indexOf(childRelation.paramName) < 0) {
-        parentEntity.metadata.invalidFields.push(childRelation.paramName);
-      }
     }
+    // else { //TODO: RC Remove if not marking entities as invalid if something missing. NOTE - will not work if the field exists in either
+    // returned entity or entity in store
+    //   parentEntity.metadata.invalidFields = parentEntity.metadata.invalidFields || [];
+    //   if (parentEntity.metadata.invalidFields.indexOf(childRelation.paramName) < 0) {
+    //     parentEntity.metadata.invalidFields.push(childRelation.paramName);
+    //   }
+    // }
   }
 
   return results;
@@ -321,12 +321,6 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
         childEntities = childRelation.isArray ? childEntities : [childEntities];
-        // // Clear it
-        // const invalidFields = entity.metadata.invalidFields || [];
-        // const paramIndex = invalidFields.indexOf(childRelation.paramName);
-        // if (paramIndex >= 0) {
-        //   entity.metadata.invalidFields = entity.metadata.invalidFields.splice(paramIndex, 1);
-        // }
       } else {
         let childEntitiesAsArray;
 
@@ -442,6 +436,9 @@ function associateChildWithParent(store, action: EntityInlineChildAction, apiRes
 function handleValidationLoopResults(store: Store<AppState>, results: ValidateEntityResult[], apiResponse: APIResponse, action, allEntities): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
 
+  // TODO: RC needs to happen once all 'results[x].fetchingState$' have finished. This will mean we've fetched any missing params (fetch
+  // org and it's managers, more then 50 managers so we independtly fetch list, need to ensure that the apiResonse/allEntities here contains
+  // the list that's been fetched)
   results = [].concat(validationPostProcessor(store, action, apiResponse, allEntities));
 
   results.forEach(request => {
@@ -490,9 +487,9 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   const { action, populateMissing, newEntities, allEntities, store } = config;
   let { parentEntities } = config;
 
-  if (action.entityKey === cfUserSchemaKey) {
-    console.log('aa');
-  }
+  // if (action.entityKey === cfUserSchemaKey) { // TODO: RC remove
+  //   console.log('aa');
+  // }
 
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
@@ -565,9 +562,10 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     withLatestFrom(
       store.select(selectEntity<any>(parentEntitySchema.key, parentGuid)),
       store.select(getAPIRequestDataState),
-      store.select(getCurrentUserCFEndpointRolesState(action.endpointGuid))
+      // store.select(getCurrentUserCFEndpointRolesState(action.endpointGuid))//TODO: RC remove if not using fetchEntityRelationAltAction
     ),
-    map(([entityInfo, entity, allEntities, connectedUserState]: [RequestInfoState, any, IRequestDataState, ICfRolesState]) => {
+    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, IRequestDataState]) => {
+      // map(([entityInfo, entity, allEntities, connectedUserState]: [RequestInfoState, any, IRequestDataState, ICfRolesState]) => {//TODO: RC remove if not using fetchEntityRelationAltAction
       if (!entity) {
         return;
       }
@@ -601,7 +599,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
             childEntitiesUrl: '',
             populateMissing: true,
-            isEndpointAdmin: connectedUserState.global.isAdmin
+            // isEndpointAdmin: connectedUserState.global.isAdmin// TODO: RC remove if not using fetchEntityRelationAltAction
           };
           return createActionsForExistingEntities(config)[0];
         }

@@ -59,7 +59,6 @@ export class CloudFoundrySpaceService {
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   allSpaceUsers$: Observable<APIResource<CfUser>[]>;
-  // allSpaceUsersAction: GetAllSpaceUsers;
   usersPaginationKey: string;
 
   constructor(
@@ -153,15 +152,6 @@ export class CloudFoundrySpaceService {
         }).entities$;
       })
     );
-
-    // getPaginationObservables({
-    //   store: this.store,
-    //   action: this.allSpaceUsersAction,
-    //   paginationMonitor: this.paginationMonitorFactory.create(
-    //     this.usersPaginationKey,
-    //     entityFactory(cfUserSchemaKey)
-    //   )
-    // });
   }
 
   private initialiseAppObservables() {

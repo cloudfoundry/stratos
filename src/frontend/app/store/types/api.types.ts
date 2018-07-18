@@ -26,7 +26,7 @@ export interface APIResourceMetadata {
   guid: string;
   updated_at: string;
   url: string;
-  invalidFields?: string[];
+  // invalidFields?: string[]; //TODO: RC Remove if not marking entities as invalid if something missing
 }
 
 export interface NormalizedResponse {
