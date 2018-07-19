@@ -38,7 +38,6 @@ class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFl
     super(httpClient, requestOptions, url, PermissionFlattener.pageUrlParam);
   }
   public getTotalPages = (res: CFResponse<any>) => {
-    console.log(res.total_pages);
     return res.total_pages;
   }
   public mergePages = (res: CFResponse[]) => {
