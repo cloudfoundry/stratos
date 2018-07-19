@@ -28,7 +28,7 @@ import { CreateServiceInstance, GetServiceInstance, UpdateServiceInstance } from
 import { AppState } from '../../../../store/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid
@@ -327,6 +327,56 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       map(() => this.validate.next(this.selectExistingInstanceForm.valid))).subscribe());
   }
 
+  private getNewServiceGuid(name: string, spaceGuid: string, servicePlanGuid: string) {
+    if (!this.modeService.isEditServiceInstanceMode()) {
+      return name + spaceGuid + servicePlanGuid;
+    } else {
+      return this.serviceInstanceGuid;
+    }
+  }
+
+  private getUpdateObservable(isEditMode: boolean, newServiceInstanceGuid: string) {
+    if (!isEditMode) {
+      return observableOf(null);
+    }
+    const actionState = selectUpdateInfo(serviceInstancesSchemaKey,
+      newServiceInstanceGuid,
+      UpdateServiceInstance.updateServiceInstance
+    );
+    return this.store.select(actionState).pipe(
+      filter(i => !i.busy)
+    );
+  }
+
+  private getAction(
+    cfGuid: string,
+    newServiceInstanceGuid: string,
+    name: string,
+    servicePlanGuid: string,
+    spaceGuid: string,
+    params: {},
+    tagsStr: string[],
+    isEditMode: boolean
+  ) {
+    if (isEditMode) {
+      return new UpdateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+    }
+    return new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+  }
+
+  private getIdFromResponseGetter(cfGuid: string, newId: string, isEditMode: boolean) {
+    return (response: NormalizedResponse) => {
+      if (!isEditMode) {
+        // We need to re-fetch the Service Instance
+        // incase of creation because the entity returned is incomplete
+        const guid = response.result[0];
+        this.store.dispatch(new GetServiceInstance(guid, cfGuid));
+        return guid;
+      }
+      return newId;
+    };
+  }
+
   createServiceInstance(createServiceInstance: CreateServiceInstanceState, isUpdate: boolean): Observable<RequestInfoState> {
 
     const name = this.createNewInstanceForm.controls.name.value;
@@ -336,40 +386,38 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
-    let newServiceInstanceGuid;
+    const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
 
-    if (!this.modeService.isEditServiceInstanceMode()) {
-      newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
-    } else {
-      newServiceInstanceGuid = this.serviceInstanceGuid;
-    }
+    const isEditMode = this.modeService.isEditServiceInstanceMode();
+    const checkUpdate$ = this.getUpdateObservable(isEditMode, newServiceInstanceGuid);
+    const action = this.getAction(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr, isEditMode);
 
-    let action;
-    if (this.modeService.isEditServiceInstanceMode()) {
-      action = new UpdateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
-    } else {
-      action = new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
-    }
-    this.store.dispatch(action);
     const create$ = this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
-    return create$.pipe(
+    const getIdFromResponse = this.getIdFromResponseGetter(cfGuid, newServiceInstanceGuid, isEditMode);
+
+    this.store.dispatch(action);
+    return checkUpdate$.pipe(
+      switchMap(o => create$),
       filter(a => !a.creating),
       switchMap(a => {
         if (a.error) {
           return create$;
         }
-        const response = a.response as NormalizedResponse;
-        const guid = response.result[0];
-        this.store.dispatch(new GetServiceInstance(guid, cfGuid));
-        return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, guid)).pipe(map(ri => ({
-          ...ri,
-          response: {
-            result: [guid]
-          }
-        })));
+
+        const guid = getIdFromResponse(a.response as NormalizedResponse);
+
+        return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, guid)).pipe(
+          map(ri => ({
+            ...ri,
+            response: {
+              result: [guid]
+            }
+          }))
+        );
       })
     );
   }
+
 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 

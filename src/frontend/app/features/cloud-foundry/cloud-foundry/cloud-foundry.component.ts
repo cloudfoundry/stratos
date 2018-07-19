@@ -19,7 +19,9 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
     {
       provide: ListConfig,
       useClass: CFEndpointsListConfigService,
-    }]
+    },
+    CloudFoundryService
+  ]
 })
 export class CloudFoundryComponent {
   connectedEndpoints$: Observable<number>;

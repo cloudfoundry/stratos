@@ -67,11 +67,6 @@ export class EntityService<T = any> {
         if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo)) {
           return;
         }
-        // If we're not an 'official' object, go forth and fetch again. This will populate all the required '<entity>__guid' fields.
-        if (!entityInfo.entity.metadata) {
-          this.actionDispatch();
-          return;
-        }
         validated = true;
         store.dispatch(new ValidateEntitiesStart(
           action as ICFAction,

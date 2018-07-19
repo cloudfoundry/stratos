@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
-import { PaginationMonitor } from '../monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { AppState } from '../../store/app-state';
 import { endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
+import { PaginationMonitor } from '../monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 @Injectable()
 export class CloudFoundryService {
+  static EndpointList = 'endpoint-list';
   hasRegisteredCFEndpoints$: Observable<boolean>;
   hasConnectedCFEndpoints$: Observable<boolean>;
   connectedCFEndpoints$: Observable<EndpointModel[]>;
@@ -23,10 +24,8 @@ export class CloudFoundryService {
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    this.cfEndpointsMonitor = this.paginationMonitorFactory.create(
-      'endpoint-list',
-      entityFactory(endpointSchemaKey)
-    );
+
+    this.cfEndpointsMonitor = new PaginationMonitor(store, CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey));
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
       map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))

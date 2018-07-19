@@ -27,6 +27,7 @@ import {
   startWith,
   switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs/operators';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
@@ -35,7 +36,7 @@ import { safeUnsubscribe } from '../../../../features/service-catalog/services-h
 import { ServicePlanAccessibility } from '../../../../features/service-catalog/services.service';
 import {
   SetCreateServiceInstanceCFDetails,
-  SetServicePlan,
+  SetCreateServiceInstanceServicePlan,
 } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
@@ -152,17 +153,22 @@ export class SelectPlanStepComponent implements OnDestroy {
   onEnter = () => {
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
-      tap(o => {
-        this.stepperForm.controls.servicePlans.setValue(o[0].id);
+      withLatestFrom(this.store.select(selectCreateServiceInstance)),
+      tap(([servicePlans, createServiceInstanceState]) => {
+        if (this.modeService.isEditServiceInstanceMode()) {
+          this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid);
+        } else {
+          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].id);
+        }
         this.stepperForm.updateValueAndValidity();
-        this.servicePlans = o;
+        this.servicePlans = servicePlans;
         this.validate.next(this.stepperForm.valid);
       }),
     ).subscribe();
   }
 
   onNext = (): Observable<StepOnNextResult> => {
-    this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
+    this.store.dispatch(new SetCreateServiceInstanceServicePlan(this.stepperForm.controls.servicePlans.value));
     return observableOf({ success: true });
   }
 

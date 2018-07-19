@@ -1,6 +1,7 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { first, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { Observable, combineLatest, of as observableOf } from 'rxjs';
+import { map, publishReplay, refCount, tap, switchMap } from 'rxjs/operators';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -20,42 +21,63 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     filter: 'Search by name',
     noEntries: 'There are no users'
   };
-  columns: ITableColumn<APIResource<CfUser>>[] = [{
-    columnId: 'username',
-    headerCell: () => 'Username',
-    cellFlex: '10',
-    cellAlignSelf: 'baseline',
-    cellDefinition: {
-      getValue: row => row.entity.username || row.metadata.guid
-    },
-    sort: {
-      type: 'sort',
-      orderKey: 'username',
-      field: 'entity.username'
+  columns: ITableColumn<APIResource<CfUser>>[] = [
+    {
+      columnId: 'username',
+      headerCell: () => 'Username',
+      cellFlex: '10',
+      cellAlignSelf: 'baseline',
+      cellDefinition: {
+        getValue: row => row.entity.username || row.metadata.guid
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'username',
+        field: 'entity.username'
+      }
     }
-  }];
+  ];
   private initialised: Observable<boolean>;
 
-  constructor(private store: Store<AppState>, cfGuid: string) {
-    this.initialised = waitForCFPermissions(store, cfGuid).pipe(
-      first(),
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(cfGuid, cf.global.isAdmin);
-        this.dataSource = new CfSelectUsersDataSourceService(cfGuid, this.store, action, this);
+  constructor(
+    private store: Store<AppState>,
+    cfGuid: string,
+    cfUserService: CfUserService,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+  ) {
+    this.initialised = waitForCFPermissions(
+      store,
+      activeRouteCfOrgSpace.cfGuid
+    ).pipe(
+      switchMap(cf =>
+        combineLatest(
+          observableOf(cf),
+          cfUserService.createPaginationAction(cf.global.isAdmin)
+        )
+      ),
+      tap(([cf, action]) => {
+        this.dataSource = new CfSelectUsersDataSourceService(
+          cfGuid,
+          this.store,
+          action,
+          this
+        );
       }),
-      map(cf => cf && cf.state.initialised),
+      map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
-      refCount(),
+      refCount()
     );
   }
 
   getColumns = () => this.columns;
   getGlobalActions = () => [];
-  getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [{
-    label: 'delete me',
-    description: '',
-    action: (items: APIResource<CfUser>[]) => false
-  }]
+  getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [
+    {
+      label: 'delete me',
+      description: '',
+      action: (items: APIResource<CfUser>[]) => false
+    }
+  ]
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
   getDataSource = () => this.dataSource;

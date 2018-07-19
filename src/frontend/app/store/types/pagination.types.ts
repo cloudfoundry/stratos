@@ -63,6 +63,7 @@ export interface PaginatedAction extends PaginationAction, IRequestAction {
     },
     method?: RequestMethod | string | null
   };
+  skipValidation?: boolean;
 }
 
 export interface PaginationEntityTypeState {

@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../core/core.module';
@@ -19,7 +20,8 @@ describe('UsersRolesSelectComponent', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        HttpModule
       ],
       providers: [
         ActiveRouteCfOrgSpace,

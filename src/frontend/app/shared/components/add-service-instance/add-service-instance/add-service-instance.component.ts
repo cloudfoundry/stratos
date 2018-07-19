@@ -18,6 +18,7 @@ import {
   SetCreateServiceInstanceServiceGuid,
   SetServiceInstanceGuid,
   ResetCreateServiceInstanceOrgAndSpaceState,
+  SetCreateServiceInstanceServicePlan,
 } from '../../../../store/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../store/actions/space.actions';
@@ -182,6 +183,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           serviceInstanceEntity.tags,
           ''
         ));
+        this.store.dispatch(new SetCreateServiceInstanceServicePlan(serviceInstanceEntity.service_plan_guid));
         const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, cfId);
         spaceEntityService.waitForEntity$.pipe(
           filter(p => !!p),

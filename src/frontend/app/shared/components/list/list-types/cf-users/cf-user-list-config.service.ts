@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
@@ -114,11 +114,16 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignColumnConfig(org$, space$);
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
+      switchMap(cf =>
+        combineLatest(
+          observableOf(cf),
+          cfUserService.createPaginationAction(cf.global.isAdmin)
+        )
+      ),
+      tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this);
       }),
-      map(cf => cf && cf.state.initialised),
+      map(([cf, action]) => cf && cf.state.initialised)
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
   }
@@ -130,25 +135,51 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
    * @memberof CfUserListConfigService
    */
   private assignColumnConfig = (
-    org$: Observable<EntityInfo<APIResource<IOrganization>>> = observableOf(null),
-    space$: Observable<EntityInfo<APIResource<ISpace>>> = observableOf(null)) => {
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>) => {
+
+    const { safeOrg$, safeSpaces$ } = this.getSafeObservables(org$, space$);
+
     this.columns.find(column => column.columnId === 'roles').cellConfig = {
-      org$: org$.pipe(map(org => org ? org.entity : null))
+      org$: safeOrg$
     };
     this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
-      org$: org$.pipe(map(org => org ? org.entity : null)),
-      spaces$: combineLatest(org$, space$ || observableOf(null)).pipe(
-        map(([org, space]) => {
-          if (space) {
-            return [space.entity];
-          } else if (org && org.entity.entity.spaces && org.entity.entity.spaces.length) {
-            return org.entity.entity.spaces;
-          } else {
-            return null;
-          }
-        })
-      )
+      org$: safeOrg$,
+      spaces$: safeSpaces$
     };
+  }
+
+  private getSafeObservables(
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>
+  ) {
+    if (space$ && org$) {
+      // List should show specific org and specific space roles
+      return {
+        safeOrg$: org$.pipe(map(org => org ? org.entity : null)),
+        safeSpaces$: space$.pipe(
+          map(space => [space.entity])
+        )
+      };
+    } else if (org$) {
+      // List should show specific org and space roles from with org
+      const safeOrg$ = org$.pipe(map(org => org ? org.entity : null));
+      return {
+        safeOrg$,
+        safeSpaces$: safeOrg$.pipe(
+          map((org: APIResource<IOrganization>) => org.entity.spaces),
+          // Important for when we fetch spaces async. This prevents the null passing through, which would mean all spaces are shown aka use
+          // case below
+          filter(spaces => !!spaces)
+        )
+      };
+    } else {
+      // List should show all org and all space roles
+      return {
+        safeOrg$: observableOf(null),
+        safeSpaces$: observableOf(null)
+      };
+    }
   }
 
   private createCanUpdateOrgSpaceRoles = () => canUpdateOrgSpaceRoles(

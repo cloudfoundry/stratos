@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpModule } from '@angular/http';
 
 import { CoreModule } from '../../../core/core.module';
 import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
@@ -9,6 +10,7 @@ import { CfUserService } from '../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { CfRoleCheckboxComponent } from './cf-role-checkbox.component';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { CfUserServiceTestProvider } from '../../../test-framework/user-service-helper';
 
 
 describe('CfRoleCheckboxComponent', () => {
@@ -21,10 +23,11 @@ describe('CfRoleCheckboxComponent', () => {
         CoreModule,
         // SharedModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        HttpModule
       ],
       providers: [
-        CfUserService,
+        CfUserServiceTestProvider,
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,
