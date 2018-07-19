@@ -1,8 +1,6 @@
-import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
-
+import { Observable, combineLatest, of as observableOf } from 'rxjs';
+import { map, publishReplay, refCount, tap, switchMap } from 'rxjs/operators';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
@@ -11,16 +9,9 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes
-} from '../../list.component.types';
+import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
-
-@Injectable()
-export class CfSelectUsersListConfigService
-  implements IListConfig<APIResource<CfUser>> {
+export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSelectUsersDataSourceService;
   defaultView = 'table' as ListView;
@@ -50,9 +41,9 @@ export class CfSelectUsersListConfigService
 
   constructor(
     private store: Store<AppState>,
-    private cfGuid: string,
-    private cfUserService: CfUserService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    cfGuid: string,
+    cfUserService: CfUserService,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.initialised = waitForCFPermissions(
       store,

@@ -1,8 +1,6 @@
-import { Injectable } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
-import { combineLatest, interval, Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
@@ -11,7 +9,7 @@ import {
   RequestInfoState,
   RequestSectionKeys,
   TRequestTypeKeys,
-  UpdatingSection,
+  UpdatingSection
 } from '../store/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
@@ -33,7 +31,6 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
 /**
  * Designed to be used in a service factory provider
  */
-@Injectable()
 export class EntityService<T = any> {
 
   constructor(

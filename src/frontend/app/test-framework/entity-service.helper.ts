@@ -1,11 +1,10 @@
-import { IRequestAction } from '../store/types/request.types';
-import { Action, Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
-import { EntityService } from '../core/entity-service';
+import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { RequestSectionKeys } from '../store/reducers/api-request-reducer/types';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
+import { ENTITY_SERVICE } from '../shared/entity.tokens';
+import { AppState } from '../store/app-state';
+import { RequestSectionKeys } from '../store/reducers/api-request-reducer/types';
+import { IRequestAction } from '../store/types/request.types';
 
 export function generateTestEntityServiceProvider(
   guid: string,
@@ -27,7 +26,7 @@ export function generateTestEntityServiceProvider(
   }
 
   return {
-    provide: EntityService,
+    provide: ENTITY_SERVICE,
     useFactory,
     deps: [Store, EntityServiceFactory]
   };
