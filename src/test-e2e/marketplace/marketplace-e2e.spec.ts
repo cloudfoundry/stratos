@@ -4,7 +4,7 @@ import { e2e } from '../e2e';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser } from 'protractor';
 
-fdescribe('Marketplace', () => {
+describe('Marketplace', () => {
   const marketplacePage = new MarketplacePage();
   const secretsHelper = new SecretsHelpers();
   const serviceSearchText = 'app';
@@ -20,7 +20,7 @@ fdescribe('Marketplace', () => {
   });
 
   it('- should reach marketplace page', () => {
-    expect(marketplacePage.isMarketplacePage()).toBeTruthy();
+    expect(marketplacePage.isActivePage()).toBeTruthy();
   });
 
   it('- should have correct title', () => {

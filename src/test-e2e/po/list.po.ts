@@ -2,7 +2,6 @@ import { by, element, promise, Key } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { MetaCard } from './meta-card.po';
-import { VOLUME_UP } from '@angular/cdk/keycodes';
 
 /**
  * Page Object for the List component
