@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-
 import { ISpace } from '../../../../../core/cf-api.types';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { selectUsersRolesRoles } from '../../../../../store/selectors/users-roles.selector';
@@ -13,9 +12,8 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 
-@Injectable()
+
 export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResource<ISpace>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfUsersSpaceRolesDataSourceService;

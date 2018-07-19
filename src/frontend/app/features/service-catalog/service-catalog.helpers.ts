@@ -7,13 +7,12 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { ServicesService } from './services.service';
 import { Provider } from '@angular/core';
 
-function servicesServiceFactory(
+export function servicesServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   paginationMonitorFactory: PaginationMonitorFactory
 ) {
-  const { id, cfId } = activatedRoute.snapshot.params;
   return new ServicesService(store, entityServiceFactory, activatedRoute, paginationMonitorFactory);
 }
 

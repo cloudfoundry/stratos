@@ -7,22 +7,22 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class UsageGaugeComponent implements OnInit {
 
-  @Input('title') private title: string;
+  @Input('title') public title: string;
 
-  @Input('value') private value: number;
+  @Input('value') public value: number;
 
-  @Input('valueText') private valueText: string;
+  @Input('valueText') public valueText: string;
 
-  @Input('barOnly') private barOnly: boolean;
+  @Input('barOnly') public barOnly: boolean;
 
   // Change bar color to warning if this threshold is reached
-  @Input('warningAt') private warningAt: number;
+  @Input('warningAt') public warningAt: number;
 
   // Change bar color to error if this threshold is reached
-  @Input('errorAt') private errorAt: number;
+  @Input('errorAt') public errorAt: number;
 
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
 }

@@ -14,7 +14,7 @@ import { ICfV2Info } from '../../../../core/cf-api.types';
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
-  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
+  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
 
   description$: Observable<string>;
 
@@ -49,7 +49,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     let desc = '-';
     if (entity && entity.entity && entity.entity.entity) {
       const metadata = entity.entity.entity;
-      if (metadata.description.length === 0 ) {
+      if (metadata.description.length === 0) {
         // No descripion - custom overrides
         if (metadata.support === 'pcfdev@pivotal.io') {
           desc = 'PCF Dev';
