@@ -1,5 +1,5 @@
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest as observableCombineLatest, of as observableOf } from 'rxjs';
@@ -61,7 +61,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
-    private endpointsService: EndpointsService
+    private endpointsService: EndpointsService,
+    private ngZone: NgZone
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -259,18 +260,21 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
-    // Auto refresh
+    this.ngZone.runOutsideAngular(() => {
     this.entityServiceAppRefresh$ = this.entityService
       .poll(10000, this.autoRefreshString).pipe(
         tap(({ resource }) => {
-          this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-          if (resource && resource.entity && resource.entity.state === 'STARTED') {
-            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-          }
+          this.ngZone.run(() => {
+            this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+            if (resource && resource.entity && resource.entity.state === 'STARTED') {
+              this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+            }
+          });
         }))
       .subscribe();
+      });
 
-    this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
+      this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
         requestInfo.error

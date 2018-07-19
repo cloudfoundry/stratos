@@ -121,4 +121,19 @@ export class CFHelpers {
       return json.resources;
     });
   }
+
+  fetchSpace(cnsiGuid: string, spaceName: string) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName).then(json => {
+      if (json.total_results > 0) {
+        const space = json.resources[0];
+        return space;
+      }
+      return null;
+    });
+  }
+
+  createApp(cnsiGuid: string, spaceGuid: string, appName: string) {
+    return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
+  }
+
 }
