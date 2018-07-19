@@ -35,7 +35,6 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
 
 function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
-
   return (entities, paginationState) => {
     const orderKey = paginationState.params['order-direction-field'];
     if (orderKey === def.orderKey) {
