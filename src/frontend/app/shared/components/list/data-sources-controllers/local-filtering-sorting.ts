@@ -35,6 +35,7 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
 
 function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
+
   return (entities, paginationState) => {
     const orderKey = paginationState.params['order-direction-field'];
     if (orderKey === def.orderKey) {
@@ -57,6 +58,27 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
     } else {
       return entities;
     }
+  };
+}
+
+/**
+ * Standard sort function for sorting integer field
+ */
+export function getIntegerFieldSortFunction(field: string): DataFunction<any> {
+  const fieldArray = field.split('.');
+  return (entities, paginationState) => {
+    const orderDirection = paginationState.params['order-direction'] || 'asc';
+    return entities.sort((a, b) => {
+      const valueA = parseInt(getValue(a, fieldArray), 10);
+      const valueB = parseInt(getValue(b, fieldArray), 10);
+      if (valueA > valueB) {
+        return orderDirection === 'desc' ? 1 : -1;
+      }
+      if (valueA < valueB) {
+        return orderDirection === 'desc' ? -1 : 1;
+      }
+      return 0;
+    });
   };
 }
 
