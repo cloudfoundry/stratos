@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Http, Request, RequestOptions } from '@angular/http';
+import { Http, Request, RequestOptions, Response } from '@angular/http';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
@@ -13,7 +13,7 @@ export interface IPaginationFlattener<T> {
   buildFetchParams: (i: number) => any[];
 }
 
-export class BaseHttpClientFetcher {
+export class BaseHttpClientFetcher<T = CFResponse> {
   constructor(
     private httpClient: HttpClient,
     public url,
@@ -21,7 +21,7 @@ export class BaseHttpClientFetcher {
     private pageUrlParam: string
   ) { }
   public fetch(url: string, options: { [key: string]: any }) {
-    return this.httpClient.get<CFResponse>(
+    return this.httpClient.get<T>(
       url,
       options
     );
@@ -38,25 +38,27 @@ export class BaseHttpClientFetcher {
   }
 }
 
-export class BaseHttpFetcher {
+export class BaseHttpFetcher<T = CFResponse> {
   constructor(
     private http: Http,
     private requestOptions: RequestOptions,
     private pageUrlParam: string
   ) { }
+
+  private getJsonData(response: Response) {
+    try {
+      return response.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
   public fetch(options: RequestOptions): Observable<any> {
     return this.http.request(new Request(options)).pipe(
-      map(response => {
-        let resData;
-        try {
-          resData = response.json();
-        } catch (e) {
-          resData = null;
-        }
-        return resData;
-      }),
+      map(this.getJsonData),
     );
   }
+
   public buildFetchParams(i: number) {
     const requestOption = { ...this.requestOptions } as RequestOptions;
     requestOption.params.set(this.pageUrlParam, i.toString());
