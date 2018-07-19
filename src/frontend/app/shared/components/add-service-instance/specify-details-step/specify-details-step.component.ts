@@ -18,8 +18,8 @@ import {
   take,
   tap
 } from 'rxjs/operators';
-import { IServiceInstance, IServicePlanSchemas } from '../../../../core/cf-api-svc.types';
-import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
+import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { getServiceJsonParams, safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -40,6 +40,8 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { constants } from 'os';
+import { JsonPointer } from 'angular2-json-schema-form';
 
 
 const enum FormMode {
@@ -90,11 +92,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
   spaceScopeSub: Subscription;
+  selectedServiceSubscription: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
-  schemas: IServicePlanSchemas;
+  schema: any;
   showJsonSchema: boolean;
   jsonFormOptions: any = { addSubmit: false };
+  formValidationErrors: any;
 
   static isValidJsonValidatorFn = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
@@ -182,8 +186,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  onEnter = (schemas) => {
-    this.schemas = schemas;
+  onEnter = (selectedService$?) => {
+    if (selectedService$ instanceof Observable) {
+      this.selectedServiceSubscription = selectedService$
+        .subscribe(selectedService => {
+          if (!!this.modeService.isEditServiceInstanceMode()) {
+            this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters);
+          } else { this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_instance.update.parameters); }
+        });
+    }
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
@@ -202,6 +213,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ).subscribe();
     }
     this.subscriptions.push(this.setupFormValidatorData());
+  }
+
+  private filterSchema = (schema: any): any => {
+    return Object.keys(schema).reduce((obj, key) => {
+      if (key !== '$schema') { obj[key] = schema[key]; }
+      return obj;
+    }, {});
   }
 
   resetForms = (mode: FormMode) => {
@@ -251,6 +269,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
+    safeUnsubscribe(this.selectedServiceSubscription);
   }
 
   ngAfterContentInit() {
@@ -262,6 +281,30 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       const stringData = JSON.stringify(jsonData);
       this.createNewInstanceForm.get('params').setValue(stringData);
     }
+  }
+
+  validationErrors(data: any): void {
+    this.formValidationErrors = data;
+  }
+
+  get prettyValidationErrors() {
+    if (!this.formValidationErrors) { return null; }
+    const errorArray = [];
+    for (const error of this.formValidationErrors) {
+      const message = error.message;
+      const dataPathArray = JsonPointer.parse(error.dataPath);
+      if (dataPathArray.length) {
+        let field = dataPathArray[0];
+        for (let i = 1; i < dataPathArray.length; i++) {
+          const key = dataPathArray[i];
+          field += /^\d+$/.test(key) ? `[${key}]` : `.${key}`;
+        }
+        errorArray.push(`${field}: ${message}`);
+      } else {
+        errorArray.push(message);
+      }
+    }
+    return errorArray.join('<br>');
   }
 
   onNext = (): Observable<StepOnNextResult> => {

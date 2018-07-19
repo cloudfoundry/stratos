@@ -4,6 +4,7 @@
 }
 
 @mixin json-schema-component() {
+  .data-bad { background-color: #fcc; }
   .display-json {
     white-space: -moz-pre-wrap;
     white-space: -pre-wrap;

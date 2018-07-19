@@ -18,8 +18,8 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
-import { IServicePlanSchemas } from '../../../../core/cf-api-svc.types';
 import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
+import { JsonPointer } from 'angular2-json-schema-form';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -39,10 +39,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   guideText = 'Specify the application to bind (Optional)';
 
   selectedFramework = 'material-design';
-  schemas: IServicePlanSchemas;
+  schema: any;
   showJsonSchema: boolean;
   jsonFormOptions: any = { addSubmit: false };
   selectedServiceSubscription: Subscription;
+  formValidationErrors: any;
+  selectedService$: any;
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
@@ -66,6 +68,30 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       const stringData = JSON.stringify(jsonData);
       this.stepperForm.get('params').setValue(stringData);
     }
+  }
+
+  validationErrors(data: any): void {
+    this.formValidationErrors = data;
+  }
+
+  get prettyValidationErrors() {
+    if (!this.formValidationErrors) { return null; }
+    const errorArray = [];
+    for (const error of this.formValidationErrors) {
+      const message = error.message;
+      const dataPathArray = JsonPointer.parse(error.dataPath);
+      if (dataPathArray.length) {
+        let field = dataPathArray[0];
+        for (let i = 1; i < dataPathArray.length; i++) {
+          const key = dataPathArray[i];
+          field += /^\d+$/.test(key) ? `[${key}]` : `.${key}`;
+        }
+        errorArray.push(`${field}: ${message}`);
+      } else {
+        errorArray.push(message);
+      }
+    }
+    return errorArray.join('<br>');
   }
 
   ngAfterContentInit() {
@@ -96,13 +122,11 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   onEnter = (selectedService$?) => {
+    this.selectedService$ = selectedService$;
     if (selectedService$ instanceof Observable) {
       this.selectedServiceSubscription = selectedService$
         .subscribe(selectedService => {
-          this.schemas = {
-            serviceBinding: this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters),
-            serviceInstances: this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters),
-          };
+          this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters);
         });
     }
   }
@@ -116,7 +140,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   submit = (): Observable<StepOnNextResult> => {
     this.setApp();
-    return observableOf({ success: true, data: this.schemas });
+    return observableOf({ success: true, data: this.selectedService$ });
   }
 
   setApp = () => this.store.dispatch(
