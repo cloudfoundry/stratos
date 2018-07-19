@@ -14,7 +14,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 export class CloudFoundryOrganizationSummaryComponent {
   appLink: Function;
 
-  constructor(private store: Store<AppState>, private cfOrgService: CloudFoundryOrganizationService) {
+  constructor(private store: Store<AppState>, public cfOrgService: CloudFoundryOrganizationService) {
     this.appLink = () => {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };

@@ -9,16 +9,16 @@ export class MetadataItemComponent implements OnInit {
 
   constructor() { }
 
-  @Input('icon') private icon: string;
+  @Input('icon') public icon: string;
 
-  @Input('iconFont') private iconFont: string;
+  @Input('iconFont') public iconFont: string;
 
-  @Input('label') private label: string;
+  @Input('label') public label: string;
 
-  @Input('tooltip') private tooltip: string;
+  @Input('tooltip') public tooltip: string;
 
   // Are we editing?
-  @Input('edit') private edit: boolean;
+  @Input('edit') public edit: boolean;
 
   ngOnInit() {
   }

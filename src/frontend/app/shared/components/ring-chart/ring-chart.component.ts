@@ -13,12 +13,16 @@ export class RingChartComponent implements OnInit {
   colors: ColorHelper;
 
   @Input() data: any;
-  @Input() label  = 'Total';
+  @Input() label = 'Total';
   @Input() scheme: any = 'cool';
 
+  @Input() onClick: ($event: Event) => void;
+  @Input() onActivate: ($event: Event) => void;
+  @Input() onDeactivate: ($event: Event) => void;
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
   @Input() percentageFormatting: (value: number) => any = percentage => percentage;
+
 
   constructor() { }
 

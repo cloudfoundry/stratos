@@ -46,7 +46,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
 
-  private deployer: DeployApplicationDeployer;
+  public deployer: DeployApplicationDeployer;
 
   private deploySub: Subscription;
   private errorSub: Subscription;

@@ -77,7 +77,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   userSchemaKey = cfUserSchemaKey;
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfAndOrgGuid$: Observable<{ cfGuid: string, orgGuid: string }>;
-  private orgName$ = new BehaviorSubject('');
+  public orgName$ = new BehaviorSubject('');
 
   private updateChanges = new BehaviorSubject(0);
   private nameCache: {

@@ -2,13 +2,12 @@
 import { of as observableOf, Observable, Subscription } from 'rxjs';
 
 import { map, filter, take } from 'rxjs/operators';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 
-import { EntityService } from '../../../core/entity-service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
@@ -33,8 +32,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   constructor(
-    private applicationService: ApplicationService,
-    private entityService: EntityService,
+    public applicationService: ApplicationService,
     private store: Store<AppState>,
     private fb: FormBuilder,
     private http: Http,

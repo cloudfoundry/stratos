@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { ActivatedRoute } from '@angular/router';
@@ -29,6 +29,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   initCfOrgSpaceService: Subscription[] = [];
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);
+  isRedeploy: boolean;
 
   constructor(
     private store: Store<AppState>,
@@ -36,6 +37,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute
   ) {
     this.appGuid = this.activatedRoute.snapshot.queryParams['appGuid'];
+    this.isRedeploy = !!this.appGuid;
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {

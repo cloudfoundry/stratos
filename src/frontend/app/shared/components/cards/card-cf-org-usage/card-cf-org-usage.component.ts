@@ -10,5 +10,5 @@ import {
   styleUrls: ['./card-cf-org-usage.component.scss']
 })
 export class CardCfOrgUsageComponent {
-  constructor(private cfOrganizationService: CloudFoundryOrganizationService) { }
+  constructor(public cfOrganizationService: CloudFoundryOrganizationService) { }
 }
