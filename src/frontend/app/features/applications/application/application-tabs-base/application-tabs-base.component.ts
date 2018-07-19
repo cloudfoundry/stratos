@@ -261,8 +261,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
+    // Auto refresh
     this.ngZone.runOutsideAngular(() => {
-    this.entityServiceAppRefresh$ = this.entityService
+      this.entityServiceAppRefresh$ = this.entityService
       .poll(10000, this.autoRefreshString).pipe(
         tap(({ resource }) => {
           this.ngZone.run(() => {
