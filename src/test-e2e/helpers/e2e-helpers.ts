@@ -3,6 +3,7 @@ import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
+import { e2e } from '../e2e';
 
 
 export enum ConsoleUserType {
@@ -13,6 +14,7 @@ export enum ConsoleUserType {
 export class E2EHelpers {
 
   static e2eItemPrefix = 'acceptance.e2e.';
+  static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
 
   secrets = new SecretsHelpers();
 
@@ -152,6 +154,26 @@ export class E2EHelpers {
     return element.click();
   }
 
+  // Cloud Foundry
+  getCustomerOrgSpaceLabel(isoTime, orgSpace) {
+    return E2EHelpers.customOrgSpaceLabel + '.' + orgSpace + '.' + (isoTime || (new Date()).toISOString());
+  }
 
+  getEndpointGuid(info, name: string): string {
+    expect(info.endpoints).toBeDefined();
+
+    let endpointGuid = null;
+    Object.keys(info.endpoints).forEach((type) => {
+      const endpoints = info.endpoints[type];
+      Object.keys(endpoints).forEach((guid) => {
+        const endpoint = endpoints[guid];
+        if (endpoint.name === name && !endpointGuid) {
+          endpointGuid = guid;
+        }
+      });
+    });
+
+    return endpointGuid;
+  }
 
 }
