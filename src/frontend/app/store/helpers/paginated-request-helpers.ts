@@ -14,7 +14,12 @@ export interface IPaginationFlattener<T> {
 }
 
 export class BaseHttpClientFetcher {
-  constructor(private httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }, private pageUrlParam: string) { }
+  constructor(
+    private httpClient: HttpClient,
+    public url,
+    public requestOptions: { [key: string]: any },
+    private pageUrlParam: string
+  ) { }
   public fetch(url: string, options: { [key: string]: any }) {
     return this.httpClient.get<CFResponse>(
       url,
@@ -34,7 +39,11 @@ export class BaseHttpClientFetcher {
 }
 
 export class BaseHttpFetcher {
-  constructor(private http: Http, private requestOptions: RequestOptions, private pageUrlParam: string) { }
+  constructor(
+    private http: Http,
+    private requestOptions: RequestOptions,
+    private pageUrlParam: string
+  ) { }
   public fetch(options: RequestOptions): Observable<any> {
     return this.http.request(new Request(options)).pipe(
       map(response => {
@@ -57,10 +66,9 @@ export class BaseHttpFetcher {
 
 export class CfAPIFlattener extends BaseHttpFetcher
   implements IPaginationFlattener<CFResponse> {
-  static pageUrlParam = 'page';
 
   constructor(http: Http, requestOptions: RequestOptions) {
-    super(http, requestOptions, CfAPIFlattener.pageUrlParam);
+    super(http, requestOptions, 'page');
   }
   public getTotalPages = res =>
     Object.keys(res).reduce((max, endpointGuid) => {

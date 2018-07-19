@@ -32,10 +32,9 @@ import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 
 class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFlattener<CFResponse> {
-  static pageUrlParam = 'page';
 
   constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {
-    super(httpClient, requestOptions, url, PermissionFlattener.pageUrlParam);
+    super(httpClient, requestOptions, url, 'page');
   }
   public getTotalPages = (res: CFResponse<any>) => {
     return res.total_pages;
