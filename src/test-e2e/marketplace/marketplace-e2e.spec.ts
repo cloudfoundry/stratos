@@ -17,6 +17,7 @@ describe('Marketplace', () => {
 
   beforeEach(() => {
     marketplacePage.navigateTo();
+    marketplacePage.waitForPage();
   });
 
   it('- should reach marketplace page', () => {
