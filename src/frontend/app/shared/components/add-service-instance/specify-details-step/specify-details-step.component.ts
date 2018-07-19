@@ -19,7 +19,7 @@ import {
   tap
 } from 'rxjs/operators';
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { getServiceJsonParams, safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
+import { getServiceJsonParams, safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -40,9 +40,6 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-import { constants } from 'os';
-import { JsonPointer } from 'angular2-json-schema-form';
-
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -288,23 +285,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   get prettyValidationErrors() {
-    if (!this.formValidationErrors) { return null; }
-    const errorArray = [];
-    for (const error of this.formValidationErrors) {
-      const message = error.message;
-      const dataPathArray = JsonPointer.parse(error.dataPath);
-      if (dataPathArray.length) {
-        let field = dataPathArray[0];
-        for (let i = 1; i < dataPathArray.length; i++) {
-          const key = dataPathArray[i];
-          field += /^\d+$/.test(key) ? `[${key}]` : `.${key}`;
-        }
-        errorArray.push(`${field}: ${message}`);
-      } else {
-        errorArray.push(message);
-      }
-    }
-    return errorArray.join('<br>');
+    return prettyValidationErrors(this.formValidationErrors);
   }
 
   onNext = (): Observable<StepOnNextResult> => {

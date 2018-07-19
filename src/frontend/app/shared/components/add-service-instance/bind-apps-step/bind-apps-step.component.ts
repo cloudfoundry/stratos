@@ -18,7 +18,7 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
-import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
+import { safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
 import { JsonPointer } from 'angular2-json-schema-form';
 
 @Component({
@@ -75,23 +75,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   get prettyValidationErrors() {
-    if (!this.formValidationErrors) { return null; }
-    const errorArray = [];
-    for (const error of this.formValidationErrors) {
-      const message = error.message;
-      const dataPathArray = JsonPointer.parse(error.dataPath);
-      if (dataPathArray.length) {
-        let field = dataPathArray[0];
-        for (let i = 1; i < dataPathArray.length; i++) {
-          const key = dataPathArray[i];
-          field += /^\d+$/.test(key) ? `[${key}]` : `.${key}`;
-        }
-        errorArray.push(`${field}: ${message}`);
-      } else {
-        errorArray.push(message);
-      }
-    }
-    return errorArray.join('<br>');
+    return prettyValidationErrors(this.formValidationErrors);
   }
 
   ngAfterContentInit() {
