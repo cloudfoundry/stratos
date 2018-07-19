@@ -2,7 +2,6 @@ import { by, element, promise, Key } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { MetaCard } from './meta-card.po';
-import { VOLUME_UP } from '@angular/cdk/keycodes';
 
 /**
  * Page Object for the List component
@@ -79,7 +78,9 @@ export class ListHeaderComponent extends Component {
   }
 
   getFilterFormField(): ElementFinder {
-    return this.getListHeader().element(by.tagName('mat-form-field'));
+    return this.getListHeader()
+    .element(by.css('.list-component__header__left--multi-filters'))
+    .element(by.tagName('mat-form-field'));
   }
 
   getRightHeaderSection(): ElementFinder {
@@ -111,7 +112,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getFilterText(): promise.Promise<string> {
-    return this.locator.element(by.css('.mat-select-value')).getText();
+    return this.getFilterFormField().element(by.css('.mat-select-value')).getText();
   }
   selectFilterOption(index: number): promise.Promise<any> {
     return this.getFilterOptions().then(options => options[index].click());
