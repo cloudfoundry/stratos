@@ -4,7 +4,7 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { BaseTestModules, BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { SelectServiceComponent } from './select-service.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
@@ -21,7 +21,6 @@ describe('SelectServiceComponent', () => {
         PaginationMonitorFactory,
         ServicesWallService,
         EntityServiceFactory,
-        CreateServiceInstanceHelperService,
         CsiGuidsService,
         EntityMonitorFactory
       ]

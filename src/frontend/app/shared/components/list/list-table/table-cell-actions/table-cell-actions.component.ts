@@ -30,8 +30,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private busy$: Observable<boolean>;
-  private show$: Observable<boolean>;
+  public busy$: Observable<boolean>;
+  public show$: Observable<boolean>;
 
   actions: IListAction<T>[];
   obs: {

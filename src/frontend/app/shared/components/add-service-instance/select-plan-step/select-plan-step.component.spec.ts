@@ -1,16 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { BaseTestModules, BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
-import { SelectPlanStepComponent } from './select-plan-step.component';
-import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CsiGuidsService } from '../csi-guids.service';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CardStatusComponent } from '../../cards/card-status/card-status.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
+import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { SelectPlanStepComponent } from './select-plan-step.component';
+
 
 describe('SelectPlanStepComponent', () => {
   let component: SelectPlanStepComponent;
