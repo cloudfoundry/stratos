@@ -16,7 +16,7 @@ import {
 import { AppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations';
 import { ValidationResult } from '../helpers/entity-relations.types';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { getRequestTypeFromMethod, completeApiRequest } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
@@ -155,14 +155,7 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
-        actions.push(new WrapperRequestActionSuccess(
-          apiResponse.response,
-          apiAction,
-          requestType,
-          apiResponse.totalResults,
-          apiResponse.totalPages
-        ));
+        completeApiRequest(this.store, apiAction, apiResponse, requestType);
 
         if (
           !apiAction.updatingKey &&

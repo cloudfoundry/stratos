@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { flatMap, mergeMap ,  catchError } from 'rxjs/operators';
+import { flatMap, mergeMap, catchError } from 'rxjs/operators';
 
 import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
 import { NormalizedResponse } from '../types/api.types';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, ICFAction } from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { AppState } from './../app-state';
 import { cfInfoSchemaKey } from '../helpers/entity-factory';
@@ -27,7 +27,7 @@ export class CloudFoundryEffects {
       const apiAction = {
         entityKey: cfInfoSchemaKey,
         type: action.type
-      };
+      } as ICFAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const headers = new Headers({ 'x-cap-cnsi-list': action.cfGuid });
       const requestArgs = {
