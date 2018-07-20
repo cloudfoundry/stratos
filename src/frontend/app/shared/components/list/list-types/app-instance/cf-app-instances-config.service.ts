@@ -15,6 +15,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { getIntegerFieldSortFunction } from '../../data-sources-controllers/local-filtering-sorting';
 
 
 @Injectable()
@@ -28,11 +29,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       cellDefinition: {
         getValue: (row) => `${row.index}`
       },
-      sort: {
-        type: 'sort',
-        orderKey: 'index',
-        field: 'index',
-      }, cellFlex: '1'
+      sort: getIntegerFieldSortFunction('index'),
+      cellFlex: '1'
     },
     {
       columnId: 'state',
