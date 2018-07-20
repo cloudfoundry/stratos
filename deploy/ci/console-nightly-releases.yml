@@ -97,6 +97,7 @@ jobs:
     passed: [generate-tag-files]
     trigger: true
   - get: image-tag
+    passed: [generate-tag-files]
     params:
       unpack: true
   - aggregate:
