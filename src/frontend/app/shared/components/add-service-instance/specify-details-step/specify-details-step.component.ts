@@ -409,16 +409,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       switchMap(o => create$),
       filter(a => !a.creating),
       switchMap(a => {
-
-        if (isEditMode) {
-        const updating = a.updating[UpdateServiceInstance.updateServiceInstance];
-          if ( !!updating && updating.error) {
+        const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
+        if ( (isEditMode && !!updating && updating.error) || (a.error) ) {
             return create$;
-          }
-        } else {
-          if (a.error) {
-            return create$;
-          }
         }
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);
