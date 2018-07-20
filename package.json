@@ -72,7 +72,7 @@
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "git+https://github.com/ohjames/rxjs-websockets.git#28711f94f6988bd23d9a120061d6f9002961114b",
     "web-animations-js": "^2.3.1",
-    "xterm": "^2.9.1",
+    "xterm": "^3.5.0",
     "zone.js": "~0.8.26"
   },
   "engines": {
@@ -88,7 +88,6 @@
     "@types/karma": "^1.7.1",
     "@types/node": "^6.0.111",
     "@types/request": "^2.47.0",
-    "@types/xterm": "^2.0.3",
     "codecov": "^3.0.2",
     "codelyzer": "~3.1.1",
     "delete": "^0.3.2",
