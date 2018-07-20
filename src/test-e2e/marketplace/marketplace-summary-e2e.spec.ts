@@ -5,7 +5,7 @@ import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser } from 'protractor';
 import { ApplicationE2eHelper } from '../application/application-e2e-helpers';
 
-fdescribe('Marketplace Summary', () => {
+describe('Marketplace Summary', () => {
   let marketplaceSummaryPage: MarketplaceSummaryPage;
   let cfGuid: string;
   let serviceGuid: string;
