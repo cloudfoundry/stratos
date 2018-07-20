@@ -58,9 +58,9 @@ Configuration information can be found in two places
 
 ## Build
 
-Run `npm build` to build the project.
+Run `npm run build` to build the project.
 
-The build artefacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+The build artefacts will be stored in the `dist/` directory. This will output a production build of the application.
 
 ## Creating angular items via angular cli
 
@@ -137,7 +137,7 @@ The portal-proxy is the back-end for the Console UI. It is written in Go.
 ### Automatically register and connect to an existing endpoint
 To automatically register a Cloud Foundry add the environment variable below
 
-> **Note** On log in the console will also attempt to auto-connect to the cloud foundry using 
+> **Note** On log in the console will also attempt to auto-connect to the cloud foundry using
            the username/password provided.
 
 ```
@@ -160,7 +160,7 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 
 #### Running portal-proxy in a container
 * Follow instructions in the deploy/docker-compose docs
-* To apply changes (build and update docker image) simply run `deploy/tools/restart_proxy.sh`  
+* To apply changes (build and update docker image) simply run `deploy/tools/restart_proxy.sh`
 
 #### Running "like a dev"
 
