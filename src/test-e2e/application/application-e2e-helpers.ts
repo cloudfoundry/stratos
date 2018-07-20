@@ -36,7 +36,7 @@ export class ApplicationE2eHelper {
   fetchServices = (cfGuid: string): promise.Promise<CFResponse> => {
     return this.cfRequestHelper.sendCfGet(
       cfGuid,
-      'services?page=1&results-per-page=100&order-direction=desc&order-direction-field=label&inline-relations-depth=1&include-relations=service_plans'
+      'services?page=1&results-per-page=100&inline-relations-depth=1&include-relations=service_plans'
     );
   }
 

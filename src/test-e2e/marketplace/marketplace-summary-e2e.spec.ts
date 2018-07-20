@@ -11,37 +11,54 @@ fdescribe('Marketplace Summary', () => {
   let serviceGuid: string;
   let applicationE2eHelper: ApplicationE2eHelper;
 
-  beforeAll((done) => {
+  beforeAll(() => {
    const setup =  e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
-    
   });
 
-  beforeEach((done)=> {
-    const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfCnsi();
-    getCfCnsi.then(endpointModel => {
-        cfGuid = endpointModel.guid;
-        return applicationE2eHelper.fetchServices(cfGuid);
-    }).then(response => {
-        const service = response.resources[0];
-        serviceGuid = service.metadata.guid;
-        marketplaceSummaryPage = new MarketplaceSummaryPage(cfGuid, serviceGuid)
-        marketplaceSummaryPage.navigateTo();
-        marketplaceSummaryPage.waitForPage();
-        done()
-    })
-  })
-  
-  it('- should reach marketplace summary page', () => {
-    expect(marketplaceSummaryPage.isActivePage()).toBeTruthy();
+  describe('', () => {
+    beforeAll((done) => {
+      const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfCnsi();
+      getCfCnsi.then(endpointModel => {
+          cfGuid = endpointModel.guid;
+          return applicationE2eHelper.fetchServices(cfGuid);
+      }).then(response => {
+          const service = response.resources[0];
+          serviceGuid = service.metadata.guid;
+          marketplaceSummaryPage = new MarketplaceSummaryPage(cfGuid, serviceGuid);
+          done();
+      });
+
+     });
+
+     beforeEach(() => {
+       marketplaceSummaryPage.navigateTo();
+       marketplaceSummaryPage.waitForPage();
+
+     });
+     it('- should reach marketplace summary page', () => {
+       expect(marketplaceSummaryPage.isActivePage()).toBeTruthy();
+     });
+
+     it('- should have a service summary card', () => {
+       expect(marketplaceSummaryPage.getServiceSummaryCard().isPresent()).toBeFalsy();
+     });
+
+     it('- should have a recent service instances card', () => {
+       expect(marketplaceSummaryPage.getRecentInstances().isPresent()).toBeFalsy();
+     });
+
+     it('- should be able to create a new service instance', () => {
+       const button = marketplaceSummaryPage.header.getIconButton('add');
+       expect(button).toBeDefined();
+       button.then(bt => bt.click());
+       browser.getCurrentUrl().then(url => {
+         expect(url.endsWith('create?isSpaceScoped=false')).toBeTruthy();
+       });
+      });
   });
-
-  it ('- should contain service summary card', () => {
-      expect(marketplaceSummaryPage.getServiceSummaryCard().isPresent()).toBeTruthy();
-  })
-
 
 });

@@ -10,7 +10,7 @@ describe('Marketplace', () => {
   const serviceSearchText = 'app';
 
   const navigateToServiceSummary = () => marketplacePage.servicesList.cards.getCards().first().click();
-  
+
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -80,6 +80,6 @@ describe('Marketplace', () => {
     navigateToServiceSummary();
     browser.getCurrentUrl().then(url => {
       expect(url.endsWith('summary')).toBeTruthy();
-    })
+    });
   });
 });
