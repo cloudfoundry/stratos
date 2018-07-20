@@ -12,7 +12,7 @@ We've been focused on more test automation and building out more end-to-end test
 
 We had an issue with the Angular AOT + build optimization which pushed the final RC into next week. This took a while to get to the bottom of.
 
-For a full list of merged PRs this week, see: [Merged PRs](https://github.com/cloudfoundry-incubator/stratos/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+updated%3A%3E%3D2018-07-13).
+For a full list of merged PRs this week, see: [Merged PRs](https://github.com/cloudfoundry-incubator/stratos/pulls?page=2&q=is%3Apr+is%3Amerged+updated%3A%3E%3D2018-07-13&utf8=%E2%9C%93).
 
 ## 13 July 2018
 
