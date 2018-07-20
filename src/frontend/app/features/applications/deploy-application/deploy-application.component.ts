@@ -1,7 +1,6 @@
 
 import { of as observableOf, Observable, Subscription } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, map, tap } from 'rxjs/operators';

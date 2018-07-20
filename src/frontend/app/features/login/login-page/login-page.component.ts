@@ -1,8 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
@@ -11,6 +10,7 @@ import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { RouterRedirect } from '../../../store/reducers/routing.reducer';
 import { EndpointState } from '../../../store/types/endpoint.types';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-login-page',
@@ -77,14 +77,14 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   login() {
     if (this.ssoLogin) {
-        const returnUrl = encodeURI(window.location.protocol + '//' + window.location.hostname +
-            (window.location.port ? ':' + window.location.port : ''));
-        window.open('/pp/v1/auth/sso_login?state=' + returnUrl , '_self');
-        this.busy$ = new Observable<boolean>((observer) => {
-          observer.next(true);
-          observer.complete();
-        });
-        return;
+      const returnUrl = encodeURI(window.location.protocol + '//' + window.location.hostname +
+        (window.location.port ? ':' + window.location.port : ''));
+      window.open('/pp/v1/auth/sso_login?state=' + returnUrl, '_self');
+      this.busy$ = new Observable<boolean>((observer) => {
+        observer.next(true);
+        observer.complete();
+      });
+      return;
     }
     this.message = '';
     this.store.dispatch(new Login(this.username, this.password));

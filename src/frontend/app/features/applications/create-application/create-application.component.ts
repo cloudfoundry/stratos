@@ -1,7 +1,6 @@
 
-import {tap, first, filter} from 'rxjs/operators';
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { tap, first, filter } from 'rxjs/operators';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
