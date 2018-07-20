@@ -2,7 +2,7 @@ import { by, element, promise, browser, protractor, Key } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { MetaCard } from './meta-card.po';
-import { validateHorizontalPosition } from '@angular/cdk/overlay';
+import { PaginatorComponent } from './paginator.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -46,6 +46,21 @@ export class ListComponent extends Component {
     return browser.wait(until.invisibilityOf(refreshIcon), 10000);
   }
 
+  getTotalResults() {
+    const paginator = new PaginatorComponent();
+    return paginator.isDisplayed().then(havePaginator => {
+      if (havePaginator) {
+        return paginator.getTotalResults();
+      }
+      return this.isCardsView().then(haveCardsView => {
+        if (haveCardsView) {
+          return this.cards.getCards().count();
+        }
+        return this.table.getRows().count();
+      });
+    });
+  }
+
 }
 
 // Page Object for the List Table View
@@ -63,8 +78,33 @@ export class ListTableComponent extends Component {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
 
-}
+  // Get the data in the table
+  getTableDataRaw() {
+    const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
+    const getRows = this.locator.all(by.css('.app-table__row')).map(row => row.all(by.css('.app-table__cell')).map(cell => cell.getText()));
+    return promise.all([getHeaders, getRows]).then(([headers, rows]) => {
+      return {
+        headers,
+        rows
+      };
+    });
+  }
 
+  getTableData() {
+    return this.getTableDataRaw().then(tableData => {
+      const table = [];
+      tableData.rows.forEach((row: string[]) => {
+        const tableRow = {};
+        row.forEach((cellValue, index) => {
+          const headerName = (tableData.headers[index] || 'column-' + index) as string;
+          tableRow[headerName.toLowerCase()] = cellValue;
+        });
+        table.push(tableRow);
+      });
+      return table;
+    });
+  }
+}
 
 // Page Object for the List Card View
 export class ListCardComponent extends Component {
