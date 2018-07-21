@@ -2,6 +2,18 @@
 
 Weekly status updates are published here.
 
+## 20 July 2018
+
+This week the focus has been on further testing and refinement of Release Candidate 2.
+
+We will be publishing a Release Candidate 3 on Monday 23 July. We expect this to be the final RC and will most likely promote this to be the final Version 2 release later next week.
+
+We've been focused on more test automation and building out more end-to-end tests, in addition to fixing a few bugs.
+
+We had an issue with the Angular AOT + build optimization which pushed the final RC into next week. This took a while to get to the bottom of.
+
+For a full list of merged PRs this week, see: [Merged PRs](https://github.com/cloudfoundry-incubator/stratos/pulls?page=1&q=is%3Apr+is%3Amerged+updated%3A%3E%3D2018-07-13&utf8=%E2%9C%93).
+
 ## 13 July 2018
 
 The SUSE team has been participating in SUSE Hack Week, so there is no change in status this week.

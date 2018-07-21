@@ -268,16 +268,25 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
             }
           });
         } else {
-          return this.createServiceInstance(p, this.modeService.isEditServiceInstanceMode());
+          return this.createServiceInstance(p);
         }
       }),
       filter(s => !s.creating && !s.fetching),
       combineLatest(this.store.select(selectCreateServiceInstance)),
       first(),
       switchMap(([request, state]) => {
-        if (request.error) {
+        if (this.modeService.isEditServiceInstanceMode()) {
+          const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
+          if (!!updatingInfo && updatingInfo.error) {
+            return observableOf({
+              success: false,
+              message: `Failed to update service instance.`
+            });
+          }
+        } else if (request.error) {
           return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
-        } else if (!this.modeService.isEditServiceInstanceMode()) {
+        }
+        if (!this.modeService.isEditServiceInstanceMode()) {
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
@@ -377,7 +386,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   }
 
-  createServiceInstance(createServiceInstance: CreateServiceInstanceState, isUpdate: boolean): Observable<RequestInfoState> {
+  createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
@@ -400,8 +409,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       switchMap(o => create$),
       filter(a => !a.creating),
       switchMap(a => {
-        if (a.error) {
-          return create$;
+        const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
+        if ( (isEditMode && !!updating && updating.error) || (a.error) ) {
+            return create$;
         }
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);

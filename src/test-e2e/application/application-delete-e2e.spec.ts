@@ -9,7 +9,7 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ExpectedConditions } from 'protractor';
 
 
-fdescribe('Application Delete', function () {
+describe('Application Delete', function () {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
