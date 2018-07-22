@@ -80,6 +80,7 @@ jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
+  - get: midnight
     trigger: true
   - do:
     - task: generate-tag
@@ -93,7 +94,7 @@ jobs:
 - name: build-images
   plan:
   - get: stratos
-  - get: midnight
+    passed: [generate-tag-files]
     trigger: true
   - get: image-tag
     passed: [generate-tag-files]

@@ -65,6 +65,15 @@ export class ResetsHelpers {
       });
   }
 
+  getInfo(req, setup) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/info' })
+      .then(response => {
+        const info = JSON.parse(response);
+        setup.info = info;
+        return info;
+      });
+  }
+
   /**
    *
    * Ensure we have multiple Cloud Foundries registered

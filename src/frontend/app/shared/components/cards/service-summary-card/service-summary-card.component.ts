@@ -1,16 +1,12 @@
 import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
-
 import { IService } from '../../../../core/cf-api-svc.types';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { AppChip } from '../../../../shared/components/chips/chips.component';
-import {
-  ServiceTag,
-} from '../../../../shared/components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
-import { AppState } from '../../../../store/app-state';
+import { ServiceTag } from '../../../../shared/components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { APIResource } from '../../../../store/types/api.types';
+
 
 @Component({
   selector: 'app-service-summary-card',
@@ -21,8 +17,7 @@ export class ServiceSummaryCardComponent {
   tags: AppChip<ServiceTag>[] = [];
   service$: Observable<APIResource<IService>>;
   constructor(
-    private store: Store<AppState>,
-    private servicesService: ServicesService
+    public servicesService: ServicesService
   ) {
     this.service$ = servicesService.service$;
 

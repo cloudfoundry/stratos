@@ -29,7 +29,7 @@ export class ApplicationInstanceChartComponent implements OnInit {
   private seriesTranslation: string;
 
   @Input('title')
-  private title: string;
+  public title: string;
 
   public instanceChartConfig: MetricsLineChartConfig;
 

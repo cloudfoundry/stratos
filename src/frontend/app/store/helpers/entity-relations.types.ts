@@ -1,6 +1,7 @@
 import { Action } from '@ngrx/store';
 
 import { getPaginationKey } from '../actions/pagination.actions';
+import { APIResponse } from '../actions/request.actions';
 import { IRequestAction } from '../types/request.types';
 import { EntitySchema } from './entity-factory';
 
@@ -107,4 +108,13 @@ export class ValidationResult {
    * @memberof ValidationResult
    */
   completed: Promise<boolean[]>;
+
+  /**
+   * The new apiResponse. For the case of validating api calls this might be updated to ensure parent entities are associated with missing
+   * children.
+   *
+   * @type {APIResponse}
+   * @memberof ValidationResult
+   */
+  apiResponse?: APIResponse;
 }

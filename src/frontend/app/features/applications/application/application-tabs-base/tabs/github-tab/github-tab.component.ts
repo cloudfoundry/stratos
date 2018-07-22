@@ -1,8 +1,7 @@
 
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, take, tap } from 'rxjs/operators';
 
