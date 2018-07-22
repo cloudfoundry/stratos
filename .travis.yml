@@ -13,17 +13,8 @@ addons:
     target_paths:
     - e2e
     debug: true
-deploy:
-  provider: s3
-  access_key_id:
-    secure: "BFoXWuosoaTrPmNsrheLW7HEKMPDVBluZ7fmNAHaJM97n4pX6rtOMFVgO6NBMj8qzDy4AU//N33bxDGbVHqjRe9ATaSAaRDecGVXtGvRYh5SrvQ1PBs4Eksi8HlTIriWGr/iEQ7EXQFVVDp8OH+0pkEfL3vUeEIDI/N2S4tIAjcrXtpXftOcCxerA5XK+ztI2aoAixvnIbgZQAQaXQkI/5OJ88hpOHObiRwtHfRFHewIAly9+0/7f65G3Bqhs58I5z6GY1OEbmB25RdfujAH7uiinflLuTSUMSXIbHuLGXUb8UfL0isHgAoKC6fnxEkVrg0chJfoVTdvUoEIvb8ISaRsCKWmDBhpo8BLgiuS3thR9IGNhX5h3K9dHG8BlRWTV6nvuEwklfQ7FCE+kHEei9I/jSajgfaTDzFb9/EaD75pAqGF8uvWFI6uMkumiNRAEEdsUOz4oUpUhWzCmEeWu5a4EF/IDhywUO7g/1bhfZ7boWhMeyiGn4Z6TmFm8dwxbYBOZa+9V8A/A2yHZTxvuxxCcWnQiFc/LD/9GhWUZLO+g+9cw7bIBLjJl7XQSDchC6oFpfQGjTbHmdClRDtJfOdnPOi68tMaHUPPYgnHWqIoiW2EtbEKOIgmIC940t+b4YFDGH8VGfKDyOpMp/VqonylL6F//PDXaR3W9rZzCxk="
-  secret_access_key:
-    secure: "j+XQTBcDKntmtCBcrsDi3E58mKBtFnu15ze/BgO8PsL65efS1GI+IA3JJOVbgr1t4jtR2BZ8dz/muK6MQaXT6/vMKcxIM/JTtHSrqOcS2HWn4eMVNhkaZt3tp+gTOw0y0u2DYij2Lv09b1qE9Knn026+KwlxR901PWn741DGLCqFUpm1lJXnH5rCaH2ghEObSWax6MmRRFizgF/struPSEpa+JVAB+5Q88bbJKKzXS0/ROUcydxVH3Q8tKplMR5RBSz+WCk+GyiMHf95ZNhn+p62A6HO7RzyUR5mvVwCWLo4tBHt+fAWURBAUPLT7Mk8ccBQoaTVdvdDENoK3N0IChZ/+z/UlZT9+v3tueYBhuVHc+YtygG3LfDD3NGsLxJ1jgthZ3MzrCRSPpx5wBK/GOmp2k7NaC2wnfO/vSeKsrN+g+QOM19j+AVqEWXNnje9HKAk2XtgP18ApZ23owLEEWVzMeIrain5MNC3gCemPpjs3Z0hiaWGxfnGSp+5GL8JXOY5LiafpAWEZbgWyrKGWfULWCpubAsmbHfXDqSOdyxNxBwOT8FRe3F1G+4OteYOPUJ05z2M7k23gO8OyUQpFxdNIrSihoFBLq4s0a3THl5hwmqSljh+Kda6IRiB58hCrmdQRtGLQ8FFg+TPFMVV9ZXgk+cIPg7M1cINe4AMG18="
-  bucket: "e2e"
-  endpoint:
-    secure: "hfTvQqu7ODlUR8qqdMkt4TM5EM8hZi+muRbLCIffCOn927Mrw9GhYeFgSzNxxDa7YzU0eGjsTAF7uKPTZ5NfI5TAXsdyl/0ph3iCeoUAp3sdxSLYxS9tCw582saQZ6Gjv/m/5iKEY28neDssDyTii1VLaHwwm/98KBoR+D8DLObShmZxktxqTfPhIWOQfK5YRWKwAR5Rgh4OvieK8pb9WfA2xOARjvRyAiMTSzB3jVBWkZdk51uq9v0/NJZbl6UwReAG3K9egoo5BbZM6EWCbKoHgUKsNADFg9w+nLLWSonNilI0yvAEPjD7YeMAtHAbOFKEMhguKCAwSe+VTJ6+1MQ3mrmQTGdUcXRF1gvHTLjnT1+0OEtrkdmvHyq9/3Kt81IXsXN6j6+oFsjwJtg5HJSADSJ+tGBQ9YujenQTA0rPQS3Zy2Tlj2Lk7CONyMp5SbM2AW1YIP8NBFS9rymvsWrdNB0NS4vxb8RNyo2j4ZQIayCJYhMnPjOIReOtPqyu2nqeTU21DLGoknBibNE2Z9DgZ+7Eih0Gbt044HZZK88zgHshM1Oir3EpbJHEFbBZy94FDWO0VYgH8KdlDs8GpqbHmd/PmxCJTNPmqVOZWNwOvzfwx4tdMEa+W8nHGjZvcpeoqTw6KNqqQnI28gLiy2MEufBtL8MITILsYecRi/s="
-  local_dir: e2e-reports
 before_install:
+- pip install --user awscli
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - sleep 3 # give xvfb some time to start  
@@ -73,14 +64,12 @@ jobs:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     script:
     - "./deploy/ci/travis/run-e2e-tests.sh"
-    after_script:
     - "./deploy/ci/travis/upload-e2e-test-report.sh"
   - stage: E2E tests quick
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     script:
     - "./deploy/ci/travis/run-e2e-tests.sh quick"
-    after_script:
     - "./deploy/ci/travis/upload-e2e-test-report.sh"
 notifications:
   slack:
