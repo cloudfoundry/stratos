@@ -24,7 +24,7 @@ import { EntityServiceFactory } from './entity-service-factory.service';
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
 const cfId = 'cf123';
 
-fdescribe('EntityServiceService', () => {
+describe('EntityServiceService', () => {
   function createTestService(
     store: Store<AppState>,
     guid: string,
