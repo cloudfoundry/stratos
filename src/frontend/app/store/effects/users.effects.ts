@@ -48,7 +48,7 @@ export class UsersEffects {
       this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
 
       // Discover all the orgs. In most cases we will already have this
-      const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, organizationSchemaKey);
+      const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, action.cfGuid);
       const allOrganisations$ = getPaginationObservables<APIResource<IOrganization>>({
         store: this.store,
         action: new GetAllOrganizations(getAllOrgsPaginationKey, action.cfGuid),

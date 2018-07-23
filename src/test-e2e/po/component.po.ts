@@ -6,7 +6,7 @@ const until = protractor.ExpectedConditions;
 /**
  * Page Object for generic base component
  */
-export abstract class Component {
+export class Component {
 
   constructor(protected locator: ElementFinder) { }
 

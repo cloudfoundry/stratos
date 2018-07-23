@@ -4,10 +4,10 @@
 
 <app-steppers cancel="/applications">
   <app-step *ngIf="!appGuid" [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
-    <app-create-application-step1 [isRedeploy]="!!appGuid" #step1></app-create-application-step1>
+    <app-create-application-step1 [isRedeploy]="isRedeploy" #step1></app-create-application-step1>
   </app-step>
   <app-step [title]="'Source'" [valid]="step2.validate | async" [onNext]="step2.onNext" [nextButtonText]="(appGuid || (skipConfig$ | async)) ? deployButtonText : 'Next'">
-    <app-deploy-application-step2 [isRedeploy]="!!appGuid" #step2></app-deploy-application-step2>
+    <app-deploy-application-step2 [isRedeploy]="isRedeploy" #step2></app-deploy-application-step2>
   </app-step>
   <app-step [hidden]="appGuid || !(step2.sourceTypeGithub$ | async)" [title]="'Source Config'" [valid]="step2_1.validate | async" [skip]="skipConfig$ | async" [onLeave]="step2_1.onLeave" [onEnter]="step2_1.onEnter" [onNext]="step2_1.onNext" [nextButtonText]="deployButtonText">
     <app-deploy-application-step2-1 #step2_1></app-deploy-application-step2-1>

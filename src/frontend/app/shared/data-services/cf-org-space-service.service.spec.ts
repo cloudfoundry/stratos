@@ -1,10 +1,12 @@
-import { SharedModule } from '../shared.module';
-import { TestBed, inject } from '@angular/core/testing';
-import { CfOrgSpaceDataService } from './cf-org-space-service.service';
-import { CoreModule } from '../../core/core.module';
+import { inject, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 import { StoreModule } from '@ngrx/store';
+
+import { CoreModule } from '../../core/core.module';
 import { appReducers } from '../../store/reducers.module';
 import { getInitialTestStoreState } from '../../test-framework/store-test-helper';
+import { SharedModule } from '../shared.module';
+import { CfOrgSpaceDataService } from './cf-org-space-service.service';
 
 
 describe('EndpointOrgSpaceServiceService', () => {
@@ -16,6 +18,7 @@ describe('EndpointOrgSpaceServiceService', () => {
       imports: [
         SharedModule,
         CoreModule,
+        HttpModule,
         StoreModule.forRoot(
           appReducers,
           {

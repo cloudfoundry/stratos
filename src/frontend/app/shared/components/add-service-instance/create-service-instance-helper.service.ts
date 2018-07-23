@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
@@ -31,10 +31,10 @@ import { selectCreateServiceInstanceServicePlan } from '../../../store/selectors
 import { APIResource } from '../../../store/types/api.types';
 import { QParam } from '../../../store/types/pagination.types';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { CF_GUID } from '../../entity.tokens';
 
 
-@Injectable()
-export class CreateServiceInstanceHelperService {
+export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
   service$: Observable<APIResource<IService>>;
   // Is instance being created from the Marketplace
@@ -43,7 +43,7 @@ export class CreateServiceInstanceHelperService {
   constructor(
     private store: Store<AppState>,
     public serviceGuid: string,
-    public cfGuid: string,
+    @Inject(CF_GUID) public cfGuid: string,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {

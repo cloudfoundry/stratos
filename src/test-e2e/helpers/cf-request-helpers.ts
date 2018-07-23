@@ -22,23 +22,29 @@ export class CFRequestHelpers extends RequestHelpers {
   getCfCnsi = (cfName?: string): promise.Promise<EndpointModel> => {
     cfName = cfName || this.e2eHelper.secrets.getDefaultCFEndpoint().name;
     return this.sendRequestAdminSession('pp/v1/cnsis', 'GET', {})
-      .then(response => {
-        const cnsis: EndpointModel[] = JSON.parse(response);
-        const promises = [];
+      .then((response: string) => {
+        const cnsis = JSON.parse(response) as EndpointModel[];
         return cnsis.find(cnsi => cnsi.name === cfName);
       });
   }
 
   sendCfGet = (cfGuid: string, url: string): promise.Promise<CFResponse> => this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
 
+  sendCfPost = (cfGuid: string, url: string, body: any): promise.Promise<CFResponse> =>
+    this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse)
+
+  sendCfPut = (cfGuid: string, url: string, body?: any): promise.Promise<CFResponse> =>
+    this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse)
+
   sendCfDelete = (cfGuid: string, url: string): promise.Promise<any> => this.sendCfRequest(cfGuid, url, 'DELETE');
 
-  private sendCfRequest = (cfGuid: string, url: string, method: string): promise.Promise<any> =>
-    this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid))
+  private sendCfRequest = (cfGuid: string, url: string, method: string, body?: string): promise.Promise<any> =>
+    this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
 
-  private sendRequestAdminSession = (url: string, method: string, headers: object) => this.sendRequest(this.e2eSetup.adminReq, {
-    headers,
-    method,
-    url
-  })
+  private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) =>
+    this.sendRequest(this.e2eSetup.adminReq, {
+      headers,
+      method,
+      url
+    }, body)
 }

@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpModule } from '@angular/http';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
 import { CoreModule } from '../../../../../../core/core.module';
@@ -12,6 +13,7 @@ import { PaginationMonitorFactory } from '../../../../../monitors/pagination-mon
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role.component';
+import { CfUserServiceTestProvider } from '../../../../../../test-framework/user-service-helper';
 
 describe('TableCellSpaceRoleComponent', () => {
   let component: TableCellRoleOrgSpaceComponent;
@@ -22,10 +24,11 @@ describe('TableCellSpaceRoleComponent', () => {
       imports: [
         CoreModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        HttpModule
       ],
       providers: [
-        CfUserService,
+        CfUserServiceTestProvider,
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,

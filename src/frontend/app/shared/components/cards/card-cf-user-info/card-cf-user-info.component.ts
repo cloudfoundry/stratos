@@ -7,9 +7,9 @@ import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/
   styleUrls: ['./card-cf-user-info.component.scss']
 })
 export class CardCfUserInfoComponent implements OnInit {
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   isAdmin(user) {
     return user && user.admin ? 'Yes' : 'No';

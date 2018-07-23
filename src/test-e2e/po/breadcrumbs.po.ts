@@ -4,7 +4,7 @@ import { Component } from './component.po';
 
 export interface Breadcrumb {
   index: number;
-  name: string;
+  label: string;
   isLink: boolean;
   click: Function;
 }

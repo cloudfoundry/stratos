@@ -42,7 +42,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private openCloseSub: Subscription;
   private closeSub: Subscription;
 
-  private fullView: boolean;
+  public fullView: boolean;
 
   private routeChangeSubscription: Subscription;
 

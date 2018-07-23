@@ -13,8 +13,8 @@ import { CfUserService } from '../../../data-services/cf-user.service';
 })
 export class CardCfOrgUserDetailsComponent {
   constructor(
-    private cfOrgService: CloudFoundryOrganizationService,
-    private cfUserService: CfUserService,
-    private cfEndpointService: CloudFoundryEndpointService
+    public cfOrgService: CloudFoundryOrganizationService,
+    public cfUserService: CfUserService,
+    public cfEndpointService: CloudFoundryEndpointService
   ) { }
 }

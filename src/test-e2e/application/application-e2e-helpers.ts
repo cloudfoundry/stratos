@@ -3,18 +3,20 @@ import { E2ESetup } from '../e2e';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { promise } from 'protractor';
-
+import { CFHelpers } from '../helpers/cf-helpers';
+import { browser } from 'protractor';
 
 const customAppLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER);
 
 export class ApplicationE2eHelper {
 
   cfRequestHelper: CFRequestHelpers;
+  cfHelper: CFHelpers;
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
+    this.cfHelper = new CFHelpers(e2eSetup);
   }
-
 
   static createApplicationName = (isoTime?: string): string => E2EHelpers.createCustomName(customAppLabel, isoTime).toLowerCase();
   /**
@@ -25,8 +27,6 @@ export class ApplicationE2eHelper {
   static getHostName = (appName) => appName.replace(/[\.:-]/g, '_');
 
   fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse> => {
-    console.log('FETCH APP cfGuid: ', cfGuid);
-    console.log('FETCH APP appName: ', appName);
     return this.cfRequestHelper.sendCfGet(
       cfGuid,
       'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName
@@ -66,6 +66,19 @@ export class ApplicationE2eHelper {
       // console.log('Successfully delete deps: ', this.cfRequestHelper.sendCfDelete);
       return cfRequestHelper.sendCfDelete(cfGuid, 'apps/' + app.metadata.guid);
     }).catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
+  }
+
+  createApp(cfGuid: string, spaceName: string, appName: string) {
+    return browser.driver.wait(this.cfHelper.fetchSpace(cfGuid, spaceName).then(space => {
+      expect(space).not.toBeNull();
+      return this.cfHelper.createApp(cfGuid, space.metadata.guid, appName).then(() => {
+        return this.fetchApp(cfGuid, appName).then(apps => {
+          expect(apps.total_results).toBe(1);
+          const app = apps.resources[0];
+          return app;
+        });
+      });
+    }));
   }
 
 }
