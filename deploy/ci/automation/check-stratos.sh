@@ -37,6 +37,7 @@ echo "consoleUsers:" > ${SECRETS}
 echo "  admin:" >> ${SECRETS}
 echo "    username: $USERNAME" >> ${SECRETS}
 echo "    password: $PASSWORD" >> ${SECRETS}
+echo "headless: true" >> ${SECRETS}
 
 set +e
 
