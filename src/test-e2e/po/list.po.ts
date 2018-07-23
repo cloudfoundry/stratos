@@ -121,7 +121,7 @@ export class ListCardComponent extends Component {
   }
 
   getCards(): ElementArrayFinder {
-    return this.locator.all(by.tagName('app-card'));
+    return this.locator.all(by.css('app-card:not(.row-filler)'));
   }
 
   getCard(index: number): MetaCard {

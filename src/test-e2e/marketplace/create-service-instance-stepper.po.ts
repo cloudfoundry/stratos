@@ -2,18 +2,18 @@ import { StepperComponent } from '../po/stepper.po';
 
 export class CreateServiceInstanceStepper extends StepperComponent {
 
-private cfFieldName = 'cf';
-private orgFieldName = 'org';
-private spaceFieldName = 'space';
-private serviceFieldName = 'service';
-private serviceNameFieldName = 'name';
-private serviceInstanceName;
+  private cfFieldName = 'cf';
+  private orgFieldName = 'org';
+  private spaceFieldName = 'space';
+  private serviceFieldName = 'service';
+  private serviceNameFieldName = 'name';
+  public serviceInstanceName;
 
-constructor() {
+  constructor() {
     super();
     const testTime = (new Date()).toISOString();
     this.serviceInstanceName = `serviceInstance-${testTime}`;
-}
+  }
 
   waitForStepCloudFoundry = () => {
     return super.waitForStep('Cloud Foundry');
