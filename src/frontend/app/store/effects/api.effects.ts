@@ -23,7 +23,7 @@ import {
   CfAPIFlattener,
   flattenPagination,
 } from '../helpers/paginated-request-helpers';
-import { getRequestTypeFromMethod, startApiRequest } from '../reducers/api-request-reducer/request-helpers';
+import { getRequestTypeFromMethod, startApiRequest, getFailApiRequestActions } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import {
   resultPerPageParam,
@@ -274,26 +274,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions: Action[] = [
-          new APISuccessOrFailedAction(
-            actionClone.actions[2],
-            actionClone,
-            error.message,
-          ),
-          new WrapperRequestActionFailed(
-            error.message,
-            actionClone,
-            requestType,
-          ),
-        ];
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
-          errorActions.push(
-            new RecursiveDeleteFailed(
-              apiAction.guid,
-              apiAction.endpointGuid,
-              entityFactory(apiAction.entityKey),
-            ),
-          );
+          this.store.dispatch(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey),
+          ), )
         }
         return errorActions;
       }),

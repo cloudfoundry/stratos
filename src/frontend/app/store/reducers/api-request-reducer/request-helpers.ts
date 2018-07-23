@@ -5,7 +5,15 @@ import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction } from '../../types/pagination.types';
-import { ICFAction, IRequestAction, SingleEntityAction, StartRequestAction, APISuccessOrFailedAction, WrapperRequestActionSuccess } from '../../types/request.types';
+import {
+  ICFAction,
+  IRequestAction,
+  SingleEntityAction,
+  StartRequestAction,
+  APISuccessOrFailedAction,
+  WrapperRequestActionSuccess,
+  WrapperRequestActionFailed
+} from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { Store } from '../../../../../../node_modules/@ngrx/store';
 import { APIResponse } from '../../actions/request.actions';
@@ -157,6 +165,36 @@ export function completeApiRequest(
     apiResponse.totalResults,
     apiResponse.totalPages
   ));
+}
+
+export function failApiRequest(
+  store: Store<AppState>,
+  apiAction: ICFAction | PaginatedAction,
+  error,
+  requestType: ApiRequestTypes = 'fetch',
+) {
+  const actions = getFailApiRequestActions(
+    apiAction,
+    error,
+    requestType
+  );
+  store.dispatch(actions[0]);
+  store.dispatch(actions[1]);
+}
+
+export function getFailApiRequestActions(
+  apiAction: ICFAction | PaginatedAction,
+  error,
+  requestType: ApiRequestTypes = 'fetch',
+) {
+  return [
+    new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
+    new WrapperRequestActionFailed(
+      error.message,
+      apiAction,
+      requestType
+    )
+  ]
 }
 
 export function getActionFromString(type: string) {

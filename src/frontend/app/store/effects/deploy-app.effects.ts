@@ -1,31 +1,20 @@
-
-import { of as observableOf, Observable } from 'rxjs';
-
-import { catchError, map, mergeMap, switchMap, filter, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-
-import {
-  CHECK_PROJECT_EXISTS,
-  CheckProjectExists,
-  FETCH_BRANCHES_FOR_PROJECT,
-  FETCH_COMMIT,
-  FETCH_COMMITS,
-  FetchBranchesForProject,
-  FetchCommit,
-  FetchCommits,
-  ProjectDoesntExist,
-  ProjectExists,
-} from '../../store/actions/deploy-applications.actions';
+import { of as observableOf } from 'rxjs';
+import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { CheckProjectExists, CHECK_PROJECT_EXISTS, FetchBranchesForProject, FetchCommit, FetchCommits, FETCH_BRANCHES_FOR_PROJECT, FETCH_COMMIT, FETCH_COMMITS, ProjectDoesntExist, ProjectExists } from '../../store/actions/deploy-applications.actions';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { GithubCommit } from '../types/github.types';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, ICFAction } from '../types/request.types';
+import { ICFAction, StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { AppState } from './../app-state';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction } from './../types/pagination.types';
+
+
+
 
 @Injectable()
 export class DeployAppEffects {
@@ -127,7 +116,7 @@ export class DeployAppEffects {
           entityKey: githubCommitSchemaKey,
           type: action.type,
           paginationKey: action.paginationKey
-        };
+        } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return this.http
           .get(`https://api.github.com/repos/${action.projectName}/commits?sha=${action.sha}`).pipe(

@@ -119,7 +119,7 @@ export class StartCFAction extends CFStartAction implements IStartRequestAction 
 
 export class StartRequestAction extends RequestAction {
   constructor(
-    public apiAction: ICFAction | PaginatedAction,
+    public apiAction: IRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
