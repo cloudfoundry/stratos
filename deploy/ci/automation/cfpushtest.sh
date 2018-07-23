@@ -11,10 +11,14 @@ STATUS=$(echo "$FULL_STATUS" | head -n 1 -)
 if [ "$STATUS" == "Not Created" ]; then
   echo "PCF DEV not created... starting"
   cf pcfdev start -m 8192
-else if [ "$STATUS" == "Suspended" ]; then
-  echo "Resuming PCF DEV"
-  cf pcfdev resume
-fi
+else if [ "$STATUS" == "Stopped" ]; then
+        echo "PCF DEV stopped... starting"
+        cf pcfdev start
+      else if [ "$STATUS" == "Suspended" ]; then
+        echo "Resuming PCF DEV"
+        cf pcfdev resume
+    fi
+  fi
 fi
 
 cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o e2e -s e2e
@@ -109,8 +113,7 @@ if [ $RET -ne 0 ]; then
 fi
 
 wget ${TEST_CONFIG_URL} -O secrets.yaml --no-check-certificate
-
-#echo "headless: true" >> secrets.yaml
+echo "headless: true" >> secrets.yaml
 
 rm -rf node_modules
 npm install
