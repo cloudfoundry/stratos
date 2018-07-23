@@ -4,10 +4,7 @@
 set -eu
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-ENDPOINT=$1
-USERNAME=$2
-PASSWORD=$3
+echo $DIRPATH
 
 if [ -z "${ENDPOINT}" ]; then
   echo "Need Stratos endpoint"
@@ -26,7 +23,7 @@ fi
 
 echo "Checking Stratos is up and running: ${ENDPOINT}"
 
-pushd ${DIRPATH}/../../..
+pushd "${DIRPATH}/../../.."
 SECRETS=secrets.yaml
 if [ -f "$SECRETS" ]; then
   mv $SECRETS $SECRETS.bak
