@@ -1,10 +1,10 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
-  CfAppVariablesDataSource,
   ListAppEnvVar,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
@@ -13,11 +13,11 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
-import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 
 export interface VariableTabAllEnvVarType {
   name: string;
   value: string;
+  section?: boolean;
 }
 
 @Component({
@@ -64,6 +64,11 @@ export class VariablesTabComponent implements OnInit {
             return;
           }
           const envVars = allEnvVars[0].entity[envVarType];
+          result.push({
+            section: true,
+            name: envVarType.replace('_json', ''),
+            value: ''
+          });
           Object.keys(envVars).forEach(key => {
             result.push({
               name: key,
