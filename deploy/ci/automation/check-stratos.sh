@@ -23,6 +23,8 @@ fi
 
 echo "Checking Stratos is up and running: ${ENDPOINT}"
 
+npm install
+
 pushd "${DIRPATH}/../../.."
 SECRETS=secrets.yaml
 if [ -f "$SECRETS" ]; then
@@ -39,7 +41,7 @@ echo "    password: $PASSWORD" >> ${SECRETS}
 set +e
 
 # Run the e2e check test suite against the supplied endpoint
-ng e2e --dev-server-target= --base-url=${ENDPOINT} --suite=check
+./ node_modules/.bin/ng e2e --dev-server-target= --base-url=${ENDPOINT} --suite=check
 RET=$?
 
 if [ -f "$SECRETS.bak" ]; then
