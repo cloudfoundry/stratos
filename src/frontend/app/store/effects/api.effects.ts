@@ -280,7 +280,7 @@ export class APIEffect {
             apiAction.guid,
             apiAction.endpointGuid,
             entityFactory(apiAction.entityKey),
-          ), )
+          ), );
         }
         return errorActions;
       }),

@@ -194,7 +194,7 @@ export function getFailApiRequestActions(
       apiAction,
       requestType
     )
-  ]
+  ];
 }
 
 export function getActionFromString(type: string) {

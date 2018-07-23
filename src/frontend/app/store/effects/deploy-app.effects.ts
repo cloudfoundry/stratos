@@ -4,12 +4,29 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
-import { CheckProjectExists, CHECK_PROJECT_EXISTS, FetchBranchesForProject, FetchCommit, FetchCommits, FETCH_BRANCHES_FOR_PROJECT, FETCH_COMMIT, FETCH_COMMITS, ProjectDoesntExist, ProjectExists } from '../../store/actions/deploy-applications.actions';
+
+import {
+  CHECK_PROJECT_EXISTS,
+  CheckProjectExists,
+  FETCH_BRANCHES_FOR_PROJECT,
+  FETCH_COMMIT,
+  FETCH_COMMITS,
+  FetchBranchesForProject,
+  FetchCommit,
+  FetchCommits,
+  ProjectDoesntExist,
+  ProjectExists,
+} from '../../store/actions/deploy-applications.actions';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { GithubCommit } from '../types/github.types';
-import { ICFAction, StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import {
+  ICFAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../types/request.types';
 import { AppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
