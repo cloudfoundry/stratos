@@ -2,13 +2,13 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { e2e } from '../e2e';
 import { ElementFinder, promise } from 'protractor';
 import { CreateServiceInstance } from './create-service-instance.po';
-import { ServicesWall } from './services-wall.po';
+import { ServicesWallPage } from './services-wall.po';
 import { MetaCard } from '../po/meta-card.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 
 describe('Create Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
-  const servicesWall = new ServicesWall();
+  const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
     const e2eSetup = e2e.setup(ConsoleUserType.admin)
@@ -33,9 +33,9 @@ describe('Create Service Instance', () => {
 
     servicesWall.isActivePage();
 
-    const serviceName = createServiceInstance.stepper.serviceInstanceName;
+    const serviceName = servicesHelperE2E.serviceInstanceName;
 
-    servicesWall.servicesList.cards.getCards().then(
+    servicesWall.serviceInstancesList.cards.getCards().then(
       (cards: ElementFinder[]) => {
         return cards.map(card => {
           const metaCard = new MetaCard(card);
@@ -120,17 +120,7 @@ describe('Create Service Instance', () => {
   });
 
   afterAll((done) => {
-    const getCfCnsi = servicesHelperE2E.cfRequestHelper.getCfCnsi();
-    let cfGuid: string;
-    getCfCnsi.then(endpointModel => {
-      cfGuid = endpointModel.guid;
-      return servicesHelperE2E.fetchServicesInstances(cfGuid);
-    }).then(response => {
-      const services = response.resources;
-      const serviceInstance = services.filter(service => service.entity.name === createServiceInstance.stepper.serviceInstanceName)[0];
-      servicesHelperE2E.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
-      done();
-    });
+    servicesHelperE2E.cleanupServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
   });
 });
 

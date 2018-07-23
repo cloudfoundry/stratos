@@ -10,11 +10,14 @@ export class ServicesHelperE2E {
   cfRequestHelper: CFRequestHelpers;
   cfHelper: CFHelpers;
   createServiceInstance: CreateServiceInstance;
+  serviceInstanceName: string;
 
   constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateServiceInstance = null) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
     this.cfHelper = new CFHelpers(e2eSetup);
     this.createServiceInstance = createServiceInstance;
+    const testTime = (new Date()).toISOString();
+    this.serviceInstanceName = `serviceInstance-${testTime}`;
   }
 
   fetchServices = (cfGuid: string): promise.Promise<CFResponse> => {
@@ -32,7 +35,7 @@ export class ServicesHelperE2E {
   }
 
   deleteServiceInstance = (cfGuid: string, serviceGuid: string): promise.Promise<CFResponse> => {
-    return this.cfRequestHelper.sendCfGet(
+    return this.cfRequestHelper.sendCfDelete(
       cfGuid,
       `service_instances/${serviceGuid}?async=false&recursive=true`
     );
@@ -67,7 +70,7 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
-    this.createServiceInstance.stepper.setServiceName();
+    this.createServiceInstance.stepper.setServiceName(this.serviceInstanceName);
   }
 
   setBindApp = () => {
@@ -103,5 +106,19 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
+
+  cleanupServiceInstance(serviceIntanceName: string): promise.Promise<any> {
+    const getCfCnsi = this.cfRequestHelper.getCfCnsi();
+    let cfGuid: string;
+    return getCfCnsi.then(endpointModel => {
+      cfGuid = endpointModel.guid;
+      return this.fetchServicesInstances(cfGuid);
+    }).then(response => {
+      const services = response.resources;
+      const serviceInstance = services.filter(service => service.entity.name === serviceIntanceName)[0];
+      return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
+    });
+  }
+
 }
 

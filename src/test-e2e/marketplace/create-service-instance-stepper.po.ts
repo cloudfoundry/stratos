@@ -7,12 +7,9 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   private spaceFieldName = 'space';
   private serviceFieldName = 'service';
   private serviceNameFieldName = 'name';
-  public serviceInstanceName;
 
   constructor() {
     super();
-    const testTime = (new Date()).toISOString();
-    this.serviceInstanceName = `serviceInstance-${testTime}`;
   }
 
   waitForStepCloudFoundry = () => {
@@ -34,9 +31,9 @@ export class CreateServiceInstanceStepper extends StepperComponent {
     return this.getStepperForm().fill({ [this.serviceFieldName]: serviceName });
   }
 
-  setServiceName = () => {
+  setServiceName = (serviceInstanceName: string) => {
 
-    return this.getStepperForm().fill({ [this.serviceNameFieldName]: this.serviceInstanceName });
+    return this.getStepperForm().fill({ [this.serviceNameFieldName]: serviceInstanceName });
   }
 
 }
