@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Check that a Stratos system is available
+set -eu
+
+DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+ENDPOINT=$1
+USERNAME=$2
+PASSWORD=$3
+
+if [ -z "${ENDPOINT}" ]; then
+  echo "Need Stratos endpoint"
+  exit 1
+fi
+
+if [ -z "${USERNAME}" ]; then
+  echo "Need username"
+  exit 1
+fi
+
+if [ -z "${PASSWORD}" ]; then
+  echo "Need password"
+  exit 1
+fi
+
+echo "Checking Stratos is up and running: ${ENDPOINT}"
+
+pushd ${DIRPATH}/../../..
+SECRETS=secrets.yaml
+if [ -f "$SECRETS" ]; then
+  mv $SECRETS $SECRETS.bak
+fi
+
+# Generate secrets.yaml for the e2e tests to run
+rm -f ${SECRETS}
+echo "consoleUsers:" > ${SECRETS}
+echo "  admin:" >> ${SECRETS}
+echo "    username: $USERNAME" >> ${SECRETS}
+echo "    password: $PASSWORD" >> ${SECRETS}
+
+set +e
+
+# Run the e2e check test suite against the supplied endpoint
+ng e2e --dev-server-target= --base-url=${ENDPOINT} --suite=check
+RET=$?
+
+if [ -f "$SECRETS.bak" ]; then
+  mv $SECRETS.bak $SECRETS
+else 
+  rm -f $SECRETS
+fi
+
+popd
+
+exit $RET
