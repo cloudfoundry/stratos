@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/sha1"
 	"crypto/tls"
 	"database/sql"
 	"encoding/gob"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -14,6 +16,7 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -323,6 +326,8 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		domain = ""
 	}
 
+	log.Infof("Session Cookie Domain: %s", domain)
+
 	// Store depends on the DB Type
 	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
@@ -446,11 +451,26 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 
 func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options) *portalProxy {
 	log.Debug("newPortalProxy")
+
+	// Generate cookie name - avoids issues if the cookie domain is changed
+	cookieName := jetstreamSessionName
+	domain := pc.CookieDomain
+	if len(domain) > 0 && domain != "-" {
+		h := sha1.New()
+		io.WriteString(h, domain)
+		hash := fmt.Sprintf("%x", h.Sum(nil))
+		cookieName = fmt.Sprintf("%s-%s", jetstreamSessionName, hash[0:10])
+	}
+
+	log.Infof("Session Cookie name: %s", cookieName)
+
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
 		SessionStore:           ss,
 		SessionStoreOptions:    sessionStoreOptions,
+		SessionCookieName:      cookieName,
+		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 	}
 
 	return pp
