@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { LoggerService } from '../../../../../../core/logger.service';
 import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
   ListAppEnvVar,
@@ -13,6 +14,7 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
+
 
 export interface VariableTabAllEnvVarType {
   name: string;
@@ -34,7 +36,8 @@ export class VariablesTabComponent implements OnInit {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig<ListAppEnvVar>
+    private listConfig: ListConfig<ListAppEnvVar>,
+    private loggerService: LoggerService
   ) {
     this.envVarsDataSource = listConfig.getDataSource();
   }
@@ -53,7 +56,7 @@ export class VariablesTabComponent implements OnInit {
       values: app.entity.entity.environment_json || {}
     })));
     this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
-      map(this.mapEnvVars)
+      map(this.mapEnvVars.bind(this))
     );
   }
 
@@ -80,11 +83,20 @@ export class VariablesTabComponent implements OnInit {
       Object.keys(envVars).forEach(key => {
         result.push({
           name: key,
-          value: envVars[key]
+          value: key === 'STRATOS_PROJECT' ? this.parseStratosProject(envVars[key]) : envVars[key]
         });
       });
     });
     return result;
+  }
+
+  private parseStratosProject(value: string): Object | string {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      this.loggerService.debug('Failed to parse STRATOS_PROJECT env var', err);
+    }
+    return '';
   }
 
 }
