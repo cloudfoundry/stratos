@@ -53,36 +53,38 @@ export class VariablesTabComponent implements OnInit {
       values: app.entity.entity.environment_json || {}
     })));
     this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
-      map(allEnvVars => {
-        if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {
-          return [];
-        }
-        const result = new Array<VariableTabAllEnvVarType>();
-
-        Object.keys(allEnvVars[0].entity).forEach(envVarType => {
-          if (envVarType === 'cfGuid') {
-            return;
-          }
-          const envVars = allEnvVars[0].entity[envVarType];
-          result.push({
-            section: true,
-            name: envVarType.replace('_json', ''),
-            value: ''
-          });
-          Object.keys(envVars).forEach(key => {
-            result.push({
-              name: key,
-              value: envVars[key]
-            });
-          });
-        });
-        return result;
-      })
+      map(this.mapEnvVars)
     );
   }
 
   isObject(test: any): boolean {
     return typeof test === 'object';
+  }
+
+  private mapEnvVars(allEnvVars): VariableTabAllEnvVarType[] {
+    if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {
+      return [];
+    }
+    const result = new Array<VariableTabAllEnvVarType>();
+
+    Object.keys(allEnvVars[0].entity).forEach(envVarType => {
+      if (envVarType === 'cfGuid') {
+        return;
+      }
+      const envVars = allEnvVars[0].entity[envVarType];
+      result.push({
+        section: true,
+        name: envVarType.replace('_json', ''),
+        value: ''
+      });
+      Object.keys(envVars).forEach(key => {
+        result.push({
+          name: key,
+          value: envVars[key]
+        });
+      });
+    });
+    return result;
   }
 
 }
