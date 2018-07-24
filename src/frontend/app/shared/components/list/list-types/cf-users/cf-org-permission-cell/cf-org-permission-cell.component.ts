@@ -51,13 +51,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
       filter(org => !org),
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles || []),
-      // Filter out any non-org roles
-      map(missingRoles => missingRoles.filter(role =>
-        role === CfUserRoleParams.AUDITED_ORGS ||
-        role === CfUserRoleParams.BILLING_MANAGER_ORGS ||
-        role === CfUserRoleParams.MANAGED_ORGS ||
-        role === CfUserRoleParams.ORGANIZATIONS)),
+      map(user => user.missingRoles ? user.missingRoles.org : [] || []),
       // If there's no missing, don't proceed
       filter(missingRoles => !!missingRoles.length),
       // Convert to screen name

@@ -50,7 +50,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       headerCell: () => 'missing',
       cellFlex: '1',
       cellDefinition: {
-        getValue: row => (row.entity.missingRoles || []).join(', ')
+        getValue: row => JSON.stringify((row.entity.missingRoles || []))
       },
     },
     {

@@ -1,20 +1,21 @@
-import { GetAllOrgUsers } from '../actions/organization.actions';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../actions/endpoint.actions';
-import {
-  ADD_ROLE_SUCCESS,
-  ChangeUserRole,
-  GET_CF_USERS_AS_NON_ADMIN_SUCCESS,
-  GetAllUsersAsNonAdmin,
-  REMOVE_ROLE_SUCCESS,
-} from '../actions/users.actions';
+import { GetAllOrgUsers } from '../actions/organization.actions';
+import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-import { APIResponse } from '../actions/request.actions';
 import { cfUserSchemaKey } from '../helpers/entity-factory';
 import { deepMergeState } from '../helpers/reducer.helper';
+import { APIResource, NormalizedResponse } from '../types/api.types';
+import { APISuccessOrFailedAction } from '../types/request.types';
+import {
+  CfUser,
+  CfUserMissingOrgRoles,
+  CfUserMissingSpaceRoles,
+  CfUserRoleParams,
+  getDefaultCfUserMissingRoles,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+} from '../types/user.types';
 
 const properties = {
   org: {
@@ -140,22 +141,40 @@ function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: 
     }
   };
 }
-
+/**
+ * Determine if the user entity is missing any roles. If so track them.
+ */
 function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction<NormalizedResponse>) {
   const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserSchemaKey];
 
-  const haveUpdatedUsers = Object.values(usersInResponse).reduce((changes, user) => {
-    const oldMissingRoles = users[user.entity.guid] ? users[user.entity.guid].entity.missingRoles || [] : [];
-    const newMissingRoles = [];
-    Object.values(CfUserRoleParams).forEach(roleParam => {
-      if (!user.entity[roleParam] && oldMissingRoles.indexOf(roleParam) < 0) {
-        newMissingRoles.push(roleParam);
+  const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {
+    const oldMissingRoles = (users[user.entity.guid] ? users[user.entity.guid].entity.missingRoles : null)
+      || getDefaultCfUserMissingRoles();
+    const newMissingRoles = getDefaultCfUserMissingRoles();
+    Object.values(CfUserRoleParams).forEach((roleParam) => {
+      if (user.entity[roleParam]) {
+        return;
+      }
+      // What's with all the `as`? Typing fun...
+      if (isOrgRole(roleParam) ? oldMissingRoles.org.indexOf(roleParam as CfUserMissingOrgRoles) < 0 :
+        oldMissingRoles.space.indexOf(roleParam as CfUserMissingSpaceRoles) < 0) {
+        if (isOrgRole(roleParam)) {
+          newMissingRoles.org.push(roleParam as CfUserMissingOrgRoles);
+        } else {
+          newMissingRoles.space.push(roleParam as CfUserMissingSpaceRoles);
+        }
       }
     });
     user.entity.missingRoles = newMissingRoles;
-    return newMissingRoles.length || changes;
+    return !!newMissingRoles.org.length || !!newMissingRoles.space.length || changes;
   }, false);
 
   return haveUpdatedUsers ? deepMergeState(users, usersInResponse) : users;
+}
 
+function isOrgRole(role: string) {
+  return role === CfUserRoleParams.AUDITED_ORGS ||
+    role === CfUserRoleParams.BILLING_MANAGER_ORGS ||
+    role === CfUserRoleParams.MANAGED_ORGS ||
+    role === CfUserRoleParams.ORGANIZATIONS;
 }

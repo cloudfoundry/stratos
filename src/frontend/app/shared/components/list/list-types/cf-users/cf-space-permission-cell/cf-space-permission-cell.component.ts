@@ -63,12 +63,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       filter(space => !space || space.length !== 1),
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles || []),
-      // Filter out any non-org roles
-      map(missingRoles => missingRoles.filter(role =>
-        role === CfUserRoleParams.AUDITED_SPACES ||
-        role === CfUserRoleParams.MANAGED_SPACES ||
-        role === CfUserRoleParams.SPACES)),
+      map(user => user.missingRoles ? user.missingRoles.space : [] || []),
       // If there's no missing, don't proceed
       filter(missingRoles => !!missingRoles.length),
       // Convert to screen name
