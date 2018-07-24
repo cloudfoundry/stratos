@@ -14,11 +14,11 @@ import { map, mergeMap, withLatestFrom, catchError } from 'rxjs/operators';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
-import { listEntityRelations } from '../helpers/entity-relations';
+import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
 import {
   EntityInlineParentAction,
   isEntityInlineParentAction,
-} from '../helpers/entity-relations.types';
+} from '../helpers/entity-relations/entity-relations.types';
 import {
   CfAPIFlattener,
   flattenPagination,
@@ -96,7 +96,7 @@ export class APIEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-  ) {}
+  ) { }
 
   @Effect()
   apiRequest$ = this.actions$
@@ -106,7 +106,7 @@ export class APIEffect {
       mergeMap(([action, state]) => {
         return this.doApiRequest(action, state);
       }),
-    );
+  );
 
   private doApiRequest(action, state) {
     const actionClone = { ...action };
@@ -312,13 +312,13 @@ export class APIEffect {
 
     const result = resource.metadata
       ? {
-          entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
-          metadata: resource.metadata,
-        }
+        entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
+        metadata: resource.metadata,
+      }
       : {
-          entity: { ...resource, cfGuid },
-          metadata: { guid: guid },
-        };
+        entity: { ...resource, cfGuid },
+        metadata: { guid: guid },
+      };
 
     // Inject `cfGuid` in nested entities
     Object.keys(result.entity).forEach(resourceKey => {
@@ -333,12 +333,12 @@ export class APIEffect {
         result.entity[resourceKey] = nestedResource.map(nested => {
           return nested && typeof nested === 'object'
             ? this.completeResourceEntity(
-                nested,
-                cfGuid,
-                nested.metadata
-                  ? nested.metadata.guid
-                  : guid + '-' + resourceKey,
-              )
+              nested,
+              cfGuid,
+              nested.metadata
+                ? nested.metadata.guid
+                : guid + '-' + resourceKey,
+            )
             : nested;
         });
       }
@@ -374,8 +374,8 @@ export class APIEffect {
       if (!succeeded) {
         errorResponse =
           endpoint &&
-          (!!endpoint.errorResponse &&
-            typeof endpoint.errorResponse !== 'string')
+            (!!endpoint.errorResponse &&
+              typeof endpoint.errorResponse !== 'string')
             ? endpoint.errorResponse
             : ({} as JetStreamCFErrorResponse);
         // Use defaults if values are not provided
@@ -416,10 +416,10 @@ export class APIEffect {
     data,
     errorCheck: APIErrorCheck[],
   ): {
-    entities: NormalizedResponse;
-    totalResults: number;
-    totalPages: number;
-  } {
+      entities: NormalizedResponse;
+      totalResults: number;
+      totalPages: number;
+    } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
@@ -427,8 +427,8 @@ export class APIEffect {
         guid =>
           data[guid] !== null &&
           errorCheck.findIndex(error => error.guid === guid && !error.error) >=
-            0,
-      )
+          0,
+    )
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
@@ -522,9 +522,9 @@ export class APIEffect {
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
     return paginationState
       ? {
-          ...paginationState.params,
-          page: paginationState.currentPage.toString(),
-        }
+        ...paginationState.params,
+        page: paginationState.currentPage.toString(),
+      }
       : {};
   }
 
@@ -546,12 +546,12 @@ export class APIEffect {
     resData,
     apiAction: IRequestAction,
   ): {
-    resData;
-    entities;
-    totalResults;
-    totalPages;
-    errorsCheck: APIErrorCheck[];
-  } {
+      resData;
+      entities;
+      totalResults;
+      totalPages;
+      errorsCheck: APIErrorCheck[];
+    } {
     const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;

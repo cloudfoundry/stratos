@@ -13,7 +13,14 @@ import { applicationSchemaKey, endpointSchemaKey } from '../../store/helpers/ent
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import {
+  CfUser,
+  CfUserRoleParams,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+  UserRoleInOrg,
+  UserRoleInSpace,
+} from '../../store/types/user.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { ICfRolesState } from '../../store/types/current-user-roles.types';
@@ -119,31 +126,31 @@ function assignRole(currentRoles: string, role: string) {
 }
 
 export function isOrgManager(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'managed_organizations');
+  return hasRole(user, guid, CfUserRoleParams.MANAGER_ORGS);
 }
 
 export function isOrgBillingManager(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'billing_managed_organizations');
+  return hasRole(user, guid, CfUserRoleParams.BILLING_MANAGER_ORGS);
 }
 
 export function isOrgAuditor(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'audited_organizations');
+  return hasRole(user, guid, CfUserRoleParams.AUDITED_ORGS);
 }
 
 export function isOrgUser(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'organizations');
+  return hasRole(user, guid, CfUserRoleParams.ORGANIZATIONS);
 }
 
 export function isSpaceManager(user: CfUser, spaceGuid: string): boolean {
-  return hasRole(user, spaceGuid, 'managed_spaces');
+  return hasRole(user, spaceGuid, CfUserRoleParams.MANAGED_SPACES);
 }
 
 export function isSpaceAuditor(user: CfUser, spaceGuid: string): boolean {
-  return hasRole(user, spaceGuid, 'audited_spaces');
+  return hasRole(user, spaceGuid, CfUserRoleParams.AUDITED_SPACES);
 }
 
 export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
-  return hasRole(user, spaceGuid, 'spaces');
+  return hasRole(user, spaceGuid, CfUserRoleParams.SPACES);
 }
 
 function hasRole(user: CfUser, guid: string, roleType: string) {

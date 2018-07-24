@@ -3,20 +3,20 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { isEntityBlocked } from '../../core/entity-service';
-import { pathGet } from '../../core/utils.service';
-import { SetInitialParams } from '../actions/pagination.actions';
-import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
-import { APIResponse } from '../actions/request.actions';
-import { AppState } from '../app-state';
-import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { IRequestDataState } from '../types/entity.types';
-import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
-import { EntitySchema } from './entity-factory';
+import { isEntityBlocked } from '../../../core/entity-service';
+import { pathGet } from '../../../core/utils.service';
+import { SetInitialParams } from '../../actions/pagination.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
+import { APIResponse } from '../../actions/request.actions';
+import { AppState } from '../../app-state';
+import { RequestInfoState } from '../../reducers/api-request-reducer/types';
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../selectors/api.selectors';
+import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { APIResource, NormalizedResponse } from '../../types/api.types';
+import { IRequestDataState } from '../../types/entity.types';
+import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
+import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
+import { EntitySchema } from '../entity-factory';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -31,7 +31,7 @@ import {
   ValidateResultFetchingState,
   ValidationResult,
 } from './entity-relations.types';
-import { pick } from './reducer.helper';
+import { pick } from '../reducer.helper';
 
 // import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
 

@@ -1,6 +1,19 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { APIResource } from './api.types';
 
+type CfUserMissingRoles = CfUserRoleParams.ORGANIZATIONS | CfUserRoleParams.MANAGER_ORGS | CfUserRoleParams.BILLING_MANAGER_ORGS |
+  CfUserRoleParams.AUDITED_ORGS | CfUserRoleParams.SPACES | CfUserRoleParams.MANAGED_SPACES | CfUserRoleParams.AUDITED_SPACES;
+
+export enum CfUserRoleParams {
+  ORGANIZATIONS = 'organizations',
+  MANAGER_ORGS = 'managed_organizations',
+  BILLING_MANAGER_ORGS = 'billing_managed_organizations',
+  AUDITED_ORGS = 'audited_organizations',
+  SPACES = 'spaces',
+  MANAGED_SPACES = 'managed_spaces',
+  AUDITED_SPACES = 'audited_spaces'
+}
+
 export interface CfUser {
   organizations?: APIResource<IOrganization>[];
   managed_organizations: APIResource<IOrganization>[];
@@ -22,6 +35,7 @@ export interface CfUser {
   managed_spaces_url: string;
   audited_spaces_url: string;
   default_space_guid: string;
+  missingRoles?: CfUserMissingRoles[];
 }
 
 /**

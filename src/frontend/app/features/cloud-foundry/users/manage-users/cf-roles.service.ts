@@ -27,7 +27,7 @@ import { entityFactory, organizationSchemaKey, spaceSchemaKey, endpointSchemaKey
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../store/helpers/entity-relations.types';
+} from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import {

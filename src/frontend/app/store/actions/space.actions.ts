@@ -16,7 +16,7 @@ import {
   createEntityRelationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-} from '../helpers/entity-relations.types';
+} from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction, PaginationAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';

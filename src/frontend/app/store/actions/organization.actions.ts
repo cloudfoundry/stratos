@@ -1,16 +1,15 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateOrganization } from '../../core/cf-api.types';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import {
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-  cfUserSchemaKey,
-} from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
-import { PaginatedAction, PaginationAction } from '../types/pagination.types';
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
+import { CfUserRoleParams } from '../types/user.types';
 import { getActions } from './action.helper';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
@@ -161,19 +160,22 @@ export class UpdateOrganization extends CFStartAction implements ICFAction {
 }
 
 export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+
+  static actions = getActions('Organizations', 'List all users');
+
   constructor(
     public guid: string,
     public paginationKey: string,
     public endpointGuid: string,
     public isAdmin: boolean,
     public includeRelations: string[] = [
-      createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGER_ORGS),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_SPACES)
     ]) {
     super();
     this.options = new RequestOptions();
@@ -182,7 +184,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     // Only admin's can use the url supplied when params are missing
     this.skipValidation = !isAdmin;
   }
-  actions = getActions('Organizations', 'List all users');
+  actions = GetAllOrgUsers.actions;
   entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
   options: RequestOptions;

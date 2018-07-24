@@ -25,7 +25,7 @@ import {
   serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';

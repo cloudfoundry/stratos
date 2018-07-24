@@ -46,6 +46,14 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       }
     },
     {
+      columnId: 'username2',
+      headerCell: () => 'missing',
+      cellFlex: '1',
+      cellDefinition: {
+        getValue: row => (row.entity.missingRoles || []).join(', ')
+      },
+    },
+    {
       columnId: 'roles',
       headerCell: () => 'Organization Roles',
       cellFlex: '3',

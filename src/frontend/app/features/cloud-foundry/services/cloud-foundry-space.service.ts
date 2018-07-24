@@ -22,7 +22,7 @@ import {
   spaceQuotaSchemaKey,
   cfUserSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';

@@ -2,13 +2,13 @@ import { Action } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { getPaginationKey } from '../actions/pagination.actions';
-import { APIResponse } from '../actions/request.actions';
-import { ActionState } from '../reducers/api-request-reducer/types';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
-import { EntitySchema } from './entity-factory';
+import { getPaginationKey } from '../../actions/pagination.actions';
+import { APIResponse } from '../../actions/request.actions';
+import { ActionState } from '../../reducers/api-request-reducer/types';
+import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
+import { IRequestAction } from '../../types/request.types';
+import { EntitySchema } from '../entity-factory';
 
 export class EntityTree {
   rootRelation: EntityTreeRelation;

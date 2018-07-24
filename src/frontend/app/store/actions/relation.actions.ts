@@ -1,7 +1,7 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { EntitySchema } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations.types';
+import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../types/request.types';
 

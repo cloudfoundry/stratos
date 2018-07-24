@@ -1,7 +1,7 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { entityFactory, servicePlanSchemaKey, serviceSchemaKey } from '../helpers/entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';

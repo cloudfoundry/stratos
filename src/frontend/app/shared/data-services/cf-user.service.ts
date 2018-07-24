@@ -21,7 +21,7 @@ import { GetAllOrgUsers } from '../../store/actions/organization.actions';
 import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import {
   getPaginationObservables,
   PaginationObservables,

@@ -8,10 +8,14 @@ import { IOrganization } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
-import { GET_CF_USERS_BY_ORG, GetAllUsersAsNonAdmin } from '../actions/users.actions';
+import {
+  GET_CF_USERS_AS_NON_ADMIN,
+  GET_CF_USERS_AS_NON_ADMIN_SUCCESS,
+  GetAllUsersAsNonAdmin,
+} from '../actions/users.actions';
 import { AppState } from '../app-state';
 import { cfUserSchemaKey, endpointSchemaKey, entityFactory, organizationSchemaKey } from '../helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { createPaginationCompleteWatcher, fetchPaginationStateFromAction } from '../helpers/store-helpers';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { getPaginationObservables } from '../reducers/pagination-reducer/pagination-reducer.helper';
@@ -34,7 +38,7 @@ export class UsersEffects {
   /**
    * Fetch users from each organisation. This is used when the user connected to cf is non-admin and cannot access the global users/ list
    */
-  @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_BY_ORG).pipe(
+  @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_AS_NON_ADMIN).pipe(
     switchMap(action => {
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {

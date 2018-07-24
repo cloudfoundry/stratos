@@ -3,8 +3,7 @@ import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
-import { CfUser } from '../types/user.types';
-import { CfUserService } from '../../shared/data-services/cf-user.service';
+import { CfUser, CfUserRoleParams } from '../types/user.types';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -366,18 +365,18 @@ const orgUserEntity = {
 // }
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
-  const schema = new EntitySchema(organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, relationKey);
+  const schema = new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
   // schema.altFetch = (store, cfGuid) => createNonAdminFetchRole(store, cfGuid, schema);// TODO: RC remove if not using fetchEntityRelationAltAction
   return schema;
 }
 
-const OrganizationUserSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, 'organizations');
-const OrganizationAuditedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, 'audited_organizations');
-const OrganizationManagedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, 'managed_organizations');
-const OrganizationBillingSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, 'billing_managed_organizations');
-const SpaceUserSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, 'spaces');
-const SpaceManagedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, 'managed_spaces');
-const SpaceAuditedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, 'audited_spaces');
+const OrganizationUserSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.ORGANIZATIONS);
+const OrganizationAuditedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.AUDITED_ORGS);
+const OrganizationManagedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.MANAGER_ORGS);
+const OrganizationBillingSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.BILLING_MANAGER_ORGS);
+const SpaceUserSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.SPACES);
+const SpaceManagedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.MANAGED_SPACES);
+const SpaceAuditedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.AUDITED_SPACES);
 
 
 function userProcessStrategy(user: APIResource<CfUser>) {

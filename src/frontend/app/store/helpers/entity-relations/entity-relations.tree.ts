@@ -1,6 +1,6 @@
 import { schema } from 'normalizr';
 
-import { EntitySchema } from './entity-factory';
+import { EntitySchema } from '../entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
 
 const entityTreeCache: {

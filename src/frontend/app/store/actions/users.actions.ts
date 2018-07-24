@@ -12,10 +12,10 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
-} from '../helpers/entity-relations.types';
+} from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { getActions } from './action.helper';
 
 export const GET_ALL = '[Users] Get all';
@@ -31,19 +31,20 @@ export const ADD_ROLE_SUCCESS = '[Users]  Add role success';
 export const ADD_ROLE_FAILED = '[Users]  Add role failed';
 
 const defaultUserRelations = [
-  createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
-  createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
-  createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
-  createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
-  createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
-  createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
-  createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGER_ORGS),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_SPACES)
 ];
 export const GET_CF_USER = '[Users] Get cf user ';
 export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
 export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
-export const GET_CF_USERS_BY_ORG = '[Users] Get cf users by org ';
+export const GET_CF_USERS_AS_NON_ADMIN = '[Users] Get cf users by org ';
+export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org success';
 
 const createGetAllUsersPaginationKey = cfGuid => createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
 const createGetUsersInitialParams = () => ({
@@ -54,7 +55,7 @@ const createGetUsersInitialParams = () => ({
 });
 
 export class GetAllUsersAsNonAdmin implements PaginatedAction, EntityInlineParentAction {
-  type = GET_CF_USERS_BY_ORG;
+  type = GET_CF_USERS_AS_NON_ADMIN;
   paginationKey: string;
   actions: string[] = [];
   entity = [entityFactory(cfUserSchemaKey)];

@@ -1,27 +1,20 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { GET_ORGANIZATION } from '../actions/organization.actions';
-import { ApiActionTypes, APIResponse } from '../actions/request.actions';
-import { GET_SPACE } from '../actions/space.actions';
-import { AppState } from '../app-state';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { IRequestDataState } from '../types/entity.types';
-import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
-import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from './entity-factory';
+import { APIResponse } from '../../../actions/request.actions';
+import { AppState } from '../../../app-state';
+import { selectPaginationState } from '../../../selectors/pagination.selectors';
+import { IRequestDataState } from '../../../types/entity.types';
+import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
+import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
+import { CfUserRoleParams } from '../../../types/user.types';
+import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,
   ValidateResultFetchingState,
-} from './entity-relations.types';
-import { deepMergeState, mergeEntity } from './reducer.helper';
-
-// class AppStoreLayout {
-//   [entityKey: string]: {
-//     [guid: string]: any;
-//   }
-// }
+} from '../entity-relations.types';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 
 function updateUserFromOrgSpaceArray(
   existingUsers: { [guid: string]: any },
@@ -52,7 +45,7 @@ function updateUserFromOrgSpaceArray(
   return newUsers;
 }
 
-function orgSpacePostProcess(
+export function orgSpacePostProcess(
   store: Store<AppState>,
   action: IRequestAction,
   apiResponse: APIResponse,
@@ -63,14 +56,14 @@ function orgSpacePostProcess(
 
   const newUsers = {};
   if (action.entityKey === organizationSchemaKey) {
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'users', 'organizations');
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', 'managed_organizations');
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'billing_managers', 'billing_managed_organizations');
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors_managers', 'audited_organizations');
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'users', CfUserRoleParams.ORGANIZATIONS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', CfUserRoleParams.MANAGER_ORGS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'billing_managers', CfUserRoleParams.BILLING_MANAGER_ORGS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors_managers', CfUserRoleParams.AUDITED_ORGS);
   } else if (action.entityKey === spaceSchemaKey) {
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'developers', 'spaces');
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', 'managed_spaces');
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors', 'audited_spaces');
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'developers', CfUserRoleParams.SPACES);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', CfUserRoleParams.MANAGED_SPACES);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors', CfUserRoleParams.AUDITED_SPACES);
   }
 
   if (!Object.keys(newUsers).length) {
@@ -110,19 +103,5 @@ function orgSpacePostProcess(
         })
       )
     };
-  }
-}
-
-export function validationPostProcessor(
-  store: Store<AppState>,
-  action: IRequestAction,
-  apiResponse: APIResponse,
-  allEntities: IRequestDataState): ValidateEntityResult {
-  if (action.type === ApiActionTypes.API_REQUEST_START) {
-    switch (action['actions'][0]) {
-      case GET_ORGANIZATION:
-      case GET_SPACE:
-        return orgSpacePostProcess(store, action, apiResponse, allEntities);
-    }
   }
 }

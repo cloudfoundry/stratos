@@ -25,7 +25,7 @@ import {
   spaceSchemaKey,
   stackSchemaKey
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
