@@ -460,6 +460,9 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 	}
 	deps.RepoLocator = api.NewRepositoryLocator(deps.Config, deps.Gateways, logger, envDialTimeout)
 
+	// Wrap an interceptor around the application repository so we can get the app details when created/updated
+	deps.RepoLocator.SetApplicationRepository(NewRepositoryIntercept(deps.RepoLocator.GetApplicationRepository()))
+
 	deps.PluginModels = &commandregistry.PluginModels{Application: nil}
 
 	deps.PlanBuilder = planbuilder.NewBuilder(
