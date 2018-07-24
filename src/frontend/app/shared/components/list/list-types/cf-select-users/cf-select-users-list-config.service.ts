@@ -1,3 +1,4 @@
+import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { Store } from '@ngrx/store';
 import { Observable, combineLatest, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount, tap, switchMap } from 'rxjs/operators';
@@ -61,23 +62,25 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
           cfUserService.createPaginationAction(cf.global.isAdmin, true)
         )
       ),
-      tap(([cf, action]) => {
-        const rowStateHelper = new ListRowSateHelper();
-        const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
-          paginationMonitorFactory,
-          entityMonitorFactory,
-          action.paginationKey,
-          action.entityKey,
-          cfUserRowStateSetUpManager
-        );
-        this.dataSource = new CfSelectUsersDataSourceService(cfGuid, this.store, action, this, rowStateManager, () => {
-          sub.unsubscribe();
-        });
-      }),
+      tap(([cf, action]) => this.createDataSource(action)),
       map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
       refCount()
     );
+  }
+
+  private createDataSource(action: PaginatedAction) {
+    const rowStateHelper = new ListRowSateHelper();
+    const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
+      this.paginationMonitorFactory,
+      this.entityMonitorFactory,
+      action.paginationKey,
+      action.entityKey,
+      cfUserRowStateSetUpManager
+    );
+    this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {
+      sub.unsubscribe();
+    });
   }
 
   getColumns = () => this.columns;

@@ -1,9 +1,8 @@
-import { Action } from '@ngrx/store';
 import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
-import { CfUser, CfUserRoleParams } from '../types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -61,7 +60,6 @@ export class EntitySchema extends schema.Entity {
    * @param {schema.EntityOptions} [options] As per schema.Entity ctor
    * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
    * spaces, manager spaces, auditor space, etc
-   * @param {(args: any?) => Action} [altFetch] // TODO: RC remove if not using fetchEntityRelationAltAction
    * @memberof EntitySchema
    */
   constructor(
@@ -69,7 +67,6 @@ export class EntitySchema extends schema.Entity {
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
-    // public altFetch?: (store: Store<AppState>, cfGuid: string) => Observable<ValidateEntityResult> // TODO: RC remove if not using fetchEntityRelationAltAction
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
@@ -231,9 +228,9 @@ const coreSpaceSchemaParams = {
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
-  developers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'developers')],
-  managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managers')],
-  auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'auditors')]
+  developers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)],
+  managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.MANAGER)],
+  auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.AUDITOR)]
 };
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
@@ -263,10 +260,10 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    users: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users')],
-    managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managers')],
-    billing_managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'billing_managers')],
-    auditors_managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'auditors_managers')]
+    users: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.USER)],
+    managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.MANAGER)],
+    billing_managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.BILLING_MANAGERS)],
+    auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.AUDITOR)]
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;
@@ -349,68 +346,41 @@ const orgUserEntity = {
     spaces: [SpaceEmptySchema]
   }
 };
-// function createNonAdminFetchRole(store, cfGuid, roleSchema: EntitySchema): Observable<ValidateEntityResult> {
-//   return store.select(selectCurrentUserCFEndpointRolesState(cfGuid)).pipe(
-//     map((state: ICfRolesState) => {
-//       if (state.global.isAdmin) {
-//         return null;
-//       }
-//       const action = new GetRolesAsNonAdmin(cfGuid, roleSchema);
-//       return {
-//         action,
-//         fetchingState$: createValidationPaginationWatcher(store, action)
-//       };
-//     })
-//   );
-// }
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
-  const schema = new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
-  // schema.altFetch = (store, cfGuid) => createNonAdminFetchRole(store, cfGuid, schema);// TODO: RC remove if not using fetchEntityRelationAltAction
-  return schema;
+  return new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
 
-const OrganizationUserSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.ORGANIZATIONS);
-const OrganizationAuditedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.AUDITED_ORGS);
-const OrganizationManagedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.MANAGED_ORGS);
-const OrganizationBillingSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.BILLING_MANAGER_ORGS);
-const SpaceUserSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.SPACES);
-const SpaceManagedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.MANAGED_SPACES);
-const SpaceAuditedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.AUDITED_SPACES);
-
-
-function userProcessStrategy(user: APIResource<CfUser>) {
-  if (user.entity.username) {
-    return user;
-  }
-  const entity = {
-    ...user.entity,
-    username: user.metadata.guid
-  };
-
-  return user.metadata ? {
-    entity,
-    metadata: user.metadata
-  } : {
-      entity
-    };
-}
 const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
   entity: {
-    organizations: [OrganizationUserSchema],
-    audited_organizations: [OrganizationAuditedSchema],
-    managed_organizations: [OrganizationManagedSchema],
-    billing_managed_organizations: [OrganizationBillingSchema],
-    spaces: [SpaceUserSchema],
-    managed_spaces: [SpaceManagedSchema],
-    audited_spaces: [SpaceAuditedSchema],
+    organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.ORGANIZATIONS)],
+    audited_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.AUDITED_ORGS)],
+    managed_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.MANAGED_ORGS)],
+    billing_managed_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.BILLING_MANAGER_ORGS)],
+    spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.SPACES)],
+    managed_spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.MANAGED_SPACES)],
+    audited_spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
     idAttribute: getAPIResourceGuid,
-    processStrategy: userProcessStrategy
+    processStrategy: (user: APIResource<CfUser>) => {
+      if (user.entity.username) {
+        return user;
+      }
+      const entity = {
+        ...user.entity,
+        username: user.metadata.guid
+      };
+
+      return user.metadata ? {
+        entity,
+        metadata: user.metadata
+      } : {
+          entity
+        };
+    }
   });
 entityCache[cfUserSchemaKey] = CFUserSchema;
-
 
 
 export function entityFactory(key: string): EntitySchema {

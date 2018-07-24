@@ -52,7 +52,7 @@ export interface CfUser {
 }
 
 /**
- * Org user roles, string values as per CF API
+ * Org user roles, string values as per CF API. Should match org entity role params
  */
 export enum OrgUserRoleNames {
   MANAGER = 'managers',
@@ -61,7 +61,7 @@ export enum OrgUserRoleNames {
   USER = 'users'
 }
 /**
- * Space user roles, string values as per CF API
+ * Space user roles, string values as per CF API. Should match space entity role params
  */
 export enum SpaceUserRoleNames {
   MANAGER = 'managers',

@@ -7,14 +7,14 @@ import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { IRequestDataState } from '../../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
-import { CfUserRoleParams } from '../../../types/user.types';
+import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,
   ValidateResultFetchingState,
 } from '../entity-relations.types';
-import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 
 function updateUserFromOrgSpaceArray(
   existingUsers: { [guid: string]: any },
@@ -24,9 +24,6 @@ function updateUserFromOrgSpaceArray(
   userParamName: string) {
   if (orgOrSpace[orgSpaceParamName]) {
     orgOrSpace[orgSpaceParamName].forEach(userGuid => {
-      if (!existingUsers[userGuid]) {
-        console.log('DANGER');
-      }
       const existingUser = existingUsers[userGuid];
       const existingRoles = existingUser.entity[userParamName] || [];
 
@@ -56,14 +53,15 @@ export function orgSpacePostProcess(
 
   const newUsers = {};
   if (action.entityKey === organizationSchemaKey) {
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'users', CfUserRoleParams.ORGANIZATIONS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', CfUserRoleParams.MANAGED_ORGS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'billing_managers', CfUserRoleParams.BILLING_MANAGER_ORGS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors_managers', CfUserRoleParams.AUDITED_ORGS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
+      CfUserRoleParams.BILLING_MANAGER_ORGS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
   } else if (action.entityKey === spaceSchemaKey) {
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'developers', CfUserRoleParams.SPACES);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', CfUserRoleParams.MANAGED_SPACES);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors', CfUserRoleParams.AUDITED_SPACES);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
 
   if (!Object.keys(newUsers).length) {

@@ -6,7 +6,6 @@ import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
-import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -25,13 +24,13 @@ import {
   serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import {
-  getPaginationObservables,
-  PaginationObservables,
-} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../store/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfUser } from '../../../store/types/user.types';
+import { CfUser, OrgUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -90,10 +89,10 @@ export class CloudFoundryOrganizationService {
         ];
         if (!isAdmin) {
           relations.push(
-            createEntityRelationKey(organizationSchemaKey, 'users'),
-            createEntityRelationKey(organizationSchemaKey, 'managers'),
-            createEntityRelationKey(organizationSchemaKey, 'billing_managers'),
-            createEntityRelationKey(organizationSchemaKey, 'auditors_managers'),
+            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.USER),
+            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.MANAGER),
+            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.BILLING_MANAGERS),
+            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.AUDITOR),
           );
         }
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(

@@ -5,30 +5,32 @@ import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
-import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetSpace, GetAllSpaceUsers } from '../../../store/actions/space.actions';
+import { GetAllSpaceUsers, GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
+  cfUserSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
+  spaceQuotaSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  spaceQuotaSchemaKey,
-  cfUserSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../store/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { CfUser, SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { CfUser } from '../../../store/types/user.types';
 
 const noQuotaDefinition = (orgGuid: string) => ({
   entity: {
@@ -110,9 +112,9 @@ export class CloudFoundrySpaceService {
         ];
         if (!isAdmin) {
           relations.push(
-            createEntityRelationKey(spaceSchemaKey, 'developers'),
-            createEntityRelationKey(spaceSchemaKey, 'managers'),
-            createEntityRelationKey(spaceSchemaKey, 'auditors'),
+            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.DEVELOPER),
+            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.MANAGER),
+            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.AUDITOR),
           );
         }
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
@@ -125,8 +127,6 @@ export class CloudFoundrySpaceService {
         return spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
       })
     );
-
-
 
     this.serviceInstances$ = this.space$.pipe(map(o => o.entity.entity.service_instances));
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));

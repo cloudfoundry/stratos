@@ -79,12 +79,8 @@ export class RequestEffect {
       const apiResponse = validateAction.apiResponse;
 
       return this.store.select(getAPIRequestDataState).pipe(
-        withLatestFrom(
-          this.store.select(getPaginationState),
-          // this.store.select(getCurrentUserCFEndpointRolesState(apiAction.endpointGuid))
-        ),
+        withLatestFrom(this.store.select(getPaginationState)),
         first(),
-        // map(([allEntities, allPagination, connectedUserState]) => {
         map(([allEntities, allPagination]) => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
@@ -99,14 +95,10 @@ export class RequestEffect {
             apiResponse,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
-            populateMissing: true,
-            // isEndpointAdmin: connectedUserState ? connectedUserState.global.isAdmin : false //TODO: RC remove if not using fetchEntityRelationAltAction
+            populateMissing: true
           });
         }),
         mergeMap(validation => {
-          // if (validation.apiResponse && validation.apiResponse.response.entities.user) { // TODO: RC Remove
-          //   console.log('sdfdsf');
-          // }
           const independentUpdates = !validateAction.apiRequestStarted && validation.started;
           if (independentUpdates) {
             this.update(apiAction, true, null);
@@ -118,9 +110,6 @@ export class RequestEffect {
           }));
         }),
         mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
-          // if (validation.apiResponse && validation.apiResponse.response.entities.user) { // TODO: RC Remove
-          //   console.log('sdfdsf');
-          // }
           return [new EntitiesPipelineCompleted(
             apiAction,
             validatedApiResponse,
@@ -187,11 +176,6 @@ export class RequestEffect {
           }
         }
       }
-
-      // if (completeAction.apiResponse && completeAction.apiResponse.response.entities.user) { // TODO: RC Remove
-      //   console.log('sdfdsf');
-      // }
-
       return actions;
     }));
 

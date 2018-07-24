@@ -33,8 +33,6 @@ import {
 } from './entity-relations.types';
 import { pick } from '../reducer.helper';
 
-// import { fetchEntityRelationAltAction } from './entity-relations-alt-requests';
-
 class AppStoreLayout {
   [entityKey: string]: {
     [guid: string]: any;
@@ -99,8 +97,6 @@ class ValidateEntityRelationsConfig {
    * @memberof ValidateEntityRelationsConfig
    */
   apiResponse: APIResponse;
-  // TODO: RC remove if not using fetchEntityRelationAltAction
-  // isEndpointAdmin: boolean;
 }
 
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
@@ -216,19 +212,11 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
  */
 function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
   const { store, childRelation, childEntitiesUrl, cfGuid, parentRelation } = config;
-  // const { store, childRelation, childEntitiesUrl, cfGuid, isEndpointAdmin, parentRelation } = config;// TODO: RC remove if not using fetchEntityRelationAltAction
 
   if (!childEntitiesUrl) {
     // There might genuinely be no entity. In those cases the url will be blank
     return [];
   }
-
-  // TODO: RC remove if not using fetchEntityRelationAltAction
-  // const valResult = fetchEntityRelationAltAction(store, cfGuid, isEndpointAdmin, parentRelation, childRelation);
-  // if (valResult) {
-  //   return [valResult];
-  // }
-
 
   const paramAction = createAction(config);
   let results: ValidateEntityResult[] = [];
@@ -288,13 +276,6 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
       // The values are missing and we want them, go fetch
       results = [].concat(results, createActionsForMissingEntities(config));
     }
-    // else { //TODO: RC Remove if not marking entities as invalid if something missing. NOTE - will not work if the field exists in either
-    // returned entity or entity in store
-    //   parentEntity.metadata.invalidFields = parentEntity.metadata.invalidFields || [];
-    //   if (parentEntity.metadata.invalidFields.indexOf(childRelation.paramName) < 0) {
-    //     parentEntity.metadata.invalidFields.push(childRelation.paramName);
-    //   }
-    // }
   }
 
   return results;
@@ -495,10 +476,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   const { action, populateMissing, newEntities, allEntities, store } = config;
   let { parentEntities } = config;
 
-  // if (action.entityKey === cfUserSchemaKey) { // TODO: RC remove
-  //   console.log('aa');
-  // }
-
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
       started: false,
@@ -536,7 +513,6 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
   return childEntitiesAsArray ? childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity) : null;
 }
 
-
 /**
  * Check to see if we already have the result of the pagination action in a parent entity (we've previously fetched it inline). If so
  * create an action that can be used to populate the pagination section with the list from the parent
@@ -570,10 +546,8 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     withLatestFrom(
       store.select(selectEntity<any>(parentEntitySchema.key, parentGuid)),
       store.select(getAPIRequestDataState),
-      // store.select(getCurrentUserCFEndpointRolesState(action.endpointGuid))//TODO: RC remove if not using fetchEntityRelationAltAction
     ),
     map(([entityInfo, entity, allEntities]: [RequestInfoState, any, IRequestDataState]) => {
-      // map(([entityInfo, entity, allEntities, connectedUserState]: [RequestInfoState, any, IRequestDataState, ICfRolesState]) => {//TODO: RC remove if not using fetchEntityRelationAltAction
       if (!entity) {
         return;
       }
@@ -607,7 +581,6 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
             childEntitiesUrl: '',
             populateMissing: true,
-            // isEndpointAdmin: connectedUserState.global.isAdmin// TODO: RC remove if not using fetchEntityRelationAltAction
           };
           return createActionsForExistingEntities(config)[0];
         }

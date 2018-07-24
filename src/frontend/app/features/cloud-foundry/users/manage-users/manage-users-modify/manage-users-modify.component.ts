@@ -27,9 +27,11 @@ import {
 import { IOrganization } from '../../../../../core/cf-api.types';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
+/* tslint:disable:max-line-length */
 import {
   TableCellRoleOrgSpaceComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
+/* tslint:enable:max-line-length */
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
@@ -46,7 +48,6 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
-
 
 interface Org { metadata: { guid: string }; }
 
@@ -162,22 +163,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
     this.users$ = this.store.select(selectUsersRolesPicked).pipe(
       distinctUntilChanged(),
-      map(users => users.map(user => {
-        // If we're at the org level or lower we guarantee org roles. If we're at the space we guarantee space roles.
-        const showWarning = user.missingRoles &&
-          (user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
-          (user.missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid);
-        // Ensure we're in an object where the username is always populated (in some cases it's missing)
-        const newUser = {
-          ...user,
-          showWarning,
-          username: user.username || user.guid //
-        };
-        if (showWarning) {
-          newUser.username = '*' + newUser.username;
-        }
-        return newUser;
-      }))
+      map(users => users.map(this.mapUser.bind(this)))
     );
 
     this.showWarning$ = this.users$.pipe(
@@ -189,6 +175,23 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles.orgGuid)),
       map(changes => !!changes.length)
     );
+  }
+
+  private mapUser(user: CfUser): CfUser {
+    // If we're at the org level or lower we guarantee org roles. If we're at the space we guarantee space roles.
+    const showWarning = user.missingRoles &&
+      (user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
+      (user.missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid);
+    // Ensure we're in an object where the username is always populated (in some cases it's missing)
+    const newUser = {
+      ...user,
+      showWarning,
+      username: user.username || user.guid //
+    };
+    if (showWarning) {
+      newUser.username = '*' + newUser.username;
+    }
+    return newUser;
   }
 
   private destroySpacesList() {
