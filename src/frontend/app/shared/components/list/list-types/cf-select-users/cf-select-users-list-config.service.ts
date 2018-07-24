@@ -48,8 +48,6 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     private cfGuid: string,
     private cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory
   ) {
     this.initialised = waitForCFPermissions(
       store,

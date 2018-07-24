@@ -580,7 +580,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             parentEntity: entity,
             childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
             childEntitiesUrl: '',
-            populateMissing: true,
+            populateMissing: true
           };
           return createActionsForExistingEntities(config)[0];
         }

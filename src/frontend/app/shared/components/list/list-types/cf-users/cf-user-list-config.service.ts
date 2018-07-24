@@ -120,8 +120,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {

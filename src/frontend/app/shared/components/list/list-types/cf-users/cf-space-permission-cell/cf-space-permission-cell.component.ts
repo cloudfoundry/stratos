@@ -59,7 +59,6 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     this.missingRoles$ = spaces$.pipe(
       // If we're at the space level (we have the space) we don't need to show the missing warning (at the org level we guarantee to show
       // all roles for that space)
-      tap(space => console.log(space)),
       filter(space => !space || space.length !== 1),
       // Switch to using the user entity
       switchMap(() => this.userEntity),

@@ -7,8 +7,6 @@ import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../t
 
 const relationActionId = 'FetchRelationAction';
 
-
-
 export abstract class FetchRelationAction extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public endpointGuid: string, // Always go out to a single cf

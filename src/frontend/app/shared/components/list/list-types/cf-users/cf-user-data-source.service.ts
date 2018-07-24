@@ -4,7 +4,6 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { cfUserSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { ListConfig } from '../../list.component.types';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource } from './../../../../../store/types/api.types';

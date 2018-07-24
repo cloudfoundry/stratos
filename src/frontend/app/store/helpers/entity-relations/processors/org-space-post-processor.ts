@@ -2,12 +2,13 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { APIResponse } from '../../../actions/request.actions';
-import { AppState } from '../../../app-state';
+import { AppState, IRequestEntityTypeState } from '../../../app-state';
 import { selectPaginationState } from '../../../selectors/pagination.selectors';
+import { APIResource } from '../../../types/api.types';
 import { IRequestDataState } from '../../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
-import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
@@ -17,8 +18,8 @@ import {
 } from '../entity-relations.types';
 
 function updateUserFromOrgSpaceArray(
-  existingUsers: { [guid: string]: any },
-  newUsers: { [guid: string]: any },
+  existingUsers: IRequestEntityTypeState<APIResource<CfUser>>,
+  newUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   orgOrSpace,
   orgSpaceParamName: string,
   userParamName: string) {
@@ -42,6 +43,12 @@ function updateUserFromOrgSpaceArray(
   return newUsers;
 }
 
+/**
+ * Given a request to fetch an org or space, extract the roles from the entity and ensure users have corresponding role. For instance
+ * an org such as { entity: billing_managers: [ userA ] } would result in userA: { billing_managed_organizations: [ org ]}.
+ * In the normal flow the user's role array will already have the org. However, when a user is an org billing_managers in more than 50 orgs
+ * the role array is missing. It's for those cases that we then bring across the role from the org to the user.
+ */
 export function orgSpacePostProcess(
   store: Store<AppState>,
   action: IRequestAction,
