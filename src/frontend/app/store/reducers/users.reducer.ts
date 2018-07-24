@@ -18,7 +18,7 @@ import { deepMergeState } from '../helpers/reducer.helper';
 
 const properties = {
   org: {
-    [OrgUserRoleNames.MANAGER]: CfUserRoleParams.MANAGER_ORGS,
+    [OrgUserRoleNames.MANAGER]: CfUserRoleParams.MANAGED_ORGS,
     [OrgUserRoleNames.BILLING_MANAGERS]: CfUserRoleParams.BILLING_MANAGER_ORGS,
     [OrgUserRoleNames.AUDITOR]: CfUserRoleParams.AUDITED_ORGS,
     [OrgUserRoleNames.USER]: CfUserRoleParams.ORGANIZATIONS,
@@ -156,9 +156,6 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
     return newMissingRoles.length || changes;
   }, false);
 
-  return haveUpdatedUsers ? {
-    ...users,
-    [cfUserSchemaKey]: deepMergeState(users, usersInResponse)
-  } : users;
+  return haveUpdatedUsers ? deepMergeState(users, usersInResponse) : users;
 
 }

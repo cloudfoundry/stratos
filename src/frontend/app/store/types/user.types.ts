@@ -1,12 +1,12 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { APIResource } from './api.types';
 
-type CfUserMissingRoles = CfUserRoleParams.ORGANIZATIONS | CfUserRoleParams.MANAGER_ORGS | CfUserRoleParams.BILLING_MANAGER_ORGS |
+type CfUserMissingRoles = CfUserRoleParams.ORGANIZATIONS | CfUserRoleParams.MANAGED_ORGS | CfUserRoleParams.BILLING_MANAGER_ORGS |
   CfUserRoleParams.AUDITED_ORGS | CfUserRoleParams.SPACES | CfUserRoleParams.MANAGED_SPACES | CfUserRoleParams.AUDITED_SPACES;
 
 export enum CfUserRoleParams {
   ORGANIZATIONS = 'organizations',
-  MANAGER_ORGS = 'managed_organizations',
+  MANAGED_ORGS = 'managed_organizations',
   BILLING_MANAGER_ORGS = 'billing_managed_organizations',
   AUDITED_ORGS = 'audited_organizations',
   SPACES = 'spaces',

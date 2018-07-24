@@ -33,7 +33,7 @@ export const ADD_ROLE_FAILED = '[Users]  Add role failed';
 const defaultUserRelations = [
   createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
   createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGER_ORGS),
+  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_ORGS),
   createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
   createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
   createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),

@@ -171,7 +171,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     public includeRelations: string[] = [
       createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
       createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
-      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGER_ORGS),
+      createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_ORGS),
       createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
       createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
       createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),

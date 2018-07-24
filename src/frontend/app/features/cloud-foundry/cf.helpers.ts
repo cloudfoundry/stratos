@@ -126,7 +126,7 @@ function assignRole(currentRoles: string, role: string) {
 }
 
 export function isOrgManager(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, CfUserRoleParams.MANAGER_ORGS);
+  return hasRole(user, guid, CfUserRoleParams.MANAGED_ORGS);
 }
 
 export function isOrgBillingManager(user: CfUser, guid: string): boolean {

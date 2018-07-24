@@ -8,11 +8,7 @@ import { IOrganization } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
-import {
-  GET_CF_USERS_AS_NON_ADMIN,
-  GET_CF_USERS_AS_NON_ADMIN_SUCCESS,
-  GetAllUsersAsNonAdmin,
-} from '../actions/users.actions';
+import { GET_CF_USERS_AS_NON_ADMIN, GetAllUsersAsNonAdmin } from '../actions/users.actions';
 import { AppState } from '../app-state';
 import { cfUserSchemaKey, endpointSchemaKey, entityFactory, organizationSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
@@ -150,7 +146,10 @@ export class UsersEffects {
     );
   }
 
-  private handleNoOrgs(action: GetAllUsersAsNonAdmin, mockPaginationAction: PaginatedAction, mockRequestType: ApiRequestTypes): Observable<any> {
+  private handleNoOrgs(
+    action: GetAllUsersAsNonAdmin,
+    mockPaginationAction: PaginatedAction,
+    mockRequestType: ApiRequestTypes): Observable<any> {
     // There's no orgs to fetch users from, instead create a mock user entity for the signed in user. This avoids some ugly 'no user' type
     // messages and '-' shown for user count and improves the general experience for those who may be visiting for the first time.
     return this.store.select(endpointsEntityRequestDataSelector(action.cfGuid)).pipe(

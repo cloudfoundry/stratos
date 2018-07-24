@@ -57,7 +57,7 @@ export function orgSpacePostProcess(
   const newUsers = {};
   if (action.entityKey === organizationSchemaKey) {
     updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'users', CfUserRoleParams.ORGANIZATIONS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', CfUserRoleParams.MANAGER_ORGS);
+    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'managers', CfUserRoleParams.MANAGED_ORGS);
     updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'billing_managers', CfUserRoleParams.BILLING_MANAGER_ORGS);
     updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, 'auditors_managers', CfUserRoleParams.AUDITED_ORGS);
   } else if (action.entityKey === spaceSchemaKey) {

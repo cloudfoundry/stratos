@@ -1,1 +1,2 @@
 <app-chips [chips]="chipsConfig$ | async"></app-chips>
+<div *ngIf="(missingRoles$ | async) as missingRoles">* The following roles may be missing (not provided by CF): {{missingRoles}}. Navigate to a specific space to view them</div>

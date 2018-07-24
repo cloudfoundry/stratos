@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { GET_ORGANIZATION, GetAllOrgUsers } from '../../actions/organization.actions';
+import { GET_ORGANIZATION } from '../../actions/organization.actions';
 import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
 import { GET_SPACE } from '../../actions/space.actions';
 import { AppState } from '../../app-state';
@@ -14,9 +14,6 @@ export function validationPostProcessor(
   action: IRequestAction,
   apiResponse: APIResponse,
   allEntities: IRequestDataState): ValidateEntityResult {
-  if (apiResponse) {
-    console.log(action.type && action['actions'][0]);
-  }
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     switch (action['actions'][0]) {
       case GET_ORGANIZATION:

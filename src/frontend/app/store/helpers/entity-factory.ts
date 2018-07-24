@@ -372,7 +372,7 @@ function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema 
 
 const OrganizationUserSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.ORGANIZATIONS);
 const OrganizationAuditedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.AUDITED_ORGS);
-const OrganizationManagedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.MANAGER_ORGS);
+const OrganizationManagedSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.MANAGED_ORGS);
 const OrganizationBillingSchema = createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.BILLING_MANAGER_ORGS);
 const SpaceUserSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.SPACES);
 const SpaceManagedSchema = createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.MANAGED_SPACES);

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -12,7 +12,8 @@ import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
+import { CfUser, CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
+import { UserRoleLabels } from '../../../../../../store/types/users-roles.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { AppChip } from '../../../../chips/chips.component';
@@ -27,6 +28,9 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
+
+  missingRoles$: Observable<string>;
+
   constructor(
     public store: Store<AppState>,
     cfUserService: CfUserService,
@@ -34,11 +38,30 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     confirmDialog: ConfirmationDialogService
   ) {
     super(store, confirmDialog, cfUserService);
+    const org$ = this.config$.pipe(switchMap(config => config.org$));
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),
-      this.config$.pipe(switchMap(config => config.org$))
+      org$
     ).pipe(
       map(([user, org]: [APIResource<CfUser>, APIResource<IOrganization>]) => this.setChipConfig(user, org))
+    );
+    this.missingRoles$ = org$.pipe(
+      // If we're at the org level (we have the org) we don't need to show the missing warning (at the org level we guarantee to show all
+      // roles for that org)
+      filter(org => !org),
+      // Switch to using the user entity
+      switchMap(() => this.userEntity),
+      map(user => user.missingRoles || []),
+      // Filter out any non-org roles
+      map(missingRoles => missingRoles.filter(role =>
+        role === CfUserRoleParams.AUDITED_ORGS ||
+        role === CfUserRoleParams.BILLING_MANAGER_ORGS ||
+        role === CfUserRoleParams.MANAGED_ORGS ||
+        role === CfUserRoleParams.ORGANIZATIONS)),
+      // If there's no missing, don't proceed
+      filter(missingRoles => !!missingRoles.length),
+      // Convert to screen name
+      map(missingRoles => missingRoles.map(role => UserRoleLabels.org.short[role]).join(', '))
     );
   }
 
