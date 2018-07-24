@@ -133,7 +133,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         new FetchBranchesForProject(this.projectName),
         false
       );
-      gitBranchEntityService.entityObs$.pipe(
+      gitBranchEntityService.waitForEntity$.pipe(
         first(),
       ).subscribe(branch => {
         this.branchName = branch.entity.entity.name;
