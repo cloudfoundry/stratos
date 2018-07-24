@@ -1,7 +1,7 @@
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest, of as observableOf } from 'rxjs';
-import { map, publishReplay, refCount, tap, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
@@ -13,9 +13,8 @@ import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factor
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
-import { ListRowSateHelper } from '../../list.helper';
-import { cfUserRowStateSetUpManager } from '../cf-users/cf-user-list-helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
+
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSelectUsersDataSourceService;
@@ -62,25 +61,11 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
           cfUserService.createPaginationAction(cf.global.isAdmin, true)
         )
       ),
-      tap(([cf, action]) => this.createDataSource(action)),
+      tap(([cf, action]) => this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this)),
       map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
       refCount()
     );
-  }
-
-  private createDataSource(action: PaginatedAction) {
-    const rowStateHelper = new ListRowSateHelper();
-    const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
-      this.paginationMonitorFactory,
-      this.entityMonitorFactory,
-      action.paginationKey,
-      action.entityKey,
-      cfUserRowStateSetUpManager
-    );
-    this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {
-      sub.unsubscribe();
-    });
   }
 
   getColumns = () => this.columns;

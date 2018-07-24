@@ -13,7 +13,6 @@ import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.act
 import { CfUser } from '../../../../../store/types/user.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { ListRowSateHelper } from '../../list.helper';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
@@ -22,7 +21,6 @@ import { IListAction, IMultiListAction, ListConfig, ListViewTypes } from './../.
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
-import { cfUserHasAllRoleProperties, cfUserRowStateSetUpManager } from './cf-user-list-helper';
 
 
 @Injectable()
@@ -45,7 +43,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         field: 'entity.username'
       }
     },
-    {
+    { // TODO: RC REMOVE
       columnId: 'username2',
       headerCell: () => 'missing',
       cellFlex: '1',
@@ -84,7 +82,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Change Roles`,
     createVisible: (row$: Observable<APIResource<CfUser>>) => {
       return combineLatest(this.createCanUpdateOrgSpaceRoles(), row$).pipe(
-        map(([canUpdate, row]) => canUpdate && cfUserHasAllRoleProperties(row))
+        map(([canUpdate, row]) => canUpdate)
       );
     }
   };
@@ -139,17 +137,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         )
       ),
       tap(([cf, action]) => {
-        const rowStateHelper = new ListRowSateHelper();
-        const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
-          paginationMonitorFactory,
-          entityMonitorFactory,
-          action.paginationKey,
-          action.entityKey,
-          cfUserRowStateSetUpManager
-        );
-        this.dataSource = new CfUserDataSourceService(store, action, this, rowStateManager, () => {
-          sub.unsubscribe();
-        });
+        this.dataSource = new CfUserDataSourceService(store, action, this);
       }),
       map(([cf, action]) => cf && cf.state.initialised)
     );

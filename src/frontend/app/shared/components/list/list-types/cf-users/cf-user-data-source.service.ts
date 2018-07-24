@@ -12,13 +12,7 @@ import { CfUser } from './../../../../../store/types/user.types';
 
 
 export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>> {
-  constructor(
-    store: Store<AppState>,
-    action: PaginatedAction,
-    listConfigService: ListConfig<APIResource<CfUser>>,
-    rowStateManager: TableRowStateManager,
-    destroy: () => void
-  ) {
+  constructor(store: Store<AppState>, action: PaginatedAction, listConfigService: ListConfig<APIResource<CfUser>>) {
     super({
       store,
       action,
@@ -27,9 +21,7 @@ export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>>
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [{ type: 'filter', field: 'entity.username' }],
-      listConfig: listConfigService,
-      rowsState: rowStateManager.observable,
-      destroy
+      listConfig: listConfigService
     });
   }
 

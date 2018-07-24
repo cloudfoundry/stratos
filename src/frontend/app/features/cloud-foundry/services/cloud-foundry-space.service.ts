@@ -111,6 +111,8 @@ export class CloudFoundrySpaceService {
           createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
         ];
         if (!isAdmin) {
+          // We're only interested in fetching space roles via the space request for non-admins. This is the only way to guarantee the roles
+          // are present for all users associated with the space
           relations.push(
             createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.DEVELOPER),
             createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.MANAGER),

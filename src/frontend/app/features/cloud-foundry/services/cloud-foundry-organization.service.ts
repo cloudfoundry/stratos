@@ -51,7 +51,6 @@ export class CloudFoundryOrganizationService {
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   allOrgUsers$: Observable<APIResource<CfUser>[]>;
-  // allOrgUsersAction: GetAllOrgUsers;
   usersPaginationKey: string;
 
   constructor(
@@ -88,6 +87,8 @@ export class CloudFoundryOrganizationService {
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
+          // We're only interested in fetching org roles via the org request for non-admins. This is the only way to guarantee the roles
+          // are present for all users associated with the org
           relations.push(
             createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.USER),
             createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.MANAGER),

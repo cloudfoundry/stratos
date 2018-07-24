@@ -10,13 +10,7 @@ import { TableRowStateManager } from '../../list-table/table-row/table-row-state
 import { IListConfig } from '../../list.component.types';
 
 export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> {
-  constructor(cfGuid: string,
-    store: Store<AppState>,
-    getAllUsersAction: PaginatedAction,
-    listConfig: IListConfig<APIResource>,
-    rowStateManager: TableRowStateManager,
-    destroy: () => void
-  ) {
+  constructor(cfGuid: string, store: Store<AppState>, getAllUsersAction: PaginatedAction, listConfig: IListConfig<APIResource>) {
     super({
       store,
       action: getAllUsersAction,
@@ -25,9 +19,7 @@ export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> 
       paginationKey: getAllUsersAction.paginationKey,
       isLocal: true,
       transformEntities: [{ type: 'filter', field: 'entity.username' }],
-      listConfig,
-      rowsState: rowStateManager.observable,
-      destroy
+      listConfig
     });
   }
 }
