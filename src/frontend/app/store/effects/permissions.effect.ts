@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, first, map, share, switchMap, withLatestFrom, mergeMap, tap } from 'rxjs/operators';
+import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import {
   createCfFeatureFlagFetchAction,
 } from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -24,11 +25,32 @@ import {
   UserRelationTypes,
 } from '../actions/permissions.actions';
 import { AppState } from '../app-state';
+import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
-import { APIResource } from '../types/api.types';
+import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-import { EndpointActionComplete, CONNECT_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
+
+class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFlattener<CFResponse> {
+
+  constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {
+    super(httpClient, requestOptions, url, 'page');
+  }
+  public getTotalPages = (res: CFResponse<any>) => {
+    return res.total_pages;
+  }
+  public mergePages = (res: CFResponse[]) => {
+    const firstRes = res.shift();
+    const final = res.reduce((finalRes, currentRes) => {
+      finalRes.resources = [
+        ...finalRes.resources,
+        ...currentRes.resources
+      ];
+      return finalRes;
+    }, firstRes);
+    return final;
+  }
+}
 
 interface CfsRequestState {
   [cfGuid: string]: Observable<boolean>[];
@@ -43,18 +65,23 @@ const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
 
 function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
-  return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(
-    `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`, {
-      headers: {
-        'x-cap-cnsi-list': action.endpointGuid
-      }
+  const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
+  const params = {
+    headers: {
+      'x-cap-cnsi-list': action.endpointGuid,
+      'x-cap-passthrough': 'true'
+    },
+    params: {
+      'results-per-page': '100'
     }
-  ).pipe(
+  };
+  const get$ = httpClient.get<CFResponse>(
+    url,
+    params
+  );
+  return flattenPagination(get$, new PermissionFlattener(httpClient, url, params)).pipe(
     map(data => {
-      if (data[action.endpointGuid]['error']) {
-        return false;
-      }
-      store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data[action.endpointGuid].resources));
+      store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;
     }),
     first(),
