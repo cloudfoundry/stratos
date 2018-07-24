@@ -1,4 +1,56 @@
 # Change Log
+## 2.0.0 Release Candidate 3
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-rc2...2.0.0-rc3)
+
+
+**Improvements:**
+- AOT [\#2594](https://github.com/cloudfoundry-incubator/stratos/pull/2594)
+- Update BOSH release for V2 [\#2616](https://github.com/cloudfoundry-incubator/stratos/pull/2616)
+- Navigation loading indicator for slow connections [\#2603](https://github.com/cloudfoundry-incubator/stratos/issues/2603)
+- Documentation updates [\#2680](https://github.com/cloudfoundry-incubator/stratos/pull/2680), [\#2702](https://github.com/cloudfoundry-incubator/stratos/pull/2702)
+- Minor improvements:  [\#2669](https://github.com/cloudfoundry-incubator/stratos/pull/2669), [\#2667](https://github.com/cloudfoundry-incubator/stratos/pull/2667), [\#2593](https://github.com/cloudfoundry-incubator/stratos/pull/2593)
+
+**Fixes:**
+- Fix broken AOT with build optimizer [\#2703](https://github.com/cloudfoundry-incubator/stratos/pull/2703)
+- App instance count sorting treats the numbers as strings [\#2698](https://github.com/cloudfoundry-incubator/stratos/issues/2698)
+- No error is reported when an update of service instance fails [\#2696](https://github.com/cloudfoundry-incubator/stratos/issues/2696)
+- Services Instances Wall says `There are no services` when no service instances exist [\#2692](https://github.com/cloudfoundry-incubator/stratos/issues/2692)
+- Delete Application shows empty page [\#2682](https://github.com/cloudfoundry-incubator/stratos/issues/2682)
+- Can not add an organisation [\#2676](https://github.com/cloudfoundry-incubator/stratos/issues/2676)
+- Use subtle mode fo boolean indicator on CF Pages [\#2523](https://github.com/cloudfoundry-incubator/stratos/issues/2523)
+- Navigating to a page that has a table that is on page 2 shows an empty list [\#2674](https://github.com/cloudfoundry-incubator/stratos/issues/2674)
+- Can not collapse security group tag list when there are lots of them [\#2461](https://github.com/cloudfoundry-incubator/stratos/issues/2461)
+- Fetching connected user roles for permissions only fetches first page [\#2655](https://github.com/cloudfoundry-incubator/stratos/issues/2655)
+- CF Endpoint Selector takes a while to update after connect/disconnect [\#2643](https://github.com/cloudfoundry-incubator/stratos/issues/2643)
+- Edit service instances sets plan to first in list, not the current plan. [\#2641](https://github.com/cloudfoundry-incubator/stratos/issues/2641)
+- Routes not updated after umap [\#2640](https://github.com/cloudfoundry-incubator/stratos/issues/2640)
+- Create org and space - create button is enabled when empty [\#2636](https://github.com/cloudfoundry-incubator/stratos/issues/2636)
+- Edit Service Instance is broken [\#2626](https://github.com/cloudfoundry-incubator/stratos/issues/2626)
+- Reloading Edit Service Instance page results in an exception [\#2625](https://github.com/cloudfoundry-incubator/stratos/issues/2625)
+- Exception switching back to the Users tab after deleting a role [\#2623](https://github.com/cloudfoundry-incubator/stratos/issues/2623)
+- Manage User Permission: Pills x button doesn't update the UI [\#2617](https://github.com/cloudfoundry-incubator/stratos/issues/2617)
+- Remove an org role via the role pill at space level shows `deleting space` message and navs to org spaces [\#2608](https://github.com/cloudfoundry-incubator/stratos/issues/2608)
+- New spaces are missing from create app steps drop down [\#2592](https://github.com/cloudfoundry-incubator/stratos/issues/2592)
+- Connected endpoints fail to update sessionData user [\#2590](https://github.com/cloudfoundry-incubator/stratos/issues/2590)
+- Disconnecting an endpoint after visiting cf pages results in endpoint warning [\#2589](https://github.com/cloudfoundry-incubator/stratos/issues/2589)
+- Exception thrown in service wall after disconnecting endpoint [\#2582](https://github.com/cloudfoundry-incubator/stratos/issues/2582)
+- Error logged in backend when disconnecting an endpoint [\#2624](https://github.com/cloudfoundry-incubator/stratos/issues/2624)
+- Performance: Pagination observable service [\#2556](https://github.com/cloudfoundry-incubator/stratos/issues/2556)
+- Pagination request: Validation doesn't insert correct value into store [\#2684](https://github.com/cloudfoundry-incubator/stratos/issues/2684)
+- Fixed bad imports [\#2701](https://github.com/cloudfoundry-incubator/stratos/pull/2701)
+- Fix routing to appropriate CF view after connecting/disconnecting an endpoint [\#2660](https://github.com/cloudfoundry-incubator/stratos/pull/2660)
+- Update parent entities at validation time - the end of partial entities [\#2659](https://github.com/cloudfoundry-incubator/stratos/pull/2659)
+- Restrict non-admin user functions at cf level  [\#2654](https://github.com/cloudfoundry-incubator/stratos/pull/2654)
+- Don't validate individual org users requests  [\#2651](https://github.com/cloudfoundry-incubator/stratos/pull/2651)
+- Fix update of User roles table after a role has been removed [\#2630](https://github.com/cloudfoundry-incubator/stratos/pull/2630)
+- Ensure we don't recursively delete with the action is an update [\#2620](https://github.com/cloudfoundry-incubator/stratos/pull/2620)
+- Fix three issues around 100+ roles [\#2613](https://github.com/cloudfoundry-incubator/stratos/pull/2613)
+- Don't copy auth and refresh tokens unless using SSO [\#2611](https://github.com/cloudfoundry-incubator/stratos/pull/2611)
+- Fix timing issue resulting in an endpoint warning [\#2604](https://github.com/cloudfoundry-incubator/stratos/pull/2604)
+- Fix Postgres to use same value as detected by VCAP\_SERVICES [\#2600](https://github.com/cloudfoundry-incubator/stratos/pull/2600)
+- Ensure auth data is updated on sys info call [\#2595](https://github.com/cloudfoundry-incubator/stratos/pull/2595)
+- Pagination obs performance [\#2561](https://github.com/cloudfoundry-incubator/stratos/pull/2561)
+
 ## 2.0.0 Release Candidate 2
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-rc1...2.0.0-rc2)
 

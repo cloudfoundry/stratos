@@ -181,7 +181,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getSearchText(): promise.Promise<string> {
-    return this.getSearchInputField().getAttribute('ng-reflect-model');
+    return this.getSearchInputField().getAttribute('value');
   }
   getPlaceholderText(): promise.Promise<string> {
     return this.getFilterFormField().element(by.tagName('mat-placeholder')).getText();
