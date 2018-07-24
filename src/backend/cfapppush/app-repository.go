@@ -4,32 +4,44 @@ import (
 	"code.cloudfoundry.org/cli/cf/api/applications"
 	"code.cloudfoundry.org/cli/cf/models"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/gorilla/websocket"
 )
 
 type RepositoryIntercept struct {
 	target applications.Repository
+	msgSender DeployAppMessageSender
+	clientWebsocket *websocket.Conn
 }
 
-func NewRepositoryIntercept(target applications.Repository) (repo RepositoryIntercept) {
-	log.Warn("NewRepositoryIntercept")
+func NewRepositoryIntercept(target applications.Repository, msgSender DeployAppMessageSender, clientWebsocket*websocket.Conn) (repo RepositoryIntercept) {
 	repo.target = target
-	return repo
+	repo.msgSender = msgSender
+	repo.clientWebsocket = clientWebsocket
+	return 
+}
+
+func (repo RepositoryIntercept) sendAppData(app models.Application) {
+	repo.msgSender.SendEvent(repo.clientWebsocket, APP_GUID_NOTIFY, app.GUID)
 }
 
 func (repo RepositoryIntercept) Create(params models.AppParams) (models.Application, error) {
-	log.Warn("********** INTERCEPTED CREATE")
-	return repo.target.Create(params)
+	app, err := repo.target.Create(params)
+	if err == nil {
+		repo.sendAppData(app)
+	}
+	return app, err
 }
 
 func (repo RepositoryIntercept) GetApp(appGUID string) (app models.Application, apiErr error) {
-	log.Warn("********** INTERCEPTED GetApp")
 	return repo.target.GetApp(appGUID)
 }
 
 func (repo RepositoryIntercept) Read(name string) (app models.Application, apiErr error) {
-	log.Warnf("********** INTERCEPTED READ: %s", name)
-	return repo.target.Read(name)
+	app, err := repo.target.Read(name)
+	if err == nil {
+		repo.sendAppData(app)
+	}
+	return app, err
 }
 
 func (repo RepositoryIntercept) ReadFromSpace(name string, spaceGUID string) (app models.Application, apiErr error) {
