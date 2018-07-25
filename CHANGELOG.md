@@ -9,7 +9,6 @@ This release has all fixes and improvements from [2.0.0-rc3](#2.0.0-release-cand
 **Fixes:**
 - Fix issue where cookie domain name change can mean you can't log out [\#2732](https://github.com/cloudfoundry-incubator/stratos/pull/2732)
 - Pagination request: Validation doesn't insert correct value into store [\#2684](https://github.com/cloudfoundry-incubator/stratos/issues/2684)
-- No services displayed instead of no service instances [\#2693](https://github.com/cloudfoundry-incubator/stratos/issues/2693)
 
 
 ## 2.0.0 Release Candidate 3
