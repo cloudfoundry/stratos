@@ -19,7 +19,7 @@ import { createEntityRelationPaginationKey } from '../../store/helpers/entity-re
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { JsonPointer } from 'angular2-json-schema-form';
+import { JsonPointer } from 'angular6-json-schema-form';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,

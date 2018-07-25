@@ -7,6 +7,7 @@ import { CsiGuidsService } from '../csi-guids.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { CsiModeService } from '../csi-mode.service';
+import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -15,7 +16,7 @@ describe('SpecifyDetailsStepComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [SpecifyDetailsStepComponent],
-      imports: [BaseTestModulesNoShared],
+      imports: [BaseTestModulesNoShared, MaterialDesignFrameworkModule],
       providers: [
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,

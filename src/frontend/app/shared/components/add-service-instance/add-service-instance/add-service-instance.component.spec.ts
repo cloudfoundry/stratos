@@ -20,6 +20,7 @@ import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.co
 import { SelectServiceComponent } from '../select-service/select-service.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -40,6 +41,7 @@ describe('AddServiceInstanceComponent', () => {
       imports: [
         PageHeaderModule,
         SteppersModule,
+        MaterialDesignFrameworkModule,
         // CoreModule,
         BaseTestModulesNoShared
       ],

@@ -92,6 +92,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   selectedServiceSubscription: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
+  selectedFramework = 'material-design';
   schema: any;
   showJsonSchema: boolean;
   jsonFormOptions: any = { addSubmit: false };

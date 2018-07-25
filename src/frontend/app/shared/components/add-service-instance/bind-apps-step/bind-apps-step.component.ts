@@ -19,7 +19,6 @@ import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
-import { JsonPointer } from 'angular2-json-schema-form';
 
 @Component({
   selector: 'app-bind-apps-step',
