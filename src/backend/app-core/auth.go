@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -48,9 +47,6 @@ const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 // ClientRequestDateHeader Custom header for getting date form client
 const ClientRequestDateHeader = "X-Cap-Request-Date"
 
-// EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
-var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
-
 // XSRFTokenHeader - XSRF Token Header name
 const XSRFTokenHeader = "X-Xsrf-Token"
 
@@ -68,7 +64,7 @@ func (p *portalProxy) getUAAIdentityEndpoint() string {
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	req := c.Request().(*standard.Request).Request
 	originalCookie := req.Header.Get("Cookie")
-	cleanCookie := EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
+	cleanCookie := p.EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
 	req.Header.Set("Cookie", cleanCookie)
 }
 
