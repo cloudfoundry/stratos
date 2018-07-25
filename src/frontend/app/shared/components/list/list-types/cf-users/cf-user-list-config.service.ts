@@ -11,8 +11,6 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
-import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
@@ -42,14 +40,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         orderKey: 'username',
         field: 'entity.username'
       }
-    },
-    { // TODO: RC REMOVE
-      columnId: 'username2',
-      headerCell: () => 'missing',
-      cellFlex: '1',
-      cellDefinition: {
-        getValue: row => JSON.stringify((row.entity.missingRoles || []))
-      },
     },
     {
       columnId: 'roles',

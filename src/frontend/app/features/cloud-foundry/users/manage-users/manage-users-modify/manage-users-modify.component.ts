@@ -186,7 +186,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     const newUser = {
       ...user,
       showWarning,
-      username: user.username || user.guid //
+      username: user.username || user.guid
     };
     if (showWarning) {
       newUser.username = '*' + newUser.username;
