@@ -1,7 +1,6 @@
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
@@ -10,7 +9,7 @@ import { AppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../helpers/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam, PaginationClientPagination } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
@@ -125,10 +124,10 @@ function getObservables<T = any>(
   let lastValidationFootprint: string;
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    publishReplay(1),
-    refCount()
+    // publishReplay(1),
+    // refCount()
   );
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -169,8 +168,8 @@ function getObservables<T = any>(
             ));
           }
         }),
-        switchMap(() => paginationMonitor.currentPage$),
-    );
+        switchMap(() => paginationMonitor.currentPage$)
+      );
 
   return {
     pagination$: pagination$.pipe(
@@ -226,5 +225,17 @@ export function getCurrentPageRequestInfo(pagination: PaginationEntityState): Ac
     busy: false,
     error: false,
     message: ''
+  };
+}
+
+export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {
+  return {
+    ...pag,
+    filter: {
+      ...pag.filter,
+      items: {
+        ...pag.filter.items
+      }
+    }
   };
 }

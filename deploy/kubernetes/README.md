@@ -23,6 +23,7 @@ The following guide details how to deploy Stratos in Kubernetes.
   * [Deploying Stratos with your own TLS certificates](#deploying-stratos-with-your-own-tls-certificates)
   * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
   * [Installing Nightly Release](#installing-a-nightly-release)
+  * [Configuring Stratos to use an Ingress controller](./ingress)
 <!-- /TOC -->
 
 ## Requirements

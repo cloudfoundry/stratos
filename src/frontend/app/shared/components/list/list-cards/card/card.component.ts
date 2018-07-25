@@ -25,7 +25,8 @@ import {
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustom, CardCell } from '../../list.types';
+import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
 
 export const listCards = [
   CardAppComponent,
@@ -36,7 +37,8 @@ export const listCards = [
   CfSecurityGroupsCardComponent,
   CfStacksCardComponent,
   CfServiceCardComponent,
-  AppServiceBindingCardComponent
+  AppServiceBindingCardComponent,
+  ServiceInstanceCardComponent
 ];
 
 @Component({
@@ -55,7 +57,7 @@ export class CardComponent<T> implements OnInit, OnChanges {
 
   @ViewChild('target', { read: ViewContainerRef }) target;
 
-  cardComponent: TableCellCustom<T>;
+  cardComponent: CardCell<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
@@ -66,13 +68,13 @@ export class CardComponent<T> implements OnInit, OnChanges {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
     // Add to target to ensure ngcontent is correct in new component
     const componentRef = this.target.createComponent(componentFactory);
-    this.cardComponent = <TableCellCustom<T>>componentRef.instance;
+    this.cardComponent = <CardCell<T>>componentRef.instance;
     this.cardComponent.row = this.item;
     this.cardComponent.dataSource = this.dataSource;
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.row;
+    const row: SimpleChange = changes.item;
     if (
       row &&
       this.cardComponent &&

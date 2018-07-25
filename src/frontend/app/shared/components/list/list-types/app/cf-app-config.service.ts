@@ -6,23 +6,18 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { CfOrgSpaceDataService, CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsCards,
-  IListConfig,
-  IListMultiFilterConfig,
-  ListConfig,
-  ListViewTypes,
-} from '../../list.component.types';
+import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { createListFilterConfig } from '../../list.helper';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
+import { TableCellAppCfOrgSpaceHeaderComponent } from './table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/table-cell-app-cforgspace.component';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
-import { createListFilterConfig } from '../../list.helper';
-
 
 @Injectable()
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
@@ -87,6 +82,11 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         orderKey: 'memory',
         field: 'entity.memory'
       }
+    },
+    {
+      columnId: 'cfOrgSpace',
+      headerCellComponent: TableCellAppCfOrgSpaceHeaderComponent,
+      cellComponent: TableCellAppCfOrgSpaceComponent,
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',

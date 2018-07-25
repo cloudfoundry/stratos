@@ -1,46 +1,39 @@
-import { Store } from '@ngrx/store';
-import { Injectable } from '@angular/core';
-import { AppState } from '../../store/app-state';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable, Subscription } from 'rxjs';
+import { filter, map, tap } from 'rxjs/operators';
+
+import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { MatSnackBar } from '@angular/material';
+import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
+import { getPaginationKey } from '../../store/actions/pagination.actions';
+import { AppState } from '../../store/app-state';
+import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { getPaginationKey } from '../../store/actions/pagination.actions';
-import { filter, map, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
-import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
-import { RouterNav } from '../../store/actions/router.actions';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
-import { getIdFromRoute } from './cf.helpers';
-import { ValidatorFn, AbstractControl } from '@angular/forms';
-import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
-import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 
 export class AddEditSpaceStepBase {
-  submitSubscription: Subscription;
   fetchSpacesSubscription: Subscription;
   orgGuid: string;
   cfGuid: string;
   allSpacesInOrg: string[];
-  allSpacesInSpace$: Observable<string[]>;
+  allSpacesInOrg$: Observable<string[]>;
   validate: (spaceName: string) => boolean;
   constructor(
     protected store: Store<AppState>,
     protected activatedRoute: ActivatedRoute,
     protected paginationMonitorFactory: PaginationMonitorFactory,
-    protected snackBar: MatSnackBar,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-    const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
+    const paginationKey = getPaginationKey('cf-space', this.orgGuid);
 
     const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
 
-    this.allSpacesInSpace$ = getPaginationObservables<APIResource>(
+    this.allSpacesInOrg$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
         action,
@@ -55,21 +48,13 @@ export class AddEditSpaceStepBase {
       map(o => o.map(org => org.entity.name)),
       tap((o) => this.allSpacesInOrg = o)
     );
-    this.fetchSpacesSubscription = this.allSpacesInSpace$.subscribe();
+    this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
   }
 
   destroy(): void {
     this.fetchSpacesSubscription.unsubscribe();
-    if (this.submitSubscription) {
-      this.submitSubscription.unsubscribe();
-    }
   }
-
-  displaySnackBar = (message: string) => this.snackBar.open(
-    message,
-    'Dismiss'
-  )
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
@@ -78,16 +63,12 @@ export class AddEditSpaceStepBase {
     };
   }
 
-  protected map(path: string[], errorMessage: string): (source: Observable<RequestInfoState>) => Observable<void> {
-    return map(o => {
-      if (o.error) {
-        this.displaySnackBar(errorMessage);
-      } else {
-        this.store.dispatch(new RouterNav({
-          path: path
-        }));
-      }
-    });
+  protected map(errorMessage: string):
+    (source: Observable<{ error: boolean, message: string }>) => Observable<StepOnNextResult> {
+    return map(o => ({
+      success: !o.error,
+      redirect: !o.error,
+      message: o.error ? errorMessage + o.message : ''
+    }));
   }
-
 }

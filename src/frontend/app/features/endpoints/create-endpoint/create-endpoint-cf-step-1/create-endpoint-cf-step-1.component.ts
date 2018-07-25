@@ -1,30 +1,29 @@
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { map, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
-import { getFullEndpointApiUrl, getEndpointTypes, DEFAULT_ENDPOINT_TYPE } from '../../endpoint-helpers';
+import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { entityFactory } from '../../../../store/helpers/entity-factory';
-import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
+import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
 
+
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
   styleUrls: ['./create-endpoint-cf-step-1.component.scss']
 })
-export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, AfterContentInit {
+export class CreateEndpointCfStep1Component implements IStepperStep, AfterContentInit {
 
   existingEndpoints: Observable<{
     names: string[],
@@ -43,6 +42,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
   endpointTypes = getEndpointTypes();
   urlValidation: string;
+
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
@@ -68,8 +68,6 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
     }
   }
 
-  ngOnInit() { }
-
   onNext: StepOnNextFunction = () => {
     const action = new RegisterEndpoint(
       this.typeField.value,
@@ -82,19 +80,16 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
     const update$ = this.store.select(
       this.getUpdateSelector(action.guid())
-    ).filter(update => !!update);
+    ).pipe(filter(update => !!update));
 
-    return update$.pairwise()
-      .filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy))
-      .map(([oldVal, newVal]) => newVal)
-      .map(result => {
-        if (!result.error) {
-          this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
-        }
-        return {
-          success: !result.error
-        };
-      });
+    return update$.pipe(pairwise(),
+      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+      map(([oldVal, newVal]) => newVal),
+      map(result => ({
+        success: !result.error,
+        redirect: !result.error,
+        message: !result.error ? '' : result.message
+      })));
   }
 
   private getUpdateSelector(guid) {
@@ -106,10 +101,10 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   }
 
   ngAfterContentInit() {
-    this.validate = this.form.statusChanges
-      .map(() => {
+    this.validate = this.form.statusChanges.pipe(
+      map(() => {
         return this.form.valid;
-      });
+      }));
   }
 
   setUrlValidation(endpointValue: string) {

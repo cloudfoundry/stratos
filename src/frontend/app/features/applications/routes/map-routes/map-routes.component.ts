@@ -1,9 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import {
   CfAppMapRoutesListConfigService,
@@ -45,12 +43,10 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   }
   routesDataSource: CfAppRoutesDataSource;
   ngOnInit() {
-    this.subscription = this.routesDataSource.isSelecting$
+    this.subscription = this.routesDataSource.selectedRows$
       .pipe(
-        tap(p => {
-          const selectedRow = Array.from(
-            this.routesDataSource.selectedRows.values()
-          );
+        tap(routes => {
+          const selectedRow = Array.from(routes.values());
           if (selectedRow.length) {
             this.selectedRoute$.next(selectedRow[0]);
           }

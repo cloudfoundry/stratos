@@ -1,8 +1,7 @@
 import { CardStatus } from './../../application-state/application-state.service';
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable, Subscription } from 'rxjs';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
@@ -41,16 +40,16 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   }
 
   private currentCount: 0;
-  private editCount: 0;
+  public editCount: 0;
 
   private sub: Subscription;
 
-  private isEditing = false;
+  public isEditing = false;
 
-  private editValue: any;
+  public editValue: any;
 
   // Observable on the running instances count for the application
-  private runningInstances$: Observable<number>;
+  public runningInstances$: Observable<number>;
 
   private app: any;
 

@@ -29,9 +29,9 @@
               <div class="app-metadata__two-cols">
                 <app-metadata-item icon="touch_app" label="App State">{{ appSvc.app.entity.state }}</app-metadata-item>
                 <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}</app-metadata-item>
-                <app-metadata-item icon="developer_board" label="Services">{{(applicationService.appSummary$| async)?.entity?.entity.services?.length || '0' }}</app-metadata-item>
-                <app-metadata-item icon="http" label="Routes">{{(applicationService.appSummary$| async)?.entity?.entity?.routes?.length || '0' }}</app-metadata-item>
-                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ appSvc.app.entity.enable_ssh ? 'Yes' : 'No' }}</app-metadata-item>
+                <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">{{(applicationService.appSummary$| async)?.entity?.entity.services?.length || '0' }}</app-metadata-item>
+                <app-metadata-item icon="network_route" iconFont="stratos-icons" label="Routes">{{(applicationService.appSummary$| async)?.entity?.entity?.routes?.length || '0' }}</app-metadata-item>
+                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ sshStatus$ | async }}</app-metadata-item>
               </div>
             </div>
           </mat-card-content>
@@ -47,7 +47,7 @@
               <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]" matTooltip="CF API URL: {{ getFullApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
             </app-metadata-item>
             <ng-container *ngIf="applicationService.appOrg$ | async as appOrg">
-              <app-metadata-item icon="location_city" label="Organization">
+              <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
                 <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
               </app-metadata-item>
               <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" icon="language" label="Space">
@@ -82,12 +82,12 @@
           <mat-card-content>
             <span [ngSwitch]="deploySource.type">
                 <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                    <div matTooltip="{{ deploySource.branch + ' ' + deploySource.commit | slice:0:8}}"
+                    <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
                     [matTooltipHideDelay]="1500">
 		    {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
                 </app-metadata-item>
-                <app-metadata-item *ngSwitchCase="'github'" icon="code" label="GitHub">
+                <app-metadata-item *ngSwitchCase="'github'" iconFont="stratos-icons" icon="github" label="GitHub">
                     <a href="{{ deploySource.url }}/commit/{{ deploySource.commit }}"
                       rel="noopener noreferrer" target="_blank">
                       {{ deploySource.commit | slice:0:8 }}
@@ -96,7 +96,7 @@
                   <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
                     Deployed from local folder
                   </app-metadata-item>
-                  <app-metadata-item *ngSwitchCase="'filefolder'" icon="insert_driev_file" label="File">
+                  <app-metadata-item *ngSwitchCase="'archive'" icon="insert_drive_file" label="File">
                     Deployed from local file
                   </app-metadata-item>
                 </span>

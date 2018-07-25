@@ -13,7 +13,9 @@ dbProvider: mysql
 useLb: false
 console:
   port: 443
+  cookieDomain:
 # externalIP: 127.0.0.1
+  backendLogLevel: info
 images:
   console: stratos-console
   proxy: stratos-jetstream
@@ -59,7 +61,7 @@ uaa:
   consoleClientSecret: 
   consoleAdminIdentifier: 
   skipSSLValidation: false
- # SCF values compatability 
+# SCF values compatability 
 env:
   DOMAIN:
   UAA_HOST: 
@@ -74,3 +76,5 @@ kube:
     username:
     password:
     email: default
+services:
+  loadbalanced: false

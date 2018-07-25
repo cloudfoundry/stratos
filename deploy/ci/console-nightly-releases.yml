@@ -67,13 +67,39 @@ resources:
     repository: ((github-repository))
     access_token: ((github-access-token))
     pre_release: true
-
+- name: image-tag
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: ((minio-server-endpoint))
+    regexp: temp-artifacts/release-(.*).tar
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
+    region_name: eu-central-1
 jobs:
-- name: build-images
+- name: generate-tag-files
   plan:
   - get: stratos
   - get: midnight
     trigger: true
+  - do:
+    - task: generate-tag
+      file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        NIGHTLY_BUILD: "true"
+    - put: image-tag
+      params:
+        file: image-tag/*.tar
+        acl: public-read
+- name: build-images
+  plan:
+  - get: stratos
+    passed: [generate-tag-files]
+    trigger: true
+  - get: image-tag
+    passed: [generate-tag-files]
+    params:
+      unpack: true
   - aggregate:
     - do:
       - put: jetstream-image
@@ -83,6 +109,7 @@ jobs:
           target_name:  prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
           tag_commit: true
+          build_args_file: image-tag/build-args
       - put: postflight-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk

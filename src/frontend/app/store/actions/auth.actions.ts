@@ -38,12 +38,13 @@ export class VerifySession implements Action {
 }
 
 export class VerifiedSession implements Action {
-  constructor(private sessionData: SessionData, public updateEndpoints = true) { }
+  constructor(public sessionData: SessionData, public updateEndpoints = true) { }
   type = SESSION_VERIFIED;
 }
 
 export class InvalidSession implements Action {
-  constructor(public uaaError: boolean = false, public upgradeInProgress = false) { }
+  constructor(public uaaError: boolean = false, public upgradeInProgress = false,
+    public domainMismatch = false, public isSSOLogin = false) { }
   type = SESSION_INVALID;
 }
 

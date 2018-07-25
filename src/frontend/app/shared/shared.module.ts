@@ -5,12 +5,23 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import {
+  AddServiceInstanceComponent,
+} from './components/add-service-instance/add-service-instance/add-service-instance.component';
+import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
+import { NoServicePlansComponent } from './components/add-service-instance/no-service-plans/no-service-plans.component';
+import { SelectPlanStepComponent } from './components/add-service-instance/select-plan-step/select-plan-step.component';
+import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
+import {
+  SpecifyDetailsStepComponent,
+} from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -34,21 +45,35 @@ import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-u
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
+import {
+  CompactServiceInstanceCardComponent,
+} from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
+import { ServiceBrokerCardComponent } from './components/cards/service-broker-card/service-broker-card.component';
+import {
+  ServiceRecentInstancesCardComponent,
+} from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
+import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
+import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import {
+  CreateApplicationStep1Component,
+} from './components/create-application/create-application-step1/create-application-step1.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnumerateComponent } from './components/enumerate/enumerate.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
+import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
@@ -59,6 +84,10 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import {
+  TableCellRequestMonitorIconComponent,
+} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -83,10 +112,15 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
+import {
+  UploadProgressIndicatorComponent,
+} from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
+import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
@@ -95,8 +129,10 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
-import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
+import { UserPermissionDirective } from './user-permission.directive';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
+import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 
 @NgModule({
   imports: [
@@ -105,7 +141,6 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    VirtualScrollModule,
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
@@ -177,8 +212,30 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
+    CfRoleCheckboxComponent,
+    EnumerateComponent,
+    UploadProgressIndicatorComponent,
+    GithubCommitAuthorComponent,
     UserProfileBannerComponent,
-    UploadProgressIndicatorComponent
+    AppActionMonitorComponent,
+    AppActionMonitorIconComponent,
+    UserProfileBannerComponent,
+    TableCellRequestMonitorIconComponent,
+    UserPermissionDirective,
+    ServiceSummaryCardComponent,
+    ServiceBrokerCardComponent,
+    ServiceRecentInstancesCardComponent,
+    CompactServiceInstanceCardComponent,
+    SpecifyDetailsStepComponent,
+    AddServiceInstanceComponent,
+    SelectPlanStepComponent,
+    SelectServiceComponent,
+    NoServicePlansComponent,
+    CreateApplicationStep1Component,
+    BindAppsStepComponent,
+    CfEndpointsMissingComponent,
+    CapitalizeFirstPipe,
+    RoutingIndicatorComponent,
   ],
   exports: [
     FormsModule,
@@ -244,12 +301,36 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent,
+    CfRoleCheckboxComponent,
+    EnumerateComponent,
     UploadProgressIndicatorComponent,
+    GithubCommitAuthorComponent,
+    AppActionMonitorComponent,
+    CliCommandComponent,
+    AppActionMonitorIconComponent,
+    UserPermissionDirective,
+    BooleanIndicatorComponent,
+    ServiceSummaryCardComponent,
+    ServiceBrokerCardComponent,
+    ServiceRecentInstancesCardComponent,
+    CompactServiceInstanceCardComponent,
+    TableComponent,
+    UserPermissionDirective,
+    SpecifyDetailsStepComponent,
+    AddServiceInstanceComponent,
+    SelectPlanStepComponent,
+    SelectServiceComponent,
+    CreateApplicationStep1Component,
+    BindAppsStepComponent,
+    CapitalizeFirstPipe,
+    CfEndpointsMissingComponent,
+    RoutingIndicatorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    NoServicePlansComponent
   ],
   providers: [
     ListConfig,
@@ -260,7 +341,8 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     EntityMonitorFactory,
     PaginationMonitorFactory,
     CloudFoundryService,
-    InternalEventMonitorFactory
+    InternalEventMonitorFactory,
+    ServiceActionHelperService
   ]
 })
 export class SharedModule { }

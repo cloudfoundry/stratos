@@ -1,10 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-
+import { ReplaySubject } from 'rxjs';
+import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
-import { TableCellCustom, CardCell } from '../../../list.types';
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
+import { CardCell } from '../../../list.types';
+
 
 @Component({
   selector: 'app-endpoint-card',
@@ -15,7 +15,7 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
 
   static columns = 2;
 
-  private status$ = new ReplaySubject<CardStatus>();
+  public status$ = new ReplaySubject<CardStatus>();
 
   @Input('row')
   row: EndpointModel;
@@ -33,7 +33,7 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
     this.status$.next(this.mapStatus(row));
   }
 
-  private getEndpointUrl(row: EndpointModel) {
+  public getEndpointUrl(row: EndpointModel) {
     return getFullEndpointApiUrl(row);
   }
 

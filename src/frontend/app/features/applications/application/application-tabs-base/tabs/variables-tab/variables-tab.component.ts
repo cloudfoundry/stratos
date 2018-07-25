@@ -1,6 +1,6 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -13,6 +13,7 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
+import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 
 export interface VariableTabAllEnvVarType {
   name: string;
@@ -30,28 +31,27 @@ export interface VariableTabAllEnvVarType {
 })
 export class VariablesTabComponent implements OnInit {
 
-
-
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
     private listConfig: ListConfig<ListAppEnvVar>
   ) {
-    this.envVarsDataSource = listConfig.getDataSource() as CfAppVariablesDataSource;
+    this.envVarsDataSource = listConfig.getDataSource();
   }
 
   envVars$: Observable<{
     names: String[],
     values: {}
   }>;
-  envVarsDataSource: CfAppVariablesDataSource;
+
+  envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;
   allEnvVars$: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
-    this.envVars$ = this.appService.waitForAppEntity$.map(app => ({
+    this.envVars$ = this.appService.waitForAppEntity$.pipe(map(app => ({
       names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
       values: app.entity.entity.environment_json || {}
-    }));
+    })));
     this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
       map(allEnvVars => {
         if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {

@@ -2,78 +2,95 @@
 
 set -e
 
-echo "Running e2e tests..."
+echo "Stratos e2e tests"
+echo "================="
 
-cat << EOF > ./build/secrets.json
-{
-  "headless": true,
-  "cloudFoundry": {
-    "url": "${CF_LOCATION}",
-    "admin": {
-      "username": "${CF_ADMIN_USER}",
-      "password": "${CF_ADMIN_PASSWORD}"
-    },
-    "user": {
-      "username": "${CF_E2E_USER}",
-      "password": "${CF_E2E_USER_PASSWORD}"
-    }
-  },
-  "console": {
-    "host": "localhost",
-    "port": "443",
-    "admin": {
-      "username": "${CONSOLE_ADMIN_USER}",
-      "password": "${CONSOLE_ADMIN_PASSWORD}"
-    },
-    "user": {
-      "username": "${CONSOLE_USER_USER}",
-      "password": "${CONSOLE_USER_PASSWORD}"
-    }
-  },
-  "uaa": {
-    "url": "http://uaa:8080",
-    "clientId": "console",
-    "adminUsername": "admin",
-    "adminPassword": "hscadmin"
-  }
-}
-EOF
+echo "Checking docker version"
+
+docker version
+docker-compose version
+
+echo "Preparing for e2e tests..."
+
+curl -sLk -o ./secrets.yaml https://travis.capbristol.com/yaml
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
-# Move the node_modules folder - the docker build will remove it anyway
-mv ./node_modules /tmp/node_modules
+# There are two ways of running - building and deploying a full docker-compose deployment
+# or doing a local build and running that with sqlite
 
-echo "Building images locally"
-./deploy/docker-compose/build.sh -n -l
-echo "Build Finished"
-docker images
+E2E_TARGET="e2e-local"
 
-echo "Running Console in Docker Compose"
-pushd deploy/ci/travis
-docker-compose up -d
-popd
+# Single arg to script can change whether we do a quick of full deploy
+RUN_TYPE=$1
 
-# The build cleared node_modules, so move back the one we kept
-#npm install
-rm -rf ./node_modules
-mv /tmp/node_modules ./node_modules
+if [ "${RUN_TYPE}" == "quick" ]; then
+  echo "Using local deployment for e2e tests"
+  # Quick deploy locally
+  # Start a local UAA - this will take a few seconds to come up in the background
+  docker run -d -p 8080:8080 splatform/stratos-uaa
+
+  # Get go 1.0 and glide
+  curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+  chmod +x ~/bin/gimme
+  eval "$(gimme 1.9)"
+  curl https://glide.sh/get | sh
+  go version
+  glide --version
+  
+  npm run build
+  npm run build-backend-dev
+  # Patch the config file so local version runs on port 443
+  pushd outputs
+  ./portal-proxy > backend.log &
+  popd
+
+  E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
+else
+  echo "Using docker-compose deployment for e2e tests"
+  # Full deploy in docker compose - this is slow
+  # Move the node_modules folder - the docker build will remove it anyway
+  mv ./node_modules /tmp/node_modules
+
+  echo "Building images locally"
+  ./deploy/docker-compose/build.sh -n -l
+  echo "Build Finished"
+  docker images
+
+  echo "Running Stratos in Docker Compose"
+  pushd deploy/ci/travis
+  docker-compose up -d
+  popd
+
+  # The build cleared node_modules, so move back the one we kept
+  #npm install
+  rm -rf ./node_modules
+  mv /tmp/node_modules ./node_modules
+fi
 
 set +e
 echo "Running e2e tests"
-npm run e2e:nocov
+npm run ${E2E_TARGET}
 RESULT=$?
 set -e
 
-pushd deploy/ci/travis
-# Uncomment to copy logs to the travis log
-#docker-compose stop
-#docker-compose logs mariadb
-#docker-compose logs goose
-#docker-compose logs proxy 
-docker-compose down
-popd
+if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
+  pushd deploy/ci/travis
+  # Uncomment to copy logs to the travis log
+  #docker-compose stop
+  #docker-compose logs mariadb
+  #docker-compose logs goose
+  #docker-compose logs proxy 
+  docker-compose down
+  popd
+fi
+
+# Check environment variable that will ignore E2E failures
+if [ -n "${STRATOS_ALLOW_E2E_FAILURES}" ]; then
+  echo "Ignoring E2E test failures (if any) because STRATOS_ALLOW_E2E_FAILURES is set"
+  exit 0
+fi
 
 exit $RESULT

@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnInit } from '@angular/core';
+import { AfterContentInit, Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { create } from 'rxjs-spy';
@@ -13,7 +13,11 @@ import { AppState } from './store/app-state';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, AfterContentInit {
+export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
+
+  @HostBinding('@.disabled')
+  public animationsDisabled = false;
+
   constructor(
     private store: Store<AppState>,
     private router: Router,
@@ -39,10 +43,21 @@ export class AppComponent implements OnInit, AfterContentInit {
       }
     }
 
+    // Disable animations for e2e tests
+    if (window.sessionStorage.getItem('STRATOS_DISABLE_ANIMATIONS')) {
+      this.animationsDisabled = true;
+    }
+
   }
   title = 'app';
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.loggedInService.init();
+  }
+
+  ngOnDestroy() {
+    this.loggedInService.destroy();
+  }
 
   ngAfterContentInit() { }
 }

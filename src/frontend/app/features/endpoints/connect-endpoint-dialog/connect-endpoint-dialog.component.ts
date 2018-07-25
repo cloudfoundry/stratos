@@ -1,10 +1,8 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
+
 import { Store } from '@ngrx/store';
-import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -15,6 +13,11 @@ import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { getCanShareTokenForEndpointType } from '../endpoint-helpers';
+
+import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -35,7 +38,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm;
+  public endpointForm: FormGroup;
 
   private bodyContent = '';
 
@@ -52,7 +55,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   ];
 
   private hasAttemptedConnect: boolean;
-  private authTypesForEndpoint = [];
+  public authTypesForEndpoint = [];
+
+  public canShareEndpointToken = false;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
@@ -77,11 +82,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       }
     });
 
+    // Not all endpoint types might allow token sharing - typically types like metrics do
+    this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
+
     // Create the endpoint form
     const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
     this.endpointForm = this.fb.group({
       authType: [autoSelected.value || '', Validators.required],
-      authValues: this.fb.group(autoSelected.form || {})
+      authValues: this.fb.group(autoSelected.form || {}),
+      systemShared: false
     });
 
     this.setupObservables();
@@ -96,8 +105,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   setupSubscriptions() {
-    this.fetchSub = this.update$
-      .pairwise()
+    this.fetchSub = this.update$.pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
           // Has finished fetching
@@ -105,9 +114,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         }
       });
 
-    this.connectingSub = this.endpointConnected$
-      .filter(connected => connected)
-      .delay(this.connectDelay)
+    this.connectingSub = this.endpointConnected$.pipe(
+      filter(connected => connected),
+      delay(this.connectDelay), )
       .subscribe(() => {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
@@ -117,19 +126,19 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   setupObservables() {
     this.update$ = this.store.select(
       this.getUpdateSelector()
-    ).filter(update => !!update);
+    ).pipe(filter(update => !!update));
 
     this.fetchingInfo$ = this.store.select(
       this.getRequestSelector()
-    )
-      .filter(request => !!request)
-      .map(request => request.fetching);
+    ).pipe(
+      filter(request => !!request),
+      map(request => request.fetching), );
 
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
-    )
-      .map(request => !!(request && request.api_endpoint && request.user));
-    const busy$ = this.update$.map(update => update.busy).startWith(false);
+    ).pipe(
+      map(request => !!(request && request.api_endpoint && request.user)));
+    const busy$ = this.update$.pipe(map(update => update.busy), startWith(false), );
     this.connecting$ = busy$.pipe(
       pairwise(),
       switchMap(([oldBusy, newBusy]) => {
@@ -139,7 +148,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
             startWith(true)
           );
         }
-        return Observable.of(newBusy);
+        return observableOf(newBusy);
       })
     );
     this.connectingError$ = this.update$.pipe(
@@ -147,24 +156,24 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       map(update => update.error)
     );
 
-    this.valid$ = this.endpointForm.valueChanges.map(() => this.endpointForm.valid);
+    this.valid$ = this.endpointForm.valueChanges.pipe(map(() => this.endpointForm.valid));
 
     this.setupCombinedObservables();
   }
 
   setupCombinedObservables() {
-    this.isBusy$ = Observable.combineLatest(
-      this.connecting$.startWith(false),
-      this.fetchingInfo$.startWith(false)
-    )
-      .map(([connecting, fetchingInfo]) => connecting || fetchingInfo);
+    this.isBusy$ = observableCombineLatest(
+      this.connecting$.pipe(startWith(false)),
+      this.fetchingInfo$.pipe(startWith(false))
+    ).pipe(
+      map(([connecting, fetchingInfo]) => connecting || fetchingInfo));
 
-    this.canSubmit$ = Observable.combineLatest(
-      this.connecting$.startWith(false),
-      this.fetchingInfo$.startWith(false),
-      this.valid$.startWith(false)
-    )
-      .map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid);
+    this.canSubmit$ = observableCombineLatest(
+      this.connecting$.pipe(startWith(false)),
+      this.fetchingInfo$.pipe(startWith(false)),
+      this.valid$.pipe(startWith(false))
+    ).pipe(
+      map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid));
   }
 
   private getUpdateSelector() {
@@ -189,14 +198,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
-  submit(event) {
+  submit() {
     this.hasAttemptedConnect = true;
-    const { guid, authType, authValues } = this.endpointForm.value;
+    const { guid, authType, authValues, systemShared } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,
       authType,
       authValues,
+      systemShared,
       this.bodyContent,
     ));
   }

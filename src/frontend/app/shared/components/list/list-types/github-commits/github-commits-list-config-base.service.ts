@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -10,7 +10,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
-import { TableCellCommitParentsComponent } from './table-cell-commit-parents/table-cell-commit-parents.component';
 
 @Injectable()
 export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GithubCommit>> {
@@ -41,6 +40,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       headerCell: () => 'SHA',
       cellDefinition: {
         externalLink: true,
+        newTab: true,
         getLink: (commit) => commit.entity.html_url,
         getValue: (commit) => commit.entity.sha.substring(0, 8)
       },
@@ -51,12 +51,6 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       },
       cellFlex: '2'
     },
-    // {
-    //   columnId: 'parentShas',
-    //   headerCell: () => 'Parent Commits',
-    //   cellComponent: TableCellCommitParentsComponent,
-    //   cellFlex: '2',
-    // },
     {
       columnId: 'author',
       headerCell: () => 'Author',

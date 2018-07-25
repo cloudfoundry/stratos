@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { AuthState } from '../../../store/reducers/auth.reducer';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+import { AppState } from '../../../store/app-state';
+import { AuthState } from '../../../store/reducers/auth.reducer';
 import { SessionData } from '../../../store/types/auth.types';
 
 @Component({
@@ -15,13 +16,18 @@ export class AboutPageComponent implements OnInit {
 
   sessionData$: Observable<SessionData>;
   versionNumber$: Observable<string>;
+  userIsAdmin$: Observable<boolean>;
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, @Inject(Customizations) public customizations: CustomizationsMetadata) { }
 
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
       filter(auth => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData)
+    );
+
+    this.userIsAdmin$ = this.sessionData$.pipe(
+      map(session => session.user && session.user.admin)
     );
 
     this.versionNumber$ = this.sessionData$.pipe(

@@ -14,12 +14,15 @@ export interface ICellDefinition<T> {
   externalLink?: boolean;
   // Automatically turns the row into a link
   getLink?: (row: T) => string;
+  newTab?: boolean;
 }
+
+export type CellConfigFunction<T> = (row: T) => any;
 export interface ITableColumn<T> {
   columnId: string;
   cellComponent?: any;
   cellDefinition?: ICellDefinition<T>; // This takes president over cellComponent
-  cellConfig?: any;   // Config for a custom cell component
+  cellConfig?: object | CellConfigFunction<T>;   // Config for a custom cell component
   headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
   class?: string;

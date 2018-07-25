@@ -12,7 +12,7 @@ import { AppState } from '../../../../store/app-state';
 export class CloudFoundrySummaryTabComponent {
   appLink: Function;
 
-  constructor(private store: Store<AppState>, private cfEndpointService: CloudFoundryEndpointService) {
+  constructor(private store: Store<AppState>, public cfEndpointService: CloudFoundryEndpointService) {
     this.appLink = () => {
       goToAppWall(store, cfEndpointService.cfGuid);
     };

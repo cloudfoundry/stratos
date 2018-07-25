@@ -1,3 +1,5 @@
+
+import {map} from 'rxjs/operators';
 import { CfOrgSpaceItem } from '../../data-services/cf-org-space-service.service';
 
 export function createListFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
@@ -5,12 +7,12 @@ export function createListFilterConfig(key: string, label: string, cfOrgSpaceIte
     key: key,
     label: label,
     ...cfOrgSpaceItem,
-    list$: cfOrgSpaceItem.list$.map((entities: any[]) => {
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
       return entities.map(entity => ({
         label: entity.name,
         item: entity,
         value: entity.guid
       }));
-    }),
+    })),
   };
 }

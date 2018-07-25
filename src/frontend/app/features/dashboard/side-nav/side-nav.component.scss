@@ -3,10 +3,13 @@ $side-nav-mat-icon-width: 24px;
 $side-nav-mat-icon-padding-right: 15px;
 $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $side-nav-mat-icon-padding-right;
 .side-nav {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 200px;
   &__top {
     display: flex;
+    flex: 0 0 56px;
     flex-direction: column;
     height: 56px;
     &-inner {
@@ -17,7 +20,9 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
   }
   &__items {
     list-style-type: none;
+    flex: 1;
     margin: 0;
+    overflow-y: auto;
     padding: 0;
   }
   &__itemContainer {
@@ -40,6 +45,7 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
     text-decoration: none;
     mat-icon {
       margin-right: $side-nav-mat-icon-padding-right;
+      text-align: center;
     }
   }
   &__logo {
@@ -51,5 +57,11 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
       text-align: center;
       text-transform: uppercase;
     }
+  }
+  &__bottom {
+    flex: 0 0 auto;
+    font-weight: 300;
+    font-size: 14px;
+    padding: 12px;
   }
 }

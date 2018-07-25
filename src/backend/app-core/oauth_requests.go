@@ -43,11 +43,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
 
 		var client http.Client
-		if cnsi.SkipSSLValidation {
-			client = httpClientSkipSSL
-		} else {
-			client = httpClient
-		}
+		client = p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
 		res, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("Request failed: %v", err)

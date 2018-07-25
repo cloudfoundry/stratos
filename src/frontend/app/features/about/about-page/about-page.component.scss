@@ -21,4 +21,25 @@
     margin-bottom: 24px;
     z-index: 1;
   }
+  &__eula {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    div {
+      flex: 1;
+      font-weight: 500;
+    }
+  }
+  &__admin-card {
+    border-left-style: solid;
+    border-left-width: 4px;
+  }
+  &__admin {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__warning-icon {
+    margin-right: 8px;
+  }
 }

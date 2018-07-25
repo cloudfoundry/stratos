@@ -14,19 +14,19 @@ $progress-transition-speed: 1s;
     height: $progress-size;
     padding-top: 16px;
     position: absolute;
-    width: $progress-size;
     text-align: center;
     transition: opacity $progress-transition-speed linear;
+    width: $progress-size;
   }
   &__done {
     opacity: 0;
   }
   &__spinner {
     height: $progress-size;
-    position: absolute;
-    width: $progress-size;
     opacity: 1;
+    position: absolute;
     transition: opacity $progress-transition-speed linear;
+    width: $progress-size;
   }
 }
 .upload-progress-done {

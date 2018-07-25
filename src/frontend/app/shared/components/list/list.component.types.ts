@@ -1,11 +1,12 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+
+import {of as observableOf,  BehaviorSubject ,  Observable } from 'rxjs';
 
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ListDataSource } from './data-sources-controllers/list-data-source';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -71,9 +72,18 @@ export interface IListConfig<T> {
    */
   tableFixedRowHeight?: boolean;
   /**
+   * Set the align-self of each cell in the row
+   */
+  tableRowAlignSelf?: string;
+  /**
    * The card component used in card view
    */
   cardComponent?: any;
+  hideRefresh?: boolean;
+  /**
+   * Allow selection regardless of number or visibility of multi actions
+   */
+  allowSelection?: boolean;
 }
 
 export interface IListMultiFilterConfig {
@@ -99,31 +109,36 @@ export class ListConfig<T> implements IListConfig<T> {
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;
-  tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
+  allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = (): any => null;
+  getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getInitialised = () => Observable.of(true);
+  getInitialised = () => observableOf(true);
 }
 
 export interface IBaseListAction<T> {
   icon?: string;
   label: string;
   description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean | Observable<T>;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
+  createVisible?: (row$: Observable<T>) => Observable<boolean>;
+  createEnabled?: (row$: Observable<T>) => Observable<boolean>;
 }
 
-export interface IMultiListAction<T> extends IBaseListAction<T> {
+export interface IOptionalAction<T> extends IBaseListAction<T> {
+  visible$?: Observable<boolean>;
+  enabled$?: Observable<boolean>;
+}
+
+export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    *
@@ -132,6 +147,6 @@ export interface IMultiListAction<T> extends IBaseListAction<T> {
   action: (items: T[]) => boolean;
 }
 
-export interface IGlobalListAction<T> extends IBaseListAction<T> {
+export interface IGlobalListAction<T> extends IOptionalAction<T> {
   action: () => void;
 }

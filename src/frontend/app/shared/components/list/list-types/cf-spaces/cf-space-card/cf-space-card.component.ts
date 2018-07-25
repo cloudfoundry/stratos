@@ -1,25 +1,25 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
-
 import { ISpace } from '../../../../../../core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
+import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+
 
 @Component({
   selector: 'app-cf-space-card',
@@ -43,30 +43,44 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   appCount: number;
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
+  entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService,
-    private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private cfOrgService: CloudFoundryOrganizationService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     super();
-
-    this.cardMenu = [
-      {
-        label: 'Edit',
-        action: this.edit
-      },
-      {
-        label: 'Delete',
-        action: this.delete
-      }
-    ];
   }
 
   ngOnInit() {
     this.spaceGuid = this.row.metadata.guid;
+    this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
+    this.orgGuid = this.cfOrgService.orgGuid;
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SPACE_EDIT,
+          this.cfEndpointService.cfGuid,
+          this.orgGuid,
+          this.spaceGuid
+        )
+      },
+      {
+        label: 'Delete',
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SPACE_DELETE,
+          this.cfEndpointService.cfGuid,
+          this.orgGuid
+        )
+      }
+    ];
 
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => this.cfUserService.getUserRoleInSpace(
@@ -84,7 +98,6 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-    this.orgGuid = this.cfOrgService.orgGuid;
 
   }
 
@@ -142,11 +155,19 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   }
 
   delete = () => {
-    this.cfOrgService.deleteSpace(
-      this.spaceGuid,
-      this.orgGuid,
-      this.cfEndpointService.cfGuid
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Space',
+      `Are you sure you want to delete space '${this.row.entity.name}'?`,
+      'Delete',
+      true
     );
+    this.confirmDialog.open(confirmation, () => {
+      this.cfOrgService.deleteSpace(
+        this.spaceGuid,
+        this.orgGuid,
+        this.cfEndpointService.cfGuid
+      );
+    });
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({

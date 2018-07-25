@@ -1,17 +1,14 @@
 import { HostListener, Inject, Injectable, NgZone } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
-import { Subscription } from 'rxjs/Rx';
+import { DOCUMENT } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
 import { VerifySession } from './store/actions/auth.actions';
 import { MatDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
-import { Observable } from 'rxjs/Observable';
+import { Observable, interval, Subscription, fromEvent, merge } from 'rxjs';
 import { SessionData } from './store/types/auth.types';
-import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { interval } from 'rxjs/observable/interval';
-import { timeInterval } from 'rxjs/operator/timeInterval';
+
 import { tap } from 'rxjs/operators';
 
 @Injectable()
@@ -40,19 +37,24 @@ export class LoggedInService {
 
   private _activityPromptShown = false;
 
+  private _sub: Subscription;
+
+  private _destroying = false;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
     private dialog: MatDialog,
-    ngZone: NgZone
+    private ngZone: NgZone
   ) {
+  }
 
+  init() {
     const eventStreams = this._userActiveEvents.map((eventName) => {
-      return Observable.fromEvent(document, eventName);
+      return fromEvent(document, eventName);
     });
 
-    this.store.select(s => s.auth)
+    this._sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
         this._sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
@@ -60,7 +62,7 @@ export class LoggedInService {
             this.openSessionCheckerPoll();
           }
           if (!this._userInteractionChecker) {
-            this._userInteractionChecker = Observable.merge(...eventStreams).subscribe(() => {
+            this._userInteractionChecker = merge(...eventStreams).subscribe(() => {
               this._lastUserInteraction = Date.now();
             });
           }
@@ -71,17 +73,33 @@ export class LoggedInService {
           }
         }
       });
-
   }
 
+  destroy() {
+    this._destroying = true;
+    if (this._sub) {
+      this._sub.unsubscribe();
+    }
+    this.closeSessionCheckerPoll();
+    if (this._userInteractionChecker) {
+      this._userInteractionChecker.unsubscribe();
+    }
+  }
+
+  // Run outside Angular zone for protractor tests to work
+  // See: https://github.com/angular/protractor/blob/master/docs/timeouts.md#waiting-for-angular
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
-    this._sessionChecker = interval(this._checkSessionInterval)
-      .pipe(
-      tap(() => {
-        this._checkSession();
-      })
-      ).subscribe();
+    this.ngZone.runOutsideAngular(() => {
+      this._sessionChecker = interval(this._checkSessionInterval)
+        .pipe(
+          tap(() => {
+            this.ngZone.run(() => {
+              this._checkSession();
+            });
+          })
+        ).subscribe();
+    });
   }
 
   private closeSessionCheckerPoll() {
@@ -109,7 +127,7 @@ export class LoggedInService {
   }
 
   private _checkSession() {
-    if (this._activityPromptShown) {
+    if (this._activityPromptShown || this._destroying) {
       return;
     }
 

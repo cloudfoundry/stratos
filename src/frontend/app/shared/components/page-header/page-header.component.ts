@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { endpointSchemaKey } from './../../../store/helpers/entity-factory';
 import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -41,6 +41,9 @@ export class PageHeaderComponent {
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
   }
+
+  // Used when non-admin logs in with no-endpoints -> only show logout in the menu
+  @Input('logoutOnly') logoutOnly: boolean;
 
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
     if (!breadcrumbs || !breadcrumbs.length) {

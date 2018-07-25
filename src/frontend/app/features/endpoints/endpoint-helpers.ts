@@ -11,6 +11,7 @@ export interface EndpointTypeHelper {
   value: EndpointType;
   label: string;
   urlValidation?: string;
+  allowTokenSharing?: boolean;
 }
 
 const endpointTypes: EndpointTypeHelper[] = [
@@ -21,7 +22,8 @@ const endpointTypes: EndpointTypeHelper[] = [
   },
   {
     value: 'metrics',
-    label: 'Metrics'
+    label: 'Metrics',
+    allowTokenSharing: true
   },
 ];
 
@@ -34,6 +36,10 @@ endpointTypes.forEach(ept => {
 // Get the name to display for a given Endpoint type
 export function getNameForEndpointType(type: string): string {
   return endpointTypesMap[type] ? endpointTypesMap[type].label : 'Unknown';
+}
+
+export function getCanShareTokenForEndpointType(type: string): boolean {
+  return endpointTypesMap[type] ? !!endpointTypesMap[type].allowTokenSharing : false;
 }
 
 export function getEndpointTypes() {

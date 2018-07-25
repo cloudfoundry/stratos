@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -15,6 +15,7 @@ import {
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations';
+import { ValidationResult } from '../helpers/entity-relations.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
@@ -25,6 +26,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+
 
 @Injectable()
 export class RequestEffect {
@@ -79,13 +81,19 @@ export class RequestEffect {
       return this.store.select(getAPIRequestDataState).pipe(
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
-        map(([allEntities, allPagination]) => {
-          return validateEntityRelations({
+        map(([allEntities, allPagination]): ValidationResult => {
+          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
+          const entities = apiResponse ? apiResponse.response.entities : null;
+          return apiAction.skipValidation ? {
+            apiResponse,
+            started: false,
+            completed: Promise.resolve(new Array<boolean>()),
+          } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
             allPagination,
-            newEntities: apiResponse ? apiResponse.response.entities : null,
+            apiResponse,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
             populateMissing: true,
@@ -104,17 +112,17 @@ export class RequestEffect {
         mergeMap(({ independentUpdates, validation }) => {
           return [new EntitiesPipelineCompleted(
             apiAction,
-            apiResponse,
+            validation.apiResponse,
             validateAction,
             validation,
             independentUpdates
           )];
         })
-      ).catch(error => {
+      ).pipe(catchError(error => {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
           return [
-            new APISuccessOrFailedAction(apiAction.actions[2], apiAction),
+            new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
             new WrapperRequestActionFailed(
               error.message,
               apiAction,
@@ -125,7 +133,7 @@ export class RequestEffect {
           this.update(apiAction, false, error.message);
           return [];
         }
-      });
+      }));
     })
   );
 
@@ -147,7 +155,7 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction));
+        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
         actions.push(new WrapperRequestActionSuccess(
           apiResponse.response,
           apiAction,
@@ -158,8 +166,8 @@ export class RequestEffect {
 
         if (
           !apiAction.updatingKey &&
-          apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
-          apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
+          (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
+            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -188,7 +196,7 @@ export class RequestEffect {
       if (busy) {
         newAction.updatingKey = rootUpdatingKey;
       }
-      this.store.dispatch(new UpdateCfAction(newAction, error));
+      this.store.dispatch(new UpdateCfAction(newAction, busy, error));
     }
   }
 

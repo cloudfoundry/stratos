@@ -1,5 +1,4 @@
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Observable ,  combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, tap, withLatestFrom, delay } from 'rxjs/operators';
 
 import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';

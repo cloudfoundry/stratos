@@ -20,7 +20,8 @@ const (
 	countTokensSql      = `SELECT COUNT`
 	insertTokenSql      = `INSERT INTO tokens`
 	updateUAATokenSql   = `UPDATE tokens`
-	findUAATokenSql     = `SELECT auth_token, refresh_token, token_expiry FROM tokens .*`
+	findTokenSql        = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid FROM tokens .*`
+	findUAATokenSql     = `SELECT auth_token, refresh_token, token_expiry FROM tokens WHERE token_type = 'uaa' AND .*`
 	deleteFromTokensSql = `DELETE FROM tokens`
 )
 
@@ -216,7 +217,7 @@ func TestSaveCNSITokens(t *testing.T) {
 						WillReturnRows(rs)
 
 					mock.ExpectExec(insertTokenSql).
-						WithArgs(mockCNSIGuid, mockUserGuid, "cnsi", sqlmock.AnyArg(), sqlmock.AnyArg(), tokenRecord.TokenExpiry).
+						WithArgs(mockCNSIGuid, mockUserGuid, "cnsi", sqlmock.AnyArg(), sqlmock.AnyArg(), tokenRecord.TokenExpiry, false, "", "").
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
 					err := repository.SaveCNSIToken(mockCNSIGuid, mockUserGuid, tokenRecord, mockEncryptionKey)
@@ -291,8 +292,8 @@ func TestFindUAATokens(t *testing.T) {
 
 		Convey("Success case", func() {
 
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
@@ -333,7 +334,7 @@ func TestFindCNSITokens(t *testing.T) {
 		})
 
 		Convey("should throw exception when finding a non-existent token", func() {
-			mock.ExpectQuery(findUAATokenSql).
+			mock.ExpectQuery(findTokenSql).
 				WillReturnError(errors.New("doesnt exist"))
 			_, err := repository.FindCNSIToken(mockCNSIToken, mockUserGuid, mockEncryptionKey)
 
@@ -342,10 +343,10 @@ func TestFindCNSITokens(t *testing.T) {
 		})
 
 		Convey("should fail to decrypt with invalid encryptionKey", func() {
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false, "oauth", "", mockUserGuid)
 
-			mock.ExpectQuery(findUAATokenSql).
+			mock.ExpectQuery(findTokenSql).
 				WillReturnRows(rs)
 			_, err := repository.FindCNSIToken(mockCNSIToken, mockUserGuid, nil)
 
@@ -354,11 +355,10 @@ func TestFindCNSITokens(t *testing.T) {
 		})
 
 		Convey("Success case", func() {
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false, "oauth", "", mockUserGuid)
 
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
-
-			mock.ExpectQuery(findUAATokenSql).
+			mock.ExpectQuery(findTokenSql).
 				WillReturnRows(rs)
 			tr, err := repository.FindCNSIToken(mockCNSIToken, mockUserGuid, mockEncryptionKey)
 
@@ -375,56 +375,6 @@ func TestFindCNSITokens(t *testing.T) {
 	})
 
 }
-
-func TestListCNSITokensForUser(t *testing.T) {
-
-	Convey("ListCNSITokensForUser Tests", t, func() {
-
-		db, mock, repository := initialiseRepo(t)
-
-		Convey("should fail to save token with an invalid user GUID", func() {
-			var userGuid string = ""
-			_, err := repository.ListCNSITokensForUser(userGuid, mockEncryptionKey)
-			So(err, ShouldNotBeNil)
-
-		})
-
-		Convey("should throw exception when finding a non-existent token", func() {
-			mock.ExpectQuery(findUAATokenSql).
-				WillReturnError(errors.New("doesnt exist"))
-			_, err := repository.ListCNSITokensForUser(mockUserGuid, mockEncryptionKey)
-
-			So(err, ShouldNotBeNil)
-			So(mock.ExpectationsWereMet(), ShouldBeNil)
-
-		})
-
-		Convey("Test successful path", func() {
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
-
-			mock.ExpectQuery(findUAATokenSql).
-				WillReturnRows(rs)
-			tr, err := repository.ListCNSITokensForUser(mockUserGuid, mockEncryptionKey)
-
-			log.Printf("tr is: %+v %+v", tr, err)
-
-			So(err, ShouldBeNil)
-			So(mock.ExpectationsWereMet(), ShouldBeNil)
-			So(len(tr), ShouldEqual, 1)
-			So(tr[0].AuthToken, ShouldNotBeNil)
-			So(tr[0].RefreshToken, ShouldNotBeNil)
-			So(tr[0].TokenExpiry, ShouldEqual, mockTokenExpiry)
-		})
-
-		Reset(func() {
-			db.Close()
-		})
-
-	})
-
-}
-
 func TestDeleteCNSIToken(t *testing.T) {
 
 	Convey("DeleteCNSIToken Tests", t, func() {

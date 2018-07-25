@@ -6,6 +6,7 @@ import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
+  domainSchemaKey,
   entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
@@ -29,11 +30,12 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
     spaceGuid: string,
     cfGuid: string
   ) {
-    // const paginationKey = getPaginationKey('cf-space-routes', cfGuid, spaceGuid);
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
     const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
-    ]);
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+    ], true, false);
+    action.initialParams['order-direction-field'] = 'creation';
     const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
       store,
       paginationKey

@@ -1,10 +1,9 @@
+
+import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map, take, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
@@ -12,25 +11,15 @@ import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
-import {
-  CheckProjectExists,
-  FetchBranchesForProject,
-  FetchCommit,
-  SetAppSourceDetails,
-  SetDeployBranch,
-  StoreCFSettings,
-} from '../../../../../../store/actions/deploy-applications.actions';
+import { FetchBranchesForProject, FetchCommit } from '../../../../../../store/actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import {
   entityFactory,
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
-  spaceSchemaKey,
 } from '../../../../../../store/helpers/entity-factory';
-import { selectEntities } from '../../../../../../store/selectors/api.selectors';
 import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
@@ -126,7 +115,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
               stProject.deploySource.commit.trim()
             );
           }),
-          tap(p => (this.initialised$ = Observable.of(true)))
+          tap(p => (this.initialised$ = observableOf(true)))
         );
       })
     );

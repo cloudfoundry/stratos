@@ -1,7 +1,9 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+import { map, switchMap, combineLatest } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -13,6 +15,8 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { getIntegerFieldSortFunction } from '../../data-sources-controllers/local-filtering-sorting';
+
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -25,11 +29,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       cellDefinition: {
         getValue: (row) => `${row.index}`
       },
-      sort: {
-        type: 'sort',
-        orderKey: 'index',
-        field: 'index',
-      }, cellFlex: '1'
+      sort: getIntegerFieldSortFunction('index'),
+      cellFlex: '1'
     },
     {
       columnId: 'state',
@@ -122,30 +123,32 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-    visible: row => true,
-    enabled: row => true,
+
   };
 
   private listActionSsh: IListAction<any> = {
     action: (item) => {
-        const index = item.index;
-        const sshRoute = (
-          `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
-        );
-        this.router.navigate([sshRoute]);
-      },
+      const index = item.index;
+      const sshRoute = (
+        `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
+      );
+      this.router.navigate([sshRoute]);
+    },
     label: 'SSH',
     description: ``, // Description depends on console user permission
-    visible: row => true,
-    enabled: row =>
-      this.appService.app$.pipe(
-        map(app => {
-          return row.value &&
-            row.value.state === 'RUNNING' &&
-            app.entity.entity.enable_ssh;
-        })
-      )
-    };
+    createEnabled: row$ =>
+      row$.pipe(switchMap(row => {
+        return this.appService.app$.pipe(
+          combineLatest(this.appService.appSpace$),
+          map(([app, space]) => {
+            return row.value &&
+              row.value.state === 'RUNNING' &&
+              app.entity.entity.enable_ssh &&
+              space.entity.allow_ssh;
+          })
+        );
+      }))
+  };
 
   private singleActions = [
     this.listActionTerminate,

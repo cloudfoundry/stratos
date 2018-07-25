@@ -22,6 +22,16 @@ import (
 // API Host Prefix to replace if the custom header is supplied
 const apiPrefix = "api."
 
+type PassthroughErrorStatus struct {
+	StatusCode int    `json:"statusCode"`
+	Status     string `json:"status"`
+}
+
+type PassthroughError struct {
+	Error         *PassthroughErrorStatus `json:"error"`
+	ErrorResponse *json.RawMessage        `json:"errorResponse"`
+}
+
 func getEchoURL(c echo.Context) url.URL {
 	log.Debug("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
@@ -83,26 +93,59 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 	for _, guid := range cnsiList {
 		var response []byte
 		cnsiResponse, ok := responses[guid]
+		var errorStatus = &PassthroughErrorStatus{
+			StatusCode: -1,
+		}
+		var errorResponse []byte
 		switch {
 		case !ok:
-			response = []byte(`{"error": "Request timed out"}`)
+			errorStatus.StatusCode = 500
+			errorStatus.Status = "Request timed out"
 		case cnsiResponse.Error != nil:
-			response = []byte(fmt.Sprintf(`{"error": %q}`, cnsiResponse.Error.Error()))
+			errorStatus.StatusCode = 500
+			errorStatus.Status = cnsiResponse.Error.Error()
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
 		// Check the HTTP Status code to make sure that it is actually a valid response
 		if cnsiResponse.StatusCode >= 400 {
-			response = []byte(fmt.Sprintf(`{"error": "Unexpected HTTP status code: %d"}`, cnsiResponse.StatusCode))
+			errorStatus.Status = cnsiResponse.Status
+			errorStatus.StatusCode = cnsiResponse.StatusCode
+			if errorStatus.StatusCode <= 0 {
+				errorStatus.StatusCode = 500
+				errorStatus.Status = "Failed to proxy request"
+			}
+			// Check that the error response was valid json - convert to string otherwise
+			if !isValidJSON(cnsiResponse.Response) {
+				errorResponse = []byte(fmt.Sprintf("%q", cnsiResponse.Response))
+			} else {
+				errorResponse = cnsiResponse.Response
+			}
 		}
-		if len(response) > 0 {
-			jsonResponse[guid] = (*json.RawMessage)(&response)
+		if errorStatus.StatusCode >= 0 {
+			passthroughError := &PassthroughError{
+				Error:         errorStatus,
+				ErrorResponse: (*json.RawMessage)(&errorResponse),
+			}
+			res, _ := json.Marshal(passthroughError)
+			jsonResponse[guid] = (*json.RawMessage)(&res)
 		} else {
-			jsonResponse[guid] = nil
+			if len(response) > 0 {
+				jsonResponse[guid] = (*json.RawMessage)(&response)
+			} else {
+				jsonResponse[guid] = nil
+			}
 		}
 	}
 
 	return jsonResponse
+}
+
+// When we move to goland 1.9 we can use json.isValid()
+func isValidJSON(data []byte) bool {
+	var res interface{}
+	err := json.Unmarshal(data, &res)
+	return err == nil
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (interfaces.CNSIRequest, error) {
@@ -147,7 +190,8 @@ func fwdCNSIStandardHeaders(cnsiRequest *interfaces.CNSIRequest, req *http.Reque
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
 		//  - "Connection", "X-Cap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
+		// - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
+		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
 
 		// Forwarding everything else
 		default:
@@ -271,7 +315,10 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 		c.Response().WriteHeader(res.StatusCode)
 
 		// we don't care if this fails
-		_, _ = c.Response().Write(res.Response)
+		_, err := c.Response().Write(res.Response)
+		if err != nil {
+			log.Errorf("Failed to write passthrough response %v", err)
+		}
 
 		return nil
 	}
@@ -324,17 +371,32 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	case interfaces.AuthTypeOIDC:
 		res, err = p.doOidcFlowRequest(cnsiRequest, req)
 	default:
-	res, err = p.doOauthFlowRequest(cnsiRequest, req)
+		res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {
 		cnsiRequest.StatusCode = 500
+		cnsiRequest.Status = "Error proxing request"
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
 		cnsiRequest.StatusCode = res.StatusCode
+		cnsiRequest.Status = res.Status
 		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
+	}
+
+	// If Status Code >=400, log this as a warning
+	if cnsiRequest.StatusCode >= 400 {
+		var contentType = "Unknown"
+		var contentLength int64 = -1
+		if res != nil {
+			contentType = res.Header.Get("Content-Type")
+			contentLength = res.ContentLength
+		}
+		log.Warnf("Passthrough response: URL: %s, Status Code: %d, Status: %s, Content Type: %s, Length: %d",
+			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, contentLength)
+		log.Warn(string(cnsiRequest.Response))
 	}
 
 	if done != nil {

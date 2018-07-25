@@ -2,13 +2,12 @@ import { Store } from '@ngrx/store';
 
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
 import { AppState } from '../../../../../store/app-state';
-import { endpointSchemaKey, entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
+import { entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
 
 export const FeatureFlagDescriptions = {
   user_org_creation: 'Any user can create an organization',
@@ -24,19 +23,18 @@ export const FeatureFlagDescriptions = {
   env_var_visibility: ' All users can view environment variables',
   space_scoped_private_broker_creation: 'Space Developers can create space-scoped private service brokers',
   space_developer_env_var_visibility:
-  'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables',
+    'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables',
   service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
-    const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const action = new GetAllFeatureFlags(cfGuid, paginationKey);
+    const action = createCfFeatureFlagFetchAction(cfGuid);
     super({
       store,
       action,
       schema: entityFactory(featureFlagSchemaKey),
       getRowUniqueId: getRowMetadata,
-      paginationKey,
+      paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [{ type: 'filter', field: 'entity.name' }],
       listConfig

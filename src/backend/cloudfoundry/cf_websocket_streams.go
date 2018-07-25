@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
@@ -15,7 +16,6 @@ import (
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 )
 
 const (
@@ -24,9 +24,6 @@ const (
 
 	// Send ping messages to peer with this period (must be less than pongWait)
 	pingPeriod = (pongWait * 9) / 10
-
-	// Time allowed to write a ping message
-	pingWriteTimeout = 10 * time.Second
 )
 
 // Allow connections from any Origin
@@ -49,7 +46,7 @@ func (c CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context,
 	}
 	defer ac.consumer.Close()
 
-	clientWebSocket, pingTicker, err := upgradeToWebSocket(echoContext)
+	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		return err
 	}
@@ -86,8 +83,14 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 		return nil, fmt.Errorf("Failed to get record for CNSI %s: [%v]", cnsiGUID, err)
 	}
 
+	// Only need to get Client ID once
+	clientID, err := c.portalProxy.GetClientId(cnsiRecord.CNSIType)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get client ID for endpoint: %s", cnsiGUID)
+	}
+
 	ac.refreshToken = func() error {
-		newTokenRecord, err := c.portalProxy.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, "", "", cnsiRecord.TokenEndpoint)
+		newTokenRecord, err := c.portalProxy.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, clientID, "", cnsiRecord.TokenEndpoint)
 		if err != nil {
 			msg := fmt.Sprintf("Error refreshing token for CNSI %s : [%v]", cnsiGUID, err)
 			return echo.NewHTTPError(http.StatusUnauthorized, msg)
@@ -118,39 +121,6 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 	ac.consumer = consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, http.ProxyFromEnvironment)
 
 	return ac, nil
-}
-
-// Upgrade the HTTP connection to a WebSocket with a Ping ticker
-func upgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker, error) {
-
-	// Adapt echo.Context to Gorilla handler
-	responseWriter := echoContext.Response().(*standard.Response).ResponseWriter
-	request := echoContext.Request().(*standard.Request).Request
-
-	// We're now ok talking to CF, time to upgrade the request to a WebSocket connection
-	log.Debugf("Upgrading request to the WebSocket protocol...")
-	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
-	if err != nil {
-		return nil, nil, fmt.Errorf("Upgrading connection to a WebSocket failed: [%v]", err)
-	}
-	log.Debugf("Successfully upgraded to a WebSocket connection")
-
-	// HSC-1276 - handle pong messages and reset the read deadline
-	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
-	clientWebSocket.SetPongHandler(func(string) error {
-		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
-	})
-
-	// HSC-1276 - send regular Pings to prevent the WebSocket being closed on us
-	ticker := time.NewTicker(pingPeriod)
-	go func() {
-		for range ticker.C {
-			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout))
-		}
-	}()
-
-	return clientWebSocket, ticker, nil
 }
 
 // Attempts to get the recent logs, if we get an unauthorized error we will refresh the auth token and retry once

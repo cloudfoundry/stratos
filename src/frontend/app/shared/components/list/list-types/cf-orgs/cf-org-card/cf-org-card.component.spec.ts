@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { ISpace } from '../../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { APIResource } from '../../../../../../store/types/api.types';
 import {
+  BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-  BaseTestModulesNoShared,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
@@ -22,7 +23,7 @@ import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-ke
 import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from './cf-org-card.component';
-import { ISpace } from '../../../../../../core/cf-api.types';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;
@@ -34,8 +35,15 @@ describe('CfOrgCardComponent', () => {
         MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
         MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent],
       imports: [...BaseTestModulesNoShared],
-      providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
-        CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
+      providers: [
+        PaginationMonitorFactory,
+        EntityMonitorFactory,
+        generateTestCfUserServiceProvider(),
+        CfOrgSpaceDataService,
+        generateTestCfEndpointServiceProvider(),
+        EntityServiceFactory,
+        ConfirmationDialogService
+      ]
     })
       .compileComponents();
   }));
@@ -77,7 +85,6 @@ describe('CfOrgCardComponent', () => {
   });
 
   it('should create', () => {
-
     expect(component).toBeTruthy();
   });
 });

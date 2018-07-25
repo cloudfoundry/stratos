@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, mergeMap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { catchError, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { IDomain } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -23,11 +23,12 @@ import {
   routeSchemaKey,
 } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
-import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
+import { getDefaultRequestState, RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
+
 
 @Component({
   selector: 'app-create-application-step3',
@@ -53,31 +54,33 @@ export class CreateApplicationStep3Component implements OnInit {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry } = cloudFoundryDetails;
-    return Observable.combineLatest(
-      this.createApp(),
-      this.createRoute()
-    )
-      .filter(([app, route]) => {
-        return !app.creating && !route.creating;
-      })
-      .map(([app, route]) => {
-        if (app.error || route.error) {
-          throw new Error(app.error ? 'Could not create application' : 'Could not create route');
-        }
+    return this.createApp().pipe(
+      switchMap(app => {
+        return combineLatest(
+          observableOf(app),
+          this.createRoute()
+        );
+      }),
+      switchMap(([app, route]: [RequestInfoState, RequestInfoState]) => {
         // Did we create a route?
-        const createdRoute = route !== 'NO_ROUTE';
-        if (createdRoute) {
-          // Then assign it to the application
-          this.store.dispatch(new AssociateRouteWithAppApplication(
-            app.response.result[0],
-            route.response.result[0],
-            cloudFoundry
-          ));
-        }
-        this.store.dispatch(createGetApplicationAction(app.response.result[0], cloudFoundry));
-        this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
+        const createdRoute = !app.error && !route.error && route.message !== 'NO_ROUTE';
+        // Then assign it to the application
+        const obs$ = createdRoute ?
+          this.associateRoute(app.response.result[0], route.response.result[0], cloudFoundry) :
+          observableOf(null);
+        return obs$.pipe(
+          map(() => app.response.result[0] as string)
+        );
+      }),
+      map(appGuid => {
+        this.store.dispatch(createGetApplicationAction(appGuid, cloudFoundry));
+        this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, appGuid, 'summary'] }));
         return { success: true };
-      });
+      }),
+      catchError((err: Error) => {
+        return observableOf({ success: false, message: err.message });
+      })
+    );
   }
 
   validate(): boolean {
@@ -97,10 +100,10 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
-    return this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid));
+    return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid)), 'Could not create application');
   }
 
-  createRoute(): Observable<RequestInfoState> | Observable<string> {
+  createRoute(): Observable<RequestInfoState> {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry, org, space } = cloudFoundryDetails;
@@ -118,8 +121,34 @@ export class CreateApplicationStep3Component implements OnInit {
           host: hostName
         }
       ));
+      return this.wrapObservable(this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)),
+        'Application created. Could not create route');
     }
-    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : Observable.of('NO_ROUTE');
+    return observableOf({
+      ...getDefaultRequestState(),
+      message: 'NO_ROUTE'
+    });
+  }
+
+  associateRoute(appGuid, routeGuid, endpointGuid): Observable<RequestInfoState> {
+    this.store.dispatch(new AssociateRouteWithAppApplication(appGuid, routeGuid, endpointGuid));
+    return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, appGuid)),
+      'Application and route created. Could not associated route with app');
+  }
+
+  private wrapObservable(obs$: Observable<RequestInfoState>, errorString: string): Observable<RequestInfoState> {
+    return obs$.pipe(
+      filter((state: RequestInfoState) => {
+        return state && !state.creating;
+      }),
+      first(),
+      tap(state => {
+        if (state.error) {
+          const fullErrorString = errorString + (state.message ? `: ${state.message}` : '');
+          throw new Error(fullErrorString);
+        }
+      })
+    );
   }
 
   ngOnInit() {

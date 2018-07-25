@@ -21,17 +21,19 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
-          <button mat-menu-item routerLink="/about">
-          <span>About</span>
-        </button>
-        <div class="page-header__menu-separator"></div>
-        <button mat-menu-item routerLink="/userProfile">
-          <span>Profile</span>
-        </button>
-        <div class="page-header__menu-separator"></div>
-        <button mat-menu-item (click)="logout()">
-          <span>Logout</span>
-        </button>
+          <div *ngIf="!logoutOnly">
+            <button mat-menu-item routerLink="/about">
+            <span>About</span>
+            </button>
+            <div class="page-header__menu-separator"></div>
+            <button mat-menu-item routerLink="/user-profile">
+              <span>Profile</span>
+            </button>
+            <div class="page-header__menu-separator"></div>
+          </div>
+          <button mat-menu-item (click)="logout()">
+            <span>Logout</span>
+          </button>
         </mat-menu>
       </mat-toolbar>
     </div>
