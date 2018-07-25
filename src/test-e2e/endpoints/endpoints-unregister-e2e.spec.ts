@@ -35,6 +35,7 @@ describe('Endpoints', () => {
             menu.waitUntilShown();
             menu.clickItem('Unregister');
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
+            endpointsPage.table.waitUntilNotBusy();
             // Should have removed the only row, so we should see welcome message again
             expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
           });
@@ -64,6 +65,7 @@ describe('Endpoints', () => {
             menu.waitUntilShown();
             menu.clickItem('Unregister');
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
+            endpointsPage.table.waitUntilNotBusy();
             endpointsPage.table.getRows().then(rows => {
               expect(rows.length).toBe(endpointCount - 1);
             });

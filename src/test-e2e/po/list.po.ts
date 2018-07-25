@@ -104,6 +104,14 @@ export class ListTableComponent extends Component {
       return table;
     });
   }
+
+  waitUntilNotBusy() {
+    return Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+    ).then(() => Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row-wrapper__blocked'))
+    ));
+  }
 }
 
 // Page Object for the List Card View
