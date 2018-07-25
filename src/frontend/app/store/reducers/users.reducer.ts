@@ -142,11 +142,12 @@ function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: 
   };
 }
 /**
- * Determine if the user entity is missing any roles. If so track them.
+ * Determine if the user entity is missing any roles. If so track them in an array
  */
 function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction<NormalizedResponse>) {
   const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserSchemaKey];
 
+  // Create a delta of the changes, this will ensure we only return an updated state if there are updates
   const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {
     const oldMissingRoles = (users[user.entity.guid] ? users[user.entity.guid].entity.missingRoles : null)
       || getDefaultCfUserMissingRoles();

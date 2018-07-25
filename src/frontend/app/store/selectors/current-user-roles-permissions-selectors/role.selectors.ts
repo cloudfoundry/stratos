@@ -52,7 +52,7 @@ export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) =>
 
 export const selectCurrentUserRequestState = (state: ICurrentUserRolesState | ICfRolesState) => state.state;
 
-export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state.global;
+export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state ? state.global : null;
 export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => state[role] || false;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;

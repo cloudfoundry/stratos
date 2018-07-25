@@ -328,5 +328,5 @@ export class CfUserService {
   }
 
   public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
-    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(map(state => state.isAdmin))
+    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(map(state => state ? state.isAdmin : false))
 }
