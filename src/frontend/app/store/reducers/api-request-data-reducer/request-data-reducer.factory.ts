@@ -11,7 +11,7 @@ import { IRequestArray } from '../api-request-reducer/types';
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const successAction = actions[1];
   const defaultState = generateDefaultState(entityList);
-  return function entitiesReducer(state = defaultState, action: Action) {
+  return function entitiesReducer(state = defaultState, action: Action): IRequestDataState {
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
@@ -56,7 +56,7 @@ function reduceIdsToState(entityKey: string) {
 }
 
 function deleteEntity(state, entityKey, guid) {
-  const newState = {};
+  const newState = {} as IRequestDataState;
   for (const entityTypeKey in state) {
     if (entityTypeKey === entityKey) {
       newState[entityTypeKey] = {};
