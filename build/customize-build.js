@@ -14,16 +14,11 @@
   var execSync = require('child_process').execSync;
 
   const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/misc/custom/custom.yaml');
-
   const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
   const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
-
   const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
-
   const GIT_FOLDER = path.resolve(__dirname, '../.git');
-
   const GIT_METADATA = path.resolve(__dirname, '../.stratos-git-metadata.json');
-
 
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
