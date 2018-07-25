@@ -122,7 +122,7 @@
     // Symlink custom backend plugin folders if they are present
     // Get all of the sub-folders in the custom-src/backend folder and symlink
 
-    // Upda the git metadata if we can
+    // Update the git metadata if we can
     storeGitRepositoryMetadata();
 
     // Remove all existing symlinks first
