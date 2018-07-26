@@ -5,7 +5,6 @@ import { BehaviorSubject, Observable, of as observableOf, Subscription, combineL
 import { filter, switchMap, tap, map } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
@@ -17,7 +16,6 @@ import { APIResource } from '../../../../store/types/api.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
-import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { entityFactory, serviceSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
@@ -35,11 +33,11 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   stepperForm: FormGroup;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isFetching$: Observable<boolean>;
+  selectedService$: Observable<APIResource<IService>>;
 
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityServiceFactory: EntityServiceFactory,
     private csiGuidService: CsiGuidsService,
     private servicesWallService: ServicesWallService
   ) {
@@ -51,12 +49,12 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
         this.store.select(selectCreateServiceInstanceCfGuid),
         this.store.select(selectCreateServiceInstanceSpaceGuid)
       ).pipe(
-       filter(([p, q]) => !!p && !!q)
+        filter(([p, q]) => !!p && !!q)
       );
     const schema = entityFactory(serviceSchemaKey);
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
-        const paginationKey = servicesWallService.getSpaceServicePagKey(cfGuid, spaceGuid);
+        const paginationKey = this.servicesWallService.getSpaceServicePagKey(cfGuid, spaceGuid);
         const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema);
         return paginationMonitor.fetchingCurrentPage$;
       }),
@@ -66,14 +64,20 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     );
     this.services$ = cfSpaceGuid$.pipe(
       tap(([cfGuid]) => this.cfGuid = cfGuid),
-      switchMap(([cfGuid, spaceGuid]) => servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
+      switchMap(([cfGuid, spaceGuid]) => this.servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
+      map(services => services.sort((a, b) => a.entity.label.localeCompare(b.entity.label))),
       tap(services => {
         if (services.length === 1) {
           const guid = services[0].metadata.guid;
           this.stepperForm.controls.service.setValue(guid);
         }
       })
+    );
+
+    this.selectedService$ = combineLatest(this.services$, this.stepperForm.controls.service.statusChanges).pipe(
+      map(([services, change]) => services.filter(a => a.entity.guid === this.stepperForm.controls.service.value)[0]),
+      filter(p => !!p)
     );
   }
 
@@ -87,7 +91,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
   ngAfterContentInit() {
     this.serviceSubscription = this.stepperForm.controls.service.statusChanges.pipe(
-      map(valid => this.validate.next(this.stepperForm.controls.service.valid))
+      map(() => this.validate.next(this.stepperForm.controls.service.valid))
     ).subscribe();
   }
 

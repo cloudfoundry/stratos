@@ -23,7 +23,7 @@ import {
   CfAPIFlattener,
   flattenPagination,
 } from '../helpers/paginated-request-helpers';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { getRequestTypeFromMethod, startApiRequest, getFailApiRequestActions } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import {
   resultPerPageParam,
@@ -96,7 +96,7 @@ export class APIEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-  ) {}
+  ) { }
 
   @Effect()
   apiRequest$ = this.actions$
@@ -106,9 +106,9 @@ export class APIEffect {
       mergeMap(([action, state]) => {
         return this.doApiRequest(action, state);
       }),
-    );
+  );
 
-  private doApiRequest(action, state) {
+  private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
@@ -120,8 +120,7 @@ export class APIEffect {
       );
     }
 
-    this.store.dispatch(new StartRequestAction(actionClone, requestType));
-    this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+    startApiRequest(this.store, action, requestType);
 
     // Apply the params from the store
     if (paginatedAction.paginationKey) {
@@ -275,26 +274,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions: Action[] = [
-          new APISuccessOrFailedAction(
-            actionClone.actions[2],
-            actionClone,
-            error.message,
-          ),
-          new WrapperRequestActionFailed(
-            error.message,
-            actionClone,
-            requestType,
-          ),
-        ];
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
-          errorActions.push(
-            new RecursiveDeleteFailed(
-              apiAction.guid,
-              apiAction.endpointGuid,
-              entityFactory(apiAction.entityKey),
-            ),
-          );
+          this.store.dispatch(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey),
+          ), );
         }
         return errorActions;
       }),
@@ -312,13 +298,13 @@ export class APIEffect {
 
     const result = resource.metadata
       ? {
-          entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
-          metadata: resource.metadata,
-        }
+        entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
+        metadata: resource.metadata,
+      }
       : {
-          entity: { ...resource, cfGuid },
-          metadata: { guid: guid },
-        };
+        entity: { ...resource, cfGuid },
+        metadata: { guid: guid },
+      };
 
     // Inject `cfGuid` in nested entities
     Object.keys(result.entity).forEach(resourceKey => {
@@ -333,12 +319,12 @@ export class APIEffect {
         result.entity[resourceKey] = nestedResource.map(nested => {
           return nested && typeof nested === 'object'
             ? this.completeResourceEntity(
-                nested,
-                cfGuid,
-                nested.metadata
-                  ? nested.metadata.guid
-                  : guid + '-' + resourceKey,
-              )
+              nested,
+              cfGuid,
+              nested.metadata
+                ? nested.metadata.guid
+                : guid + '-' + resourceKey,
+            )
             : nested;
         });
       }
@@ -374,8 +360,8 @@ export class APIEffect {
       if (!succeeded) {
         errorResponse =
           endpoint &&
-          (!!endpoint.errorResponse &&
-            typeof endpoint.errorResponse !== 'string')
+            (!!endpoint.errorResponse &&
+              typeof endpoint.errorResponse !== 'string')
             ? endpoint.errorResponse
             : ({} as JetStreamCFErrorResponse);
         // Use defaults if values are not provided
@@ -416,10 +402,10 @@ export class APIEffect {
     data,
     errorCheck: APIErrorCheck[],
   ): {
-    entities: NormalizedResponse;
-    totalResults: number;
-    totalPages: number;
-  } {
+      entities: NormalizedResponse;
+      totalResults: number;
+      totalPages: number;
+    } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
@@ -427,8 +413,8 @@ export class APIEffect {
         guid =>
           data[guid] !== null &&
           errorCheck.findIndex(error => error.guid === guid && !error.error) >=
-            0,
-      )
+          0,
+    )
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
@@ -515,16 +501,13 @@ export class APIEffect {
     return headers;
   }
 
-  getActionFromString(type: string) {
-    return { type };
-  }
 
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
     return paginationState
       ? {
-          ...paginationState.params,
-          page: paginationState.currentPage.toString(),
-        }
+        ...paginationState.params,
+        page: paginationState.currentPage.toString(),
+      }
       : {};
   }
 
@@ -546,12 +529,12 @@ export class APIEffect {
     resData,
     apiAction: IRequestAction,
   ): {
-    resData;
-    entities;
-    totalResults;
-    totalPages;
-    errorsCheck: APIErrorCheck[];
-  } {
+      resData;
+      entities;
+      totalResults;
+      totalPages;
+      errorsCheck: APIErrorCheck[];
+    } {
     const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;

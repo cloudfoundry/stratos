@@ -349,15 +349,7 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	clientID, err := p.GetClientId(cnsiRecord.CNSIType)
-	if err != nil {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Endpoint type has not been registered",
-			"Endpoint type has not been registered %s: %s", cnsiRecord.CNSIType, err)
-	}
-
-	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, clientID, "", tokenEndpoint)
+	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -366,14 +358,6 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 			"Login failed: %v", err)
 	}
 	return uaaRes, u, &cnsiRecord, nil
-}
-
-func (p *portalProxy) GetClientId(cnsiType string) (string, error) {
-	plugin, err := p.GetEndpointTypeSpec(cnsiType)
-	if err != nil {
-		return "", errors.New("Endpoint type not registered")
-	}
-	return plugin.GetClientId(), nil
 }
 
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {

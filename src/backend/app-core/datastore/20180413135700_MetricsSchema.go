@@ -2,30 +2,34 @@ package datastore
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 )
 
-func (s *StratosMigrations) Up_20180413135700(txn *sql.Tx, conf *goose.DBConf) {
+func init() {
+	RegisterMigration(20180413135700, "MetricsSchema", func(txn *sql.Tx, conf *goose.DBConf) error {
+		if strings.Contains(conf.Driver.Name, "sqlite3") {
+			// SQLite does not support MODIFY on ALTER TABLE - but fortunately it doesn't mind about the column sizes
+			return nil
+		}
 
-	if strings.Contains(conf.Driver.Name, "sqlite3") {
-		// SQLite does not support MODIFY on ALTER TABLE - but fortunately it doesn't mind about the column sizes
-		return
-	}
+		// Special case Postgres as it has different syntax
+		if strings.Contains(conf.Driver.Name, "postgres") {
+			alterColumn := "ALTER TABLE cnsis ALTER COLUMN cnsi_type TYPE VARCHAR(16), ALTER COLUMN cnsi_type SET NOT NULL"
+			_, err := txn.Exec(alterColumn)
+			if err != nil {
+				return err
+			}
+		} else {
+			// Fallback to MySQL
+			alterColumn := "ALTER TABLE cnsis modify cnsi_type VARCHAR(16) NOT NULL"
+			_, err := txn.Exec(alterColumn)
+			if err != nil {
+				return err
+			}
+		}
 
-	alterColumn := "ALTER TABLE cnsis modify cnsi_type VARCHAR(16) NOT NULL"
-	_, err := txn.Exec(alterColumn)
-	if err != nil {
-		fmt.Printf("Failed to migrate due to: %v", err)
-	}
-}
-
-func Down_20180413135700(txn *sql.Tx) {
-	alterColumn := "ALTER TABLE cnsis modify cnsi_type VARCHAR(3) NOT NULL"
-	_, err := txn.Exec(alterColumn)
-	if err != nil {
-		fmt.Printf("Failed to migrate due to: %v", err)
-	}
+		return nil
+	})
 }
