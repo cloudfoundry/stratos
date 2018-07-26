@@ -7,12 +7,15 @@ import {
   CfSelectUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
+import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
+
 
 @Component({
   selector: 'app-manage-users-select',
@@ -23,10 +26,11 @@ import { CfRolesService } from '../cf-roles.service';
       provide: ListConfig,
       useFactory: (
         store: Store<AppState>,
-        activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) => {
-        return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid);
+        activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+        cfUserService: CfUserService) => {
+        return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid, cfUserService, activeRouteCfOrgSpace);
       },
-      deps: [Store, ActiveRouteCfOrgSpace]
+      deps: [Store, ActiveRouteCfOrgSpace, CfUserService]
     }
   ],
 })

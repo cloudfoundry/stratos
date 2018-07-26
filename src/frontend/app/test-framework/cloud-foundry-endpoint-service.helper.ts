@@ -1,12 +1,13 @@
+import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
+import { ActiveRouteCfOrgSpace } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
-import { CloudFoundryService } from '../shared/data-services/cloud-foundry.service';
 import {
   ApplicationStateIconComponent,
 } from '../shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -27,13 +28,14 @@ import {
 } from '../shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgSpaceDataService } from '../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../shared/data-services/cf-user.service';
+import { CloudFoundryService } from '../shared/data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
 import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
-import { ActiveRouteCfOrgSpace } from '../features/cloud-foundry/cf-page.types';
+import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -58,6 +60,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
       provide: ActiveRouteCfOrgSpace,
       useFactory: () => new BaseCFMock(guid)
     },
+    CfUserServiceTestProvider,
     CloudFoundryEndpointService
   ];
 }
@@ -75,11 +78,17 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
     useFactory: (
       store: Store<AppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
-      entityServiceFactory: EntityServiceFactory
+      entityServiceFactory: EntityServiceFactory,
+      http: Http
     ) => {
-      return new CfUserService(store, paginationMonitorFactory, { cfGuid: guid, orgGuid: guid, spaceGuid: guid }, entityServiceFactory);
+      return new CfUserService(
+        store,
+        paginationMonitorFactory,
+        { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
+        entityServiceFactory,
+        http);
     },
-    deps: [Store, PaginationMonitorFactory, EntityServiceFactory]
+    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
   };
 }
 
@@ -104,7 +113,8 @@ export const BaseTestModulesNoShared = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
-  NoopAnimationsModule
+  NoopAnimationsModule,
+  HttpModule
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 

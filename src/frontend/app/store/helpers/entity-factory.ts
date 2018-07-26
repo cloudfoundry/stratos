@@ -367,14 +367,17 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
       if (user.entity.username) {
         return user;
       }
-
-      return {
-        entity: {
-          ...user.entity,
-          username: user.metadata.guid
-        },
-        metadata: { ...user.metadata }
+      const entity = {
+        ...user.entity,
+        username: user.metadata.guid
       };
+
+      return user.metadata ? {
+        entity,
+        metadata: user.metadata
+      } : {
+          entity
+        };
     }
   });
 entityCache[cfUserSchemaKey] = CFUserSchema;

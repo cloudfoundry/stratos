@@ -17,6 +17,8 @@
   margin: 5px 0;
   &__limit {
     cursor: pointer;
+    font-weight: 300;
+    min-width: 0;
     padding: 0 5px;
   }
 }

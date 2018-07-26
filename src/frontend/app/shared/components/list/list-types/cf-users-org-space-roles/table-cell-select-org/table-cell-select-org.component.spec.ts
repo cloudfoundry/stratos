@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 
 import { TableCellSelectOrgComponent } from './table-cell-select-org.component';
 import { CoreModule } from '../../../../../../core/core.module';
@@ -9,6 +10,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { CfUserServiceTestProvider } from '../../../../../../test-framework/user-service-helper';
 
 describe('TableCellSelectOrgComponent', () => {
   let component: TableCellSelectOrgComponent;
@@ -19,10 +21,11 @@ describe('TableCellSelectOrgComponent', () => {
       imports: [
         CoreModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        HttpModule
       ],
       providers: [
-        CfUserService,
+        CfUserServiceTestProvider,
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,

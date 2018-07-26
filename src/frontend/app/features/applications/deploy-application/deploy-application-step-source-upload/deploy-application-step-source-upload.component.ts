@@ -17,13 +17,13 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
-  private deployer: DeployApplicationDeployer;
+  public deployer: DeployApplicationDeployer;
 
   public valid$: Observable<boolean>;
 
   constructor(private store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private http: HttpClient,
+    http: HttpClient,
   ) {
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, http);
     this.valid$ = this.deployer.fileTransferStatus$.pipe(

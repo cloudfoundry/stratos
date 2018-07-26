@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -17,6 +17,7 @@ import { selectUsersRoles, selectUsersRolesPicked } from '../../../../store/sele
 import { CfUser } from '../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
+import { CfRolesService } from './cf-roles.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -24,6 +25,8 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
   styleUrls: ['./manage-users.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
+    CfUserService,
+    CfRolesService
   ]
 })
 export class UsersRolesComponent implements OnDestroy {

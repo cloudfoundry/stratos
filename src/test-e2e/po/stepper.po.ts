@@ -54,11 +54,34 @@ export class StepperComponent extends Component {
     return this.isPresentNotDisabled(element(by.id('stepper_previous')));
   }
 
+  hasPrevious() {
+    return element(by.id('stepper_previous')).isPresent();
+  }
+
+  getNextLabel() {
+    return this.locator.element(by.id('stepper_next')).getText().then(label => label.trim());
+  }
+
+  waitUntilCanClose() {
+    const nextButton = this.locator.element(by.id('stepper_next'));
+    return browser.wait(until.textToBePresentInElement(nextButton, 'Close')).then(() => {
+      return browser.wait(until.elementToBeClickable(nextButton));
+    });
+  }
+
   waitForStep(stepName: string) {
     const lastActiveHeader = element.all(by.css('.steppers__header.steppers__header--active')).last();
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
+
+  hasStep(name: string) {
+    return element(by.cssContainingText('.steppers__header .steppers__header-text', name)).isPresent();
+  }
+
+  getStepNames() {
+    return element.all(by.css('.steppers__header .steppers__header-text'));
+  }
 
 }

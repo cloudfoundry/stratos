@@ -1,6 +1,6 @@
 # Stratos
 
-<a href="https://travis-ci.org/cloudfoundry-incubator/stratos"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master"></a><a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-incubator/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
+<a href="https://travis-ci.org/cloudfoundry-incubator/stratos"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=v2-master"></a><a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-incubator/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
 <a href="https://codecov.io/gh/cloudfoundry-incubator/stratos">
 <img src="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/master/graph/badge.svg"/></a>
 <a href="https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"/></a>
@@ -8,19 +8,22 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE)
 [![slack.cloudfoundry.org](https://slack.cloudfoundry.org/badge.svg)](https://cloudfoundry.slack.com/messages/C80EP4Y57/)
 
----
-> **NOTE**
-> If you are looking for the Stable, V1 version of Stratos, this is in the
-> [master](https://github.com/cloudfoundry-incubator/stratos/tree/master) branch.
->
-> Development effort has switched over to Version 2. This is being developed in the v2-master branch which is set as the GitHub project default.
->
-> Version 2 is now feature complete and will be released in July - see the [Development Roadmap](docs/roadmap.md) for more information.
----
-
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
+If you are looking for the V1 version of Stratos, you can find it in the [master](https://github.com/cloudfoundry-incubator/stratos/tree/master) branch.
+
 ![Stratos Application view](docs/images/screenshots/app-summary.png)
+
+## Quick Start
+
+To get started quickly, we recommend following the steps to deploy the Stratos Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry).
+
+If you have [docker](https://www.docker.com/community-edition) installed, you can quickly deploy Stratos using the all-in-one container:
+```
+$ docker run -p 4443:443 splatform/stratos-ui:latest 
+```
+
+Once that has finished, you can then access Stratos by visiting https://localhost:4443.
 
 ## Deploying Stratos
 
@@ -30,17 +33,6 @@ Stratos can be deployed in the following environments:
 2. Kubernetes, using a Helm chart. See [guide](deploy/kubernetes)
 3. Docker, using docker compose. See [guide](deploy/docker-compose)
 4. Docker, single container deploying all components. See [guide](deploy/all-in-one)
-
-## Quick Start
-
-To get started quickly, we recommend following the steps to deploy the Stratos Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry).
-
-You can also quickly deploy Stratos, using the all-in-one container:
-```
-$ docker run -p 4443:443 splatform/stratos-ui:latest 
-```
-
-You can access the UI on `https://localhost:4443`
 
 ## Troubleshooting
 Please see our [Troubleshooting](docs/troubleshooting) page.
