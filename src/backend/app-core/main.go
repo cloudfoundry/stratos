@@ -473,9 +473,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 	}
 
-	// Get Diagnostics and store them once
-	pp.StoreDiagnostics()
-
 	return pp
 }
 
