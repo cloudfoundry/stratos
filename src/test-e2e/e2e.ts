@@ -1,9 +1,9 @@
+import { browser, promise, protractor } from 'protractor';
+
 import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
-
-import { browser, promise, protractor } from 'protractor';
 
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
@@ -65,13 +65,13 @@ export class E2ESetup {
   private needAdminSession = false;
   private needUserSession = false;
 
-  static setup(userType: ConsoleUserType) {
-    return new E2ESetup(userType);
+  static setup(userType: ConsoleUserType, loginUserType?: ConsoleUserType) {
+    return new E2ESetup(userType, loginUserType);
   }
 
-  constructor(userType: ConsoleUserType) {
+  constructor(userType: ConsoleUserType, loginUserType?: ConsoleUserType) {
     this.userType = userType;
-    this.loginUserType = userType;
+    this.loginUserType = loginUserType || userType;
     // Create requests in case we need to make any API requests as admin and/or user
     this.adminReq = this.reqHelper.newRequest();
     this.userReq = this.reqHelper.newRequest();
@@ -94,6 +94,7 @@ export class E2ESetup {
   // Don't login after setup is done
   doNotLogin() {
     this.loginUserType = null;
+    return this;
   }
 
   // Ensure that an admin session is created, even if it is not needed by the setup process
@@ -153,7 +154,7 @@ export class E2ESetup {
   }
 
 
-  // NOTE: You don't need to explictly call createSession
+  // NOTE: You don't need to explicitly call createSession
   // Create a new session with Stratos so that we can make API requests
   private createSession = (req, userType) => {
     return protractor.promise.controlFlow().execute(() => {

@@ -1,3 +1,4 @@
+import { CFResponse, APIResource } from '../../frontend/app/store/types/api.types';
 import { CFRequestHelpers } from './cf-request-helpers';
 import { E2ESetup } from '../e2e';
 import { promise } from 'protractor';
@@ -15,9 +16,9 @@ export class CFHelpers {
     return this.fetchUsers(guid).then(users => {
       testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
       testAdminUser = this.findUser(users, endpoint.creds.admin.username);
-        expect(testUser).toBeDefined();
-        expect(testAdminUser).toBeDefined();
-        return this.addOrgIfMissing(guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
+      expect(testUser).toBeDefined();
+      expect(testAdminUser).toBeDefined();
+      return this.addOrgIfMissing(guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
     });
   }
 
@@ -85,7 +86,7 @@ export class CFHelpers {
         } else {
           throw new Error('There should only be one app, found multiple. Add Name: ' + appName);
         }
-    });
+      });
   }
 
   fetchServiceExist(cnsiGuid, serviceName) {
@@ -119,6 +120,16 @@ export class CFHelpers {
   fetchUsers(cnsiGuid) {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'users').then(json => {
       return json.resources;
+    });
+  }
+
+  fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
+      if (json.total_results > 0) {
+        const org = json.resources[0];
+        return org;
+      }
+      return null;
     });
   }
 

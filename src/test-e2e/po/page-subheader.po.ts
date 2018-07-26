@@ -1,5 +1,6 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
+import { ElementFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 
 export class MenuItemMap {
@@ -13,6 +14,9 @@ export class MenuItem {
   click: Function;
   disabled: boolean;
 }
+
+const until = protractor.ExpectedConditions;
+
 /**
  * Page Object for page sub header component
  */
@@ -35,11 +39,21 @@ export class PageSubHeaderComponent extends Component {
   }
 
   getItem(name: string): ElementFinder {
-    return this.locator.element(by.cssContainingText('a', name));
+    return this.locator.element(by.cssContainingText('a', ' ' + name + ' '));
   }
 
   clickItem(name: string): promise.Promise<void> {
+    console.log(name);
     return this.getItem(name).click();
+  }
+
+  goToItemAndWait(name: string, baseUrl: string, suffix: string) {
+    this.clickItem(name);
+    if (!suffix.startsWith('/')) {
+      suffix = '/' + suffix;
+    }
+    console.log(browser.baseUrl + baseUrl + suffix);
+    browser.wait(until.urlContains(browser.baseUrl + baseUrl + suffix), 20000);
   }
 
   getItemMap(): promise.Promise<MenuItemMap> {

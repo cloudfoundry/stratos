@@ -13,7 +13,7 @@ export abstract class CFPage extends Page {
     super(navLink);
   }
 
-  hasNoCloudFoundryMesasge(): promise.Promise<boolean> {
+  hasNoCloudFoundryMessage(): promise.Promise<boolean> {
     return this.noContent.isPresent().then(() => {
       return this.noContent.checkFirstLineMessage('There are no connected Cloud Foundry endpoints');
     });

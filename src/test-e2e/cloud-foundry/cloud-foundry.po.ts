@@ -1,33 +1,26 @@
-import { browser, promise, ElementArrayFinder } from 'protractor';
-import { CFPage } from '../po/cf-page.po';
-import { ListComponent } from '../po/list.po';
+// import { browser, promise } from 'protractor';
 
-export class CloudFoundryPage extends CFPage {
+// import { CFPage } from '../po/cf-page.po';
+// import { ListComponent } from '../po/list.po';
 
-  public list = new ListComponent();
+// export class CloudFoundryPage extends CFPage {
 
-  constructor() {
-    super('/cloud-foundry');
-  }
+//   public list = new ListComponent();
 
-  static forEndpoint(guid: string): CloudFoundryPage {
-    const page = new CloudFoundryPage();
-    page.navLink = '/cloud-foundry/' + guid;
-    return page;
-  }
+//   constructor() {
+//     super('/cloud-foundry');
+//   }
 
-  isSummaryView(): promise.Promise<boolean> {
-    return browser.getCurrentUrl().then(url => {
-      return url.startsWith(browser.baseUrl + this.navLink) && url.endsWith('/summary');
-    });
-  }
+//   static forEndpoint(guid: string): CloudFoundryPage {
+//     const page = new CloudFoundryPage();
+//     page.navLink = '/cloud-foundry/' + guid;
+//     return page;
+//   }
 
-  // Goto the Organizations view (tab)
-  gotoOrgView(): ListComponent {
-    this.subHeader.clickItem('Organizations');
-    const cardView = new ListComponent();
-    cardView.cards.waitUntilShown();
-    return cardView;
-  }
+//   isSummaryView(): promise.Promise<boolean> {
+//     return browser.getCurrentUrl().then(url => {
+//       return url.startsWith(browser.baseUrl + this.navLink) && url.endsWith('/summary');
+//     });
+//   }
 
-}
+// }
