@@ -2,7 +2,6 @@ package datastore
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
