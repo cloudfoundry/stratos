@@ -27,7 +27,12 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   set row(row: APIResource<IService>) {
     if (row) {
       this.serviceEntity = row;
-      this.extraInfo = this.serviceEntity.entity.extra ? JSON.parse(this.serviceEntity.entity.extra) : null;
+      this.extraInfo = null;
+      if (this.serviceEntity.entity.extra) {
+        try {
+          this.extraInfo = JSON.parse(this.serviceEntity.entity.extra);
+        } catch { }
+      }
       this.serviceEntity.entity.tags.forEach(t => {
         this.tags.push({
           value: t,
