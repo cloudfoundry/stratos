@@ -55,8 +55,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
         Validators.required,
         Validators.min(0)
       ]],
-      enable_ssh: false,
-      production: false
+      enable_ssh: false
     });
   }
 
@@ -87,7 +86,6 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
         instances: this.app.instances,
         memory: this.app.memory,
         disk_quota: this.app.disk_quota,
-        production: this.app.production,
         enable_ssh: this.app.enable_ssh,
       });
       // Don't want the values to change while the user is editing
