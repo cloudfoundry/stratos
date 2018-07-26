@@ -12,25 +12,28 @@ export class RoutingIndicatorComponent {
   public value$: Observable<number>;
 
   public HIDE_VALUE = 101;
-
+  private started = false;
   constructor(private router: Router) {
-    let started = false;
     this.value$ = this.router.events.pipe(
       filter(event => {
-        return (event instanceof NavigationStart && !started) ||
+        return (event instanceof NavigationStart && !this.started) ||
           event instanceof NavigationCancel ||
           event instanceof NavigationEnd;
       }),
       switchMap(event => {
         if (event instanceof NavigationStart) {
-          started = true;
           return this.getValueEmitter();
         }
-        started = false;
-        return observableOf(this.HIDE_VALUE).pipe(
-          delay(100),
-          startWith(100)
-        );
+        const endObs$ = observableOf(this.HIDE_VALUE);
+        if (this.started) {
+          this.started = false;
+          return endObs$.pipe(
+            delay(200),
+            startWith(100)
+          );
+        } else {
+          return endObs$;
+        }
       })
     );
   }
@@ -40,6 +43,7 @@ export class RoutingIndicatorComponent {
     return interval(80).pipe(
       delay(500),
       map(() => getValue()),
+      tap(() => this.started = true)
     );
   }
   // Fakes a natual loading indicator
