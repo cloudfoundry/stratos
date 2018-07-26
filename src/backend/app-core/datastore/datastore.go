@@ -152,7 +152,7 @@ func GetSQLLiteConnection() (*sql.DB, error) {
 
 	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
 	if err != nil {
-		return db, err
+		return nil, err
 	}
 
 	// Create fake goose db conf object for SQLite
@@ -166,9 +166,12 @@ func GetSQLLiteConnection() (*sql.DB, error) {
 		Driver: d,
 	}
 
-	ApplyMigrations(conf, db)
+	err = ApplyMigrations(conf, db)
+	if err != nil {
+		return nil, err
+	}
 
-	return db, err
+	return db, nil
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
