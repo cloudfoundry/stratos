@@ -7,28 +7,28 @@ import (
 	"net/url"
 
 	"github.com/SUSE/stratos-ui/datastore"
-
+	"github.com/SUSE/stratos-ui/repository/crypto"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 
-var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret
 							FROM cnsis`
 
 var listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, c.doppler_logging_endpoint, t.user_guid, t.token_expiry, c.skip_ssl_validation, t.disconnected, t.meta_data
 										FROM cnsis c, tokens t
 										WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2 AND t.disconnected = '0'`
 
-var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret
 						FROM cnsis
 						WHERE guid=$1`
 
-var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret
 						FROM cnsis
 						WHERE api_endpoint=$1`
 
-var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
@@ -56,7 +56,7 @@ func InitRepositoryProvider(databaseProvider string) {
 }
 
 // List - Returns a list of CNSI Records
-func (p *PostgresCNSIRepository) List() ([]*interfaces.CNSIRecord, error) {
+func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("List")
 	rows, err := p.db.Query(listCNSIs)
 	if err != nil {
@@ -71,11 +71,12 @@ func (p *PostgresCNSIRepository) List() ([]*interfaces.CNSIRecord, error) {
 		var (
 			pCNSIType string
 			pURL      string
+			cipherTextClientSecret []byte
 		)
 
 		cnsi := new(interfaces.CNSIRecord)
 
-		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
+		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cipherTextClientSecret)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
@@ -85,6 +86,12 @@ func (p *PostgresCNSIRepository) List() ([]*interfaces.CNSIRecord, error) {
 		if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
 			return nil, fmt.Errorf("Unable to parse API Endpoint: %v", err)
 		}
+
+		plaintextClientSecret, err := crypto.DecryptToken(encryptionKey, cipherTextClientSecret)
+		if err != nil {
+			return nil, err
+		}
+		cnsi.ClientSecret = plaintextClientSecret
 
 		cnsiList = append(cnsiList, cnsi)
 	}
@@ -142,28 +149,29 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*interfaces.Conn
 }
 
 // Find - Returns a single CNSI Record
-func (p *PostgresCNSIRepository) Find(guid string) (interfaces.CNSIRecord, error) {
+func (p *PostgresCNSIRepository) Find(guid string, encryptionKey []byte) (interfaces.CNSIRecord, error) {
 	log.Debug("Find")
-	return p.findBy(findCNSI, guid)
+	return p.findBy(findCNSI, guid, encryptionKey)
 }
 
 // FindByAPIEndpoint - Returns a single CNSI Record
-func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.CNSIRecord, error) {
+func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string, encryptionKey []byte) (interfaces.CNSIRecord, error) {
 	log.Debug("FindByAPIEndpoint")
-	return p.findBy(findCNSIByAPIEndpoint, endpoint)
+	return p.findBy(findCNSIByAPIEndpoint, endpoint, encryptionKey)
 }
 
 // FindBy - Returns a single CNSI Record found using the given query looking for match
-func (p *PostgresCNSIRepository) findBy(query, match string) (interfaces.CNSIRecord, error) {
+func (p *PostgresCNSIRepository) findBy(query, match string, encryptionKey []byte) (interfaces.CNSIRecord, error) {
 	var (
 		pCNSIType string
 		pURL      string
+		cipherTextClientSecret []byte
 	)
 
 	cnsi := new(interfaces.CNSIRecord)
 
 	err := p.db.QueryRow(query, match).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cipherTextClientSecret)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -182,14 +190,25 @@ func (p *PostgresCNSIRepository) findBy(query, match string) (interfaces.CNSIRec
 		return interfaces.CNSIRecord{}, fmt.Errorf("Unable to parse API Endpoint: %v", err)
 	}
 
+	plaintextClientSecret, err := crypto.DecryptToken(encryptionKey, cipherTextClientSecret)
+	if err != nil {
+		return interfaces.CNSIRecord{}, err
+	}
+	cnsi.ClientSecret = plaintextClientSecret
+
 	return *cnsi, nil
 }
 
 // Save - Persist a CNSI Record to a datastore
-func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) error {
+func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord, encryptionKey []byte) error {
 	log.Debug("Save")
+	cipherTextClientSecret, err := crypto.EncryptToken(encryptionKey, cnsi.ClientSecret)
+	if err != nil {
+		return err
+	}
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation); err != nil {
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
+			cnsi.ClientId, cipherTextClientSecret); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
 
