@@ -288,16 +288,16 @@ export class ApplicationService {
         return null;
       }),
       map(entRoute => {
-          if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
-           return  getRoute(entRoute, true, false, {
-              entityRequestInfo: undefined,
-              entity: entRoute.entity.domain
-            });
-          }
-          return null;
+        if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
+          return getRoute(entRoute, true, false, {
+            entityRequestInfo: undefined,
+            entity: entRoute.entity.domain
+          });
+        }
+        return null;
       })
-  );
-}
+    );
+  }
 
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
