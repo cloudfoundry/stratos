@@ -11,7 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-var findAuthToken = `SELECT auth_token, refresh_token, token_expiry
+var findAuthToken = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data
 									FROM tokens
 									WHERE token_type = 'uaa' AND user_guid = $1`
 
@@ -155,10 +155,12 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
 		tokenExpiry            int64
+		authType			   string
+		metadata			   string
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
+	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
@@ -182,6 +184,8 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
 	tr.TokenExpiry = tokenExpiry
+	tr.AuthType = authType
+	tr.Metadata = metadata
 
 	return *tr, nil
 }

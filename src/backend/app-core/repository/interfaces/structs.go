@@ -29,6 +29,8 @@ type CNSIRecord struct {
 	TokenEndpoint          string   `json:"token_endpoint"`
 	DopplerLoggingEndpoint string   `json:"doppler_logging_endpoint"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
+	ClientId               string   `json:"client_id"`
+	ClientSecret           string   `json:"-"`
 }
 
 // ConnectedEndpoint

@@ -251,7 +251,7 @@ func Ping(db *sql.DB) error {
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
 	if databaseProvider == SQLITE || databaseProvider == MYSQL {
-		sqlParamReplace := regexp.MustCompile("\\$[0-9]")
+		sqlParamReplace := regexp.MustCompile("\\$[0-9]+")
 		return sqlParamReplace.ReplaceAllString(sql, "?")
 	}
 
