@@ -42,9 +42,13 @@ export const UserRoleLabels = {
     },
     long: {
       [OrgUserRoleNames.MANAGER]: 'Org Manager',
+      [CfUserRoleParams.MANAGED_ORGS]: 'Org Manager',
       [OrgUserRoleNames.BILLING_MANAGERS]: 'Org Billing Manager',
+      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Org Billing Manager',
       [OrgUserRoleNames.AUDITOR]: 'Org Auditor',
-      [OrgUserRoleNames.USER]: 'Org User'
+      [CfUserRoleParams.AUDITED_ORGS]: 'Org Auditor',
+      [OrgUserRoleNames.USER]: 'Org User',
+      [CfUserRoleParams.ORGANIZATIONS]: 'Org User'
     }
   },
   space: {
@@ -58,8 +62,11 @@ export const UserRoleLabels = {
     },
     long: {
       [SpaceUserRoleNames.MANAGER]: 'Space Manager',
+      [CfUserRoleParams.MANAGED_SPACES]: 'Space Manager',
       [SpaceUserRoleNames.DEVELOPER]: 'Space Developer',
+      [CfUserRoleParams.SPACES]: 'Space Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
+      [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
     }
   }
 };
