@@ -33,7 +33,6 @@ import { QParam } from '../../../store/types/pagination.types';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { CF_GUID } from '../../entity.tokens';
 
-
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
   service$: Observable<APIResource<IService>>;
@@ -220,9 +219,8 @@ export class CreateServiceInstanceHelper {
       )
     }, true)
       .entities$.pipe(
-        share(),
-        first(),
-    );
+        share()
+      );
   }
 
   getServicesForSpace = (spaceGuid: string, cfGuid: string) => {
