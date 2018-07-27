@@ -106,7 +106,7 @@ func upRun(args []string) {
 	}
 	defer db.Close()
 
-	datastore.ApplyMigrations(conf, db)
+	err = datastore.ApplyMigrations(conf, db)
 	if err != nil {
 		log.Fatal("Migration failed", err)
 	}

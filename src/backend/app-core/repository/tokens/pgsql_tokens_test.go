@@ -21,7 +21,7 @@ const (
 	insertTokenSql      = `INSERT INTO tokens`
 	updateUAATokenSql   = `UPDATE tokens`
 	findTokenSql        = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid FROM tokens .*`
-	findUAATokenSql     = `SELECT auth_token, refresh_token, token_expiry FROM tokens WHERE token_type = 'uaa' AND .*`
+	findUAATokenSql     = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data FROM tokens WHERE token_type = 'uaa' AND .*`
 	deleteFromTokensSql = `DELETE FROM tokens`
 )
 
@@ -292,8 +292,8 @@ func TestFindUAATokens(t *testing.T) {
 
 		Convey("Success case", func() {
 
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, "oauth", "")
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)

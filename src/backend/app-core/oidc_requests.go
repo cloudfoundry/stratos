@@ -24,16 +24,8 @@ func (p *portalProxy) doOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req
 	expTime := time.Unix(tokenRec.TokenExpiry, 0)
 
 	for {
-		clientID, err := p.GetClientId(cnsi.CNSIType)
-		if err != nil {
-			return nil, interfaces.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Endpoint type has not been registered",
-				"Endpoint type has not been registered %s: %s", cnsi.CNSIType, err)
-		}
-
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshOidcToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.RefreshOidcToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
 			if err != nil {
 				log.Info(err)
 				return nil, fmt.Errorf("Couldn't refresh OIDC token for Endpoint with GUID %s", cnsiRequest.GUID)

@@ -21822,8 +21822,7 @@ export function getInitialTestStoreState() {
   return { ...testInitialStoreState };
 }
 
-export function createBasicStoreModule(): ModuleWithProviders {
-  const initialState = getInitialTestStoreState();
+export function createBasicStoreModule(initialState: Partial<AppState> = getInitialTestStoreState()): ModuleWithProviders {
   return StoreModule.forRoot(
     appReducers,
     {
