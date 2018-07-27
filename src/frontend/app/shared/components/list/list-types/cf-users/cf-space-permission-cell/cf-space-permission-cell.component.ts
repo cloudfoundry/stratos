@@ -62,8 +62,9 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       filter(space => !space || space.length !== 1),
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles ? user.missingRoles.space ? !!user.missingRoles.space.length : false : false),
-      filter(missingRoles => !!missingRoles),
+      map(user => user.missingRoles || { space: [] }),
+      map(missingRoles => missingRoles.space ? !!missingRoles.space.length : false),
+      filter(areMissingRoles => !!areMissingRoles),
     );
   }
 
