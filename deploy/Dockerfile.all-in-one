@@ -1,3 +1,4 @@
+# Docker build for all-in-one Stratos
 FROM splatform/stratos-aio-base:opensuse
 
 COPY --chown=stratos:users *.json ./
