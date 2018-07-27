@@ -85,8 +85,6 @@ jobs:
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
-      params:
-        NIGHTLY_BUILD: "true"
     - put: image-tag
       params:
         file: image-tag/*.tar

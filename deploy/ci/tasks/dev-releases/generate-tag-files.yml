@@ -18,11 +18,7 @@ run:
     - |
       cd stratos
 
-      if [ -z ${NIGHTLY_BUILD} ]; then
-        LATEST_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | tail -1)
-      else
-        LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
-      fi
+      LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
 
       if [ ! -z ${TAG_SUFFIX} ]; then
         LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
