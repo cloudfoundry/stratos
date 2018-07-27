@@ -17,6 +17,7 @@ import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import { EntitySchema } from '../entity-factory';
+import { pick } from '../reducer.helper';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -31,7 +32,6 @@ import {
   ValidateResultFetchingState,
   ValidationResult,
 } from './entity-relations.types';
-import { pick } from '../reducer.helper';
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -475,7 +475,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
   const { action, populateMissing, newEntities, allEntities, store } = config;
   let { parentEntities } = config;
-
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
       started: false,
@@ -489,7 +488,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
     parentEntities = denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities);
   }
-
   const results = validationLoop({
     ...config,
     includeRelations: relationAction.includeRelations,

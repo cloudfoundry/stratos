@@ -1,2 +1,6 @@
-<app-chips [chips]="chipsConfig$ | async"></app-chips>
-<div *ngIf="(missingRoles$ | async) as missingRoles"><i>The following role/s may be missing (not provided by CF): {{missingRoles}}. Navigate to a specific space to view them</i></div>
+<div *ngIf="(missingRoles$ | async) as missingRoles; else chips">
+  <i>Not all roles could be discovered. Please navigate to a specific space to view them</i>
+</div>
+<ng-template #chips>
+  <app-chips [chips]="chipsConfig$ | async"></app-chips>
+</ng-template>

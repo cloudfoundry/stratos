@@ -33,7 +33,7 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 })
 export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRoleNames> {
 
-  missingRoles$: Observable<string>;
+  missingRoles$: Observable<boolean>;
 
   constructor(
     public store: Store<AppState>,
@@ -62,11 +62,8 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       filter(space => !space || space.length !== 1),
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles ? user.missingRoles.space : [] || []),
-      // If there's no missing, don't proceed
-      filter(missingRoles => !!missingRoles.length),
-      // Convert to screen name
-      map(missingRoles => missingRoles.map(role => UserRoleLabels.space.short[role]).join(', '))
+      map(user => user.missingRoles ? user.missingRoles.space ? !!user.missingRoles.space.length : false : false),
+      filter(missingRoles => !!missingRoles),
     );
   }
 
