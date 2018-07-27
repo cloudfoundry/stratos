@@ -14,11 +14,11 @@ export class SecretsHelpers {
 
   constructor() { }
 
-  haveMultipleCloudFoundryEndpoints(): boolean {
+  haveMultipleCloudFoundryEndpoints = () => {
     return Object.keys(this.getCloudFoundryEndpoints()).length > 1;
   }
 
-  haveSingleCloudFoundryEndpoint(): boolean {
+  haveSingleCloudFoundryEndpoint = () => {
     return !this.haveMultipleCloudFoundryEndpoints();
   }
 
