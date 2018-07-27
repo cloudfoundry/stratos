@@ -25,7 +25,7 @@ run:
       STRATOS_MASTER=${ROOT_DIR}/stratos-master
       cd ${STRATOS}/deploy/kubernetes/
       TAG=$(nightlyTag)
-      IMAGE_TAG=$(fetchImageTag)
+      IMAGE_TAG=${TAG}
       # Patch Helm chart
       patchHelmChart ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
 
