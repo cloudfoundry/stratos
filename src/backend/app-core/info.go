@@ -53,6 +53,12 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		CloudFoundry: p.Config.CloudFoundryInfo,
 		PluginConfig: p.Config.PluginConfig,
 	}
+
+	// Only add diagnostics information if the user is an admin
+	if uaaUser.Admin {
+		s.Diagnostics = p.Diagnostics
+	}
+
 	// initialize the Endpoints maps
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
