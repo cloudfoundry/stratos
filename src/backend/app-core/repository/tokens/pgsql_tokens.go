@@ -186,9 +186,9 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	if tokenExpiry.Valid {
 		tr.TokenExpiry = tokenExpiry.Int64
 	}
-	tr.AuthType = authType.String
+	tr.AuthType = authType
 	if metadata.Valid {
-		tr.Metadata = metadata
+		tr.Metadata = metadata.String
 	}
 
 	return *tr, nil
