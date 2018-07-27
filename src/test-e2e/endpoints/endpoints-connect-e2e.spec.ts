@@ -105,6 +105,7 @@ describe('Endpoints', () => {
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(e2e.secrets.getConsoleAdminUsername(), e2e.secrets.getConsoleAdminPassword());
+        loginPage.waitForLoading();
         loginPage.waitForApplicationPage();
         expect(endpointsPage.isActivePage()).toBeTruthy();
       });
@@ -114,7 +115,7 @@ describe('Endpoints', () => {
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(e2e.secrets.getConsoleNonAdminUsername(), e2e.secrets.getConsoleNonAdminPassword());
-        // loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+        loginPage.waitForLoading();
         loginPage.waitForApplicationPage();
         const appPage = new ApplicationsPage();
         expect(appPage.isActivePage()).toBeTruthy();
