@@ -119,8 +119,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     const userName = user.username || user.guid;
     const missingRoles = this.createMissingRoles(user.missingRoles);
     if (missingRoles.length) {
-      return `${userName} - Not all roles could be discovered (${missingRoles.join(', ')}). If you continue with this user their roles will
-      not be accurately shown. Please navigate to a specific organization or space to ensure accurate roles are displayed`;
+      return `${userName} - Not all roles for this user are known (${missingRoles.join(', ')})`;
     }
     return userName;
   }

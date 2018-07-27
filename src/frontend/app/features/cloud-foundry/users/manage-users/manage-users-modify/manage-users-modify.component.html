@@ -2,7 +2,7 @@
   Selected Users:
   <app-enumerate [collection]="users$" [labelPath]="'username'"></app-enumerate>
 </div>
-<div class="modify-users__users-warning" *ngIf="showWarning$ | async"><i>* Not all roles are known for user. Navigate to organization or space level for accurate values.</i></div>
+<div class="modify-users__users-warning" *ngIf="showWarning$ | async"><i>* Not all roles are known for user.</i></div>
 <div class="modify-users__org-roles">
   <app-table [dataSource]="orgDataSource" [columns]="orgColumns"></app-table>
 </div>

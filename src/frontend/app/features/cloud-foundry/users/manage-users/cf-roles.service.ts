@@ -169,7 +169,7 @@ export class CfRolesService {
     // ... and for each space, populate space roles
     spaceRoles.forEach(space => {
       if (!mappedUser[space.orgGuid]) {
-        mappedUser[space.orgGuid] = { spaces: {} };
+        mappedUser[space.orgGuid] = createDefaultOrgRoles(space.orgGuid);
       }
       mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
         ...space
