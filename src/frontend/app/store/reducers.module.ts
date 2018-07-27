@@ -53,23 +53,21 @@ if (!environment.production) {
     metaReducers.push(logger);
   }
 }
-
-const imports = [
-  StoreModule.forRoot(
-    appReducers,
-    {
-      metaReducers
-    }
-  )
-];
-
-if (!environment.production) {
-  imports.push(
+const store = StoreModule.forRoot(
+  appReducers,
+  {
+    metaReducers
+  }
+);
+const imports = environment.production ? [
+  store
+] : [
+    store,
     StoreDevtoolsModule.instrument({
       maxAge: 100,
+      logOnly: !environment.production
     })
-  );
-}
+  ];
 
 @NgModule({
   imports
