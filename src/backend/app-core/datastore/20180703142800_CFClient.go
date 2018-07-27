@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterMigration(20170818162837, "SetupSchema", func(txn *sql.Tx, conf *goose.DBConf) error {
+	RegisterMigration(20180703142800, "SetupSchema", func(txn *sql.Tx, conf *goose.DBConf) error {
 		binaryDataType := "BYTEA"
 		if strings.Contains(conf.Driver.Name, "mysql") {
 			binaryDataType = "BLOB"
