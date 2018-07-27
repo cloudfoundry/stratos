@@ -21818,9 +21818,9 @@ export function getInitialTestStoreState(): AppState {
     }
   };
 }
+
 /* tslint:enable */
-export function createBasicStoreModule(): ModuleWithProviders {
-  const initialState = getInitialTestStoreState();
+export function createBasicStoreModule(initialState: Partial<AppState> = getInitialTestStoreState()): ModuleWithProviders {
   return StoreModule.forRoot(
     appReducers,
     {

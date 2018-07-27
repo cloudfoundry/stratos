@@ -1,3 +1,4 @@
+import { PaginatedAction } from './../types/pagination.types';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -201,7 +202,7 @@ export class EndpointsEffect {
   }
 
   private doEndpointAction(
-    apiAction: IRequestAction,
+    apiAction: IRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',

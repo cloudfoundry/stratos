@@ -23,7 +23,7 @@ import {
   CfAPIFlattener,
   flattenPagination,
 } from '../helpers/paginated-request-helpers';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { getRequestTypeFromMethod, startApiRequest, getFailApiRequestActions } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import {
   resultPerPageParam,
@@ -108,7 +108,7 @@ export class APIEffect {
       }),
   );
 
-  private doApiRequest(action, state) {
+  private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
@@ -120,8 +120,7 @@ export class APIEffect {
       );
     }
 
-    this.store.dispatch(new StartRequestAction(actionClone, requestType));
-    this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+    startApiRequest(this.store, action, requestType);
 
     // Apply the params from the store
     if (paginatedAction.paginationKey) {
@@ -275,26 +274,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions: Action[] = [
-          new APISuccessOrFailedAction(
-            actionClone.actions[2],
-            actionClone,
-            error.message,
-          ),
-          new WrapperRequestActionFailed(
-            error.message,
-            actionClone,
-            requestType,
-          ),
-        ];
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
-          errorActions.push(
-            new RecursiveDeleteFailed(
-              apiAction.guid,
-              apiAction.endpointGuid,
-              entityFactory(apiAction.entityKey),
-            ),
-          );
+          this.store.dispatch(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey),
+          ), );
         }
         return errorActions;
       }),
@@ -515,9 +501,6 @@ export class APIEffect {
     return headers;
   }
 
-  getActionFromString(type: string) {
-    return { type };
-  }
 
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
     return paginationState

@@ -62,17 +62,18 @@ export class EntityService<T = any> {
     ).pipe(
       publishReplay(1),
       refCount(),
-      filter(entityInfo => !entityInfo || entityInfo.entity),
       tap((entityInfo: EntityInfo) => {
-        if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo)) {
-          return;
+        if (!entityInfo || entityInfo.entity) {
+          if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
+            return;
+          }
+          validated = true;
+          store.dispatch(new ValidateEntitiesStart(
+            action as ICFAction,
+            [entityInfo.entity.metadata.guid],
+            false
+          ));
         }
-        validated = true;
-        store.dispatch(new ValidateEntitiesStart(
-          action as ICFAction,
-          [entityInfo.entity.metadata.guid],
-          false
-        ));
       })
     );
 
@@ -81,7 +82,8 @@ export class EntityService<T = any> {
         const { entityRequestInfo, entity } = ent;
         return this.isEntityAvailable(entity, entityRequestInfo);
       }),
-      publishReplay(1), refCount()
+      publishReplay(1),
+      refCount()
     );
   }
 

@@ -1,4 +1,36 @@
 # Change Log
+
+## 2.0.0 
+
+[Full Changelog since 1.1.0](https://github.com/cloudfoundry-incubator/stratos/compare/1.1.0...2.0.0)
+
+This is the second major release of Stratos.
+
+The focus of this release is a new version of the front-end UI in Angular (Stratos version 1 used AngularJS). The UI has undergone numerous updates and we have switched out our own UI component set in favour of Material Design.
+
+Highlights of version 2:
+
+- Adoption of Angular in place of AngularJS
+- User of the Angular Material component library and an adoption of Material Design
+- Largely feature complete with version 1 (see below)
+- Improved Services support with Services and Marketplace now shown at the top-level of the UI
+- Improved UI throughout with card layouts used to improve readability
+- Added ability to re-deploy applications from GitHub
+- Improved Application UI - Instances and Routes information is now shown on separate tabs and the instances view has been improved
+
+The following features in version 1 are not currently available in version 2:
+
+- i18n - V2 supports US English only. This will be addressed as soon as the Angular platform supports string translation outside of templates.
+- Extensions/Plugins - The ability to extend the UI at various points will be added in the next minor version.
+- Drag and Drop for Application Deployment - You can not drag and drop a file/folder or url onto the application deployment UI - you have to use the browse UI.
+
+This release contains all of the fixes and improvements from the 2.0.0 Beta and Release Candidate releases. The additional fixes in this release from [2.0.0-rc3](#2.0.0-release-candidate-3) are:
+
+**Fixes:**
+- Fix issue where cookie domain name change can mean you can't log out [\#2732](https://github.com/cloudfoundry-incubator/stratos/pull/2732)
+- Pagination request: Validation doesn't insert correct value into store [\#2684](https://github.com/cloudfoundry-incubator/stratos/issues/2684)
+
+
 ## 2.0.0 Release Candidate 3
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-rc2...2.0.0-rc3)
 

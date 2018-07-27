@@ -103,9 +103,7 @@ export class CloudFoundryOrganizationService {
           new GetOrganization(this.orgGuid, this.cfGuid, relations),
           true
         );
-        return orgEntityService.entityObs$.pipe(
-          filter(o => !!o && !!o.entity)
-        );
+        return orgEntityService.waitForEntity$;
       })
     );
 

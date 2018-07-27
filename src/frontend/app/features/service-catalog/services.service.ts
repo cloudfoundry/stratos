@@ -163,6 +163,18 @@ export class ServicesService {
         }));
   }
 
+  getServiceProviderName = () => {
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
+      .pipe(
+        map(([extraInfo, service]) => {
+          if (extraInfo && extraInfo.providerDisplayName) {
+            return extraInfo.providerDisplayName;
+          } else {
+            return '';
+          }
+        }));
+  }
+
   getServiceDescription = () => {
     return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(

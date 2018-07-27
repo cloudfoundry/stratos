@@ -10,27 +10,44 @@
   var path = require('path');
   var fs = require('fs-extra');
   var yaml = require('js-yaml');
+  var replace = require('replace-in-file');
+  var execSync = require('child_process').execSync;
 
   const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/misc/custom/custom.yaml');
+  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
+  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
+  const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
+  const GIT_FOLDER = path.resolve(__dirname, '../.git');
+  const GIT_METADATA = path.resolve(__dirname, '../.stratos-git-metadata.json');
 
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
   gulp.task('customize', function (cb) {
     doCustomize(false);
+    doGenerateIndexHtml(true);
     cb();
   });
 
   // Apply defaults instead of any customizations that are available in custom-src
   gulp.task('customize-default', function (cb) {
     doCustomize(true);
+    doGenerateIndexHtml(false);
     cb();
   });
 
   // Remove all customizations (removes all symlinks as if customize had not been run)
   gulp.task('customize-reset', function (cb) {
     doCustomize(true, true);
+    doGenerateIndexHtml(false);
     cb();
   });
+
+  // Store git metadata so we have it when we are running the the non-git world (Docker)
+  gulp.task('store-git-metadata', function (cb) {
+    storeGitRepositoryMetadata();
+    cb();
+  });
+
 
   function doCustomize(forceDefaults, reset) {
     var msg = !forceDefaults ? 'Checking for and applying customizations' : 'Removing customizations and applying defaults';
@@ -105,6 +122,9 @@
     // Symlink custom backend plugin folders if they are present
     // Get all of the sub-folders in the custom-src/backend folder and symlink
 
+    // Update the git metadata if we can
+    storeGitRepositoryMetadata();
+
     // Remove all existing symlinks first
     var existing = fs.readdirSync(baseFolder);
     existing.forEach(file => {
@@ -138,6 +158,73 @@
         fs.symlinkSync(srcFolder, destFolder);
       }
     })
+  }
+
+  // Generate index.html from template
+  function doGenerateIndexHtml(customize) {
+    // Copy the default
+    fs.copySync(INDEX_TEMPLATE, INDEX_HTML);
+
+    // Read custom metadata if we are customizing and the file is present 
+    var metadata = {};
+    if (customize && fs.existsSync(CUSTOM_METADATA)) {
+      try {
+        metadata = yaml.safeLoad(fs.readFileSync(CUSTOM_METADATA, 'utf8'));
+      } catch (e) {
+        console.log('Could not read stratos.yaml file');
+        console.log(e);
+        process.exit(1);
+      }
+    }
+
+    // Patch different page title if there is one
+    var title = metadata.title || 'Stratos';
+    replace.sync({ files: INDEX_HTML, from: /@@TITLE@@/g, to: title });
+
+    // Read in the stored Git metadata if it is there, default to empty metadata
+    var gitMetadata = {
+      project: '',
+      branch: '',
+      commit: ''
+    };
+
+    if (fs.existsSync(GIT_METADATA)) {
+      gitMetadata = JSON.parse(fs.readFileSync(GIT_METADATA));
+    }
+
+    // Git Information
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_git_project@@', to: gitMetadata.project });
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_git_branch@@', to: gitMetadata.branch });
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_git_commit@@', to: gitMetadata.commit });
+
+    // Date and Time that the build was made (approximately => it is when this script is run)
+    replace.sync({ files: INDEX_HTML, from: '@@stratos_build_date@@', to: new Date() });
+  }
+
+  // We can only do this if we have a git repository checkout
+  // We'll store this in a file which we will then use - when in environments like Docker, we will run this
+  // in the host environment so that we can pick it up when we're running in the Docker world
+  function storeGitRepositoryMetadata() {
+    // Do we have a git folder?
+    if (!fs.existsSync(GIT_FOLDER)) {
+      return;
+    }
+    var gitMetadata = {
+      project: execGit('git config --get remote.origin.url'),
+      branch: execGit('git rev-parse --abbrev-ref HEAD'),
+      commit: execGit('git rev-parse HEAD')
+    };
+
+    fs.writeFileSync(GIT_METADATA, JSON.stringify(gitMetadata, null, 2));
+  }
+
+  function execGit(cmd) {
+    try {
+      var response = execSync(cmd + ' 2> /dev/null');
+      return response.toString().trim();
+    } catch (e) {
+      return '';
+    }
   }
 
 })();
