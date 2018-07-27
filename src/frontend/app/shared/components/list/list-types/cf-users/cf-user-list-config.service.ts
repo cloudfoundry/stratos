@@ -70,11 +70,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     },
     label: 'Manage',
     description: `Change Roles`,
-    createVisible: (row$: Observable<APIResource<CfUser>>) => {
-      return combineLatest(this.createCanUpdateOrgSpaceRoles(), row$).pipe(
-        map(([canUpdate, row]) => canUpdate)
-      );
-    }
+    createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
   };
 
   manageMultiUserAction: IMultiListAction<APIResource<CfUser>> = {
@@ -118,7 +114,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignColumnConfig(org$, space$);
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(cf =>
+      switchMap(cf => // `cf` needed to create the second observable
         combineLatest(
           observableOf(cf),
           (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space)))

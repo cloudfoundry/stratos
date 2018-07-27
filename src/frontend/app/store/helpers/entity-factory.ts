@@ -228,9 +228,11 @@ const coreSpaceSchemaParams = {
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
-  developers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)],
-  managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.MANAGER)],
-  auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.AUDITOR)]
+  [SpaceUserRoleNames.DEVELOPER]: [
+    new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)
+  ],
+  [SpaceUserRoleNames.MANAGER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.MANAGER)],
+  [SpaceUserRoleNames.AUDITOR]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.AUDITOR)]
 };
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
@@ -260,10 +262,12 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    users: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.USER)],
-    managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.MANAGER)],
-    billing_managers: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.BILLING_MANAGERS)],
-    auditors: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.AUDITOR)]
+    [OrgUserRoleNames.USER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.USER)],
+    [OrgUserRoleNames.MANAGER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.MANAGER)],
+    [OrgUserRoleNames.BILLING_MANAGERS]: [
+      new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.BILLING_MANAGERS)
+    ],
+    [OrgUserRoleNames.AUDITOR]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.AUDITOR)]
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;

@@ -1,6 +1,6 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../actions/endpoint.actions';
-import { GetAllOrgUsers } from '../actions/organization.actions';
+import { GetAllOrgUsers, GET_ORGANIZATION_USERS_SUCCESS } from '../actions/organization.actions';
 import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { cfUserSchemaKey } from '../helpers/entity-factory';
@@ -45,7 +45,7 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
           entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_ROLE_SUCCESS),
         }
       };
-    case GetAllOrgUsers.actions[1]:
+    case GET_ORGANIZATION_USERS_SUCCESS:
       // Determine if any of the user's roles have not been provided
       return updateUserMissingRoles(state, action);
   }
@@ -141,10 +141,14 @@ function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: 
     }
   };
 }
+
 /**
  * Determine if the user entity is missing any roles. If so track them in an array
  */
 function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction<NormalizedResponse>) {
+  // At this point in the flow the request flow (APISuccessOrFailedAction), the users may or may not be in the store yet
+  // (via WrapperRequestActionSuccess). Therefore in order to avoid partial entities we need to stick the whole user set into the store
+  // including `missingRoles`.
   const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserSchemaKey];
 
   // Create a delta of the changes, this will ensure we only return an updated state if there are updates
@@ -167,7 +171,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
       }
     });
     user.entity.missingRoles = newMissingRoles;
-    return !!newMissingRoles.org.length || !!newMissingRoles.space.length || changes;
+    return changes || !!newMissingRoles.org.length || !!newMissingRoles.space.length;
   }, false);
 
   return haveUpdatedUsers ? deepMergeState(users, usersInResponse) : users;

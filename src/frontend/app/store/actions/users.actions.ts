@@ -30,15 +30,17 @@ export const ADD_ROLE = '[Users] Add role';
 export const ADD_ROLE_SUCCESS = '[Users]  Add role success';
 export const ADD_ROLE_FAILED = '[Users]  Add role failed';
 
-const defaultUserRelations = [
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_ORGS),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),
-  createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_SPACES)
-];
+export function createDefaultUserRelations() {
+  return [
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_ORGS),
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),
+    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_SPACES)
+  ];
+}
 export const GET_CF_USER = '[Users] Get cf user ';
 export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
 export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
@@ -61,7 +63,7 @@ export class GetAllUsersAsNonAdmin implements PaginatedAction, EntityInlineParen
   entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
   populateMissing = false;
-  includeRelations: string[] = defaultUserRelations;
+  includeRelations: string[] = createDefaultUserRelations();
   constructor(
     public cfGuid: string,
     public skipValidation = false
@@ -76,7 +78,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   paginationKey: string;
   constructor(
     public endpointGuid: string,
-    public includeRelations: string[] = defaultUserRelations,
+    public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
     this.paginationKey = createGetAllUsersPaginationKey(endpointGuid);
@@ -193,7 +195,7 @@ export class GetUser extends CFStartAction {
   constructor(
     public endpointGuid: string,
     public userGuid: string,
-    public includeRelations: string[] = defaultUserRelations,
+    public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
     this.options = new RequestOptions();

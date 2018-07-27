@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
 
-import { GET_ORGANIZATION } from '../../actions/organization.actions';
+import { GET_ORGANIZATION, GetOrganization } from '../../actions/organization.actions';
 import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
-import { GET_SPACE } from '../../actions/space.actions';
+import { GET_SPACE, GetSpace } from '../../actions/space.actions';
 import { AppState } from '../../app-state';
 import { IRequestDataState } from '../../types/entity.types';
-import { IRequestAction } from '../../types/request.types';
+import { CFStartAction, IRequestAction } from '../../types/request.types';
 import { ValidateEntityResult } from './entity-relations.types';
 import { orgSpacePostProcess } from './processors/org-space-post-processor';
 
@@ -15,10 +15,20 @@ export function validationPostProcessor(
   apiResponse: APIResponse,
   allEntities: IRequestDataState): ValidateEntityResult {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
-    switch (action['actions'][0]) {
-      case GET_ORGANIZATION:
-      case GET_SPACE:
-        return orgSpacePostProcess(store, action, apiResponse, allEntities);
-    }
+    return apiAction(store, action as CFStartAction, apiResponse, allEntities);
+  }
+}
+
+function apiAction(
+  store: Store<AppState>,
+  action: CFStartAction,
+  apiResponse: APIResponse,
+  allEntities: IRequestDataState): ValidateEntityResult {
+  const actions = action['actions'] || [];
+  switch (actions[0]) {
+    case GET_ORGANIZATION:
+      return orgSpacePostProcess(store, action as GetOrganization, apiResponse, allEntities);
+    case GET_SPACE:
+      return orgSpacePostProcess(store, action as GetSpace, apiResponse, allEntities);
   }
 }

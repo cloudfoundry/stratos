@@ -1,3 +1,4 @@
+import { GetSpace } from '../../../actions/space.actions';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
@@ -7,7 +8,7 @@ import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
 import { IRequestDataState } from '../../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
+import { CFStartAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
@@ -16,6 +17,7 @@ import {
   ValidateEntityResult,
   ValidateResultFetchingState,
 } from '../entity-relations.types';
+import { GetOrganization } from '../../../actions/organization.actions';
 
 function updateUserFromOrgSpaceArray(
   existingUsers: IRequestEntityTypeState<APIResource<CfUser>>,
@@ -51,7 +53,7 @@ function updateUserFromOrgSpaceArray(
  */
 export function orgSpacePostProcess(
   store: Store<AppState>,
-  action: IRequestAction,
+  action: GetOrganization | GetSpace,
   apiResponse: APIResponse,
   allEntities: IRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;

@@ -209,7 +209,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     public paginationKey: string,
     public endpointGuid: string,
     public isAdmin: boolean,
-    public includeRelations: string[] = []) {
+    includeRelations?: string[]) {
     super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
     this.options.url = `spaces/${guid}/user_roles`;
   }
