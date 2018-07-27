@@ -128,6 +128,7 @@ jobs:
           target_name: prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
           tag_commit: true
+          prebuild_script: build/store-git-metadata.sh
 - name: create-chart
   plan:
   - get: stratos
