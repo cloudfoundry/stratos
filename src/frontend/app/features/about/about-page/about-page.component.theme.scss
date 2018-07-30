@@ -7,4 +7,8 @@
   .about-page__warning-icon {
     color: map-get($status, danger);
   }
+
+  .about-page__mat-warning-icon mat-icon {
+    color: map-get($status, danger);
+  }
 }

@@ -14,6 +14,14 @@ export class SecretsHelpers {
 
   constructor() { }
 
+  haveMultipleCloudFoundryEndpoints = () => {
+    return Object.keys(this.getCloudFoundryEndpoints()).length > 1;
+  }
+
+  haveSingleCloudFoundryEndpoint = () => {
+    return !this.haveMultipleCloudFoundryEndpoints();
+  }
+
   getConsoleAdminUsername(): string {
     return this.secrets.consoleUsers.admin.username;
   }
@@ -31,7 +39,7 @@ export class SecretsHelpers {
   }
 
   getCloudFoundryEndpoints(): any {
-    throw new Error('Not implemented');
+    return this.secrets.endpoints.cf;
   }
 
   getConsoleCredentials(userType: ConsoleUserType): E2ECred {
