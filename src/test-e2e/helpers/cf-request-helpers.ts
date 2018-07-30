@@ -42,7 +42,6 @@ export class CFRequestHelpers extends RequestHelpers {
     this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
 
   private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) => {
-    console.log(url, this.e2eSetup.adminReq);
     return this.sendRequest(this.e2eSetup.adminReq, {
       headers,
       method,

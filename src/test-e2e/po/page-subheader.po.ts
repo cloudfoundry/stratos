@@ -43,7 +43,6 @@ export class PageSubHeaderComponent extends Component {
   }
 
   clickItem(name: string): promise.Promise<void> {
-    console.log(name);
     return this.getItem(name).click();
   }
 
@@ -52,7 +51,6 @@ export class PageSubHeaderComponent extends Component {
     if (!suffix.startsWith('/')) {
       suffix = '/' + suffix;
     }
-    console.log(browser.baseUrl + baseUrl + suffix);
     browser.wait(until.urlContains(browser.baseUrl + baseUrl + suffix), 20000);
   }
 
