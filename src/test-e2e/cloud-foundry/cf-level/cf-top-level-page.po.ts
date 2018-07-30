@@ -38,24 +38,30 @@ export class CfTopLevelPage extends CFPage {
     });
   }
 
-  getSummaryDescription(): MetaDataItemComponent {
-    return new MetaDataItemComponent(element(by.css('app-metadata-item[@label="Description"]')));
+  waitForSummaryDescription(): MetaDataItemComponent {
+    return this.waitForMetaDataItemComponent('Description');
   }
 
-  getInstanceAddress(): MetaDataItemComponent {
-    return new MetaDataItemComponent(element(by.css('app-metadata-item[label="Instance Address"]')));
+  waitForInstanceAddress(): MetaDataItemComponent {
+    return this.waitForMetaDataItemComponent('Instance Address');
   }
 
-  getApiVersion(): MetaDataItemComponent {
-    return new MetaDataItemComponent(element(by.css('app-metadata-item[label="CF API Version"]')));
+  waitForApiVersion(): MetaDataItemComponent {
+    return this.waitForMetaDataItemComponent('CF API Version');
   }
 
-  getUsername(): MetaDataItemComponent {
-    return new MetaDataItemComponent(element(by.css('app-metadata-item[label="Account Username"]')));
+  waitForUsername(): MetaDataItemComponent {
+    return this.waitForMetaDataItemComponent('Account Username');
   }
 
-  getAdministrator(): MetaDataItemComponent {
-    return new MetaDataItemComponent(element(by.css('app-metadata-item[label="Administrator"]')));
+  waitForAdministrator(): MetaDataItemComponent {
+    return this.waitForMetaDataItemComponent('Administrator');
+  }
+
+  private waitForMetaDataItemComponent(label: string): MetaDataItemComponent {
+    const comp = new MetaDataItemComponent(element(by.css(`app-metadata-item[label="${label}"]`)));
+    comp.waitUntilShown();
+    return comp;
   }
 
   goToSummaryTab() {

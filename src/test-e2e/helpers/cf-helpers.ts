@@ -1,8 +1,9 @@
 import { CFResponse, APIResource } from '../../frontend/app/store/types/api.types';
 import { CFRequestHelpers } from './cf-request-helpers';
-import { E2ESetup } from '../e2e';
+import { e2e, E2ESetup } from '../e2e';
 import { promise } from 'protractor';
 import { E2EConfigCloudFoundry } from '../e2e.types';
+
 
 export class CFHelpers {
   cfRequestHelper: CFRequestHelpers;
@@ -130,6 +131,9 @@ export class CFHelpers {
         return org;
       }
       return null;
+    }).catch(err => {
+      e2e.log(`Failed to fetch organisation with name '${orgName}' from endpoint ${cnsiGuid}`);
+      throw new Error(err);
     });
   }
 

@@ -6,29 +6,30 @@ import { CfOrgLevelPage } from './cf-org-level-page.po';
 import { browser, by, element, promise } from 'protractor';
 
 
-xdescribe('CF - Org Level - ', () => {
+fdescribe('CF - Org Level - ', () => {
 
   let orgPage: CfOrgLevelPage;
   let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
   let applicationE2eHelper: ApplicationE2eHelper;
 
-  let orgGuid = 'abc';
+  // let orgGuid = 'abc';
 
   function setup(user: ConsoleUserType) {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2eSetup = e2e.setup(ConsoleUserType.admin, user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(user)
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .connectAllEndpoints(ConsoleUserType.user)
       .loginAs(user)
-      .getInfo(user);
+      .getInfo();
     applicationE2eHelper = new ApplicationE2eHelper(e2eSetup);
+    e2e.log('SETUP');
   }
 
   function testBreadcrumb() {
     orgPage.breadcrumbs.waitUntilShown();
     orgPage.breadcrumbs.getBreadcrumbs().then(breadcrumbs => {
-      console.log(breadcrumbs);
       expect(breadcrumbs.length).toBe(1);
       expect(breadcrumbs[0].label).toBe(defaultCf.name);
     });
@@ -44,29 +45,31 @@ xdescribe('CF - Org Level - ', () => {
   function navToCfPage() {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
     const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+    console.log('BEFORE ORG');
     browser.wait(applicationE2eHelper.cfHelper.fetchOrg(endpointGuid, defaultCf.testOrg).then((org => {
-      orgGuid = org.entity.guid;
-      orgPage = CfOrgLevelPage.forEndpoint(endpointGuid, orgGuid);
+      console.log('ORG!! ', org);
+      orgPage = CfOrgLevelPage.forEndpoint(endpointGuid, org.metadata.guid);
       orgPage.navigateTo();
       orgPage.waitForPageOrChildPage();
+      orgPage.loadingIndicator.waitUntilNotShown();
     })));
   }
 
-  describe('As Admin', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.admin);
-    });
+  // describe('As Admin', () => {
+  //   beforeEach(() => {
+  //     setup(ConsoleUserType.admin);
+  //   });
 
-    describe('Basic Tests - ', () => {
-      beforeEach(navToCfPage);
+  //   describe('Basic Tests - ', () => {
+  //     beforeEach(navToCfPage);
 
-      fit('Breadcrumb', testBreadcrumb);
+  //     it('Breadcrumb', testBreadcrumb);
 
-      it('Walk Tabs', testTabs);
+  //     it('Walk Tabs', testTabs);
 
-    });
+  //   });
 
-  });
+  // });
 
   describe('As User', () => {
     beforeEach(() => {
@@ -76,7 +79,7 @@ xdescribe('CF - Org Level - ', () => {
     describe('Basic Tests - ', () => {
       beforeEach(navToCfPage);
 
-      fit('Breadcrumb', testBreadcrumb);
+      it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
 

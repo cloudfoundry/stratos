@@ -11,7 +11,8 @@ import { SecretsHelpers } from './helpers/secrets-helpers';
 export class E2E {
 
   // Turn on debug logging for test helpers
-  public static DEBUG_LOGGING = !!process.env['STRATOS_E2E_DEBUG'] || false;
+  // TODO: RC improve
+  public static DEBUG_LOGGING = !!process.env['STRATOS_E2E_DEBUG'] || false || true;
 
   // General helpers
   public helper = new E2EHelpers();
@@ -31,8 +32,9 @@ export class E2E {
   /**
    * Initialize and return helper to setup Stratos for a test spec
    */
-  setup(userType: ConsoleUserType) {
-    return E2ESetup.setup(userType);
+  setup(userType: ConsoleUserType, loginUserType?: ConsoleUserType) {
+    // TODO: RC remove loginUserType
+    return E2ESetup.setup(userType, loginUserType);
   }
 
   /**
@@ -80,7 +82,7 @@ export class E2ESetup {
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
     const that = this;
     protractor.promise.controlFlow().execute(() => {
-      E2E.debugLog('Logging in as user: ' + (userType === ConsoleUserType.admin ? 'admin' : 'user'));
+      E2E.debugLog('Logging in as user: ' + (that.loginUserType === ConsoleUserType.admin ? 'admin' : 'user'));
       return e2e.helper.setupApp(that.loginUserType);
     });
   }

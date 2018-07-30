@@ -2,6 +2,7 @@ import { browser, promise, protractor } from 'protractor';
 
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
+import { LoadingIndicatorComponent } from './loading-indicator.po';
 import { PageHeader } from './page-header.po';
 import { PageSubHeaderComponent } from './page-subheader.po';
 import { SideNavigation } from './side-nav.po';
@@ -24,6 +25,9 @@ export abstract class Page {
 
   // Breadcrumbs (if present)
   public breadcrumbs = new BreadcrumbsComponent();
+
+  // Loading page indicator (if present)
+  public loadingIndicator = new LoadingIndicatorComponent();
 
   // Helpers
   public helpers = new E2EHelpers();

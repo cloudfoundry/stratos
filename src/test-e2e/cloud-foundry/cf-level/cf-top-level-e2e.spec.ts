@@ -26,6 +26,7 @@ describe('CF - Top Level - ', () => {
     cfPage = CfTopLevelPage.forEndpoint(endpointGuid);
     cfPage.navigateTo();
     cfPage.waitForPageOrChildPage();
+    cfPage.loadingIndicator.waitUntilNotShown();
   }
 
   function testTitle() {
@@ -45,21 +46,21 @@ describe('CF - Top Level - ', () => {
       it('Breadcrumb', testTitle);
 
       it('Summary Panel', () => {
-        expect(cfPage.getInstanceAddress().getValue()).toBe(defaultCf.url);
-        expect(cfPage.getUsername().getValue()).toBe(defaultCf.creds.admin.username);
-        expect(cfPage.getAdministrator().getValue()).toBe('Yes');
+        expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
+        expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.admin.username);
+        expect(cfPage.waitForAdministrator().getValue()).toBe('Yes');
       });
 
-      // fit('Walk Tabs', () => {
-      //   cfPage.goToOrgTab();
-      //   cfPage.goToUsersTab();
-      //   cfPage.goToFirehoseTab();
-      //   cfPage.goToFeatureFlagsTab();
-      //   cfPage.goToBuildPacksTab();
-      //   cfPage.goToStacksTab();
-      //   cfPage.goToSecurityGroupsTab();
-      //   cfPage.goToSummaryTab();
-      // });
+      it('Walk Tabs', () => {
+        cfPage.goToOrgTab();
+        cfPage.goToUsersTab();
+        cfPage.goToFeatureFlagsTab();
+        cfPage.goToBuildPacksTab();
+        cfPage.goToStacksTab();
+        cfPage.goToSecurityGroupsTab();
+        cfPage.goToSummaryTab();
+        cfPage.goToFirehoseTab();
+      });
 
     });
 
@@ -79,15 +80,15 @@ describe('CF - Top Level - ', () => {
       });
 
       it('Summary Panel', () => {
-        expect(cfPage.getInstanceAddress().getValue()).toBe(defaultCf.url);
-        expect(cfPage.getUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
-        expect(cfPage.getAdministrator().getValue()).toBe('No');
+        expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
+        expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
+        expect(cfPage.waitForAdministrator().getValue()).toBe('No');
       });
 
       it('Walk Tabs', () => {
         cfPage.goToOrgTab();
         cfPage.goToUsersTab();
-        // cfPage.goToFirehoseTab();
+        // cfPage.goToFirehoseTab();// Is not shown to non-admins
         cfPage.goToFeatureFlagsTab();
         cfPage.goToBuildPacksTab();
         cfPage.goToStacksTab();
