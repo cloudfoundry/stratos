@@ -52,7 +52,7 @@ describe('CF Endpoints Dashboard', () => {
     });
   });
 
-  describe('Multiple endpoints', () => {
+  describe('Multiple endpoints', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
         .clearAllEndpoints()
