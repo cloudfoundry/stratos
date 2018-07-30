@@ -147,6 +147,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, interfaces.CNSIRecord, error) {
 	cfAPI := c.portalProxy.GetConfig().AutoRegisterCFUrl
+	cfAPI = strings.TrimRight(cfAPI, "/")
 
 	if cfAPI == "" {
 		return "", interfaces.CNSIRecord{}, nil

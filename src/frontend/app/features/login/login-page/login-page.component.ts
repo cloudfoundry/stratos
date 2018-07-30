@@ -77,8 +77,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   login() {
     if (this.ssoLogin) {
-      const returnUrl = encodeURI(window.location.protocol + '//' + window.location.hostname +
-        (window.location.port ? ':' + window.location.port : ''));
+      const returnUrl = encodeURIComponent(window.location.protocol + '//' + window.location.hostname +
+        (window.location.port ? ':' + window.location.port : '') +
+          (this.redirect ? this.redirect.path + '?' +
+              Object.keys(this.redirect.queryParams).map(k => k + '=' + this.redirect.queryParams[k]).join('&') : '/')
+      );
       window.open('/pp/v1/auth/sso_login?state=' + returnUrl, '_self');
       this.busy$ = new Observable<boolean>((observer) => {
         observer.next(true);
