@@ -1,4 +1,6 @@
 import { StepperComponent } from '../po/stepper.po';
+import { by, element, promise, browser } from 'protractor';
+
 
 export class CreateServiceInstanceStepper extends StepperComponent {
 
@@ -32,7 +34,7 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   }
 
   setServiceName = (serviceInstanceName: string) => {
-
+    browser.sleep(5000);
     return this.getStepperForm().fill({ [this.serviceNameFieldName]: serviceInstanceName });
   }
 

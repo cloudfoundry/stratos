@@ -1,12 +1,13 @@
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { e2e } from '../e2e';
 import { ElementFinder, promise } from 'protractor';
-import { CreateServiceInstance } from './create-service-instance.po';
-import { ServicesWallPage } from './services-wall.po';
-import { MetaCard } from '../po/meta-card.po';
-import { ServicesHelperE2E } from './services-helper-e2e';
 
-describe('Create Service Instance', () => {
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { MetaCard } from '../po/meta-card.po';
+import { CreateServiceInstance } from './create-service-instance.po';
+import { ServicesHelperE2E } from './services-helper-e2e';
+import { ServicesWallPage } from './services-wall.po';
+
+fdescribe('Create Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -14,7 +15,8 @@ describe('Create Service Instance', () => {
     const e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.admin);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
   });
 
@@ -28,10 +30,9 @@ describe('Create Service Instance', () => {
   });
 
   it('- should be able to to create a service instance', () => {
-
     servicesHelperE2E.createService();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
 

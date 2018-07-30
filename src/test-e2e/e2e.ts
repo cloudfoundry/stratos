@@ -11,8 +11,7 @@ import { SecretsHelpers } from './helpers/secrets-helpers';
 export class E2E {
 
   // Turn on debug logging for test helpers
-  // TODO: RC improve
-  public static DEBUG_LOGGING = !!process.env['STRATOS_E2E_DEBUG'] || false || true;
+  public static DEBUG_LOGGING = !!process.env['STRATOS_E2E_DEBUG'] || false;
 
   // General helpers
   public helper = new E2EHelpers();

@@ -147,6 +147,12 @@ export class CFHelpers {
     });
   }
 
+  fetchAppsCountInSpace(cnsiGuid: string, spaceGuid: string) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, `spaces/${spaceGuid}/apps`).then(json => {
+      return json.total_results;
+    });
+  }
+
   createApp(cnsiGuid: string, spaceGuid: string, appName: string) {
     return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
   }

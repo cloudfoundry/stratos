@@ -1,10 +1,10 @@
-import { ListComponent } from '../po/list.po';
 import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { ListComponent } from '../po/list.po';
 import { MetaCard } from '../po/meta-card.po';
 import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
@@ -18,6 +18,7 @@ describe('CF - Manage Organizations and Spaces', () => {
   let cloudFoundry: CfTopLevelPage;
 
   let cfHelper: CFHelpers;
+  const listComponent = new ListComponent();
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
@@ -83,7 +84,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     // Count the number of organizations
     let orgCount = 0;
     const cardView = cloudFoundry.goToOrgView();
-    cardView.cards.getCards().count().then(count => orgCount = count);
+    listComponent.getTotalResults().then(total => orgCount = total);
 
     // Click the add button to add an organization
     cloudFoundry.header.clickIconButton('add');
@@ -95,7 +96,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     modal.next();
 
     cardView.cards.waitUntilShown();
-    cardView.cards.getCards().count().then((newOrgCount) => expect(newOrgCount).toEqual(orgCount + 1));
+    listComponent.getTotalResults().then(newOrgCount => expect(newOrgCount).toEqual(orgCount + 1));
 
     // Delete the org
     cardView.cards.findCardByTitle(testOrgName).then(card => {

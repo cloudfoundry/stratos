@@ -7,17 +7,10 @@ import { CFPage } from '../../po/cf-page.po';
 
 export class CfTopLevelPage extends CFPage {
 
-  // static forEndpoint(guid: string, orgGuid?: string, spaceGuid?: string): CloudFoundryLevelPage {
-  //   const page = new CloudFoundryPage();
-  //   page.navLink = '/cloud-foundry/' + guid;
-  //   if (orgGuid) {
-  //     page.navLink += '/organizations/' + orgGuid;
-  //     if (spaceGuid) {
-  //       page.navLink += '/spaces/' + spaceGuid;
-  //     }
-  //   }
-  //   return page;
-  // }
+  constructor() {
+    super('/cloud-foundry');
+  }
+
   static forEndpoint(guid: string, orgGuid?: string, spaceGuid?: string): CfTopLevelPage {
     const page = new CfTopLevelPage();
     page.navLink = '/cloud-foundry/' + guid;

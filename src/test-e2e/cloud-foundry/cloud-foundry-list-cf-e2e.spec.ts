@@ -1,3 +1,5 @@
+import { browser } from 'protractor';
+
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
@@ -9,7 +11,7 @@ describe('CF Endpoints Dashboard', () => {
   const nav = new SideNavigation();
   const cfEndpoint = e2e.secrets.getDefaultCFEndpoint();
 
-  describe('No endpoints', () => {
+  describe('No endpoints - ', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
         .clearAllEndpoints();
@@ -17,9 +19,10 @@ describe('CF Endpoints Dashboard', () => {
 
     beforeEach(() => {
       nav.goto(SideNavMenuItem.CloudFoundry);
+      cloudFoundry.loadingIndicator.waitUntilNotShown();
     });
 
-    it('should be the CF Endpoints page', () => {
+    it('should be the Endpoints page', () => {
       expect(cloudFoundry.isActivePage()).toBeTruthy();
     });
 
@@ -28,7 +31,7 @@ describe('CF Endpoints Dashboard', () => {
     });
   });
 
-  describe('Single endpoint', () => {
+  describe('Single endpoint - ', () => {
     beforeAll(() => {
       // Only register and connect a single Cloud Foundry endpoint
       e2e.setup(ConsoleUserType.admin)
@@ -51,7 +54,7 @@ describe('CF Endpoints Dashboard', () => {
     });
   });
 
-  describe('Multiple endpoints', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
+  describe('Multiple endpoints - ', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
         .clearAllEndpoints()

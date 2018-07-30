@@ -8,7 +8,7 @@ import { ServicesHelperE2E } from './services-helper-e2e';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { MetaCard } from '../po/meta-card.po';
 
-describe('Service Instances Wall', () => {
+fdescribe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
   const secretsHelper = new SecretsHelpers();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -16,7 +16,8 @@ describe('Service Instances Wall', () => {
     const e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.admin);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
 
     // Create service instance
     const createServiceInstance = new CreateServiceInstance();

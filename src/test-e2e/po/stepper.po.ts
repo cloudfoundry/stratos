@@ -70,18 +70,18 @@ export class StepperComponent extends Component {
   }
 
   waitForStep(stepName: string) {
-    const lastActiveHeader = element.all(by.css('.steppers__header.steppers__header--active')).last();
+    const lastActiveHeader = this.locator.all(by.css('.steppers__header.steppers__header--active')).last();
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
 
   hasStep(name: string) {
-    return element(by.cssContainingText('.steppers__header .steppers__header-text', name)).isPresent();
+    return this.locator.element(by.cssContainingText('.steppers__header .steppers__header-text', name)).isPresent();
   }
 
   getStepNames() {
-    return element.all(by.css('.steppers__header .steppers__header-text'));
+    return this.locator.all(by.css('.steppers__header .steppers__header-text'));
   }
 
 }

@@ -19,7 +19,7 @@ export class CFRequestHelpers extends RequestHelpers {
     'x-cap-passthrough': true
   })
 
-  getCfCnsi = (cfName?: string): promise.Promise<EndpointModel> => {
+  getCfInfo = (cfName?: string): promise.Promise<EndpointModel> => {
     cfName = cfName || this.e2eHelper.secrets.getDefaultCFEndpoint().name;
     return this.sendRequestAdminSession('pp/v1/cnsis', 'GET', {})
       .then((response: string) => {
@@ -27,6 +27,9 @@ export class CFRequestHelpers extends RequestHelpers {
         return cnsis.find(cnsi => cnsi.name === cfName);
       });
   }
+
+  getCfGuid = (cfName?: string): promise.Promise<string> =>
+    this.getCfInfo(cfName).then((endpoint: EndpointModel) => endpoint ? endpoint.guid : null)
 
   sendCfGet = (cfGuid: string, url: string): promise.Promise<CFResponse> => this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
 
