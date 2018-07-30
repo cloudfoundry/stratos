@@ -26,6 +26,7 @@ import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getCurrentUserCFGlobalStates } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { PaginatedAction } from '../../store/types/pagination.types';
 import {
@@ -39,10 +40,6 @@ import {
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
-import {
-  getCurrentUserCFGlobalState,
-  getCurrentUserCFGlobalStates,
-} from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -327,8 +324,9 @@ export class CfUserService {
       }));
   }
 
-  public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
-    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
+  public isConnectedUserAdmin = (store, cfGuid: string): Observable<boolean> =>
+    waitForCFPermissions(store, cfGuid).pipe(
+      switchMap(() => this.store.select(getCurrentUserCFGlobalStates(cfGuid))),
       map(state => state ? state.isAdmin : false),
       first()
     )

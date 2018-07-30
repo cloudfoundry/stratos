@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
@@ -99,7 +99,7 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+    this.space$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
           createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
@@ -127,7 +127,9 @@ export class CloudFoundrySpaceService {
           true
         );
         return spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
 
     this.serviceInstances$ = this.space$.pipe(map(o => o.entity.entity.service_instances));
@@ -141,7 +143,7 @@ export class CloudFoundrySpaceService {
       }
     }));
 
-    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
       switchMap(isAdmin => {
         const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
         return getPaginationObservables({

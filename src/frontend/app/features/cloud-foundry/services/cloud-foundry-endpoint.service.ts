@@ -20,12 +20,16 @@ import {
   endpointSchemaKey,
   entityFactory,
   organizationSchemaKey,
+  privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
@@ -73,7 +77,9 @@ export class CloudFoundryEndpointService {
       paginationKey,
       cfGuid, [
         createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
         createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with

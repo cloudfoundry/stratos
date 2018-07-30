@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
@@ -74,14 +74,13 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+    this.org$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
           createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
           createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
           createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
           createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
-          createEntityRelationKey(organizationSchemaKey, cfUserSchemaKey),
           createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
           createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
@@ -104,7 +103,9 @@ export class CloudFoundryOrganizationService {
           true
         );
         return orgEntityService.waitForEntity$;
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
 
     this.initialiseOrgObservables();
@@ -143,7 +144,7 @@ export class CloudFoundryOrganizationService {
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
 
 
-    this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+    this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
       switchMap(isAdmin => {
         const action = new GetAllOrgUsers(this.orgGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
         return getPaginationObservables<APIResource<CfUser>>({
