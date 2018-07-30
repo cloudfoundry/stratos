@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Store the git metadata - only dependency is the git binary
 
