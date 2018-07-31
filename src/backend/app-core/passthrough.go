@@ -363,6 +363,8 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		log.Infof("CNSI Request is: %+v", cnsiRequest)
 		cnsiRequest.Error = err
 		if done != nil {
+			cnsiRequest.StatusCode = 400
+			cnsiRequest.Status = "Unable to retrieve CNSI token record"
 			done <- cnsiRequest
 		}
 		return
