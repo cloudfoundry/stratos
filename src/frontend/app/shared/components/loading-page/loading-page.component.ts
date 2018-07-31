@@ -1,11 +1,12 @@
-
-import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
-import { filter, first, startWith, map } from 'rxjs/operators';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { schema } from 'normalizr';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
+
 import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+
 
 @Component({
   selector: 'app-loading-page',
@@ -23,7 +24,6 @@ import { EntityMonitor } from '../../monitors/entity-monitor';
   ]
 })
 export class LoadingPageComponent implements OnInit {
-
 
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
@@ -78,7 +78,20 @@ export class LoadingPageComponent implements OnInit {
   }
 
   private buildFromMonitor(monitor: EntityMonitor) {
-    this.isLoading = monitor.isFetchingEntity$;
     this.isDeleting = monitor.isDeletingEntity$;
+    this.isLoading = combineLatest(
+      monitor.isFetchingEntity$.pipe(
+        // There's a brief amount of time between the monitor returning an initial 'false' value before the validation code kicks
+        // in and marks as 'updating' (true + false --> false + false --> false --> true). Add some artificial lag here until we find a
+        // better solution.. see #2779
+        debounceTime(50)
+      ),
+      monitor.updatingSection$
+    ).pipe(
+      map(([fetching, updating]) => {
+        return fetching || updating._root_.busy;
+      }),
+      startWith(true),
+    );
   }
 }

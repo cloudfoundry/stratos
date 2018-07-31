@@ -354,8 +354,11 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	// get a cnsi token record and a cnsi record
 	tokenRec, _, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
+
 		cnsiRequest.Error = err
 		if done != nil {
+			cnsiRequest.StatusCode = 400
+			cnsiRequest.Status = "Unable to retrieve CNSI token record"
 			done <- cnsiRequest
 		}
 		return
@@ -380,12 +383,12 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
+
 		cnsiRequest.StatusCode = res.StatusCode
 		cnsiRequest.Status = res.Status
 		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
 	}
-
 	// If Status Code >=400, log this as a warning
 	if cnsiRequest.StatusCode >= 400 {
 		var contentType = "Unknown"

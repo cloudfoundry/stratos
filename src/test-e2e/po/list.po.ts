@@ -70,6 +70,10 @@ export class ListTableComponent extends Component {
     super(locator);
   }
 
+  getHeaderText() {
+    return this.locator.element(by.css('.list-component__header__left--text')).getText();
+  }
+
   getRows(): ElementArrayFinder {
     return this.locator.all(by.css('.app-table__row'));
   }
@@ -102,6 +106,13 @@ export class ListTableComponent extends Component {
         table.push(tableRow);
       });
       return table;
+    });
+  }
+
+  selectRow(index: number) {
+    return this.locator.all(by.css('.app-table__row')).then(rows => {
+      expect(rows.length).toBeGreaterThan(index);
+      return rows[index].element(by.css('.mat-radio-button')).click();
     });
   }
 }

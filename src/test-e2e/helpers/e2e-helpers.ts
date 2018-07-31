@@ -160,6 +160,7 @@ export class E2EHelpers {
   }
 
   getEndpointGuid(info, name: string): string {
+    expect(info).toBeDefined();
     expect(info.endpoints).toBeDefined();
 
     let endpointGuid = null;
