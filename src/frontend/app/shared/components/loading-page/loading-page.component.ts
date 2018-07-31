@@ -2,7 +2,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { schema } from 'normalizr';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, startWith, tap, debounce, debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
@@ -24,7 +24,6 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
   ]
 })
 export class LoadingPageComponent implements OnInit {
-
 
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
@@ -84,7 +83,7 @@ export class LoadingPageComponent implements OnInit {
       monitor.isFetchingEntity$.pipe(
         // There's a brief amount of time between the monitor returning an initial 'false' value before the validation code kicks
         // in and marks as 'updating' (true + false --> false + false --> false --> true). Add some artificial lag here until we find a
-        // better solution
+        // better solution.. see #2779
         debounceTime(50)
       ),
       monitor.updatingSection$
