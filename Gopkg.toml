@@ -1,0 +1,14 @@
+# without this constraint, dep will give errors about unadvertised objects in src/github.com/codegangsta/cli
+# which we don't even use, but older versions of the the CF cli reference. Pinning to a recent version
+# seems to fix this
+[[constraint]]
+  name = "code.cloudfoundry.org/cli"
+  source = "github.com/cloudfoundry/cli"
+  version = "v6.37.0"
+# code.cloudfoundry.org/cli requires moby master, which isn't compatible with current code.cloudfoundry.org/cli
+[[override]]
+  name = "github.com/moby/moby"
+  revision = "9de84a78d76ed2ffe386fe21466f7401cf5d2e9d"
+[prune]
+  go-tests = true
+  unused-packages = true
