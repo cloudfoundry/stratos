@@ -1,12 +1,14 @@
+import { browser, protractor } from 'protractor';
+
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
+import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
-import { CreateApplicationStepper } from './create-application-stepper.po';
-import { CFHelpers } from '../helpers/cf-helpers';
-import { ExpectedConditions, browser } from 'protractor';
+
+const until = protractor.ExpectedConditions;
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -99,13 +101,12 @@ describe('Application Deploy', function () {
       // Should be app summary
       ApplicationSummary.detect().then(appSummary => {
         appSummary.waitForPage();
+        browser.wait(until.presenceOf(appSummary.header.getTitle()), 5000);
         expect(appSummary.getAppName()).toBe('cf-quick-app');
         applicationE2eHelper.cfHelper.deleteApp(appSummary.cfGuid, appSummary.appGuid);
       });
     });
 
   });
-
-
 
 });

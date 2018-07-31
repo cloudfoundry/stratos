@@ -31,9 +31,8 @@ export class E2E {
   /**
    * Initialize and return helper to setup Stratos for a test spec
    */
-  setup(userType: ConsoleUserType, loginUserType?: ConsoleUserType) {
-    // TODO: RC remove loginUserType
-    return E2ESetup.setup(userType, loginUserType);
+  setup(userType: ConsoleUserType) {
+    return E2ESetup.setup(userType);
   }
 
   /**
@@ -66,13 +65,13 @@ export class E2ESetup {
   private needAdminSession = false;
   private needUserSession = false;
 
-  static setup(userType: ConsoleUserType, loginUserType?: ConsoleUserType) {
-    return new E2ESetup(userType, loginUserType);
+  static setup(userType: ConsoleUserType) {
+    return new E2ESetup(userType);
   }
 
-  constructor(userType: ConsoleUserType, loginUserType?: ConsoleUserType) {
+  constructor(userType: ConsoleUserType) {
     this.userType = userType;
-    this.loginUserType = loginUserType || userType;
+    this.loginUserType = userType;
     // Create requests in case we need to make any API requests as admin and/or user
     this.adminReq = this.reqHelper.newRequest();
     this.userReq = this.reqHelper.newRequest();

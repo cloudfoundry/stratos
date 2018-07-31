@@ -15,7 +15,7 @@ describe('CF - Space Level - ', () => {
   let applicationE2eHelper: ApplicationE2eHelper;
 
   function setup(user: ConsoleUserType) {
-    e2eSetup = e2e.setup(ConsoleUserType.admin, user)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)

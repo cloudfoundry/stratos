@@ -11,9 +11,6 @@ import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  // const applications = new ApplicationsPage();
-  // const services = new ServicesPage();
-  // const cloudFoundry = new CfTopLevelPage();
 
   describe('Connect/Disconnect endpoints -', () => {
 

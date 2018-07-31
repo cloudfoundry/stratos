@@ -44,12 +44,11 @@ export class CFRequestHelpers extends RequestHelpers {
   private sendCfRequest = (cfGuid: string, url: string, method: string, body?: string): promise.Promise<any> =>
     this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
 
-  private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) => {
-    return this.sendRequest(this.e2eSetup.adminReq, {
+  private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) =>
+    this.sendRequest(this.e2eSetup.adminReq, {
       headers,
       method,
       url
-    }, body);
-  }
+    }, body)
 
 }
