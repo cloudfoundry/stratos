@@ -339,8 +339,6 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	var req *http.Request
 	var err error
 
-	log.Info("Do Request")
-
 	if len(cnsiRequest.Body) > 0 {
 		body = bytes.NewReader(cnsiRequest.Body)
 	}
@@ -353,14 +351,10 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		return
 	}
 
-	log.Info("Do Request2")
-
 	// get a cnsi token record and a cnsi record
 	tokenRec, _, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
 
-		log.Infof("error is: %+v", err)
-		log.Infof("CNSI Request is: %+v", cnsiRequest)
 		cnsiRequest.Error = err
 		if done != nil {
 			cnsiRequest.StatusCode = 400
@@ -369,7 +363,6 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		}
 		return
 	}
-	log.Info("Do Request3")
 
 	// Copy original headers through, except custom portal-proxy Headers
 	fwdCNSIStandardHeaders(cnsiRequest, req)
@@ -391,15 +384,11 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
 
-		log.Info("Do Request6")
-
 		cnsiRequest.StatusCode = res.StatusCode
 		cnsiRequest.Status = res.Status
 		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
 	}
-	log.Info("Do Request4")
-
 	// If Status Code >=400, log this as a warning
 	if cnsiRequest.StatusCode >= 400 {
 		var contentType = "Unknown"
@@ -412,7 +401,6 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, contentLength)
 		log.Warn(string(cnsiRequest.Response))
 	}
-	log.Info("Do Request5")
 
 	if done != nil {
 		done <- cnsiRequest
