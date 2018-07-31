@@ -358,6 +358,9 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	// get a cnsi token record and a cnsi record
 	tokenRec, _, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
+
+		log.Infof("error is: %+v", err)
+		log.Infof("CNSI Request is: %+v", cnsiRequest)
 		cnsiRequest.Error = err
 		if done != nil {
 			done <- cnsiRequest
