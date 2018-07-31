@@ -72,7 +72,7 @@
     const backendCustomBaseFolder = path.resolve(__dirname, '../custom-src/backend');
 
     // There are no defaults for the backend - its the same as removing all of the custom plugins that be there
-    doCustomizeBackend(forceDefaults || reset, backendBaseFolder, backendCustomBaseFolder);
+    //doCustomizeBackend(forceDefaults || reset, backendBaseFolder, backendCustomBaseFolder);
   };
 
   function doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {

@@ -23,16 +23,17 @@ find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 
 cd ${TOP_LEVEL}
 
+echo "Building portal-proxy..."
+mkdir -p go/src/github.com/cloudfoundry-incubator
+ln -s $PWD go/src/github.com/cloudfoundry-incubator/stratos
+GOPATH=$PWD/go go install github.com/cloudfoundry-incubator/stratos/components/app-core
+mv go/bin/app-core portal-proxy
+rm -rf go
+
 npm install
 npm run customize
 
-# Fetch Glide dependencies
-npm run cf-get-backend-deps
-
 npm run build-cf
-
-# Build backend components
-npm run cf-build-backend
 
 npm run deploy-cf
 
