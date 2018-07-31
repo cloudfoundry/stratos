@@ -48,6 +48,7 @@ const (
 	DATA MessageType = iota + 20000
 	MANIFEST
 	CLOSE_SUCCESS
+	APP_GUID_NOTIFY
 )
 
 // Close - error cases
@@ -86,6 +87,11 @@ const (
 const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
+
+// Interface for sending a message over a web socket
+type DeployAppMessageSender interface {
+	SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string)
+}
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
@@ -178,6 +184,11 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	dialTimeout := os.Getenv("CF_DIAL_TIMEOUT")
 	deps := initialiseDependency(socketWriter, traceLogger, dialTimeout, configRepo)
 	defer deps.Config.Close()
+
+	// Patch in app repo watcher
+	// Wrap an interceptor around the application repository so we can get the app details when created/updated
+	var repo = deps.RepoLocator.GetApplicationRepository()
+	deps.RepoLocator = deps.RepoLocator.SetApplicationRepository(NewRepositoryIntercept(repo, cfAppPush, clientWebSocket))
 
 	cfAppPush.pushCommand.SetDependency(deps, false)
 
@@ -679,5 +690,10 @@ func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType Mess
 
 func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	msg, _ := getMarshalledSocketMessage("", event)
+	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
+}
+
+func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
+	msg, _ := getMarshalledSocketMessage(data, event)
 	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
 }

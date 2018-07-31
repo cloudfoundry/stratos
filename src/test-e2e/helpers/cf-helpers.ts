@@ -157,4 +157,8 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
   }
 
+  deleteApp(cnsiGuid: string, appGuid: string) {
+    return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
+  }
+
 }

@@ -101,7 +101,7 @@ describe('Application Delete', function () {
       // Delete the app
       deleteApp.stepper.next();
 
-      deleteApp.stepper.waitUntilCanClose();
+      deleteApp.stepper.waitUntilCanNext();
       expect(deleteApp.stepper.getNextLabel()).toBe('Close');
       // Close
       deleteApp.stepper.next();

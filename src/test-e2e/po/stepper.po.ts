@@ -1,4 +1,4 @@
-import { by, element, browser, protractor } from 'protractor';
+import { by, element, browser, protractor, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
@@ -62,9 +62,9 @@ export class StepperComponent extends Component {
     return this.locator.element(by.id('stepper_next')).getText().then(label => label.trim());
   }
 
-  waitUntilCanClose() {
+  waitUntilCanNext(nextButtonLabel = 'Close') {
     const nextButton = this.locator.element(by.id('stepper_next'));
-    return browser.wait(until.textToBePresentInElement(nextButton, 'Close')).then(() => {
+    return browser.wait(until.textToBePresentInElement(nextButton, nextButtonLabel)).then(() => {
       return browser.wait(until.elementToBeClickable(nextButton));
     });
   }
@@ -81,7 +81,11 @@ export class StepperComponent extends Component {
   }
 
   getStepNames() {
-    return this.locator.all(by.css('.steppers__header .steppers__header-text'));
+    return this.locator.all(by.css('.steppers__header .steppers__header-text')).map(step => step.getText());
+  }
+
+  getActiveStepName(): promise.Promise<string> {
+    return element(by.css('.steppers__header--active .steppers__header-text')).getText();
   }
 
 }
