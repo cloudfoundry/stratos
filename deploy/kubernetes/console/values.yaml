@@ -78,3 +78,5 @@ kube:
     email: default
 services:
   loadbalanced: false
+metrics:
+  enabled: false
