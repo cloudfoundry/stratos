@@ -2,8 +2,9 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, withLatestFrom, map, switchMap } from 'rxjs/operators';
 
+import { DispatchThrottler } from '../../../../../core/dispatch-throttler';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
@@ -50,6 +51,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   constructor(
     store: Store<AppState>,
+    throttler: DispatchThrottler,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
@@ -83,26 +85,35 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       destroy: () => this.statsSub.unsubscribe()
     });
 
+    throttler.setDispatchDebounceTime(5000);
+
     this.statsSub = this.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
       withLatestFrom(this.pagination$),
       // Ensure we keep pagination smooth
       debounceTime(250),
-      tap(([page, pagination]) => {
+      map(([page, pagination]) => {
         if (!page) {
-          return;
+          return [];
         }
+        const actions = [];
         page.forEach(app => {
           const appState = app.entity.state;
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           const dispatching = false;
           if (appState === 'STARTED') {
-            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+            actions.push({
+              id: appGuid,
+              action: new GetAppStatsAction(appGuid, cfGuid)
+            });
+            // this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
           }
         });
+        return actions;
       }),
+      switchMap(throttler.throttle.bind(throttler)),
       tag('stat-obs')).subscribe();
   }
 }

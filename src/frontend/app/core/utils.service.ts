@@ -232,3 +232,11 @@ export function pathSet(path: string, object: any, value: any) {
     object[params[index++]] = value;
   }
 }
+
+export function chunkArray<T = any>(myArray: T[], chunkSize = 1) {
+  const results = [];
+  while (myArray.length) {
+    results.push(myArray.splice(0, chunkSize));
+  }
+  return results;
+}
