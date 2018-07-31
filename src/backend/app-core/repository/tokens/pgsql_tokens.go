@@ -11,7 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-var findAuthToken = `SELECT auth_token, refresh_token, token_expiry
+var findAuthToken = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data
 									FROM tokens
 									WHERE token_type = 'uaa' AND user_guid = $1`
 
@@ -154,11 +154,13 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	var (
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
-		tokenExpiry            int64
+		tokenExpiry            sql.NullInt64
+		authType               string
+		metadata               sql.NullString
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
+	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
@@ -181,7 +183,13 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	tr := new(interfaces.TokenRecord)
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
-	tr.TokenExpiry = tokenExpiry
+	if tokenExpiry.Valid {
+		tr.TokenExpiry = tokenExpiry.Int64
+	}
+	tr.AuthType = authType
+	if metadata.Valid {
+		tr.Metadata = metadata.String
+	}
 
 	return *tr, nil
 }
@@ -300,11 +308,11 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	var (
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
-		tokenExpiry            int64
+		tokenExpiry            sql.NullInt64
 		disconnected           bool
 		authType               string
-		metadata               string
-		tokenUserGUID          string
+		metadata               sql.NullString
+		tokenUserGUID          sql.NullString
 	)
 
 	var err error
@@ -340,11 +348,17 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	tr := new(interfaces.TokenRecord)
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
-	tr.TokenExpiry = tokenExpiry
+	if tokenExpiry.Valid {
+		tr.TokenExpiry = tokenExpiry.Int64
+	}
 	tr.Disconnected = disconnected
 	tr.AuthType = authType
-	tr.Metadata = metadata
-	tr.SystemShared = tokenUserGUID == SystemSharedUserGuid
+	if metadata.Valid {
+		tr.Metadata = metadata.String
+	}
+	if tokenUserGUID.Valid {
+		tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
+	}
 
 	return *tr, nil
 }

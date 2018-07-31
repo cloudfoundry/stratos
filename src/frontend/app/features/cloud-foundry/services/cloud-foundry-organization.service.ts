@@ -98,9 +98,7 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.orgEntityService.entityObs$.pipe(
-      filter(o => !!o && !!o.entity)
-    );
+    this.org$ = this.orgEntityService.waitForEntity$;
 
     this.initialiseOrgObservables();
 

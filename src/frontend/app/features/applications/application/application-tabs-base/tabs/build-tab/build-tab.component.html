@@ -24,14 +24,13 @@
                 <app-metadata-item icon="storage" label="Disk Quota">{{ appSvc.app.entity.disk_quota | mbToHumanSize}}</app-metadata-item>
                 <app-metadata-item icon="date_range" label="Created">{{ appSvc.app.metadata.created_at | date:'medium' }}</app-metadata-item>
                 <app-metadata-item icon="access_time" label="Modified">{{ appSvc.app.entity.package_updated_at ? (appSvc.app.entity.package_updated_at | date:'medium') : '-' }}</app-metadata-item>
-                <app-metadata-item icon="bug_report" label="Production">{{ appSvc.app.entity.production ? 'Yes' : 'No'}}</app-metadata-item>
+                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ sshStatus$ | async }}</app-metadata-item>
               </div>
               <div class="app-metadata__two-cols">
                 <app-metadata-item icon="touch_app" label="App State">{{ appSvc.app.entity.state }}</app-metadata-item>
                 <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}</app-metadata-item>
                 <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">{{(applicationService.appSummary$| async)?.entity?.entity.services?.length || '0' }}</app-metadata-item>
                 <app-metadata-item icon="network_route" iconFont="stratos-icons" label="Routes">{{(applicationService.appSummary$| async)?.entity?.entity?.routes?.length || '0' }}</app-metadata-item>
-                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ sshStatus$ | async }}</app-metadata-item>
               </div>
             </div>
           </mat-card-content>

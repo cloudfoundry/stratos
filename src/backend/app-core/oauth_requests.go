@@ -21,19 +21,10 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 
 	got401 := false
 
-	// Only need to get Client ID once
-	clientID, err := p.GetClientId(cnsi.CNSIType)
-	if err != nil {
-		return nil, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Endpoint type has not been registered",
-			"Endpoint type has not been registered %s: %s", cnsi.CNSIType, err)
-	}
-
 	for {
 		expTime := time.Unix(tokenRec.TokenExpiry, 0)
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
 			if err != nil {
 				log.Info(err)
 				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)

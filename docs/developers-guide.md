@@ -122,6 +122,8 @@ Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github
 
 Run `npm run e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
 
+More information on the E2E tests and pre-requisites for running them is available here - [E2E Tests](developers-guide-e2e-tests.md).
+
 ## Backend Development
 
 The backend (more informally called the portal-proxy or 'pp' for short) is still to be ported over from V1 of

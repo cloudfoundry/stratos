@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	portalSessionName = "console-session"
+	// Default cookie name/cookie name prefix
+	jetstreamSessionName = "console-session"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
@@ -26,7 +27,7 @@ func (e *SessionValueNotFound) Error() string {
 func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 	log.Debug("getSession")
 	req := c.Request().(*standard.Request).Request
-	return p.SessionStore.Get(req, portalSessionName)
+	return p.SessionStore.Get(req, p.SessionCookieName)
 }
 
 func (p *portalProxy) GetSessionValue(c echo.Context, key string) (interface{}, error) {
@@ -80,7 +81,7 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 	log.Debug("setSessionValues")
 
 	req := c.Request().(*standard.Request).Request
-	session, err := p.SessionStore.Get(req, portalSessionName)
+	session, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err != nil {
 		return err
 	}
@@ -96,7 +97,7 @@ func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error
 	log.Debug("unsetSessionValues")
 
 	req := c.Request().(*standard.Request).Request
-	session, err := p.SessionStore.Get(req, portalSessionName)
+	session, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err != nil {
 		return err
 	}
@@ -111,7 +112,7 @@ func (p *portalProxy) clearSession(c echo.Context) error {
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter
-	session, err := p.SessionStore.Get(req, portalSessionName)
+	session, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err != nil {
 		return err
 	}
