@@ -13,10 +13,12 @@ let appWall: ApplicationsPage;
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
 
-const orgName = 'e2e';
-const spaceName = 'e2e';
+const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
+const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
 describe('Application Deploy', function () {
+
+  const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -26,7 +28,7 @@ describe('Application Deploy', function () {
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
-      .getInfo(ConsoleUserType.admin)
+      .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
     cfHelper = new CFHelpers(setup);
   });
@@ -63,7 +65,7 @@ describe('Application Deploy', function () {
 
     expect(deployApp.stepper.getActiveStepName()).toBe('Source');
     expect(deployApp.stepper.canNext()).toBeFalsy();
-    deployApp.stepper.getStepperForm().fill({ 'projectname': 'nwmac/cf-quick-app' });
+    deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
 
     deployApp.stepper.waitUntilCanNext('Next');
     deployApp.stepper.next();
@@ -98,6 +100,7 @@ describe('Application Deploy', function () {
       ApplicationSummary.detect().then(appSummary => {
         appSummary.waitForPage();
         expect(appSummary.getAppName()).toBe('cf-quick-app');
+        applicationE2eHelper.cfHelper.deleteApp(appSummary.cfGuid, appSummary.appGuid);
       });
     });
 
