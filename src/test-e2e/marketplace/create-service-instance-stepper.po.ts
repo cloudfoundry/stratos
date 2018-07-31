@@ -34,7 +34,6 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   }
 
   setServiceName = (serviceInstanceName: string) => {
-    browser.sleep(5000);
     return this.getStepperForm().fill({ [this.serviceNameFieldName]: serviceInstanceName });
   }
 

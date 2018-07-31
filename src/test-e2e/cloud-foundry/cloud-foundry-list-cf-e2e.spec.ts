@@ -6,7 +6,7 @@ import { ListComponent } from '../po/list.po';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 
-describe('CF Endpoints Dashboard', () => {
+describe('CF Endpoints Dashboard - ', () => {
   const cloudFoundry = new CfTopLevelPage();
   const nav = new SideNavigation();
   const cfEndpoint = e2e.secrets.getDefaultCFEndpoint();

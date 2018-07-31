@@ -39,6 +39,16 @@ export interface NormalizedResponseEntities {
   [key: string]: string;
 }
 
+export function createEmptyCfResponse<T = any>(): CFResponse<T> {
+  return {
+    total_results: 0,
+    total_pages: 0,
+    prev_url: '',
+    next_url: '',
+    resources: new Array<APIResource<T>>()
+  };
+}
+
 export interface CFResponse<T = any> {
   total_results: number;
   total_pages: number;
