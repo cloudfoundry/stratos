@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, withLatestFrom, map, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, withLatestFrom, map, switchMap, concatMap, mergeMap } from 'rxjs/operators';
 
 import { DispatchThrottler } from '../../../../../core/dispatch-throttler';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -85,7 +85,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       destroy: () => this.statsSub.unsubscribe()
     });
 
-    throttler.setDispatchDebounceTime(5000);
+    throttler.setDispatchDebounceTime(10000);
 
     this.statsSub = this.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
@@ -113,7 +113,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         });
         return actions;
       }),
-      switchMap(throttler.throttle.bind(throttler)),
+      mergeMap(throttler.throttle.bind(throttler)),
       tag('stat-obs')).subscribe();
   }
 }
