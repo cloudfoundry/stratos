@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/SUSE/stratos-ui/config"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
@@ -115,6 +115,23 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		context.Clear(req)
 
 		return err
+	}
+}
+
+// This middleware is not required if Echo is upgraded to v3
+func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("urlCheckMiddleware")
+		requestPath := c.Request().URL().Path()
+		if strings.Contains(requestPath, "../") {
+			err := "Invalid path"
+			return interfaces.NewHTTPShadowError(
+				http.StatusBadRequest,
+				err,
+				err,
+			)
+		}
+		return h(c)
 	}
 }
 
