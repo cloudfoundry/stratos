@@ -2,9 +2,9 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, withLatestFrom, map, switchMap, concatMap, mergeMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
-import { DispatchThrottler } from '../../../../../core/dispatch-throttler';
+import { DispatchThrottler, DispatchThrottlerAction } from '../../../../../core/dispatch-throttler';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
@@ -85,8 +85,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       destroy: () => this.statsSub.unsubscribe()
     });
 
-    throttler.setDispatchDebounceTime(10000);
-
     this.statsSub = this.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
@@ -97,7 +95,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         if (!page) {
           return [];
         }
-        const actions = [];
+        const actions = new Array<DispatchThrottlerAction>();
         page.forEach(app => {
           const appState = app.entity.state;
           const appGuid = app.metadata.guid;
@@ -108,12 +106,11 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
               id: appGuid,
               action: new GetAppStatsAction(appGuid, cfGuid)
             });
-            // this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
           }
         });
         return actions;
       }),
-      mergeMap(throttler.throttle.bind(throttler)),
+      throttler.throttle.bind(throttler),
       tag('stat-obs')).subscribe();
   }
 }

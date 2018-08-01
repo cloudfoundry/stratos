@@ -5,7 +5,6 @@ import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { DispatchThrottler } from '../../../core/dispatch-throttler';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
@@ -35,8 +34,8 @@ import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
     provide: ListConfig,
     useClass: CfAppConfigService
   },
-    CfOrgSpaceDataService,
-    DispatchThrottler]
+    CfOrgSpaceDataService
+  ]
 })
 export class ApplicationWallComponent implements OnDestroy {
 

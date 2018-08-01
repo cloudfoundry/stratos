@@ -35,7 +35,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     super();
-    this.appsDataSource = new CfAppsDataSource(this.store, new DispatchThrottler(this.store, 5, 5000));
+    this.appsDataSource = new CfAppsDataSource(this.store, new DispatchThrottler(this.store, 1, 5000));
 
     this.multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
