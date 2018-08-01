@@ -161,6 +161,6 @@ entries:
     digest: 9c6bac79b2f8a6c9b52a077eaf4343c61fed764913c8d2d40d7baddcf7e34866
     name: metrics
     urls:
-    - https://github.com/SUSE/stratos-metrics/releases/download/2.0.0-metrics-dev/stratos-metrics-0.2.0.tgz
+    - https://github.com/SUSE/stratos-metrics/releases/download/2.0.0-metrics-dev/metrics-0.2.0.tgz
     version: 2.0.0-metrics-dev
 generated: 2018-07-25T09:46:48.558989238Z
