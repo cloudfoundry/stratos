@@ -123,7 +123,7 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("urlCheckMiddleware")
 		requestPath := c.Request().URL().Path()
-		if strings.HasPrefix(requestPath, "/../") || strings.HasPrefix(requestPath, "/./..") {
+		if strings.Contains(requestPath, "../") {
 			err := "Invalid path"
 			return interfaces.NewHTTPShadowError(
 				http.StatusBadRequest,
