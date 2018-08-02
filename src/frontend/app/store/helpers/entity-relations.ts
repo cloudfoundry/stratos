@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom, tap } from 'rxjs/operators';
 
 import { isEntityBlocked } from '../../core/entity-service';
 import { pathGet, pathSet } from '../../core/utils.service';
@@ -507,8 +507,8 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   return handleValidationLoopResults(store, results, config.apiResponse);
 }
 
-export function listEntityRelations(action: EntityInlineParentAction) {
-  const tree = fetchEntityTree(action);
+export function listEntityRelations(action: EntityInlineParentAction, fromCache = true) {
+  const tree = fetchEntityTree(action, fromCache);
   return {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames
@@ -518,7 +518,6 @@ export function listEntityRelations(action: EntityInlineParentAction) {
 function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
   return childEntitiesAsArray ? childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity) : null;
 }
-
 
 /**
  * Check to see if we already have the result of the pagination action in a parent entity (we've previously fetched it inline). If so
@@ -588,7 +587,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             childEntitiesUrl: '',
             populateMissing: true
           };
-          return createActionsForExistingEntities(config)[0];
+          return createActionsForExistingEntities(config);
         }
       }
       return;
