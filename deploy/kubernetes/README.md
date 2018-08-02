@@ -378,3 +378,5 @@ Deploy Stratos with Metrics enabled
 $ helm install ./console -f values.yaml --name console --namespace stratos
 
 ```
+
+The metrics endpoint will be available as `https://console-metrics-nginx`. This can registered as an endpoint in Stratos as a `Metrics` type.
