@@ -2,7 +2,6 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { DispatchThrottler } from '../../../../../core/dispatch-throttler';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -35,7 +34,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     super();
-    this.appsDataSource = new CfAppsDataSource(this.store, new DispatchThrottler(this.store, 1, 5000));
+    this.appsDataSource = new CfAppsDataSource(this.store);
 
     this.multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
