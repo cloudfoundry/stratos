@@ -536,6 +536,9 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
 	}))
+	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
+		XFrameOptions: "DENY",
+	}))
 
 	if !isUpgrade {
 		e.Use(errorLoggingMiddleware)
