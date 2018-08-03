@@ -10,6 +10,8 @@ This week we've focused on..
 - Responding to community issues. There's been an increase in use and some great contributions.
 - Fixing older, but still valid, issues that haven't quite been important to address at the time.
 
+In addition we’ve created a short (a few minutes) survey to get a better idea how the community plan to use Stratos. Answers and feedback will directly impact the direction we take Stratos, so the quicker we have responses the quicker we can act on them. Follow this link to start answering https://www.surveymonkey.com/r/2L8XWST
+
 ## 27 July 2018
 
 The main news this week is that we have released a first version of Stratos 2.0.
