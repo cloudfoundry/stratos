@@ -28,7 +28,7 @@ import {
   EntityTreeRelation,
 } from './entity-relations.types';
 
-describe('Entity Relations - ', () => {
+fdescribe('Entity Relations - ', () => {
 
   const missingSpacesUrl = 'spaces_url';
   const missingQuotaGuid = 'quota_guid';
@@ -77,7 +77,7 @@ describe('Entity Relations - ', () => {
     };
   }
 
-  fdescribe('validateEntityRelations - ', () => {
+  describe('validateEntityRelations - ', () => {
 
     const pagKey = 'validateEntityRelations-pagKey';
     const cfGuid = 'validateEntityRelations-cf';
@@ -102,7 +102,12 @@ describe('Entity Relations - ', () => {
         store: iStore
       });
       expect(res.started).toBeFalsy();
-      expect(res.apiResponse).toBeFalsy();
+      if (apiResponse) {
+        expect(res.apiResponse).toBeTruthy();
+      } else {
+        expect(res.apiResponse).toBeFalsy();
+      }
+
       expect(res.completed.then(done));
     }
 
@@ -151,7 +156,11 @@ describe('Entity Relations - ', () => {
           store: iStore
         });
         expect(res.started).toBeTruthy();
-        expect(res.apiResponse).toBeFalsy();
+        if (apiResponse) {
+          expect(res.apiResponse).toBeTruthy();
+        } else {
+          expect(res.apiResponse).toBeFalsy();
+        }
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(2);
         expect(dispatchSpy.calls.count()).toBe(2);
@@ -214,7 +223,11 @@ describe('Entity Relations - ', () => {
           store: iStore
         });
         expect(res.started).toBeTruthy();
-        expect(res.apiResponse).toBeFalsy();
+        if (apiResponse) {
+          expect(res.apiResponse).toBeTruthy();
+        } else {
+          expect(res.apiResponse).toBeFalsy();
+        }
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(1);
         expect(dispatchSpy.calls.count()).toBe(1);
@@ -306,14 +319,14 @@ describe('Entity Relations - ', () => {
       it('List exists, list required', (done) => {
         const newSpace = createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
         apiResponse.response.entities[organizationSchemaKey][orgGuid].entity.spaces = [newSpace];
-        apiResponse.response.entities[spaceSchemaKey][spaceGuid] = newSpace;
+        apiResponse.response.entities[spaceSchemaKey] = { [spaceGuid]: newSpace };
         listExistsListRequired(done);
       });
 
       it('List exists, list not required', (done) => {
         const newSpace = createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
         apiResponse.response.entities[organizationSchemaKey][orgGuid].entity.spaces = [newSpace];
-        apiResponse.response.entities[spaceSchemaKey][spaceGuid] = newSpace;
+        apiResponse.response.entities[spaceSchemaKey] = { [spaceGuid]: newSpace };
         listExistsListNotRequired(done);
       });
 
@@ -323,42 +336,7 @@ describe('Entity Relations - ', () => {
 
     });
     // already fetching?
-    // with, without api response
-
-
-
-
-
-
-
-    // it('', () => {
-
-    // })
-
-
-    // iStore.select(selectPaginationState(spaceSchemaKey, getSpacesAction.paginationKey)).pipe(
-    //   filter(state => !!state),
-    //   first(),
-    //   tap(state => {
-    //     expect(state).toBeDefined();
-    //     expect(state.pageRequests[0]).toBeDefined();
-    //     expect(state.pageRequests[0].busy).toBeTruthy();
-
-    //     const fakeResponse: NormalizedResponse = {
-    //       entities: {
-    //         [spaceSchemaKey]: [
-    //           createEmptySpace(spaceGuid, 'No params, some required', orgGuid)
-    //         ]
-    //       },
-    //       result: [spaceGuid]
-    //     };
-
-    //     iStore.dispatch(new WrapperRequestActionSuccess(fakeResponse, getSpacesAction, 'fetch', 1, 1));
-    //   })
-    // ).subscribe();
-    // console.log(JSON.stringify(store.pagination[spaceSchemaKey]));
-    // store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState(); // TODO: fetching
-    // expect(res.completed.then(done));
+    // specific features
   });
 
   describe('listEntityRelations', () => {
