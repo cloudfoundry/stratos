@@ -2,6 +2,14 @@
 
 Weekly status updates are published here.
 
+## 3 August 2018
+This week we've focused on..
+
+- Making metrics components easier to deploy. This will help us apply polish and publicise CF metrics in the coming weeks.
+- Improving test suites and coverage.
+- Responding to community issues. There's been an increase in use and some great contributions.
+- Fixing older, but still valid, issues that haven't quite been important to address at the time.
+
 ## 27 July 2018
 
 The main news this week is that we have released a first version of Stratos 2.0.
