@@ -228,9 +228,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
       results = [].concat(results, connectEntityWithParent);
     }
   } else {
-    console.log(4.5);
     if (populateMissing) {
-      console.log(4.6);
       // The values are missing and we want them, go fetch
       results = [].concat(results, createActionsForMissingEntities(config));
     }
@@ -251,18 +249,14 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   if (!entities) {
     return [];
   }
-  console.log('2');
 
   let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
-    console.log('3', childRelation);
     entities.forEach(entity => {
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
-        console.log('3.1');
         childEntities = childRelation.isArray ? childEntities : [childEntities];
       } else {
-        console.log('3.2');
         let childEntitiesAsArray;
 
         if (childRelation.isArray) {
@@ -293,7 +287,6 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
             }
           }
         }
-        console.log('3.3', childEntities);
         results = [].concat(results, handleRelation({
           ...config,
           cfGuid: cfGuid || entity.entity.cfGuid,
@@ -305,7 +298,6 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
       }
 
       if (childEntities && childRelation.childRelations.length) {
-        console.log('5');
         results = [].concat(results, validationLoop({
           ...config,
           cfGuid: cfGuid || entity.entity.cfGuid,
@@ -378,12 +370,10 @@ function associateChildWithParent(store, action: FetchRelationAction, apiRespons
 
 function handleValidationLoopResults(store: Store<AppState>, results: ValidateEntityResult[], apiResponse: APIResponse): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
-  console.log('6', results.length);
   results.forEach(request => {
     // Fetch any missing data
     if (!request.abortDispatch) {
       store.dispatch(request.action);
-      console.log('res', JSON.stringify(request.action.type));
     }
     // Wait for the action to be completed
     const obs = request.fetchingState$ ? request.fetchingState$.pipe(
@@ -439,7 +429,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
     parentEntities = denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities);
   }
-  console.log('1', parentEntities);
 
   const results = validationLoop({
     ...config,

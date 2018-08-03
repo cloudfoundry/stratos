@@ -78,8 +78,6 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
     if (includeRelations.indexOf(parentChildKey) >= 0) {
       // Ensure we maintain type by creating new instance, rather than spreading old
       const clone = new EntityTreeRelation(relation.entity, relation.isArray, relation.paramName, relation.path, relation.childRelations);
-      console.log('WANK1', relation);
-      console.log('WANK2', clone);
       newChildRelations.push(clone);
       if (tree.requiredParamNames.indexOf(relation.paramName) < 0) {
         tree.requiredParamNames.push(relation.paramName);
