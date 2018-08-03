@@ -2,7 +2,7 @@ import { EntitySchema } from './entity-factory';
 import { fetchEntityTree } from './entity-relations.tree';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
 
-fdescribe('Entity Relations - Tree', () => {
+describe('Entity Relations - Tree', () => {
 
   function createBaseAction(): EntityInlineParentAction {
     const entityKey = 'parent';
@@ -40,7 +40,7 @@ fdescribe('Entity Relations - Tree', () => {
     const childSchema = new EntitySchema('child1', {}, {}, 'rel1');
 
     const action = createBaseAction();
-    action.includeRelations = [createEntityRelationKey(action.entityKey, childSchema.key)];
+    action.includeRelations = [createEntityRelationKey(action.entityKey, childSchema.relationKey)];
     action.entity = new EntitySchema(action.entityKey, {
       entity: {
         [childSchema.relationKey]: childSchema

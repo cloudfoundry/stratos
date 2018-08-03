@@ -73,10 +73,13 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
 export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [], )
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
-  entityRelation.childRelations.forEach((relation) => {
-    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entityKey);
+  entityRelation.childRelations.forEach((relation: EntityTreeRelation) => {
+    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entity.relationKey || relation.entityKey);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
-      const clone = { ...relation };
+      // Ensure we maintain type by creating new instance, rather than spreading old
+      const clone = new EntityTreeRelation(relation.entity, relation.isArray, relation.paramName, relation.path, relation.childRelations);
+      console.log('WANK1', relation);
+      console.log('WANK2', clone);
       newChildRelations.push(clone);
       if (tree.requiredParamNames.indexOf(relation.paramName) < 0) {
         tree.requiredParamNames.push(relation.paramName);

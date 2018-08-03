@@ -1,10 +1,10 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom, tap } from 'rxjs/operators';
+import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { isEntityBlocked } from '../../core/entity-service';
-import { pathGet, pathSet } from '../../core/utils.service';
+import { pathGet } from '../../core/utils.service';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { APIResponse } from '../actions/request.actions';
@@ -23,16 +23,11 @@ import {
   EntityInlineParentAction,
   EntityTreeRelation,
   isEntityInlineChildAction,
+  ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
 import { pick } from './reducer.helper';
 
-
-class AppStoreLayout {
-  [entityKey: string]: {
-    [guid: string]: any;
-  }
-}
 
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -47,66 +42,6 @@ interface ValidateEntityResult {
   action: FetchRelationAction;
   fetchingState$?: Observable<ValidateResultFetchingState>;
   abortDispatch?: boolean;
-}
-
-class ValidateEntityRelationsConfig {
-  /**
-   * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
-   *
-   * @type {string}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  cfGuid: string;
-  store: Store<AppState>;
-  /**
-   * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
-   *
-   * @type {AppStoreLayout}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  allEntities: AppStoreLayout;
-  /**
-   * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
-   * and quicker
-   *
-   * @type {AppStoreLayout}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  allPagination: AppStoreLayout;
-  /**
-   * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
-   * have an entity/entities
-   *
-   * @type {AppStoreLayout}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  newEntities?: AppStoreLayout;
-  /**
-   * The action that has fetched the entity/entities
-   *
-   * @type {IRequestAction}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  action: IRequestAction;
-  /**
-   * Collection of parent entities whose children may be missing. for example a list of organizations that have missing spaces
-   *
-   * @type {any[]}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  parentEntities: any[];
-  /**
-   * If a child is missing, should we raise an action to fetch it?
-   *
-   * @memberof ValidateEntityRelationsConfig
-   */
-  populateMissing = true;
-  /**
-   * If we're validating an api request we'll have the apiResponse, otherwise it's null and we're ad hoc validating an entity/list
-   *
-   * @memberof ValidateEntityRelationsConfig
-   */
-  apiResponse: APIResponse;
 }
 
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
@@ -293,7 +228,9 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
       results = [].concat(results, connectEntityWithParent);
     }
   } else {
+    console.log(4.5);
     if (populateMissing) {
+      console.log(4.6);
       // The values are missing and we want them, go fetch
       results = [].concat(results, createActionsForMissingEntities(config));
     }
@@ -314,14 +251,18 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   if (!entities) {
     return [];
   }
+  console.log('2');
 
   let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
+    console.log('3', childRelation);
     entities.forEach(entity => {
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
+        console.log('3.1');
         childEntities = childRelation.isArray ? childEntities : [childEntities];
       } else {
+        console.log('3.2');
         let childEntitiesAsArray;
 
         if (childRelation.isArray) {
@@ -352,6 +293,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
             }
           }
         }
+        console.log('3.3', childEntities);
         results = [].concat(results, handleRelation({
           ...config,
           cfGuid: cfGuid || entity.entity.cfGuid,
@@ -363,6 +305,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
       }
 
       if (childEntities && childRelation.childRelations.length) {
+        console.log('5');
         results = [].concat(results, validationLoop({
           ...config,
           cfGuid: cfGuid || entity.entity.cfGuid,
@@ -435,11 +378,12 @@ function associateChildWithParent(store, action: FetchRelationAction, apiRespons
 
 function handleValidationLoopResults(store: Store<AppState>, results: ValidateEntityResult[], apiResponse: APIResponse): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
-
+  console.log('6', results.length);
   results.forEach(request => {
     // Fetch any missing data
     if (!request.abortDispatch) {
       store.dispatch(request.action);
+      console.log('res', JSON.stringify(request.action.type));
     }
     // Wait for the action to be completed
     const obs = request.fetchingState$ ? request.fetchingState$.pipe(
@@ -495,6 +439,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
     parentEntities = denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities);
   }
+  console.log('1', parentEntities);
 
   const results = validationLoop({
     ...config,

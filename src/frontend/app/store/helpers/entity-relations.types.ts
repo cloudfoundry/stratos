@@ -1,10 +1,71 @@
-import { Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 
 import { getPaginationKey } from '../actions/pagination.actions';
 import { APIResponse } from '../actions/request.actions';
+import { AppState, IRequestTypeState } from '../app-state';
+import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
 import { EntitySchema } from './entity-factory';
 
+export class ValidateEntityRelationsConfig {
+  /**
+   * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
+   *
+   * @type {string}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  cfGuid: string;
+  store: Store<AppState>;
+  /**
+   * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
+   *
+   * @type {IRequestTypeState}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  allEntities: IRequestTypeState;
+  /**
+   * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
+   * and quicker
+   *
+   * @type {IRequestTypeState}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  allPagination: IRequestTypeState;
+  /**
+   * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
+   * have an entity/entities
+   *
+   * @type {IRequestTypeState}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  newEntities?: IRequestTypeState;
+  /**
+   * The action that has fetched the entity/entities
+   *
+   * @type {IRequestAction}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  action: IRequestAction;
+  /**
+   * Collection of entity (guids) whose children may be missing. For example a list of organizations that have missing spaces
+   *
+   * @type {string[]}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  parentEntities: string[];
+  /**
+   * If a child is missing, should we raise an action to fetch it?
+   *
+   * @memberof ValidateEntityRelationsConfig
+   */
+  populateMissing = true;
+  /**
+   * If we're validating an api request we'll have the apiResponse, otherwise it's null and we're ad hoc validating an entity/list
+   *
+   * @memberof ValidateEntityRelationsConfig
+   */
+  apiResponse: APIResponse;
+}
 
 export class EntityTree {
   rootRelation: EntityTreeRelation;
