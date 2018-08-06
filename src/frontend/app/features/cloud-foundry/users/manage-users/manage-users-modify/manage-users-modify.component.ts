@@ -51,6 +51,9 @@ import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space
 /* tslint:enable:max-line-length */
 
 interface Org { metadata: { guid: string }; }
+interface CfUserWithWarning extends CfUser {
+  showWarning: boolean;
+}
 
 @Component({
   selector: 'app-manage-users-modify',
@@ -108,13 +111,13 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  users$: Observable<CfUser[]>;
+  usersNames$: Observable<string[]>;
   blocked$: Observable<boolean>;
   valid$: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
-  showWarning$: Observable<boolean>;
+  usersWithWarning$: Observable<string[]>;
 
   constructor(
     private store: Store<AppState>,
@@ -165,13 +168,17 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       ).subscribe(orgs => this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid)));
     }
 
-    this.users$ = this.store.select(selectUsersRolesPicked).pipe(
+    const users$: Observable<CfUserWithWarning[]> = this.store.select(selectUsersRolesPicked).pipe(
       distinctUntilChanged(),
       map(users => users.map(this.mapUser.bind(this)))
     );
 
-    this.showWarning$ = this.users$.pipe(
-      map(users => !!users.find(user => !!user['showWarning']))
+    this.usersNames$ = users$.pipe(
+      map(users => users.map(user => user.showWarning ? '*' + user.username : user.username))
+    );
+
+    this.usersWithWarning$ = users$.pipe(
+      map(users => users.filter(user => !!user.showWarning).map(user => user.username))
     );
 
     this.valid$ = this.store.select(selectUsersRolesRoles).pipe(
@@ -181,7 +188,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     );
   }
 
-  private mapUser(user: CfUser): CfUser {
+  private mapUser(user: CfUser): CfUserWithWarning {
     // If we're at the org level or lower we guarantee org roles. If we're at the space we guarantee space roles.
     const showWarning = user.missingRoles &&
       (user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
@@ -192,9 +199,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       showWarning,
       username: user.username || user.guid
     };
-    if (showWarning) {
-      newUser.username = '*' + newUser.username;
-    }
     return newUser;
   }
 
@@ -240,10 +244,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   onEnter = () => {
     if (!this.snackBarRef) {
-      this.showWarning$.pipe(first()).subscribe((showWarning => {
-        if (showWarning) {
-          this.snackBarRef = this.snackBar.open(`Not all roles are shown. To avoid this please navigate to a specific organization or space`
-            , 'Dismiss');
+      this.usersWithWarning$.pipe(first()).subscribe((usersWithWarning => {
+        if (usersWithWarning && usersWithWarning.length) {
+          this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
+          navigate to a specific organization or space`, 'Dismiss');
         }
       }));
     }

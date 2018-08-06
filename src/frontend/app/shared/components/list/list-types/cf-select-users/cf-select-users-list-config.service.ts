@@ -77,7 +77,6 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
         )
       ),
       tap(([cf, action]) => this.createDataSource(action)),
-      // tap(([cf, action]) => this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this)),
       map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
       refCount()
@@ -94,8 +93,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       distinctUntilChanged(),
       switchMap(entities => entities
         .map(entity => {
-          const missingRoles = this.createMissingRoles(entity.entity.missingRoles);
-          rowStateManager.updateRowState(entity.entity.guid, { warning: missingRoles.length });
+          const hasMissingRoles = this.hasMissingRoles(entity.entity.missingRoles);
+          rowStateManager.updateRowState(entity.entity.guid, { warning: hasMissingRoles });
         })
       ),
     ).subscribe();
@@ -117,26 +116,20 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
 
   private getUsername = (user: CfUser): string => {
     const userName = user.username || user.guid;
-    const missingRoles = this.createMissingRoles(user.missingRoles);
-    if (missingRoles.length) {
-      return `${userName} - Not all roles for this user are known (${missingRoles.join(', ')})`;
-    }
-    return userName;
+    return this.hasMissingRoles(user.missingRoles) ? `${userName} - Not all roles for this user are known` : userName;
   }
 
-  private createMissingRoles(missingRoles: CfUserMissingRoles): string[] {
+  private hasMissingRoles(missingRoles: CfUserMissingRoles): boolean {
     if (missingRoles) {
       if (this.activeRouteCfOrgSpace.spaceGuid) {
-        // At space level, we'll have all the org and space roles
-        return [];
+        // At space level, we'll have all the org and space roles (impossible to have missing roles)
+        return false;
       } else if (this.activeRouteCfOrgSpace.orgGuid) {
         // At org level, we'll have all the org but possibly not space roles
-        return missingRoles.space.map(role => UserRoleLabels.space.long[role]);
+        return !!missingRoles.space.length;
       } else {
         // At cf level, we might not have either org or space roles
-        return [].concat(
-          missingRoles.org.map(role => UserRoleLabels.org.long[role]),
-          missingRoles.space.map(role => UserRoleLabels.space.long[role]));
+        return !!missingRoles.org.length || !!missingRoles.space.length;
       }
     }
   }
