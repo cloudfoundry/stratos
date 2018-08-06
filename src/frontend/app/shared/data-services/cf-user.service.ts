@@ -325,9 +325,9 @@ export class CfUserService {
   }
 
   public isConnectedUserAdmin = (store, cfGuid: string): Observable<boolean> =>
-    waitForCFPermissions(store, cfGuid).pipe(
-      switchMap(() => this.store.select(getCurrentUserCFGlobalStates(cfGuid))),
-      map(state => state ? state.isAdmin : false),
+    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
+      filter(state => !!state),
+      map(state => state.isAdmin),
       first()
     )
 }
