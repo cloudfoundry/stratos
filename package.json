@@ -69,7 +69,7 @@
     "reselect": "^3.0.1",
     "rxjs": "^6.2.0",
     "rxjs-spy": "^7.0.2",
-    "rxjs-websockets": "git+https://github.com/ohjames/rxjs-websockets.git#28711f94f6988bd23d9a120061d6f9002961114b",
+    "rxjs-websockets": "~6.0.0",
     "web-animations-js": "^2.3.1",
     "xterm": "^3.5.0",
     "zone.js": "~0.8.26"
