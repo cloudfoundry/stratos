@@ -1,4 +1,4 @@
-import { IOrganization, ISpace } from '../../core/cf-api.types';
+import { IOrganization, IQuotaDefinition, ISpace } from '../../core/cf-api.types';
 import { APIResource } from '../types/api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';
@@ -39,7 +39,7 @@ export class EntityRelationSpecHelper {
         security_groups_url: '',
         service_instances_url: '',
         allow_ssh: false,
-        staging_security_groups_url: ''
+        staging_security_groups_url: '',
       },
       metadata: {
         guid,
@@ -48,5 +48,22 @@ export class EntityRelationSpecHelper {
         updated_at: '2017-09-08T17:23:43Z'
       }
     };
+  }
+
+  createEmptyQuotaDefinition(guid: string, name: string): APIResource<IQuotaDefinition> {
+    return {
+      entity: {
+        memory_limit: 1,
+        app_instance_limit: 2,
+        instance_memory_limit: 3,
+        name,
+      },
+      metadata: {
+        guid,
+        url: '',
+        created_at: '2017-09-08T17:23:42Z',
+        updated_at: '2017-09-08T17:23:43Z'
+      }
+    }
   }
 }

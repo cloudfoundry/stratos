@@ -9,7 +9,14 @@ import { APIResponse } from '../actions/request.actions';
 import { AppState, IRequestTypeState } from '../app-state';
 import { getDefaultRequestState } from '../reducers/api-request-reducer/types';
 import { IRequestDataState } from '../types/entity.types';
-import { entityFactory, organizationSchemaKey, quotaDefinitionSchemaKey, spaceSchemaKey } from './entity-factory';
+import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
+import {
+  entityFactory,
+  organizationSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from './entity-factory';
 import { validateEntityRelations } from './entity-relations';
 import {
   entityRelationMissingQuotaGuid,
@@ -19,7 +26,7 @@ import {
 } from './entity-relations.spec';
 import { createEntityRelationKey, createEntityRelationPaginationKey, EntityTreeRelation } from './entity-relations.types';
 
-fdescribe('validateEntityRelations - ', () => {
+fdescribe('Entity Relations - validate', () => {
 
   const helper = new EntityRelationSpecHelper();
 
@@ -34,9 +41,10 @@ fdescribe('validateEntityRelations - ', () => {
   let newEntities: IRequestTypeState;
 
   function noOp(iStore: Store<AppState>, includeRelations: string[], done: () => void) {
+    const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
     const res = validateEntityRelations({
       cfGuid,
-      action: new GetOrganization(orgGuid, cfGuid, [], true),
+      action: new GetOrganization(orgGuid, cfGuid, includeRelations, true),
       allEntities,
       allPagination: {},
       apiResponse,
@@ -53,15 +61,18 @@ fdescribe('validateEntityRelations - ', () => {
     }
 
     expect(res.completed.then(done));
+
+    expect(iStore.dispatch).toHaveBeenCalledTimes(0);
+    expect(dispatchSpy.calls.count()).toBe(0);
   }
 
-  function everythingMissingNothingRequired(done: () => void) {
+  function testEverythingMissingNothingRequired(done: () => void) {
     inject([Store], (iStore: Store<AppState>) => {
       noOp(iStore, [], done);
     })();
   }
 
-  function listMissingListRequired(done: () => void) {
+  function testListMissingListRequired(done: () => void) {
     const getOrgAction = new GetOrganization(orgGuid, cfGuid, [createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)], true);
 
     const childSpaceToOrgRelation = new EntityTreeRelation(entityFactory(spaceSchemaKey), true, 'spaces', 'entity.spaces', []);
@@ -114,19 +125,19 @@ fdescribe('validateEntityRelations - ', () => {
     })();
   }
 
-  function listExistsListRequired(done: () => void) {
+  function testListExistsListRequired(done: () => void) {
     inject([Store], (iStore: Store<AppState>) => {
       noOp(iStore, [createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)], done);
     })();
   }
 
-  function listExistsListNotRequired(done: () => void) {
+  function testListExistsListNotRequired(done: () => void) {
     inject([Store], (iStore: Store<AppState>) => {
       noOp(iStore, [], done);
     })();
   }
 
-  function entityMissingEntityRequired(done: () => void) {
+  function testEntityMissingEntityRequired(done: () => void) {
     const getOrgAction = new GetOrganization(
       orgGuid,
       cfGuid,
@@ -197,31 +208,221 @@ fdescribe('validateEntityRelations - ', () => {
     });
 
     it('Everything missing, nothing required', (done) => {
-      everythingMissingNothingRequired(done);
+      testEverythingMissingNothingRequired(done);
     });
 
     it('List missing, list required', (done) => {
-      listMissingListRequired(done);
+      testListMissingListRequired(done);
     });
 
     it('List exists, list required', (done) => {
       store.requestData[organizationSchemaKey][orgGuid].entity.spaces = [
         helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid)
       ];
-      listExistsListRequired(done);
+      testListExistsListRequired(done);
     });
 
     it('List exists, list not required', (done) => {
       store.requestData[organizationSchemaKey][orgGuid].entity.spaces = [
         helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid)
       ];
-      listExistsListNotRequired(done);
+      testListExistsListNotRequired(done);
     });
 
     it('Entity Missing, entity required', (done) => {
-      entityMissingEntityRequired(done);
+      testEntityMissingEntityRequired(done);
     });
 
+    it('child has missing required relation', (done) => {
+      const space = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
+      space.entity.routes_url = 'routes_url';
+      store.requestData[organizationSchemaKey][orgGuid].entity.spaces = [space];
+
+      const getOrgAction = new GetOrganization(
+        orgGuid,
+        cfGuid,
+        [
+          createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, routeSchemaKey)
+        ],
+        true);
+
+      const childRoutesToSpaceRelation = new EntityTreeRelation(
+        entityFactory(routeSchemaKey),
+        true,
+        'routes',
+        'entity.routes',
+        []);
+
+      const childSpaceToOrgRelation = new EntityTreeRelation(entityFactory(spaceSchemaKey), true, 'spaces', 'entity.spaces', [
+        childRoutesToSpaceRelation
+      ]);
+      const parentOrgToSpaceRelation = new EntityTreeRelation(getOrgAction.entity[0], true, null, '', [childSpaceToOrgRelation]);
+
+      const getSpaceRoutesAction = new FetchRelationPaginatedAction(
+        cfGuid,
+        spaceGuid,
+        childSpaceToOrgRelation,
+        childRoutesToSpaceRelation,
+        getOrgAction.includeRelations,
+        createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid) + '-relation',
+        true,
+        space.entity.routes_url
+      );
+      const setSpaceRoutesParamsActions = new SetInitialParams(
+        routeSchemaKey,
+        getSpaceRoutesAction.paginationKey,
+        getSpaceRoutesAction.initialParams,
+        true
+      );
+
+      inject([Store], (iStore: Store<AppState>) => {
+        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+
+        const res = validateEntityRelations({
+          cfGuid,
+          action: getOrgAction,
+          allEntities,
+          allPagination: {},
+          apiResponse,
+          parentEntities: [orgGuid],
+          newEntities,
+          populateMissing: true,
+          store: iStore
+        });
+        expect(res.started).toBeTruthy();
+        expect(res.apiResponse).toBeFalsy();
+
+        expect(iStore.dispatch).toHaveBeenCalledTimes(2);
+        expect(dispatchSpy.calls.count()).toBe(2);
+        expect(dispatchSpy.calls.all()[0].args[0]).toEqual(setSpaceRoutesParamsActions);
+        expect(dispatchSpy.calls.all()[1].args[0]).toEqual(getSpaceRoutesAction);
+        done();
+
+      })();
+    });
+
+    it('Missing entities has required relations but not allowed to populate missing', (done) => {
+      const populateMissing = false;
+      const getOrgAction = new GetOrganization(
+        orgGuid,
+        cfGuid,
+        [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+        populateMissing);
+
+      inject([Store], (iStore: Store<AppState>) => {
+        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+
+        const res = validateEntityRelations({
+          cfGuid,
+          action: getOrgAction,
+          allEntities,
+          allPagination: {},
+          apiResponse,
+          parentEntities: [orgGuid],
+          newEntities,
+          populateMissing,
+          store: iStore
+        });
+
+        expect(res.started).toBeFalsy();
+        expect(res.apiResponse).toBeFalsy();
+
+        expect(iStore.dispatch).toHaveBeenCalledTimes(0);
+        expect(dispatchSpy.calls.count()).toBe(0);
+        done();
+
+      })();
+    });
+
+    it('Basic no-op', (done) => {
+      const getOrgAction = new GetOrganization(
+        orgGuid,
+        cfGuid,
+        [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+        true);
+
+      inject([Store], (iStore: Store<AppState>) => {
+        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+
+        const res = validateEntityRelations({
+          cfGuid,
+          action: getOrgAction,
+          allEntities,
+          allPagination: {},
+          apiResponse,
+          parentEntities: [],
+          newEntities,
+          populateMissing: true,
+          store: iStore
+        });
+
+        expect(res.started).toBeFalsy();
+        expect(res.apiResponse).toBeFalsy();
+
+        expect(iStore.dispatch).toHaveBeenCalledTimes(0);
+        expect(dispatchSpy.calls.count()).toBe(0);
+        done();
+
+      })();
+    });
+
+    it('Have missing relation in store, associate it with parent', (done) => {
+      const quotaDefinition = helper.createEmptyQuotaDefinition('quota_guid', 'missing but in store');
+      // space.entity.routes_url = 'routes_url';
+      store.requestData[quotaDefinitionSchemaKey] = {
+        [quotaDefinition.metadata.guid]: quotaDefinition
+      };
+      const org = store.requestData[organizationSchemaKey][orgGuid];
+      org.entity.quota_definition_guid = quotaDefinition.metadata.guid;
+
+
+      const getOrgAction = new GetOrganization(
+        orgGuid,
+        cfGuid,
+        [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+        true);
+
+      const associateAction = new WrapperRequestActionSuccess({
+        entities: {
+          [organizationSchemaKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
+        },
+        result: [org.metadata.guid]
+      }, {
+        endpointGuid: getOrgAction.endpointGuid,
+        entity: getOrgAction.entity[0],
+        entityLocation: RequestEntityLocation.OBJECT,
+        guid: orgGuid,
+        entityKey: organizationSchemaKey,
+        type: '[Entity] Associate with parent',
+        childEntityKey: 'quota_definition'
+      } as IRequestAction, 'fetch', 1, 1);
+
+      inject([Store], (iStore: Store<AppState>) => {
+        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+
+        const res = validateEntityRelations({
+          cfGuid,
+          action: getOrgAction,
+          allEntities,
+          allPagination: {},
+          apiResponse,
+          parentEntities: [orgGuid],
+          newEntities,
+          populateMissing: true,
+          store: iStore
+        });
+        expect(res.started).toBeTruthy();
+        expect(res.apiResponse).toBeFalsy();
+
+        expect(iStore.dispatch).toHaveBeenCalledTimes(1);
+        expect(dispatchSpy.calls.count()).toBe(1);
+        expect(dispatchSpy.calls.all()[0].args[0]).toEqual(associateAction);
+        done();
+
+      })();
+
+    });
   });
 
   describe('validate from api response', () => {
@@ -253,33 +454,31 @@ fdescribe('validateEntityRelations - ', () => {
     });
 
     it('Everything missing, nothing required', (done) => {
-      everythingMissingNothingRequired(done);
+      testEverythingMissingNothingRequired(done);
     });
 
     it('List missing, list required', (done) => {
-      listMissingListRequired(done);
+      testListMissingListRequired(done);
     });
 
     it('List exists, list required', (done) => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
       apiResponse.response.entities[organizationSchemaKey][orgGuid].entity.spaces = [newSpace];
       apiResponse.response.entities[spaceSchemaKey] = { [spaceGuid]: newSpace };
-      listExistsListRequired(done);
+      testListExistsListRequired(done);
     });
 
     it('List exists, list not required', (done) => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
       apiResponse.response.entities[organizationSchemaKey][orgGuid].entity.spaces = [newSpace];
       apiResponse.response.entities[spaceSchemaKey] = { [spaceGuid]: newSpace };
-      listExistsListNotRequired(done);
+      testListExistsListNotRequired(done);
     });
 
     it('Entity Missing, entity required', (done) => {
-      entityMissingEntityRequired(done);
+      testEntityMissingEntityRequired(done);
     });
 
   });
-  // already fetching?
-  // specific features
-});
 
+});
