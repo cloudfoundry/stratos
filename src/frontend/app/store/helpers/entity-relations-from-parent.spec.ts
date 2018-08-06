@@ -14,7 +14,7 @@ import { organizationSchemaKey } from './entity-factory';
 import { populatePaginationFromParent } from './entity-relations';
 import { EntityRelationSpecHelper } from './entity-relations.spec';
 
-fdescribe('populatePaginationFromParent', () => {
+describe('Entity Relations - populate from parent', () => {
 
   const helper = new EntityRelationSpecHelper();
 

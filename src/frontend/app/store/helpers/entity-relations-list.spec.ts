@@ -2,7 +2,7 @@ import { EntitySchema } from './entity-factory';
 import { listEntityRelations } from './entity-relations';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
 
-fdescribe('Entity Relations - List relations', () => {
+describe('Entity Relations - List relations', () => {
   function createBaseAction(): EntityInlineParentAction {
     const entityKey = 'parent';
     return {
