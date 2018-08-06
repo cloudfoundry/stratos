@@ -156,8 +156,9 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 
 #### Dependencies
 * go
-  * GOPATH, GOBIN env vars set
+  * GOPATH, GOBIN env vars set to default values
 * glide
+* npm
 * UAA instance
 
 #### Running portal-proxy in a container
@@ -169,11 +170,11 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 1. Set up developer certs
     - Execute `deploy/tools/generate_cert.sh`
     - Copy `portal-proxy-output/dev-certs` to `./`
-1. Update `build/dev_config.json` with `"localDevBuild": true`
-1. Run `gulp local-dev-build`
-1. cd ./outputs
-1. Run `gulp build-backend`
-1. Update `config.propeties` and ensure that..
+2. Navigate to the root of the project
+3. run `npm install`
+4. Run `npm run build-backend-dev`
+5. cd ./outputs
+6. Update `config.propeties` and ensure that..
     - the UAA points to a valid instance
     - the `CONSOLE_CLIENT` and `CONSOLE_ADMIN_SCOPE` are valid in the UAA instance
-1. Run `portal-proxy`
+7. Make `portal-proxy` executable and run it
