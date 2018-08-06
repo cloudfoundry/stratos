@@ -1,9 +1,8 @@
 import { Action, Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { concatMap, delay, filter, map, switchMap, tap } from 'rxjs/operators';
-
+import { from, Observable, of as observableOf } from 'rxjs';
+import { bufferTime, concatMap, delay, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
-import { chunkArray } from './utils.service';
+
 
 export interface DispatchSequencerAction {
   id: string;
@@ -42,7 +41,7 @@ export class DispatchSequencer {
     return actions;
   }
 
-  private dispatch(actions: DispatchSequencerAction[]) {
+  private dispatch = (actions: DispatchSequencerAction[]) => {
     actions.forEach(action => {
       this.dispatchRecord[action.id] = new Date().getTime();
       this.store.dispatch(action.action);
@@ -62,16 +61,19 @@ export class DispatchSequencer {
       filter(actions => !!actions.length),
       map(actions => this.filter(actions)),
       filter(actions => !!actions.length),
-      concatMap(filteredActions => {
-        const chunks = chunkArray(filteredActions, this.batchSize);
-        // Always dispatch the first chunk immediately rather than after batchDelay. It would be nice to change this flow to processing
-        // individual actions and use something like filter + `bufferTime(500, null, this.batchSize)`, however this delays the first batch
-        this.dispatch(chunks.shift());
-        return observableOf(...chunks);
-      }),
-      // Could be improved by waiting on finish of previous batch
-      concatMap(actions => observableOf(actions).pipe(delay(this.batchDelayInMs))),
-      tap(this.dispatch.bind(this)),
+      mergeMap(filteredActions => {
+        return from(filteredActions)
+          .pipe(
+            bufferTime(100, null, this.batchSize),
+            concatMap((actions, i) => observableOf(actions)
+              .pipe(
+                delay(i > 0 ? this.batchDelayInMs : 0)
+              )
+            ),
+            tap(this.dispatch)
+          );
+
+      })
     );
   }
 }
