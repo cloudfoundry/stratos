@@ -196,7 +196,7 @@ describe('Entity Relations - validate', () => {
     beforeEach(() => {
       store = getInitialTestStoreState();
       store.requestData[organizationSchemaKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-      store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState(); // TODO: fetching
+      store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState();
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -369,7 +369,6 @@ describe('Entity Relations - validate', () => {
 
     it('Have missing relation in store, associate it with parent', (done) => {
       const quotaDefinition = helper.createEmptyQuotaDefinition('quota_guid', 'missing but in store');
-      // space.entity.routes_url = 'routes_url';
       store.requestData[quotaDefinitionSchemaKey] = {
         [quotaDefinition.metadata.guid]: quotaDefinition
       };
@@ -430,8 +429,7 @@ describe('Entity Relations - validate', () => {
     beforeEach(() => {
       store = getInitialTestStoreState();
 
-      // store.requestData[organizationSchemaKey][orgGuid] = createEmptyOrg(orgGuid, 'org-name');
-      store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState(); // TODO: fetching
+      store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState();
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
