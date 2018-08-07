@@ -64,6 +64,6 @@ export class EntityRelationSpecHelper {
         created_at: '2017-09-08T17:23:42Z',
         updated_at: '2017-09-08T17:23:43Z'
       }
-    }
+    };
   }
 }
