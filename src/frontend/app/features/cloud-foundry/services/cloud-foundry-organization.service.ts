@@ -6,6 +6,7 @@ import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
+import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -122,9 +123,7 @@ export class CloudFoundryOrganizationService {
     this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
     this.appInstances$ = this.apps$.pipe(
       filter($apps => !!$apps),
-      map(a => {
-        return a ? a.map(app => app.entity.instances).reduce((x, sum) => x + sum, 0) : 0;
-      })
+      map(getStartedAppInstanceCount)
     );
 
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
