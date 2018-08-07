@@ -123,8 +123,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
-	// set the guid on the object so it's returned in the response
-	newCNSI.GUID = guid
+	// set the id on the object so it's returned in the response
+	newCNSI.ID = guid
 
 	return newCNSI, err
 }

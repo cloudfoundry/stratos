@@ -155,7 +155,7 @@ func TestSaveCNSITokens(t *testing.T) {
 
 			db, _, repository := initialiseRepo(t)
 
-			Convey("should fail to save token with an invalid CNSI GUID", func() {
+			Convey("should fail to save token with an invalid CNSI ID", func() {
 				err := repository.SaveCNSIToken("", mockUserGuid, tokenRecord, mockEncryptionKey)
 				So(err, ShouldNotBeNil)
 			})
@@ -318,7 +318,7 @@ func TestFindCNSITokens(t *testing.T) {
 
 		db, mock, repository := initialiseRepo(t)
 
-		Convey("should fail to find token with an invalid CNSI GUID", func() {
+		Convey("should fail to find token with an invalid CNSI ID", func() {
 
 			_, err := repository.FindCNSIToken("", mockUserGuid, mockEncryptionKey)
 			log.Print("findUAA returned ", err)
@@ -381,7 +381,7 @@ func TestDeleteCNSIToken(t *testing.T) {
 
 		db, mock, repository := initialiseRepo(t)
 
-		Convey("should fail to delete token with an invalid CNSI GUID", func() {
+		Convey("should fail to delete token with an invalid CNSI ID", func() {
 			var cnsiGuid string = ""
 			err := repository.DeleteCNSIToken(cnsiGuid, mockUserGuid)
 			So(err, ShouldNotBeNil)

@@ -25,10 +25,10 @@ func (p *portalProxy) doOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req
 
 	for {
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshOidcToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.RefreshOidcToken(cnsi.SkipSSLValidation, cnsiRequest.ID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
 			if err != nil {
 				log.Info(err)
-				return nil, fmt.Errorf("Couldn't refresh OIDC token for Endpoint with GUID %s", cnsiRequest.GUID)
+				return nil, fmt.Errorf("Couldn't refresh OIDC token for Endpoint with ID %s", cnsiRequest.ID)
 			}
 			tokenRec = refreshedTokenRec
 		}

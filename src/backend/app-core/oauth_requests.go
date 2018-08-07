@@ -24,10 +24,10 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 	for {
 		expTime := time.Unix(tokenRec.TokenExpiry, 0)
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.ID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
 			if err != nil {
 				log.Info(err)
-				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
+				return nil, fmt.Errorf("Couldn't refresh token for CNSI with ID %s", cnsiRequest.ID)
 			}
 			tokenRec = refreshedTokenRec
 		}
@@ -54,14 +54,14 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
 	log.Debug("getCNSIRequestRecords")
 	// look up token
-	t, ok := p.GetCNSITokenRecord(r.GUID, r.UserGUID)
+	t, ok := p.GetCNSITokenRecord(r.ID, r.UserGUID)
 	if !ok {
-		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
+		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.ID, r.UserGUID)
 	}
 
-	c, err = p.GetCNSIRecord(r.GUID)
+	c, err = p.GetCNSIRecord(r.ID)
 	if err != nil {
-		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s: %s", r.GUID, err)
+		return t, c, fmt.Errorf("Info could not be found for CNSI with ID %s: %s", r.ID, err)
 	}
 
 	return t, c, nil

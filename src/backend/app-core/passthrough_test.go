@@ -27,7 +27,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		mockCNSIRequest := interfaces.CNSIRequest{
-			GUID:     mockCFGUID,
+			ID:       mockCFGUID,
 			UserGUID: mockUserGUID,
 			Method:   "GET",
 			URL:      uri,
@@ -216,7 +216,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 
 	Convey("Passthrough request should succeed", t, func() {
 		expectedCNSIRequest := interfaces.CNSIRequest{
-			GUID:     mockCFGUID,
+			ID:       mockCFGUID,
 			UserGUID: "user1",
 			Method:   "GET",
 			Body:     nil,
@@ -238,7 +238,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 			WithArgs(mockCFGUID).
 			WillReturnRows(expectCFRow())
 
-		cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
+		cr, err := pp.buildCNSIRequest(expectedCNSIRequest.ID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
 
 		So(err, ShouldBeNil)
 
@@ -247,7 +247,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 		})
 
 		Convey("Request GUID should equal expected GUID", func() {
-			So(cr.GUID, ShouldEqual, expectedCNSIRequest.GUID)
+			So(cr.ID, ShouldEqual, expectedCNSIRequest.ID)
 		})
 
 		Convey("Request Method should equal expected Method", func() {

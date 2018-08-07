@@ -198,7 +198,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
 	log.Debug("SaveCNSIToken")
 	if cnsiGUID == "" {
-		msg := "Unable to save CNSI Token without a valid CNSI GUID."
+		msg := "Unable to save CNSI Token without a valid CNSI ID."
 		log.Debug(msg)
 		return errors.New(msg)
 	}
@@ -293,7 +293,7 @@ func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string,
 func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte, includeDisconnected bool) (interfaces.TokenRecord, error) {
 	log.Debug("findCNSIToken")
 	if cnsiGUID == "" {
-		msg := "Unable to find CNSI Token without a valid CNSI GUID."
+		msg := "Unable to find CNSI Token without a valid CNSI ID."
 		log.Debug(msg)
 		return interfaces.TokenRecord{}, errors.New(msg)
 	}
@@ -367,7 +367,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string) error {
 	log.Debug("DeleteCNSIToken")
 	if cnsiGUID == "" {
-		msg := "Unable to delete CNSI Token without a valid CNSI GUID."
+		msg := "Unable to delete CNSI Token without a valid CNSI ID."
 		log.Debug(msg)
 		return errors.New(msg)
 	}

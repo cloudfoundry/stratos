@@ -105,7 +105,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		}
 
 		if c.portalProxy.GetConfig().CloudFoundryInfo != nil {
-			c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
+			c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.ID
 		}
 	} else {
 		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
@@ -118,7 +118,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		return fmt.Errorf("Could not determine user_id from session: %s", err)
 	}
 
-	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
+	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.ID, userGUID)
 	if ok && cfTokenRecord.Disconnected {
 		// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
 		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previsouly disoconnected). ", cfAPI)
@@ -135,7 +135,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 			}
 		} else {
 			log.Info("Auto-connecting to the auto-registered endpoint with credentials")
-			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
+			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.ID, false)
 			if err != nil {
 				log.Warnf("Could not auto-connect using credentials to auto-registered endpoint: %s", err.Error())
 				return err
