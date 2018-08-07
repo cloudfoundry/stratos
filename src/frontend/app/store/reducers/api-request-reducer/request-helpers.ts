@@ -49,8 +49,8 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
   Object.keys(entities).forEach(entityKey => {
     Object.keys(entities[entityKey]).forEach(guid => {
       const entState = getEntityRequestState(state, { entityKey, guid } as SingleEntityAction);
-      entState.fetching = false;
-      entState.error = false;
+      entState.fetching = entState.fetching || false;
+      entState.error = entState.error || false;
       const busy = entState.deleting ? entState.deleting.busy : false;
       entState.deleting = { ...defaultDeletingActionState, busy };
       newState = setEntityRequestState(newState, entState, { entityKey, guid } as IRequestAction);

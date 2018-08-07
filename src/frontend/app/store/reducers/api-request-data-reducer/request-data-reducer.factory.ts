@@ -1,12 +1,12 @@
 import { Action } from '@ngrx/store';
 
 import { pathGet } from '../../../core/utils.service';
-import { fetchEntityTree } from '../../helpers/entity-relations.tree';
+import { fetchEntityTree } from '../../helpers/entity-relations/entity-relations.tree';
 import {
   createEntityRelationKey,
   EntityInlineChildAction,
   isEntityInlineChildAction,
-} from '../../helpers/entity-relations.types';
+} from '../../helpers/entity-relations/entity-relations.types';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';

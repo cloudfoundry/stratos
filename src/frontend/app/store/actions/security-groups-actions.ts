@@ -1,7 +1,7 @@
 import { RequestOptions } from '@angular/http';
 
 import { entityFactory, securityGroupSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';

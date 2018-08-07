@@ -1,6 +1,6 @@
 import { schema } from 'normalizr';
 
-import { EntitySchema } from './entity-factory';
+import { EntitySchema } from '../entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
 
 const entityTreeCache: {
@@ -72,7 +72,7 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
   entityRelation.childRelations.forEach((relation) => {
-    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entityKey);
+    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entity.relationKey || relation.entityKey);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
       const clone = { ...relation };
       newChildRelations.push(clone);

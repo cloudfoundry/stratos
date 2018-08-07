@@ -1,12 +1,6 @@
-import { IRequestDataState } from './entity.types';
 import { IRequestEntityTypeState } from '../app-state';
-import { stringDistance } from 'codelyzer/util/utils';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { Schema } from 'normalizr';
-import { RequestOptions } from '@angular/http';
-import { Action } from '@ngrx/store';
-import { ApiActionTypes } from '../actions/request.actions';
-import { PaginatedAction } from './pagination.types';
+import { IRequestDataState } from './entity.types';
 
 export interface EntityInfo<T = any> {
   entityRequestInfo: RequestInfoState;
