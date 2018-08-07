@@ -79,19 +79,6 @@ export class LoadingPageComponent implements OnInit {
 
   private buildFromMonitor(monitor: EntityMonitor) {
     this.isDeleting = monitor.isDeletingEntity$;
-    this.isLoading = combineLatest(
-      monitor.isFetchingEntity$.pipe(
-        // There's a brief amount of time between the monitor returning an initial 'false' value before the validation code kicks
-        // in and marks as 'updating' (true + false --> false + false --> false --> true). Add some artificial lag here until we find a
-        // better solution.. see #2779
-        debounceTime(50)
-      ),
-      monitor.updatingSection$
-    ).pipe(
-      map(([fetching, updating]) => {
-        return fetching || updating._root_.busy;
-      }),
-      startWith(true),
-    );
+    this.isLoading = monitor.isFetchingEntity$;
   }
 }
