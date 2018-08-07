@@ -20,7 +20,7 @@ To get started quickly, we recommend following the steps to deploy the Stratos C
 
 If you have [docker](https://www.docker.com/community-edition) installed, you can quickly deploy Stratos using the all-in-one container:
 ```
-$ docker run -p 4443:443 splatform/stratos-ui:latest 
+$ docker run -p 4443:443 splatform/stratos:latest 
 ```
 
 Once that has finished, you can then access Stratos by visiting https://localhost:4443.

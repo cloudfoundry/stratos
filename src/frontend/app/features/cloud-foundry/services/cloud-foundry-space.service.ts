@@ -5,6 +5,7 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
+import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -167,9 +168,7 @@ export class CloudFoundrySpaceService {
     );
 
     this.appInstances$ = this.apps$.pipe(
-      map(a => {
-        return a.map(app => app.entity.instances).reduce((i, x) => i + x, 0);
-      })
+      map(getStartedAppInstanceCount)
     );
 
     this.totalMem$ = this.apps$.pipe(

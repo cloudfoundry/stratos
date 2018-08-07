@@ -2,8 +2,9 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
+import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
@@ -57,6 +58,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
     const action = createGetAllAppAction(paginationKey);
+    const dispatchSequencer = new DispatchSequencer(store);
 
     if (syncNeeded) {
       // We do this here to ensure we sync up with main endpoint table data.
@@ -89,20 +91,26 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       withLatestFrom(this.pagination$),
       // Ensure we keep pagination smooth
       debounceTime(250),
-      tap(([page, pagination]) => {
+      map(([page, pagination]) => {
         if (!page) {
-          return;
+          return [];
         }
+        const actions = new Array<DispatchSequencerAction>();
         page.forEach(app => {
           const appState = app.entity.state;
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           const dispatching = false;
           if (appState === 'STARTED') {
-            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+            actions.push({
+              id: appGuid,
+              action: new GetAppStatsAction(appGuid, cfGuid)
+            });
           }
         });
+        return actions;
       }),
+      dispatchSequencer.sequence.bind(dispatchSequencer),
       tag('stat-obs')).subscribe();
   }
 }

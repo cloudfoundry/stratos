@@ -6,7 +6,11 @@ import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLates
 import { isEntityBlocked } from '../../../core/entity-service';
 import { pathGet } from '../../../core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
-import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
+import {
+  FetchRelationAction,
+  FetchRelationPaginatedAction,
+  FetchRelationSingleAction,
+} from '../../actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
 import { RequestInfoState } from '../../reducers/api-request-reducer/types';
@@ -28,75 +32,23 @@ import {
   EntityInlineParentAction,
   EntityTreeRelation,
   isEntityInlineChildAction,
-  ValidateEntityResult,
-  ValidateResultFetchingState,
+  ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
 
-class AppStoreLayout {
-  [entityKey: string]: {
-    [guid: string]: any;
-  }
+interface ValidateResultFetchingState {
+  fetching: boolean;
 }
 
-class ValidateEntityRelationsConfig {
-  /**
-   * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
-   *
-   * @type {string}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  cfGuid: string;
-  store: Store<AppState>;
-  /**
-   * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
-   *
-   * @type {IRequestDataState}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  allEntities: IRequestDataState;
-  /**
-   * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
-   * and quicker
-   *
-   * @type {AppStoreLayout}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  allPagination: AppStoreLayout;
-  /**
-   * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
-   * have an entity/entities
-   *
-   * @type {AppStoreLayout}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  newEntities?: AppStoreLayout;
-  /**
-   * The action that has fetched the entity/entities
-   *
-   * @type {IRequestAction}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  action: IRequestAction;
-  /**
-   * Collection of parent entities whose children may be missing. for example a list of organizations that have missing spaces
-   *
-   * @type {any[]}
-   * @memberof ValidateEntityRelationsConfig
-   */
-  parentEntities: any[];
-  /**
-   * If a child is missing, should we raise an action to fetch it?
-   *
-   * @memberof ValidateEntityRelationsConfig
-   */
-  populateMissing = true;
-  /**
-   * If we're validating an api request we'll have the apiResponse, otherwise it's null and we're ad hoc validating an entity/list
-   *
-   * @memberof ValidateEntityRelationsConfig
-   */
-  apiResponse: APIResponse;
+/**
+ * An object to represent the action and status of a missing inline depth/entity relation.
+ * @export
+ * @interface ValidateEntityResult
+ */
+interface ValidateEntityResult {
+  action: FetchRelationAction;
+  fetchingState$?: Observable<ValidateResultFetchingState>;
+  abortDispatch?: boolean;
 }
 
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
@@ -419,7 +371,6 @@ function handleValidationLoopResults(
   action: IRequestAction,
   allEntities: IRequestDataState): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
-
   results.forEach(request => {
     // Fetch any missing data
     if (!request.abortDispatch) {
@@ -473,8 +424,7 @@ function handleValidationLoopResults(
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
-  const { action, populateMissing, newEntities, allEntities, store } = config;
-  let { parentEntities } = config;
+  const { action, populateMissing, newEntities, allEntities, store, parentEntities } = config;
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
       started: false,
@@ -485,22 +435,19 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   const relationAction = action as EntityInlineParentAction;
   const entityTree = fetchEntityTree(relationAction);
 
-  if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
-    parentEntities = denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities);
-  }
   const results = validationLoop({
     ...config,
     includeRelations: relationAction.includeRelations,
     populateMissing: populateMissing || relationAction.populateMissing,
-    entities: parentEntities,
+    entities: denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities),
     parentRelation: entityTree.rootRelation,
   });
 
   return handleValidationLoopResults(store, results, config.apiResponse, action, allEntities);
 }
 
-export function listEntityRelations(action: EntityInlineParentAction) {
-  const tree = fetchEntityTree(action);
+export function listEntityRelations(action: EntityInlineParentAction, fromCache = true) {
+  const tree = fetchEntityTree(action, fromCache);
   return {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames
@@ -580,7 +527,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             childEntitiesUrl: '',
             populateMissing: true
           };
-          return createActionsForExistingEntities(config)[0];
+          return createActionsForExistingEntities(config);
         }
       }
       return;
