@@ -6,7 +6,7 @@ import { applicationSchemaKey, endpointSchemaKey } from '../../helpers/entity-fa
 import { IRequestDataState } from '../../types/entity.types';
 import { APIResource } from '../../types/api.types';
 
-fdescribe('RequestDataReducerFactory', () => {
+describe('RequestDataReducerFactory', () => {
   it('should create', () => {
     const reducer = requestDataReducerFactory([], ['a', 'b', 'c', 'd']);
     expect(reducer).toBeDefined();
