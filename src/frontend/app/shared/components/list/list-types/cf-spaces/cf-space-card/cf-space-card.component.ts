@@ -4,7 +4,7 @@ import { Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
-import { startedAppInstances } from '../../../../../../core/cf.helpers';
+import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
@@ -109,7 +109,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   setCounts = () => {
     this.appCount = this.row.entity.apps ? this.row.entity.apps.length : 0;
-    this.appInstancesCount = startedAppInstances(this.row.entity.apps);
+    this.appInstancesCount = getStartedAppInstanceCount(this.row.entity.apps);
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
