@@ -1,4 +1,4 @@
-, e2e.secrets.haveSingleCloudFoundryEndpointkip# compiled output
+# compiled output
 /dist
 .dist
 /tmp
@@ -27,7 +27,7 @@
 # misc
 /.sass-cache
 /connect.lock
-/coverage, e2e.secrets.haveSingleCloudFoundryEndpoint
+/coverage
 /libpeerconnection.log
 npm-debug.log
 testem.log

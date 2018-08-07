@@ -15,13 +15,14 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
   return entityKey + '+' + includeRelations.join(',');
 }
 
-export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
+export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
   let entity = action.entity;
   const isArray = entity['length'] > 0;
   entity = isArray ? entity[0] : entity;
   const entityKey = entity['key'];
   const cacheKey = generateCacheKey(entityKey, action);
-  const entityTree = entityTreeCache[cacheKey] || createEntityTree(entity as EntitySchema, isArray);
+  const cachedTree = entityTreeCache[cacheKey];
+  const entityTree = fromCache && cachedTree ? cachedTree : createEntityTree(entity as EntitySchema, isArray);
   entityTreeCache[cacheKey] = entityTree;
   // Calc max depth and exclude not needed
   entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
@@ -37,6 +38,7 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
     new Array<EntityTreeRelation>()
   );
   const entityTree = {
+    maxDepth: 0,
     rootRelation: rootEntityRelation,
     requiredParamNames: new Array<string>(),
   };
@@ -71,10 +73,11 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
 export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [], )
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
-  entityRelation.childRelations.forEach((relation) => {
-    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entityKey);
+  entityRelation.childRelations.forEach((relation: EntityTreeRelation) => {
+    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entity.relationKey || relation.entityKey);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
-      const clone = { ...relation };
+      // Ensure we maintain type by creating new instance, rather than spreading old
+      const clone = new EntityTreeRelation(relation.entity, relation.isArray, relation.paramName, relation.path, relation.childRelations);
       newChildRelations.push(clone);
       if (tree.requiredParamNames.indexOf(relation.paramName) < 0) {
         tree.requiredParamNames.push(relation.paramName);
