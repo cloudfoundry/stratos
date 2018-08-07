@@ -536,6 +536,9 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
 	}))
+	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
+		XFrameOptions: "DENY",
+	}))
 
 	if !isUpgrade {
 		e.Use(errorLoggingMiddleware)
@@ -729,6 +732,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	// Serve up static resources
 	if err == nil {
+		log.Debug("Add URL Check Middleware")
+		e.Use(p.urlCheckMiddleware)
 		e.Static("/", staticDir)
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")

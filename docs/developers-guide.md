@@ -50,10 +50,10 @@ Configuration information can be found in two places
 
 ## Run the frontend
 
-1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required portal-proxy url (see above for more info)
+1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required Jet Stream url (see above for more info)
 1. Run `npm install`
 1. Run `npm start` for a dev server. (the app will automatically reload if you change any of the source files)
-1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the portal-proxy the console points at. Please refer
+1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the Jet Stream the console points at. Please refer
    to the guides used when setting up the backend for more information
 
 ## Build
@@ -126,7 +126,7 @@ More information on the E2E tests and pre-requisites for running them is availab
 
 ## Backend Development
 
-The backend (more informally called the portal-proxy or 'pp' for short) is still to be ported over from V1 of
+The backend (more informally called the Jet Stream) is still to be ported over from V1 of
 [Stratos](https://github.com/cloudfoundry-incubator/stratos). Once that's completed come back and check out this section for instructions on how to
 make changes to it.
 
@@ -134,7 +134,7 @@ WIP
 
 ### Getting started
 
-The portal-proxy is the back-end for the Console UI. It is written in Go.
+The Jet Stream is the back-end for the Console UI. It is written in Go.
 
 ### Automatically register and connect to an existing endpoint
 To automatically register a Cloud Foundry add the environment variable below
