@@ -1,8 +1,11 @@
 import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { Subscription } from 'rxjs';
-
+import { Subscription, Observable, of as observableOf } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { switchMap } from 'rxjs/operators';
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
+import { AppState } from '../store/app-state';
+import { waitForCFPermissions } from '../features/cloud-foundry/cf.helpers';
 
 @Directive({
   selector: '[appUserPermission]'
@@ -24,17 +27,20 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   private canSub: Subscription;
 
   constructor(
+    private store: Store<AppState>,
     private templateRef: TemplateRef<any>,
     private viewContainer: ViewContainerRef,
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) { }
 
   public ngOnInit() {
-    this.canSub = this.currentUserPermissionsService.can(
-      this.appUserPermission,
-      this.appUserPermissionEndpointGuid,
-      this.getOrgOrSpaceGuid(),
-      this.getSpaceGuid()
+    this.canSub = this.waitForEndpointPermissions(this.appUserPermissionEndpointGuid).pipe(
+      switchMap(() => this.currentUserPermissionsService.can(
+        this.appUserPermission,
+        this.appUserPermissionEndpointGuid,
+        this.getOrgOrSpaceGuid(),
+        this.getSpaceGuid()
+      ))
     ).subscribe(
       can => {
         if (can) {
@@ -44,6 +50,10 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
         }
       }
     );
+  }
+
+  private waitForEndpointPermissions(endpointGuid: string): Observable<any> {
+    return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.store, endpointGuid) : observableOf(true);
   }
 
   public ngOnDestroy() {
