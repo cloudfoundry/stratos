@@ -9,7 +9,7 @@ import (
 	"code.cloudfoundry.org/cli/cf/commandsloader"
 	"code.cloudfoundry.org/cli/cf/flags"
 	"github.com/cloudfoundry-community/go-cfclient"
-	"github.com/cloudfoundry-incubator/stratos/src/backend/cfapppush"
+	"github.com/cloudfoundry-incubator/stratos/plugins/cfapppush/pushapp"
 )
 
 type ServiceCreator struct {
