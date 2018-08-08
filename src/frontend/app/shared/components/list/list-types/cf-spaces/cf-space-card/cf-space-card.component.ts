@@ -2,12 +2,18 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
+
 import { ISpace } from '../../../../../../core/cf-api.types';
+import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import {
+  CloudFoundryEndpointService,
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import {
+  CloudFoundryOrganizationService,
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -32,7 +38,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   serviceInstancesCount: number;
   appInstancesCount: number;
   serviceInstancesLimit: number;
-  appIntancesLimit: number;
+  appInstancesLimit: number;
   orgGuid: string;
   normalisedMemoryUsage: number;
   memoryLimit: number;
@@ -103,16 +109,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   setCounts = () => {
     this.appCount = this.row.entity.apps ? this.row.entity.apps.length : 0;
-    let count = 0;
-    if (this.appCount > 0) {
-      this.row.entity.apps.forEach(a => {
-        count += a.entity.instances;
-      });
-    } else {
-      count = 0;
-    }
-
-    this.appInstancesCount = count;
+    this.appInstancesCount = getStartedAppInstanceCount(this.row.entity.apps);
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
@@ -135,7 +132,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         metadata: null
       };
     }
-    this.appIntancesLimit = quotaDefinition.entity.app_instance_limit;
+    this.appInstancesLimit = quotaDefinition.entity.app_instance_limit;
     this.serviceInstancesLimit = quotaDefinition.entity.total_services;
     this.memoryLimit = quotaDefinition.entity.memory_limit;
     this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;

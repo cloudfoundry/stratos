@@ -1,24 +1,17 @@
 import { Action } from '@ngrx/store';
-
-import { pathGet } from '../../../core/utils.service';
-import { fetchEntityTree } from '../../helpers/entity-relations.tree';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  isEntityInlineChildAction,
-} from '../../helpers/entity-relations.types';
+import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
 import { deepMergeState } from '../../helpers/reducer.helper';
+import { IFlatTree } from '../../helpers/schema-tree-traverse';
+import { IRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
-import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
-import { IRequestDataState } from '../../types/entity.types';
-import { IFlatTree } from '../../helpers/schema-tree-traverse';
+
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
-  const [startAction, successAction, failedAction] = actions;
+  const successAction = actions[1];
   const defaultState = generateDefaultState(entityList);
-  return function entitiesReducer(state = defaultState, action: Action) {
+  return function entitiesReducer(state = defaultState, action: Action): IRequestDataState {
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
@@ -63,7 +56,7 @@ function reduceIdsToState(entityKey: string) {
 }
 
 function deleteEntity(state, entityKey, guid) {
-  const newState = {};
+  const newState = {} as IRequestDataState;
   for (const entityTypeKey in state) {
     if (entityTypeKey === entityKey) {
       newState[entityTypeKey] = {};
