@@ -16,7 +16,7 @@ import (
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/SUSE/stratos-ui/repository/tokens"
 	"crypto/sha1"
-	"encoding/hex"
+	"encoding/base64"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -113,7 +113,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 	h := sha1.New()
 	h.Write([]byte(apiEndpointURL.String()))
-	guid := hex.EncodeToString(h.Sum(nil))
+	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL
