@@ -46,7 +46,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
-	cnsiClientId :=  c.FormValue("cnsi_client_id")
+	cnsiClientId := c.FormValue("cnsi_client_id")
 	cnsiClientSecret := c.FormValue("cnsi_client_secret")
 
 	if cnsiClientId == "" {
@@ -110,7 +110,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			err)
 	}
 
-	guid := uuid.NewV4().String()
+	UUID, _ := uuid.NewV4()
+	guid := UUID.String()
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL

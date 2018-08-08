@@ -100,7 +100,7 @@ func Constructor(config *CFPushAppConfig) CFPush {
 }
 
 func (c *CFPushApp) init(config *CFPushAppConfig) error {
-	uuid, err := uuid.NewV1()
+	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("Unable to intiialise UUID")
 	}

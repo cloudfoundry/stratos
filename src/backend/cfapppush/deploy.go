@@ -10,10 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/cli/cf/configuration/coreconfig"
+	"github.com/SUSE/stratos-ui/plugins/cfapppush/pushapp"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
-	"github.com/cloudfoundry-incubator/stratos/cfapppush/pushapp"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	yaml "gopkg.in/yaml.v2"
@@ -71,7 +70,7 @@ type DeployAppMessageSender interface {
 	SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string)
 }
 
-func (cfAppPush *cfPush) deploy(echoContext echo.Context) error {
+func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGuid := echoContext.Param("orgGuid")
@@ -408,14 +407,13 @@ func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, e
 
 }
 
-func (cfAppPush *cfPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*pushapp.CFPushAppConfig, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*pushapp.CFPushAppConfig, error) {
 
-	var configRepo coreconfig.Repository
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)
 	if err != nil {
 		log.Warnf("Failed to retrieve record for CNSI %s, error is %+v", cnsiGuid, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI)
-		return configRepo, err
+		return nil, err
 	}
 
 	userId, err := cfAppPush.portalProxy.GetSessionStringValue(echoContext, "user_id")
@@ -423,16 +421,16 @@ func (cfAppPush *cfPush) getConfigData(echoContext echo.Context, cnsiGuid string
 	if err != nil {
 		log.Warnf("Failed to retrieve session user")
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
-		return configRepo, err
+		return nil, err
 	}
 	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGuid, userId)
 	if !found {
 		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGuid)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
-		return configRepo, errors.New("Failed to find token record")
+		return nil, errors.New("Failed to find token record")
 	}
 
-	config := &pushapp.CFPushAppConfig{
+	config = &pushapp.CFPushAppConfig{
 		AuthorizationEndpoint:  cnsiRecord.AuthorizationEndpoint,
 		CFClient:               cfAppPush.portalProxy.GetConfig().CFClient,
 		CFClientSecret:         cfAppPush.portalProxy.GetConfig().CFClientSecret,
@@ -575,7 +573,7 @@ func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
 }
 
-func (cfAppPush *cfPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
+func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
 	msg, _ := getMarshalledSocketMessage(data, event)
 	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
 }

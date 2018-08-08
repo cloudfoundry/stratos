@@ -220,7 +220,8 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			// We have a session
 			guid, err := ch.portalProxy.GetSessionValue(c, cfSessionCookieName)
 			if err != nil || guid == nil {
-				guid = uuid.NewV4().String()
+				UUID, _ = uuid.NewV4()
+				guid = UUID.String()
 				session.Values[cfSessionCookieName] = guid
 				ch.portalProxy.SaveSession(c, session)
 			}

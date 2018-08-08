@@ -225,7 +225,8 @@ func (p *portalProxy) cloudFoundrySessionMiddleware(h echo.HandlerFunc) echo.Han
 			// We have a session
 			guid, err := p.GetSessionValue(c, cfSessionCookieName)
 			if err != nil || guid == nil {
-				guid = uuid.NewV4().String()
+				UUID, _ := uuid.NewV4()
+				guid = UUID.String()
 				session.Values[cfSessionCookieName] = guid
 				p.SaveSession(c, session)
 			}
