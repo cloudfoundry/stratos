@@ -177,4 +177,5 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 6. Update `config.propeties` and ensure that..
     - the UAA points to a valid instance
     - the `CONSOLE_CLIENT` and `CONSOLE_ADMIN_SCOPE` are valid in the UAA instance
+    - The above properties are saved to the database on first run. Any subsequent changes require the db to be reset. For the default db provider (`sqlite`, see `config.properties` `DATABASE_PROVIDER` value), this can be done by deleting `./outputs/console-database.db` 
 7. Make `portal-proxy` executable and run it
