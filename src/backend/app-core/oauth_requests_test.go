@@ -64,7 +64,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
-			ID:                    mockCNSIGUID,
+			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
@@ -106,13 +106,13 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 
 		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret"}).
-			AddRow(mockCNSI.ID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret)
+			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
 		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
-			ID:       mockCNSIGUID,
+			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
 
@@ -189,7 +189,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
-			ID:                    mockCNSIGUID,
+			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
@@ -235,7 +235,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret"}).
-			AddRow(mockCNSI.ID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret)
+			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
@@ -257,7 +257,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 
 		//
 		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
-			ID:       mockCNSIGUID,
+			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
 
@@ -335,7 +335,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
-			ID:                    mockCNSIGUID,
+			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
@@ -378,7 +378,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-			AddRow(mockCNSI.ID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
+			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
@@ -388,7 +388,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 
 		//
 		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
-			ID:       mockCNSIGUID,
+			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
 
@@ -432,7 +432,7 @@ func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
 
 	_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
-		ID:       mockCNSIGUID,
+		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
 
@@ -473,7 +473,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 		pp := setupPortalProxy(nil)
 
 		invalidCNSIRequest := &interfaces.CNSIRequest{
-			ID:       "",
+			GUID:     "",
 			UserGUID: "",
 		}
 
@@ -570,7 +570,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
-			ID:                    mockCNSIGUID,
+			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
@@ -622,7 +622,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-			AddRow(mockCNSI.ID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
+			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
@@ -644,7 +644,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 			WillReturnError(errors.New("Unknown Database Error"))
 		//
 		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
-			ID:       mockCNSIGUID,
+			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
 

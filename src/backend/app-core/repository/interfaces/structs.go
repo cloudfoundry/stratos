@@ -21,7 +21,7 @@ type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, inte
 
 //TODO this could be moved back to cnsis subpackage, and extensions could import it?
 type CNSIRecord struct {
-	ID                     string   `json:"guid"`
+	GUID                   string   `json:"guid"`
 	Name                   string   `json:"name"`
 	CNSIType               string   `json:"cnsi_type"`
 	APIEndpoint            *url.URL `json:"api_endpoint"`
@@ -190,7 +190,7 @@ type ConsoleConfig struct {
 
 // CNSIRequest
 type CNSIRequest struct {
-	ID       string `json:"-"`
+	GUID     string `json:"-"`
 	UserGUID string `json:"-"`
 
 	Method      string      `json:"-"`

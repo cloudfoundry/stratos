@@ -173,7 +173,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 			if err == nil {
 				for _, item := range m {
 					info := MetricsMetadata{}
-					info.EndpointGUID = endpoint.ID
+					info.EndpointGUID = endpoint.GUID
 					info.Type = item.Type
 					info.URL = item.URL
 					info.Job = item.Job

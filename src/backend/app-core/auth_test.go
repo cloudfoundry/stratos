@@ -174,7 +174,7 @@ func TestLoginToCNSI(t *testing.T) {
 		mockURL, _ = url.Parse(mockUAA.URL)
 		stringCFType := "cf"
 		var mockCNSI = interfaces.CNSIRecord{
-			ID:                     mockCNSIGUID,
+			GUID:                   mockCNSIGUID,
 			Name:                   "mockCF",
 			CNSIType:               "cf",
 			APIEndpoint:            mockURL,
@@ -260,7 +260,7 @@ func TestLoginToCNSIWithMissingCNSIRecord(t *testing.T) {
 		// Return nil from db call
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
-			WillReturnError(errors.New("No match for that ID"))
+			WillReturnError(errors.New("No match for that GUID"))
 
 		// do the call
 		Convey("Should fail to login", func() {
@@ -338,7 +338,7 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		mockURL, _ = url.Parse(mockUAA.URL)
 		stringCFType := "cf"
 		var mockCNSI = interfaces.CNSIRecord{
-			ID:                    mockCNSIGUID,
+			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,

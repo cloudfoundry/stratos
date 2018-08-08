@@ -172,7 +172,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
-			"Need Endpoint ID passed as form param")
+			"Need Endpoint GUID passed as form param")
 	}
 
 	systemSharedValue := c.FormValue("system_shared")
@@ -202,7 +202,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		return nil, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Requested endpoint not registered",
-			"No Endpoint registered with ID %s: %s", cnsiGUID, err)
+			"No Endpoint registered with GUID %s: %s", cnsiGUID, err)
 	}
 
 	// Get ther User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
@@ -303,7 +303,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 		}
 
 		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
-			err = p.setCNSITokenRecord(theCNSIrecord.ID, u.UserGUID, uaaToken)
+			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
 			return err
 		} else {
 			return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
@@ -369,7 +369,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
-			"Need CNSI ID passed as form param")
+			"Need CNSI GUID passed as form param")
 	}
 
 	userGUID, err := p.GetSessionStringValue(c, "user_id")

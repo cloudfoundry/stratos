@@ -151,7 +151,7 @@ func isValidJSON(data []byte) bool {
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (interfaces.CNSIRequest, error) {
 	log.Debug("buildCNSIRequest")
 	cnsiRequest := interfaces.CNSIRequest{
-		ID:       cnsiGUID,
+		GUID:     cnsiGUID,
 		UserGUID: userGUID,
 
 		Method: method,
@@ -267,7 +267,7 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 	responses := make(map[string]*interfaces.CNSIRequest)
 	for range cnsiList {
 		res := <-done
-		responses[res.ID] = res
+		responses[res.GUID] = res
 	}
 
 	return responses, nil
