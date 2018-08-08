@@ -110,8 +110,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			err)
 	}
 
-	UUID, _ := uuid.NewV4()
-	guid := UUID.String()
+	guid := uuid.NewV4().String()
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL

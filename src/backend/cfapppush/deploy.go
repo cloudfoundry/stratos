@@ -430,7 +430,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 		return nil, errors.New("Failed to find token record")
 	}
 
-	config = &pushapp.CFPushAppConfig{
+	config := &pushapp.CFPushAppConfig{
 		AuthorizationEndpoint:  cnsiRecord.AuthorizationEndpoint,
 		CFClient:               cfAppPush.portalProxy.GetConfig().CFClient,
 		CFClientSecret:         cfAppPush.portalProxy.GetConfig().CFClientSecret,
