@@ -4,40 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/cli/cf/actors"
-	"code.cloudfoundry.org/cli/cf/actors/brokerbuilder"
-	"code.cloudfoundry.org/cli/cf/actors/planbuilder"
-	"code.cloudfoundry.org/cli/cf/actors/pluginrepo"
-	"code.cloudfoundry.org/cli/cf/actors/servicebuilder"
-	"code.cloudfoundry.org/cli/cf/api"
-	"code.cloudfoundry.org/cli/cf/appfiles"
-	"code.cloudfoundry.org/cli/cf/commandregistry"
-	"code.cloudfoundry.org/cli/cf/commands/application"
-	"code.cloudfoundry.org/cli/cf/commandsloader"
-	"code.cloudfoundry.org/cli/cf/configuration"
-	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
-	"code.cloudfoundry.org/cli/cf/configuration/coreconfig"
-	"code.cloudfoundry.org/cli/cf/configuration/pluginconfig"
-	"code.cloudfoundry.org/cli/cf/flags"
-	"code.cloudfoundry.org/cli/cf/manifest"
-	"code.cloudfoundry.org/cli/cf/models"
-	"code.cloudfoundry.org/cli/cf/net"
-	"code.cloudfoundry.org/cli/cf/terminal"
-	"code.cloudfoundry.org/cli/cf/trace"
-	"code.cloudfoundry.org/cli/util"
-	"code.cloudfoundry.org/cli/util/randomword"
+	"github.com/SUSE/stratos-ui/plugins/cfapppush/pushapp"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
-	uuid "github.com/satori/go.uuid"
 	yaml "gopkg.in/yaml.v2"
 
 	archiver "github.com/mholt/archiver"
@@ -94,10 +71,6 @@ type DeployAppMessageSender interface {
 }
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
-
-	cfAppPush.pushCommand = &application.Push{}
-	metaData := cfAppPush.pushCommand.MetaData()
-	cfAppPush.flagContext = flags.NewFlagContext(metaData.Flags)
 
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGuid := echoContext.Param("orgGuid")
@@ -167,32 +140,29 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		return err
 	}
 
-	// Initialise push command
-	commandsloader.Load()
-
 	socketWriter := &SocketWriter{
 		clientWebSocket: clientWebSocket,
 	}
-
-	configRepo, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName, clientWebSocket)
+	pushConfig, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName, clientWebSocket)
 	if err != nil {
-		log.Warnf("Failed to initialise config repo due to error %+v", err)
+		log.Warnf("Failed to initialise config due to error %+v", err)
 		return err
 	}
 
-	traceLogger := trace.NewLogger(os.Stdout, true)
 	dialTimeout := os.Getenv("CF_DIAL_TIMEOUT")
-	deps := initialiseDependency(socketWriter, traceLogger, dialTimeout, configRepo)
-	defer deps.Config.Close()
+	pushConfig.OutputWriter = socketWriter
+	pushConfig.DialTimeout = dialTimeout
+
+	// Initialise Push Command
+	cfAppPush.cfPush = pushapp.Constructor(pushConfig)
 
 	// Patch in app repo watcher
 	// Wrap an interceptor around the application repository so we can get the app details when created/updated
+	deps := cfAppPush.cfPush.GetDeps()
 	var repo = deps.RepoLocator.GetApplicationRepository()
-	deps.RepoLocator = deps.RepoLocator.SetApplicationRepository(NewRepositoryIntercept(repo, cfAppPush, clientWebSocket))
+	cfAppPush.cfPush.PatchApplicationRepository(NewRepositoryIntercept(repo, cfAppPush, clientWebSocket))
 
-	cfAppPush.pushCommand.SetDependency(deps, false)
-
-	err = cfAppPush.flagContext.Parse("-p", appDir, "-f", appDir+"/manifest.yml")
+	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml")
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -200,7 +170,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 
 	sendEvent(clientWebSocket, EVENT_PUSH_STARTED)
-	err = cfAppPush.pushCommand.Execute(cfAppPush.flagContext)
+	err = cfAppPush.cfPush.Push()
 	if err != nil {
 		log.Warnf("Failed to execute due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
@@ -437,97 +407,13 @@ func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, e
 
 }
 
-func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout string, config coreconfig.Repository) commandregistry.Dependency {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*pushapp.CFPushAppConfig, error) {
 
-	deps := commandregistry.Dependency{}
-	deps.TeePrinter = terminal.NewTeePrinter(writer)
-	deps.UI = terminal.NewUI(os.Stdin, writer, deps.TeePrinter, logger)
-
-	errorHandler := func(err error) {
-		if err != nil {
-			deps.UI.Failed(fmt.Sprintf("Config error: %s", err))
-		}
-	}
-
-	deps.Config = config
-
-	deps.ManifestRepo = manifest.NewDiskRepository()
-	deps.AppManifest = manifest.NewGenerator()
-
-	pluginPath := filepath.Join(confighelpers.PluginRepoDir(), ".cf", "plugins")
-	deps.PluginConfig = pluginconfig.NewPluginConfig(
-		errorHandler,
-		configuration.NewDiskPersistor(filepath.Join(pluginPath, "config.json")),
-		pluginPath,
-	)
-
-	terminal.UserAskedForColors = deps.Config.ColorEnabled()
-	terminal.InitColorSupport()
-
-	deps.Gateways = map[string]net.Gateway{
-		"cloud-controller": net.NewCloudControllerGateway(deps.Config, time.Now, deps.UI, logger, envDialTimeout),
-		"uaa":              net.NewUAAGateway(deps.Config, deps.UI, logger, envDialTimeout),
-		"routing-api":      net.NewRoutingAPIGateway(deps.Config, time.Now, deps.UI, logger, envDialTimeout),
-	}
-	deps.RepoLocator = api.NewRepositoryLocator(deps.Config, deps.Gateways, logger, envDialTimeout)
-
-	deps.PluginModels = &commandregistry.PluginModels{Application: nil}
-
-	deps.PlanBuilder = planbuilder.NewBuilder(
-		deps.RepoLocator.GetServicePlanRepository(),
-		deps.RepoLocator.GetServicePlanVisibilityRepository(),
-		deps.RepoLocator.GetOrganizationRepository(),
-	)
-
-	deps.ServiceBuilder = servicebuilder.NewBuilder(
-		deps.RepoLocator.GetServiceRepository(),
-		deps.PlanBuilder,
-	)
-
-	deps.BrokerBuilder = brokerbuilder.NewBuilder(
-		deps.RepoLocator.GetServiceBrokerRepository(),
-		deps.ServiceBuilder,
-	)
-
-	deps.PluginRepo = pluginrepo.NewPluginRepo()
-
-	deps.ServiceHandler = actors.NewServiceHandler(
-		deps.RepoLocator.GetOrganizationRepository(),
-		deps.BrokerBuilder,
-		deps.ServiceBuilder,
-	)
-
-	deps.ServicePlanHandler = actors.NewServicePlanHandler(
-		deps.RepoLocator.GetServicePlanRepository(),
-		deps.RepoLocator.GetServicePlanVisibilityRepository(),
-		deps.RepoLocator.GetOrganizationRepository(),
-		deps.PlanBuilder,
-		deps.ServiceBuilder,
-	)
-
-	deps.WordGenerator = new(randomword.Generator)
-
-	deps.AppZipper = appfiles.ApplicationZipper{}
-	deps.AppFiles = appfiles.ApplicationFiles{}
-
-	deps.RouteActor = actors.NewRouteActor(deps.UI, deps.RepoLocator.GetRouteRepository(), deps.RepoLocator.GetDomainRepository())
-	deps.PushActor = actors.NewPushActor(deps.RepoLocator.GetApplicationBitsRepository(), deps.AppZipper, deps.AppFiles, deps.RouteActor)
-
-	deps.ChecksumUtil = util.NewSha1Checksum("")
-
-	deps.Logger = logger
-
-	return deps
-
-}
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (coreconfig.Repository, error) {
-
-	var configRepo coreconfig.Repository
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)
 	if err != nil {
 		log.Warnf("Failed to retrieve record for CNSI %s, error is %+v", cnsiGuid, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI)
-		return configRepo, err
+		return nil, err
 	}
 
 	userId, err := cfAppPush.portalProxy.GetSessionStringValue(echoContext, "user_id")
@@ -535,37 +421,31 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	if err != nil {
 		log.Warnf("Failed to retrieve session user")
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
-		return configRepo, err
+		return nil, err
 	}
 	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGuid, userId)
 	if !found {
 		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGuid)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
-		return configRepo, errors.New("Failed to find token record")
+		return nil, errors.New("Failed to find token record")
 	}
 
-	var filePath = fmt.Sprintf("/tmp/%s", uuid.NewV1())
-	repo := coreconfig.NewRepositoryFromFilepath(filePath, func(error) {})
+	config := &pushapp.CFPushAppConfig{
+		AuthorizationEndpoint:  cnsiRecord.AuthorizationEndpoint,
+		CFClient:               cfAppPush.portalProxy.GetConfig().CFClient,
+		CFClientSecret:         cfAppPush.portalProxy.GetConfig().CFClientSecret,
+		APIEndpointURL:         cnsiRecord.APIEndpoint.String(),
+		DopplerLoggingEndpoint: cnsiRecord.DopplerLoggingEndpoint,
+		SkipSSLValidation:      cnsiRecord.SkipSSLValidation,
+		AuthToken:              cnsiTokenRecord.AuthToken,
+		RefreshToken:           cnsiTokenRecord.RefreshToken,
+		OrgGUID:                orgGuid,
+		OrgName:                orgName,
+		SpaceGUID:              spaceGuid,
+		SpaceName:              spaceName,
+	}
 
-	repo.SetAuthenticationEndpoint(cnsiRecord.AuthorizationEndpoint)
-	repo.SetUAAOAuthClient(cfAppPush.portalProxy.GetConfig().CFClient)
-	repo.SetUAAOAuthClientSecret(cfAppPush.portalProxy.GetConfig().CFClientSecret)
-	repo.SetAPIEndpoint(cnsiRecord.APIEndpoint.String())
-	repo.SetDopplerEndpoint(cnsiRecord.DopplerLoggingEndpoint)
-	repo.SetSSLDisabled(cnsiRecord.SkipSSLValidation)
-	repo.SetAccessToken(cnsiTokenRecord.AuthToken)
-	repo.SetRefreshToken(cnsiTokenRecord.RefreshToken)
-	repo.SetColorEnabled("true")
-	repo.SetOrganizationFields(models.OrganizationFields{
-		GUID: orgGuid,
-		Name: orgName,
-	})
-	repo.SetSpaceFields(models.SpaceFields{
-		GUID: spaceGuid,
-		Name: spaceName,
-	})
-
-	return repo, nil
+	return config, nil
 }
 
 func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempDir string) (string, error) {

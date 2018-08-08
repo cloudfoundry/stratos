@@ -5,30 +5,34 @@ import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
+import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetSpace, GetAllSpaceUsers } from '../../../store/actions/space.actions';
+import { GetAllSpaceUsers, GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
+  cfUserSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
+  spaceQuotaSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  spaceQuotaSchemaKey,
-  cfUserSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { CfUser } from '../../../store/types/user.types';
 
 const noQuotaDefinition = (orgGuid: string) => ({
   entity: {
@@ -150,9 +154,7 @@ export class CloudFoundrySpaceService {
     );
 
     this.appInstances$ = this.apps$.pipe(
-      map(a => {
-        return a.map(app => app.entity.instances).reduce((i, x) => i + x, 0);
-      })
+      map(getStartedAppInstanceCount)
     );
 
     this.totalMem$ = this.apps$.pipe(
