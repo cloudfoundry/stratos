@@ -13,9 +13,20 @@ type Config struct {
 }
 
 type Endpoint struct {
-	Url               string `yaml:"url"`
+	URL               string    `yaml:"url"`
+	SkipSSLValidation bool      `yaml:"skip-ssl"`
+	AdminUser         User      `yaml:"admin-user"`
+	UAA               UAAConfig `yaml:"uaa"`
+}
+
+type UAAConfig struct {
+	URL               string `yaml:"url"`
 	SkipSSLValidation bool   `yaml:"skip-ssl"`
-	AdminUser         User   `yaml:"admin-user"`
+	ZoneID            string `yaml:"zoneId"`
+	Client            string `yaml:"client"`
+	CFClient          string `yaml:"cf-client"`
+	ClientSecret      string `yaml:"client-secret"`
+	CFClientSecret    string `yaml:"cf-client-secret"`
 }
 
 type FixtureConfig struct {

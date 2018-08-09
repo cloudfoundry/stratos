@@ -162,7 +162,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	var repo = deps.RepoLocator.GetApplicationRepository()
 	cfAppPush.cfPush.PatchApplicationRepository(NewRepositoryIntercept(repo, cfAppPush, clientWebSocket))
 
-	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml")
+	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml", nil)
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)

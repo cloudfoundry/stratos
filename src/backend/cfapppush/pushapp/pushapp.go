@@ -69,7 +69,7 @@ const (
 
 // CFPush Interface
 type CFPush interface {
-	Init(appDir string, manifestPath string) error
+	Init(appDir string, manifestPath string, args []PushArg) error
 	Push() error
 	GetDeps() commandregistry.Dependency
 	PatchApplicationRepository(repo applications.Repository)
@@ -207,12 +207,32 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 	deps.Logger = logger
 
 	return deps
-
 }
 
-func (c *CFPushApp) Init(appDir string, manifestPath string) error {
+type PushArg struct {
+	Flag  string
+	Value string
+	NoArg bool
+}
 
-	err := c.flagContext.Parse("-p", appDir, "-f", manifestPath)
+func (c *CFPushApp) Init(appName string, appDir string, manifestPath string, args []PushArg) error {
+
+	var defaultArgs []string
+	if appName != "" {
+		defaultArgs = []string{appName, "-p", appDir, "-f", manifestPath}
+	} else {
+		defaultArgs = []string{"-p", appDir, "-f", manifestPath}
+	}
+
+	if args != nil {
+		for _, arg := range args {
+			defaultArgs = append(defaultArgs, arg.Flag)
+			if !arg.NoArg {
+				defaultArgs = append(defaultArgs, arg.Value)
+			}
+		}
+	}
+	err := c.flagContext.Parse(defaultArgs...)
 	if err != nil {
 		return &PushError{Err: err, Type: GeneralFailure}
 	}

@@ -8,26 +8,42 @@ import (
 	uaa "github.com/cloudfoundry-community/go-uaa"
 )
 
-func (e2e *E2ESetupHelper) setupEndpoint(endpoint Endpoint, fixture FixtureConfig) {
-
-	// create clien
+func (e2e *E2ESetupHelper) createCFClent(endpoint Endpoint) (*cfclient.Client, error) {
 	c := &cfclient.Config{
-		ApiAddress:        endpoint.Url,
+		ApiAddress:        endpoint.URL,
 		Username:          endpoint.AdminUser.Username,
 		Password:          endpoint.AdminUser.Password,
 		SkipSslValidation: endpoint.SkipSSLValidation,
 	}
-	cfAPI, _ := cfclient.NewClient(c)
+	return cfclient.NewClient(c)
 
-	uaaAPI, err := uaa.NewWithClientCredentials("https://uaa.local.pcfdev.io", "uaa", "admin", "admin-client-secret", uaa.JSONWebToken, true)
+}
+
+func (e2e *E2ESetupHelper) createUAAClient(endpoint Endpoint) (*uaa.API, error) {
+	return uaa.NewWithClientCredentials(
+		endpoint.UAA.URL,
+		endpoint.UAA.ZoneID,
+		endpoint.UAA.Client,
+		endpoint.UAA.ClientSecret,
+		uaa.JSONWebToken,
+		endpoint.UAA.SkipSSLValidation)
+}
+
+func (e2e *E2ESetupHelper) setupEndpoint(endpoint Endpoint, fixture FixtureConfig) {
+
+	// create clien
+
+	cfAPI, _ := e2e.createCFClent(endpoint)
+	uaaAPI, err := e2e.createUAAClient(endpoint)
 	fmt.Printf("Failed to log in to UAA %+v", err)
 	if err != nil {
 		fmt.Printf("Failed to log in to UAA %+v", err)
 		os.Exit(1)
 	}
-	// uaaAPI.Verbose = true
+	uaaAPI.Verbose = true
 
 	fmt.Println("Creating User")
+
 	userEntity, err := e2e.CreateUser(cfAPI, uaaAPI, fixture.NonAdminUser)
 	if err != nil || userEntity == nil {
 		fmt.Printf("Failed to create user due to %+v\n", err)
@@ -57,7 +73,7 @@ func (e2e *E2ESetupHelper) setupEndpoint(endpoint Endpoint, fixture FixtureConfi
 		os.Exit(1)
 	}
 
-	e2e.CreateServices(cfAPI, fixture.Services)
+	e2e.CreateServices(cfAPI, endpoint, fixture)
 }
 
 func (e2e *E2ESetupHelper) AssociateOrgUser(client *cfclient.Client, orgGuid string, userGuid string) error {
@@ -119,8 +135,8 @@ func (e2e *E2ESetupHelper) CreateSpace(client *cfclient.Client, space string, or
 	return &spaceEntity, nil
 }
 
-func (e2e *E2ESetupHelper) CreateServices(client *cfclient.Client, services ServiceConfig) {
+func (e2e *E2ESetupHelper) CreateServices(client *cfclient.Client, endpoint Endpoint, fixture FixtureConfig) {
 
-	e2e.createService()
+	CreateServiceCreator(client, endpoint, fixture)
 
 }
