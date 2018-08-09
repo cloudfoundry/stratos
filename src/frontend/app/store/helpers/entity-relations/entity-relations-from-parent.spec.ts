@@ -40,7 +40,7 @@ describe('Entity Relations - populate from parent', () => {
     inject([Store], (iStore: Store<AppState>) => {
       populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))
         .pipe(first()).subscribe((action: WrapperRequestActionSuccess) => {
-          expect(action).toBeNull();
+          expect(action).toBeUndefined();
           done();
         });
     })();
