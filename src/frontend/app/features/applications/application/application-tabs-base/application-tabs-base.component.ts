@@ -1,26 +1,27 @@
 
-import { Component, OnDestroy, OnInit, Inject, NgZone } from '@angular/core';
+import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, combineLatest as observableCombineLatest, of as observableOf } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { delay, filter, first, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
+import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { appStatsSchemaKey, entityFactory, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 
 
 // Confirmation dialogs
@@ -54,7 +55,7 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
-
+  public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -264,19 +265,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // Auto refresh
     this.ngZone.runOutsideAngular(() => {
       this.entityServiceAppRefresh$ = this.entityService
-      .poll(10000, this.autoRefreshString).pipe(
-        tap(({ resource }) => {
-          this.ngZone.run(() => {
-            this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-            if (resource && resource.entity && resource.entity.state === 'STARTED') {
-              this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-            }
-          });
-        }))
-      .subscribe();
-      });
+        .poll(10000, this.autoRefreshString).pipe(
+          tap(({ resource }) => {
+            this.ngZone.run(() => {
+              this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+              if (resource && resource.entity && resource.entity.state === 'STARTED') {
+                this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+              }
+            });
+          }))
+        .subscribe();
+    });
 
-      this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
+    this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
         requestInfo.error
