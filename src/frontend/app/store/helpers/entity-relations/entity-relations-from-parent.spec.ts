@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { inject, TestBed, async } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
@@ -40,14 +40,14 @@ describe('Entity Relations - populate from parent', () => {
     inject([Store], (iStore: Store<AppState>) => {
       populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))
         .pipe(first()).subscribe((action: WrapperRequestActionSuccess) => {
-          expect(action).toBeUndefined();
+          expect(action).toBeNull();
           done();
         });
     })();
 
   });
 
-  it('List in parent', (done) => {
+  fit('List in parent', async(() => {
     const spaces: APIResource<ISpace>[] = [
       helper.createEmptySpace('1', 'space1`', orgGuid),
       helper.createEmptySpace('2', 'space2`', orgGuid),
@@ -64,6 +64,7 @@ describe('Entity Relations - populate from parent', () => {
       populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))
         .pipe(first()).subscribe((action: WrapperRequestActionSuccess) => {
           expect(action).toBeDefined();
+          expect(action).not.toBeNull();
           expect(action.type).toBe(RequestTypes.SUCCESS);
           expect(action.totalResults).toBe(spaces.length);
           expect(action.totalPages).toBe(1);
@@ -72,10 +73,9 @@ describe('Entity Relations - populate from parent', () => {
             map[space.metadata.guid] = space;
             return map;
           }, {}));
-          done();
         });
     })();
 
-  });
+  }));
 
 });
