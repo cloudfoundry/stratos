@@ -112,19 +112,13 @@ export const getServicePlans = (
     }));
 };
 
-export const prettyValidationErrors = (formValidationErrors) => {
+export const prettyValidationErrors = (formValidationErrors: any[]): string => {
   if (!formValidationErrors) { return null; }
-  const errorArray = [];
-  for (const error of formValidationErrors) {
-    const message = error.message;
-    const dataPathArray = JsonPointer.parse(error.dataPath);
-    if (dataPathArray.length) {
-      let field: any;
-      dataPathArray.forEach(elm => field += /^\d+$/.test(elm) ? `[${elm}]` : `.${elm}`);
-      errorArray.push(`${field}: ${message}`);
-    } else {
-      errorArray.push(message);
-    }
-  }
-  return errorArray.join('<br>');
+  return formValidationErrors.reduce((a, c) => {
+      const arrMessage = JsonPointer.parse(c.dataPath).reduce((aa, cc) => {
+          const dd = /^\d+$/.test(cc) ? `[${cc}]` : `.${cc}`;
+          return aa + dd;
+      }, '');
+      return `${a} ${arrMessage} ${c.message} <br>`;
+  }, '');
 };
