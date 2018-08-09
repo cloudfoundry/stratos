@@ -92,7 +92,11 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 }
 
 func getSSORedirectUri(state string) string {
-	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", state, url.QueryEscape(state))
+	baseURL, _ := url.Parse(state)
+	baseURL.Path = ""
+	baseURL.RawQuery = ""
+	baseURLString := strings.TrimRight(baseURL.String(), "?")
+	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", baseURLString, url.QueryEscape(state))
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -398,6 +402,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	}
 
 	// If cnsi is cf AND cf is auto-register only clear the entry
+	p.Config.AutoRegisterCFUrl = strings.TrimRight(p.Config.AutoRegisterCFUrl, "/")
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
 		log.Debug("Setting token record as disconnected")
 

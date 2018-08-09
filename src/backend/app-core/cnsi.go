@@ -11,11 +11,12 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/SUSE/stratos-ui/repository/cnsis"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/SUSE/stratos-ui/repository/tokens"
+	"crypto/sha1"
+	"encoding/base64"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -110,7 +111,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			err)
 	}
 
-	guid := uuid.NewV4().String()
+	h := sha1.New()
+	h.Write([]byte(apiEndpointURL.String()))
+	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL

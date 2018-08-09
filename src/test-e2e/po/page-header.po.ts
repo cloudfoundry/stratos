@@ -1,4 +1,4 @@
-import { browser, by, element, ElementFinder, promise } from 'protractor';
+import { browser, by, element, ElementFinder, promise, protractor } from 'protractor';
 import { ElementArrayFinder } from 'protractor/built';
 
 import { Component } from './component.po';
@@ -12,6 +12,8 @@ export class PageHeader extends Component {
   constructor() {
     super(element(by.tagName('app-page-header')));
   }
+  private readonly until = protractor.ExpectedConditions;
+  private readonly pageTitleSelector = '.page-header h1';
 
   getIconButtons(): ElementArrayFinder {
     return this.locator.all(by.css('.page-header button.mat-icon-button'));
@@ -35,7 +37,9 @@ export class PageHeader extends Component {
   }
 
   getTitle(): ElementFinder {
-    return this.locator.element(by.css('.page-header h1'));
+    const element = this.locator.element(by.css(this.pageTitleSelector));
+    browser.wait(this.until.presenceOf(element), 20000);
+    return element;
   }
 
   getTitleText(): promise.Promise<string> {

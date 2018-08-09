@@ -1,4 +1,4 @@
-import { browser, promise, protractor } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
 
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
@@ -6,6 +6,7 @@ import { LoadingIndicatorComponent } from './loading-indicator.po';
 import { PageHeader } from './page-header.po';
 import { PageSubHeaderComponent } from './page-subheader.po';
 import { SideNavigation } from './side-nav.po';
+
 
 const until = protractor.ExpectedConditions;
 
@@ -62,6 +63,11 @@ export abstract class Page {
   waitForPage() {
     expect(this.navLink.startsWith('/')).toBeTruthy();
     browser.wait(until.urlIs(this.getUrl()), 20000);
+  }
+
+  waitForPageDataLoaded() {
+    this.waitForPage();
+    browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
   }
 
   waitForPageOrChildPage() {
