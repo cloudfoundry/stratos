@@ -26,7 +26,7 @@ import {
 } from './entity-relations.spec';
 import { createEntityRelationKey, createEntityRelationPaginationKey, EntityTreeRelation } from './entity-relations.types';
 
-fdescribe('Entity Relations - validate', () => {
+describe('Entity Relations - validate', () => {
 
   const helper = new EntityRelationSpecHelper();
 
