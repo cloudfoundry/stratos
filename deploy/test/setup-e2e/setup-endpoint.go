@@ -67,13 +67,13 @@ func (e2e *E2ESetupHelper) setupEndpoint(endpoint Endpoint, fixture FixtureConfi
 		os.Exit(1)
 	}
 	fmt.Printf("Creating Space Guids are: %s %s\n", org.Guid, userEntity.Guid)
-	_, err = e2e.CreateSpace(cfAPI, fixture.Space, org.Guid, userEntity.Guid)
+	spaceEntity, err := e2e.CreateSpace(cfAPI, fixture.Space, org.Guid, userEntity.Guid)
 	if err != nil {
 		fmt.Printf("Failed to create space due to %+v\n", err)
 		os.Exit(1)
 	}
 
-	e2e.CreateServices(cfAPI, endpoint, fixture)
+	e2e.CreateServices(cfAPI, endpoint, fixture, spaceEntity.Guid, org.Guid)
 }
 
 func (e2e *E2ESetupHelper) AssociateOrgUser(client *cfclient.Client, orgGuid string, userGuid string) error {
@@ -135,8 +135,25 @@ func (e2e *E2ESetupHelper) CreateSpace(client *cfclient.Client, space string, or
 	return &spaceEntity, nil
 }
 
-func (e2e *E2ESetupHelper) CreateServices(client *cfclient.Client, endpoint Endpoint, fixture FixtureConfig) {
+func (e2e *E2ESetupHelper) CreateServices(client *cfclient.Client, endpoint Endpoint, fixture FixtureConfig, spaceGUID string, orgGuid string) {
 
-	CreateServiceCreator(client, endpoint, fixture)
+	serviceCreator := CreateServiceCreator(client, endpoint, fixture)
+	servicesConfig := fixture.Services
 
+	// Create public service
+	err := serviceCreator.CreateService(servicesConfig.PublicService, ServiceVisibility{SpaceScoped: false, Private: false})
+	if err != nil {
+		fmt.Printf("Failed to create public service due to: %s", err)
+	}
+	// Create private service
+	err = serviceCreator.CreateService(servicesConfig.PrivateService, ServiceVisibility{SpaceScoped: false, Private: true, OrgGuid: orgGuid})
+	if err != nil {
+		fmt.Printf("Failed to create private service due to: %s", err)
+	}
+
+	// Create space scoped service
+	err = serviceCreator.CreateService(servicesConfig.PrivateSpaceScopedService, ServiceVisibility{SpaceScoped: true, Private: false, SpaceGUID: spaceGUID})
+	if err != nil {
+		fmt.Printf("Failed to create space scoped service due to: %s", err)
+	}
 }

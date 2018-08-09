@@ -3,6 +3,7 @@ package pushapp
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -55,6 +56,7 @@ type CFPushAppConfig struct {
 	SpaceName              string
 	OutputWriter           io.Writer
 	DialTimeout            string
+	DisableTraceLogging    bool
 }
 
 // ErrorType default error returned
@@ -69,7 +71,7 @@ const (
 
 // CFPush Interface
 type CFPush interface {
-	Init(appDir string, manifestPath string, args []PushArg) error
+	Init(appName string, appDir string, manifestPath string, args []PushArg) error
 	Push() error
 	GetDeps() commandregistry.Dependency
 	PatchApplicationRepository(repo applications.Repository)
@@ -120,7 +122,13 @@ func (c *CFPushApp) init(config *CFPushAppConfig) error {
 		GUID: config.SpaceGUID,
 		Name: config.SpaceName,
 	})
-	traceLogger := trace.NewLogger(os.Stdout, true)
+
+	var traceLogger trace.Printer
+	if config.DisableTraceLogging {
+		traceLogger = trace.NewLogger(ioutil.Discard, true)
+	} else {
+		traceLogger = trace.NewLogger(os.Stdout, true)
+	}
 	dialTimeout := config.DialTimeout
 	c.deps = initialiseDependency(config.OutputWriter, traceLogger, dialTimeout, repo)
 	return nil
@@ -219,9 +227,14 @@ func (c *CFPushApp) Init(appName string, appDir string, manifestPath string, arg
 
 	var defaultArgs []string
 	if appName != "" {
-		defaultArgs = []string{appName, "-p", appDir, "-f", manifestPath}
+		defaultArgs = []string{appName, "-p", appDir}
 	} else {
-		defaultArgs = []string{"-p", appDir, "-f", manifestPath}
+		defaultArgs = []string{"-p", appDir}
+	}
+
+	if manifestPath != "" {
+		defaultArgs = append(defaultArgs, "f")
+		defaultArgs = append(defaultArgs, manifestPath)
 	}
 
 	if args != nil {

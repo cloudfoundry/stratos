@@ -17,10 +17,9 @@ func main() {
 		fmt.Printf("Unable to fetch Config due to %s", err)
 		os.Exit(1)
 	}
-	fmt.Printf("%+v", config)
 
 	for _, endpoint := range config.Endpoints {
+		e2eSetup.tearDownEndpoint(endpoint, config.Fixture)
 		e2eSetup.setupEndpoint(endpoint, config.Fixture)
 	}
-
 }
