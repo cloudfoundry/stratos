@@ -50,7 +50,7 @@ Get an [Overview](docs/overview.md) of Stratos, its components and the different
 
 Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](docs/status_updates.md).
 
-Browse through features and issues in the project's [issues](https://github.com/SUSE/stratos-ui/issues) page or [Zenhub Board](https://github.com/SUSE/stratos-ui#boards).
+Browse through features and issues in the project's [issues](https://github.com/cloudfoundry-incubator/stratos/issues) page or [Zenhub Board](https://github.com/cloudfoundry-incubator/stratos#boards).
 
 What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/SUSE/stratos)
 

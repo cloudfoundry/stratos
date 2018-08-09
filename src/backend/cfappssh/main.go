@@ -3,7 +3,7 @@ package cfappssh
 import (
 	"errors"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	"github.com/labstack/echo"
 )
 

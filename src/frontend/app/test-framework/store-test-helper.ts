@@ -11617,7 +11617,7 @@ const testInitialStoreState: AppState = {
           detected_buildpack: '',
           detected_buildpack_guid: null,
           environment_json: {
-            STRATOS_PROJECT: '{"deploySource":{"type":"github","timestamp":1507198314,"project":"suse/stratos-ui","branch":"master","url":"https://github.com/suse/stratos-ui","commit":"abd53d23fb7a64fa2dabfc89c7c20177845000bb\\n"}}'
+            STRATOS_PROJECT: '{"deploySource":{"type":"github","timestamp":1507198314,"project":"suse/stratos-ui","branch":"master","url":"https://github.com/cloudfoundry-incubator/stratos","commit":"abd53d23fb7a64fa2dabfc89c7c20177845000bb\\n"}}'
           },
           memory: 1024,
           instances: 1,

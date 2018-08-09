@@ -12,8 +12,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
 )
