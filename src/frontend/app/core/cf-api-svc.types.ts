@@ -70,6 +70,16 @@ export interface IServicePlan {
   schemas?: any;
 }
 
+export interface ServicePlanSchemas {
+   service_instance: ServicePlanSchema;
+   service_binding: ServicePlanSchema;
+}
+
+export interface ServicePlanSchema {
+  create?: object;
+  update?: object;
+}
+
 export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
