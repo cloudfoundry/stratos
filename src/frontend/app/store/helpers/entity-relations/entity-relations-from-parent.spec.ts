@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { async, inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
@@ -47,7 +47,7 @@ describe('Entity Relations - populate from parent', () => {
 
   });
 
-  it('List in parent', (done) => {
+  it('List in parent', async(() => {
     const spaces: APIResource<ISpace>[] = [
       helper.createEmptySpace('1', 'space1`', orgGuid),
       helper.createEmptySpace('2', 'space2`', orgGuid),
@@ -72,10 +72,9 @@ describe('Entity Relations - populate from parent', () => {
             map[space.metadata.guid] = space;
             return map;
           }, {}));
-          done();
         });
     })();
 
-  });
+  }));
 
 });
