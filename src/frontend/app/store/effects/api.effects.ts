@@ -14,11 +14,11 @@ import { map, mergeMap, withLatestFrom, catchError } from 'rxjs/operators';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
-import { listEntityRelations } from '../helpers/entity-relations';
+import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
 import {
   EntityInlineParentAction,
   isEntityInlineParentAction,
-} from '../helpers/entity-relations.types';
+} from '../helpers/entity-relations/entity-relations.types';
 import {
   CfAPIFlattener,
   flattenPagination,

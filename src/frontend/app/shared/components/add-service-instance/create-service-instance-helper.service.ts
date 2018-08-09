@@ -25,7 +25,7 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstanceServicePlan } from '../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../store/types/api.types';

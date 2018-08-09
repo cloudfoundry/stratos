@@ -1,22 +1,22 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
-import { createBasicStoreModule, getInitialTestStoreState } from '../../test-framework/store-test-helper';
-import { GetOrganization } from '../actions/organization.actions';
-import { SetInitialParams } from '../actions/pagination.actions';
-import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
-import { APIResponse } from '../actions/request.actions';
-import { AppState, IRequestTypeState } from '../app-state';
-import { getDefaultRequestState } from '../reducers/api-request-reducer/types';
-import { IRequestDataState } from '../types/entity.types';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../types/request.types';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { GetOrganization } from '../../actions/organization.actions';
+import { SetInitialParams } from '../../actions/pagination.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
+import { APIResponse } from '../../actions/request.actions';
+import { AppState, IRequestTypeState } from '../../app-state';
+import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
+import { IRequestDataState } from '../../types/entity.types';
+import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
   entityFactory,
   organizationSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
   spaceSchemaKey,
-} from './entity-factory';
+} from '../entity-factory';
 import { validateEntityRelations } from './entity-relations';
 import {
   entityRelationMissingQuotaGuid,
@@ -26,7 +26,7 @@ import {
 } from './entity-relations.spec';
 import { createEntityRelationKey, createEntityRelationPaginationKey, EntityTreeRelation } from './entity-relations.types';
 
-describe('Entity Relations - validate', () => {
+fdescribe('Entity Relations - validate', () => {
 
   const helper = new EntityRelationSpecHelper();
 
@@ -54,13 +54,16 @@ describe('Entity Relations - validate', () => {
       store: iStore
     });
     expect(res.started).toBeFalsy();
-    if (apiResponse) {
-      expect(res.apiResponse).toBeTruthy();
-    } else {
-      expect(res.apiResponse).toBeFalsy();
-    }
 
-    expect(res.completed.then(done));
+
+    expect(res.completed.then(completedRes => {
+      if (apiResponse) {
+        expect(completedRes).toBeTruthy();
+      } else {
+        expect(completedRes).toBeFalsy();
+      }
+      done();
+    }));
 
     expect(iStore.dispatch).toHaveBeenCalledTimes(0);
     expect(dispatchSpy.calls.count()).toBe(0);
@@ -111,11 +114,6 @@ describe('Entity Relations - validate', () => {
         store: iStore
       });
       expect(res.started).toBeTruthy();
-      if (apiResponse) {
-        expect(res.apiResponse).toBeTruthy();
-      } else {
-        expect(res.apiResponse).toBeFalsy();
-      }
 
       expect(iStore.dispatch).toHaveBeenCalledTimes(2);
       expect(dispatchSpy.calls.count()).toBe(2);
@@ -177,12 +175,6 @@ describe('Entity Relations - validate', () => {
         populateMissing: true,
         store: iStore
       });
-      expect(res.started).toBeTruthy();
-      if (apiResponse) {
-        expect(res.apiResponse).toBeTruthy();
-      } else {
-        expect(res.apiResponse).toBeFalsy();
-      }
 
       expect(iStore.dispatch).toHaveBeenCalledTimes(1);
       expect(dispatchSpy.calls.count()).toBe(1);
@@ -291,7 +283,6 @@ describe('Entity Relations - validate', () => {
           store: iStore
         });
         expect(res.started).toBeTruthy();
-        expect(res.apiResponse).toBeFalsy();
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(2);
         expect(dispatchSpy.calls.count()).toBe(2);
@@ -326,11 +317,13 @@ describe('Entity Relations - validate', () => {
         });
 
         expect(res.started).toBeFalsy();
-        expect(res.apiResponse).toBeFalsy();
+        expect(res.completed.then(completedRes => {
+          expect(completedRes).toBeFalsy();
+          done();
+        }));
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(0);
         expect(dispatchSpy.calls.count()).toBe(0);
-        done();
 
       })();
     });
@@ -358,7 +351,11 @@ describe('Entity Relations - validate', () => {
         });
 
         expect(res.started).toBeFalsy();
-        expect(res.apiResponse).toBeFalsy();
+        expect(res.completed.then(completedRes => {
+          expect(completedRes).toBeFalsy();
+          done();
+        }));
+
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(0);
         expect(dispatchSpy.calls.count()).toBe(0);
@@ -412,7 +409,6 @@ describe('Entity Relations - validate', () => {
           store: iStore
         });
         expect(res.started).toBeTruthy();
-        expect(res.apiResponse).toBeFalsy();
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(1);
         expect(dispatchSpy.calls.count()).toBe(1);
