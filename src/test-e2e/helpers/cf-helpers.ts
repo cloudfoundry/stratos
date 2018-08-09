@@ -1,8 +1,10 @@
-import { CFResponse, APIResource } from '../../frontend/app/store/types/api.types';
-import { CFRequestHelpers } from './cf-request-helpers';
-import { e2e, E2ESetup } from '../e2e';
 import { promise } from 'protractor';
+
+import { APIResource } from '../../frontend/app/store/types/api.types';
+import { CfUser } from '../../frontend/app/store/types/user.types';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
+import { CFRequestHelpers } from './cf-request-helpers';
 
 
 export class CFHelpers {
@@ -12,18 +14,29 @@ export class CFHelpers {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
   }
 
-  addOrgIfMissingForEndpointUsers(guid: string, endpoint: E2EConfigCloudFoundry, testOrgName: string) {
-    let testAdminUser, testUser;
-    return this.fetchUsers(guid).then(users => {
-      testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
-      testAdminUser = this.findUser(users, endpoint.creds.admin.username);
+  private assignAdminAndUserGuids(cnsiGuid: string, endpoint: E2EConfigCloudFoundry): promise.Promise<any> {
+    if (endpoint.creds.admin.guid && endpoint.creds.nonAdmin.guid) {
+      return promise.fullyResolved({});
+    }
+    return this.fetchUsers(cnsiGuid).then(users => {
+      const testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
+      const testAdminUser = this.findUser(users, endpoint.creds.admin.username);
       expect(testUser).toBeDefined();
       expect(testAdminUser).toBeDefined();
-      return this.addOrgIfMissing(guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
+      endpoint.creds.nonAdmin.guid = testUser.metadata.guid;
+      endpoint.creds.admin.guid = testAdminUser.metadata.guid;
     });
   }
 
-  private findUser(users: any, name: string) {
+  addOrgIfMissingForEndpointUsers(guid: string, endpoint: E2EConfigCloudFoundry, testOrgName: string) {
+    return this.assignAdminAndUserGuids(guid, endpoint).then(() => {
+      expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
+      expect(endpoint.creds.admin.guid).not.toBeNull();
+      return this.addOrgIfMissing(guid, testOrgName, endpoint.creds.admin.guid, endpoint.creds.nonAdmin.guid);
+    });
+  }
+
+  private findUser(users: any, name: string): APIResource<CfUser> {
     return users.find(user => user && user.entity && user.entity.username === name);
   }
 
@@ -52,7 +65,15 @@ export class CFHelpers {
     });
   }
 
-  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, adminGuid, userGuid) {
+  addSpaceIfMissingForEndpointUsers(cnsiGuid, orgGuid, orgName, spaceName, endpoint: E2EConfigCloudFoundry) {
+    return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
+      expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
+      return this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
+    });
+  }
+
+  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid) {
+    const cfRequestHelper = this.cfRequestHelper;
     return this.cfRequestHelper.sendCfGet(cnsiGuid,
       'spaces?inline-relations-depth=1&include-relations=organization&q=name IN ' + spaceName)
       .then(function (json) {
@@ -65,11 +86,11 @@ export class CFHelpers {
           });
         }
         if (add) {
-          return this.cfRequestHelper.sendCfPost(cnsiGuid, 'pp/v1/proxy/v2/spaces',
+          return cfRequestHelper.sendCfPost(cnsiGuid, 'spaces',
             {
               name: spaceName,
-              manager_guids: [adminGuid],
-              developer_guids: [userGuid, adminGuid],
+              manager_guids: [],
+              developer_guids: [userGuid],
               organization_guid: orgGuid
             });
         }

@@ -1,6 +1,7 @@
 export interface E2ECred {
   username: string;
   password: string;
+  guid?: string;
 }
 
 export interface E2ECreds {

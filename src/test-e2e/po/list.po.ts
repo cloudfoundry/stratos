@@ -1,6 +1,8 @@
-import { by, element, promise, browser, protractor, Key } from 'protractor';
+import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
+
 import { Component } from './component.po';
+import { FormComponent } from './form.po';
 import { MetaCard } from './meta-card.po';
 import { PaginatorComponent } from './paginator.po';
 
@@ -218,6 +220,18 @@ export class ListHeaderComponent extends Component {
 
   getCardListViewToggleButton(): ElementFinder {
     return this.getRightHeaderSection().element(by.css('#list-card-toggle'));
+  }
+
+  private findSortSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__right .sort'));
+  }
+
+  getSortFieldForm(): FormComponent {
+    return new FormComponent(this.findSortSection());
+  }
+
+  toggleSortOrder() {
+    this.findSortSection().element(by.css('button')).click();
   }
 
 }
