@@ -8,6 +8,7 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import { EntityMonitorFactory } from '../../../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -27,10 +28,18 @@ import { CfRolesService } from '../cf-roles.service';
       useFactory: (
         store: Store<AppState>,
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-        cfUserService: CfUserService) => {
-        return new CfSelectUsersListConfigService(store, activeRouteCfOrgSpace.cfGuid, cfUserService, activeRouteCfOrgSpace);
+        cfUserService: CfUserService,
+        paginationMonitorFactory: PaginationMonitorFactory,
+        entityMonitorFactory: EntityMonitorFactory) => {
+        return new CfSelectUsersListConfigService(
+          store,
+          activeRouteCfOrgSpace.cfGuid,
+          cfUserService,
+          activeRouteCfOrgSpace,
+          paginationMonitorFactory,
+          entityMonitorFactory);
       },
-      deps: [Store, ActiveRouteCfOrgSpace, CfUserService]
+      deps: [Store, ActiveRouteCfOrgSpace, CfUserService, PaginationMonitorFactory, EntityMonitorFactory]
     }
   ],
 })

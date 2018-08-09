@@ -25,7 +25,7 @@
         <app-card-number-metric icon="memory" label="Memory Usage" units="mb" value="{{ (cfSpaceService.totalMem$ | async) }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.memory_limit }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{(cfSpaceService.allSpaceUsers.entities$ | async)?.length}}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{(cfSpaceService.allSpaceUsers$ | async)?.length}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes" iconFont="stratos-icons" icon="network_route" label="Routes" value="{{ (cfSpaceService.routes$ | async)?.length }}"

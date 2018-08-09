@@ -2,7 +2,7 @@ import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
-import { CfUser } from '../types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -228,11 +228,16 @@ const coreSpaceSchemaParams = {
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
+  [SpaceUserRoleNames.DEVELOPER]: [
+    new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)
+  ],
+  [SpaceUserRoleNames.MANAGER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.MANAGER)],
+  [SpaceUserRoleNames.AUDITOR]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.AUDITOR)]
 };
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
-    apps: [ApplicationWithoutSpaceEntitySchema],
+    apps: [ApplicationWithoutSpaceEntitySchema]
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -257,6 +262,12 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
+    [OrgUserRoleNames.USER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.USER)],
+    [OrgUserRoleNames.MANAGER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.MANAGER)],
+    [OrgUserRoleNames.BILLING_MANAGERS]: [
+      new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.BILLING_MANAGERS)
+    ],
+    [OrgUserRoleNames.AUDITOR]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.AUDITOR)]
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;
@@ -339,27 +350,20 @@ const orgUserEntity = {
     spaces: [SpaceEmptySchema]
   }
 };
-const OrganizationUserSchema = new EntitySchema(
-  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'organizations');
-const OrganizationAuditedSchema = new EntitySchema(
-  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'audited_organizations');
-const OrganizationManagedSchema = new EntitySchema(
-  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'managed_organizations');
-const OrganizationBillingSchema = new EntitySchema(
-  organizationSchemaKey, orgUserEntity, { idAttribute: getAPIResourceGuid }, 'billing_managed_organizations');
-const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'spaces');
-const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces');
-const SpaceAuditedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');
+
+function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
+  return new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
+}
 
 const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
   entity: {
-    organizations: [OrganizationUserSchema],
-    audited_organizations: [OrganizationAuditedSchema],
-    managed_organizations: [OrganizationManagedSchema],
-    billing_managed_organizations: [OrganizationBillingSchema],
-    spaces: [SpaceUserSchema],
-    managed_spaces: [SpaceManagedSchema],
-    audited_spaces: [SpaceAuditedSchema],
+    organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.ORGANIZATIONS)],
+    audited_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.AUDITED_ORGS)],
+    managed_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.MANAGED_ORGS)],
+    billing_managed_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.BILLING_MANAGER_ORGS)],
+    spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.SPACES)],
+    managed_spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.MANAGED_SPACES)],
+    audited_spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
     idAttribute: getAPIResourceGuid,
@@ -381,6 +385,7 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
     }
   });
 entityCache[cfUserSchemaKey] = CFUserSchema;
+
 
 export function entityFactory(key: string): EntitySchema {
   const entity = entityCache[key];
