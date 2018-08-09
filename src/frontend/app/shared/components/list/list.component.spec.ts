@@ -20,7 +20,7 @@ import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
 
-fdescribe('ListComponent', () => {
+describe('ListComponent', () => {
 
   describe('basic tests', () => {
 
