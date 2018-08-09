@@ -1,0 +1,24 @@
+endpoints:
+  - url: https://api.local.pcfdev.io
+    skip-ssl: true
+    admin-user:
+      username: admin
+      password: admin
+    uaa:
+      url: https://uaa.local.pcfdev.io
+      zoneId: uaa
+      client: admin
+      client-secret: admin-client-secret
+      cf-client: cf
+      cf-client-secret: 
+      skip-ssl: true
+fixture:
+  non-admin-user:
+    username: e2e-irfan
+    password: changeme
+  organization: e2e-irfan
+  space: e2e-irfan
+  services:
+    public-service: public-service
+    private-service: private-service
+    space-scoped-service: space-scoped-service
