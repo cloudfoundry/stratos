@@ -103,7 +103,7 @@
       tempSrcPath = path.join(tempPath, conf.goPath);
       return done();
     } else {
-      mktemp.createDir('/tmp/stratos-ui-XXXX.build',
+      mktemp.createDir('/tmp/stratos-XXXX.build',
         function (err, path_) {
           if (err) {
             throw err;
@@ -138,7 +138,7 @@
 
     var appCore = '../src/backend/app-core';
     appCore = path.resolve(__dirname, appCore);
-    var symLinkPath = path.join(symLinkFolder, 'stratos-ui')
+    var symLinkPath = path.join(symLinkFolder, 'stratos')
 
     // Create the plugins folder if it does not exist
     var pluginsFolder = path.join(appCore, 'plugins');
