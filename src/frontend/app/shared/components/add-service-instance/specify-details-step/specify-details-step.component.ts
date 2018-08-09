@@ -276,8 +276,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   onFormChange(jsonData) {
     if (!!jsonData) {
-      const stringData = JSON.stringify(jsonData);
-      this.createNewInstanceForm.get('params').setValue(stringData);
+      try {
+        const stringData = JSON.stringify(jsonData);
+        this.createNewInstanceForm.get('params').setValue(stringData);
+      } catch { }
     }
   }
 
@@ -446,8 +448,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       filter(a => !a.creating),
       switchMap(a => {
         const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
-        if ( (isEditMode && !!updating && updating.error) || (a.error) ) {
-            return create$;
+        if ((isEditMode && !!updating && updating.error) || (a.error)) {
+          return create$;
         }
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);

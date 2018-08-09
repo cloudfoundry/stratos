@@ -64,8 +64,10 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   onFormChange(jsonData) {
     if (!!jsonData) {
-      const stringData = JSON.stringify(jsonData);
-      this.stepperForm.get('params').setValue(stringData);
+      try {
+        const stringData = JSON.stringify(jsonData);
+        this.stepperForm.get('params').setValue(stringData);
+      } catch { }
     }
   }
 
@@ -107,10 +109,11 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   onEnter = (selectedService$?) => {
     this.selectedService$ = selectedService$;
     if (selectedService$ instanceof Observable) {
-      this.selectedServiceSubscription = selectedService$
-        .subscribe(selectedService => {
-          this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters);
-        });
+      this.selectedServiceSubscription = selectedService$.pipe(
+        first()
+      ).subscribe(selectedService => {
+        this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters);
+      });
     }
   }
 
