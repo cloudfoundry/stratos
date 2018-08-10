@@ -147,6 +147,7 @@ jobs:
         DOCKER_ORG: ((artifact-docker-organization))
         DOCKER_REGISTRY: ((artifact-docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
+        HELM_REPO_BRANCH: ((helm-repo-branch))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
