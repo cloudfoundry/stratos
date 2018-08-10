@@ -11,8 +11,18 @@ export class SnackBarComponent extends Component {
     super(element(by.css('.mat-simple-snackbar')));
   }
 
+  private getButton(): ElementFinder {
+    return this.locator.element(by.tagName('button'));
+  }
+
   close(): promise.Promise<void> {
-    return this.locator.element(by.tagName('button')).click();
+    return this.getButton().click();
+  }
+
+  safeClose(): promise.Promise<void> {
+    return this.getButton().isPresent().then(isPresent => {
+      return isPresent ? this.getButton().click() : null;
+    });
   }
 
   getButtonText(): promise.Promise<string> {

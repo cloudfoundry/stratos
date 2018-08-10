@@ -12,11 +12,12 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
+	"crypto/sha1"
+	"encoding/base64"
+
 	"github.com/SUSE/stratos-ui/repository/cnsis"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/SUSE/stratos-ui/repository/tokens"
-	"crypto/sha1"
-	"encoding/base64"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -47,7 +48,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
-	cnsiClientId :=  c.FormValue("cnsi_client_id")
+	cnsiClientId := c.FormValue("cnsi_client_id")
 	cnsiClientSecret := c.FormValue("cnsi_client_secret")
 
 	if cnsiClientId == "" {
@@ -143,12 +144,7 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 	p.unsetCNSIRecord(cnsiGUID)
 
-	userID, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
-	}
-
-	p.unsetCNSITokenRecord(cnsiGUID, userID)
+	p.unsetCNSITokenRecords(cnsiGUID)
 
 	return nil
 }
@@ -412,6 +408,25 @@ func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) err
 	}
 
 	err = tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
+	if err != nil {
+		msg := "Unable to delete a CNSI Token: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
+	log.Debug("unsetCNSITokenRecord")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		msg := "Unable to establish a database reference: '%v'"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	err = tokenRepo.DeleteCNSITokens(cnsiGUID)
 	if err != nil {
 		msg := "Unable to delete a CNSI Token: %v"
 		log.Errorf(msg, err)

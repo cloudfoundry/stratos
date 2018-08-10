@@ -1,3 +1,5 @@
+import { browser } from 'protractor';
+
 import { ApplicationsPage } from '../applications/applications.po';
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
@@ -20,6 +22,8 @@ describe('Endpoints', () => {
   describe('Connect/Disconnect endpoints -', () => {
 
     beforeAll(() => {
+      // Ran independently these tests are fine. However stacked with other spec files they'll fail without a pause
+      browser.sleep(1000);
       e2e.setup(ConsoleUserType.user)
         .clearAllEndpoints()
         .registerDefaultCloudFoundry();
@@ -33,7 +37,7 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
-        connectDialog.snackBar.close();
+        connectDialog.snackBar.safeClose();
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {

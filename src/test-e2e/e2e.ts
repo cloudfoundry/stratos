@@ -80,7 +80,7 @@ export class E2ESetup {
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
     const that = this;
     protractor.promise.controlFlow().execute(() => {
-      E2E.debugLog('Logging in as user: ' + (userType === ConsoleUserType.admin ? 'admin' : 'user'));
+      E2E.debugLog('Logging in as user: ' + (that.loginUserType === ConsoleUserType.admin ? 'admin' : 'user'));
       return e2e.helper.setupApp(that.loginUserType);
     });
   }
