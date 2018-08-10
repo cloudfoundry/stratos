@@ -26,7 +26,7 @@ setupAndPushChange() {
   git add index.yaml
   git commit -m "Dev releases Helm repository updated for tag: ${IMAGE_TAG}"
   git config --global push.default simple
-  git push origin HEAD:master
+  git push origin HEAD:${HELM_REPO_BRANCH}
 
 }
 
