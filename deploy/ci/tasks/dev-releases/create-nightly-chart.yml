@@ -33,7 +33,7 @@ run:
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
-      INDEX_FILE=${STRATOS_MASTER}/index.yaml
+      INDEX_FILE=${HELM_REPO}/index.yaml
       CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
       if [ -f ${INDEX_FILE} ]; then
             NIGHTLY_EXISTS=$(cat  ${INDEX_FILE} | grep ${TAG})
