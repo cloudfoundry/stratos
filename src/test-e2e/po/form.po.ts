@@ -67,11 +67,14 @@ export class FormComponent extends Component {
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
     const fields = this.getFields().filter((elm => {
-      return elm.getAttribute('name').then(name => {
-        return elm.getAttribute('formcontrolname').then(formcontrolname => {
-          const nameAtt = name || formcontrolname;
-          return nameAtt.toLowerCase() === ctrlName;
-        });
+      return promise.all([
+        elm.getAttribute('name'),
+        elm.getAttribute('formcontrolname'),
+        elm.getAttribute('id')
+      ]).then(([name, formcontrolname, id]) => {
+        console.log(id);
+        const nameAtt = name || formcontrolname || id;
+        return nameAtt.toLowerCase() === ctrlName;
       });
     }));
     expect(fields.count()).toBe(1);

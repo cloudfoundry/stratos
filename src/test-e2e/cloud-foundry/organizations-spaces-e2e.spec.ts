@@ -162,7 +162,7 @@ describe('CF - Manage Organizations and Spaces', () => {
         space.openActionMenu().then(menu => {
           menu.clickItem('Delete');
           ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space');
-          cardView.cards.getCardCound().then(c => {
+          cardView.cards.getCardCount().then(c => {
             expect(c).toBe(0);
           });
         });
