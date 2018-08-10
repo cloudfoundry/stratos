@@ -39,6 +39,5 @@ func (cfAppSsh *CFAppSsh) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (cfAppSsh *CFAppSsh) Init() error {
-
 	return nil
 }

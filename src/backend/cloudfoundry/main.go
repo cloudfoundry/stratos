@@ -76,6 +76,7 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfac
 }
 
 func (c *CloudFoundrySpecification) Init() error {
+	// This plugin is loaded in all cases
 	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
 	c.portalProxy.GetConfig().LoginHook = c.cfLoginHook
 

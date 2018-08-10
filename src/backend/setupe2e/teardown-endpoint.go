@@ -8,7 +8,7 @@ import (
 	uaa "github.com/cloudfoundry-community/go-uaa"
 )
 
-func (e2e *SetupE2EHelper) tearDownEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) error {
+func (e2e *SetupE2EHelper) TearDownEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) error {
 	uaaAPI, err := e2e.createUAAClient(endpoint)
 	cfAPI, _ := e2e.createCFClent(endpoint)
 

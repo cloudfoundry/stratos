@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/SUSE/stratos-ui/config"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/labstack/echo"
 )
@@ -12,7 +13,13 @@ type SetupE2EHelper struct {
 	portalProxy interfaces.PortalProxy
 }
 
+const EnableTestPlugins = "ENABLE_TEST_PLUGINS"
+
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+	// This is only loaded in the dev world
+	if !config.IsSet(EnableTestPlugins) {
+		return nil, nil
+	}
 	return &SetupE2EHelper{portalProxy: portalProxy}, nil
 }
 
@@ -45,7 +52,7 @@ func (e2e *SetupE2EHelper) setupEndpoint(c echo.Context) error {
 
 	config := new(Config)
 	if err := c.Bind(config); err != nil {
-		e2e.setupEndpointForFixture(config.Endpoint, config.Fixture)
+		e2e.SetupEndpointForFixture(config.Endpoint, config.Fixture)
 		return c.NoContent(http.StatusServiceUnavailable)
 	}
 	return c.NoContent(http.StatusBadRequest)
@@ -54,7 +61,7 @@ func (e2e *SetupE2EHelper) setupEndpoint(c echo.Context) error {
 func (e2e *SetupE2EHelper) tearDownEndpoint(c echo.Context) error {
 	config := new(Config)
 	if err := c.Bind(config); err != nil {
-		e2e.tearDownEndpointForFixture(config.Endpoint, config.Fixture)
+		e2e.TearDownEndpointForFixture(config.Endpoint, config.Fixture)
 		return c.NoContent(http.StatusServiceUnavailable)
 	}
 	return c.NoContent(http.StatusBadRequest)

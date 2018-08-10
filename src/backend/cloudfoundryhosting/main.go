@@ -33,6 +33,12 @@ type CFHosting struct {
 }
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+
+	// Don't load is VCAPApplication env var is not available
+	if !config.IsSet(VCapApplication) {
+		return nil, nil
+	}
+
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
@@ -52,133 +58,132 @@ func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 }
 
 func (ch *CFHosting) Init() error {
+
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
-	if config.IsSet(VCapApplication) {
-		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
+	log.Info("Detected that Console is deployed as a Cloud Foundry Application")
 
-		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
-		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
-		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
-		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
+	ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
+	// We are using the CF UAA - so the Console must use the same Client and Secret as CF
+	ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
+	ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
 
-		// Ensure that the identifier for an admin is the standard Cloud Foundry one
-		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
+	// Ensure that the identifier for an admin is the standard Cloud Foundry one
+	ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
 
-		// Allow Console Application manifest to override the Admin Scope if really desired
-		if config.IsSet("STRATOS_ADMIN_SCOPE") {
-			stratosAdminScope, err := config.GetValue("STRATOS_ADMIN_SCOPE")
-			if err == nil {
-				ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
-				log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
-			}
+	// Allow Console Application manifest to override the Admin Scope if really desired
+	if config.IsSet("STRATOS_ADMIN_SCOPE") {
+		stratosAdminScope, err := config.GetValue("STRATOS_ADMIN_SCOPE")
+		if err == nil {
+			ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
+			log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
 		}
-
-		// Need to run as HTTP on the port we were told to use
-		ch.portalProxy.GetConfig().HTTPS = false
-
-		if config.IsSet("PORT") {
-			port, err := config.GetValue("PORT")
-			if err != nil {
-				log.Warnf("Unable to read Port")
-			} else {
-
-				ch.portalProxy.GetConfig().TLSAddress = ":" + port
-				log.Infof("Updated Console address to: %s", ch.portalProxy.GetConfig().TLSAddress)
-			}
-		}
-		// Get the cf_api value from the JSON
-		var appData interfaces.VCapApplicationData
-		vCapApp, _ := config.GetValue(VCapApplication)
-		data := []byte(vCapApp)
-		err := json.Unmarshal(data, &appData)
-		if err != nil {
-			log.Fatal("Could not get the Cloud Foundry API URL", err)
-			return nil
-		}
-
-		log.Infof("CF API URL: %s", appData.API)
-
-		// Allow the URL to be overridden by an application environment variable
-		if config.IsSet(CFApiURLOverride) {
-			apiUrl, _ := config.GetValue(CFApiURLOverride)
-			appData.API = apiUrl
-			log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
-		}
-
-		if config.IsSet(CFApiForceSecure) {
-			// Force the API URL protocol to be https
-			appData.API = strings.Replace(appData.API, "http://", "https://", 1)
-			log.Infof("Ensuring that CF API URL is accessed over HTTPS")
-		} else {
-			log.Info("No forced override to HTTPS")
-		}
-
-		disableEndpointDashboard := true
-		if config.IsSet(ForceEndpointDashboard) {
-			// Force the Endpoint Dashboard to be visible?
-			if forceStr, err := config.GetValue(ForceEndpointDashboard); err == nil {
-				if force, err := strconv.ParseBool(forceStr); err == nil {
-					disableEndpointDashboard = !force
-				}
-			}
-		}
-
-		if disableEndpointDashboard {
-			log.Info("Endpoint Dashboard has been DISABLED")
-		} else {
-			log.Info("Endpoint Dashboard has been ENABLED")
-		}
-		ch.portalProxy.GetConfig().PluginConfig["endpointsDashboardDisabled"] = strconv.FormatBool(disableEndpointDashboard)
-
-		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
-		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
-		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
-		if err != nil {
-			log.Fatal("Could not get the info for Cloud Foundry", err)
-			return nil
-		}
-
-		// Override the configuration to set the authorization endpoint
-		url, err := url.Parse(newCNSI.AuthorizationEndpoint)
-		if err != nil {
-			return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
-		}
-
-		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
-		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
-
-		skipSsl, err := config.GetValue("SKIP_SSL_VALIDATION")
-		if err != nil {
-			// Not set in the environment and failed to read from the Secrets file
-			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
-		}
-
-		skipSslBool, err := strconv.ParseBool(skipSsl)
-		if err != nil {
-			// Not set in the environment and failed to read from the Secrets file
-			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
-		}
-
-		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = skipSslBool
-
-		// Save to Console DB
-		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
-		if err != nil {
-			log.Fatalf("Failed to save console configuration due to %s", err)
-			return fmt.Errorf("Failed to save console configuration due to %s", err)
-		}
-
-		log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
-		ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
-
-		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
-		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-			SpaceGUID: appData.SpaceID,
-			AppGUID:   appData.ApplicationID,
-		}
-
-		log.Info("All done for Cloud Foundry deployment")
 	}
+
+	// Need to run as HTTP on the port we were told to use
+	ch.portalProxy.GetConfig().HTTPS = false
+
+	if config.IsSet("PORT") {
+		port, err := config.GetValue("PORT")
+		if err != nil {
+			log.Warnf("Unable to read Port")
+		} else {
+
+			ch.portalProxy.GetConfig().TLSAddress = ":" + port
+			log.Infof("Updated Console address to: %s", ch.portalProxy.GetConfig().TLSAddress)
+		}
+	}
+	// Get the cf_api value from the JSON
+	var appData interfaces.VCapApplicationData
+	vCapApp, _ := config.GetValue(VCapApplication)
+	data := []byte(vCapApp)
+	err := json.Unmarshal(data, &appData)
+	if err != nil {
+		log.Fatal("Could not get the Cloud Foundry API URL", err)
+		return nil
+	}
+
+	log.Infof("CF API URL: %s", appData.API)
+
+	// Allow the URL to be overridden by an application environment variable
+	if config.IsSet(CFApiURLOverride) {
+		apiUrl, _ := config.GetValue(CFApiURLOverride)
+		appData.API = apiUrl
+		log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
+	}
+
+	if config.IsSet(CFApiForceSecure) {
+		// Force the API URL protocol to be https
+		appData.API = strings.Replace(appData.API, "http://", "https://", 1)
+		log.Infof("Ensuring that CF API URL is accessed over HTTPS")
+	} else {
+		log.Info("No forced override to HTTPS")
+	}
+
+	disableEndpointDashboard := true
+	if config.IsSet(ForceEndpointDashboard) {
+		// Force the Endpoint Dashboard to be visible?
+		if forceStr, err := config.GetValue(ForceEndpointDashboard); err == nil {
+			if force, err := strconv.ParseBool(forceStr); err == nil {
+				disableEndpointDashboard = !force
+			}
+		}
+	}
+
+	if disableEndpointDashboard {
+		log.Info("Endpoint Dashboard has been DISABLED")
+	} else {
+		log.Info("Endpoint Dashboard has been ENABLED")
+	}
+	ch.portalProxy.GetConfig().PluginConfig["endpointsDashboardDisabled"] = strconv.FormatBool(disableEndpointDashboard)
+
+	log.Infof("Using Cloud Foundry API URL: %s", appData.API)
+	cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
+	newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
+	if err != nil {
+		log.Fatal("Could not get the info for Cloud Foundry", err)
+		return nil
+	}
+
+	// Override the configuration to set the authorization endpoint
+	url, err := url.Parse(newCNSI.AuthorizationEndpoint)
+	if err != nil {
+		return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
+	}
+
+	ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
+	log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
+
+	skipSsl, err := config.GetValue("SKIP_SSL_VALIDATION")
+	if err != nil {
+		// Not set in the environment and failed to read from the Secrets file
+		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
+	}
+
+	skipSslBool, err := strconv.ParseBool(skipSsl)
+	if err != nil {
+		// Not set in the environment and failed to read from the Secrets file
+		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
+	}
+
+	ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = skipSslBool
+
+	// Save to Console DB
+	err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
+	if err != nil {
+		log.Fatalf("Failed to save console configuration due to %s", err)
+		return fmt.Errorf("Failed to save console configuration due to %s", err)
+	}
+
+	log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
+	ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
+
+	// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
+	ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
+		SpaceGUID: appData.SpaceID,
+		AppGUID:   appData.ApplicationID,
+	}
+
+	log.Info("All done for Cloud Foundry deployment")
 	return nil
 }
 

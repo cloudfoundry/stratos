@@ -29,7 +29,7 @@ func (e2e *SetupE2EHelper) createUAAClient(endpoint Endpoint) (*uaa.API, error) 
 		endpoint.UAA.SkipSSLValidation)
 }
 
-func (e2e *SetupE2EHelper) setupEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) {
+func (e2e *SetupE2EHelper) SetupEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) {
 
 	cfAPI, err := e2e.createCFClent(endpoint)
 

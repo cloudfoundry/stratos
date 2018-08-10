@@ -146,8 +146,8 @@
       var destPath = path.join(srcPath, pkgName);
 
       imports += '\t"github.com/SUSE/stratos-ui/plugins/' + pkgName + '"\n';
-      inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
-      inits += '\tlog.Info("Loaded plugin: ' + plugin.name + '")\n';
+      inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tif plugin != nil {\n\t\tpp.Plugins["' + pkgName + '"] = plugin\n';
+      inits += '\t\tlog.Info("Loaded plugin: ' + plugin.name + '")\n\t}\n';
     });
 
     // Patch the static plugin loader
