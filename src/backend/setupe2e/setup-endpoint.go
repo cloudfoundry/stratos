@@ -2,7 +2,6 @@ package setupe2e
 
 import (
 	"fmt"
-	"os"
 
 	cfclient "github.com/cloudfoundry-community/go-cfclient"
 	uaa "github.com/cloudfoundry-community/go-uaa"
@@ -32,11 +31,13 @@ func (e2e *SetupE2EHelper) createUAAClient(endpoint Endpoint) (*uaa.API, error) 
 func (e2e *SetupE2EHelper) SetupEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) {
 
 	cfAPI, err := e2e.createCFClent(endpoint)
+	if err != nil {
+		fmt.Printf("Failed to log in to CF due to %s", err)
+	}
 
 	uaaAPI, err := e2e.createUAAClient(endpoint)
-	fmt.Printf("Failed to log in to UAA %+v", err)
 	if err != nil {
-		fmt.Printf("Failed to log in to UAA %+v", err)
+		fmt.Printf("Failed to log in to UAA %s", err)
 	}
 	uaaAPI.Verbose = true
 
@@ -45,30 +46,27 @@ func (e2e *SetupE2EHelper) SetupEndpointForFixture(endpoint Endpoint, fixture Fi
 	userEntity, err := e2e.CreateUser(cfAPI, uaaAPI, fixture.NonAdminUser)
 	if err != nil || userEntity == nil {
 		fmt.Printf("Failed to create user due to %+v\n", err)
-		os.Exit(1)
 
 	}
-
 	fmt.Printf("Created User with ID: %s\n", userEntity.Guid)
 	fmt.Println("Creating Org")
 	org, err := e2e.CreateOrg(cfAPI, fixture.Organization)
 	if err != nil {
 		fmt.Printf("Failed to create org due to %+v", err)
-		os.Exit(1)
 	}
+
 	fmt.Printf("Created org with ID: %s\n", org.Guid)
 
 	fmt.Println("Associate Org with User")
 	err = e2e.AssociateOrgUser(cfAPI, org.Guid, userEntity.Guid)
 	if err != nil {
 		fmt.Printf("Failed to associate role due to %s", err)
-		os.Exit(1)
 	}
+
 	fmt.Printf("Creating Space Guids are: %s %s\n", org.Guid, userEntity.Guid)
 	spaceEntity, err := e2e.CreateSpace(cfAPI, fixture.Space, org.Guid, userEntity.Guid)
 	if err != nil {
 		fmt.Printf("Failed to create space due to %+v\n", err)
-		os.Exit(1)
 	}
 
 	e2e.CreateServices(cfAPI, endpoint, fixture, spaceEntity.Guid, org.Guid)
@@ -78,6 +76,15 @@ func (e2e *SetupE2EHelper) AssociateOrgUser(client *cfclient.Client, orgGuid str
 	_, err := client.AssociateOrgUser(orgGuid, userGuid)
 	return err
 }
+
+// func (e2e *SetupE2EHelper) CheckUser(uaaClient *uaa.API, user User) (bool, error) {
+
+// 	userEntity, err := uaaClient.GetUserByUsername(user.Username, "", "")
+// 	if err != nil {
+// 		fmt.Printf("Failed to create space due to %+v\n", err)
+// 		os.Exit(1)
+// 	}
+// }
 
 func (e2e *SetupE2EHelper) CreateUser(client *cfclient.Client, uaaClient *uaa.API, user User) (*cfclient.User, error) {
 

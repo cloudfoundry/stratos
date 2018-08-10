@@ -37,7 +37,8 @@
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "npm run customize"
+    "postinstall": "npm run customize",
+    "e2e-setup-tool": "gulp build-e2e-setup-tool"
   },
   "author": "",
   "license": "Apache-2.0",

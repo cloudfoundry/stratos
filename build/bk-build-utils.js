@@ -90,17 +90,21 @@
     return Q.resolve();
   }
 
-  function build(srcPath, exeName) {
+  function build(srcPath, exeName, isToolBuild) {
+
     var args = ['build', '-i', '-o', exeName];
 
-    prepareBuildWithoutPluginSupport(srcPath);
+    if (!isToolBuild) {
+      prepareBuildWithoutPluginSupport(srcPath);
+    }
 
     // Set the console version from that of the package.json and the git commit
     return getVersion().then(function (version) {
-      if (version) {
+      if (version && !isToolBuild) {
         args.push('-ldflags');
         args.push('-X=main.appVersion=' + version);
       }
+
       return spawnProcess('go', args, srcPath, env);
     });
   }

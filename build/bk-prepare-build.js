@@ -41,6 +41,10 @@
     return tempSrcPath;
   };
 
+  module.exports.getE2ESetupSourcePath = function () {
+    return path.join(tempPath, conf.e2eSetupPath);
+  };
+
   function getPlugins() {
     var plugins = [];
     findPlugins(plugins, conf.pluginFolder);
@@ -168,6 +172,23 @@
           done(err);
         });
 
+    });
+  });
+
+  gulp.task('copy-e2e-setup-tool', function (done) {
+
+    var symLinkFolder = path.dirname(tempSrcPath);
+    fs.ensureDirSync(symLinkFolder);
+
+    var setupE2ETool = '../deploy/test/setup-e2e';
+    setupE2ETool = path.resolve(__dirname, setupE2ETool);
+    var symLinkPath = path.join(symLinkFolder, 'setup-e2e')
+
+    fs.symlink(setupE2ETool, symLinkPath, function (err) {
+      if (err) {
+        throw err;
+      }
+      done()
     });
   });
 

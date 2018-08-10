@@ -31,6 +31,11 @@
     done();
   }));
 
+  gulp.task('init-build-e2e-tool', gulp.series('create-temp', 'copy-portal-proxy', 'create-outputs', 'copy-e2e-setup-tool', function (done) {
+    buildUtils.init();
+    done();
+  }));
+
   gulp.task('prepare-deps', gulp.series('get-plugins-data', function (done) {
     if (buildUtils.skipGlideInstall()) {
       return done();
@@ -54,6 +59,41 @@
       done(err);
     });
   }));
+
+  gulp.task('prepare-deps-e2e-tool', function (done) {
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
+    var setupE2ETool = prepareBuild.getE2ESetupSourcePath()
+    var promise = Q.resolve();
+    var glidePluginPath = path.join(setupE2ETool, 'glide.yaml');
+
+      if (fs.existsSync(glidePluginPath)) {
+        promise = promise
+          .then(function() {
+            return buildUtils.runGlideInstall(setupE2ETool);
+          });
+      }
+
+    promise.then(function () {
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  });
+  gulp.task('build-e2e-tool', function (done) {
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
+    var setupE2ETool = prepareBuild.getE2ESetupSourcePath()
+    var promise = buildUtils.build(setupE2ETool, conf.e2eSetupName, true);
+
+    promise.then(function () {
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  });
 
   // If plugins are using different version of the same dependency,
   // than we will end up overwriting one of them. Therefore, plugins should use
@@ -104,6 +144,29 @@
         done(err);
       });
   }));
+
+  gulp.task('dedup-vendor-e2e', function (done) {
+
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
+
+    // Plugins
+    var promise = Q.resolve();
+    var setupE2EVendorPath = path.join(prepareBuild.getE2ESetupSourcePath(), 'vendor');
+    promise
+    .then(function() {
+      var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
+      if (fs.existsSync(setupE2EVendorPath)) {
+        mergeDirs.default(setupE2EVendorPath, goSrc);
+      }
+      fs.removeSync(setupE2EVendorPath);
+      return Q.resolve();
+    }).then(done)
+    .catch(function(err) {
+      done(err);
+    });
+  });
 
   gulp.task('build-all', function (done) {
     buildUtils.init();
@@ -222,6 +285,15 @@
     'copy-artefacts',
     'delete-temp',
     'local-dev-build'
+  ));
+
+  gulp.task('build-e2e-setup-tool', gulp.series(
+    'init-build-e2e-tool',
+    'prepare-deps-e2e-tool',
+    'dedup-vendor',
+    'dedup-vendor-e2e',
+    'build-e2e-tool',
+    'delete-temp',
   ));
 
   gulp.task('set-no-glide-install', function (done) {
