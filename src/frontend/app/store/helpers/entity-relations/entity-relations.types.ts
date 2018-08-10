@@ -124,8 +124,8 @@ export interface EntityInlineChildAction {
 export function isEntityInlineChildAction(anything): EntityInlineChildAction {
   return anything &&
     !!anything['parentGuid'] &&
-    !!anything['parentEntitySchema'] &&
-    !!anything['child'] ? anything as EntityInlineChildAction : null;
+    !!anything['parentEntitySchema']
+    ? anything as EntityInlineChildAction : null;
 }
 
 /**

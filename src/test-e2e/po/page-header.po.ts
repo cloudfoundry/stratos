@@ -46,6 +46,10 @@ export class PageHeader extends Component {
     return this.getTitle().getText();
   }
 
+  waitForTitleText(text: string) {
+    browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000);
+  }
+
   logout(): promise.Promise<any> {
     return this.clickIconButton('more_vert').then(() => {
       browser.driver.sleep(2000);
