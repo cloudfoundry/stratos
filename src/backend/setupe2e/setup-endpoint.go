@@ -2,7 +2,9 @@ package setupe2e
 
 import (
 	"fmt"
+	"sync"
 
+	log "github.com/Sirupsen/logrus"
 	cfclient "github.com/cloudfoundry-community/go-cfclient"
 	uaa "github.com/cloudfoundry-community/go-uaa"
 )
@@ -28,63 +30,67 @@ func (e2e *SetupE2EHelper) createUAAClient(endpoint Endpoint) (*uaa.API, error) 
 		endpoint.UAA.SkipSSLValidation)
 }
 
-func (e2e *SetupE2EHelper) SetupEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) {
+func (e2e *SetupE2EHelper) SetupEndpointForFixture(endpoint Endpoint, fixture FixtureConfig) error {
 
 	cfAPI, err := e2e.createCFClent(endpoint)
 	if err != nil {
-		fmt.Printf("Failed to log in to CF due to %s", err)
+		return fmt.Errorf("Failed to log in to CF due to %s", err)
 	}
 
 	uaaAPI, err := e2e.createUAAClient(endpoint)
 	if err != nil {
-		fmt.Printf("Failed to log in to UAA %s", err)
+		return fmt.Errorf("Failed to log in to UAA %s", err)
 	}
 	uaaAPI.Verbose = true
 
-	fmt.Println("Creating User")
+	log.Infof("Creating User %s\n", fixture.NonAdminUser.Username)
 
 	userEntity, err := e2e.CreateUser(cfAPI, uaaAPI, fixture.NonAdminUser)
-	if err != nil || userEntity == nil {
-		fmt.Printf("Failed to create user due to %+v\n", err)
+	if err != nil {
+		return fmt.Errorf("Failed to create user due to %+v\n", err)
 
 	}
-	fmt.Printf("Created User with ID: %s\n", userEntity.Guid)
-	fmt.Println("Creating Org")
+	log.Debugf("Created User with ID: %s\n", userEntity.Guid)
+
+	log.Infof("Creating Org %s", fixture.Organization)
 	org, err := e2e.CreateOrg(cfAPI, fixture.Organization)
 	if err != nil {
-		fmt.Printf("Failed to create org due to %+v", err)
+		return fmt.Errorf("Failed to create org due to %+v", err)
 	}
 
-	fmt.Printf("Created org with ID: %s\n", org.Guid)
+	log.Debugf("Created org with ID: %s\n", org.Guid)
 
-	fmt.Println("Associate Org with User")
+	log.Debug("Associate Org with User")
 	err = e2e.AssociateOrgUser(cfAPI, org.Guid, userEntity.Guid)
 	if err != nil {
-		fmt.Printf("Failed to associate role due to %s", err)
+		return fmt.Errorf("Failed to associate role due to %s", err)
 	}
 
-	fmt.Printf("Creating Space Guids are: %s %s\n", org.Guid, userEntity.Guid)
+	log.Infof("Creating Space %s\n", fixture.Space)
 	spaceEntity, err := e2e.CreateSpace(cfAPI, fixture.Space, org.Guid, userEntity.Guid)
 	if err != nil {
-		fmt.Printf("Failed to create space due to %+v\n", err)
+		return fmt.Errorf("Failed to create space due to %s\n", err)
+	}
+	log.Infof("Creating Services %+v\n", fixture.Services)
+
+	err = e2e.CreateServices(cfAPI, endpoint, fixture, spaceEntity.Guid, org.Guid)
+	if err != nil {
+		return fmt.Errorf("Failed to create service due to %s\n", err)
 	}
 
-	e2e.CreateServices(cfAPI, endpoint, fixture, spaceEntity.Guid, org.Guid)
+	log.Infof("All done!")
+
+	return nil
 }
 
 func (e2e *SetupE2EHelper) AssociateOrgUser(client *cfclient.Client, orgGuid string, userGuid string) error {
 	_, err := client.AssociateOrgUser(orgGuid, userGuid)
+	if err != nil {
+		return err
+	}
+	_, err = client.AssociateOrgManager(orgGuid, userGuid)
 	return err
 }
-
-// func (e2e *SetupE2EHelper) CheckUser(uaaClient *uaa.API, user User) (bool, error) {
-
-// 	userEntity, err := uaaClient.GetUserByUsername(user.Username, "", "")
-// 	if err != nil {
-// 		fmt.Printf("Failed to create space due to %+v\n", err)
-// 		os.Exit(1)
-// 	}
-// }
 
 func (e2e *SetupE2EHelper) CreateUser(client *cfclient.Client, uaaClient *uaa.API, user User) (*cfclient.User, error) {
 
@@ -103,7 +109,7 @@ func (e2e *SetupE2EHelper) CreateUser(client *cfclient.Client, uaaClient *uaa.AP
 		return nil, fmt.Errorf("Failed to create uaa user due to %s", err)
 	}
 
-	fmt.Printf("Created User with ID: %s", createdUser.ID)
+	log.Debugf("Created User with ID: %s\n", createdUser.ID)
 	userRequest := cfclient.UserRequest{Guid: createdUser.ID}
 	userEntity, err := client.CreateUser(userRequest)
 	if err != nil {
@@ -140,25 +146,47 @@ func (e2e *SetupE2EHelper) CreateSpace(client *cfclient.Client, space string, or
 	return &spaceEntity, nil
 }
 
-func (e2e *SetupE2EHelper) CreateServices(client *cfclient.Client, endpoint Endpoint, fixture FixtureConfig, spaceGUID string, orgGuid string) {
+func (e2e *SetupE2EHelper) CreateServices(client *cfclient.Client, endpoint Endpoint, fixture FixtureConfig, spaceGUID string, orgGuid string) error {
 
 	serviceCreator := CreateServiceCreator(client, endpoint, fixture)
 	servicesConfig := fixture.Services
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
 
-	// Create public service
-	err := serviceCreator.CreateService(servicesConfig.PublicService, ServiceVisibility{SpaceScoped: false, Private: false})
-	if err != nil {
-		fmt.Printf("Failed to create public service due to: %s", err)
-	}
-	// Create private service
-	err = serviceCreator.CreateService(servicesConfig.PrivateService, ServiceVisibility{SpaceScoped: false, Private: true, OrgGuid: orgGuid})
-	if err != nil {
-		fmt.Printf("Failed to create private service due to: %s", err)
-	}
+		// Create public service
+		if servicesConfig.PublicService != "" {
+			err := serviceCreator.CreateService(servicesConfig.PublicService, ServiceVisibility{SpaceScoped: false, Private: false})
+			if err != nil {
+				log.Errorf("Failed to create public service due to: %s", err)
+			}
+		}
+		wg.Done()
+	}()
 
-	// Create space scoped service
-	err = serviceCreator.CreateService(servicesConfig.PrivateSpaceScopedService, ServiceVisibility{SpaceScoped: true, Private: false, SpaceGUID: spaceGUID})
-	if err != nil {
-		fmt.Printf("Failed to create space scoped service due to: %s", err)
-	}
+	wg.Add(1)
+	go func() {
+		// Create private service
+		if servicesConfig.PrivateService != "" {
+			err := serviceCreator.CreateService(servicesConfig.PrivateService, ServiceVisibility{SpaceScoped: false, Private: true, OrgGuid: orgGuid})
+			if err != nil {
+				log.Errorf("Failed to create private service due to: %s", err)
+			}
+		}
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		// Create space scoped service
+		if servicesConfig.PrivateSpaceScopedService != "" {
+			err := serviceCreator.CreateService(servicesConfig.PrivateSpaceScopedService, ServiceVisibility{SpaceScoped: true, Private: false, SpaceGUID: spaceGUID})
+			if err != nil {
+				log.Errorf("Failed to create space scoped service due to: %s", err)
+			}
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+	return nil
 }

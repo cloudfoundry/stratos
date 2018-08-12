@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/SUSE/stratos-ui/plugins/setupe2e"
+	log "github.com/Sirupsen/logrus"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -24,16 +25,28 @@ func main() {
 
 	config, err := getConfig()
 	if err != nil {
-		fmt.Printf("Unable to fetch Config due to %s", err)
+		log.Errorf("Unable to fetch Config due to %s", err)
 		os.Exit(1)
 	}
 
 	if *setupEndpoint {
-		setupE2E.SetupEndpointForFixture(config.Endpoint, config.Fixture)
+		// Cleanup any previous state in the CF
+		err = setupE2E.TearDownEndpointForFixture(config.Endpoint, config.Fixture, true)
+		if err != nil {
+			log.Errorf("Failed to tear down setup due to %s", err)
+			os.Exit(1)
+		}
+
+		err = setupE2E.SetupEndpointForFixture(config.Endpoint, config.Fixture)
+		if err != nil {
+			log.Errorf("Failed to setup due to %s", err)
+			os.Exit(1)
+		}
+
 	}
 
 	if *teardownEndpoint {
-		setupE2E.TearDownEndpointForFixture(config.Endpoint, config.Fixture)
+		setupE2E.TearDownEndpointForFixture(config.Endpoint, config.Fixture, false)
 	}
 }
 

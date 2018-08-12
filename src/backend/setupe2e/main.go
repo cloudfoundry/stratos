@@ -52,8 +52,10 @@ func (e2e *SetupE2EHelper) setupEndpoint(c echo.Context) error {
 
 	config := new(Config)
 	if err := c.Bind(config); err != nil {
-		e2e.SetupEndpointForFixture(config.Endpoint, config.Fixture)
-		return c.NoContent(http.StatusServiceUnavailable)
+		setupError := e2e.SetupEndpointForFixture(config.Endpoint, config.Fixture)
+		if setupError == nil {
+			return c.NoContent(http.StatusOK)
+		}
 	}
 	return c.NoContent(http.StatusBadRequest)
 }
@@ -61,8 +63,10 @@ func (e2e *SetupE2EHelper) setupEndpoint(c echo.Context) error {
 func (e2e *SetupE2EHelper) tearDownEndpoint(c echo.Context) error {
 	config := new(Config)
 	if err := c.Bind(config); err != nil {
-		e2e.TearDownEndpointForFixture(config.Endpoint, config.Fixture)
-		return c.NoContent(http.StatusServiceUnavailable)
+		tearDownError := e2e.TearDownEndpointForFixture(config.Endpoint, config.Fixture, false)
+		if tearDownError == nil {
+			return c.NoContent(http.StatusOK)
+		}
 	}
 	return c.NoContent(http.StatusBadRequest)
 }

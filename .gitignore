@@ -104,3 +104,4 @@ src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom
 src/frontend/index.html
+deploy/test/setup-e2e/setup-e2e
