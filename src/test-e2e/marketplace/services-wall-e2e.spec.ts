@@ -23,7 +23,7 @@ describe('Service Instances Wall', () => {
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, new CreateServiceInstance());
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
-    servicesHelperE2E.createService();
+    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
   });
 
   beforeEach(() => {
