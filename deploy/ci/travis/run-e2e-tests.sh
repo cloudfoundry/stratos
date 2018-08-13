@@ -87,6 +87,13 @@ if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
   popd
 fi
 
+# Output backend log if the tests failed
+if [ "${RUN_TYPE}" == "quick" ]; then
+  if [ $RESULT -ne 0 ]; then
+    cat outputs/backend.log
+  fi
+fi
+
 # Check environment variable that will ignore E2E failures
 if [ -n "${STRATOS_ALLOW_E2E_FAILURES}" ]; then
   echo "Ignoring E2E test failures (if any) because STRATOS_ALLOW_E2E_FAILURES is set"
