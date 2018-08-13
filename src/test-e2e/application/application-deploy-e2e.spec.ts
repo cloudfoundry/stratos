@@ -1,4 +1,4 @@
-import { browser } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
@@ -13,6 +13,7 @@ let appWall: ApplicationsPage;
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
 
+const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
@@ -55,9 +56,20 @@ describe('Application Deploy', function () {
       expect(steps[3]).toBe('Deploy');
     });
     expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
-    expect(deployApp.stepper.canNext()).toBeFalsy();
+    promise.all([
+      deployApp.stepper.getStepperForm().getText('cf'),
+      deployApp.stepper.getStepperForm().getText('org'),
+      deployApp.stepper.getStepperForm().getText('space')
+    ]).then(([cf, org, space]) => {
+      if (cf !== 'Cloud Foundry' && org !== 'Organization' && space !== 'Space') {
+        expect(deployApp.stepper.canNext()).toBeTruthy();
+      } else {
+        expect(deployApp.stepper.canNext()).toBeFalsy();
+      }
+    });
 
     // Fill in form
+    deployApp.stepper.getStepperForm().fill({ 'cf': cfName });
     deployApp.stepper.getStepperForm().fill({ 'org': orgName });
     deployApp.stepper.getStepperForm().fill({ 'space': spaceName });
     expect(deployApp.stepper.canNext()).toBeTruthy();
