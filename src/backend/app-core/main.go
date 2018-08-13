@@ -722,7 +722,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 		routePlugin, err := plugin.GetRoutePlugin()
 		if err == nil {
-			fmt.Printf("Running Add Admin Group Routes for %+v", plugin)
 			routePlugin.AddAdminGroupRoutes(adminGroup)
 		}
 
