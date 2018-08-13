@@ -5,6 +5,18 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
 }
 
+export function getEndpointUsername(endpoint: EndpointModel) {
+  return endpoint && endpoint.user ? endpoint.user.name : '-';
+}
+
+export function getEndpointIsAdminString(endpoint: EndpointModel) {
+  if (!endpoint || !endpoint.user) {
+    return '-';
+  }
+  return endpoint.user.admin ? 'Yes' : 'No';
+}
+
+
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
 
 export interface EndpointTypeHelper {

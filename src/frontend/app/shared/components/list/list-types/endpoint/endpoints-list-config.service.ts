@@ -8,7 +8,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getFullEndpointApiUrl, getNameForEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getNameForEndpointType, getEndpointUsername, getEndpointIsAdminString } from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
@@ -68,6 +68,32 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
       type: 'sort',
       orderKey: 'type',
       field: 'cnsi_type'
+    },
+    cellFlex: '2'
+  },
+  {
+    columnId: 'username',
+    headerCell: () => 'Username',
+    cellDefinition: {
+      getValue: getEndpointUsername
+    },
+    sort: {
+      type: 'sort',
+      orderKey: 'username',
+      field: 'user.name'
+    },
+    cellFlex: '2'
+  },
+  {
+    columnId: 'user-type',
+    headerCell: () => 'Admin',
+    cellDefinition: {
+      getValue: getEndpointIsAdminString
+    },
+    sort: {
+      type: 'sort',
+      orderKey: 'user-type',
+      field: 'user.admin'
     },
     cellFlex: '2'
   },
@@ -139,7 +165,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionConnect: IListAction<EndpointModel> = {
     action: (item) => {
-      const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
+      this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,
           guid: item.guid,
