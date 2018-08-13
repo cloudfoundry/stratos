@@ -22,8 +22,6 @@ describe('Endpoints', () => {
   describe('Connect/Disconnect endpoints -', () => {
 
     beforeAll(() => {
-      // Ran independently these tests are fine. However stacked with other spec files they'll fail without a pause
-      browser.sleep(1000);
       e2e.setup(ConsoleUserType.user)
         .clearAllEndpoints()
         .registerDefaultCloudFoundry();
