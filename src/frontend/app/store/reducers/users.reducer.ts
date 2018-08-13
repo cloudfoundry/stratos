@@ -1,22 +1,33 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../actions/endpoint.actions';
+import { GetAllOrgUsers, GET_ORGANIZATION_USERS_SUCCESS } from '../actions/organization.actions';
 import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { APIResource } from '../types/api.types';
+import { cfUserSchemaKey } from '../helpers/entity-factory';
+import { deepMergeState } from '../helpers/reducer.helper';
+import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, EndpointAction } from '../actions/endpoint.actions';
+import {
+  CfUser,
+  CfUserMissingOrgRoles,
+  CfUserMissingSpaceRoles,
+  CfUserRoleParams,
+  getDefaultCfUserMissingRoles,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+} from '../types/user.types';
 
 const properties = {
   org: {
-    [OrgUserRoleNames.MANAGER]: 'managed_organizations',
-    [OrgUserRoleNames.BILLING_MANAGERS]: 'billing_managed_organizations',
-    [OrgUserRoleNames.AUDITOR]: 'audited_organizations',
-    [OrgUserRoleNames.USER]: 'organizations',
+    [OrgUserRoleNames.MANAGER]: CfUserRoleParams.MANAGED_ORGS,
+    [OrgUserRoleNames.BILLING_MANAGERS]: CfUserRoleParams.BILLING_MANAGER_ORGS,
+    [OrgUserRoleNames.AUDITOR]: CfUserRoleParams.AUDITED_ORGS,
+    [OrgUserRoleNames.USER]: CfUserRoleParams.ORGANIZATIONS,
   },
   space: {
-    [SpaceUserRoleNames.MANAGER]: 'managed_spaces',
-    [SpaceUserRoleNames.AUDITOR]: 'audited_spaces',
-    [SpaceUserRoleNames.DEVELOPER]: 'spaces'
+    [SpaceUserRoleNames.MANAGER]: CfUserRoleParams.MANAGED_SPACES,
+    [SpaceUserRoleNames.AUDITOR]: CfUserRoleParams.AUDITED_SPACES,
+    [SpaceUserRoleNames.DEVELOPER]: CfUserRoleParams.SPACES
   }
 };
 
@@ -34,9 +45,13 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
           entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_ROLE_SUCCESS),
         }
       };
+    case GET_ORGANIZATION_USERS_SUCCESS:
+      // Determine if any of the user's roles have not been provided
+      return updateUserMissingRoles(state, action);
   }
   return state;
 }
+
 export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint) {
   if (action.endpointType === 'cf') {
     switch (action.type) {
@@ -125,4 +140,46 @@ function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: 
       })
     }
   };
+}
+
+/**
+ * Determine if the user entity is missing any roles. If so track them in an array
+ */
+function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction<NormalizedResponse>) {
+  // At this point in the flow the request flow (APISuccessOrFailedAction), the users may or may not be in the store yet
+  // (via WrapperRequestActionSuccess). Therefore in order to avoid partial entities we need to stick the whole user set into the store
+  // including `missingRoles`.
+  const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserSchemaKey];
+
+  // Create a delta of the changes, this will ensure we only return an updated state if there are updates
+  const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {
+    const oldMissingRoles = (users[user.entity.guid] ? users[user.entity.guid].entity.missingRoles : null)
+      || getDefaultCfUserMissingRoles();
+    const newMissingRoles = getDefaultCfUserMissingRoles();
+    Object.values(CfUserRoleParams).forEach((roleParam) => {
+      if (user.entity[roleParam]) {
+        return;
+      }
+      // What's with all the `as`? Typing fun...
+      if (isOrgRole(roleParam) ? oldMissingRoles.org.indexOf(roleParam as CfUserMissingOrgRoles) < 0 :
+        oldMissingRoles.space.indexOf(roleParam as CfUserMissingSpaceRoles) < 0) {
+        if (isOrgRole(roleParam)) {
+          newMissingRoles.org.push(roleParam as CfUserMissingOrgRoles);
+        } else {
+          newMissingRoles.space.push(roleParam as CfUserMissingSpaceRoles);
+        }
+      }
+    });
+    user.entity.missingRoles = newMissingRoles;
+    return changes || !!newMissingRoles.org.length || !!newMissingRoles.space.length;
+  }, false);
+
+  return haveUpdatedUsers ? deepMergeState(users, usersInResponse) : users;
+}
+
+function isOrgRole(role: string) {
+  return role === CfUserRoleParams.AUDITED_ORGS ||
+    role === CfUserRoleParams.BILLING_MANAGER_ORGS ||
+    role === CfUserRoleParams.MANAGED_ORGS ||
+    role === CfUserRoleParams.ORGANIZATIONS;
 }

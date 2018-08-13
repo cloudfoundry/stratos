@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
-import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -23,13 +22,13 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import {
-  getPaginationObservables,
-  PaginationObservables,
-} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../store/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfUser } from '../../../store/types/user.types';
+import { CfUser, SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -62,9 +61,7 @@ export class CloudFoundrySpaceService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  spaceEntityService: EntityService<APIResource<ISpace>>;
-  allSpaceUsers: PaginationObservables<APIResource<CfUser>>;
-  allSpaceUsersAction: GetAllSpaceUsers;
+  allSpaceUsers$: Observable<APIResource<CfUser>[]>;
   usersPaginationKey: string;
 
   constructor(
@@ -81,29 +78,8 @@ export class CloudFoundrySpaceService {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
-    this.allSpaceUsersAction = new GetAllSpaceUsers(
-      activeRouteCfOrgSpace.spaceGuid,
-      this.usersPaginationKey,
-      activeRouteCfOrgSpace.cfGuid
-    );
-    this.spaceEntityService = this.entityServiceFactory.create(
-      spaceSchemaKey,
-      entityFactory(spaceWithOrgKey),
-      this.spaceGuid,
-      new GetSpace(this.spaceGuid, this.cfGuid, [
-        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
-        createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
-        createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
-      ]),
-      true
-    );
 
     this.initialiseObservables();
-
   }
 
   private initialiseObservables() {
@@ -124,7 +100,39 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    this.space$ = this.spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
+    this.space$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
+      switchMap(isAdmin => {
+        const relations = [
+          createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
+          createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+          createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+          createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
+        ];
+        if (!isAdmin) {
+          // We're only interested in fetching space roles via the space request for non-admins. This is the only way to guarantee the roles
+          // are present for all users associated with the space
+          relations.push(
+            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.DEVELOPER),
+            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.MANAGER),
+            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.AUDITOR),
+          );
+        }
+        const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
+          spaceSchemaKey,
+          entityFactory(spaceWithOrgKey),
+          this.spaceGuid,
+          new GetSpace(this.spaceGuid, this.cfGuid, relations),
+          true
+        );
+        return spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
+      }),
+      publishReplay(1),
+      refCount()
+    );
+
     this.serviceInstances$ = this.space$.pipe(map(o => o.entity.entity.service_instances));
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
@@ -135,14 +143,20 @@ export class CloudFoundrySpaceService {
         return noQuotaDefinition(this.orgGuid);
       }
     }));
-    this.allSpaceUsers = getPaginationObservables({
-      store: this.store,
-      action: this.allSpaceUsersAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.usersPaginationKey,
-        entityFactory(cfUserSchemaKey)
-      )
-    });
+
+    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
+      switchMap(isAdmin => {
+        const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
+        return getPaginationObservables({
+          store: this.store,
+          action,
+          paginationMonitor: this.paginationMonitorFactory.create(
+            this.usersPaginationKey,
+            entityFactory(cfUserSchemaKey)
+          )
+        }).entities$;
+      })
+    );
   }
 
   private initialiseAppObservables() {

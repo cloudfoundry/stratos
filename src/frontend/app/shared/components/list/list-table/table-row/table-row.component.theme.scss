@@ -1,6 +1,7 @@
 @mixin table-row-theme($theme, $app-theme) {
   $status-colors: map-get($app-theme, status);
   $error-color: map-get($status-colors, danger);
+  $warn-color: map-get($status-colors, warning);
   $text-color: map-get($status-colors, text);
   $primary: map-get($theme, primary);
   $primary-color: mat-color($primary);
@@ -21,6 +22,11 @@
     &__errored {
       .table-row {
         background-color: transparentize($error-color, .9);
+      }
+    }
+    &__warning {
+      .table-row {
+        background-color: transparentize($warn-color, .9);
       }
     }
     &__highlighted {
