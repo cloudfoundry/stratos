@@ -12,11 +12,11 @@
     "ok": "OK",
     "cancel": "Annuler",
     "next": "Suivant",
-    "previous": "Précedent",
+    "previous": "Précédent",
     "back": "Back",
     "done": "Terminer",
     "add": "Ajouter",
-    "set": "poser",
+    "set": "Poser",
     "save": "Sauvegarder",
     "delete": "Supprimer",
     "rename": "Renommer",
@@ -31,7 +31,7 @@
   "navbar": {
     "title": "@:product.name",
     "logo": "Accueil",
-    "copyright": "&copy; SUSE 2017"
+    "copyright": "&copy; 2017 [[@:company.name]]"
   },
   "menu": {
     "applications": "@:applications",

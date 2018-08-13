@@ -1,0 +1,7 @@
+{
+  "errors": {
+    "no-cf-connected": "没有已连接的[[@:cloud-foundry]]端点。",
+    "no-cf-connected-text": "<a class=\"btn-link\" href=\"/#!/endpoint\">使用端点控制板</a>来修复连接或连接新的端点。",
+    "no-cf-connected-cant-fix-text": "请联系您的管理员。"
+  }
+}

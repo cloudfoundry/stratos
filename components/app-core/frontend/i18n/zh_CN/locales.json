@@ -1,0 +1,8 @@
+{
+  "locales": {
+    "locales": "zh_CN,en_US,en_GB",
+    "zh_CN": "中文 (简体)",
+    "en_US": "英文 (US)",
+    "en_GB": "英文 (UK)"
+  }
+}

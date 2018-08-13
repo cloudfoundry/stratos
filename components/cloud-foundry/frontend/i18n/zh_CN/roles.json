@@ -1,0 +1,111 @@
+{
+  "cf": {
+    "roles": {
+      "common-roles-actions": {
+        "manage-roles": "管理多个角色",
+        "remove-all-roles": "移除所有角色",
+        "remove-from-org": "从组织移除",
+        "remove-from-space": "从空间移除",
+        "assign-users": "分配用户"
+      },
+      "assign-user-roles": {
+        "title": "分配用户",
+        "step1": {
+          "title": "选择用户",
+          "user-count": "用户",
+          "no-matching-users": "没有满足搜索条件的用户",
+          "show-all-users": "显示全部",
+          "user-label": "用户",
+          "busy-message": "获取用户中..."
+        },
+        "step2": {
+          "title": "分配多个角色",
+          "intro": "选择一个组织来分配角色。",
+          "org-label": "组织",
+          "org-placeholder": "选择组织",
+          "button-yes": "分配"
+        }
+      },
+      "manage-user-roles": {
+        "title-singular": "管理用户: {{ name }}",
+        "title-plural": "更改多个用户的角色",
+        "error-init-load": "无法更新用户角色列表",
+        "intro-plural-roles": "更改以下用户的角色。",
+        "warning-plural-roles": "所有之前分配的角色都会被更新。",
+        "button-clear-all": "清空全部用户的多个角色",
+        "button-submit": "保存更改"
+      },
+      "change-roles-confirmation": {
+        "title": {
+          "update-singular": "更新角色",
+          "update-plural": "更新多个角色",
+          "remove-singular": "移除角色",
+          "remove-plural": "移除多个角色",
+          "assign-singular": "分配角色",
+          "assign-plural": "分配多个角色"
+        },
+        "line-one-singular": "您要对用户'{{user}}'作出以下更改。",
+        "line-one-plural": "您要对用户 {{users}} 作出以下更改",
+        "line-assign-singular": "分配角色 '{{role}}'",
+        "line-assign-plural": "分配 {{count}} 角色",
+        "line-remove-singular": "移除 role '{{role}}'",
+        "line-remove-plural": "移除 {{count}} 角色",
+        "line-four": "您确定要继续吗?",
+        "success-one": "成功更新用户角色",
+        "success-two": "成功更新用户角色",
+        "success-three": "成功更新用户角色",
+        "success-four": "成功更新用户角色",
+        "notifications": {
+          "no-changes": "没有任何更改。用户角色没有被更改",
+          "failure-singular": "无法更新用户{{failedUsers}} 的角色。",
+          "failure-plural": "无法更新用户{{failedUsers}}. 的角色。",
+          "failure-reason": "失败原因: '{{reason}}'"
+        }
+      },
+      "selected-users-roles-change": {
+        "singular": "已选择用户",
+        "plural": "已选择用户",
+        "button-view-all": "查看全部",
+        "button-view-less": "查看部分"
+      },
+      "update-roles-table": {
+        "org": "组织",
+        "button-remove-from-org": "从组织移除",
+        "space": "SPACE",
+        "button-show-all": "显示全部"
+      },
+      "role-labels": {
+        "none": "没有已分配的",
+        "org": {
+          "short": {
+            "org_user": "用户",
+            "org_manager": "管理员",
+            "org_auditor": "审计员",
+            "billing_manager": "账单管理员"
+          },
+          "long": {
+            "org_user": "[[@:org]] [[@:cf.roles.role-labels.org.short.org_user]]",
+            "org_manager": "[[@:org]] [[@:cf.roles.role-labels.org.short.org_manager]]",
+            "org_auditor": "[[@:org]] [[@:cf.roles.role-labels.org.short.org_auditor]]",
+            "billing_manager": "[[@:org]] [[@:cf.roles.role-labels.org.short.billing_manager]]"
+          }
+        },
+        "space": {
+          "none": "未分派",
+          "short": {
+            "space_manager": "管理员",
+            "space_auditor": "审计员",
+            "space_developer": "开发者"
+          },
+          "long": {
+            "space_manager": "[[@:space]] [[@:cf.roles.role-labels.space.short.space_manager]]",
+            "space_auditor": "[[@:space]] [[@:cf.roles.role-labels.space.short.space_auditor]]",
+            "space_developer": "[[@:space]] [[@:cf.roles.role-labels.space.short.space_developer]]"
+          }
+        },
+        "cf-admin": "管理员",
+        "cf-user": "用户"
+      }
+    }
+  }
+}

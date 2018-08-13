@@ -1,0 +1,493 @@
+{
+  "app": {
+    "auto-update": "自动更新",
+    "state": {
+      "separator": "&nbsp;-&nbsp;",
+      "deployed": "已部署",
+      "incomplete": "未能完成",
+      "failed": "传输失败",
+      "pending": "等待中",
+      "loading": "读取中",
+      "offline": "离线",
+      "updating": "离线更新中",
+      "no-instances": "没有实例",
+      "staging": "应用上传中",
+      "starting": "应用开始中",
+      "online": "在线",
+      "crashed": "已销毁",
+      "crashing": "崩溃中",
+      "partial": "部分在线",
+      "unknown": "未知"
+    },
+    "app-instance": {
+      "labels": {
+        "index": "序号",
+        "status": "状态",
+        "memory": "内存",
+        "disk": "硬盘",
+        "uptime": "运行时间"
+      }
+    },
+    "new-app": {
+      "headline": "您的应用已经创建完毕。",
+      "suggestions": "您可能想:"
+    },
+    "app-info": {
+      "app-actions": {
+        "view": "查看应用",
+        "stop": "停止",
+        "restart": "重启",
+        "delete": "删除",
+        "start": "开始",
+        "cli": "命令行界面信息"
+      },
+      "edit-app": {
+        "edit-app": "编辑应用",
+        "ssh-access": "开启SSH登录",
+        "ssh-restart-warning": "提示：开启或关闭 SSH 登录会重启所有应用实例。",
+        "ssh-no-edit": "提示：由于这个空间禁止 SSH 登录，无法编辑这个应用的 SSH 登录。"
+      },
+      "app-instances-actions" :{
+        "terminate": "终止"
+      },
+      "terminate-instance": {
+        "title": "终止实例",
+        "description": "您确定要终止实例{{index}}吗?",
+        "error-message": "终止实例时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。",
+        "button": {
+          "yes": "终止",
+          "no": "@:buttons.cancel"
+        },
+        "success": "成功终止实例 {{index}}"
+      },
+      "delete-app": {
+        "complex": {
+          "title": "删除App和关联对象",
+          "success": "'{{appName}}'已经被删除"
+        },
+        "simple": {
+          "title": "删除应用",
+          "description": "您确定要删除'{{appName}}'吗?",
+          "button": {
+            "yes": "删除",
+            "no": "@:buttons.cancel"
+          },
+          "success": "'{{appName}}'已经被删除"
+        }
+      },
+      "app-tabs": {
+        "routes": {
+          "add": {
+            "create": {
+              "title": "创建新的路由"
+            },
+            "reuse": {
+              "title": "使用已有的路由"
+            }
+          }
+        },
+        "summary": {
+          "label": "简介",
+          "instructions": {
+            "cli": "使用命令行界面部署您的应用",
+            "service": "为您的应用添加服务"
+          },
+          "summary-panel": {
+            "title": "概述",
+            "state-label": "状态",
+            "state-app-label": "应用状态",
+            "state-package-label": "包状态",
+            "instances-label": "实例",
+            "created-label": "已创建",
+            "modified-label": "已修改",
+            "deployed-label": "控制台部署",
+            "deployed-source-label": "控制台部署源",
+            "deployed-source-filefolder": "文件夹上传",
+            "deployed-source-archive": "存档文件上传",
+            "ssh-enabled-label": "启用 SSH",
+            "memory-label": "内存",
+            "disk-quota-label": "磁盘配额",
+            "buildpack-label": "构建包",
+            "production-label": "产品",
+            "stack-label": "栈",
+            "endpoint-url-label": "端点 url 地址",
+            "endpoint-label": "[[@:endpoint]]",
+            "org-label": "[[@:organization]]",
+            "space-label": "[[@:space]]",
+            "edit-button": "编辑",
+            "service-count": "服务",
+            "edit-dialog": {
+              "title": "编辑",
+              "name-label": "应用名称",
+              "name-error-required": "需要设置名称",
+              "memory-label": "内存使用",
+              "memory-error-required": "需要设置内存",
+              "memory-error-min": "内存必须大于0",
+              "instances-label": "实例",
+              "instances-error-required": "需要设置实例",
+              "instances-error-min": "实例必须多于0",
+              "instances-error-whole": "实例必须是一个整数"
+            }
+          },
+          "instances-panel": {
+            "title": "实例",
+            "none": "这个应用没有正在运行的实例。",
+            "index-label": "序号",
+            "status-label": "状态",
+            "memory-label": "内存",
+            "disk-label": "磁盘",
+            "uptime-label": "运行时间",
+            "action-label": "动作",
+            "show-all": "显示所有"
+          },
+          "routes-panel": {
+            "title": "路由",
+            "add-button": "添加路由",
+            "none": "您现在没有路由。",
+            "route-label": "路由",
+            "action-label": "动作",
+            "route-actions": {
+              "unmap": "从应用取消映射",
+              "delete": "删除路由"
+            },
+            "add-route-dialog": {
+              "title": "添加一个路由",
+              "host-label": "主机",
+              "host-error-exists": "这个名字的路由已经存在",
+              "host-error-required": "需要设置主机",
+              "host-placeholder": "这个路由的唯一标识符",
+              "domain-label": "域",
+              "route-options-label": "HTTP 路由选项",
+              "path-label": "路径 (可选)",
+              "path-placeholder": "这个路由的可选路径",
+              "tcp-label": "TCP路由选项",
+              "port-random-label": "使用随机端口",
+              "port-label": "端口",
+              "port-placeholder": "这个路由的端口",
+              "button": {
+                "submit": "添加路由"
+              },
+              "search-placeholder": "按名称搜索",
+              "no-routes-found": "没有找到路由"
+            }
+          },
+          "service-instances-panel": {
+            "title": "服务实例",
+            "manage-button": "管理服务",
+            "none": "您现在没有服务实例。",
+            "name-label": "名称",
+            "service-label": "服务",
+            "plan-label": "计划"
+          }
+        },
+        "log-stream": {
+          "label": "日志流",
+          "title": "日志流",
+          "scroll-button": "滚动到底部"
+        },
+        "services": {
+          "label": "实例服务",
+          "labels": {
+            "type": "类型",
+            "description": "描述",
+            "created-date": "创建时间",
+            "env-variables": "显示环境变量",
+            "tags": "Tags"
+          },
+          "messages": {
+            "no-services": "此应用程序没有绑定的服务实例。",
+            "view-catalogue": "要查看此应用程序的可用服务，请访问",
+            "view-catalogue-link": "服务目录",
+            "no-services-search": "找不到与您的搜索匹配的服务实例。",
+            "currently-viewing-1": "您正在查看实例{{ type }}。",
+            "click-here": "点击这里",
+            "currently-viewing-2": "查看所有类型。"
+          },
+          "types": {
+            "show": "显示",
+            "all": "所有类型"
+          },
+          "card": {
+            "version": "版本",
+            "attached": "附加",
+            "cannot-bind": "此服务不能绑定到应用程序",
+            "actions": {
+              "detach": "分离"
+            }
+          },
+          "unbind": {
+            "title": "分离服务",
+            "description": "你确定要分离{{name}}吗?",
+            "error-message": "有一个问题分离这项服务。请再试一次。如果此错误仍然存在，请联系管理员。",
+            "button": {
+              "yes": "分离",
+              "no": "@:buttons.cancel"
+            },
+            "error": "某些应用程序无法从服务实例中分离",
+            "success": "服务实例成功分离"
+          },
+          "delete": {
+            "title": "删除服务",
+            "description": "你确定要删除{{name}}吗？",
+            "error-message": "删除此服务时出现问题。 请再试一次。 如果此错误仍然存在，请联系管理员。",
+            "button": {
+              "yes": "删除",
+              "no": "@:buttons.cancel"
+            },
+            "success": "服务实例已成功删除"
+          },
+          "create": {
+            "title": "创建服务实例",
+            "name-label": "名称",
+            "name-error-required": "名称是必需的",
+            "name-error-unique": "名称必须是唯一的",
+            "name-error-pattern": "名称包含无效的格式",
+            "name-error-maxlength": "名称不得超过50个字符",
+            "plan-label": "计划",
+            "plan-placeholder": "选择一个计划  ",
+            "params-label": "实例参数",
+            "binding-params-label": "绑定参数",
+            "service-params": "服务实例参数",
+            "binding-params": "服务绑定参数",
+            "params-placeholder": "输入服务 JSON 格式参数",
+            "tags-label": "标签",
+            "edit-params": "编辑",
+            "done": "完成",
+            "button": {
+              "yes": "创建",
+              "no": "@:buttons.cancel"
+            },
+            "json-error-invalid": "必须是有效的 JSON"
+          },
+          "edit": {
+            "title": "编辑服务实例",
+            "button": {
+              "yes": "更新"
+            },
+            "success": "服务实例成功更新"
+          },
+          "view-envs": {
+            "title": "{{instanceName}}: 变量"
+          },
+          "bind": {
+            "bind-to-app": "绑定到应用",
+            "select": "选择服务实例",
+            "warnings": {
+              "auto-scaler": "您可以在这里将 Auto-scaler 绑定到这个应用程序。 请注意，您需要使用命令行界面为此应用程序配置自动扩展策略才能启用它。"
+            },
+            "no-instances": {
+              "title": "没有服务实例绑定到此应用程序",
+              "prompt": "创建一个新的服务实例以继续"
+            },
+            "create": "创建一个新的服务实例"
+          },
+          "add": {
+            "title": "添加服务到{{ appName }}",
+            "back-to-services": "返回到服务",
+            "add": "添加服务实例",
+            "create": {
+              "title": "创建新的实例"
+            },
+            "existing": {
+              "title": "选择存在的实例",
+              "name-label": "名称",
+              "plan-label": "计划",
+              "apps-label": "应用附加",
+              "tags-label": "标签"
+            },
+            "notifications": {
+              "success": "'{{ service }}'服务已成功附加到应用程序'{{ appName }}'",
+              "failure-create": "创建实例时出现问题。请再试一次。如果此错误仍然存在，请联系管理员。",
+              "failure-bind": "将服务实例绑定到应用程序时出现问题。请再试一次。如果此错误仍然存在，请联系管理员。"
+            },
+            "acknowledge": {
+              "info": "将此服务绑定到应用程序的最佳做法是更新应用程序的 manifest 文件。",
+              "add-to-manifest": "添加到 manifest"
+            }
+          }
+        },
+        "service-catalogue": {
+          "label": "服务目录",
+          "messages": {
+            "no-services": "没有可用于此端点的服务。请联系您的管理员添加服务，以便将其绑定到您的应用程序。"
+          },
+          "categories": {
+            "show": "显示",
+            "attached": "附加的服务实例",
+            "all": "全部服务"
+          },
+          "manage": {
+            "title": "管理服务实例",
+            "name-label": "名称",
+            "plan-label": "计划",
+            "env-vars-label": "环境变量",
+            "detach-button": "分离"
+          },
+          "card": {
+            "version": "版本",
+            "attached": "已附加",
+            "cannot-bind": "这个服务不能被绑定到应用",
+            "actions": {
+              "add": "添加服务",
+              "detach": "分离",
+              "manage": "管理实例"
+            }
+          },
+          "unbind": {
+            "title": "分离服务",
+            "description": "您确定要分离{{name}}吗?",
+            "error-message": "分离服务时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。",
+            "button": {
+              "yes": "分离",
+              "no": "@:buttons.cancel"
+            },
+            "error": "有些应用无法从服务实例分离",
+            "success": "成功分离服务实例"
+          },
+          "delete": {
+            "title": "删除服务",
+            "description": "您确定要删除{{name}}吗?",
+            "error-message": "删除服务时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。",
+            "button": {
+              "yes": "删除",
+              "no": "@:buttons.cancel"
+            },
+            "success": "成功删除服务实例"
+          },
+          "view-envs": {
+            "title": "{{instanceName}}: 变量"
+          },
+          "bind": {
+            "title": "绑定\"{{ svcName }}\"服务到应用\"{{ appName }}\""
+          },
+          "add": {
+            "title": "添加服务到{{ appName }}",
+            "back-to-services": "回到服务",
+            "add": "添加服务实例",
+            "create": {
+              "title": "创建新实例",
+              "name-label": "名称",
+              "name-error-required": "需要设置名称",
+              "name-error-unique": "名称必须唯一",
+              "name-error-pattern": "名称包含无效字符",
+              "plan-label": "计划",
+              "plan-placeholder": "选择一个计划"
+            },
+            "existing": {
+              "title": "选择已有实例",
+              "name-label": "名称",
+              "plan-label": "计划",
+              "apps-label": "已附加应用"
+            },
+            "notifications": {
+              "success": "'{{ service }}' 服务被成功附加到应用 '{{ appName }}'",
+              "failure-create": "创建实例时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。",
+              "failure-bind": "绑定服务到应用时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。"
+            },
+            "acknowledge": {
+              "info": "维持这个服务到您的应用的绑定的最好方法是更新您的应用manifest文件。",
+              "add-to-manifest": "添加到manifest"
+            }
+          }
+        },
+        "variables": {
+          "title": "变量",
+          "table": {
+            "title": "[[@:app.app-info.app-tabs.variables.title]]",
+            "none": "您现在没有变量。",
+            "name-label": "名称",
+            "value-label": "值",
+            "actions-label": "动作",
+            "add-button": "添加变量"
+          },
+          "add-dialog": {
+            "title": "添加新的变量",
+            "description": "新的变量会在应用手动重启后启用。",
+            "name-label": "名称",
+            "name-required": "需要设置名称",
+            "value-label": "值",
+            "value-required": "需要设置值",
+            "submit-button": "添加",
+            "error": "添加变量时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。"
+          },
+          "all": {
+            "title": "[[@:app.app-info.app-tabs.variables.title]]",
+            "error": "调用应用变量时出现了一个错误",
+            "refresh-button": "刷新"
+          },
+          "actions": {
+            "edit": "编辑变量",
+            "edit-dialog": {
+              "title": "编辑变量",
+              "description": "变量的更改会在应用手动重启后启用。",
+              "submit-button": "更新",
+              "error": "更新变量时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。"
+            },
+            "delete": "删除变量"
+          },
+          "deleteError": "删除变量的时候出现了一个错误，请重新尝试。"
+        },
+        "events": {
+          "events": "事件",
+          "total": "总计: {{total}}",
+          "empty": "没有可用事件",
+          "error": "调用事件的时候出现了一个错误",
+          "detail": "事件细节",
+          "labels":{
+            "timestamp": "时间戳",
+            "type": "类型",
+            "actor-name": "角色名",
+            "detail": "细节"
+          },
+          "page-sizes": {
+            "five": "每页5个 ",
+            "ten": "每页10个",
+            "twenty": "每页20个",
+            "fifty": "每页50个"
+          }
+        }
+      },
+      "cli-dialog-app": {
+        "title": "@:cf.cli-common.title",
+        "intro": "@:cf.cli-common.intro",
+        "get-started": "@:cf.cli-common.get-started",
+        "get-started-intro": "@:cf.cli-common.get-started-intro",
+        "step1": "@:cf.cli-common.step1",
+        "step1-link-text": "@:cf.cli-common.step1-link-text",
+        "step2": "@:cf.cli-common.step2",
+        "step3": "@:cf.cli-common.step3",
+        "step4": "@:cf.cli-common.step4",
+        "app-commands": {
+          "title": "应用管理命令",
+          "summary": "概要",
+          "summary-intro": "获取应用简介",
+          "start": "开始",
+          "start-intro": "开始应用",
+          "stop": "Stop",
+          "stop-intro": "停止应用",
+          "restart": "重启",
+          "restart-intro": "重启介绍"
+        },
+        "scaling-commands": {
+          "title": "调整应用",
+          "instances": "实例",
+          "instances-intro": "更改应用实例数量",
+          "memory": "内存",
+          "memory-intro": "更改应用实例的内存"
+        }
+      },
+      "cli-dialog-deploy": {
+        "title": "使用命令行界面部署",
+        "intro": "使用命令行界面部署时，按照以下几步:",
+        "step1": "1. 下载并安装命令行界面 - ",
+        "step1-link-text": "请看这里",
+        "step2": "2. 添加一个 <strong>manifest.yml</strong> 文件到您的源代码或使用以下内容更新已有文件。Cloud Foundry 使用 manifest 文件设置应用名称，路由以及服务绑定。请确认 manifest 的应用名称和路由和以下显示的一致。如果 manifest 文件的应用名称和路由不正确，会创建多个应用和路由。",
+        "step3": "3. 在命令行界面输入以下命令:",
+        "step3-1": "设置api端点",
+        "step3-2": "登录",
+        "step3-3": "指定组织和空间",
+        "step3-4": "推到 Cloud Foundry 端点 - 导航到项目目录并执行以下操作。"
+      }
+    }
+  }
+}

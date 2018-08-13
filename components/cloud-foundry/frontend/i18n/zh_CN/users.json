@@ -1,0 +1,25 @@
+{
+  "cf": {
+    "users": {
+      "users": "用户",
+      "table": {
+        "buttons": {
+          "manage": "管理角色",
+          "change": "改变角色",
+          "remove": "移除所有角色",
+          "remove-org": "从组织移除"
+        },
+        "users-label": "用户",
+        "org-roles-label": "组织角色",
+        "space-roles-label": "空间角色",
+        "action-label": "操作",
+        "no-roles": {
+          "none-assigned": "分配为空",
+          "not-applicable": "不适用"
+        },
+        "show-all-users": "查看所有"
+      }
+
+    }
+  }
+}

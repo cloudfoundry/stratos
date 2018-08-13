@@ -1,0 +1,14 @@
+{
+  "login": {
+    "company-logo": "",
+    "title": "STRATOS UI",
+    "footer": {
+      "title": "",
+      "copyright": "",
+      "company.logo": "images/OpenSUSE_Logo.png",
+      "product.logo": "",
+      "company.www-link": "www.suse.com",
+      "product.www-link": ""
+    }
+  }
+}

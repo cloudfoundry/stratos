@@ -1,0 +1,101 @@
+{
+  "app-wall": {
+    "app-wall": "@:applications",
+    "search-placeholder": "通过名称搜索",
+    "add-application": "添加应用",
+    "retrieving": "检索应用程序中",
+    "reset": "重置",
+    "options": {
+      "show": "显示选项",
+      "hide": "隐藏选项"
+    },
+    "sort-by": "排列方式",
+    "select-endpoint-all": "全部端点",
+    "select-org-all": "全部组织",
+    "select-space-all": "全部空间",
+    "total-apps": "全部应用",
+    "filtered-apps": "过滤的应用",
+    "instances": "实例",
+    "disk-quota": "磁盘配额",
+    "memory": "内存",
+    "no-cf": {
+      "warning": "您不能查看任何应用。",
+      "advice-can-fix-link": "请使用端点控制板",
+      "advice-can-fix-text": "来修复您的连接或连接新的端点。",
+      "advice-cant-fix": "请联系您的管理员。"
+    },
+    "no-apps": {
+      "none-space-developer": {
+        "admin": {
+          "line1": "您现在没有任何应用而且",
+          "line2": "现在没有能添加应用的空间。",
+          "link-text": "点击这里",
+          "link-message": "管理空间。"
+        },
+        "non-admin": {
+          "line1": "您现在没有应用而且不能添加应用。",
+          "line2": "请联系您的管理员。"
+        }
+      },
+      "space-developer": {
+        "default": "您现在没有任何应用",
+        "empty-space": "这个空间没有任何应用",
+        "empty-org": "这个组织没有任何应用",
+        "empty-endpoint": "这个端点没有任何应用",
+        "empty-x-due-to-search": "{{emptyXMessage}}符合搜索条件",
+        "add": "添加一个应用"
+      }
+    },
+    "errors": {
+      "single-endpoint-down": "这个控制台无法连接到名为 \"{{name}}\" 的端点。 请尝试重新连接端点来解决这个问题。",
+      "multiple-endpoint-down": "这个控制台无法连接到多个端点。请使用端点控制板来管理您的端点。"
+    },
+    "table": {
+      "columns": {
+        "appName": "应用名称",
+        "appName-sort-by": "应用名称",
+        "status": "状态",
+        "instances": "实例",
+        "instances-sort-by": "[[@:app-wall.table.columns.instances]]",
+        "disk": "磁盘配额",
+        "disk-sort-by": "[[@:app-wall.table.columns.disk]]",
+        "memory": "内存",
+        "memory-sort-by": "[[@:app-wall.table.columns.memory]]",
+        "creation": "创建日期",
+        "creation-sort-by": "[[@:app-wall.table.columns.creation]]"
+      }
+    }
+  },
+  "add-app-dialog": {
+    "title": "@:app-wall.add-application",
+    "name-message": "为您的应用输入一个名称。",
+    "app-name-label": "应用名称",
+    "app-name-error-required": "需要设置应用名称",
+    "app-name-error-used": "这个名称已存在。请输入一个新的名称。",
+    "route-message": "创建一个路由",
+    "domain-label": "域",
+    "domain-placeholder": "选择域",
+    "host-label": "主机",
+    "host-error-required": "需要设置主机",
+    "host-error-format": "无效格式",
+    "step1": {
+      "notifications": {
+        "success": "已经为'{{ appName }}'创建了一个新的应用程序和路由",
+        "failure-part-1": "创建应用程序时出现问题。",
+        "failure-part-1-alt": "创建您的应用程序时发生以下异常：{{ error }}. ",
+        "failure-part-2": "如果问题仍然存在，请重试或联系您的管理员。"
+      },
+      "route-validate": {
+        "exists": "这个路由已经存在。选择一个新的。",
+        "failure-part-1": "验证路由时出现问题。",
+        "failure-part-1-alt": "验证路由时发生以下异常：{{ error }}. ",
+        "failure-part-2": "如果问题仍然存在，请重试或联系您的管理员。"
+      },
+      "route-create-bind": {
+        "failure-part-1": "创建路由并将其绑定到新应用程序时出现问题。",
+        "failure-part-1-alt": "创建路由并将其绑定到新应用程序时发生以下异常：{{ error }}. ",
+        "failure-part-2": "如果问题仍然存在，请重试或联系您的管理员。"
+      }
+    }
+  }
+}

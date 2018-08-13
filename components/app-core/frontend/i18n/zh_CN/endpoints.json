@@ -1,0 +1,37 @@
+{
+  "endpoints": {
+    "unknown": "未知",
+    "unregister": {
+      "unregister": "注销",
+      "title": "注销端点",
+      "confirm": "您确定要注销端点吗'{{name}}'?",
+      "error": "注销端点失败",
+      "success": "成功注销端点'{{name}}'"
+    },
+    "connect": {
+      "connect-action": "连接",
+      "title": "提供凭证",
+      "description": "输入您的用户名和密码连接到下面的端点。",
+      "service-label": "服务",
+      "url-label": "URL",
+      "username-label": "用户名",
+      "password-label": "密码",
+      "connect-button": "连接",
+      "success-notification": "成功连接到'{{name}}'",
+      "error-no-connect": "身份验证服务器无法响应。 请再试一次。如果此错误仍然存在，请联系管理员。",
+      "error-server-failure": "尝试注册服务时失败。 请再试一次。 如果此错误仍然存在，请联系管理员。",
+      "error-user-input": "您使用的用户名和密码组合不正确。 请再试一次。"
+    },
+    "disconnect": {
+      "disconnect": "断开",
+      "success": "成功断开端点'{{name}}'",
+      "error": "断开端点'{{name}}'失败"
+    },
+    "errors": {
+      "unavailable": "控制台不能连接到端点'{{name}}'. 尝试重新连接到此端点来解决此问题。",
+      "multiple": "控制台无法连接到多个端点。",
+      "contact": "控制台不能连接到这个端点。 尝试重新连接到此端点来解决此问题。",
+      "expired": "Token超时。尝试重新连接到此端点来解决此问题。"
+    }
+  }
+}

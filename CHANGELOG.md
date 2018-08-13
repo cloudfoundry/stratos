@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.1.0 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...1.1.0)
+
+**Improvements:**
+
+- Added support for SUSE Cloud Foundry 1.1 configuration values to the Helm chart [\#1950](https://github.com/cloudfoundry-incubator/stratos/pull/1950)
+
+**Fixes:**
+
+- Fix width of top nav bar menu's bottom border [\#1739](https://github.com/cloudfoundry-incubator/stratos/pull/1739)
+
 ## 1.0.2 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.0...1.0.2)
