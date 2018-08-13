@@ -14,10 +14,10 @@ endpoint:
     skip-ssl: true
 fixture:
   non-admin-user:
-    username: e2e-irfan
+    username: e2e
     password: changeme
-  organization: e2e-irfan
-  space: e2e-irfan
+  organization: e2e
+  space: e2e
   services:
     public-service: public-service
     private-service: private-service
