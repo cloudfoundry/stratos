@@ -46,9 +46,9 @@
   width: 100%;
   word-wrap: break-word;
   &__content {
-    word-break: break-word;
     left: 0;
     position: absolute;
     top: 0;
+    word-break: break-word;
   }
 }
