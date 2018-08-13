@@ -9,7 +9,7 @@ import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { ListComponent } from '../../po/list.po';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 
-const customAppLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-org-spaces-test-';
+const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-org-spaces-test-';
 
 fdescribe('Org Spaces - ', () => {
 
@@ -22,7 +22,7 @@ fdescribe('Org Spaces - ', () => {
   function createSpaceNames(count: number): string[] {
     const spaceNames = [];
     for (let i = 0; i < count; i++) {
-      spaceNames.push(E2EHelpers.createCustomName(customAppLabel + i));
+      spaceNames.push(E2EHelpers.createCustomName(customOrgSpacesLabel + i));
     }
     return spaceNames;
   }
@@ -51,17 +51,12 @@ fdescribe('Org Spaces - ', () => {
       defaultCf)));
   }
 
-
-
   function setup(spaceNames: string[], orderImportant: boolean) {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
     const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
     browser.wait(
       cfHelper.fetchOrg(endpointGuid, defaultCf.testOrg)
         .then((org: APIResource<IOrganization>) => {
-          if (orderImportant) {
-
-          }
           // Chain the creation of the spaces to ensure there's a nice sequential 'created_at' value
           const promises = orderImportant ?
             chainCreateSpace(endpointGuid, org, spaceNames) :
@@ -69,15 +64,17 @@ fdescribe('Org Spaces - ', () => {
 
           return promises.then(() => org.metadata.guid);
         })
-        .then(orgGuid => {
-          orgPage = CfOrgLevelPage.forEndpoint(endpointGuid, orgGuid);
-          orgPage.navigateTo();
-          orgPage.waitForPageOrChildPage();
-          orgPage.loadingIndicator.waitUntilNotShown();
-          orgPage.goToSpacesTab();
-          expect(spaceList.isTableView()).toBeFalsy();
-        })
+        .then(orgGuid => navToOrgSpaces(endpointGuid, orgGuid))
     );
+  }
+
+  function navToOrgSpaces(endpointGuid: string, orgGuid: string) {
+    orgPage = CfOrgLevelPage.forEndpoint(endpointGuid, orgGuid);
+    orgPage.navigateTo();
+    orgPage.waitForPageOrChildPage();
+    orgPage.loadingIndicator.waitUntilNotShown();
+    orgPage.goToSpacesTab();
+    expect(spaceList.isTableView()).toBeFalsy();
   }
 
   function tearDown(spaceNames: string[]) {
@@ -95,7 +92,31 @@ fdescribe('Org Spaces - ', () => {
     cfHelper = new CFHelpers(e2eSetup);
   });
 
-  describe('Single Page', () => {
+  describe('No Pages -', () => {
+    const orgName = customOrgSpacesLabel;
+    let endpointGuid;
+    beforeAll(() => {
+      defaultCf = e2e.secrets.getDefaultCFEndpoint();
+      endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+      // Create a temporary org which will contain no spaces
+      browser.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName));
+    });
+
+    beforeEach(() => {
+      navToOrgSpaces(endpointGuid);
+    });
+
+    it('Should show message', () => {
+
+    });
+
+    afterAll(() => {
+      const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+      cfHelper.deleteSpaceIfExisting(endpointGuid, orgName);
+    });
+  });
+
+  describe('Single Page -', () => {
 
     let spaceNames;
 
@@ -124,7 +145,7 @@ fdescribe('Org Spaces - ', () => {
       spaceNames = createSpaceNames(3);
       setup(spaceNames, true);
       expect(spaceList.getTotalResults()).toBeLessThanOrEqual(9);
-      expect(spaceList.pagination.isPresent()).toBeFalsy();
+      expect(spaceList.pagination.isDisplayed()).toBeFalsy();
     });
 
     afterAll(() => tearDown(spaceNames));
@@ -170,14 +191,12 @@ fdescribe('Org Spaces - ', () => {
     });
 
     it('single page pagination settings', () => {
-
-
-
+      expect(spaceList.pagination.isDisplayed()).toBeFalsy();
     });
 
   });
 
-  fdescribe('Multi Page', () => {
+  describe('Multi Page -', () => {
 
     let spaceNames;
 
@@ -185,23 +204,67 @@ fdescribe('Org Spaces - ', () => {
       spaceNames = createSpaceNames(11);
       setup(spaceNames, false);
       expect(spaceList.getTotalResults()).toBeGreaterThanOrEqual(spaceNames.length);
-      expect(spaceList.pagination.isPresent()).toBeTruthy();
 
     });
 
     afterAll(() => tearDown(spaceNames));
 
-    fit('Pagination', () => {
-      // Initial values
-      expect(spaceList.pagination.getPageSizeForm().getText('mat-select-1')).toEqual('9');
+    function testStartingPosition() {
+      // General expects for all tests in this section
+      expect(spaceList.getTotalResults()).toBeLessThan(80);
+      expect(spaceList.pagination.isPresent()).toBeTruthy();
+
+      expect(spaceList.cards.getCardCount()).toBe(9);
+      expect(spaceList.pagination.getPageSize()).toEqual('9');
       expect(spaceList.pagination.getTotalResults()).toBeGreaterThan(9);
-      // lower - upper pages
-      // Buttons
-      // browser.sleep(20000);
+      expect(spaceList.pagination.getTotalResults()).toBeLessThanOrEqual(18);
+
       expect(spaceList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
       expect(spaceList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
       expect(spaceList.pagination.getNavNextPage().getComponent().isEnabled()).toBeTruthy();
       expect(spaceList.pagination.getNavLastPage().getComponent().isEnabled()).toBeTruthy();
+    }
+
+    beforeEach(testStartingPosition);
+
+    afterEach(testStartingPosition);
+
+    it('Initial Pagination Values', () => { });
+
+    it('Next and Previous Page', () => {
+      spaceList.pagination.getNavNextPage().getComponent().click();
+
+      expect(spaceList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
+      expect(spaceList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
+      expect(spaceList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
+      expect(spaceList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+
+      spaceList.pagination.getNavPreviousPage().getComponent().click();
+    });
+
+    it('Last and First Page', () => {
+      spaceList.pagination.getNavLastPage().getComponent().click();
+
+      expect(spaceList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
+      expect(spaceList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
+      expect(spaceList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
+      expect(spaceList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+
+      spaceList.pagination.getNavFirstPage().getComponent().click();
+    });
+
+    it('Change Page Size', () => {
+
+      spaceList.pagination.setPageSize('80');
+      expect(spaceList.cards.getCardCount()).toBeGreaterThan(9);
+
+      expect(spaceList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
+      expect(spaceList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
+      expect(spaceList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
+      expect(spaceList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+
+      spaceList.pagination.setPageSize('9');
+      expect(spaceList.cards.getCardCount()).toBe(9);
 
     });
 

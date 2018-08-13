@@ -262,6 +262,14 @@ export class ListPaginationComponent extends Component {
     return this.locator.element(by.css('.mat-paginator-page-size'));
   }
 
+  getPageSize(): promise.Promise<string> {
+    return this.getPageSizeForm().getText('mat-select-1');
+  }
+
+  setPageSize(pageSize): promise.Promise<void> {
+    return this.getPageSizeForm().fill({ 'mat-select-1': pageSize });
+  }
+
   getPageSizeForm(): FormComponent {
     return new FormComponent(this.findPageSizeSection());
   }

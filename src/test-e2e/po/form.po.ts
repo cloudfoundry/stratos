@@ -24,6 +24,7 @@ export interface FormItem {
   tag: string;
   valid: string;
   error: string;
+  id: string;
 }
 
 /**
@@ -61,6 +62,7 @@ export class FormComponent extends Component {
       clear: elm.clear,
       click: elm.click,
       tag: elm.getTagName(),
+      id: elm.getAttribute('id')
     };
   }
 
@@ -72,7 +74,6 @@ export class FormComponent extends Component {
         elm.getAttribute('formcontrolname'),
         elm.getAttribute('id')
       ]).then(([name, formcontrolname, id]) => {
-        console.log(id);
         const nameAtt = name || formcontrolname || id;
         return nameAtt.toLowerCase() === ctrlName;
       });
@@ -119,7 +120,7 @@ export class FormComponent extends Component {
     return this.getFieldsMapped().then(items => {
       const form = {};
       items.forEach((item: FormItem) => {
-        const id = item.name || item.formControlName;
+        const id = item.name || item.formControlName || item.id;
         form[id.toLowerCase()] = item;
       });
       return form;
