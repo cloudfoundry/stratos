@@ -1,8 +1,8 @@
 import { browser, promise } from 'protractor';
 
-import { IApp, IRoute } from '../../frontend/app/core/cf-api.types';
+import { IApp, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
-import { E2ESetup } from '../e2e';
+import { E2ESetup, e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
@@ -27,71 +27,142 @@ export class ApplicationE2eHelper {
    */
   static getHostName = (appName) => appName.replace(/[\.:-]/g, '_');
 
-  fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse> => {
-    return this.cfRequestHelper.sendCfGet(
-      cfGuid,
-      'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName
-    );
+  fetchAppInDefault = (
+    appName?: string,
+    appGuid?: string,
+    cfGuid?: string,
+    spaceGuid?: string
+  ): promise.Promise<{ cfGuid: string, app: APIResource<IApp> }> => {
+    const cfGuidP: promise.Promise<string> = cfGuid ?
+      promise.fullyResolved(cfGuid) :
+      this.cfRequestHelper.getCfCnsi().then(endpoint => endpoint.guid);
+    const spaceGuidP: promise.Promise<string> = spaceGuid ? promise.fullyResolved(spaceGuid) : cfGuidP
+      .then(cfGuid1 => {
+        cfGuid = cfGuid1;
+        console.log(cfGuid, cfGuid1);
+        return this.cfHelper.fetchOrg(cfGuid, e2e.secrets.getDefaultCFEndpoint().testOrg)
+          .then(org => {
+            return this.cfHelper.fetchSpace(cfGuid, org.metadata.guid, e2e.secrets.getDefaultCFEndpoint().testSpace);
+          });
+      })
+      .then(space => space.metadata.guid);
+    const appP: promise.Promise<APIResource<IApp>> = promise.all([cfGuidP, spaceGuidP]).then(([cfGuid1, spaceGuid1]) => {
+      return appName ? this.fetchApp(cfGuid1, spaceGuid1, appName) : this.fetchAppByGuid(cfGuid1, appGuid);
+    });
+    return appP.then(app => ({ cfGuid, app }));
   }
 
-  deleteApplication = (cfGuid: string, app: APIResource<IApp>): promise.Promise<any> => {
-    if (!cfGuid || !app) {
-      return promise.fullyResolved({});
+  fetchApp = (cfGuid: string, spaceGuid: string, appName: string): promise.Promise<APIResource<IApp>> => {
+    console.log('appName ', appName);
+    return this.cfHelper.baseFetchApp(cfGuid, spaceGuid, appName).then(json => {
+      console.log('app2: ', json);
+      if (json.total_results < 1) {
+        return null;
+      } else if (json.total_results === 1) {
+        return json.resources[0];
+      } else {
+        throw new Error('There should only be one app, found multiple. App Name: ' + appName);
+      }
+    });
+  }
+
+  fetchAppByGuid = (cfGuid: string, appGuid: string): promise.Promise<APIResource<IApp>> => {
+    return this.cfRequestHelper.sendCfGet<APIResource<IApp>>(cfGuid, 'apps/' + appGuid);
+  }
+
+  deleteApplication = (
+    haveApp?: {
+      cfGuid: string,
+      app: APIResource<IApp>
+    },
+    needApp?: {
+      appName?: string,
+      appGuid?: string
+    }
+  ): promise.Promise<any> => {
+    if (!haveApp && !needApp) {
+      e2e.log(`Skipping Deleting App...`);
+      return;
     }
 
-    const promises = [];
+    let cfGuid = haveApp ? haveApp.cfGuid : null;
+    const appP: promise.Promise<APIResource<IApp>> = haveApp ?
+      this.fetchAppByGuid(haveApp.cfGuid, haveApp.app.metadata.guid) :
+      this.fetchAppInDefault(needApp.appName, needApp.appGuid).then(res => {
+        cfGuid = res.cfGuid;
+        return res.app;
+      });
 
-    // Delete service instance
-    const serviceBindings = app.entity.service_bindings || [];
-    serviceBindings.forEach(serviceBinding => {
-      const url = 'service_instances/' + serviceBinding.entity.service_instance_guid + '?recursive=true&async=false';
-      promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, url));
-    });
+    e2e.log(`Deleting App...`);
 
-    // Delete route
-    const routes: promise.Promise<APIResource<IRoute>[]> = app.entity.routes && app.entity.routes.length ?
-      promise.fullyResolved(app.entity.routes) :
-      this.cfRequestHelper.sendCfGet(cfGuid, `apps/${app.metadata.guid}/routes`).then(res => res.resources);
+    return appP
+      .then(app => {
+        e2e.log(`'${app.entity.name}: Found app to delete'`);
 
-    promises.push(routes.then(appRoutes => {
-      const routePromises = [];
-      return promise.all(appRoutes.map(route =>
-        this.cfRequestHelper.sendCfDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false'))
-      );
-    }));
+        const promises = [];
 
-    const deps = promise.all(promises).catch(err => {
-      const errorString = `Failed to delete routes or services attached to an app`;
-      console.log(`${errorString}: ${err}`);
-      return promise.rejected(errorString);
-    });
+        // Delete service instance
+        const serviceBindings = app.entity.service_bindings || [];
+        serviceBindings.forEach(serviceBinding => {
+          const url = 'service_instances/' + serviceBinding.entity.service_instance_guid + '?recursive=true&async=false';
+          promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, url));
+        });
 
-    const cfRequestHelper = this.cfRequestHelper;
+        // Delete route
+        let routes: promise.Promise<APIResource<IRoute>[]>;
+        if (app.entity.routes && app.entity.routes.length) {
+          routes = promise.fullyResolved(app.entity.routes);
+        } else {
+          e2e.log('BEFORE');
+          browser.sleep(5000);
+          e2e.log('AFter');
+          routes = this.cfRequestHelper.sendCfGet(cfGuid, `apps/${app.metadata.guid}/routes`).then(res => {
+            console.log(app.entity.name + ': using request RESPONSE ', res.resources);
+            return res.resources;
+          });
+        }
+        promises.push(routes.then(appRoutes => {
+          if (!appRoutes.length) {
+            e2e.log(`'${app.entity.name}: Deleting App Routes... None found'. `);
+            return promise.fullyResolved({});
+          }
+          e2e.log(`'${app.entity.name}: Deleting App Routes... '${appRoutes.map(route => route.entity.host).join(',')}'. `);
+          return promise.all(appRoutes.map(route =>
+            this.cfRequestHelper.sendCfDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false')
+          ));
+        }));
 
-    // Delete app
-    return deps.then(() => {
-      // console.log('Successfully delete deps: ', this.cfRequestHelper.sendCfDelete);
-      return cfRequestHelper.sendCfDelete(cfGuid, 'apps/' + app.metadata.guid);
-    }).catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
+        const deps = promise.all(promises).catch(err => {
+          const errorString = `Failed to delete routes or services attached to an app`;
+          console.log(`${errorString}: ${err}`);
+          return promise.rejected(errorString);
+        });
+
+        const cfRequestHelper = this.cfRequestHelper;
+
+        // Delete app
+        return deps.then(() => this.cfHelper.baseDeleteApp(cfGuid, app.metadata.guid)).then(() => {
+          e2e.log(`'${app.entity.name}': Successfully deleted.`);
+        });
+      })
+      .catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
   }
 
   createApp(cfGuid: string, orgName: string, spaceName: string, appName: string) {
     return browser.driver.wait(
       this.cfHelper.addOrgIfMissing(cfGuid, orgName)
         .then(org => {
-          return this.cfHelper.fetchSpace(cfGuid, org.resources[0].metadata.guid, spaceName);
+          return this.cfHelper.fetchSpace(cfGuid, org.metadata.guid, spaceName);
         })
         .then(space => {
           expect(space).not.toBeNull();
-          return this.cfHelper.createApp(cfGuid, space.metadata.guid, appName);
+          return promise.all([
+            this.cfHelper.baseCreateApp(cfGuid, space.metadata.guid, appName),
+            promise.fullyResolved(space)
+          ]);
         })
-        .then(() => {
-          return this.fetchApp(cfGuid, appName);
-        })
-        .then(apps => {
-          expect(apps.total_results).toBe(1);
-          const app = apps.resources[0];
-          return app;
+        .then(([app, space]: [APIResource<IApp>, APIResource<ISpace>]) => {
+          return this.fetchApp(cfGuid, space.metadata.guid, appName);
         })
     );
   }

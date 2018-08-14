@@ -28,10 +28,14 @@ export class CFRequestHelpers extends RequestHelpers {
       });
   }
 
-  sendCfGet = (cfGuid: string, url: string): promise.Promise<CFResponse> => this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  sendCfGet<T= CFResponse>(cfGuid: string, url: string): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  }
 
-  sendCfPost = (cfGuid: string, url: string, body: any): promise.Promise<CFResponse> =>
-    this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse)
+  sendCfPost<T= CFResponse>(cfGuid: string, url: string, body: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse);
+  }
+
 
   sendCfPut = (cfGuid: string, url: string, body?: any): promise.Promise<CFResponse> =>
     this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse)

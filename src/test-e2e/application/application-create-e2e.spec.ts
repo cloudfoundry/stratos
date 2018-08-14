@@ -1,3 +1,5 @@
+import { IApp } from '../../frontend/app/core/cf-api.types';
+import { APIResource } from '../../frontend/app/store/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -6,13 +8,12 @@ import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
 import { CreateApplicationStepper } from './create-application-stepper.po';
 
-
 fdescribe('Application Create', function () {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
   let applicationE2eHelper: ApplicationE2eHelper;
-  let cfGuid, app;
+  let cfGuid, app: APIResource<IApp>;
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -21,7 +22,8 @@ fdescribe('Application Create', function () {
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
-      .connectAllEndpoints(ConsoleUserType.admin);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
     applicationE2eHelper = new ApplicationE2eHelper(setup);
   });
 
@@ -69,18 +71,16 @@ fdescribe('Application Create', function () {
     createAppStepper.waitUntilNotShown();
 
     // Determine the app guid and confirm we're on the app summary page
-    const fetchApp = applicationE2eHelper.cfRequestHelper.getCfCnsi().then(endpointModel => {
-      cfGuid = endpointModel.guid;
-      return applicationE2eHelper.fetchApp(cfGuid, testAppName);
-    });
-    const appFetched = fetchApp.then(response => {
-      expect(response.total_results).toBe(1);
-      app = response.resources[0];
-      const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
+    applicationE2eHelper.fetchAppInDefault(testAppName).then((res) => {
+      expect(res.app).not.toBe(null);
+      app = res.app;
+      cfGuid = res.cfGuid;
+      const appSummaryPage = new ApplicationSummary(res.cfGuid, app.metadata.guid, app.entity.name);
       appSummaryPage.waitForPage();
     });
+
   });
 
-  afterEach(() => applicationE2eHelper.deleteApplication(cfGuid, app));
+  afterEach(() => app ? applicationE2eHelper.deleteApplication({ cfGuid, app }) : null);
 
 });

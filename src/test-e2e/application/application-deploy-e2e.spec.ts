@@ -17,7 +17,9 @@ const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
-describe('Application Deploy', function () {
+const appName = 'cf-quick-app';
+
+fdescribe('Application Deploy', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
 
@@ -111,17 +113,17 @@ describe('Application Deploy', function () {
       (new E2E()).log(`Debug: Should be arriving at app summary`);
 
       // Should be app summary
-      ApplicationSummary.detect().then(appSummary => {
-        (new E2E()).log(`Debug: Created app summary obj`);
-        appSummary.waitForPage();
-        appSummary.header.waitForTitleText('cf-quick-app');
-        (new E2E()).log(`Debug: Have title`);
-        applicationE2eHelper.cfHelper.deleteApp(appSummary.cfGuid, appSummary.appGuid);
-      });
+      browser.wait(ApplicationSummary.detect()
+        .then(appSummary => {
+          (new E2E()).log(`Debug: Created app summary obj`);
+          appSummary.waitForPage();
+          appSummary.header.waitForTitleText(appName);
+          (new E2E()).log(`Debug: Have title`);
+          return appSummary.cfGuid;
+        })
+        .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName })));
     });
 
   });
-
-
 
 });

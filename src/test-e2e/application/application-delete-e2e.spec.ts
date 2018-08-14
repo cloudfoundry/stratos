@@ -9,7 +9,7 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ExpectedConditions } from 'protractor';
 
 
-describe('Application Delete', function () {
+fdescribe('Application Delete', function () {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
@@ -48,7 +48,11 @@ describe('Application Delete', function () {
       ).then(appl => app = appl);
     });
 
-    afterAll(() => applicationE2eHelper.deleteApplication(cfGuid, app));
+    afterAll(() => {
+      if (app) {
+        applicationE2eHelper.deleteApplication({ cfGuid, app });
+      }
+    });
 
     it('Should return to summary page after cancel', () => {
       const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
@@ -122,6 +126,5 @@ describe('Application Delete', function () {
       appWall.appList.getTotalResults().then(count => expect(count).toBe(appCount - 1));
     });
   });
-
 
 });
