@@ -16,6 +16,7 @@ git reset --hard v2-master
 git mv src/backend src/jetstream
 mkdir src/jetstream/plugins
 git mv src/jetstream/app-core/* src/jetstream
+git rm src/jetstream/app-core
 git mv src/jetstream/cfapppush src/jetstream/plugins/cfapppush
 git mv src/jetstream/cfappssh src/jetstream/plugins/cfappssh
 git mv src/jetstream/cloudfoundry src/jetstream/plugins/cloudfoundry
