@@ -26,12 +26,15 @@ export class ListComponent extends Component {
 
   public pagination: ListPaginationComponent;
 
+  public empty: ListEmptyComponent;
+
   constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.cards = new ListCardComponent(locator);
     this.header = new ListHeaderComponent(locator);
     this.pagination = new ListPaginationComponent(locator);
+    this.empty = new ListEmptyComponent(locator);
   }
 
   isTableView(): promise.Promise<boolean> {
@@ -290,4 +293,14 @@ export class ListPaginationComponent extends Component {
     return new Component(this.locator.element(by.css('.mat-paginator-navigation-next')));
   }
 
+}
+
+export class ListEmptyComponent extends Component {
+  constructor(listComponent: ElementFinder) {
+    super(listComponent.element(by.css('.list-component__no-entries')));
+  }
+
+  getDefault(): Component {
+    return new Component(element(by.css('.list-component__default-no-entries')));
+  }
 }

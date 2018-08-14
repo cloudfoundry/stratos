@@ -1,10 +1,11 @@
 import { promise } from 'protractor';
 
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { CfUser } from '../../frontend/app/store/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFRequestHelpers } from './cf-request-helpers';
+import { IOrganization, ISpace } from '../../frontend/app/core/cf-api.types';
 
 
 export class CFHelpers {
@@ -28,7 +29,11 @@ export class CFHelpers {
     });
   }
 
-  addOrgIfMissingForEndpointUsers(guid: string, endpoint: E2EConfigCloudFoundry, testOrgName: string) {
+  addOrgIfMissingForEndpointUsers(
+    guid: string,
+    endpoint: E2EConfigCloudFoundry,
+    testOrgName: string
+  ): promise.Promise<APIResource<IOrganization>> {
     return this.assignAdminAndUserGuids(guid, endpoint).then(() => {
       expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
       expect(endpoint.creds.admin.guid).not.toBeNull();
@@ -40,21 +45,21 @@ export class CFHelpers {
     return users.find(user => user && user.entity && user.entity.username === name);
   }
 
-  addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid) {
+  addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid): promise.Promise<APIResource<IOrganization>> {
     let added;
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results === 0) {
         added = true;
-        return this.cfRequestHelper.sendCfPost(cnsiGuid, 'organizations', { name: orgName });
+        return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
       }
-      return json;
+      return json.resources[0];
     }).then(newOrg => {
       if (!added) {
         // No need to mess around with permissions, it exists already.
         return newOrg;
       }
-      const org = newOrg.resources ? newOrg.resources[0] as any : newOrg;
-      const orgGuid = org.metadata.guid;
+      // const org = newOrg.resources ? newOrg.resources[0] as any : newOrg;
+      const orgGuid = newOrg.metadata.guid;
       const p1 = this.cfRequestHelper.sendCfPut(cnsiGuid, 'organizations/' + orgGuid + '/users/' + adminGuid);
       const p2 = this.cfRequestHelper.sendCfPut(cnsiGuid, 'organizations/' + orgGuid + '/users/' + userGuid);
       // Add user to org users
@@ -65,14 +70,20 @@ export class CFHelpers {
     });
   }
 
-  addSpaceIfMissingForEndpointUsers(cnsiGuid, orgGuid, orgName, spaceName, endpoint: E2EConfigCloudFoundry) {
+  addSpaceIfMissingForEndpointUsers(
+    cnsiGuid,
+    orgGuid,
+    orgName,
+    spaceName,
+    endpoint: E2EConfigCloudFoundry
+  ): promise.Promise<CFResponse<ISpace>> {
     return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
       expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
       return this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
     });
   }
 
-  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid) {
+  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<CFResponse<ISpace>> {
     const cfRequestHelper = this.cfRequestHelper;
     return this.cfRequestHelper.sendCfGet(cnsiGuid,
       'spaces?inline-relations-depth=1&include-relations=organization&q=name IN ' + spaceName)

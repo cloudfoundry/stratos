@@ -2,16 +2,16 @@ import { browser, promise } from 'protractor';
 
 import { IOrganization } from '../../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../../frontend/app/store/types/api.types';
-import { e2e, E2ESetup } from '../../e2e';
+import { e2e, E2ESetup, E2E } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { ListComponent } from '../../po/list.po';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 
-const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-org-spaces-test-';
+const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-org-spaces-test';
 
-fdescribe('Org Spaces - ', () => {
+fdescribe('Org Spaces List- ', () => {
 
   let e2eSetup: E2ESetup;
   let cfHelper: CFHelpers;
@@ -93,25 +93,27 @@ fdescribe('Org Spaces - ', () => {
   });
 
   describe('No Pages -', () => {
-    const orgName = customOrgSpacesLabel;
-    let endpointGuid;
+    const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel);
+    let endpointGuid, orgGuid;
     beforeAll(() => {
       defaultCf = e2e.secrets.getDefaultCFEndpoint();
       endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
       // Create a temporary org which will contain no spaces
-      browser.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName));
+      browser.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName).then(res => orgGuid = res.metadata.guid));
     });
 
     beforeEach(() => {
-      navToOrgSpaces(endpointGuid);
+      navToOrgSpaces(endpointGuid, orgGuid);
     });
 
-    it('Should show message', () => {
-
+    it('Should show no entities message', () => {
+      expect(spaceList.isDisplayed()).toBeTruthy();
+      spaceList.empty.getDefault().waitUntilShown();
+      expect(spaceList.empty.getDefault().getComponent().getText()).toBe('There are no spaces');
+      expect(spaceList.cards.getCardCount()).toBe(0);
     });
 
     afterAll(() => {
-      const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
       cfHelper.deleteSpaceIfExisting(endpointGuid, orgName);
     });
   });
@@ -185,9 +187,14 @@ fdescribe('Org Spaces - ', () => {
       const spaceToNotFind = 'sdfst4654324543224 s5d4x4g5g gdg4fdg 5fdg';
       spaceList.header.setSearchText(spaceToNotFind);
 
-      // Check for zero cards
       expect(spaceList.header.getSearchText()).toEqual(spaceToNotFind);
+
+      // Check for zero cards
       expect(spaceList.cards.getCardCount()).toBe(0);
+
+      // Check for 'no spaces' message
+      spaceList.empty.getDefault().waitUntilShown();
+      expect(spaceList.empty.getDefault().getComponent().getText()).toBe('There are no spaces');
     });
 
     it('single page pagination settings', () => {
@@ -271,5 +278,3 @@ fdescribe('Org Spaces - ', () => {
   });
 
 });
-
-// TODO: RC empty list
