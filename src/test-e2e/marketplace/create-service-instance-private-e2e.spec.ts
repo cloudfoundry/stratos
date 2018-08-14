@@ -6,7 +6,7 @@ import { ServicesWallPage } from './services-wall.po';
 import { MetaCard } from '../po/meta-card.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 
-fdescribe('Create Service Instance of Private Service', () => {
+describe('Create Service Instance of Private Service', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -80,7 +80,7 @@ fdescribe('Create Service Instance of Private Service', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace(e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidOrgName,
-     e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidSpaceName);
+      e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidSpaceName);
     createServiceInstance.stepper.next();
 
     // Select Service
