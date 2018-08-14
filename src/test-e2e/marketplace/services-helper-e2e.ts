@@ -101,7 +101,6 @@ export class ServicesHelperE2E {
   }
 
   setCfOrgSpace = (orgName: string = null, spaceName: string = null) => {
-    expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
     this.createServiceInstance.stepper.setOrg(!!orgName ? orgName : e2e.secrets.getDefaultCFEndpoint().testOrg);
     this.createServiceInstance.stepper.setSpace(!!spaceName ? spaceName : e2e.secrets.getDefaultCFEndpoint().testSpace);

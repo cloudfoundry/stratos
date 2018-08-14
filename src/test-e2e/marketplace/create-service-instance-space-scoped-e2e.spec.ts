@@ -11,9 +11,10 @@ describe('Create Service Instance of Space Scoped Service', () => {
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.admin)
+    const e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin);
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
   });
