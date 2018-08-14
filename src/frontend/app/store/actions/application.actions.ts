@@ -212,5 +212,5 @@ export class RestageApplication extends CFStartAction implements ICFAction {
   entity = [applicationEntitySchema];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
-  updatingKey: 'restaging';
+  updatingKey = 'restaging';
 }
