@@ -23,7 +23,7 @@ import { ApplicationData, ApplicationService } from '../../../../application.ser
 export class BuildTabComponent implements OnInit {
 
 
-  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
+  constructor(public applicationService: ApplicationService) { }
 
   cardTwoFetching$: Observable<boolean>;
 

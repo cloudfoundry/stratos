@@ -22,6 +22,8 @@ import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { RestageApplication } from '../../../../store/actions/application.actions';
+import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
 
 
 // Confirmation dialogs
@@ -56,6 +58,7 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
+  public appState$: Observable<ApplicationStateData>;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -110,7 +113,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
-  appActions$: Observable<{ [key: string]: boolean }>;
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }
@@ -216,6 +218,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
   }
 
+  restageApplication() {
+    const { cfGuid, appGuid } = this.applicationService;
+    this.store.dispatch(new RestageApplication(appGuid, cfGuid));
+  }
+
   pollEntityService(state, stateString): Observable<any> {
     return this.entityService
       .poll(1000, state).pipe(
@@ -307,10 +314,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return !!(isFetchingApp || isUpdating);
     }));
-
-    this.appActions$ = this.applicationService.applicationState$.pipe(
-      map(app => app.actions)
-    );
   }
 
   ngOnDestroy() {
