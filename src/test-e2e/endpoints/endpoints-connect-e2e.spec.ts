@@ -1,3 +1,5 @@
+import { browser } from 'protractor';
+
 import { ApplicationsPage } from '../applications/applications.po';
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
@@ -33,7 +35,7 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
-        connectDialog.snackBar.close();
+        connectDialog.snackBar.safeClose();
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
@@ -142,7 +144,6 @@ describe('Endpoints', () => {
             const snackBar = new SnackBarComponent();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
-            
             endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
               expect(data.connected).toBeFalsy();
             });

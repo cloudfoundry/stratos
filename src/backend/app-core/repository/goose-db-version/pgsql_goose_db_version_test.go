@@ -8,6 +8,8 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 )
 
 func TestPgSQLGooseDB(t *testing.T) {
@@ -42,7 +44,7 @@ func TestPgSQLGooseDB(t *testing.T) {
 		defer db.Close()
 
 		// General setup
-		expectedVersionRecord := GooseDBVersionRecord{VersionID: mockVersionID}
+		expectedVersionRecord := interfaces.GooseDBVersionRecord{VersionID: mockVersionID}
 
 		Convey("if one exists", func() {
 

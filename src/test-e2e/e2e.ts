@@ -38,14 +38,14 @@ export class E2E {
   /**
    * Convenience for sleep
    */
-  sleep(duration) {
+  sleep(duration: number) {
     browser.driver.sleep(duration);
   }
 
   /**
    * Log message in the control flow
    */
-  log(log) {
+  log(log: string) {
     protractor.promise.controlFlow().execute(() => console.log(log));
   }
 }
@@ -80,7 +80,7 @@ export class E2ESetup {
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
     const that = this;
     protractor.promise.controlFlow().execute(() => {
-      E2E.debugLog('Logging in as user: ' + (userType === ConsoleUserType.admin ? 'admin' : 'user'));
+      E2E.debugLog('Logging in as user: ' + (that.loginUserType === ConsoleUserType.admin ? 'admin' : 'user'));
       return e2e.helper.setupApp(that.loginUserType);
     });
   }

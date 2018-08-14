@@ -2,6 +2,29 @@
 
 Weekly status updates are published here.
 
+## 3 August 2018
+This week we've focused on..
+
+- Making metrics components easier to deploy. This will help us apply polish and publicise CF metrics in the coming weeks.
+- Improving test suites and coverage.
+- Responding to community issues. There's been an increase in use and some great contributions.
+- Fixing older, but still valid, issues that haven't quite been important to address at the time.
+
+In addition we’ve created a short (a few minutes) survey to get a better idea how the community plan to use Stratos. Answers and feedback will directly impact the direction we take Stratos, so the quicker we have responses the quicker we can act on them. Follow this link to start answering https://www.surveymonkey.com/r/2L8XWST
+
+## 27 July 2018
+
+The main news this week is that we have released a first version of Stratos 2.0.
+
+We've been focused over the past weeks on fixing bugs and improving tests and we're delighted to have reached this milestone.
+
+The release details are available here - https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.0.0.
+
+We've also started to catch up on some of the outstanding PRs, especially submitted from the community, for example:
+
+- Change DB schema and backend to support storing a client/secret for each Endpoint [\#2622](https://github.com/cloudfoundry-incubator/stratos/pull/2622)
+- Fix migrate script to work in Postgresql [\#2601](https://github.com/cloudfoundry-incubator/stratos/pull/2601)
+
 ## 20 July 2018
 
 This week the focus has been on further testing and refinement of Release Candidate 2.

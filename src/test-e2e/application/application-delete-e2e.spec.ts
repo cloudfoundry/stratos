@@ -26,7 +26,7 @@ describe('Application Delete', function () {
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
-      .getInfo(ConsoleUserType.admin)
+      .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
     cfHelper = new CFHelpers(setup);
   });
@@ -101,7 +101,7 @@ describe('Application Delete', function () {
       // Delete the app
       deleteApp.stepper.next();
 
-      deleteApp.stepper.waitUntilCanClose();
+      deleteApp.stepper.waitUntilCanNext();
       expect(deleteApp.stepper.getNextLabel()).toBe('Close');
       // Close
       deleteApp.stepper.next();
@@ -116,7 +116,7 @@ describe('Application Delete', function () {
       app = null;
 
       // Check that we have 1 less app
-      appWall.appList.getTotalResults().then(count =>expect(count).toBe(appCount - 1));
+      appWall.appList.getTotalResults().then(count => expect(count).toBe(appCount - 1));
     });
   });
 

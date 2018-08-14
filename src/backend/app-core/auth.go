@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -48,9 +47,6 @@ const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 // ClientRequestDateHeader Custom header for getting date form client
 const ClientRequestDateHeader = "X-Cap-Request-Date"
 
-// EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
-var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
-
 // XSRFTokenHeader - XSRF Token Header name
 const XSRFTokenHeader = "X-Xsrf-Token"
 
@@ -68,7 +64,7 @@ func (p *portalProxy) getUAAIdentityEndpoint() string {
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	req := c.Request().(*standard.Request).Request
 	originalCookie := req.Header.Get("Cookie")
-	cleanCookie := EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
+	cleanCookie := p.EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
 	req.Header.Set("Cookie", cleanCookie)
 }
 
@@ -96,7 +92,11 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 }
 
 func getSSORedirectUri(state string) string {
-	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", state, url.QueryEscape(state))
+	baseURL, _ := url.Parse(state)
+	baseURL.Path = ""
+	baseURL.RawQuery = ""
+	baseURLString := strings.TrimRight(baseURL.String(), "?")
+	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", baseURLString, url.QueryEscape(state))
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -353,15 +353,7 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	clientID, err := p.GetClientId(cnsiRecord.CNSIType)
-	if err != nil {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Endpoint type has not been registered",
-			"Endpoint type has not been registered %s: %s", cnsiRecord.CNSIType, err)
-	}
-
-	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, clientID, "", tokenEndpoint)
+	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -370,14 +362,6 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 			"Login failed: %v", err)
 	}
 	return uaaRes, u, &cnsiRecord, nil
-}
-
-func (p *portalProxy) GetClientId(cnsiType string) (string, error) {
-	plugin, err := p.GetEndpointTypeSpec(cnsiType)
-	if err != nil {
-		return "", errors.New("Endpoint type not registered")
-	}
-	return plugin.GetClientId(), nil
 }
 
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
@@ -418,6 +402,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	}
 
 	// If cnsi is cf AND cf is auto-register only clear the entry
+	p.Config.AutoRegisterCFUrl = strings.TrimRight(p.Config.AutoRegisterCFUrl, "/")
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
 		log.Debug("Setting token record as disconnected")
 

@@ -196,6 +196,14 @@ spec:
         - name: COOKIE_DOMAIN
           value: {{.Values.env.DOMAIN}}
         {{- end }}
+        - name: HELM_NAME
+          value: "{{ .Release.Namespace }}/{{ .Release.Name }}"
+        - name: HELM_REVISION
+          value: "{{ .Release.Revision }}"
+        - name: HELM_CHART_VERSION
+          value: "{{ .Chart.Version }}"
+        - name: HELM_LAST_MODIFIED
+          value: "{{ .Release.Time }}"
         ports:
         - containerPort: 3003
           name: proxy

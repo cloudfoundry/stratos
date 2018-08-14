@@ -11,7 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-var findAuthToken = `SELECT auth_token, refresh_token, token_expiry
+var findAuthToken = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data
 									FROM tokens
 									WHERE token_type = 'uaa' AND user_guid = $1`
 
@@ -44,9 +44,10 @@ var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, aut
 var updateCNSIToken = `UPDATE tokens
 										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5
 										WHERE cnsi_guid = $6 AND user_guid = $7 AND token_type = $8 AND auth_type = $9`
-
 var deleteCNSIToken = `DELETE FROM tokens
-											WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
+										WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
+var deleteCNSITokens = `DELETE FROM tokens
+											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
 // TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
 
@@ -74,6 +75,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
 	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)
 	deleteCNSIToken = datastore.ModifySQLStatement(deleteCNSIToken, databaseProvider)
+	deleteCNSITokens = datastore.ModifySQLStatement(deleteCNSITokens, databaseProvider)
 }
 
 // saveAuthToken - Save the Auth token to the datastore
@@ -154,11 +156,13 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	var (
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
-		tokenExpiry            int64
+		tokenExpiry            sql.NullInt64
+		authType               string
+		metadata               sql.NullString
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
+	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
@@ -181,7 +185,13 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	tr := new(interfaces.TokenRecord)
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
-	tr.TokenExpiry = tokenExpiry
+	if tokenExpiry.Valid {
+		tr.TokenExpiry = tokenExpiry.Int64
+	}
+	tr.AuthType = authType
+	if metadata.Valid {
+		tr.Metadata = metadata.String
+	}
 
 	return *tr, nil
 }
@@ -300,11 +310,11 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	var (
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
-		tokenExpiry            int64
+		tokenExpiry            sql.NullInt64
 		disconnected           bool
 		authType               string
-		metadata               string
-		tokenUserGUID          string
+		metadata               sql.NullString
+		tokenUserGUID          sql.NullString
 	)
 
 	var err error
@@ -340,11 +350,17 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	tr := new(interfaces.TokenRecord)
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
-	tr.TokenExpiry = tokenExpiry
+	if tokenExpiry.Valid {
+		tr.TokenExpiry = tokenExpiry.Int64
+	}
 	tr.Disconnected = disconnected
 	tr.AuthType = authType
-	tr.Metadata = metadata
-	tr.SystemShared = tokenUserGUID == SystemSharedUserGuid
+	if metadata.Valid {
+		tr.Metadata = metadata.String
+	}
+	if tokenUserGUID.Valid {
+		tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
+	}
 
 	return *tr, nil
 }
@@ -365,6 +381,24 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 	}
 
 	_, err := p.db.Exec(deleteCNSIToken, cnsiGUID, userGUID)
+	if err != nil {
+		msg := "Unable to Delete CNSI token: %v"
+		log.Debugf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+func (p *PgsqlTokenRepository) DeleteCNSITokens(cnsiGUID string) error {
+	log.Debug("DeleteCNSITokens")
+	if cnsiGUID == "" {
+		msg := "Unable to delete CNSI Token without a valid CNSI GUID."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	_, err := p.db.Exec(deleteCNSITokens, cnsiGUID)
 	if err != nil {
 		msg := "Unable to Delete CNSI token: %v"
 		log.Debugf(msg, err)

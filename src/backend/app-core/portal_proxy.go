@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"regexp"
 	"time"
 
 	"github.com/SUSE/stratos-ui/repository/interfaces"
@@ -14,6 +15,9 @@ type portalProxy struct {
 	SessionStore           interfaces.SessionStorer
 	SessionStoreOptions    *sessions.Options
 	Plugins                map[string]interfaces.StratosPlugin
+	Diagnostics            *interfaces.Diagnostics
+	SessionCookieName      string
+	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

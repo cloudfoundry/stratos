@@ -15,9 +15,9 @@ export class CFHelpers {
     return this.fetchUsers(guid).then(users => {
       testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
       testAdminUser = this.findUser(users, endpoint.creds.admin.username);
-        expect(testUser).toBeDefined();
-        expect(testAdminUser).toBeDefined();
-        return this.addOrgIfMissing(guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
+      expect(testUser).toBeDefined();
+      expect(testAdminUser).toBeDefined();
+      return this.addOrgIfMissing(guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
     });
   }
 
@@ -85,7 +85,7 @@ export class CFHelpers {
         } else {
           throw new Error('There should only be one app, found multiple. Add Name: ' + appName);
         }
-    });
+      });
   }
 
   fetchServiceExist(cnsiGuid, serviceName) {
@@ -134,6 +134,10 @@ export class CFHelpers {
 
   createApp(cnsiGuid: string, spaceGuid: string, appName: string) {
     return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
+  }
+
+  deleteApp(cnsiGuid: string, appGuid: string) {
+    return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
   }
 
 }
