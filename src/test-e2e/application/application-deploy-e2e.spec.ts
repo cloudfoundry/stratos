@@ -1,7 +1,7 @@
 import { browser, promise } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
-import { e2e } from '../e2e';
+import { e2e, E2E } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
@@ -108,10 +108,14 @@ describe('Application Deploy', function () {
       // Click next
       deployApp.stepper.next();
 
+      (new E2E()).log(`Debug: Should be arriving at app summary`);
+
       // Should be app summary
       ApplicationSummary.detect().then(appSummary => {
+        (new E2E()).log(`Debug: Created app summary obj`);
         appSummary.waitForPage();
         appSummary.header.waitForTitleText('cf-quick-app');
+        (new E2E()).log(`Debug: Have title`);
         applicationE2eHelper.cfHelper.deleteApp(appSummary.cfGuid, appSummary.appGuid);
       });
     });

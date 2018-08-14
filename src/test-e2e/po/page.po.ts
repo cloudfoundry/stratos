@@ -48,7 +48,7 @@ export abstract class Page {
 
   waitForPage() {
     expect(this.navLink.startsWith('/')).toBeTruthy();
-    browser.wait(until.urlIs(this.getUrl()), 20000);
+    browser.wait(until.urlIs(this.getUrl()), 20000, `Failed to wait for page with navlink '${this.navLink}'`);
   }
 
   waitForPageDataLoaded() {
