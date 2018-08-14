@@ -41,15 +41,17 @@ export class ServicesHelperE2E {
     );
   }
 
-  createService = (serviceName: string) => {
+  createService = (serviceName: string, marketplaceMode = false) => {
 
     // Select CF/Org/Space
-    this.setCfOrgSpace();
+    this.setCfOrgSpace(null, null, marketplaceMode);
     this.createServiceInstance.stepper.next();
 
-    // Select Service
-    this.setServiceSelection(serviceName);
-    this.createServiceInstance.stepper.next();
+    if (!marketplaceMode) {
+      // Select Service
+      this.setServiceSelection(serviceName);
+      this.createServiceInstance.stepper.next();
+    }
 
     // Select Service Plan
     this.setServicePlan();
@@ -64,6 +66,7 @@ export class ServicesHelperE2E {
     this.createServiceInstance.stepper.next();
 
   }
+
 
   setServiceInstanceDetail = () => {
     this.createServiceInstance.stepper.waitForStep('Service Instance');
@@ -100,8 +103,10 @@ export class ServicesHelperE2E {
     }
   }
 
-  setCfOrgSpace = (orgName: string = null, spaceName: string = null) => {
-    this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
+  setCfOrgSpace = (orgName: string = null, spaceName: string = null, marketplaceMode = false) => {
+    if (!marketplaceMode) {
+      this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
+    }
     this.createServiceInstance.stepper.setOrg(!!orgName ? orgName : e2e.secrets.getDefaultCFEndpoint().testOrg);
     this.createServiceInstance.stepper.setSpace(!!spaceName ? spaceName : e2e.secrets.getDefaultCFEndpoint().testSpace);
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
@@ -113,9 +118,11 @@ export class ServicesHelperE2E {
     let cfGuid: string;
     return getCfCnsi.then(endpointModel => {
       cfGuid = endpointModel.guid;
+      console.log(cfGuid);
       return this.fetchServicesInstances(cfGuid);
     }).then(response => {
       const services = response.resources;
+      console.log(services.map(e => e.entity.name));
       const serviceInstance = services.filter(service => service.entity.name === serviceIntanceName)[0];
       return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
     });
