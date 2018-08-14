@@ -215,7 +215,6 @@
   });
 
   gulp.task('run-tests', ['build-all'], function (done) {
-
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     buildUtils.test(corePath)
       .then(function () {
@@ -224,7 +223,17 @@
       .catch(function (err) {
         done(err);
       });
+  });
 
+  gulp.task('run-backend-coverage', ['build-all'], function (done) {
+    var corePath = conf.getCorePath(prepareBuild.getSourcePath());
+    buildUtils.test(corePath, true)
+      .then(function () {
+        done();
+      })
+      .catch(function (err) {
+        done(err);
+      });
   });
 
   gulp.task('copy-artefacts', ['build-all', 'build-dbmigrator'], function (done) {
@@ -366,6 +375,18 @@
       'init-build',
       'dedup-vendor',
       'run-tests',
+      'delete-temp'
+    );
+  });
+
+  gulp.task('test-backend-coverage', function () {
+
+    prepareBuild.setBuildTest(true);
+
+    return runSequence(
+      'init-build',
+      'dedup-vendor',
+      'run-backend-coverage',
       'delete-temp'
     );
   });

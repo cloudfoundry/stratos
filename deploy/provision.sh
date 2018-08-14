@@ -31,8 +31,23 @@ fi
 bower install --allow-root --force
 npm run build
 
+# Instrument code if required for e2e tests
+if [ ! -z "${STRATOS_INSTRUMENT}" ]; then
+  # Need dev dependencies to instrument code
+  echo "Instrumenting code"
+  npm install
+  gulp dev-build
+  gulp e2e:pre-instrument
+  gulp e2e:instrument-source
+  rm -rf ./dist
+  mv ./tmp/instrumented ./dist
+else
+  npm run build
+fi
+
 if [ ! -z "${CREATE_USER}" ]; then
   chown -R ${USER_ID}:${GROUP_ID} node_modules
   chown -R ${USER_ID}:${GROUP_ID} bower_components
   chown -R ${USER_ID}:${GROUP_ID} dist
 fi
+
