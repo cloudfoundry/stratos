@@ -47,7 +47,7 @@ export class PageHeader extends Component {
   }
 
   waitForTitleText(text: string) {
-    browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000);
+    browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000, `Failed to wait for page header with text ${text}`);
   }
 
   logout(): promise.Promise<any> {
