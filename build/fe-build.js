@@ -11,6 +11,7 @@
   var spawn = require('child_process').spawn;
   var path = require('path');
   var os = require('os');
+  var zip = require('gulp-zip');
 
   var config = require('./gulp.config');
   var paths = config.paths;
@@ -23,6 +24,13 @@
     del(paths.dist + '**/*', {
       force: true
     }, next);
+  });
+
+  // Package pre-built UI for the buildpack to detect
+  gulp.task('package-prebuild', function () {
+    return gulp.src('dist/*')
+      .pipe(zip('stratos-frontend-prebuild.zip'))
+      .pipe(gulp.dest('.'))
   });
 
   // Legacy task name
