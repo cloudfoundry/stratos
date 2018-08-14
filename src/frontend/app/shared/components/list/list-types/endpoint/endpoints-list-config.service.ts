@@ -8,7 +8,12 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getFullEndpointApiUrl, getNameForEndpointType, getEndpointUsername, getEndpointIsAdminString } from '../../../../../features/endpoints/endpoint-helpers';
+import {
+  getFullEndpointApiUrl,
+  getNameForEndpointType,
+  getEndpointUsername,
+  getEndpointIsAdminString
+} from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
