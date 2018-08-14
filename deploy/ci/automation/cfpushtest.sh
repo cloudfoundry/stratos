@@ -99,6 +99,13 @@ fi
 
 cat $MANIFEST
 
+# Prebuild
+if [ "$2" == "prebuild" ]; then
+  echo "Pre-building UI ..."
+  npm install
+  npm run prebuild-ui
+fi
+
 # Push Stratos to the Cloud Foundry
 cf push -f $MANIFEST
 RET=$?
