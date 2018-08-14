@@ -11,7 +11,7 @@ import { CfOrgLevelPage } from './cf-org-level-page.po';
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-org-spaces-test';
 
-fdescribe('Org Spaces List- ', () => {
+describe('Org Spaces List- ', () => {
 
   let e2eSetup: E2ESetup;
   let cfHelper: CFHelpers;
