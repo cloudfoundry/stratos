@@ -1,8 +1,8 @@
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription, combineLatest } from 'rxjs';
-import { filter, switchMap, tap, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of as observableOf, Subscription, combineLatest, empty } from 'rxjs';
+import { filter, switchMap, combineLatest as combineLatestOperator, tap, map } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
@@ -62,11 +62,34 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
         fetching ? this.stepperForm.disable() : this.stepperForm.enable();
       })
     );
+
+    const spaceScopedServices = cfSpaceGuid$.pipe(
+      switchMap(([cfGuid, spaceGuid]) => {
+        return this.servicesWallService.getServiceBrokersInCf(cfGuid).pipe(
+          map(brokers => brokers.filter(b => b.entity.space_guid === spaceGuid)),
+          switchMap(b => {
+            if (b.length > 0) {
+              // There are space scoped brokers in the space
+              const brokerGuids = b.map(e => e.entity.guid);
+              return this.servicesWallService.services$.pipe(
+                map(p => p.filter(s => brokerGuids.indexOf(s.entity.service_broker_guid) !== -1)),
+              );
+            } else {
+              return empty();
+            }
+          })
+        );
+      })
+    );
     this.services$ = cfSpaceGuid$.pipe(
       tap(([cfGuid]) => this.cfGuid = cfGuid),
       switchMap(([cfGuid, spaceGuid]) => this.servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
-      map(services => services.sort((a, b) => a.entity.label.localeCompare(b.entity.label))),
+      combineLatestOperator(spaceScopedServices),
+      map(([services, ssServices]) => {
+        const allServices = [].concat(services, ssServices);
+        return allServices.sort((a, b) => a.entity.label.localeCompare(b.entity.label));
+      }),
       tap(services => {
         if (services.length === 1) {
           const guid = services[0].metadata.guid;

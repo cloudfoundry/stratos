@@ -115,7 +115,7 @@ export class ServicesService {
     return getPaginationObservables<APIResource<IServiceBroker>>(
       {
         store: this.store,
-        action: new GetServiceBrokers(this.cfGuid, paginationKey),
+        action: new GetServiceBrokers(paginationKey, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           entityFactory(serviceBrokerSchemaKey)
