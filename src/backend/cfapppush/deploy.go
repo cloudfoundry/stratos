@@ -34,7 +34,7 @@ import (
 	"code.cloudfoundry.org/cli/util"
 	"code.cloudfoundry.org/cli/util/randomword"
 	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"

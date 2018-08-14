@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/datastore"
 )

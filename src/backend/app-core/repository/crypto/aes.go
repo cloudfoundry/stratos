@@ -10,7 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Encrypt - Encrypt a token based on an encryption key

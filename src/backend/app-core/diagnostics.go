@@ -4,7 +4,7 @@ import (
 	"os/exec"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/config"
 	"github.com/cloudfoundry-incubator/stratos/repository/goose-db-version"

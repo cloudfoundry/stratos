@@ -6,7 +6,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/repository/goose-db-version"
 	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 

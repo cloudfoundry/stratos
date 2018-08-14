@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/ssh"

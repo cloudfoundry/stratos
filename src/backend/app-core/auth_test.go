@@ -10,7 +10,7 @@ import (
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"

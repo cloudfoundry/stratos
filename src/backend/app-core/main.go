@@ -21,7 +21,7 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
 	"github.com/gorilla/sessions"
 	"github.com/irfanhabib/mysqlstore"

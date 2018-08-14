@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/config"
 	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 
