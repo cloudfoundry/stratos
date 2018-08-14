@@ -8,7 +8,7 @@ import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
 import { CreateApplicationStepper } from './create-application-stepper.po';
 
-fdescribe('Application Create', function () {
+describe('Application Create', function () {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
