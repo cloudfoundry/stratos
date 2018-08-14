@@ -40,9 +40,12 @@ describe('Application Delete', function () {
       cfGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
       const testTime = (new Date()).toISOString();
       testAppName = ApplicationE2eHelper.createApplicationName(testTime);
-      return applicationE2eHelper.createApp(cfGuid, e2e.secrets.getDefaultCFEndpoint().testSpace, testAppName).then(appl => {
-        app = appl;
-      });
+      return applicationE2eHelper.createApp(
+        cfGuid,
+        e2e.secrets.getDefaultCFEndpoint().testOrg,
+        e2e.secrets.getDefaultCFEndpoint().testSpace,
+        testAppName
+      ).then(appl => app = appl);
     });
 
     afterAll(() => applicationE2eHelper.deleteApplication(cfGuid, app));

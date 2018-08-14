@@ -1,7 +1,6 @@
-import { CFRequestHelpers } from './cf-request-helpers';
 import { E2ESetup } from '../e2e';
-import { promise } from 'protractor';
 import { E2EConfigCloudFoundry } from '../e2e.types';
+import { CFRequestHelpers } from './cf-request-helpers';
 
 export class CFHelpers {
   cfRequestHelper: CFRequestHelpers;
@@ -25,7 +24,7 @@ export class CFHelpers {
     return users.find(user => user && user.entity && user.entity.username === name);
   }
 
-  addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid) {
+  addOrgIfMissing(cnsiGuid, orgName, adminGuid?: string, userGuid?: string) {
     let added;
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results === 0) {
@@ -34,7 +33,7 @@ export class CFHelpers {
       }
       return json;
     }).then(newOrg => {
-      if (!added) {
+      if (!added || !adminGuid || !userGuid) {
         // No need to mess around with permissions, it exists already.
         return newOrg;
       }
@@ -122,8 +121,8 @@ export class CFHelpers {
     });
   }
 
-  fetchSpace(cnsiGuid: string, spaceName: string) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName).then(json => {
+  fetchSpace(cnsiGuid: string, orgGuid: string, spaceName: string) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName + '&organization_guid=' + orgGuid).then(json => {
       if (json.total_results > 0) {
         const space = json.resources[0];
         return space;

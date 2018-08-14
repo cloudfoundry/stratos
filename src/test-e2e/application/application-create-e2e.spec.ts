@@ -7,7 +7,7 @@ import { ApplicationSummary } from './application-summary.po';
 import { CreateApplicationStepper } from './create-application-stepper.po';
 
 
-describe('Application Create', function () {
+fdescribe('Application Create', function () {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
@@ -69,8 +69,7 @@ describe('Application Create', function () {
     createAppStepper.waitUntilNotShown();
 
     // Determine the app guid and confirm we're on the app summary page
-    const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfCnsi();
-    const fetchApp = getCfCnsi.then(endpointModel => {
+    const fetchApp = applicationE2eHelper.cfRequestHelper.getCfCnsi().then(endpointModel => {
       cfGuid = endpointModel.guid;
       return applicationE2eHelper.fetchApp(cfGuid, testAppName);
     });
