@@ -1,10 +1,11 @@
-import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { browser, ElementFinder, promise } from 'protractor';
+
 import { e2e } from '../e2e';
-import { ElementFinder, promise } from 'protractor';
-import { CreateServiceInstance } from './create-service-instance.po';
-import { ServicesWallPage } from './services-wall.po';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { MetaCard } from '../po/meta-card.po';
+import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
+import { ServicesWallPage } from './services-wall.po';
 
 describe('Create Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
@@ -15,7 +16,7 @@ describe('Create Service Instance', () => {
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
-      .connectAllEndpoints(ConsoleUserType.admin);
+      .getInfo();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
   });
 
@@ -98,30 +99,34 @@ describe('Create Service Instance', () => {
   });
 
   it('- should return user to Service summary when cancelled on service instance details', () => {
+    browser.wait(servicesHelperE2E.canBindAppStep()
+      .then(canBindApp => {
+        // Select CF/Org/Space
+        servicesHelperE2E.setCfOrgSpace();
+        createServiceInstance.stepper.next();
 
-    // Select CF/Org/Space
-    servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.next();
+        // Select Service
+    	servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+        createServiceInstance.stepper.next();
 
-    // Select Service
-    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    createServiceInstance.stepper.next();
+        // Select Service Plan
+        servicesHelperE2E.setServicePlan();
+        createServiceInstance.stepper.next();
 
-    // Select Service Plan
-    servicesHelperE2E.setServicePlan();
-    createServiceInstance.stepper.next();
+        if (canBindApp) {
+          // Bind App
+          servicesHelperE2E.setBindApp();
+          createServiceInstance.stepper.next();
+        }
 
-    // Bind App
-    servicesHelperE2E.setBindApp();
-    createServiceInstance.stepper.next();
+        createServiceInstance.stepper.cancel();
 
-    createServiceInstance.stepper.cancel();
-
-    servicesWall.isActivePage();
+        servicesWall.isActivePage();
+      }));
   });
 
   afterAll((done) => {
-    servicesHelperE2E.cleanupServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
+    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
   });
 });
 

@@ -2,7 +2,7 @@ import { MarketplacePage } from './marketplace.po';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { e2e } from '../e2e';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
-import { browser } from 'protractor';
+import { browser, protractor } from 'protractor';
 import { ServicesWallPage } from './services-wall.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { CreateServiceInstance } from './create-service-instance.po';
@@ -16,14 +16,20 @@ describe('Service Instances Wall', () => {
     const e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.admin);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
 
-    // Create service instance
-    const createServiceInstance = new CreateServiceInstance();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, new CreateServiceInstance());
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
+    // Ensure setup executes before creating the instance, or adding to exec stack
+    protractor.promise.controlFlow().execute(() => {
+      // Create service instance
+      const createServiceInstance = new CreateServiceInstance();
+      servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+      // FIXME: To save time the service should be created via api call
+      createServiceInstance.navigateTo();
+      createServiceInstance.waitForPage();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+    });
+
   });
 
   beforeEach(() => {
@@ -31,7 +37,7 @@ describe('Service Instances Wall', () => {
     servicesWallPage.waitForPage();
   });
 
-  it('- should reach service instannces wall page', () => {
+  it('- should reach service instances wall page', () => {
     expect(servicesWallPage.isActivePage()).toBeTruthy();
   });
 
@@ -68,7 +74,6 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to search', () => {
-
     servicesWallPage.serviceInstancesList.header.setSearchText(servicesHelperE2E.serviceInstanceName).then(
       () => {
         expect(servicesWallPage.serviceInstancesList.header.getSearchText()).toEqual(servicesHelperE2E.serviceInstanceName);
@@ -113,7 +118,7 @@ describe('Service Instances Wall', () => {
     );
   });
 
-  it('- should be able to  delete Service Instance', () => {
+  it('- should be able to delete Service Instance', () => {
     servicesWallPage.serviceInstancesList.cards.getCards().then(
       cards => {
         const metaCard = new MetaCard(cards[0]);
@@ -128,6 +133,6 @@ describe('Service Instances Wall', () => {
   });
 
   afterAll((done) => {
-    servicesHelperE2E.cleanupServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
+    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
   });
 });

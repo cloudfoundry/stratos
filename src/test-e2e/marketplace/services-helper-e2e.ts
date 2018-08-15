@@ -1,8 +1,9 @@
-import { CFResponse } from '../../frontend/app/store/types/api.types';
-import { E2ESetup, e2e } from '../e2e';
-import { CFRequestHelpers } from '../helpers/cf-request-helpers';
-import { promise, browser } from 'protractor';
+import { browser, promise } from 'protractor';
+
+import { CFResponse, createEmptyCfResponse } from '../../frontend/app/store/types/api.types';
+import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
+import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 
 export class ServicesHelperE2E {
@@ -42,31 +43,46 @@ export class ServicesHelperE2E {
   }
 
   createService = (serviceName: string, marketplaceMode = false) => {
+    browser.wait(this.canBindAppStep()
+      .then(canBindApp => {
+        this.createServiceInstance.waitForPage();
 
-    // Select CF/Org/Space
+        // Select CF/Org/Space
     this.setCfOrgSpace(null, null, marketplaceMode);
-    this.createServiceInstance.stepper.next();
+        this.createServiceInstance.stepper.next();
 
+        // Select Service
     if (!marketplaceMode) {
       // Select Service
       this.setServiceSelection(serviceName);
       this.createServiceInstance.stepper.next();
     }
 
-    // Select Service Plan
-    this.setServicePlan();
-    this.createServiceInstance.stepper.next();
+        // Select Service Plan
+        this.setServicePlan();
+        this.createServiceInstance.stepper.next();
 
-    // Bind App
-    this.setBindApp();
-    this.createServiceInstance.stepper.next();
+        // Bind App
+        if (canBindApp) {
+          this.setBindApp();
+          this.createServiceInstance.stepper.next();
+        }
 
-    this.setServiceInstanceDetail();
+        this.setServiceInstanceDetail();
 
-    this.createServiceInstance.stepper.next();
-
+        this.createServiceInstance.stepper.next();
+      })
+    );
   }
 
+  canBindAppStep = (): promise.Promise<boolean> => {
+    const cf = e2e.secrets.getDefaultCFEndpoint();
+    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, cf.name);
+    return this.cfHelper.fetchSpace(endpointGuid, cf.testSpace)
+      .then(space => space.metadata.guid)
+      .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(endpointGuid, spaceGuid))
+      .then(totalAppsInSpace => !!totalAppsInSpace);
+  }
 
   setServiceInstanceDetail = () => {
     this.createServiceInstance.stepper.waitForStep('Service Instance');
@@ -113,16 +129,21 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
 
-  cleanupServiceInstance(serviceIntanceName: string): promise.Promise<any> {
-    const getCfCnsi = this.cfRequestHelper.getCfCnsi();
+  cleanUpServiceInstance(serviceInstanceName: string): promise.Promise<any> {
+    const getCfCnsi = this.cfRequestHelper.getCfGuid();
     let cfGuid: string;
-    return getCfCnsi.then(endpointModel => {
-      cfGuid = endpointModel.guid;
+    return getCfCnsi.then(guid => {
+      cfGuid = guid;
       return this.fetchServicesInstances(cfGuid);
     }).then(response => {
       const services = response.resources;
-      const serviceInstance = services.filter(service => service.entity.name === serviceIntanceName)[0];
-      return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
+      const serviceInstance = services.filter(service => service.entity.name === serviceInstanceName)[0];
+      if (serviceInstance) {
+        return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
+      }
+      const p = promise.defer<any>();
+      p.fulfill(createEmptyCfResponse());
+      return p;
     });
   }
 
