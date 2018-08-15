@@ -132,9 +132,7 @@ export class ServicesHelperE2E {
       if (serviceInstance) {
         return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
       }
-      const p = promise.defer<any>();
-      p.fulfill(createEmptyCfResponse());
-      return p;
+      return promise.fullyResolved(createEmptyCfResponse());
     });
   }
 
