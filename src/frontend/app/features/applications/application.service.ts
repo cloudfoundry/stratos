@@ -189,7 +189,7 @@ export class ApplicationService {
           spaceSchemaKey,
           entityFactory(spaceWithOrgKey),
           app.space_guid,
-          new GetSpace(app.guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );
