@@ -7,7 +7,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesWallPage } from './services-wall.po';
 import { MetaCard } from '../po/meta-card.po';
 
-fdescribe('Marketplace', () => {
+describe('Marketplace', () => {
   let setup: E2ESetup;
   const servicesWall = new ServicesWallPage();
   beforeAll(() => {
