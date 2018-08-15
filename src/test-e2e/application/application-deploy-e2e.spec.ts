@@ -110,15 +110,11 @@ describe('Application Deploy', function () {
       // Click next
       deployApp.stepper.next();
 
-      (new E2E()).log(`Debug: Should be arriving at app summary`);
-
       // Should be app summary
       browser.wait(ApplicationSummary.detect()
         .then(appSummary => {
-          (new E2E()).log(`Debug: Created app summary obj`);
           appSummary.waitForPage();
           appSummary.header.waitForTitleText(appName);
-          (new E2E()).log(`Debug: Have title`);
           return appSummary.cfGuid;
         })
         .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName })));

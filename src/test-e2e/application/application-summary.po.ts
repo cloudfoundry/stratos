@@ -1,7 +1,8 @@
 import { browser, promise } from 'protractor';
+
+import { e2e } from '../e2e';
 import { Page } from '../po/page.po';
 import { DeleteApplication } from './delete-app.po';
-import { E2E } from '../e2e';
 
 export class ApplicationSummary extends Page {
 
@@ -21,7 +22,7 @@ export class ApplicationSummary extends Page {
       expect(urlParts[3]).toBe('summary');
       const cfGuid = urlParts[1];
       const appGuid = urlParts[2];
-      (new E2E()).log(`Creating App Summary object using cfGuid: '${cfGuid}' and appGuid: '${appGuid}'`);
+      e2e.log(`Creating App Summary object using cfGuid: '${cfGuid}' and appGuid: '${appGuid}'`);
       return new ApplicationSummary(cfGuid, appGuid);
     });
   }

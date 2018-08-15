@@ -118,7 +118,7 @@ export class ApplicationE2eHelper {
         return promise.fullyResolved(res);
       }
       browser.sleep(500);
-      return this.chain(res, nextChainFc, maxChain, abortChainFc, ++count);
+      return this.chain<T>(res, nextChainFc, maxChain, abortChainFc, ++count);
     });
   }
 
