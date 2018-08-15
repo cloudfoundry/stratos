@@ -118,11 +118,9 @@ export class ServicesHelperE2E {
     let cfGuid: string;
     return getCfCnsi.then(endpointModel => {
       cfGuid = endpointModel.guid;
-      console.log(cfGuid);
       return this.fetchServicesInstances(cfGuid);
     }).then(response => {
       const services = response.resources;
-      console.log(services.map(e => e.entity.name));
       const serviceInstance = services.filter(service => service.entity.name === serviceIntanceName)[0];
       return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
     });
