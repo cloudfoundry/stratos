@@ -133,6 +133,7 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { DrillDownComponent } from './components/drill-down/drill-down.component';
 
 @NgModule({
   imports: [
@@ -236,6 +237,7 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
     CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
+    DrillDownComponent,
   ],
   exports: [
     FormsModule,
