@@ -9,17 +9,11 @@ echo "Preparing application folder for Cloud Foundry deployment"
 
 CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TOP_LEVEL=${CF_DIR}/../../
-BOWER_PATH=${NODE_HOME}/bin
 
 export STRATOS_TEMP=$(mktemp -d)
 
 # Copy the config file
 cp ${CF_DIR}/config.properties ${TOP_LEVEL}
-
-# Hack for deleting testImports in glide files
-# because unfortunately `glide install --skip-test` doesn't seem to work
-find . -name glide.lock -exec sed -i '/^testImports.*/q' {} \;
-find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 
 cd ${TOP_LEVEL}
 
@@ -29,10 +23,15 @@ npm run customize
 npm run build-cf
 
 # Build backend (and fetch dependencies)
-npm run cf-build-backend
+./build/bk-build.sh
 
-npm run deploy-cf
+# Copy backend executable here
+cp ./output/**/* .
 
+# Back-end serves static resources from ui folder not dist
+mv dist ui
+
+# Ensure executable can be run (should be)
 chmod +x portal-proxy
 
 # Clean up build folders
@@ -40,7 +39,6 @@ rm -rf ./dist
 rm -rf ./outputs
 
 # Don't need the source code after build
-rm -rf ./components
 rm -rf ./src
 
 echo "All done"

@@ -10,7 +10,6 @@
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
     "cf-build-backend": "gulp cf-build-backend",
     "bosh-build-backend": "gulp bosh-build-backend",
-    "deploy-cf": "gulp deploy:cf",
     "test-backend": "./build/bk-build.sh test",
     "update-webdriver": "webdriver-manager update",
     "build": "ng build --prod",
