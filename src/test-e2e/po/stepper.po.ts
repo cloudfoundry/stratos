@@ -70,18 +70,18 @@ export class StepperComponent extends Component {
   }
 
   waitForStep(stepName: string) {
-    const lastActiveHeader = element.all(by.css('.steppers__header.steppers__header--active')).last();
+    const lastActiveHeader = this.locator.all(by.css('.steppers__header.steppers__header--active')).last();
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
 
-  hasStep(name: string): promise.Promise<boolean> {
-    return element(by.cssContainingText('.steppers__header .steppers__header-text', name)).isPresent();
+  hasStep(name: string) {
+    return this.locator.element(by.cssContainingText('.steppers__header .steppers__header-text', name)).isPresent();
   }
 
-  getStepNames(): promise.Promise<string[]>  {
-    return element.all(by.css('.steppers__header .steppers__header-text')).map(step => step.getText());
+  getStepNames() {
+    return this.locator.all(by.css('.steppers__header .steppers__header-text')).map(step => step.getText());
   }
 
   getActiveStepName(): promise.Promise<string> {

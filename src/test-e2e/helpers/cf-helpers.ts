@@ -1,7 +1,9 @@
+import { CFResponse, APIResource } from '../../frontend/app/store/types/api.types';
 import { CFRequestHelpers } from './cf-request-helpers';
-import { E2ESetup } from '../e2e';
+import { e2e, E2ESetup } from '../e2e';
 import { promise } from 'protractor';
 import { E2EConfigCloudFoundry } from '../e2e.types';
+
 
 export class CFHelpers {
   cfRequestHelper: CFRequestHelpers;
@@ -122,6 +124,19 @@ export class CFHelpers {
     });
   }
 
+  fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
+      if (json.total_results > 0) {
+        const org = json.resources[0];
+        return org;
+      }
+      return null;
+    }).catch(err => {
+      e2e.log(`Failed to fetch organisation with name '${orgName}' from endpoint ${cnsiGuid}`);
+      throw new Error(err);
+    });
+  }
+
   fetchSpace(cnsiGuid: string, spaceName: string) {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName).then(json => {
       if (json.total_results > 0) {
@@ -129,6 +144,12 @@ export class CFHelpers {
         return space;
       }
       return null;
+    });
+  }
+
+  fetchAppsCountInSpace(cnsiGuid: string, spaceGuid: string) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, `spaces/${spaceGuid}/apps`).then(json => {
+      return json.total_results;
     });
   }
 
