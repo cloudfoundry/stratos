@@ -1,12 +1,15 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
-import { e2e, E2E } from '../e2e';
+import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
+
+
+const until = protractor.ExpectedConditions;
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -16,6 +19,8 @@ let cfHelper: CFHelpers;
 const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
+
+const appName = 'cf-quick-app';
 
 describe('Application Deploy', function () {
 
@@ -108,16 +113,14 @@ describe('Application Deploy', function () {
       // Click next
       deployApp.stepper.next();
 
-      (new E2E()).log(`Debug: Should be arriving at app summary`);
-
       // Should be app summary
-      ApplicationSummary.detect().then(appSummary => {
-        (new E2E()).log(`Debug: Created app summary obj`);
-        appSummary.waitForPage();
-        appSummary.header.waitForTitleText('cf-quick-app');
-        (new E2E()).log(`Debug: Have title`);
-        applicationE2eHelper.cfHelper.deleteApp(appSummary.cfGuid, appSummary.appGuid);
-      });
+      browser.wait(ApplicationSummary.detect()
+        .then(appSummary => {
+          appSummary.waitForPage();
+          appSummary.header.waitForTitleText(appName);
+          return appSummary.cfGuid;
+        })
+        .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName })));
     });
 
   });

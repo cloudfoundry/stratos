@@ -7,7 +7,7 @@ import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
 
 
-describe('CF - Space Level - ', () => {
+describe('CF - Space Level -', () => {
 
   let spacePage: CfSpaceLevelPage;
   let e2eSetup: E2ESetup;
@@ -45,43 +45,47 @@ describe('CF - Space Level - ', () => {
 
   function navToPage() {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    browser.wait(cfHelper.fetchSpace(endpointGuid, defaultCf.testSpace).then((space => {
-      spacePage = CfSpaceLevelPage.forEndpoint(endpointGuid, space.entity.organization_guid, space.metadata.guid);
-      spacePage.navigateTo();
-      spacePage.waitForPageOrChildPage();
-      spacePage.loadingIndicator.waitUntilNotShown();
-    })));
+    browser.wait(
+      cfHelper.fetchDefaultSpaceGuid(true)
+        .then(spaceGuid => {
+          spacePage = CfSpaceLevelPage.forEndpoint(
+            cfHelper.cachedDefaultCfGuid,
+            cfHelper.cachedDefaultOrgGuid,
+            cfHelper.cachedDefaultSpaceGuid
+          );
+          return spacePage.navigateTo();
+        })
+        .then(() => spacePage.waitForPageOrChildPage())
+        .then(() => spacePage.loadingIndicator.waitUntilNotShown())
+    );
   }
 
-  describe('As Admin', () => {
+  describe('As Admin -', () => {
     beforeEach(() => {
       setup(ConsoleUserType.admin);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
       beforeEach(navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
-
     });
 
   });
 
-  describe('As User', () => {
+  fdescribe('As User -', () => {
     beforeEach(() => {
       setup(ConsoleUserType.user);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
       beforeEach(navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
-
     });
   });
 
