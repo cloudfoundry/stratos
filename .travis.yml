@@ -55,7 +55,7 @@ jobs:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
     - eval "$(gimme 1.9)"
-    - curl https://glide.sh/get | sh
+    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - npm run test-backend
   - stage: E2E tests

@@ -26,12 +26,9 @@ cd ${TOP_LEVEL}
 npm install
 npm run customize
 
-# Fetch Glide dependencies
-npm run cf-get-backend-deps
-
 npm run build-cf
 
-# Build backend components
+# Build backend (and fetch dependencies)
 npm run cf-build-backend
 
 npm run deploy-cf

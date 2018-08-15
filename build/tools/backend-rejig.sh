@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 
-# Creates a directory called "fixbuild", clone the repo, and create a commit that will
-# make an app-core that can be built with a standard:
-# go get github.com/cloudfoundry-incubator/stratos/components/app-core
+# Re-jig the backend code layout to be more standard
 
 # This assumes that Go is installed, as well as dep (https://golang.github.io/dep/)
+
+CMD=$1
 
 set -eux
 set -o pipefail
 
-git reset --hard v2-master
-
-# Just in case the script has been run before
-rm -rf src/jetstream
+# Run with reset as first arg to undo the source code changes
+if [ "$CMD" == "reset" ]; then
+  echo "Resetting source changes"
+  git reset HEAD src/backend
+  git reset HEAD src/jetstream
+  git checkout -- src/backend
+  rm -rf src/jetstream
+  rm -rf vendor
+  exit 0
+fi
 
 # Assumes you are running from top-level folder
 
@@ -100,6 +106,20 @@ cat <<EOF > Gopkg.toml
   source = "github.com/cloudfoundry/cli"
   version = "v6.37.0"
 
+# API changed in the newer version - pin to 1.1.3 for now
+[[constraint]]
+  name = "gopkg.in/DATA-DOG/go-sqlmock.v1"
+  version = "=1.1.3"  
+
+# Pin the next two dependencies for tests to work as before
+[[constraint]]
+  name = "github.com/smartystreets/goconvey"
+  version = "=1.6.2"
+
+[[constraint]]
+  name = "github.com/kat-co/vala"
+  revision = "43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b"
+
 # code.cloudfoundry.org/cli requires moby master, which isn't compatible with current code.cloudfoundry.org/cli
 [[override]]
   name = "github.com/moby/moby"
@@ -112,13 +132,3 @@ EOF
 
 # Next step takes about 5-10 minutes
 dep ensure
-
-# Add dep files
-# git add Gopkg.lock Gopkg.toml
-#git commit -a -m "Build now easier to work with in Go"
-
-# Verify it now builds
-#go install github.com/cloudfoundry-incubator/stratos/components/app-core
-
-# And runs (segfaults, unrelated to the build though, more likely missing config, TODO someone should fix that)
-#$GOPATH/bin/app-core

@@ -59,7 +59,6 @@ dev-certs/*
 vendor/
 **/vendor
 **/*.so
-.glide
 tools/ssl
 build/secrets.json
 deploy/data/
@@ -80,10 +79,7 @@ deploy/glide-cache/
 
 .dist/
 deploy/uaa/tmp/
-src/backend/app-core/plugins
-src/backend/app-core/debug
 src/backend/*/vendor/
-src/backend/app-core/load_plugins.go
 .v8flags*
 
 *.bak
@@ -91,6 +87,7 @@ secrets.yaml
 build/dev_config.json
 e2e-reports/
 .stratos-git-metadata.json
+src/jetstream/jetstream
 
 # Customisations
 
