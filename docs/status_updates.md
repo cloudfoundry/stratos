@@ -2,6 +2,19 @@
 
 Weekly status updates are published here.
 
+## 10th August 2018
+A similar update to last week, focusing on metrics, testing and the community.
+
+- Testing the new metrics deployment process.
+- Improving the end to end test setup process, this will enable better coverage of service tests.
+- Improving test coverage, both unit and end to end, of the often used list component.
+- Improving test coverage of entity validation, another often used component.
+- Manage application stats requests better in the application wall when there are many many started apps.
+- Investigating, solving and shepherding community issues. Some of the stand out ones..
+  - Stratos URLs are now consistent. Previously for the same CF the id would change every time it's registered, meaning bookmarks would need updating following every re-registration. Now as long as the CF API url doesn't change the CF id in the url will remain the same. - https://github.com/cloudfoundry-incubator/stratos/issues/2798
+  - Correctly report application instance counts with respect to app state - https://github.com/cloudfoundry-incubator/stratos/issues/2797
+  - Apply permissions to application actions (start, restart, etc) - https://github.com/cloudfoundry-incubator/stratos/issues/2806
+
 ## 3 August 2018
 This week we've focused on..
 
