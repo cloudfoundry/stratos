@@ -9,8 +9,6 @@ import { E2EHelpers } from '../helpers/e2e-helpers';
 
 const customAppLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER);
 
-let cachedDefaultCfGuid, cachedDefaultOrgGuid, cachedDefaultSpaceGuid;
-
 export class ApplicationE2eHelper {
 
   cfRequestHelper: CFRequestHelpers;
@@ -30,42 +28,6 @@ export class ApplicationE2eHelper {
    */
   static getHostName = (appName) => appName.replace(/[\.:-]/g, '_');
 
-  updateDefaultCfOrgSpace = (): promise.Promise<any> => {
-    // Fetch cf guid, org guid, or space guid from ... cache or jetstream
-    return this.fetchDefaultCfGuid(false)
-      .then(() => this.fetchDefaultOrgGuid(false))
-      .then(() => this.fetchDefaultSpaceGuid(false));
-  }
-
-  fetchDefaultCfGuid = (fromCache = true): promise.Promise<string> => {
-    return fromCache && cachedDefaultCfGuid ?
-      promise.fullyResolved(cachedDefaultCfGuid) :
-      this.cfRequestHelper.getCfCnsi().then(endpoint => {
-        cachedDefaultCfGuid = endpoint.guid;
-        return cachedDefaultCfGuid;
-      });
-  }
-
-  fetchDefaultOrgGuid = (fromCache = true): promise.Promise<string> => {
-    return fromCache && cachedDefaultOrgGuid ?
-      promise.fullyResolved(cachedDefaultOrgGuid) :
-      this.fetchDefaultCfGuid(true).then(guid => this.cfHelper.fetchOrg(guid, e2e.secrets.getDefaultCFEndpoint().testOrg).then(org => {
-        cachedDefaultOrgGuid = org.metadata.guid;
-        return cachedDefaultOrgGuid;
-      }));
-  }
-
-  fetchDefaultSpaceGuid = (fromCache = true): promise.Promise<string> => {
-    return fromCache && cachedDefaultSpaceGuid ?
-      promise.fullyResolved(cachedDefaultSpaceGuid) :
-      this.fetchDefaultOrgGuid(true).then(orgGuid =>
-        this.cfHelper.fetchSpace(cachedDefaultCfGuid, orgGuid, e2e.secrets.getDefaultCFEndpoint().testSpace)
-      ).then(space => {
-        cachedDefaultSpaceGuid = space.metadata.guid;
-        return cachedDefaultSpaceGuid;
-      });
-  }
-
   fetchAppInDefaultOrgSpace = (
     appName?: string,
     appGuid?: string,
@@ -73,14 +35,14 @@ export class ApplicationE2eHelper {
     spaceGuid?: string
   ): promise.Promise<{ cfGuid: string, app: APIResource<IApp> }> => {
 
-    const cfGuidP: promise.Promise<string> = cfGuid ? promise.fullyResolved(cfGuid) : this.fetchDefaultCfGuid();
-    const spaceGuidP: promise.Promise<string> = spaceGuid ? promise.fullyResolved(spaceGuid) : this.fetchDefaultSpaceGuid();
+    const cfGuidP: promise.Promise<string> = cfGuid ? promise.fullyResolved(cfGuid) : this.cfHelper.fetchDefaultCfGuid();
+    const spaceGuidP: promise.Promise<string> = spaceGuid ? promise.fullyResolved(spaceGuid) : this.cfHelper.fetchDefaultSpaceGuid();
 
     const appP: promise.Promise<APIResource<IApp>> = promise.all([cfGuidP, spaceGuidP]).then(([cfGuid1, spaceGuid1]) => {
       return appName ? this.fetchApp(cfGuid1, spaceGuid1, appName) : this.fetchAppByGuid(cfGuid1, appGuid);
     });
 
-    return appP.then(app => ({ cfGuid: cachedDefaultCfGuid, app })).catch(e => {
+    return appP.then(app => ({ cfGuid: this.cfHelper.cachedDefaultCfGuid, app })).catch(e => {
       e2e.log('Failed to fetch application in default cf, org and space: ' + e);
       throw e;
     });

@@ -30,7 +30,7 @@ describe('Application Create', function () {
   });
 
   // Fetch the default cf, org and space up front. This saves time later
-  beforeAll(() => applicationE2eHelper.updateDefaultCfOrgSpace());
+  beforeAll(() => applicationE2eHelper.cfHelper.updateDefaultCfOrgSpace());
 
   beforeEach(() => nav.goto(SideNavMenuItem.Applications));
 
