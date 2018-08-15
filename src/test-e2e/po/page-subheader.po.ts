@@ -51,7 +51,7 @@ export class PageSubHeaderComponent extends Component {
     if (!suffix.startsWith('/')) {
       suffix = '/' + suffix;
     }
-    browser.wait(until.urlContains(browser.baseUrl + baseUrl + suffix), 20000);
+    browser.wait(until.urlContains(browser.baseUrl + baseUrl + suffix), 20000, `Waiting for item '${name}'`);
   }
 
   getItemMap(): promise.Promise<MenuItemMap> {
