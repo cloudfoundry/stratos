@@ -11,12 +11,14 @@ set -o pipefail
 
 git reset --hard v2-master
 
+# Just in case the script has been run before
+rm -rf src/jetstream
+
 # Assumes you are running from top-level folder
 
 git mv src/backend src/jetstream
 mkdir src/jetstream/plugins
 git mv src/jetstream/app-core/* src/jetstream
-git rm src/jetstream/app-core
 git mv src/jetstream/cfapppush src/jetstream/plugins/cfapppush
 git mv src/jetstream/cfappssh src/jetstream/plugins/cfappssh
 git mv src/jetstream/cloudfoundry src/jetstream/plugins/cloudfoundry
@@ -77,7 +79,7 @@ find . -name "*.go" | xargs sed -i '' 's/github.com\/Sirupsen\/logrus/github.com
 find . -name "*.go" | xargs sed -i '' 's/github.com\/cloudfoundry-incubator\/stratos/github.com\/cloudfoundry-incubator\/stratos\/src\/jetstream/g'
 
 # Cleanup our changes above with gofmt
-#find . -name "*.go" | xargs gofmt -w
+find . -name "*.go" | xargs gofmt -w
 
 # Remove glide and other vendored stuff
 find . -name glide.lock | xargs git rm -f
