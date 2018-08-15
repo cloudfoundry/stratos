@@ -44,7 +44,7 @@ describe('Marketplace', () => {
   afterAll((done) => {
     // Sleeping because the service instance may not be listed in the `get services` request
     browser.sleep(1000);
-    servicesHelperE2E.cleanupServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
+    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
   });
 });
 
@@ -75,7 +75,7 @@ describe('Create Private Service Instance', () => {
   afterAll((done) => {
     // Sleeping because the service instance may not be listed in the `get services` request
     browser.sleep(1000);
-    servicesHelperE2E.cleanupServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
+    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
   });
 });
 
@@ -106,7 +106,7 @@ describe('Create Private Service Instance', () => {
     afterAll((done) => {
       // Sleeping because the service instance may not be listed in the `get services` request
       browser.sleep(1000);
-      servicesHelperE2E.cleanupServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
+      servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
     });
   });
 });
