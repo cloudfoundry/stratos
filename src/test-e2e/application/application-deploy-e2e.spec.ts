@@ -1,12 +1,14 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
-import { E2E, e2e } from '../e2e';
+import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
+
+const until = protractor.ExpectedConditions;
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;

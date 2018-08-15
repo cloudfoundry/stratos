@@ -2,9 +2,10 @@ import { promise } from 'protractor';
 
 import { IOrganization, IRoute } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
-import { E2ESetup } from '../e2e';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFRequestHelpers } from './cf-request-helpers';
+
 
 export class CFHelpers {
   cfRequestHelper: CFRequestHelpers;
@@ -114,13 +115,16 @@ export class CFHelpers {
     });
   }
 
-  fetchOrg(cnsiGuid: string, orgName: string) {
+  fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results > 0) {
-        const space = json.resources[0];
-        return space;
+        const org = json.resources[0];
+        return org;
       }
       return null;
+    }).catch(err => {
+      e2e.log(`Failed to fetch organisation with name '${orgName}' from endpoint ${cnsiGuid}`);
+      throw new Error(err);
     });
   }
 
@@ -142,7 +146,9 @@ export class CFHelpers {
 
   // For fully fleshed our create see application-e2e-helpers
   baseCreateApp(cnsiGuid: string, spaceGuid: string, appName: string) {
-    return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, `spaces/${spaceGuid}/apps`).then(json => {
+      return json.total_results;
+    });
   }
 
   // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)

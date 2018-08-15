@@ -1,5 +1,6 @@
-import { browser, by, element, promise, ElementFinder, protractor } from 'protractor';
+import { browser, by, element, ElementFinder, promise, protractor } from 'protractor';
 import { ElementArrayFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 import { MenuComponent } from './menu.po';
 

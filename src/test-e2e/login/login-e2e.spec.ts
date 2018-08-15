@@ -7,7 +7,7 @@ describe('Login', () => {
 
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
-    .doNotLogin();
+      .doNotLogin();
   });
 
   beforeEach(() => {

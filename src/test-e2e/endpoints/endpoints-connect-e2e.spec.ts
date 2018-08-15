@@ -1,7 +1,6 @@
 import { browser } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
@@ -9,15 +8,11 @@ import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
-import { ServicesPage } from '../services/services.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  const applications = new ApplicationsPage();
-  const services = new ServicesPage();
-  const cloudFoundry = new CloudFoundryPage();
 
   describe('Connect/Disconnect endpoints -', () => {
 
