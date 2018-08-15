@@ -1,3 +1,5 @@
+import { browser } from 'protractor';
+
 import { IApp } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
@@ -26,6 +28,9 @@ describe('Application Create', function () {
       .getInfo();
     applicationE2eHelper = new ApplicationE2eHelper(setup);
   });
+
+  // Fetch the default cf, org and space up front. This saves time later
+  beforeAll(() => applicationE2eHelper.updateDefaultCfOrgSpace());
 
   beforeEach(() => nav.goto(SideNavMenuItem.Applications));
 
@@ -71,16 +76,22 @@ describe('Application Create', function () {
     createAppStepper.waitUntilNotShown();
 
     // Determine the app guid and confirm we're on the app summary page
-    applicationE2eHelper.fetchAppInDefault(testAppName).then((res) => {
+    browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName).then((res) => {
       expect(res.app).not.toBe(null);
       app = res.app;
       cfGuid = res.cfGuid;
       const appSummaryPage = new ApplicationSummary(res.cfGuid, app.metadata.guid, app.entity.name);
       appSummaryPage.waitForPage();
-    });
+    }));
 
   });
 
-  afterEach(() => app ? applicationE2eHelper.deleteApplication({ cfGuid, app }) : null);
+  afterAll(() => {
+    expect(cfGuid).toBeDefined();
+    expect(cfGuid).not.toBeNull();
+    expect(app).toBeDefined();
+    expect(app).not.toBeNull();
+    return app ? applicationE2eHelper.deleteApplication({ cfGuid, app }) : null;
+  });
 
 });

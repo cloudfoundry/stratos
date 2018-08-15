@@ -1,6 +1,6 @@
 import { promise } from 'protractor';
 
-import { IOrganization } from '../../frontend/app/core/cf-api.types';
+import { IOrganization, IRoute } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
 import { E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
@@ -148,6 +148,10 @@ export class CFHelpers {
   // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)
   baseDeleteApp(cnsiGuid: string, appGuid: string) {
     return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
+  }
+
+  fetchAppRoutes(cnsiGuid: string, appGuid: string): promise.Promise<APIResource<IRoute>[]> {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, `apps/${appGuid}/routes`).then(res => res.resources);
   }
 
 }

@@ -1,7 +1,7 @@
 import { browser, promise } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
-import { e2e, E2E } from '../e2e';
+import { E2E, e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
