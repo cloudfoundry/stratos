@@ -77,7 +77,7 @@ export class ApplicationE2eHelper {
 
     return nextChainFc().then(res => {
       if (abortChainFc(res)) {
-        return promise.fullyResolved(res);
+        return promise.fullyResolved<T>(res);
       }
       browser.sleep(500);
       return this.chain<T>(res, nextChainFc, maxChain, abortChainFc, ++count);
@@ -145,7 +145,7 @@ export class ApplicationE2eHelper {
 
         const deps = promise.all(promises).catch(err => {
           const errorString = `Failed to delete routes or services attached to an app`;
-          console.log(`${errorString}: ${err}`);
+          e2e.log(`${errorString}: ${err}`);
           return promise.rejected(errorString);
         });
 
