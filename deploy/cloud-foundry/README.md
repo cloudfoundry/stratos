@@ -30,6 +30,27 @@ Note:
 3. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
 4. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
+### Pre-building the UI
+
+Due to the memory usage of the Angular compiler (see below), when deployed to Cloud Foundry via `cf push`, Stratos does not use AOT (Ahead-of-Time) complilation.
+
+If you wish to enable AOT or reduce the push time, you can pre-build the UI before pushing.
+
+This can be done with:
+
+```
+git clone https://github.com/cloudfoundry-incubator/stratos
+cd stratos
+npm install
+npm run prebuild-ui
+cf push
+```
+
+You will need a recent version of Node installed locally to do this.
+
+The `prebuild-ui` npm script performs a build of the front-end UI and then zips up the resulting folder into a package named `stratos-frontend-prebuild.zip`. The Stratos buildpack will unpack this zip file and use its contents instead of building the UI during staging, when this file is present.
+
+
 ### Memory Usage
 
 The Stratos Cloud Foundry `manifest.yml` states that the application requires

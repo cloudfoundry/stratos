@@ -28,7 +28,7 @@
 
   // Package pre-built UI for the buildpack to detect
   gulp.task('package-prebuild', function () {
-    return gulp.src('dist/*')
+    return gulp.src('dist/**/*')
       .pipe(zip('stratos-frontend-prebuild.zip'))
       .pipe(gulp.dest('.'))
   });
