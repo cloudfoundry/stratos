@@ -12,15 +12,16 @@ describe('Marketplace', () => {
   const servicesWall = new ServicesWallPage();
   beforeAll(() => {
     setup = e2e.setup(ConsoleUserType.admin)
-    .clearAllEndpoints()
-    .registerDefaultCloudFoundry()
-    .connectAllEndpoints(ConsoleUserType.admin);
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
   });
 
   describe('Create Public Service Instance', () => {
     let servicesHelperE2E: ServicesHelperE2E;
     let marketplaceSummaryPage: MarketplaceSummaryPage;
-    const serviceName =  e2e.secrets.getDefaultCFEndpoint().services.publicService.name;
+    const serviceName = e2e.secrets.getDefaultCFEndpoint().services.publicService.name;
     beforeAll((done) => {
       init(setup, serviceName).then(res => {
         servicesHelperE2E = res.servicesHelper;
@@ -29,60 +30,60 @@ describe('Marketplace', () => {
       });
     });
 
-  beforeEach(() => {
-    marketplaceSummaryPage.navigateTo();
-    marketplaceSummaryPage.waitForPage();
-  });
+    beforeEach(() => {
+      marketplaceSummaryPage.navigateTo();
+      marketplaceSummaryPage.waitForPage();
+    });
 
-  it('- should have an Add Service Instance button', () => {
-    expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
-  });
+    it('- should have an Add Service Instance button', () => {
+      expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
+    });
 
-  it('- should be able to create a new service instance', () => {
-    createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
-  });
-  afterAll((done) => {
-    // Sleeping because the service instance may not be listed in the `get services` request
-    browser.sleep(1000);
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
-});
-
-describe('Create Private Service Instance', () => {
-  let servicesHelperE2E: ServicesHelperE2E;
-  let marketplaceSummaryPage: MarketplaceSummaryPage;
-  const serviceName =  e2e.secrets.getDefaultCFEndpoint().services.privateService.name;
-  beforeAll((done) => {
-    init(setup, serviceName).then(res => {
-      servicesHelperE2E = res.servicesHelper;
-      marketplaceSummaryPage = res.summaryPage;
-      done();
+    it('- should be able to create a new service instance', () => {
+      createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+    });
+    afterAll((done) => {
+      // Sleeping because the service instance may not be listed in the `get services` request
+      browser.sleep(1000);
+      servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
     });
   });
 
-  beforeEach(() => {
-    marketplaceSummaryPage.navigateTo();
-    marketplaceSummaryPage.waitForPage();
+  describe('Create Private Service Instance', () => {
+    let servicesHelperE2E: ServicesHelperE2E;
+    let marketplaceSummaryPage: MarketplaceSummaryPage;
+    const serviceName = e2e.secrets.getDefaultCFEndpoint().services.privateService.name;
+    beforeAll((done) => {
+      init(setup, serviceName).then(res => {
+        servicesHelperE2E = res.servicesHelper;
+        marketplaceSummaryPage = res.summaryPage;
+        done();
+      });
+    });
 
-  });
-  it('- should have an Add Service Instance button', () => {
-    expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
-  });
+    beforeEach(() => {
+      marketplaceSummaryPage.navigateTo();
+      marketplaceSummaryPage.waitForPage();
 
-  it('- should be able to create a new service instance', () => {
-    createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+    });
+    it('- should have an Add Service Instance button', () => {
+      expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
+    });
+
+    it('- should be able to create a new service instance', () => {
+      createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+    });
+    afterAll((done) => {
+      // Sleeping because the service instance may not be listed in the `get services` request
+      browser.sleep(1000);
+      servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
+    });
   });
-  afterAll((done) => {
-    // Sleeping because the service instance may not be listed in the `get services` request
-    browser.sleep(1000);
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
-});
 
   describe('Create Space Scoped Service Instance', () => {
     let servicesHelperE2E: ServicesHelperE2E;
     let marketplaceSummaryPage: MarketplaceSummaryPage;
-    const serviceName =  e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name;
+    const serviceName = e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name;
     beforeAll((done) => {
       init(setup, serviceName).then(res => {
         servicesHelperE2E = res.servicesHelper;
@@ -142,18 +143,20 @@ function createService(marketplaceSummaryPage: MarketplaceSummaryPage,
 function init(
   setup: E2ESetup,
   serviceName: string,
+  spaceScoped = false
 ) {
-  const servicesHelperE2E = new ServicesHelperE2E(setup, new CreateServiceInstance());
-  const getCfCnsi = servicesHelperE2E.cfRequestHelper.getCfCnsi();
-  let cfGuid;
-  return getCfCnsi.then(endpointModel => {
-    cfGuid = endpointModel.guid;
-    return servicesHelperE2E.fetchServices(cfGuid);
-  }).then(response => {
+  const defaultCf = e2e.secrets.getDefaultCFEndpoint();
+  const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+
+  const servicesHelperE2E = new ServicesHelperE2E(setup);
+  return servicesHelperE2E.fetchServices(endpointGuid).then(response => {
     serviceName = e2e.secrets.getDefaultCFEndpoint().services.publicService.name;
     const service = response.resources.find(e => e.entity.label === serviceName);
     const serviceGuid = service.metadata.guid;
-    const marketplaceSummaryPage = new MarketplaceSummaryPage(cfGuid, serviceGuid);
+    servicesHelperE2E.setCreateServiceInstance(
+      new CreateServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid +
+        '/create?isSpaceScoped=' + (spaceScoped ? 'true' : 'false')));
+    const marketplaceSummaryPage = new MarketplaceSummaryPage(endpointGuid, serviceGuid);
     return { servicesHelper: servicesHelperE2E, summaryPage: marketplaceSummaryPage };
   });
 }

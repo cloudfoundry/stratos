@@ -16,9 +16,15 @@ export class ServicesHelperE2E {
   constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateServiceInstance = null) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
     this.cfHelper = new CFHelpers(e2eSetup);
-    this.createServiceInstance = createServiceInstance;
     const testTime = (new Date()).toISOString();
     this.serviceInstanceName = `serviceInstance-${testTime}`;
+    if (!!createServiceInstance) {
+      this.createServiceInstance = createServiceInstance;
+    }
+  }
+
+  setCreateServiceInstance = (createServiceInstance: CreateServiceInstance) => {
+    this.createServiceInstance = createServiceInstance;
   }
 
   fetchServices = (cfGuid: string): promise.Promise<CFResponse> => {
@@ -48,15 +54,15 @@ export class ServicesHelperE2E {
         this.createServiceInstance.waitForPage();
 
         // Select CF/Org/Space
-    this.setCfOrgSpace(null, null, marketplaceMode);
+        this.setCfOrgSpace(null, null, marketplaceMode);
         this.createServiceInstance.stepper.next();
 
         // Select Service
-    if (!marketplaceMode) {
-      // Select Service
-      this.setServiceSelection(serviceName);
-      this.createServiceInstance.stepper.next();
-    }
+        if (!marketplaceMode) {
+          // Select Service
+          this.setServiceSelection(serviceName);
+          this.createServiceInstance.stepper.next();
+        }
 
         // Select Service Plan
         this.setServicePlan();
@@ -120,6 +126,7 @@ export class ServicesHelperE2E {
   }
 
   setCfOrgSpace = (orgName: string = null, spaceName: string = null, marketplaceMode = false) => {
+
     if (!marketplaceMode) {
       this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
     }
@@ -141,9 +148,7 @@ export class ServicesHelperE2E {
       if (serviceInstance) {
         return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
       }
-      const p = promise.defer<any>();
-      p.fulfill(createEmptyCfResponse());
-      return p;
+      return promise.fullyResolved(createEmptyCfResponse);
     });
   }
 
