@@ -7,8 +7,8 @@ import { getActions } from './action.helper';
 
 export class GetServiceBrokers extends CFStartAction implements PaginationAction {
   constructor(
+    public endpointGuid: string,
     public paginationKey: string,
-    public endpointGuid: string = null,
     public includeRelations: string[] = [],
     public populateMissing = true
   ) {
