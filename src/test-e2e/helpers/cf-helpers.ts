@@ -142,26 +142,24 @@ export class CFHelpers {
   }
 
   fetchAppsCountInSpace(cnsiGuid: string, spaceGuid: string) {
-    console.log(cnsiGuid, spaceGuid);
     return this.cfRequestHelper.sendCfGet(cnsiGuid, `spaces/${spaceGuid}/apps`).then(json => {
-      console.log(json.total_results);
       return json.total_results;
     });
   }
 
   // For fully fleshed out fetch see application-e2e-helpers
-  baseFetchApp(cnsiGuid: string, spaceGuid: string, appName: string) {
+  basicFetchApp(cnsiGuid: string, spaceGuid: string, appName: string) {
     return this.cfRequestHelper.sendCfGet(cnsiGuid,
       `apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ${appName},space_guid IN ${spaceGuid}`);
   }
 
   // For fully fleshed our create see application-e2e-helpers
-  baseCreateApp(cnsiGuid: string, spaceGuid: string, appName: string) {
+  basicCreateApp(cnsiGuid: string, spaceGuid: string, appName: string) {
     return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
   }
 
   // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)
-  baseDeleteApp(cnsiGuid: string, appGuid: string) {
+  basicDeleteApp(cnsiGuid: string, appGuid: string) {
     return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
   }
 

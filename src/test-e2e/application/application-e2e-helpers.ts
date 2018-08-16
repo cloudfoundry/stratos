@@ -49,7 +49,7 @@ export class ApplicationE2eHelper {
   }
 
   fetchApp = (cfGuid: string, spaceGuid: string, appName: string): promise.Promise<APIResource<IApp>> => {
-    return this.cfHelper.baseFetchApp(cfGuid, spaceGuid, appName).then(json => {
+    return this.cfHelper.basicFetchApp(cfGuid, spaceGuid, appName).then(json => {
       if (json.total_results < 1) {
         return null;
       } else if (json.total_results === 1) {
@@ -152,7 +152,7 @@ export class ApplicationE2eHelper {
         const cfRequestHelper = this.cfRequestHelper;
 
         // Delete app
-        return deps.then(() => this.cfHelper.baseDeleteApp(cfGuid, app.metadata.guid)).then(() => {
+        return deps.then(() => this.cfHelper.basicDeleteApp(cfGuid, app.metadata.guid)).then(() => {
           e2e.log(`'${app.entity.name}': Successfully deleted.`);
         });
       })
@@ -168,7 +168,7 @@ export class ApplicationE2eHelper {
         .then(space => {
           expect(space).not.toBeNull();
           return promise.all([
-            this.cfHelper.baseCreateApp(cfGuid, space.metadata.guid, appName),
+            this.cfHelper.basicCreateApp(cfGuid, space.metadata.guid, appName),
             promise.fullyResolved(space)
           ]);
         })
