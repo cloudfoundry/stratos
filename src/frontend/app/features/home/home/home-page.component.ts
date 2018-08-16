@@ -1,3 +1,4 @@
+import { applicationSchemaKey } from './../../../store/helpers/entity-factory';
 import { EndpointModel } from './../../../store/types/endpoint.types';
 import { DrillDownDefinition } from './../../../shared/components/drill-down/drill-down.component';
 import { PaginationMonitorFactory } from './../../../shared/monitors/pagination-monitor.factory';
@@ -9,10 +10,11 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
 import { entityFactory, endpointSchemaKey, organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { map } from 'rxjs/operators';
 import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { IOrganization, ISpace } from '../../../core/cf-api.types';
+import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
 import { APIResource } from '../../../store/types/api.types';
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { GetAllOrganizationSpaces } from '../../../store/actions/organization.actions';
+import { GetAllAppsInSpace } from '../../../store/actions/space.actions';
 
 @Component({
   selector: 'app-home-page',
@@ -26,14 +28,14 @@ export class HomePageComponent implements OnInit {
 
     this.definition = [
       {
-        title: 'cf',
+        title: 'Cloud Foundrys',
         request: {
           data$: paginationMonitorFactory
             .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
         }
       },
       {
-        title: '2',
+        title: 'Organizations',
         selectItem: (cf: EndpointModel) => {
           const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
           action.includeRelations = [];
@@ -50,12 +52,12 @@ export class HomePageComponent implements OnInit {
         }
       },
       {
-        title: '3',
+        title: 'Spaces',
         selectItem: (
           org: APIResource<IOrganization>,
           [cf]: [EndpointModel]
         ) => {
-          const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, org.entity.guid);
+          const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid);
           store.dispatch(new GetAllOrganizationSpaces(
             paginationKey,
             org.entity.guid,
@@ -63,9 +65,29 @@ export class HomePageComponent implements OnInit {
           ));
         },
         request: (org: APIResource<IOrganization>) => {
-          const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, org.entity.guid);
+          const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid);
           const monitor = paginationMonitorFactory
             .create<APIResource<ISpace>>(paginationKey, entityFactory(spaceSchemaKey));
+          return {
+            data$: monitor.currentPage$,
+            state$: monitor.currentPageRequestState$
+          }
+        }
+      },
+      {
+        title: 'Applications',
+        selectItem: (
+          space: APIResource<ISpace>,
+          [cf]: [EndpointModel]
+        ) => {
+          const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid);
+          const action = new GetAllAppsInSpace(cf.guid, space.entity.guid, paginationKey);
+          store.dispatch(action);
+        },
+        request: (space: APIResource<ISpace>) => {
+          const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid);
+          const monitor = paginationMonitorFactory
+            .create<APIResource<IApp>>(paginationKey, entityFactory(applicationSchemaKey));
           return {
             data$: monitor.currentPage$,
             state$: monitor.currentPageRequestState$
