@@ -19,11 +19,11 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
-- name: stratos-master
+- name: helm-repo
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: master
+    uri: git@github.com:((helm-repo-github-organization))/((helm-repo-github-repository))
+    branch: ((helm-repo-branch))
     private_key: ((github-private-key))
 # Docker Images
 - name: jetstream-image
@@ -135,7 +135,7 @@ jobs:
   - get: stratos
     passed: [build-images]
     trigger: true
-  - get: stratos-master
+  - get: helm-repo
   - do:
     - task: build
       privileged: true
@@ -147,6 +147,7 @@ jobs:
         GITHUB_ORG: ((github-organization))
         GITHUB_REPO: ((github-repository))
         GIT_PRIVATE_KEY: ((github-private-key))
+        HELM_REPO_BRANCH: ((helm-repo-branch))
         DOCKER_ORG: ((artifact-docker-organization))
         DOCKER_REGISTRY: ((artifact-docker-registry))
     - put: helm-chart-tarball
