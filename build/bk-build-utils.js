@@ -145,7 +145,7 @@
       var pkgName = replaceAll(plugin.name, '-', '');
       var destPath = path.join(srcPath, pkgName);
 
-      imports += '\t"github.com/SUSE/stratos-ui/plugins/' + pkgName + '"\n';
+      imports += '\t"github.com/cloudfoundry-incubator/stratos/plugins/' + pkgName + '"\n';
       inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
       inits += '\tlog.Info("Loaded plugin: ' + plugin.name + '")\n';
     });

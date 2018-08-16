@@ -1,7 +1,7 @@
 package cnsis
 
 import (
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 // Repository is an application of the repository pattern for storing CNSI Records
