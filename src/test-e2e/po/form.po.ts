@@ -37,17 +37,14 @@ export class FormComponent extends Component {
 
   // Get metadata for all of the fields in the form
   getFields(): ElementArrayFinder {
-    console.log('At getFields')
     return this.locator.all(by.tagName('input, mat-select, textarea'));
   }
 
   getFieldsMapped(): promise.Promise<FormItem[]> {
-    console.log('At getFieldsMapped')
     return this.getFields().map(this.mapField);
   }
 
   mapField(elm: ElementFinder, index: number): FormItem | any {
-    console.log('In MapField')
     return {
       index: index,
       name: elm.getAttribute('name'),
@@ -117,7 +114,6 @@ export class FormComponent extends Component {
 
   getControlsMap(): promise.Promise<FormItemMap> {
     return this.getFieldsMapped().then(items => {
-      console.log('getFieldsMapped')
       const form = {};
       items.forEach((item: FormItem) => {
         const id = item.name || item.formControlName;
@@ -130,9 +126,7 @@ export class FormComponent extends Component {
   // Fill the form fields in the specified object
   fill(fields: { [fieldKey: string]: string | boolean }, expectFailure = false): promise.Promise<void> {
 
-    console.log('Fill')
     return this.getControlsMap().then(ctrls => {
-      console.log(fields)
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value = fields[field];
