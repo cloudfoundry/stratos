@@ -104,8 +104,22 @@ export class SelectPlanStepComponent implements OnDestroy {
       }),
       switchMap(state => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
-        return this.cSIHelperService.getServicePlans();
+        return observableCombineLatest(this.cSIHelperService.getServicePlans(),
+        this.cSIHelperService.getServicePlanVisibilitiesForOrg(state.orgGuid));
       }),
+      map(([servicePlans, visibilities]) => servicePlans.filter(s => {
+        // If its space-scoped, no visibility will be present, allow
+        if (this.modeService.spaceScopedDetails.isSpaceScoped) {
+          return true;
+        }
+        if (s.entity.public) {
+          return true;
+        }
+        if (!s.entity.public) {
+          const visibility = visibilities.find(v => v.entity.service_plan_guid === s.metadata.guid);
+          return !!visibility;
+        }
+      })),
       tap(o => {
         if (o.length === 0) {
           this.stepperForm.controls.servicePlans.disable();
