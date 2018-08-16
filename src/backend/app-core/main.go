@@ -30,13 +30,13 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 
-	"github.com/SUSE/stratos-ui/config"
-	"github.com/SUSE/stratos-ui/datastore"
-	"github.com/SUSE/stratos-ui/repository/cnsis"
-	"github.com/SUSE/stratos-ui/repository/console_config"
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/config"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
+	"github.com/cloudfoundry-incubator/stratos/repository/cnsis"
+	"github.com/cloudfoundry-incubator/stratos/repository/console_config"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
