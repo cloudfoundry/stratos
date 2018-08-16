@@ -1,7 +1,7 @@
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription, combineLatest, empty } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf, Subscription, combineLatest } from 'rxjs';
 import { filter, switchMap, combineLatest as combineLatestOperator, tap, map } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
@@ -75,7 +75,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
                 map(p => p.filter(s => brokerGuids.indexOf(s.entity.service_broker_guid) !== -1)),
               );
             } else {
-              return empty();
+              return observableOf([]);
             }
           })
         );
