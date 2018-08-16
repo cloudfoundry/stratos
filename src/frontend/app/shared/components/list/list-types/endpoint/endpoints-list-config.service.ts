@@ -12,7 +12,6 @@ import {
   getFullEndpointApiUrl,
   getNameForEndpointType,
   getEndpointUsername,
-  getEndpointIsAdminString
 } from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
@@ -34,6 +33,7 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
 
 import { map, pairwise } from 'rxjs/operators';
 import { combineLatest, Observable } from 'rxjs';
+import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -92,9 +92,7 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'user-type',
     headerCell: () => 'Admin',
-    cellDefinition: {
-      getValue: getEndpointIsAdminString
-    },
+    cellComponent: TableCellEndpointIsAdminComponent,
     sort: {
       type: 'sort',
       orderKey: 'user-type',

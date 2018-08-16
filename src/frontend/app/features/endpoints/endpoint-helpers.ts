@@ -9,14 +9,6 @@ export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
 }
 
-export function getEndpointIsAdminString(endpoint: EndpointModel) {
-  if (!endpoint || !endpoint.user) {
-    return '-';
-  }
-  return endpoint.user.admin ? 'Yes' : 'No';
-}
-
-
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
 
 export interface EndpointTypeHelper {
