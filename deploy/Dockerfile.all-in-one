@@ -13,7 +13,7 @@ RUN npm install \
     && npm run build-cf \
     && npm run build-backend \
     && ./build/bk-build.sh \
-    && cp ./output/**/* . \
+    && cp outputs/portal-proxy . \
     && mv dist ui
 
 # Generate dev-certs

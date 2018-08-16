@@ -19,13 +19,15 @@ pushd ${STRATOS} > /dev/null
 OUTPUTS=$STRATOS/outputs
 mkdir -p ${OUTPUTS}
 
-# Remove the temporary source folder if it is already there
-if [ -d "tmp/go/src" ]; then
-  rm -rf tmp/go/src
-fi
-
 STRATOS_GOBASE=tmp/go/src/github.com/cloudfoundry-incubator/stratos
 mkdir -p ${STRATOS_GOBASE}/src
+
+# Remove the temporary source folder if it is already there
+if [ -d "${STRATOS_GOBASE}/src/jetstream" ]; then
+  rm -rf ${STRATOS_GOBASE}/src/jetstream
+fi
+
+
 
 # Set go path
 export GOPATH=${STRATOS}/tmp/go
@@ -38,10 +40,20 @@ popd > /dev/null
 # Copy dep files
 cp Gopkg.* ${STRATOS_GOBASE}
 
+# Check the dependencies - update if needed
 pushd ${STRATOS_GOBASE} > /dev/null
-echo "Fetching backend dependencies ..."
-# Just downlaod the dependencies using the lock file
-dep ensure -vendor-only -v
+set +e
+echo "Checking backend dependencies ..."
+dep check -skip-lock
+DEP_CHECK_RESULT=$?
+set -e
+if [ ${DEP_CHECK_RESULT} -ne 0 ]; then
+  echo "Fetching backend dependencies ..."
+  # Just downlaod the dependencies using the lock file
+  dep ensure -vendor-only -v
+else
+  echo "Backend dependencies are up to date (vendor folder okay)"
+fi
 popd > /dev/null
 
 # Build backend or run tests

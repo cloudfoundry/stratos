@@ -2,7 +2,6 @@
 node_modules/
 bower_components/
 dist/
-components/*/backend/vendor
 dev-certs/
 out/
 outputs/
@@ -14,7 +13,11 @@ deploy/all-in-one/
 deploy/ci/
 deploy/containers/
 deploy/docker-compose/
-deploy/stratos-ui-release/
+deploy/fissile/
 deploy/kubernetes/
+deploy/stratos-base-images/
+deploy/stratos-ui-release/
+deploy/uaa/
 docs/
 build/dev_config.json
+vendor/
