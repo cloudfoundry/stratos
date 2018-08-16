@@ -3,10 +3,10 @@
 
   var path = require('path');
   module.exports = {
-    goDestPath: path.join('src', 'github.com', 'SUSE'),
-    goPath: path.join('src', 'github.com', 'SUSE', 'stratos-ui'),
+    goDestPath: path.join('src', 'github.com', 'cloudfoundry-incubator'),
+    goPath: path.join('src', 'github.com', 'cloudfoundry-incubator', 'stratos'),
     getVendorPath: function (srcPath) {
-      return path.join(srcPath, 'vendor', 'github.com', 'SUSE', 'stratos-ui');
+      return path.join(srcPath, 'vendor', 'github.com', 'cloudfoundry-incubator', 'stratos');
     },
     getCorePath: function (srcPath, executable) {
       return path.join(srcPath, executable ? executable : '');

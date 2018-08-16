@@ -37,4 +37,8 @@ export class CreateServiceInstanceStepper extends StepperComponent {
     return this.getStepperForm().fill({ [this.serviceNameFieldName]: serviceInstanceName });
   }
 
+  isBindAppStepDisabled = () => {
+    return this.isStepDisabled('Bind App (Optional)');
+  }
+
 }

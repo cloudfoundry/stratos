@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SUSE/stratos-ui/datastore"
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -44,9 +44,10 @@ var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, aut
 var updateCNSIToken = `UPDATE tokens
 										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5
 										WHERE cnsi_guid = $6 AND user_guid = $7 AND token_type = $8 AND auth_type = $9`
-
 var deleteCNSIToken = `DELETE FROM tokens
-											WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
+										WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
+var deleteCNSITokens = `DELETE FROM tokens
+											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
 // TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
 
@@ -74,6 +75,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
 	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)
 	deleteCNSIToken = datastore.ModifySQLStatement(deleteCNSIToken, databaseProvider)
+	deleteCNSITokens = datastore.ModifySQLStatement(deleteCNSITokens, databaseProvider)
 }
 
 // saveAuthToken - Save the Auth token to the datastore
@@ -379,6 +381,24 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 	}
 
 	_, err := p.db.Exec(deleteCNSIToken, cnsiGUID, userGUID)
+	if err != nil {
+		msg := "Unable to Delete CNSI token: %v"
+		log.Debugf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+func (p *PgsqlTokenRepository) DeleteCNSITokens(cnsiGUID string) error {
+	log.Debug("DeleteCNSITokens")
+	if cnsiGUID == "" {
+		msg := "Unable to delete CNSI Token without a valid CNSI GUID."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	_, err := p.db.Exec(deleteCNSITokens, cnsiGUID)
 	if err != nil {
 		msg := "Unable to Delete CNSI token: %v"
 		log.Debugf(msg, err)
