@@ -23,6 +23,9 @@ export class ServicesHelperE2E {
     }
   }
 
+  addPrefixToServiceName = (prefix: string) => {
+    this.serviceInstanceName = `${prefix}-${this.serviceInstanceName}`;
+  }
   setCreateServiceInstance = (createServiceInstance: CreateServiceInstance) => {
     this.createServiceInstance = createServiceInstance;
   }
@@ -90,10 +93,14 @@ export class ServicesHelperE2E {
       .then(totalAppsInSpace => !!totalAppsInSpace);
   }
 
-  setServiceInstanceDetail = () => {
+  setServiceInstanceDetail = (isEditServiceInstance = false) => {
     this.createServiceInstance.stepper.waitForStep('Service Instance');
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
-    expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
+    if (!isEditServiceInstance) {
+      expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
+    } else {
+      expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
+    }
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
     this.createServiceInstance.stepper.setServiceName(this.serviceInstanceName);
   }
@@ -106,10 +113,14 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
 
-  setServicePlan = () => {
+  setServicePlan = (isEditServiceInstance = false) => {
     this.createServiceInstance.stepper.waitForStep('Select Plan');
     // Should have a plan auto-selected
-    expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
+    if (!isEditServiceInstance) {
+      expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
+    } else {
+      expect(this.createServiceInstance.stepper.canPrevious()).toBeFalsy();
+    }
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
