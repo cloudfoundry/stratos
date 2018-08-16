@@ -29,8 +29,8 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   setSpace = (spaceName: string) => {
     return this.getStepperForm().fill({ [this.spaceFieldName]: spaceName });
   }
-  setService = (serviceName: string) => {
-    return this.getStepperForm().fill({ [this.serviceFieldName]: serviceName });
+  setService = (serviceName: string, expectFailure = false) => {
+    return this.getStepperForm().fill({ [this.serviceFieldName]: serviceName }, expectFailure);
   }
 
   setServiceName = (serviceInstanceName: string) => {
