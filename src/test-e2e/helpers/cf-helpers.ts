@@ -50,12 +50,12 @@ export class CFHelpers {
 
   addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid): promise.Promise<APIResource<IOrganization>> {
     let added;
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
-      if (json.total_results === 0) {
+    return this.fetchOrg(cnsiGuid, orgName).then(org => {
+      if (!org) {
         added = true;
         return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
       }
-      return json.resources[0];
+      return org;
     }).then(newOrg => {
       if (!added || !adminGuid || !userGuid) {
         // No need to mess around with permissions, it exists already.
@@ -78,35 +78,24 @@ export class CFHelpers {
     orgName,
     spaceName,
     endpoint: E2EConfigCloudFoundry
-  ): promise.Promise<CFResponse<ISpace>> {
+  ): promise.Promise<APIResource<ISpace>> {
     return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
       expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
       return this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
     });
   }
 
-  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<CFResponse<ISpace>> {
+  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const cfRequestHelper = this.cfRequestHelper;
-    return this.cfRequestHelper.sendCfGet(cnsiGuid,
-      'spaces?inline-relations-depth=1&include-relations=organization&q=name IN ' + spaceName)
-      .then(function (json) {
-        let add = false;
-        if (json.total_results === 0) {
-          add = true;
-        } else if (json.total_results > 0) {
-          add = !!json.resources.find(r => {
-            return r && r.entity && r.entity.organization && r.entity.organization.entity && r.entity.organization.entity.name === orgName;
+    return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
+      .then(function (space) {
+        return space ? space : cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces',
+          {
+            name: spaceName,
+            manager_guids: [],
+            developer_guids: [userGuid],
+            organization_guid: orgGuid
           });
-        }
-        if (add) {
-          return cfRequestHelper.sendCfPost(cnsiGuid, 'spaces',
-            {
-              name: spaceName,
-              manager_guids: [],
-              developer_guids: [userGuid],
-              organization_guid: orgGuid
-            });
-        }
       });
   }
 
@@ -151,9 +140,6 @@ export class CFHelpers {
         return org;
       }
       return null;
-    }).catch(err => {
-      e2e.log(`Failed to fetch organisation with name '${orgName}' from endpoint ${cnsiGuid}`);
-      throw new Error(err);
     });
   }
 
