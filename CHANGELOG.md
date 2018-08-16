@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.1
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0...2.0.1)
+
+This is a bugfix release that fixes an issue that prevents Stratos from correctly building in certain environments.
+
+**Fixes:**
+
+- Upgrade to a versioned release of rxjs-websockets [\#2791](https://github.com/cloudfoundry-incubator/stratos/pull/2791)
+
 ## 2.0.0 
 
 [Full Changelog since 1.1.0](https://github.com/cloudfoundry-incubator/stratos/compare/1.1.0...2.0.0)
