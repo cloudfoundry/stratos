@@ -28,18 +28,20 @@ export class CFRequestHelpers extends RequestHelpers {
       });
   }
 
-  sendCfGet<T= CFResponse>(cfGuid: string, url: string): promise.Promise<T> {
-    return this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
-  }
-
-  sendCfPost<T= CFResponse>(cfGuid: string, url: string, body: any): promise.Promise<T> {
-    return this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse);
-  }
   getCfGuid = (cfName?: string): promise.Promise<string> =>
     this.getCfInfo(cfName).then((endpoint: EndpointModel) => endpoint ? endpoint.guid : null)
 
-  sendCfPut = (cfGuid: string, url: string, body?: any): promise.Promise<CFResponse> =>
-    this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse)
+  sendCfGet<T = CFResponse>(cfGuid: string, url: string): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  }
+
+  sendCfPost<T = CFResponse>(cfGuid: string, url: string, body: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse);
+  }
+
+  sendCfPut<T = CFResponse>(cfGuid: string, url: string, body?: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse);
+  }
 
   sendCfDelete = (cfGuid: string, url: string): promise.Promise<any> => this.sendCfRequest(cfGuid, url, 'DELETE');
 
