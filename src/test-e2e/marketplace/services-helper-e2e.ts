@@ -48,6 +48,7 @@ export class ServicesHelperE2E {
         this.createServiceInstance.waitForPage();
 
         // Select CF/Org/Space
+        console.log('In SetCfOrgSpace')
     this.setCfOrgSpace(null, null, marketplaceMode);
         this.createServiceInstance.stepper.next();
 
@@ -120,9 +121,12 @@ export class ServicesHelperE2E {
   }
 
   setCfOrgSpace = (orgName: string = null, spaceName: string = null, marketplaceMode = false) => {
+
+    console.log('Marketplace: ' + marketplaceMode)
     if (!marketplaceMode) {
       this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
     }
+    console.log('In setCfOrgSpacesdfad ' + e2e.secrets.getDefaultCFEndpoint().testOrg  + ' ' + e2e.secrets.getDefaultCFEndpoint().testSpace)
     this.createServiceInstance.stepper.setOrg(!!orgName ? orgName : e2e.secrets.getDefaultCFEndpoint().testOrg);
     this.createServiceInstance.stepper.setSpace(!!spaceName ? spaceName : e2e.secrets.getDefaultCFEndpoint().testSpace);
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();

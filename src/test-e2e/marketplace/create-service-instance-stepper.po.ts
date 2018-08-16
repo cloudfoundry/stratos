@@ -23,6 +23,7 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   }
 
   setOrg = (orgName: string) => {
+    console.log('In setOrg ' + orgName)
     return this.getStepperForm().fill({ [this.orgFieldName]: orgName });
   }
 

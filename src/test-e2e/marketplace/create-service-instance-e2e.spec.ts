@@ -16,6 +16,7 @@ describe('Create Service Instance', () => {
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
+      .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
   });
@@ -32,7 +33,6 @@ describe('Create Service Instance', () => {
   it('- should be able to to create a service instance', () => {
 
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-
     servicesWall.isActivePage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
@@ -106,7 +106,7 @@ describe('Create Service Instance', () => {
         createServiceInstance.stepper.next();
 
         // Select Service
-    	servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+  servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
         createServiceInstance.stepper.next();
 
         // Select Service Plan

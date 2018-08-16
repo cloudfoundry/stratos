@@ -14,7 +14,8 @@ describe('Marketplace', () => {
     setup = e2e.setup(ConsoleUserType.admin)
     .clearAllEndpoints()
     .registerDefaultCloudFoundry()
-    .connectAllEndpoints(ConsoleUserType.admin);
+    .connectAllEndpoints(ConsoleUserType.admin)
+    .getInfo();
   });
 
   describe('Create Public Service Instance', () => {
@@ -38,7 +39,7 @@ describe('Marketplace', () => {
     expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
   });
 
-  it('- should be able to create a new service instance', () => {
+  fit('- should be able to create a new service instance', () => {
     createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
   });
   afterAll((done) => {
@@ -119,6 +120,7 @@ function createService(marketplaceSummaryPage: MarketplaceSummaryPage,
   browser.getCurrentUrl().then(url => {
     expect(url.endsWith('create?isSpaceScoped=false')).toBeTruthy();
     // Proceeed to create a service instance
+    console.log("Service NAme: " + serviceName + " is true: " + true)
     servicesHelperE2E.createService(serviceName, true);
 
     servicesWall.isActivePage();
@@ -144,16 +146,14 @@ function init(
   serviceName: string,
 ) {
   const servicesHelperE2E = new ServicesHelperE2E(setup, new CreateServiceInstance());
-  const getCfCnsi = servicesHelperE2E.cfRequestHelper.getCfCnsi();
-  let cfGuid;
-  return getCfCnsi.then(endpointModel => {
-    cfGuid = endpointModel.guid;
-    return servicesHelperE2E.fetchServices(cfGuid);
-  }).then(response => {
+  const defaultCf = e2e.secrets.getDefaultCFEndpoint();
+  const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+  console.log('#############################' + endpointGuid + '##################')
+  return servicesHelperE2E.fetchServices(endpointGuid).then(response => {
     serviceName = e2e.secrets.getDefaultCFEndpoint().services.publicService.name;
     const service = response.resources.find(e => e.entity.label === serviceName);
     const serviceGuid = service.metadata.guid;
-    const marketplaceSummaryPage = new MarketplaceSummaryPage(cfGuid, serviceGuid);
+    const marketplaceSummaryPage = new MarketplaceSummaryPage(endpointGuid, serviceGuid);
     return { servicesHelper: servicesHelperE2E, summaryPage: marketplaceSummaryPage };
   });
 }
