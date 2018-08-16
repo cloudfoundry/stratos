@@ -734,6 +734,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	if err == nil {
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
+		e.Use(middleware.Gzip())
 		e.Static("/", staticDir)
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
@@ -760,7 +761,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 }
 
 func getStaticFiles() (string, error) {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	dir, err := filepath.Abs(".")
 	if err == nil {
 		// Look for a folder named 'ui'
 		_, err := os.Stat(dir + "/ui")
