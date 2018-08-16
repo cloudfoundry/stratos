@@ -75,7 +75,7 @@ describe('CF - Space Level -', () => {
 
   });
 
-  fdescribe('As User -', () => {
+  describe('As User -', () => {
     beforeEach(() => {
       setup(ConsoleUserType.user);
     });
