@@ -13,11 +13,14 @@ const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_
 
 describe('Org Spaces List- ', () => {
 
-  let e2eSetup: E2ESetup;
   let cfHelper: CFHelpers;
   let defaultCf: E2EConfigCloudFoundry;
   let orgPage: CfOrgLevelPage;
   const spaceList = new ListComponent();
+  let orgGuid: string;
+  let endpointGuid: string;
+
+  const timeAllowed = 60000;
 
   function createSpaceNames(count: number): string[] {
     const spaceNames = [];
@@ -27,7 +30,7 @@ describe('Org Spaces List- ', () => {
     return spaceNames;
   }
 
-  function chainCreateSpace(endpointGuid: string, org: APIResource<IOrganization>, spaceNames: string[]): promise.Promise<any> {
+  function chainCreateSpace(org: APIResource<IOrganization>, spaceNames: string[]): promise.Promise<any> {
     return spaceNames.reduce((promiseChain, name) => {
       return promiseChain.then(() => {
         // Ensure there's a gap so that the 'created_at' is different
@@ -37,38 +40,45 @@ describe('Org Spaces List- ', () => {
           org.metadata.guid,
           org.entity.name,
           name,
-          defaultCf);
+          defaultCf,
+          true);
       });
     }, promise.fullyResolved(''));
   }
 
-  function concurrentCreateSpace(endpointGuid: string, org: APIResource<IOrganization>, spaceNames: string[]): promise.Promise<any> {
+  function concurrentCreateSpace(org: APIResource<IOrganization>, spaceNames: string[]): promise.Promise<any> {
     return promise.all(spaceNames.map(name => cfHelper.addSpaceIfMissingForEndpointUsers(
       endpointGuid,
       org.metadata.guid,
       org.entity.name,
       name,
-      defaultCf)));
+      defaultCf,
+      true)));
   }
 
-  function setup(spaceNames: string[], orderImportant: boolean) {
+  function setup(orgName: string, spaceNames: string[], orderImportant: boolean) {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+    endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+
     browser.wait(
-      cfHelper.fetchOrg(endpointGuid, defaultCf.testOrg)
+      cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName)
         .then((org: APIResource<IOrganization>) => {
-          // Chain the creation of the spaces to ensure there's a nice sequential 'created_at' value
+          orgGuid = org.metadata.guid;
+          if (!spaceNames || !spaceNames.length) {
+            return promise.fullyResolved(org);
+          }
+          // Chain the creation of the spaces to ensure there's a nice sequential 'created_at' value to be used for sort tests
           const promises = orderImportant ?
-            chainCreateSpace(endpointGuid, org, spaceNames) :
-            concurrentCreateSpace(endpointGuid, org, spaceNames);
+            chainCreateSpace(org, spaceNames) :
+            concurrentCreateSpace(org, spaceNames);
 
           return promises.then(() => org.metadata.guid);
         })
-        .then(orgGuid => navToOrgSpaces(endpointGuid, orgGuid))
+        .then(navToOrgSpaces)
     );
   }
 
-  function navToOrgSpaces(endpointGuid: string, orgGuid: string) {
+  function navToOrgSpaces() {
     orgPage = CfOrgLevelPage.forEndpoint(endpointGuid, orgGuid);
     orgPage.navigateTo();
     orgPage.waitForPageOrChildPage();
@@ -77,13 +87,13 @@ describe('Org Spaces List- ', () => {
     expect(spaceList.isTableView()).toBeFalsy();
   }
 
-  function tearDown(spaceNames: string[]) {
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    spaceNames.forEach(name => cfHelper.deleteSpaceIfExisting(endpointGuid, name));
+  function tearDown(orgName: string) {
+    expect(orgName).not.toBeNull();
+    cfHelper.deleteOrgIfExisting(endpointGuid, orgName);
   }
 
   beforeAll(() => {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
+    const e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
@@ -93,18 +103,12 @@ describe('Org Spaces List- ', () => {
   });
 
   describe('No Pages -', () => {
-    const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel);
-    let endpointGuid, orgGuid;
+    const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-no-pages';
     beforeAll(() => {
-      defaultCf = e2e.secrets.getDefaultCFEndpoint();
-      endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-      // Create a temporary org which will contain no spaces
-      browser.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName).then(res => orgGuid = res.metadata.guid));
+      setup(orgName, [], false);
     });
 
-    beforeEach(() => {
-      navToOrgSpaces(endpointGuid, orgGuid);
-    });
+    beforeEach(navToOrgSpaces);
 
     it('Should show no entities message', () => {
       expect(spaceList.isDisplayed()).toBeTruthy();
@@ -113,12 +117,11 @@ describe('Org Spaces List- ', () => {
       expect(spaceList.cards.getCardCount()).toBe(0);
     });
 
-    afterAll(() => {
-      cfHelper.deleteSpaceIfExisting(endpointGuid, orgName);
-    });
+    afterAll(() => tearDown(orgName));
   });
 
   describe('Single Page -', () => {
+    const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-1-page';
 
     let spaceNames;
 
@@ -145,13 +148,12 @@ describe('Org Spaces List- ', () => {
 
     beforeAll(() => {
       spaceNames = createSpaceNames(3);
-      setup(spaceNames, true);
+      setup(orgName, spaceNames, true);
       expect(spaceList.getTotalResults()).toBeLessThanOrEqual(9);
       expect(spaceList.pagination.isDisplayed()).toBeFalsy();
-    });
+    }, timeAllowed);
 
-    afterAll(() => tearDown(spaceNames));
-
+    afterAll(() => tearDown(orgName), timeAllowed);
 
     it('sort by name', () => {
       testSortBy('Name');
@@ -204,17 +206,17 @@ describe('Org Spaces List- ', () => {
   });
 
   describe('Multi Page -', () => {
+    const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-multi-page';
 
     let spaceNames;
 
     beforeAll(() => {
       spaceNames = createSpaceNames(11);
-      setup(spaceNames, false);
+      setup(orgName, spaceNames, false);
       expect(spaceList.getTotalResults()).toBeGreaterThanOrEqual(spaceNames.length);
+    }, timeAllowed);
 
-    });
-
-    afterAll(() => tearDown(spaceNames));
+    afterAll(() => tearDown(orgName), timeAllowed);
 
     function testStartingPosition() {
       // General expects for all tests in this section
@@ -232,9 +234,9 @@ describe('Org Spaces List- ', () => {
       expect(spaceList.pagination.getNavLastPage().getComponent().isEnabled()).toBeTruthy();
     }
 
-    beforeEach(testStartingPosition);
+    beforeEach(testStartingPosition, timeAllowed);
 
-    afterEach(testStartingPosition);
+    afterEach(testStartingPosition, timeAllowed);
 
     it('Initial Pagination Values', () => { });
 

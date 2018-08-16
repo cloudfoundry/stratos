@@ -35,8 +35,11 @@ try {
   process.exit(1);
 }
 
+// This is the maximum amount of time ALL before/after/it's must execute in
+const timeout = 60000
+
 exports.config = {
-  allScriptsTimeout: 11000,
+  allScriptsTimeout: timeout,
   specs: [
     './src/test-e2e/**/*-e2e.spec.ts',
   ],
@@ -53,7 +56,7 @@ exports.config = {
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
-    defaultTimeoutInterval: 30000,
+    defaultTimeoutInterval: timeout,
     print: function () {}
   },
   params: secrets,

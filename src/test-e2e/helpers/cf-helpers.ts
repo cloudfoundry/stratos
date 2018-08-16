@@ -77,25 +77,23 @@ export class CFHelpers {
     orgGuid,
     orgName,
     spaceName,
-    endpoint: E2EConfigCloudFoundry
+    endpoint: E2EConfigCloudFoundry,
+    skipExistsCheck = false,
   ): promise.Promise<APIResource<ISpace>> {
     return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
       expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
-      return this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
+      return skipExistsCheck ?
+        this.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid) :
+        this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
+
     });
   }
 
   addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
-    const cfRequestHelper = this.cfRequestHelper;
+    const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
       .then(function (space) {
-        return space ? space : cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces',
-          {
-            name: spaceName,
-            manager_guids: [],
-            developer_guids: [userGuid],
-            organization_guid: orgGuid
-          });
+        return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, userGuid);
       });
   }
 
@@ -106,23 +104,17 @@ export class CFHelpers {
   }
 
   deleteOrgIfExisting(cnsiGuid: string, orgName: string) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
-      if (json.total_results > 0) {
-        const org = json.resources[0];
-        if (org) {
-          return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'organizations/' + org.metadata.guid);
-        }
+    return this.fetchOrg(cnsiGuid, orgName).then(org => {
+      if (org) {
+        return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'organizations/' + org.metadata.guid + '?recursive=true&async=false');
       }
     });
   }
 
-  deleteSpaceIfExisting(cnsiGuid: string, spaceName: string) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName).then(json => {
-      if (json.total_results > 0) {
-        const space = json.resources[0];
-        if (space) {
-          return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'spaces/' + space.metadata.guid);
-        }
+  deleteSpaceIfExisting(cnsiGuid: string, orgGuid: string, spaceName: string) {
+    return this.fetchSpace(cnsiGuid, orgGuid, spaceName).then(space => {
+      if (space) {
+        return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'spaces/' + space.metadata.guid);
       }
     });
   }
@@ -173,6 +165,17 @@ export class CFHelpers {
   // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)
   baseDeleteApp(cnsiGuid: string, appGuid: string) {
     return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
+  }
+
+  baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
+    const cfRequestHelper = this.cfRequestHelper;
+    return cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces',
+      {
+        name: spaceName,
+        manager_guids: [],
+        developer_guids: [userGuid],
+        organization_guid: orgGuid
+      });
   }
 
   fetchAppRoutes(cnsiGuid: string, appGuid: string): promise.Promise<APIResource<IRoute>[]> {
