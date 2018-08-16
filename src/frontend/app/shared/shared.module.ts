@@ -326,7 +326,8 @@ import { DrillDownComponent } from './components/drill-down/drill-down.component
     BindAppsStepComponent,
     CapitalizeFirstPipe,
     CfEndpointsMissingComponent,
-    RoutingIndicatorComponent
+    RoutingIndicatorComponent,
+    DrillDownComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

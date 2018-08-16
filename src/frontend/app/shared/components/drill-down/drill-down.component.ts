@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
-
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 
 export interface DrillDownLevel {
   title: string;
   getData: (parent?) => Observable<any[]>;
+  levelState$?: Observable<ActionState>;
 }
 
 export type DrillDownDefinition = DrillDownLevel[];
@@ -15,39 +16,48 @@ export type DrillDownDefinition = DrillDownLevel[];
   styleUrls: ['./drill-down.component.scss']
 })
 export class DrillDownComponent implements OnInit {
-
+  @Input('definition')
   private definition: DrillDownDefinition;
-  private levelData: Observable<any[]>[];
 
-  constructor() {
-    const getFauxData = (pn: number) => (cn?: number) => {
-      return of(new Array<number>(pn * cn));
-    };
-    this.definition = [
-      {
-        title: '1',
-        getData: getFauxData(1)
-      },
-      {
-        title: '2',
-        getData: getFauxData(2)
-      },
-      {
-        title: '3',
-        getData: getFauxData(3)
-      },
-      {
-        title: '4',
-        getData: getFauxData(4)
+  public levelData: {
+    selected: number,
+    data$: Observable<any[]>;
+    levelState$?: Observable<ActionState>;
+  }[] = [];
+
+  public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
+    const nextIndex = levelIndex + 1;
+    if (this.definition[nextIndex]) {
+      this.addLevel(nextIndex, item);
+      this.setSelectedForLevel(itemIndex, levelIndex);
+    }
+  }
+
+  public setSelectedForLevel(itemIndex: number, levelIndex: number) {
+    this.levelData[levelIndex].selected = itemIndex;
+  }
+
+  public addLevel(levelIndex: number, item?) {
+    const levelData = this.definition[levelIndex];
+    if (levelData) {
+      const data$ = levelData.getData(item);
+      const levelState$ = levelData.levelState$ || of({
+        busy: false,
+        error: false,
+        message: ''
+      });
+      if (this.levelData.length > (levelIndex + 1)) {
+        // Remove old data
+        this.levelData = this.levelData.slice(0, levelIndex);
       }
-    ];
-    this.levelData = [
-      this.definition[0].getData()
-    ]
+      this.levelData[levelIndex] = { data$, selected: null, levelState$ };
+    }
   }
 
 
+
   ngOnInit() {
+    this.addLevel(0);
   }
 
 }
