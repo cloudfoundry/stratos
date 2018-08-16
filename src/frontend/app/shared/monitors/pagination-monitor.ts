@@ -35,6 +35,10 @@ export class PaginationMonitor<T = any> {
   /**
    * Emits a boolean stating if the current page has errored or not.
    */
+  public currentPageRequestState$: Observable<ActionState>;
+  /**
+   * Emits a boolean stating if the current page has errored or not.
+   */
   public currentPageError$: Observable<boolean>;
   /**
    * All the information about the current pagination selection.
@@ -108,6 +112,7 @@ export class PaginationMonitor<T = any> {
       paginationKey,
     );
     this.currentPage$ = this.createPageObservable(this.pagination$, schema);
+    this.currentPageRequestState$ = this.createRequestStateObservable(this.pagination$);
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
     this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
   }
@@ -168,6 +173,12 @@ export class PaginationMonitor<T = any> {
       samePage && x.ids[x.currentPage] === y.ids[y.currentPage];
     return samePageIdList && samePageBusyState;
   }
+
+  private createRequestStateObservable = (
+    pagination$: Observable<PaginationEntityState>,
+  ) => pagination$.pipe(
+    map(this.getCurrentPageRequestInfo)
+  );
 
   private createErrorObservable(
     pagination$: Observable<PaginationEntityState>,

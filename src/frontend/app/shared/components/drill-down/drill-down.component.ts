@@ -1,11 +1,15 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-
+import { tap } from 'rxjs/operators';
+export interface IDrillDownLevelRequest {
+  data$: Observable<any[]>;
+  state$?: Observable<ActionState>
+}
 export interface DrillDownLevel {
   title: string;
-  getData: (parent?) => Observable<any[]>;
-  levelState$?: Observable<ActionState>;
+  request: ((parent?: any, allAncestors?: any[]) => IDrillDownLevelRequest) | IDrillDownLevelRequest,
+  selectItem?: (parent?: any, allAncestors?: any[]) => void;
 }
 
 export type DrillDownDefinition = DrillDownLevel[];
@@ -20,41 +24,51 @@ export class DrillDownComponent implements OnInit {
   private definition: DrillDownDefinition;
 
   public levelData: {
-    selected: number,
+    selected: {
+      index: number,
+      item: any
+    },
     data$: Observable<any[]>;
-    levelState$?: Observable<ActionState>;
+    state$: Observable<ActionState>;
   }[] = [];
 
   public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
     const nextIndex = levelIndex + 1;
     if (this.definition[nextIndex]) {
       this.addLevel(nextIndex, item);
-      this.setSelectedForLevel(itemIndex, levelIndex);
+      this.setSelectedForLevel(itemIndex, levelIndex, item);
     }
   }
 
-  public setSelectedForLevel(itemIndex: number, levelIndex: number) {
-    this.levelData[levelIndex].selected = itemIndex;
+  public setSelectedForLevel(index: number, levelIndex: number, item: any) {
+    this.levelData[levelIndex].selected = { index, item };
   }
 
-  public addLevel(levelIndex: number, item?) {
+  private getLevelRequest(level: DrillDownLevel, item?: any, allSelected?: any[]) {
+    const request = level.request;
+    if (typeof request === 'function') {
+      return request(item, allSelected);
+    }
+    return request;
+  }
+
+  public addLevel(levelIndex: number, item?: any) {
     const levelData = this.definition[levelIndex];
     if (levelData) {
-      const data$ = levelData.getData(item);
-      const levelState$ = levelData.levelState$ || of({
-        busy: false,
-        error: false,
-        message: ''
-      });
+      const allSelected = this.levelData.map((level, i) => level.selected.item);
+      if (levelData.selectItem) {
+        levelData.selectItem(item, allSelected);
+      }
+
+      const { data$, state$ = of({ busy: false, error: false, message: '' }) } = this.getLevelRequest(levelData, item, allSelected);
+
       if (this.levelData.length > (levelIndex + 1)) {
         // Remove old data
         this.levelData = this.levelData.slice(0, levelIndex);
       }
-      this.levelData[levelIndex] = { data$, selected: null, levelState$ };
+      this.levelData[levelIndex] = { data$, selected: { index: null, item: null }, state$ };
     }
   }
-
-
 
   ngOnInit() {
     this.addLevel(0);

@@ -1,6 +1,7 @@
 <div class="drill-down">
   <div class="drill-down-level" *ngFor="let level of levelData; index as levelIndex">
-    <div [ngClass]="{'drill-down-item--selected': levelData[levelIndex].selected === itemIndex}" (click)="clickItem(data, itemIndex, levelIndex, $event)"
-      class="drill-down-item" *ngFor="let data of level.data$ | async; index as itemIndex">{{ data * levelIndex }}</div>
+    <mat-progress-spinner *ngIf="(levelData[levelIndex].state$ | async).busy" diameter="20" mode="indeterminate"></mat-progress-spinner>
+    <div [ngClass]="{'drill-down-item--selected': levelData[levelIndex].selected.index === itemIndex}" (click)="clickItem(data, itemIndex, levelIndex, $event)"
+      class="drill-down-item" *ngFor="let data of level.data$ | async; index as itemIndex">{{ data }}</div>
   </div>
 </div>
