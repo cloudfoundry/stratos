@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SUSE/stratos-ui/plugins/cfapppush/pushapp"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
+	"github.com/cloudfoundry-incubator/stratos/plugins/cfapppush/pushapp"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	yaml "gopkg.in/yaml.v2"
@@ -432,8 +432,8 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 
 	config := &pushapp.CFPushAppConfig{
 		AuthorizationEndpoint:  cnsiRecord.AuthorizationEndpoint,
-		CFClient:               cfAppPush.portalProxy.GetConfig().CFClient,
-		CFClientSecret:         cfAppPush.portalProxy.GetConfig().CFClientSecret,
+		CFClient:               cnsiRecord.ClientId,
+		CFClientSecret:         cnsiRecord.ClientSecret,
 		APIEndpointURL:         cnsiRecord.APIEndpoint.String(),
 		DopplerLoggingEndpoint: cnsiRecord.DopplerLoggingEndpoint,
 		SkipSSLValidation:      cnsiRecord.SkipSSLValidation,

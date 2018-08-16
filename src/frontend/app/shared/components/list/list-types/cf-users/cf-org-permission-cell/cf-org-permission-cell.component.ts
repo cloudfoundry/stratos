@@ -19,7 +19,6 @@ import { AppChip } from '../../../../chips/chips.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 
-
 @Component({
   selector: 'app-org-user-permission-cell',
   templateUrl: './cf-org-permission-cell.component.html',
@@ -27,6 +26,7 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
+
   constructor(
     public store: Store<AppState>,
     cfUserService: CfUserService,

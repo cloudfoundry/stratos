@@ -1,5 +1,5 @@
 import { ApplicationsPage } from '../applications/applications.po';
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
+import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
@@ -13,7 +13,7 @@ describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
-  const cloudFoundry = new CloudFoundryPage();
+  const cloudFoundry = new CfTopLevelPage();
   const login = new LoginPage();
 
   describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints) -', () => {
@@ -50,17 +50,17 @@ describe('Endpoints', () => {
 
         it('Should show application wall with \'no clusters\' message', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.Applications);
-          expect(applications.hasNoCloudFoundryMesasge()).toBeTruthy();
+          expect(applications.hasNoCloudFoundryMessage()).toBeTruthy();
         });
 
         it('Should show services view with \'no clusters\' message', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.Services);
-          expect(services.hasNoCloudFoundryMesasge()).toBeTruthy();
+          expect(services.hasNoCloudFoundryMessage()).toBeTruthy();
         });
 
         it('Should show Cloud Foundry view with \'no clusters\' message', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.CloudFoundry);
-          expect(cloudFoundry.hasNoCloudFoundryMesasge()).toBeTruthy();
+          expect(cloudFoundry.hasNoCloudFoundryMessage()).toBeTruthy();
         });
 
         it('Welcome snackbar message should be displayed', () => {
@@ -138,6 +138,14 @@ describe('Endpoints', () => {
                   });
                 });
               });
+            });
+
+            it('Welcome snackbar message should be displayed', () => {
+              endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
+              const snackBar = new SnackBarComponent();
+              expect(snackBar.isDisplayed()).toBeTruthy();
+              expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
+              snackBar.close();
             });
           });
         });

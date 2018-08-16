@@ -20,6 +20,7 @@ export class TableRowComponent extends CdkRow implements OnInit {
   rowState: Observable<RowState>;
 
   public inErrorState$: Observable<boolean>;
+  public inWarningState$: Observable<boolean>;
   public errorMessage$: Observable<string>;
   public isBlocked$: Observable<boolean>;
   public isHighlighted$: Observable<boolean>;
@@ -29,6 +30,9 @@ export class TableRowComponent extends CdkRow implements OnInit {
     if (this.rowState) {
       this.inErrorState$ = this.rowState.pipe(
         map(state => state.error)
+      );
+      this.inWarningState$ = this.rowState.pipe(
+        map(state => state.warning)
       );
       this.errorMessage$ = this.rowState.pipe(
         map(state => state.message)

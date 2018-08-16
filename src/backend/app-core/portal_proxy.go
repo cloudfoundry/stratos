@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	"github.com/gorilla/sessions"
 )
 

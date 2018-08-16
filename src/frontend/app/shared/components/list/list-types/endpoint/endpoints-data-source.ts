@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { pairwise, tap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
@@ -11,9 +12,8 @@ import { PaginationMonitorFactory } from '../../../../monitors/pagination-monito
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
-import { ListRowSateHelper } from './endpoint-data-source.helpers';
-
-import { pairwise, tap } from 'rxjs/operators';
+import { ListRowSateHelper } from '../../list.helper';
+import { EndpointRowStateSetUpManager } from './endpoint-data-source.helpers';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -31,7 +31,9 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
-      GetAllEndpoints.storeKey
+      GetAllEndpoints.storeKey,
+      endpointSchemaKey,
+      EndpointRowStateSetUpManager
     );
     const eventSub = EndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager);
     const config = EndpointsDataSource.getEndpointConfig(

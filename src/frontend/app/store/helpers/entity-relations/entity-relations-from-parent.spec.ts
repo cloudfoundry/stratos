@@ -1,16 +1,16 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { async, inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
-import { ISpace } from '../../core/cf-api.types';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../test-framework/store-test-helper';
-import { GetAllOrganizationSpaces } from '../actions/organization.actions';
-import { RequestTypes } from '../actions/request.actions';
-import { AppState } from '../app-state';
-import { getDefaultRequestState } from '../reducers/api-request-reducer/types';
-import { APIResource } from '../types/api.types';
-import { WrapperRequestActionSuccess } from '../types/request.types';
-import { organizationSchemaKey } from './entity-factory';
+import { ISpace } from '../../../core/cf-api.types';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { GetAllOrganizationSpaces } from '../../actions/organization.actions';
+import { RequestTypes } from '../../actions/request.actions';
+import { AppState } from '../../app-state';
+import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
+import { APIResource } from '../../types/api.types';
+import { WrapperRequestActionSuccess } from '../../types/request.types';
+import { organizationSchemaKey } from '../entity-factory';
 import { populatePaginationFromParent } from './entity-relations';
 import { EntityRelationSpecHelper } from './entity-relations.spec';
 
@@ -47,7 +47,7 @@ describe('Entity Relations - populate from parent', () => {
 
   });
 
-  it('List in parent', (done) => {
+  it('List in parent', async(() => {
     const spaces: APIResource<ISpace>[] = [
       helper.createEmptySpace('1', 'space1`', orgGuid),
       helper.createEmptySpace('2', 'space2`', orgGuid),
@@ -72,10 +72,9 @@ describe('Entity Relations - populate from parent', () => {
             map[space.metadata.guid] = space;
             return map;
           }, {}));
-          done();
         });
     })();
 
-  });
+  }));
 
 });

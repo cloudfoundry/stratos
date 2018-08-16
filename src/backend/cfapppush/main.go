@@ -3,8 +3,8 @@ package cfapppush
 import (
 	"errors"
 
-	"github.com/SUSE/stratos-ui/plugins/cfapppush/pushapp"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/plugins/cfapppush/pushapp"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	"github.com/labstack/echo"
 )
 

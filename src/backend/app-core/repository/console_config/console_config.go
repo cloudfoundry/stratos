@@ -1,7 +1,7 @@
 package console_config
 
 import (
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 type Repository interface {

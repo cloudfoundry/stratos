@@ -4,7 +4,7 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { GetServiceInstances } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { endpointSchemaKey, entityFactory, serviceInstancesSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

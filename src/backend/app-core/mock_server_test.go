@@ -16,11 +16,11 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 
-	"github.com/SUSE/stratos-ui/plugins/cloudfoundry"
+	"github.com/cloudfoundry-incubator/stratos/plugins/cloudfoundry"
 )
 
 type mockServer struct {

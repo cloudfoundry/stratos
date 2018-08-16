@@ -10,8 +10,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/datastore"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation
