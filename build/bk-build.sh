@@ -27,8 +27,6 @@ if [ -d "${STRATOS_GOBASE}/src/jetstream" ]; then
   rm -rf ${STRATOS_GOBASE}/src/jetstream
 fi
 
-
-
 # Set go path
 export GOPATH=${STRATOS}/tmp/go
 
@@ -44,7 +42,7 @@ cp Gopkg.* ${STRATOS_GOBASE}
 pushd ${STRATOS_GOBASE} > /dev/null
 set +e
 echo "Checking backend dependencies ..."
-dep check -skip-lock
+dep check -skip-lock > /dev/null
 DEP_CHECK_RESULT=$?
 set -e
 if [ ${DEP_CHECK_RESULT} -ne 0 ]; then

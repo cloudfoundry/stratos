@@ -10,6 +10,8 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
+VENDOR_FOLDER=tmp/go/src/github.com/cloudfoundry-incubator/stratos/vendor
+
 function log {
   COLOR=${2:-}
   STYLE=${3:-}
@@ -28,22 +30,29 @@ cp ${CF_DIR}/config.properties ${TOP_LEVEL}
 
 cd ${TOP_LEVEL}
 
+log "Fetching front-end dependencies" $CYAN
+
 npm install
 npm run customize
 
+log "Building front-end" $CYAN
 npm run build-cf
 
 # Restore cached go vendor folder if there is one
 if [ -d $CACHE_DIR/go-vendor ]; then
   log "Restoring vendor folder" $YELLOW
-  cp -R $CACHE_DIR/go-vendor ./vendor 
+  mkdir -p ${VENDOR_FOLDER}
+  cp -R $CACHE_DIR/go-vendor/* ${VENDOR_FOLDER}
 fi
 
 # Build backend (and fetch dependencies)
+log "Building back-end" $CYAN
 ./build/bk-build.sh
 
 # Copy backend executable here
 cp outputs/portal-proxy .
+
+mkdir -p dist
 
 # Back-end serves static resources from ui folder not dist
 mv dist ui
@@ -56,9 +65,12 @@ rm -rf ./dist
 rm -rf ./outputs
 
 # Store dep cache
-if [ -d ./vendor ]; then
+if [ -d ${VENDOR_FOLDER} ]; then
   log "Storing vendor folder" $YELLOW
-  cp -R ./vendor $CACHE_DIR/go-vendor
+  # Remove existing vendor cache if there is one
+  rm -rf $CACHE_DIR/go-vendor
+  mkdir -p $CACHE_DIR/go-vendor
+  cp -R ${VENDOR_FOLDER}/* $CACHE_DIR/go-vendor
 fi
 
 # Remove files and folders not needed for running the app
@@ -77,12 +89,12 @@ rm -rf *.js
 rm -rf *.md
 
 # List app contents at the top-level
-echo "App folder (top-level)"
+log "App folder (top-level)" $CYAN
 ls -al
 
-log "All done" $CYAN $BOLD
-
-echo "Disk usage for cache and app folders:"
+log "Disk usage for cache and app folders:" $CYAN
 
 du -h -c --summarize ${CACHE_DIR}
 du -h -c --summarize ${BUILD_DIR}
+
+log "All done" $CYAN $BOLD
