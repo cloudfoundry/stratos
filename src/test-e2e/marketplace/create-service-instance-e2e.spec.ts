@@ -106,7 +106,7 @@ describe('Create Service Instance', () => {
         createServiceInstance.stepper.next();
 
         // Select Service
-  servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+        servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
         createServiceInstance.stepper.next();
 
         // Select Service Plan
