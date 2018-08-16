@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/datastore"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
 )
 
 const (

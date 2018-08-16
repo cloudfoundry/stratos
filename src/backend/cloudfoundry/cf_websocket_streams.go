@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	log "github.com/sirupsen/logrus"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
 	noaa_errors "github.com/cloudfoundry/noaa/errors"

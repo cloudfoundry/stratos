@@ -7,15 +7,15 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/SUSE/stratos-ui/config"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/config"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 const cfSessionCookieName = "JSESSIONID"

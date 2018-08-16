@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/SUSE/stratos-ui/config"
+	"github.com/cloudfoundry-incubator/stratos/config"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	// Mysql driver
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"

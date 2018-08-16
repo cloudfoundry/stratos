@@ -4,11 +4,11 @@ import (
 	"os/exec"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/config"
-	"github.com/SUSE/stratos-ui/repository/goose-db-version"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/config"
+	"github.com/cloudfoundry-incubator/stratos/repository/goose-db-version"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 func (p *portalProxy) StoreDiagnostics() {

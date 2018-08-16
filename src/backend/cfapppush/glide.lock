@@ -21,8 +21,8 @@ imports:
   subpackages:
   - color
   - log
-- name: github.com/Sirupsen/logrus
-  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
+- name: github.com/sirupsen/logrus
+  version: 3e01752db0189b9157070a0e1668a620f9a85da2
 - name: code.cloudfoundry.org/cli
   version: e3799ad7e657d4e04663af7f0440c3fc0906c9ac
   subpackages:

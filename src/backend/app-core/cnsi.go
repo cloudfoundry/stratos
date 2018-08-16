@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo"
 
-	"github.com/SUSE/stratos-ui/repository/cnsis"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/repository/cnsis"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 	"crypto/sha1"
 	"encoding/base64"
 )

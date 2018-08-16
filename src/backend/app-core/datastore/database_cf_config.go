@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SUSE/stratos-ui/config"
-	log "github.com/Sirupsen/logrus"
+	"github.com/cloudfoundry-incubator/stratos/config"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

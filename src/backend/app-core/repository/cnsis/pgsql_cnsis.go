@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/SUSE/stratos-ui/datastore"
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	log "github.com/sirupsen/logrus"
 )
 
 var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret

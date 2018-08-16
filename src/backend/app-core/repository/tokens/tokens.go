@@ -1,6 +1,6 @@
 package tokens
 
-import "github.com/SUSE/stratos-ui/repository/interfaces"
+import "github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 
 // Token -
 type Token struct {

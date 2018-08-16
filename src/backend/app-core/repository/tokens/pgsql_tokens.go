@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SUSE/stratos-ui/datastore"
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	log "github.com/sirupsen/logrus"
 )
 
 var findAuthToken = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data

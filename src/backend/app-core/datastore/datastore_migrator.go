@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 )

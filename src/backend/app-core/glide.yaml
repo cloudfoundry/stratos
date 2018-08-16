@@ -1,7 +1,7 @@
-package: github.com/SUSE/stratos-ui/components/app-core/backend
+package: github.com/cloudfoundry-incubator/stratos/src/backend/app-core
 import:
-- package: github.com/Sirupsen/logrus
-  version: 0.11.5
+- package: github.com/sirupsen/logrus
+  version: 1.0.6
 - package: github.com/antonlindstrom/pgstore
 - package: github.com/cloudfoundry/noaa
   version: ^2.0.0

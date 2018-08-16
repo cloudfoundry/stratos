@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 )
 
 // UAAResponse - Response returned by Cloud Foundry UAA Service
