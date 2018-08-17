@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
+import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin.component';
 
 
@@ -11,7 +12,7 @@ describe('TableCellEndpointIsAdminComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellEndpointIsAdminComponent],
+      declarations: [TableCellEndpointIsAdminComponent, BooleanIndicatorComponent],
       imports: [
         CoreModule
       ]
