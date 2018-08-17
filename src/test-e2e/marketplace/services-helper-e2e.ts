@@ -51,7 +51,7 @@ export class ServicesHelperE2E {
     );
   }
 
-eateService = (serviceName: string, marketplaceMode = false) => {
+  createService = (serviceName: string, marketplaceMode = false) => {
     this.createServiceInstance.waitForPage();
 
     // Select CF/Org/Space
