@@ -36,7 +36,7 @@ try {
 }
 
 // This is the maximum amount of time ALL before/after/it's must execute in
-const timeout = 60000
+const timeout = 30000
 
 exports.config = {
   allScriptsTimeout: timeout,
@@ -56,7 +56,7 @@ exports.config = {
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
-    defaultTimeoutInterval: 30000,
+    defaultTimeoutInterval: timeout,
     print: function () {}
   },
   params: secrets,
