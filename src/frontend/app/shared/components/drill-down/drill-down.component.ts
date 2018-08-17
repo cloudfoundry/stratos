@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-import { tap } from 'rxjs/operators';
+import { map, distinctUntilChanged, tap, startWith, debounceTime, delay } from 'rxjs/operators';
 export interface IDrillDownLevelRequest {
   data$: Observable<any[]>;
-  state$?: Observable<ActionState>
+  state$?: Observable<ActionState>;
 }
 export interface DrillDownLevel {
   title: string;
@@ -30,7 +30,8 @@ export class DrillDownComponent implements OnInit {
       item: any
     },
     data$: Observable<any[]>;
-    state$: Observable<ActionState>;
+    // state$: Observable<ActionState>;
+    isBusy$: Observable<boolean>;
   }[] = [];
 
   public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
@@ -62,12 +63,18 @@ export class DrillDownComponent implements OnInit {
       }
 
       const { data$, state$ = of({ busy: false, error: false, message: '' }) } = this.getLevelRequest(levelData, item, allSelected);
-
+      const isBusy$ = state$.pipe(
+        map(state => state.busy),
+        delay(0),
+        distinctUntilChanged(),
+        tap(console.log)
+      );
       if (this.levelData.length > (levelIndex + 1)) {
         // Remove old data
         this.levelData = this.levelData.slice(0, levelIndex);
       }
-      this.levelData[levelIndex] = { title: levelData.title, data$, selected: { index: null, item: null }, state$ };
+      this.levelData[levelIndex] =
+        { title: levelData.title, data$, selected: { index: null, item: null }, isBusy$ };
     }
   }
 

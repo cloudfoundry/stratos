@@ -1,20 +1,21 @@
-import { applicationSchemaKey } from './../../../store/helpers/entity-factory';
-import { EndpointModel } from './../../../store/types/endpoint.types';
-import { DrillDownDefinition } from './../../../shared/components/drill-down/drill-down.component';
-import { PaginationMonitorFactory } from './../../../shared/monitors/pagination-monitor.factory';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { of, Observable } from 'rxjs';
-import { AppState } from '../../../store/app-state';
+import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { entityFactory, endpointSchemaKey, organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
-import { map } from 'rxjs/operators';
-import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
-import { APIResource } from '../../../store/types/api.types';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { GetAllOrganizationSpaces } from '../../../store/actions/organization.actions';
 import { GetAllAppsInSpace } from '../../../store/actions/space.actions';
+import { AppState } from '../../../store/app-state';
+import { endpointSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
+import { APIResource } from '../../../store/types/api.types';
+import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { DrillDownDefinition } from './../../../shared/components/drill-down/drill-down.component';
+import { PaginationMonitorFactory } from './../../../shared/monitors/pagination-monitor.factory';
+import { applicationSchemaKey } from './../../../store/helpers/entity-factory';
+import { EndpointModel } from './../../../store/types/endpoint.types';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginatedAction } from '../../../store/types/pagination.types';
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 
 @Component({
   selector: 'app-home-page',
@@ -24,7 +25,15 @@ import { GetAllAppsInSpace } from '../../../store/actions/space.actions';
 export class HomePageComponent implements OnInit {
   public definition: DrillDownDefinition;
 
-  constructor(store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) {
+  public getPagination(action: PaginatedAction, paginationMonitor: PaginationMonitor) {
+    return getPaginationObservables({
+      store: this.store,
+      action,
+      paginationMonitor
+    });
+  }
+
+  constructor(private store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) {
 
     this.definition = [
       {
@@ -36,62 +45,48 @@ export class HomePageComponent implements OnInit {
       },
       {
         title: 'Organizations',
-        selectItem: (cf: EndpointModel) => {
-          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
-          action.includeRelations = [];
-          store.dispatch(action);
-        },
         request: (cf: EndpointModel) => {
           const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
+          action.includeRelations = [];
           const monitor = paginationMonitorFactory
-            .create<APIResource<IOrganization>>(action.paginationKey, entityFactory(organizationSchemaKey))
+            .create<APIResource<IOrganization>>(action.paginationKey, entityFactory(organizationSchemaKey));
+          const data$ = this.getPagination(action, monitor).entities$;
           return {
-            data$: monitor.currentPage$,
+            data$,
             state$: monitor.currentPageRequestState$
-          }
+          };
         }
       },
       {
         title: 'Spaces',
-        selectItem: (
-          org: APIResource<IOrganization>,
-          [cf]: [EndpointModel]
-        ) => {
+        request: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
           const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid);
-          store.dispatch(new GetAllOrganizationSpaces(
+          const action = new GetAllOrganizationSpaces(
             paginationKey,
             org.entity.guid,
             cf.guid
-          ));
-        },
-        request: (org: APIResource<IOrganization>) => {
-          const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid);
+          );
           const monitor = paginationMonitorFactory
             .create<APIResource<ISpace>>(paginationKey, entityFactory(spaceSchemaKey));
+          const data$ = this.getPagination(action, monitor).entities$;
           return {
-            data$: monitor.currentPage$,
+            data$,
             state$: monitor.currentPageRequestState$
-          }
+          };
         }
       },
       {
         title: 'Applications',
-        selectItem: (
-          space: APIResource<ISpace>,
-          [cf]: [EndpointModel]
-        ) => {
+        request: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => {
           const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid);
           const action = new GetAllAppsInSpace(cf.guid, space.entity.guid, paginationKey);
-          store.dispatch(action);
-        },
-        request: (space: APIResource<ISpace>) => {
-          const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid);
           const monitor = paginationMonitorFactory
             .create<APIResource<IApp>>(paginationKey, entityFactory(applicationSchemaKey));
+          const data$ = this.getPagination(action, monitor).entities$;
           return {
-            data$: monitor.currentPage$,
+            data$,
             state$: monitor.currentPageRequestState$
-          }
+          };
         }
       }
     ];
