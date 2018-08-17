@@ -1,6 +1,6 @@
 import { promise } from 'protractor';
 
-import { IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
+import { IOrganization, IRoute, ISpace, IApp } from '../../frontend/app/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { CfUser } from '../../frontend/app/store/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -158,7 +158,7 @@ export class CFHelpers {
   }
 
   // For fully fleshed our create see application-e2e-helpers
-  basicCreateApp(cnsiGuid: string, spaceGuid: string, appName: string) {
+  basicCreateApp(cnsiGuid: string, spaceGuid: string, appName: string): promise.Promise<APIResource<IApp>> {
     return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
   }
 
@@ -202,21 +202,35 @@ export class CFHelpers {
   fetchDefaultOrgGuid = (fromCache = true): promise.Promise<string> => {
     return fromCache && this.cachedDefaultOrgGuid ?
       promise.fullyResolved(this.cachedDefaultOrgGuid) :
-      this.fetchDefaultCfGuid(true).then(guid => this.fetchOrg(guid, e2e.secrets.getDefaultCFEndpoint().testOrg).then(org => {
-        this.cachedDefaultOrgGuid = org.metadata.guid;
-        return this.cachedDefaultOrgGuid;
-      }));
+      this.fetchDefaultCfGuid(true)
+        .then(guid => this.addOrgIfMissingForEndpointUsers(
+          guid,
+          e2e.secrets.getDefaultCFEndpoint(),
+          e2e.secrets.getDefaultCFEndpoint().testOrg
+        ))
+        .then(org => {
+          this.cachedDefaultOrgGuid = org.metadata.guid;
+          return this.cachedDefaultOrgGuid;
+        });
   }
 
   fetchDefaultSpaceGuid = (fromCache = true): promise.Promise<string> => {
     return fromCache && this.cachedDefaultSpaceGuid ?
       promise.fullyResolved(this.cachedDefaultSpaceGuid) :
-      this.fetchDefaultOrgGuid(true).then(orgGuid =>
-        this.fetchSpace(this.cachedDefaultCfGuid, orgGuid, e2e.secrets.getDefaultCFEndpoint().testSpace)
-      ).then(space => {
-        this.cachedDefaultSpaceGuid = space.metadata.guid;
-        return this.cachedDefaultSpaceGuid;
-      });
+      this.fetchDefaultOrgGuid(true)
+        .then(orgGuid =>
+          this.addSpaceIfMissingForEndpointUsers(
+            this.cachedDefaultCfGuid,
+            this.cachedDefaultOrgGuid,
+            e2e.secrets.getDefaultCFEndpoint().testOrg,
+            e2e.secrets.getDefaultCFEndpoint().testSpace,
+            e2e.secrets.getDefaultCFEndpoint()
+          )
+        )
+        .then(space => {
+          this.cachedDefaultSpaceGuid = space.metadata.guid;
+          return this.cachedDefaultSpaceGuid;
+        });
   }
 
 }

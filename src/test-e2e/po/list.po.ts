@@ -3,7 +3,7 @@ import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
-import { MetaCard } from './meta-card.po';
+import { MetaCard, MetaCardTitleType } from './meta-card.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -143,7 +143,7 @@ export class ListCardComponent extends Component {
   }
 
   getCard(index: number): MetaCard {
-    return new MetaCard(this.getCards().get(index));
+    return new MetaCard(this.getCards().get(index), MetaCardTitleType.CUSTOM);
   }
 
   findCardByTitle(title: string): promise.Promise<MetaCard> {
@@ -151,7 +151,7 @@ export class ListCardComponent extends Component {
       return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
-      return new MetaCard(e[0]);
+      return new MetaCard(e[0], MetaCardTitleType.CUSTOM);
     });
   }
 
@@ -302,5 +302,13 @@ export class ListEmptyComponent extends Component {
 
   getDefault(): Component {
     return new Component(element(by.css('.list-component__default-no-entries')));
+  }
+
+  getCustom(): Component {
+    return new Component(element(by.css('app-no-content-message')));
+  }
+
+  getCustomLineOne(): promise.Promise<string> {
+    return this.getCustom().getComponent().element(by.css('.first-line')).getText();
   }
 }

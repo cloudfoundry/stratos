@@ -1,8 +1,8 @@
 import { browser, by, element, promise } from 'protractor';
 
-import { ListComponent } from '../../po/list.po';
-import { MetaDataItemComponent } from '../../po/meta-data-time.po';
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
+import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
 
 export class CfTopLevelPage extends CFPage {
@@ -52,7 +52,8 @@ export class CfTopLevelPage extends CFPage {
   }
 
   private waitForMetaDataItemComponent(label: string): MetaDataItemComponent {
-    const comp = new MetaDataItemComponent(element(by.css(`app-metadata-item[label="${label}"]`)));
+    // TODO: RC fix
+    const comp = MetaDataItemComponent.withLabel(element(by.css('')), label);
     comp.waitUntilShown();
     return comp;
   }
@@ -70,7 +71,11 @@ export class CfTopLevelPage extends CFPage {
   }
 
   goToFirehoseTab() {
-    return this.goToTab('Firehose', 'firehose');
+    // log viewer blocks angular from settling
+    browser.waitForAngularEnabled(false);
+    return this.goToTab('Firehose', 'firehose').then(() => {
+      browser.waitForAngularEnabled(true);
+    });
   }
 
   goToFeatureFlagsTab() {

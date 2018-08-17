@@ -1,15 +1,41 @@
+import { browser, by, ElementFinder, promise, protractor } from 'protractor';
+import { By } from 'selenium-webdriver';
+
 import { Component } from './component.po';
-import { ElementFinder, element, by, promise } from 'protractor';
 import { MenuComponent } from './menu.po';
+
+const until = protractor.ExpectedConditions;
+
+export enum MetaCardTitleType {
+  /**
+   * Title is in a normal mat-card-header
+   */
+  MAT_CARD = 'mat-card-title',
+  /**
+   * Title text is in a custom div (used to inline title with action menu)
+   */
+  CUSTOM = 'meta-card__title'
+}
 
 export class MetaCard extends Component {
 
-  constructor(private elementFinder: ElementFinder) {
+  titleBy: By;
+
+  constructor(private elementFinder: ElementFinder, titleType: MetaCardTitleType) {
     super(elementFinder);
+    this.titleBy = by.css(titleType);
+  }
+
+  private getTitleElement() {
+    return this.elementFinder.element(this.titleBy);
+  }
+
+  waitForTitle(title: string): promise.Promise<any> {
+    return browser.wait(until.textToBePresentInElement(this.getTitleElement(), title), 5000);
   }
 
   getTitle(): promise.Promise<string> {
-    return this.elementFinder.getWebElement().findElement(by.css('.meta-card__title')).getText();
+    return this.getTitleElement().getText();
   }
 
   openActionMenu(): promise.Promise<MenuComponent> {
