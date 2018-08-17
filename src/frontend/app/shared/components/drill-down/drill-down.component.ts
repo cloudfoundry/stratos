@@ -73,8 +73,7 @@ export class DrillDownComponent implements OnInit {
         // Remove old data
         this.levelData = this.levelData.slice(0, levelIndex);
       }
-      this.levelData[levelIndex] =
-        { title: levelData.title, data$, selected: { index: null, item: null }, isBusy$ };
+      this.levelData[levelIndex] = { title: levelData.title, data$, selected: { index: null, item: null }, isBusy$ };
     }
   }
 

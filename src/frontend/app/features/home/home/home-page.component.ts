@@ -16,6 +16,7 @@ import { EndpointModel } from './../../../store/types/endpoint.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
+import { ApiRequestDrillDownLevel } from '../../../shared/components/drill-down/drill-down-levels/api-request-drill-down-level';
 
 @Component({
   selector: 'app-home-page',
@@ -43,52 +44,30 @@ export class HomePageComponent implements OnInit {
             .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
         }
       },
-      {
+      new ApiRequestDrillDownLevel(this.store, {
         title: 'Organizations',
-        request: (cf: EndpointModel) => {
-          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
+        getAction: (cf: EndpointModel) => {
+          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid)
           action.includeRelations = [];
-          const monitor = paginationMonitorFactory
-            .create<APIResource<IOrganization>>(action.paginationKey, entityFactory(organizationSchemaKey));
-          const data$ = this.getPagination(action, monitor).entities$;
-          return {
-            data$,
-            state$: monitor.currentPageRequestState$
-          };
+          return action;
         }
-      },
-      {
+      }),
+      new ApiRequestDrillDownLevel(this.store, {
         title: 'Spaces',
-        request: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
-          const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid);
-          const action = new GetAllOrganizationSpaces(
-            paginationKey,
-            org.entity.guid,
-            cf.guid
-          );
-          const monitor = paginationMonitorFactory
-            .create<APIResource<ISpace>>(paginationKey, entityFactory(spaceSchemaKey));
-          const data$ = this.getPagination(action, monitor).entities$;
-          return {
-            data$,
-            state$: monitor.currentPageRequestState$
-          };
-        }
-      },
-      {
+        getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => new GetAllOrganizationSpaces(
+          createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid),
+          org.entity.guid,
+          cf.guid
+        )
+      }),
+      new ApiRequestDrillDownLevel(this.store, {
         title: 'Applications',
-        request: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => {
-          const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid);
-          const action = new GetAllAppsInSpace(cf.guid, space.entity.guid, paginationKey);
-          const monitor = paginationMonitorFactory
-            .create<APIResource<IApp>>(paginationKey, entityFactory(applicationSchemaKey));
-          const data$ = this.getPagination(action, monitor).entities$;
-          return {
-            data$,
-            state$: monitor.currentPageRequestState$
-          };
-        }
-      }
+        getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => new GetAllAppsInSpace(
+          cf.guid,
+          space.entity.guid,
+          createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid)
+        )
+      })
     ];
   }
 
