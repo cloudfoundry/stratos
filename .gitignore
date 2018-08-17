@@ -104,3 +104,7 @@ src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom
 src/frontend/index.html
+
+# Prebuild package
+
+stratos-frontend-prebuild.zip

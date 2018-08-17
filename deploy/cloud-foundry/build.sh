@@ -29,7 +29,15 @@ npm run customize
 # Fetch Glide dependencies
 npm run cf-get-backend-deps
 
-npm run build-cf
+# Use pre-built UI if archive file is present
+if [ -f "stratos-frontend-prebuild.zip" ]; then
+  echo "Using pre-built front-end"
+  mkdir -p dist
+  unzip stratos-frontend-prebuild.zip -d ./dist
+else
+  # Build front-end
+  npm run build-cf
+fi
 
 # Build backend components
 npm run cf-build-backend
@@ -52,3 +60,4 @@ echo "Disk usage for cache and app folders:"
 
 du -h -c --summarize ${CACHE_DIR}
 du -h -c --summarize ${BUILD_DIR}
+
