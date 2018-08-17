@@ -23,8 +23,11 @@ STRATOS_GOBASE=tmp/go/src/github.com/cloudfoundry-incubator/stratos
 mkdir -p ${STRATOS_GOBASE}/src
 
 # Remove the temporary source folder if it is already there
-if [ -d "${STRATOS_GOBASE}/src/jetstream" ]; then
-  rm -rf ${STRATOS_GOBASE}/src/jetstream
+rm -rf ${STRATOS_GOBASE}/src/jetstream
+
+# Copy vendor folder if needed
+if [ ! -d "${STRATOS_GOBASE}/vendor" ] && [ -d "${STRATOS}/vendor" ]; then
+  cp -R ${STRATOS}/vendor ${STRATOS_GOBASE} 
 fi
 
 # Set go path
@@ -42,7 +45,7 @@ cp Gopkg.* ${STRATOS_GOBASE}
 pushd ${STRATOS_GOBASE} > /dev/null
 set +e
 echo "Checking backend dependencies ..."
-dep check -skip-lock > /dev/null
+dep check -skip-lock
 DEP_CHECK_RESULT=$?
 set -e
 if [ ${DEP_CHECK_RESULT} -ne 0 ]; then

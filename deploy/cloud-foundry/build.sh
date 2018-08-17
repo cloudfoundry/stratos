@@ -52,8 +52,6 @@ log "Building back-end" $CYAN
 # Copy backend executable here
 cp outputs/portal-proxy .
 
-mkdir -p dist
-
 # Back-end serves static resources from ui folder not dist
 mv dist ui
 
@@ -73,24 +71,9 @@ if [ -d ${VENDOR_FOLDER} ]; then
   cp -R ${VENDOR_FOLDER}/* $CACHE_DIR/go-vendor
 fi
 
-# Remove files and folders not needed for running the app
-rm -rf ./build
-rm -rf ./src
-rm -rf ./vendor
+# Remove transient folders used during build
 rm -rf ./node_modules
 rm -rf ./tmp
-rm -rf angular.json
-rm -rf index.yaml
-rm -rf Gopkg.*
-rm -rf package.json
-rm -rf .??*
-rm -rf *.json
-rm -rf *.js
-rm -rf *.md
-
-# List app contents at the top-level
-log "App folder (top-level)" $CYAN
-ls -al
 
 log "Disk usage for cache and app folders:" $CYAN
 

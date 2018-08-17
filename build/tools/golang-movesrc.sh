@@ -20,6 +20,9 @@ fi
 
 # Assumes you are running from top-level folder
 
+# Remove readme file for plugin - no longer needed
+git rm src/backend/cfapppush/README.md
+
 git mv src/backend src/jetstream
 mkdir src/jetstream/plugins
 git mv src/jetstream/app-core/* src/jetstream
@@ -92,6 +95,3 @@ git rm -rf src/jetstream/__vendor
 
 # Stop ignore of app-core
 sed -i '' '/.*app-core.*/d' .gitignore
-
-# Remove readme file for plugin - no longer needed
-git rm src/jetstream/plugins/cfapppush/README.md

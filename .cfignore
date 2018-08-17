@@ -7,7 +7,7 @@ out/
 outputs/
 tmp/
 tools/
-CHANGELOG.md
+*.md
 test/
 deploy/all-in-one/
 deploy/ci/
@@ -20,4 +20,3 @@ deploy/stratos-ui-release/
 deploy/uaa/
 docs/
 build/dev_config.json
-vendor/
