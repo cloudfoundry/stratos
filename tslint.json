@@ -1,9 +1,4 @@
 {
-  "linterOptions": {
-    "exclude": [
-        "src/test-e2e/**/*.ts"
-    ]
-  },
   "rulesDirectory": [
     "node_modules/codelyzer",
     "node_modules/rxjs-tslint"

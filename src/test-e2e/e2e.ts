@@ -5,6 +5,7 @@ import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
 
+/* tslint:disable */
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
  */
@@ -212,3 +213,4 @@ export class E2ESetup {
 export const e2e = new E2E();
 
 
+/* tslint:enable */

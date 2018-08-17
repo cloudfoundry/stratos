@@ -55,7 +55,9 @@ export class ApplicationE2eHelper {
 
     const deps = promise.all(promises).catch(err => {
       const errorString = `Failed to delete routes or services attached to an app`;
+      /* tslint:disable */
       console.log(`${errorString}: ${err}`);
+      /* tslint:enable */
       return promise.rejected(errorString);
     });
 
