@@ -44,11 +44,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cloudFoundry.waitForPageOrChildPage();
   });
 
-  afterAll(() => {
-    return cfHelper.deleteSpaceIfExisting(endpointGuid, testSpaceName).then(() =>
-      cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName)
-    );
-  });
+  afterAll(() => cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName));
 
   it('Should validate org name', () => {
     const cardView = cloudFoundry.goToOrgView();
