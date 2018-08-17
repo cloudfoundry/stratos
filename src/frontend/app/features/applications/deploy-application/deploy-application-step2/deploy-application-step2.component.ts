@@ -122,6 +122,7 @@ export class DeployApplicationStep2Component
       this.stepperText = 'Review source details';
     }
 
+    let action;
     this.sourceType$ = this.store.select(selectSourceType);
 
     this.sourceTypeGithub$ = this.sourceType$.pipe(
@@ -142,7 +143,7 @@ export class DeployApplicationStep2Component
           if (this.branchesSubscription) {
             this.branchesSubscription.unsubscribe();
           }
-          const action = new FetchBranchesForProject(p.name);
+          action = new FetchBranchesForProject(p.name);
           this.branchesSubscription = getPaginationObservables<APIResource>(
             {
               store: this.store,
@@ -160,7 +161,7 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(fetchBranches);
 
-    const action = {
+    action = {
       entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;

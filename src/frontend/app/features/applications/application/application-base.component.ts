@@ -16,7 +16,7 @@ export function applicationServiceFactory(
   cfId: string,
   id: string,
   store: Store<AppState>,
-  entityServiceFactory: EntityServiceFactory,
+  entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsService,
   paginationMonitorFactory: PaginationMonitorFactory
@@ -25,7 +25,7 @@ export function applicationServiceFactory(
     cfId,
     id,
     store,
-    entityServiceFactory,
+    entityServiceFactoryInstance,
     appStateService,
     appEnvVarsService,
     paginationMonitorFactory

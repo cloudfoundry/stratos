@@ -68,12 +68,13 @@ export class CurrentUserPermissionsChecker {
       filter(state => !!state),
       map(state => {
         const permissionString = permission as PermissionStrings;
+        let orgOrSpaceState;
         if (allSpacesWithinOrg) {
-          const orgOrSpaceState = state[PermissionTypes.ORGANIZATION][orgOrSpaceGuid];
+          orgOrSpaceState = state[PermissionTypes.ORGANIZATION][orgOrSpaceGuid];
           const spaceState = state[PermissionTypes.SPACE];
           return this.checkAllSpacesInOrg(orgOrSpaceState, spaceState, permissionString);
         }
-        const orgOrSpaceState = state[type][orgOrSpaceGuid];
+        orgOrSpaceState = state[type][orgOrSpaceGuid];
         return this.selectPermission(orgOrSpaceState, permissionString);
       }),
       distinctUntilChanged(),
