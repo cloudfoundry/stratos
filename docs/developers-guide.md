@@ -16,7 +16,7 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
 ### Set up Dependencies
 
 * Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo. To set up a backend
-  run through the [deploy section](https://github.com/SUSE/stratos-ui/blob/master/deploy/README.md), choose a deployment method and bring
+  run through the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md), choose a deployment method and bring
   one up. These deployments will bring up the entire backend, including api service and database along with a V2 frontend.
 * Install [NodeJs](https://nodejs.org) (mininum version v8.6.0)
 * Install [Angular CLI](https://cli.angular.io/) - `npm install -g @angular/cli`

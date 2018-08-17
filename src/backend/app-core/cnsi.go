@@ -12,9 +12,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
-	"github.com/SUSE/stratos-ui/repository/cnsis"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/repository/cnsis"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 	"crypto/sha1"
 	"encoding/base64"
 )
@@ -47,7 +47,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
-	cnsiClientId :=  c.FormValue("cnsi_client_id")
+	cnsiClientId := c.FormValue("cnsi_client_id")
 	cnsiClientSecret := c.FormValue("cnsi_client_secret")
 
 	if cnsiClientId == "" {

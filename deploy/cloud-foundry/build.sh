@@ -35,8 +35,16 @@ log "Fetching front-end dependencies" $CYAN
 npm install
 npm run customize
 
-log "Building front-end" $CYAN
-npm run build-cf
+# Use pre-built UI if archive file is present
+if [ -f "stratos-frontend-prebuild.zip" ]; then
+  log "Using pre-built front-end" $VYAN
+  mkdir -p dist
+  unzip stratos-frontend-prebuild.zip -d ./dist
+else
+  # Build front-end
+  log "Building front-end" $CYAN
+  npm run build-cf
+fi
 
 # If the repo has a vendor folder  move that to the cache to be used, signal to use it as is
 if [ -d ./vendor ]; then
@@ -59,8 +67,6 @@ log "Building back-end" $CYAN
 
 # Copy backend executable here
 cp outputs/portal-proxy .
-
-mkdir -p dist
 
 # Back-end serves static resources from ui folder not dist
 mv dist ui

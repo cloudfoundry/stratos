@@ -63,7 +63,6 @@ export class ApplicationE2eHelper {
 
     // Delete app
     return deps.then(() => {
-      // console.log('Successfully delete deps: ', this.cfRequestHelper.sendCfDelete);
       return cfRequestHelper.sendCfDelete(cfGuid, 'apps/' + app.metadata.guid);
     }).catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
   }

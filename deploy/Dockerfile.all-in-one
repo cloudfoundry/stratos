@@ -10,7 +10,7 @@ COPY --chown=stratos:users deploy/db deploy/db
 COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
 RUN npm install \
-    && npm run build-cf \
+    && npm run build \
     && npm run build-backend \
     && ./build/bk-build.sh \
     && cp outputs/portal-proxy . \

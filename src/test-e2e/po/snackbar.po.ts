@@ -19,9 +19,9 @@ export class SnackBarComponent extends Component {
     return this.locator.element(by.tagName('button')).getText();
   }
 
-  // The text has the button text as well - so just check that the text starts with expected text
   hasMessage(expected: string): promise.Promise<boolean> {
     return this.locator.getText().then(actual => {
+      // The text has the button text as well - so just check that the text starts with expected text
       return actual.startsWith(expected);
     });
   }

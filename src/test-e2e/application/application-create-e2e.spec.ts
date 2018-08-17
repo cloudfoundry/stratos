@@ -69,7 +69,7 @@ describe('Application Create', function () {
     createAppStepper.waitUntilNotShown();
 
     // Determine the app guid and confirm we're on the app summary page
-    const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfCnsi();
+    const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfInfo();
     const fetchApp = getCfCnsi.then(endpointModel => {
       cfGuid = endpointModel.guid;
       return applicationE2eHelper.fetchApp(cfGuid, testAppName);
