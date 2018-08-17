@@ -38,11 +38,19 @@ npm run customize
 log "Building front-end" $CYAN
 npm run build-cf
 
-# Restore cached go vendor folder if there is one
-if [ -d $CACHE_DIR/go-vendor ]; then
-  log "Restoring vendor folder" $YELLOW
+# If the repo has a vendor folder  move that to the cache to be used, signal to use it as is
+if [ -d ./vendor ]; then
+  log "Using vendor folder" $YELLOW
   mkdir -p ${VENDOR_FOLDER}
-  cp -R $CACHE_DIR/go-vendor/* ${VENDOR_FOLDER}
+  cp -R ./vendor/* ${VENDOR_FOLDER}
+  export STRATOS_USE_VENDOR_AS_IS=true
+else
+  # Restore cached go vendor folder if there is one
+  if [ -d $CACHE_DIR/go-vendor ]; then
+    log "Restoring cached vendor folder" $YELLOW
+    mkdir -p ${VENDOR_FOLDER}
+    cp -R $CACHE_DIR/go-vendor/* ${VENDOR_FOLDER}
+  fi
 fi
 
 # Build backend (and fetch dependencies)
@@ -51,6 +59,8 @@ log "Building back-end" $CYAN
 
 # Copy backend executable here
 cp outputs/portal-proxy .
+
+mkdir -p dist
 
 # Back-end serves static resources from ui folder not dist
 mv dist ui
@@ -64,7 +74,7 @@ rm -rf ./outputs
 
 # Store dep cache
 if [ -d ${VENDOR_FOLDER} ]; then
-  log "Storing vendor folder" $YELLOW
+  log "Cacheing vendor folder" $YELLOW
   # Remove existing vendor cache if there is one
   rm -rf $CACHE_DIR/go-vendor
   mkdir -p $CACHE_DIR/go-vendor
