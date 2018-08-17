@@ -1,18 +1,39 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { delay, distinctUntilChanged, map } from 'rxjs/operators';
+import { ListPagination } from '../../../store/actions/list.actions';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-import { map, distinctUntilChanged, tap, startWith, debounceTime, delay } from 'rxjs/operators';
+import { PageEvent } from '@angular/material';
+
+export interface IDrillDownLevelPagination {
+  state$: Observable<ListPagination>;
+  page: (pageEvent: PageEvent) => void;
+}
 export interface IDrillDownLevelRequest {
   data$: Observable<any[]>;
   state$?: Observable<ActionState>;
+  pagination?: IDrillDownLevelPagination;
 }
 export interface DrillDownLevel {
   title: string;
-  request: ((parent?: any, allAncestors?: any[]) => IDrillDownLevelRequest) | IDrillDownLevelRequest,
+  request: ((parent?: any, allAncestors?: any[]) => IDrillDownLevelRequest) | IDrillDownLevelRequest;
   selectItem?: (parent?: any, allAncestors?: any[]) => void;
 }
 
 export type DrillDownDefinition = DrillDownLevel[];
+
+// Internal level data derived from the drill down definition passed to the component
+interface DrillDownLevelData {
+  title: string;
+  selected: {
+    index: number,
+    item: any
+  };
+  data$: Observable<any[]>;
+  isBusy$: Observable<boolean>;
+  hasErrored$: Observable<boolean>;
+  pagination?: IDrillDownLevelPagination;
+}
 
 @Component({
   selector: 'app-drill-down',
@@ -23,16 +44,7 @@ export class DrillDownComponent implements OnInit {
   @Input('definition')
   private definition: DrillDownDefinition;
 
-  public levelData: {
-    title: string,
-    selected: {
-      index: number,
-      item: any
-    },
-    data$: Observable<any[]>;
-    // state$: Observable<ActionState>;
-    isBusy$: Observable<boolean>;
-  }[] = [];
+  public levelData: DrillDownLevelData[] = [];
 
   public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
     const nextIndex = levelIndex + 1;
@@ -55,30 +67,43 @@ export class DrillDownComponent implements OnInit {
   }
 
   public addLevel(levelIndex: number, item?: any) {
-    const levelData = this.definition[levelIndex];
-    if (levelData) {
-      const allSelected = this.levelData.map((level, i) => level.selected.item);
-      if (levelData.selectItem) {
-        levelData.selectItem(item, allSelected);
+    const levelDefinition = this.definition[levelIndex];
+    if (levelDefinition) {
+      const { selectItem, title } = levelDefinition;
+      const allSelected = this.levelData.map(level => level.selected.item);
+      if (selectItem) {
+        selectItem(item, allSelected);
       }
 
-      const { data$, state$ = of({ busy: false, error: false, message: '' }) } = this.getLevelRequest(levelData, item, allSelected);
+      const {
+        pagination,
+        data$,
+        state$ = of({ busy: false, error: false, message: '' })
+      } = this.getLevelRequest(levelDefinition, item, allSelected);
       const isBusy$ = state$.pipe(
         map(state => state.busy),
         delay(0),
         distinctUntilChanged(),
-        tap(console.log)
+      );
+      const hasErrored$ = state$.pipe(
+        map(state => state.error)
       );
       if (this.levelData.length > (levelIndex + 1)) {
         // Remove old data
         this.levelData = this.levelData.slice(0, levelIndex);
       }
-      this.levelData[levelIndex] = { title: levelData.title, data$, selected: { index: null, item: null }, isBusy$ };
+      this.levelData[levelIndex] = {
+        title,
+        data$,
+        selected: { index: null, item: null },
+        isBusy$,
+        hasErrored$,
+        pagination
+      };
     }
   }
 
   ngOnInit() {
     this.addLevel(0);
   }
-
 }

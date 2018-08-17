@@ -1,6 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DrillDownComponent } from './drill-down.component';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../shared.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { appReducers } from '../../../store/reducers.module';
 
 describe('DrillDownComponent', () => {
   let component: DrillDownComponent;
@@ -8,9 +14,17 @@ describe('DrillDownComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DrillDownComponent ]
+      declarations: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
+        BrowserAnimationsModule,
+        StoreModule.forRoot(
+          appReducers
+        )
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

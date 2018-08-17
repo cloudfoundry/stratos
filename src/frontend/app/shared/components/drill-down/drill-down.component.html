@@ -1,9 +1,19 @@
 <div class="drill-down">
-  <div class="drill-down-level-wrapper" *ngFor="let level of levelData; index as levelIndex">
+  <div class="drill-down__level-wrapper" *ngFor="let level of levelData; index as levelIndex">
     <h2>{{ levelData[levelIndex].title }}</h2>
-    <mat-progress-spinner *ngIf="levelData[levelIndex].isBusy$ | async" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    <div class="drill-down-level">
-      <div [ngClass]="{'drill-down-item--selected': levelData[levelIndex].selected.index === itemIndex}" (click)="clickItem(data, itemIndex, levelIndex, $event)" class="drill-down-item" *ngFor="let data of level.data$ | async; index as itemIndex">{{ data }}</div>
+    <div class="drill-down__level-inner">
+      <div class="drill-down__loading" *ngIf="levelData[levelIndex].isBusy$ | async">
+        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+      </div>
+      <div class="drill-down__level">
+        <div class="drill-down__item" [ngClass]="{'drill-down__item--selected': levelData[levelIndex].selected.index === itemIndex}" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">{{ data }}</div>
+      </div>
+      <div *ngIf="levelData[levelIndex].pagination as pagination">
+        <div *ngIf="pagination.state$ | async as state">
+          <mat-paginator *ngIf="state.pageCount > 1" [length]="state.totalResults" [pageSize]="state.pageSize" (page)="pagination.page($event)">
+          </mat-paginator>
+        </div>
+      </div>
     </div>
   </div>
 </div>

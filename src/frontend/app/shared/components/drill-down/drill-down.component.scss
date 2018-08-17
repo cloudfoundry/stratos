@@ -1,5 +1,16 @@
 .drill-down {
-  &-level {
+  &__loading {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: rgba(255, 255, 255, .6);
+  }
+  &__level {
     display: grid;
     grid-column-gap: 20px;
     grid-row-gap: 20px;
@@ -8,8 +19,11 @@
     &-wrapper {
       border-top: solid 1px black;
     }
+    &-inner {
+      position: relative;
+    }
   }
-  &-item {
+  &__item {
     background-color: white;
     cursor: pointer;
     padding: 20px;

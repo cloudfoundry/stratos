@@ -35,7 +35,6 @@ export class HomePageComponent implements OnInit {
   }
 
   constructor(private store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) {
-
     this.definition = [
       {
         title: 'Cloud Foundrys',
@@ -47,25 +46,31 @@ export class HomePageComponent implements OnInit {
       new ApiRequestDrillDownLevel(this.store, {
         title: 'Organizations',
         getAction: (cf: EndpointModel) => {
-          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid)
+          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
+          action.paginationKey += '-drill-down';
           action.includeRelations = [];
           return action;
         }
       }),
       new ApiRequestDrillDownLevel(this.store, {
         title: 'Spaces',
-        getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => new GetAllOrganizationSpaces(
-          createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid),
-          org.entity.guid,
-          cf.guid
-        )
+        getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
+          const action = new GetAllOrganizationSpaces(
+            createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid) + '-drill-down',
+            org.entity.guid,
+            cf.guid
+          );
+          action.initialParams['results-per-page'] = 50;
+          action.flattenPagination = false;
+          return action;
+        }
       }),
       new ApiRequestDrillDownLevel(this.store, {
         title: 'Applications',
         getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => new GetAllAppsInSpace(
           cf.guid,
           space.entity.guid,
-          createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid)
+          createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down'
         )
       })
     ];
