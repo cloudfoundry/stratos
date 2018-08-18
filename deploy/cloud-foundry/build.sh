@@ -30,11 +30,6 @@ cp ${CF_DIR}/config.properties ${TOP_LEVEL}
 
 cd ${TOP_LEVEL}
 
-log "Fetching front-end dependencies" $CYAN
-
-npm install
-npm run customize
-
 # Use pre-built UI if archive file is present
 if [ -f "stratos-frontend-prebuild.zip" ]; then
   log "Using pre-built front-end" $VYAN
@@ -42,6 +37,10 @@ if [ -f "stratos-frontend-prebuild.zip" ]; then
   unzip stratos-frontend-prebuild.zip -d ./dist
 else
   # Build front-end
+  log "Fetching front-end dependencies" $CYAN
+  npm install
+  npm run customize
+
   log "Building front-end" $CYAN
   npm run build-cf
 fi
