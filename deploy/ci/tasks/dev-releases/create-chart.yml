@@ -28,8 +28,11 @@ run:
       # Required for setupAndPushChange commit message
       IMAGE_TAG=${GIT_TAG}
       cd ${STRATOS}/deploy/kubernetes/
-      patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
-
+      if [ -z "${NIGTHLY_BUID}" ]; then
+        patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      else
+        patchHelmChartDev ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      fi
       # Generate Helm package
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
