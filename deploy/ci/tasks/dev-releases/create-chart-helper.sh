@@ -19,7 +19,7 @@ patchHelmChartDev () {
   local CHART_PATH=$4
   patchHelmChart ${TAG} ${DOCKER_ORG} ${DOCKER_REG} ${CHART_PATH}
 
-  sed -i -e 's/imagePullPolicy: IfNotPresent/imagePullPolicy: Always/g' ${CHART_PATH}/Chart.yaml  
+  sed -i -e 's/imagePullPolicy: IfNotPresent/imagePullPolicy: Always/g' ${CHART_PATH}/values.yaml  
 }
 
 setupAndPushChange() {
