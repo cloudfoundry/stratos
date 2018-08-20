@@ -1,4 +1,4 @@
-import { ElementFinder, promise, by } from 'protractor';
+import { ElementFinder, promise, by, browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -7,7 +7,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-fdescribe('Create Service Instance with binding', () => {
+describe('Create Service Instance with binding', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -31,7 +31,7 @@ fdescribe('Create Service Instance with binding', () => {
     expect(createServiceInstance.isActivePage()).toBeTruthy();
   });
 
- it('- should be able to to create a service instance with binding', () => {
+  it('- should be able to to create a service instance with binding', () => {
 
     const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;
     servicesHelperE2E.createService(servicesSecrets.publicService.name, false, servicesSecrets.bindApp);
@@ -81,42 +81,27 @@ fdescribe('Create Service Instance with binding', () => {
     // Switch to list view
     servicesWall.serviceInstancesList.header.getCardListViewToggleButton().click();
     expect(servicesWall.serviceInstancesList.isTableView()).toBeTruthy();
-
-
     const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;
-    const serviceInstanceRow = servicesWall.serviceInstancesList.table.getRows().then(
-      (rows: ElementFinder[]) => {
-         return rows.map((row: ElementFinder) => {
-           return row.all(by.css('.app-table__cell')).then(
-           });
-         });
-      }
-    )
-    
-    ;
-    card.getMetaCardItems().then(metaCardRows => {
-      expect(metaCardRows[1] .value).toBe(servicesSecrets.publicService.name);
-      expect(metaCardRows[2].value).toBe('shared');
-      expect(metaCardRows[3].value).toBe('1');
-    }).catch(e => fail(e));
+
+    // Filter for name
+    servicesWall.serviceInstancesList.header.setSearchText(servicesHelperE2E.serviceInstanceName)
+      .then(() => {
+        servicesWall.serviceInstancesList.table.getRows().then((rows: ElementFinder[]) => {
+          expect(rows.length).toBe(1);
+
+          const attachedApps = rows[0].element(by.css('.mat-column-attachedApps'));
+
+          expect(attachedApps.getText()).toBe(servicesSecrets.bindApp);
+
+          // Navigate to Apps
+          attachedApps.element(by.tagName('a')).click();
+
+          browser.getCurrentUrl().then(url => {
+            expect(url.endsWith('summary?breadcrumbs=service-wall')).toBeTruthy();
+          });
+        });
+      });
   });
-
-  // it('- should have correct number in list view', () => {
-
-  // });
-  // it('- should display binding in App services view', () => {
-
-  // });
-  // it('- should be able to edit binding in App services view', () => {
-
-  // });
-  // it('- should be able to edit binding in App services view', () => {
-
-  // });
-
-  // it('- should be able to delete binding in App services view', () => {
-
-  // });
 
   afterAll((done) => {
     servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
