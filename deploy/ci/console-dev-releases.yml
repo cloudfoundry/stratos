@@ -100,6 +100,7 @@ jobs:
           build_args_file: image-tag/build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
+          tag_commit: "true"
       - put: postflight-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk
@@ -108,23 +109,20 @@ jobs:
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: mariadb-image
-        params:
+          tag_commit: "true"
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: ui-image
-        params:
+          tag_commit: "true"
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-- name: create-chart
-  plan:
+          tag_commit: "true"
   - get: stratos
     passed: [build-images]
     trigger: true
