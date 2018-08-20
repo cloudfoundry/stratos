@@ -84,7 +84,7 @@ import {
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  @Input('addForm') addForm: NgForm;
+  @Input() addForm: NgForm;
 
   @Input() noEntries: TemplateRef<any>;
 

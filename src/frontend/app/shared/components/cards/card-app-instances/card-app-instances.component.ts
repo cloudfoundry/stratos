@@ -21,11 +21,11 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   // Should the card show the actions to scale/down the number of instances?
-  @Input('showActions') showActions = false;
+  @Input() showActions = false;
 
-  @Input('busy') busy: any;
+  @Input() busy: any;
 
-  @ViewChild('instanceField') instanceField: ElementRef;
+  @ViewChild() instanceField: ElementRef;
 
   status$: Observable<CardStatus>;
 
