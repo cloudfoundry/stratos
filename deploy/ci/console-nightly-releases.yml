@@ -145,7 +145,6 @@ jobs:
         HELM_REPO_BRANCH: ((helm-repo-branch))
         DOCKER_ORG: ((artifact-docker-organization))
         DOCKER_REGISTRY: ((artifact-docker-registry))
-        NIGTHLY_BUID: "true"
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
