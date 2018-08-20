@@ -10,6 +10,11 @@
         white-space: pre-wrap;
       }
     }
+    &--section {
+      &:not(:first-of-type) {
+        padding-top: 15px;
+      }
+    }
   }
   &__env-table--add-form {
     form {
