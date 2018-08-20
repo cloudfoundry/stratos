@@ -117,8 +117,4 @@ export class EndpointsTable extends ListTableComponent {
     return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
   }
 
-  openActionMenu(row: ElementFinder) {
-    row.element(by.css('app-table-cell-actions button')).click();
-  }
-
 }

@@ -3,6 +3,7 @@ import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
+import { MenuComponent } from './menu.po';
 import { MetaCard, MetaCardTitleType } from './meta-card.po';
 
 const until = protractor.ExpectedConditions;
@@ -138,6 +139,15 @@ export class ListTableComponent extends Component {
         return -1;
       });
   }
+
+  openRowActionMenuByIndex(index: number): MenuComponent {
+    return this.openRowActionMenuByRow(this.getRows().get(index));
+  }
+
+  openRowActionMenuByRow(row: ElementFinder): MenuComponent {
+    row.element(by.css('app-table-cell-actions button')).click();
+    return new MenuComponent();
+  }
 }
 
 // Page Object for the List Card View
@@ -257,6 +267,10 @@ export class ListHeaderComponent extends Component {
 
   toggleSortOrder() {
     this.findSortSection().element(by.css('button')).click();
+  }
+
+  getAdd(): ElementFinder {
+    return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
   }
 
 }

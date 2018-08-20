@@ -35,7 +35,7 @@ describe('Endpoints', () => {
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
@@ -82,7 +82,7 @@ describe('Endpoints', () => {
         });
 
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
@@ -127,7 +127,7 @@ describe('Endpoints', () => {
         endpointsPage.navigateTo();
 
         endpointsPage.table.getRowForEndpoint(toDisconnect.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {

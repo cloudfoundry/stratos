@@ -151,6 +151,16 @@ export class CFHelpers {
     });
   }
 
+  fetchRoutesInSpace(cnsiGuid: string, spaceGuid: string): promise.Promise<APIResource<IRoute>[]> {
+    return this.cfRequestHelper.sendCfGet<CFResponse<IRoute>>(cnsiGuid, `/spaces/spaceGuid/routes?results-per-page=100`)
+      .then(json => {
+        if (json.total_results > 100) {
+          fail('Number of routes in space is over the max page size of 100, requires de-paginating');
+        }
+        return json.resources;
+      });
+  }
+
   // For fully fleshed out fetch see application-e2e-helpers
   basicFetchApp(cnsiGuid: string, spaceGuid: string, appName: string) {
     return this.cfRequestHelper.sendCfGet(cnsiGuid,
