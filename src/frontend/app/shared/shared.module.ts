@@ -134,6 +134,9 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { DrillDownComponent } from './components/drill-down/drill-down.component';
+import { TableCellDefaultComponent } from './components/list/list-table/app-table-cell-default/app-table-cell-default.component';
+import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
+import { TableCellEndpointStatusComponent } from './components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 @NgModule({
   imports: [
@@ -333,8 +336,7 @@ import { DrillDownComponent } from './components/drill-down/drill-down.component
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
-    NoServicePlansComponent,
-    ...listCardComponents,
+    NoServicePlansComponent
   ],
   providers: [
     ListConfig,

@@ -20,6 +20,11 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { XSRFModule } from './xsrf.module';
+import { listCardComponents } from './shared/components/list/list-cards/card.types';
+import { TableCellDefaultComponent } from './shared/components/list/list-table/app-table-cell-default/app-table-cell-default.component';
+import { TableCellEndpointStatusComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellActionsComponent } from './shared/components/list/list-table/table-cell-actions/table-cell-actions.component';
+import { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 
 // Create action for router navigation. See
@@ -77,6 +82,13 @@ export class CustomRouterStateSerializer
     AboutModule,
     CustomModule,
     XSRFModule,
+  ],
+  entryComponents: [
+    ...listCardComponents,
+    TableCellDefaultComponent,
+    TableCellEndpointStatusComponent,
+    TableCellActionsComponent,
+    TableCellEndpointNameComponent
   ],
   providers: [
     LoggedInService,

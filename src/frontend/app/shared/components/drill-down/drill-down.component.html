@@ -11,7 +11,8 @@
           'drill-down__item--selected': levelData[levelIndex].selected.index === itemIndex,
           'drill-down__item--hidden': levelData[levelIndex].selected.index !== null && levelData[levelIndex].selected.index !== itemIndex
         }" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
-            <app-table-cell *ngIf="levelData[levelIndex].component as component" [component]="component" [row]="data">
+            <app-table-cell [config]="{ linkButton: true }" *ngIf="levelData[levelIndex].component as component" [component]="component"
+              [row]="data">
             </app-table-cell>
           </div>
         </div>

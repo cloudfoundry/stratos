@@ -5,7 +5,9 @@ import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 
-
+export interface EndpointCardConfig {
+  linkButton: boolean;
+}
 @Component({
   selector: 'app-endpoint-card',
   templateUrl: './endpoint-card.component.html',
@@ -20,11 +22,18 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
   @Input('row')
   row: EndpointModel;
 
+  @Input('config')
+  public config: EndpointCardConfig = { linkButton: false };
+
+  public linkButton: boolean;
+
   constructor() {
     super();
   }
 
   ngOnInit() {
+    console.log(this.config);
+    this.linkButton = this.config ? this.config.linkButton : false;
     this.status$.next(this.mapStatus(this.row));
   }
 

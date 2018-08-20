@@ -1,7 +1,7 @@
 <ng-template #content>
   <div [ngClass]="itemStyle">
     <div class="meta-card-item__key">
-      <span>
+      <span *ngIf="key">
         <ng-content *ngTemplateOutlet="key.content"></ng-content>:
       </span>
     </div>
