@@ -1,6 +1,13 @@
 .drill-down {
+  overflow: hidden;
+  &__scroller {
+    display: flex;
+    flex-direction: column;
+    transition: margin-top .25s cubic-bezier(.215, .61, .355, 1);
+  }
   &__loading {
     align-items: center;
+    background-color: rgba(255, 255, 255, .6);
     bottom: 0;
     display: flex;
     justify-content: center;
@@ -8,7 +15,6 @@
     position: absolute;
     right: 0;
     top: 0;
-    background-color: rgba(255, 255, 255, .6);
   }
   &__level {
     display: grid;
@@ -16,9 +22,6 @@
     grid-row-gap: 20px;
     grid-template-columns: auto auto auto auto auto;
     padding: 20px 0;
-    &-wrapper {
-      border-top: solid 1px black;
-    }
     &-inner {
       position: relative;
     }
@@ -29,6 +32,9 @@
     padding: 20px;
     &--selected {
       background-color: grey;
+    }
+    &--hidden {
+      display: none;
     }
   }
 }

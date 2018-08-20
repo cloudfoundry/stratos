@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay, distinctUntilChanged, map } from 'rxjs/operators';
 import { ListPagination } from '../../../store/actions/list.actions';
@@ -28,6 +28,7 @@ interface DrillDownLevelData {
   selected: {
     index: number,
     item: any
+    element: Element
   };
   data$: Observable<any[]>;
   isBusy$: Observable<boolean>;
@@ -41,21 +42,56 @@ interface DrillDownLevelData {
   styleUrls: ['./drill-down.component.scss']
 })
 export class DrillDownComponent implements OnInit {
-  @Input('definition')
+  @Input()
   private definition: DrillDownDefinition;
+
+  @ViewChild('drillDown') drillDown: ElementRef;
+  @ViewChildren('drillDownLevel') drillDownLevel: QueryList<ElementRef>;
 
   public levelData: DrillDownLevelData[] = [];
 
   public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
-    const nextIndex = levelIndex + 1;
-    if (this.definition[nextIndex]) {
-      this.addLevel(nextIndex, item);
-      this.setSelectedForLevel(itemIndex, levelIndex, item);
+    this.reduceLevels(levelIndex + 1);
+    if (this.levelData[levelIndex].selected.index === itemIndex) {
+      this.resetLevelSelection(levelIndex);
+      this.positionDrillDown(levelIndex - 1);
+    } else {
+      const nextIndex = levelIndex + 1;
+      if (this.definition[nextIndex]) {
+        const element = $event.srcElement;
+        this.addLevel(nextIndex, item);
+        this.setSelectedForLevel(itemIndex, levelIndex, item, element);
+        this.positionDrillDown(levelIndex);
+      }
     }
   }
 
-  public setSelectedForLevel(index: number, levelIndex: number, item: any) {
-    this.levelData[levelIndex].selected = { index, item };
+  public setSelectedForLevel(index: number, levelIndex: number, item: any, element: Element) {
+    this.levelData[levelIndex].selected = { index, item, element };
+  }
+
+  public resetLevelSelection(levelIndex: number) {
+    this.levelData[levelIndex].selected = { index: null, item: null, element: null };
+  }
+
+  public positionDrillDown(levelIndex: number) {
+    setTimeout(() => {
+      if (levelIndex <= 0) {
+        this.drillDown.nativeElement.style.marginTop = `-${0}px`;
+      } else {
+        const levels = this.drillDownLevel.toArray().slice(0, levelIndex);
+        if (levels.length) {
+          const marginTop = levels.reduce((total: number, level: ElementRef) => {
+            return level.nativeElement.offsetHeight + total;
+          }, 0);
+          this.drillDown.nativeElement.style.marginTop = `-${marginTop}px`;
+        }
+      }
+    }, 0);
+  }
+
+  private reduceLevels(levelIndex: number) {
+    this.levelData = this.levelData.slice(0, levelIndex);
   }
 
   private getLevelRequest(level: DrillDownLevel, item?: any, allSelected?: any[]) {
@@ -80,6 +116,7 @@ export class DrillDownComponent implements OnInit {
         data$,
         state$ = of({ busy: false, error: false, message: '' })
       } = this.getLevelRequest(levelDefinition, item, allSelected);
+
       const isBusy$ = state$.pipe(
         map(state => state.busy),
         delay(0),
@@ -88,14 +125,11 @@ export class DrillDownComponent implements OnInit {
       const hasErrored$ = state$.pipe(
         map(state => state.error)
       );
-      if (this.levelData.length > (levelIndex + 1)) {
-        // Remove old data
-        this.levelData = this.levelData.slice(0, levelIndex);
-      }
+
       this.levelData[levelIndex] = {
         title,
         data$,
-        selected: { index: null, item: null },
+        selected: { index: null, item: null, element: null },
         isBusy$,
         hasErrored$,
         pagination
