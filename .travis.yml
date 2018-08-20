@@ -20,6 +20,7 @@ before_install:
 install:
 - npm install npm@5.6.0 -g
 - npm install
+- git config --global url."https://".insteadOf git://
 filter_secrets: false
 branches:
   only:
