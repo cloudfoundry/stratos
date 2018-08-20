@@ -20,6 +20,7 @@ before_install:
 install:
 - npm install npm@5.6.0 -g
 - npm install
+- ssh-keyscan -t rsa bitbucket.org >> ~/.ssh/known_hosts
 filter_secrets: false
 branches:
   only:
