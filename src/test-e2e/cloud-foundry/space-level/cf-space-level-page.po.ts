@@ -8,9 +8,7 @@ import { CFPage } from '../../po/cf-page.po';
 export class CfSpaceLevelPage extends CFPage {
 
   static forEndpoint(guid: string, orgGuid: string, spaceGuid: string): CfSpaceLevelPage {
-    const page = new CfSpaceLevelPage();
-    page.navLink = `/cloud-foundry/${guid}/organizations/${orgGuid}/spaces/${spaceGuid}`;
-    return page;
+    return new CfSpaceLevelPage(`/cloud-foundry/${guid}/organizations/${orgGuid}/spaces/${spaceGuid}`);
   }
 
   goToSummaryTab() {

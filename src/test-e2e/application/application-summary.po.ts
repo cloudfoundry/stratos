@@ -1,4 +1,5 @@
 import { browser, promise } from 'protractor';
+
 import { Page } from '../po/page.po';
 import { DeleteApplication } from './delete-app.po';
 

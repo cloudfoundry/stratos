@@ -42,7 +42,7 @@ export class ResetsHelpers {
   }
 
   /**
-   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * Get all of the registered Endpoints and connect all of them for which credentials
    * have been configured
    */
   connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
