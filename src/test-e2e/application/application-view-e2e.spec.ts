@@ -152,7 +152,7 @@ describe('Application View -', function () {
     });
 
     it('App Running', () => {
-      appInstances.cardUptime.waitForTitle('Application is not running');
+      appInstances.cardUsage.waitForTitle('Application is not running');
     });
 
     it('Empty Instances Table', () => {
@@ -190,7 +190,7 @@ describe('Application View -', function () {
     });
 
     it('Empty Variables Table', () => {
-      expect(appVariables.list.empty.getDefault().isDisplayed()).toBeTruthy();
+      expect(appVariables.list.empty.getDefault().isPresent()).toBeTruthy();
       expect(appVariables.list.empty.getDefault().getComponent().getText()).toBe('There are no variables');
     });
 
@@ -206,7 +206,6 @@ describe('Application View -', function () {
     });
 
     it('One row in events table', () => {
-      appEvents.list.empty.isDisplayed();
       expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
       expect(appEvents.list.isTableView()).toBeTruthy();
       expect(appEvents.list.getTotalResults()).toBe(1);

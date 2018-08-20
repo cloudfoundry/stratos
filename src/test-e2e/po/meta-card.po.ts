@@ -26,7 +26,7 @@ export class MetaCard extends Component {
     this.titleBy = by.css(titleType);
   }
 
-  private getTitleElement() {
+  getTitleElement() {
     return this.elementFinder.element(this.titleBy);
   }
 

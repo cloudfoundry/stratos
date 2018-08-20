@@ -122,6 +122,22 @@ export class ListTableComponent extends Component {
       return rows[index].element(by.css('.mat-radio-button')).click();
     });
   }
+
+  getHighlightedRow(): promise.Promise<number> {
+    return this.locator.all(by.css('.app-table__row'))
+      .map((row, index) => row.getAttribute('class').then(classes => classes.indexOf('table-row-wrapper__highlighted')))
+      .then(isHighlighted => {
+        return promise.all(isHighlighted);
+      })
+      .then(isHighlighted => {
+        for (let i = 0; i < isHighlighted.length; i++) {
+          if (isHighlighted[i]) {
+            return i;
+          }
+        }
+        return -1;
+      });
+  }
 }
 
 // Page Object for the List Card View

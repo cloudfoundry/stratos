@@ -5,7 +5,6 @@ import { Component } from './component.po';
 export class MetaDataItemComponent extends Component {
 
   static withLabel(locator: ElementFinder, label: string): MetaDataItemComponent {
-
     return new MetaDataItemComponent(locator.element(by.css(`app-metadata-item[label="${label}"]`)));
   }
 

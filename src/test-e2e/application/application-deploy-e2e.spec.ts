@@ -1,4 +1,3 @@
-import { ApplicationPageRoutesTab } from './application-page-routes.po';
 import { browser, promise, protractor } from 'protractor';
 
 import { IApp } from '../../frontend/app/core/cf-api.types';
@@ -9,10 +8,13 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
+import { ApplicationPageEventsTab } from './application-page-events.po';
+import { ApplicationPageGithubTab } from './application-page-github.po';
 import { ApplicationPageInstancesTab } from './application-page-instances.po';
+import { ApplicationPageRoutesTab } from './application-page-routes.po';
 import { ApplicationPageSummaryTab } from './application-page-summary.po';
+import { ApplicationPageVariablesTab } from './application-page-variables.po';
 import { ApplicationBasePage } from './application-page.po';
-
 
 const until = protractor.ExpectedConditions;
 
@@ -30,6 +32,7 @@ const appName = 'cf-quick-app';
 describe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
+  let deployedCommit: promise.Promise<string>;
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -104,6 +107,7 @@ describe('Application Deploy -', function () {
         expect(deployApp.stepper.canNext()).toBeFalsy();
 
         commits.selectRow(0);
+        deployedCommit = commits.getCell(0, 2).getText();
         expect(deployApp.stepper.canNext()).toBeTruthy();
 
         // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
@@ -132,7 +136,7 @@ describe('Application Deploy -', function () {
     });
   });
 
-  // This is a bit of a hijack to test app tabs with a started app without going through a second long deploy process
+  // This is a bit of a hijack to test app tabs with a started app without going through a second long deploy app process
   describe('Deploy result -', () => {
 
     let appDetails: {
@@ -147,7 +151,11 @@ describe('Application Deploy -', function () {
         .then(res => { appDetails = res; })
         .then(() => {
           appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.app.metadata.guid);
-          appBasePage.navigateTo();
+          return appBasePage.navigateTo();
+        })
+        .then(() => {
+          const appSummary = new ApplicationPageSummaryTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+          return appSummary.cardStatus.waitForStatus('Deployed');
         })
       );
     });
@@ -191,7 +199,7 @@ describe('Application Deploy -', function () {
 
     });
 
-    fit('Instances Tab', () => {
+    it('Instances Tab', () => {
       const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
       appInstances.goToInstancesTab();
 
@@ -202,32 +210,103 @@ describe('Application Deploy -', function () {
 
       appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
 
-      expect(appInstances.cardUptime.getTitle()).not.toBe('Application is not running');
-      // TODO: RC
-      expect(appInstances.cardUptime.getUptime().isDisplayed()).toBeTruthy();
-      expect(appInstances.cardUptime.getUptimeText()).not.toBeNull();
+      expect(appInstances.cardUsage.getTitleElement().isPresent()).toBeFalsy();
+      expect(appInstances.cardUsage.getUsageTable().isDisplayed()).toBeTruthy();
 
       expect(appInstances.list.empty.getDefault().isPresent()).toBeFalsy();
       expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
 
     });
 
-    fit('Routes Tab', () => {
+    it('Routes Tab', () => {
       const appRoutes = new ApplicationPageRoutesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
       appRoutes.goToRoutesTab();
 
       expect(appRoutes.list.empty.getDefault().isPresent()).toBeFalsy();
-      expect(appRoutes.list.empty.getCustom().getComponent().isDisplayed()).toBeFalsy();
-      appRoutes.list.table.getCell(0, 2).getText().then((route: string) => {
+      expect(appRoutes.list.empty.getCustom().getComponent().isPresent()).toBeFalsy();
+      appRoutes.list.table.getCell(0, 1).getText().then((route: string) => {
         expect(route).not.toBeNull();
         expect(route.length).toBeGreaterThan(appName.length);
         expect(route.startsWith(appName)).toBeTruthy();
       });
+      appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
+        expect(tcpRoute).not.toBeNull();
+        expect(tcpRoute).toBe('No');
+      });
+    });
+
+    it('Variables Tab', () => {
+      const appVariables = new ApplicationPageVariablesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appVariables.goToVariablesTab();
+
+      expect(appVariables.list.empty.getDefault().isPresent()).toBeFalsy();
+      expect(appVariables.list.table.getRows().count()).toBe(1);
+      expect(appVariables.list.table.getCell(0, 1).getText()).toBe('STRATOS_PROJECT');
+      expect(appVariables.list.table.getCell(0, 2).getText()).not.toBeNull();
+    });
+
+    it('Events Tab', () => {
+      const appEvents = new ApplicationPageEventsTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appEvents.goToEventsTab();
+
+      expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
+      expect(appEvents.list.isTableView()).toBeTruthy();
+      expect(appEvents.list.getTotalResults()).toBe(4);
+      const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
+      // Create
+      expect(appEvents.list.table.getCell(3, 1).getText()).toBe('audit\napp\ncreate');
+      expect(appEvents.list.table.getCell(3, 2).getText()).toBe(`person\n${currentUser}`);
+      // Map Route
+      expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nmap-route');
+      expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
+      // Update (route)
+      expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nupdate');
+      expect(appEvents.list.table.getCell(1, 2).getText()).toBe(`person\n${currentUser}`);
+      // Update (started)
+      expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\nupdate');
+      expect(appEvents.list.table.getCell(0, 2).getText()).toBe(`person\n${currentUser}`);
+    });
+
+    it('Github Tab', () => {
+      const appGithub = new ApplicationPageGithubTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appGithub.goToGithubTab();
+
+      expect(appGithub.cardDeploymentInfo.repo.getValue()).toBe(testApp);
+      expect(appGithub.cardDeploymentInfo.branch.getValue()).toBe('master');
+      appGithub.cardDeploymentInfo.commit.getValue().then(commit => {
+        expect(commit).not.toBeNull();
+        expect(commit.length).toBe(8);
+      });
+
+      expect(appGithub.cardRepoInfo.name.getValue()).toBe(testApp);
+      expect(appGithub.cardRepoInfo.owner.getValue()).toBe(testApp.substring(0, testApp.indexOf('/')));
+      expect(appGithub.cardRepoInfo.description.getValue()).not.toBeFalsy();
+
+      appGithub.cardCommitInfo.sha.getValue().then(commit => {
+        expect(commit).not.toBeNull();
+        expect(commit.length).toBe(8);
+      });
+
+      expect(appGithub.commits.empty.getDefault().isPresent()).toBeFalsy();
+      expect(appGithub.commits.empty.getCustom().isPresent()).toBeFalsy();
+
+      // Check that whatever the sha we selected earlier matches the sha in the deploy info, commit details and highlighted table row
+      expect(deployedCommit).toBeTruthy('deployedCommit info is missing (has the deploy test run?)');
+      if (deployedCommit) {
+        deployedCommit.then(commitSha => {
+          expect(appGithub.cardDeploymentInfo.commit.getValue()).toBe(commitSha);
+          expect(appGithub.cardCommitInfo.sha.getValue()).toBe(commitSha);
+
+          appGithub.commits.table.getHighlightedRow().then(index => {
+            expect(index).toBeGreaterThanOrEqual(0);
+            expect(appGithub.commits.table.getCell(index, 1).getText()).toEqual(commitSha);
+          });
+        });
+      }
     });
 
   });
 
-  // TODO: RC Add back in
-  // afterAll(() => applicationE2eHelper.deleteApplication(null, { appName }))
+  afterAll(() => applicationE2eHelper.deleteApplication(null, { appName }));
 
 });

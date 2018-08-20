@@ -1,6 +1,6 @@
 import { by, element, ElementFinder } from 'protractor';
 
-import { MetaCard } from '../../po/meta-card.po';
+import { MetaCard, MetaCardTitleType } from '../../po/meta-card.po';
 import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
 
@@ -10,7 +10,7 @@ export class CardAppBuildInfo extends MetaCard {
   stack: MetaDataItemComponent;
 
   constructor(locator: ElementFinder = element(by.css('app-build-tab app-tile-grid app-tile-group:nth-of-type(3)'))) {
-    super(locator);
+    super(locator, MetaCardTitleType.MAT_CARD);
 
     this.buildPack = MetaDataItemComponent.withLabel(locator, 'Buildpack');
     this.stack = MetaDataItemComponent.withLabel(locator, 'Stack');

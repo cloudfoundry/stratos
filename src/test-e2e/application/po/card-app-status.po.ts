@@ -32,6 +32,7 @@ export class CardAppStatus extends Component {
 
 
   waitForStatus(status: string): promise.Promise<any> {
-    return browser.wait(until.textToBePresentInElement(this.getStatusLabel(), status));
+    // This wait should cover the time between app entity created, app deployed, stratos poll gap and status change
+    return browser.wait(until.textToBePresentInElement(this.getStatusLabel(), status), 30000);
   }
 }
