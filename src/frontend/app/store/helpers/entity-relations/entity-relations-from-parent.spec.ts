@@ -64,6 +64,7 @@ describe('Entity Relations - populate from parent', () => {
       populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))
         .pipe(first()).subscribe((action: WrapperRequestActionSuccess) => {
           expect(action).toBeDefined();
+          expect(action).not.toBeNull();
           expect(action.type).toBe(RequestTypes.SUCCESS);
           expect(action.totalResults).toBe(spaces.length);
           expect(action.totalPages).toBe(1);
