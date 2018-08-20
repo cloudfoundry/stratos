@@ -265,6 +265,11 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 		return key32bytes, nil
 	}
 
+	// Check we have volume and filename
+	if len(pc.EncryptionKeyVolume) == 0 && len(pc.EncryptionKeyFilename) == 0 {
+		return nil, errors.New("You must configure either an Encryption key or the Encryption key filename")
+	}
+
 	// Read the key from the shared volume
 	key, err := crypto.ReadEncryptionKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
@@ -370,7 +375,11 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	config.LoadConfigFile("./config.properties")
+	// Load config.properties if it exists, otherwise look for default.config.properties
+	err := config.LoadConfigFile("./config.properties")
+	if os.IsNotExist(err) {
+		config.LoadConfigFile("./default.config.properties")
+	}
 
 	if err := config.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
