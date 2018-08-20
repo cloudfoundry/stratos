@@ -1,4 +1,4 @@
-import { protractor } from 'protractor';
+import { protractor, ElementFinder } from 'protractor';
 import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 import { e2e } from '../e2e';
