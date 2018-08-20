@@ -10,12 +10,14 @@
           <div class="drill-down__item" [ngClass]="{
           'drill-down__item--selected': levelData[levelIndex].selected.index === itemIndex,
           'drill-down__item--hidden': levelData[levelIndex].selected.index !== null && levelData[levelIndex].selected.index !== itemIndex
-        }" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">{{
-            data }}</div>
+        }" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
+            <app-table-cell *ngIf="levelData[levelIndex].component as component" [component]="component" [row]="data">
+            </app-table-cell>
+          </div>
         </div>
         <div *ngIf="levelData[levelIndex].pagination as pagination">
           <div *ngIf="pagination.state$ | async as state">
-            <mat-paginator *ngIf="levelData[levelIndex].selected.index === null && state.pageCount > 1" [length]="state.totalResults"
+            <mat-paginator [hidden]="levelData[levelIndex].selected.index === null && state.pageCount > 1" [length]="state.totalResults"
               [pageSize]="state.pageSize" (page)="pagination.page($event)">
             </mat-paginator>
           </div>

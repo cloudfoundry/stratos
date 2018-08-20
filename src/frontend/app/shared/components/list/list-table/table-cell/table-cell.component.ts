@@ -151,13 +151,12 @@ export const listTableCells = [
   encapsulation: ViewEncapsulation.None,
   // When we look at modules we should think about swapping this approach (create + insert in code, hard code types here) with
   // NgComponentOutlet (create in html with custom external module factory). Alternatively try marking as entry component where they live?
-  entryComponents: [...listTableCells]
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;
 
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input('dataSource') dataSource?: IListDataSource<T>;
 
   @Input('component') component: Type<{}>;
   @Input('cellDefinition') cellDefinition: ICellDefinition<T>;
@@ -197,7 +196,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
-      if (this.dataSource.getRowState) {
+      if (this.dataSource && this.dataSource.getRowState) {
         this.cellComponent.rowState = this.dataSource.getRowState(this.row);
       }
       if (this.cellDefinition) {

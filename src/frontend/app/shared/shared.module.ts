@@ -333,7 +333,8 @@ import { DrillDownComponent } from './components/drill-down/drill-down.component
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
-    NoServicePlansComponent
+    NoServicePlansComponent,
+    ...listCardComponents,
   ],
   providers: [
     ListConfig,

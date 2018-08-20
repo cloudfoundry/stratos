@@ -1,9 +1,10 @@
-import { Component, Input, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ViewChildren, QueryList, ElementRef, ComponentFactoryResolver, Type } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay, distinctUntilChanged, map } from 'rxjs/operators';
 import { ListPagination } from '../../../store/actions/list.actions';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { PageEvent } from '@angular/material';
+import { CardCell } from '../list/list.types';
 
 export interface IDrillDownLevelPagination {
   state$: Observable<ListPagination>;
@@ -16,6 +17,7 @@ export interface IDrillDownLevelRequest {
 }
 export interface DrillDownLevel {
   title: string;
+  component?;
   request: ((parent?: any, allAncestors?: any[]) => IDrillDownLevelRequest) | IDrillDownLevelRequest;
   selectItem?: (parent?: any, allAncestors?: any[]) => void;
 }
@@ -34,6 +36,7 @@ interface DrillDownLevelData {
   isBusy$: Observable<boolean>;
   hasErrored$: Observable<boolean>;
   pagination?: IDrillDownLevelPagination;
+  component: any;
 }
 
 @Component({
@@ -42,6 +45,9 @@ interface DrillDownLevelData {
   styleUrls: ['./drill-down.component.scss']
 })
 export class DrillDownComponent implements OnInit {
+
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+
   @Input()
   private definition: DrillDownDefinition;
 
@@ -132,7 +138,8 @@ export class DrillDownComponent implements OnInit {
         selected: { index: null, item: null, element: null },
         isBusy$,
         hasErrored$,
-        pagination
+        pagination,
+        component: levelDefinition.component || null
       };
     }
   }

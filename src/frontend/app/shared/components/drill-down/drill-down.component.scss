@@ -27,11 +27,10 @@
     }
   }
   &__item {
-    background-color: white;
     cursor: pointer;
-    padding: 20px;
+    padding: 5px;
     &--selected {
-      background-color: grey;
+
     }
     &--hidden {
       display: none;

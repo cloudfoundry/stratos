@@ -17,6 +17,8 @@ import { getPaginationObservables } from '../../../store/reducers/pagination-red
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { ApiRequestDrillDownLevel } from '../../../shared/components/drill-down/drill-down-levels/api-request-drill-down-level';
+import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
+import { CfEndpointCardComponent } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 
 @Component({
   selector: 'app-home-page',
@@ -38,6 +40,7 @@ export class HomePageComponent implements OnInit {
     this.definition = [
       {
         title: 'Cloud Foundrys',
+        component: CfEndpointCardComponent,
         request: {
           data$: paginationMonitorFactory
             .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
@@ -65,14 +68,18 @@ export class HomePageComponent implements OnInit {
           return action;
         }
       }),
-      new ApiRequestDrillDownLevel(this.store, {
-        title: 'Applications',
-        getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => new GetAllAppsInSpace(
-          cf.guid,
-          space.entity.guid,
-          createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down'
-        )
-      })
+      {
+        component: CardAppComponent,
+        ...new ApiRequestDrillDownLevel(this.store, {
+          title: 'Applications',
+          getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => new GetAllAppsInSpace(
+            cf.guid,
+            space.entity.guid,
+            createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down'
+          ),
+
+        })
+      }
     ];
   }
 
