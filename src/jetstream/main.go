@@ -770,12 +770,18 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 }
 
 func getStaticFiles() (string, error) {
-	dir, err := filepath.Abs(".")
+
+	uiFolder, _ := config.GetValue("UI_PATH")
+	if len(uiFolder) == 0 {
+		uiFolder = "./ui"
+	}
+
+	dir, err := filepath.Abs(uiFolder)
 	if err == nil {
-		// Look for a folder named 'ui'
-		_, err := os.Stat(dir + "/ui")
+		// Check if folder exists
+		_, err := os.Stat(dir)
 		if err == nil || !os.IsNotExist(err) {
-			return dir + "/ui", nil
+			return dir, nil
 		}
 	}
 	return "", errors.New("UI folder not found")
