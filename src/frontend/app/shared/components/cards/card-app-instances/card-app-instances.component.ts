@@ -25,7 +25,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @Input() busy: any;
 
-  @ViewChild() instanceField: ElementRef;
+  @ViewChild('instanceField') instanceField: ElementRef;
 
   status$: Observable<CardStatus>;
 
