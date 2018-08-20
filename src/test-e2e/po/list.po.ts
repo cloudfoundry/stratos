@@ -158,16 +158,16 @@ export class ListCardComponent extends Component {
     return this.locator.all(by.css('app-card:not(.row-filler)'));
   }
 
-  getCard(index: number): MetaCard {
-    return new MetaCard(this.getCards().get(index), MetaCardTitleType.CUSTOM);
+  getCard(index: number, metaType = MetaCardTitleType.CUSTOM): MetaCard {
+    return new MetaCard(this.getCards().get(index), metaType);
   }
 
-  findCardByTitle(title: string): promise.Promise<MetaCard> {
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
     return this.getCards().filter((elem) => {
       return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
-      return new MetaCard(e[0], MetaCardTitleType.CUSTOM);
+      return new MetaCard(e[0], metaType);
     });
   }
 

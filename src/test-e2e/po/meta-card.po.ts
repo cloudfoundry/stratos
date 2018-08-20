@@ -8,13 +8,13 @@ const until = protractor.ExpectedConditions;
 
 export enum MetaCardTitleType {
   /**
-   * Title is in a normal mat-card-header
+   * Title is in a normal mat-card-title
    */
   MAT_CARD = 'mat-card-title',
   /**
    * Title text is in a custom div (used to inline title with action menu)
    */
-  CUSTOM = 'meta-card__title'
+  CUSTOM = '.meta-card__title'
 }
 
 export class MetaCard extends Component {

@@ -52,8 +52,7 @@ export class CfTopLevelPage extends CFPage {
   }
 
   private waitForMetaDataItemComponent(label: string): MetaDataItemComponent {
-    // TODO: RC fix
-    const comp = MetaDataItemComponent.withLabel(element(by.css('')), label);
+    const comp = MetaDataItemComponent.withLabel(element(by.css('app-cloud-foundry-summary-tab')), label);
     comp.waitUntilShown();
     return comp;
   }

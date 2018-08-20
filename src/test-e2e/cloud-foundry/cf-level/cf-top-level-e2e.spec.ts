@@ -39,7 +39,7 @@ describe('CF - Top Level - ', () => {
       setup(ConsoleUserType.admin);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
 
       beforeEach(navToCfPage);
 
@@ -71,7 +71,7 @@ describe('CF - Top Level - ', () => {
       setup(ConsoleUserType.user);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
 
       beforeEach(navToCfPage);
 

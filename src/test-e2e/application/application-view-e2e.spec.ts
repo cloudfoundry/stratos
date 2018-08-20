@@ -85,7 +85,6 @@ describe('Application View -', function () {
     appSummary.goToServicesTab();
     appSummary.goToVariablesTab();
     appSummary.goToEventsTab();
-    // appSummary.goToGithubTab(); //TODO: RC
     appSummary.goToSummaryTab();
   });
 
