@@ -12,7 +12,7 @@ import (
 	"bitbucket.org/liamstask/goose/lib/goose"
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/datastore"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
 )
 
 const (
@@ -106,7 +106,7 @@ func upRun(args []string) {
 	}
 	defer db.Close()
 
-	datastore.ApplyMigrations(conf, db)
+	err = datastore.ApplyMigrations(conf, db)
 	if err != nil {
 		log.Fatal("Migration failed", err)
 	}

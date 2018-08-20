@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
@@ -83,14 +83,8 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 		return nil, fmt.Errorf("Failed to get record for CNSI %s: [%v]", cnsiGUID, err)
 	}
 
-	// Only need to get Client ID once
-	clientID, err := c.portalProxy.GetClientId(cnsiRecord.CNSIType)
-	if err != nil {
-		return nil, fmt.Errorf("Could not get client ID for endpoint: %s", cnsiGUID)
-	}
-
 	ac.refreshToken = func() error {
-		newTokenRecord, err := c.portalProxy.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, clientID, "", cnsiRecord.TokenEndpoint)
+		newTokenRecord, err := c.portalProxy.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
 		if err != nil {
 			msg := fmt.Sprintf("Error refreshing token for CNSI %s : [%v]", cnsiGUID, err)
 			return echo.NewHTTPError(http.StatusUnauthorized, msg)

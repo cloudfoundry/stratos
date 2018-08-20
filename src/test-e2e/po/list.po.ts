@@ -70,6 +70,10 @@ export class ListTableComponent extends Component {
     super(locator);
   }
 
+  getHeaderText() {
+    return this.locator.element(by.css('.list-component__header__left--text')).getText();
+  }
+
   getRows(): ElementArrayFinder {
     return this.locator.all(by.css('.app-table__row'));
   }
@@ -105,6 +109,13 @@ export class ListTableComponent extends Component {
     });
   }
 
+  selectRow(index: number) {
+    return this.locator.all(by.css('.app-table__row')).then(rows => {
+      expect(rows.length).toBeGreaterThan(index);
+      return rows[index].element(by.css('.mat-radio-button')).click();
+    });
+  }
+  
   waitUntilNotBusy() {
     return Component.waitUntilNotShown(
       this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
@@ -129,7 +140,7 @@ export class ListCardComponent extends Component {
   }
 
   getCards(): ElementArrayFinder {
-    return this.locator.all(by.tagName('app-card'));
+    return this.locator.all(by.css('app-card:not(.row-filler)'));
   }
 
   getCard(index: number): MetaCard {
@@ -167,10 +178,10 @@ export class ListHeaderComponent extends Component {
     return this.locator.element(by.css('.list-component__header'));
   }
 
-  getFilterFormField(): ElementFinder {
+  getFilterFormField(): ElementArrayFinder {
     return this.getListHeader()
       .element(by.css('.list-component__header__left--multi-filters'))
-      .element(by.tagName('mat-form-field'));
+      .all(by.tagName('mat-form-field'));
   }
 
   getRightHeaderSection(): ElementFinder {
@@ -191,26 +202,30 @@ export class ListHeaderComponent extends Component {
   getSearchText(): promise.Promise<string> {
     return this.getSearchInputField().getAttribute('value');
   }
-  getPlaceholderText(): promise.Promise<string> {
-    return this.getFilterFormField().element(by.tagName('mat-placeholder')).getText();
+  getPlaceholderText(index = 0): promise.Promise<string> {
+    return this.getFilterFormField().get(index).element(by.tagName('mat-placeholder')).getText();
   }
 
-  getFilterOptions(): promise.Promise<ElementFinder[]> {
-    this.getFilterFormField().click();
+  getFilterOptions(index = 0): promise.Promise<ElementFinder[]> {
+    this.getFilterFormField().get(index).click();
     return element.all(by.tagName('mat-option')).then((matOptions: ElementFinder[]) => {
       return matOptions;
     });
   }
 
-  getFilterText(): promise.Promise<string> {
-    return this.getFilterFormField().element(by.css('.mat-select-value')).getText();
+  getFilterText(index = 0): promise.Promise<string> {
+    return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
   }
   selectFilterOption(index: number): promise.Promise<any> {
     return this.getFilterOptions().then(options => options[index].click());
   }
 
   getRefreshListButton(): ElementFinder {
-    return this.getRightHeaderSection().element(by.css('button'));
+    return this.getRightHeaderSection().element(by.css('#app-list-refresh-button'));
+  }
+
+  getCardListViewToggleButton(): ElementFinder {
+    return this.getRightHeaderSection().element(by.css('#list-card-toggle'));
   }
 
 }

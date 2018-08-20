@@ -11,11 +11,13 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	uuid "github.com/satori/go.uuid"
 
-	"github.com/SUSE/stratos-ui/repository/cnsis"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"crypto/sha1"
+	"encoding/base64"
+
+	"github.com/cloudfoundry-incubator/stratos/repository/cnsis"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -46,7 +48,15 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, fetchInfo)
+	cnsiClientId := c.FormValue("cnsi_client_id")
+	cnsiClientSecret := c.FormValue("cnsi_client_secret")
+
+	if cnsiClientId == "" {
+		cnsiClientId = p.GetConfig().CFClient
+		cnsiClientSecret = p.GetConfig().CFClientSecret
+	}
+
+	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -55,7 +65,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -102,11 +112,15 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			err)
 	}
 
-	guid := uuid.NewV4().String()
+	h := sha1.New()
+	h.Write([]byte(apiEndpointURL.String()))
+	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL
 	newCNSI.SkipSSLValidation = skipSSLValidation
+	newCNSI.ClientId = clientId
+	newCNSI.ClientSecret = clientSecret
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
@@ -130,12 +144,7 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 	p.unsetCNSIRecord(cnsiGUID)
 
-	userID, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
-	}
-
-	p.unsetCNSITokenRecord(cnsiGUID, userID)
+	p.unsetCNSITokenRecords(cnsiGUID)
 
 	return nil
 }
@@ -150,7 +159,7 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
 
-	cnsiList, err = cnsiRepo.List()
+	cnsiList, err = cnsiRepo.List(p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return cnsiList, err
 	}
@@ -251,7 +260,7 @@ func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) 
 		return interfaces.CNSIRecord{}, err
 	}
 
-	rec, err := cnsiRepo.Find(guid)
+	rec, err := cnsiRepo.Find(guid, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return interfaces.CNSIRecord{}, err
 	}
@@ -271,7 +280,7 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 		return rec, err
 	}
 
-	rec, err = cnsiRepo.FindByAPIEndpoint(endpoint)
+	rec, err = cnsiRepo.FindByAPIEndpoint(endpoint, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return rec, err
 	}
@@ -297,7 +306,7 @@ func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error 
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
-	err = cnsiRepo.Save(guid, c)
+	err = cnsiRepo.Save(guid, c, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		msg := "Unable to save a CNSI Token: %v"
 		log.Errorf(msg, err)
@@ -399,6 +408,25 @@ func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) err
 	}
 
 	err = tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
+	if err != nil {
+		msg := "Unable to delete a CNSI Token: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
+	log.Debug("unsetCNSITokenRecord")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		msg := "Unable to establish a database reference: '%v'"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	err = tokenRepo.DeleteCNSITokens(cnsiGUID)
 	if err != nil {
 		msg := "Unable to delete a CNSI Token: %v"
 		log.Errorf(msg, err)

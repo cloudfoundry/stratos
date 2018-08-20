@@ -14,18 +14,16 @@ import {
   ValidateEntitiesStart,
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
-import { validateEntityRelations } from '../helpers/entity-relations';
-import { ValidationResult } from '../helpers/entity-relations.types';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { validateEntityRelations } from '../helpers/entity-relations/entity-relations';
+import {
+  completeApiRequest,
+  getFailApiRequestActions,
+  getRequestTypeFromMethod,
+} from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
-import {
-  APISuccessOrFailedAction,
-  UpdateCfAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from '../types/request.types';
+import { UpdateCfAction } from '../types/request.types';
 
 
 @Injectable()
@@ -81,13 +79,12 @@ export class RequestEffect {
       return this.store.select(getAPIRequestDataState).pipe(
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
-        map(([allEntities, allPagination]): ValidationResult => {
+        map(([allEntities, allPagination]) => {
           // The apiResponse will be null if we're validating as part of the entity service, not during an api request
           const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
-            apiResponse,
             started: false,
-            completed: Promise.resolve(new Array<boolean>()),
+            completed: Promise.resolve(apiResponse),
           } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
@@ -96,7 +93,7 @@ export class RequestEffect {
             apiResponse,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
-            populateMissing: true,
+            populateMissing: true
           });
         }),
         mergeMap(validation => {
@@ -104,15 +101,16 @@ export class RequestEffect {
           if (independentUpdates) {
             this.update(apiAction, true, null);
           }
-          return validation.completed.then(() => ({
+          return validation.completed.then(validatedApiResponse => ({
+            validatedApiResponse,
             independentUpdates,
             validation
           }));
         }),
-        mergeMap(({ independentUpdates, validation }) => {
+        mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
           return [new EntitiesPipelineCompleted(
             apiAction,
-            validation.apiResponse,
+            validatedApiResponse,
             validateAction,
             validation,
             independentUpdates
@@ -121,14 +119,7 @@ export class RequestEffect {
       ).pipe(catchError(error => {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
-          return [
-            new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
-            new WrapperRequestActionFailed(
-              error.message,
-              apiAction,
-              requestType
-            )
-          ];
+          return getFailApiRequestActions(apiAction, error, requestType);
         } else {
           this.update(apiAction, false, error.message);
           return [];
@@ -155,14 +146,7 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
-        actions.push(new WrapperRequestActionSuccess(
-          apiResponse.response,
-          apiAction,
-          requestType,
-          apiResponse.totalResults,
-          apiResponse.totalPages
-        ));
+        completeApiRequest(this.store, apiAction, apiResponse, requestType);
 
         if (
           !apiAction.updatingKey &&
@@ -176,7 +160,6 @@ export class RequestEffect {
           }
         }
       }
-
       return actions;
     }));
 

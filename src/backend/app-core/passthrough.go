@@ -16,7 +16,7 @@ import (
 	"github.com/labstack/echo/engine"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 // API Host Prefix to replace if the custom header is supplied
@@ -356,6 +356,8 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	if err != nil {
 		cnsiRequest.Error = err
 		if done != nil {
+			cnsiRequest.StatusCode = 400
+			cnsiRequest.Status = "Unable to retrieve CNSI token record"
 			done <- cnsiRequest
 		}
 		return

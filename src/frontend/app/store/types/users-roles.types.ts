@@ -1,4 +1,4 @@
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './user.types';
+import { CfUser, CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './user.types';
 
 export interface UsersRolesState {
   cfGuid: string;
@@ -32,27 +32,41 @@ export const UserRoleLabels = {
   org: {
     short: {
       [OrgUserRoleNames.MANAGER]: 'Manager',
+      [CfUserRoleParams.MANAGED_ORGS]: 'Manager',
       [OrgUserRoleNames.BILLING_MANAGERS]: 'Billing Manager',
+      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Billing Manager',
       [OrgUserRoleNames.AUDITOR]: 'Auditor',
-      [OrgUserRoleNames.USER]: 'User'
+      [CfUserRoleParams.AUDITED_ORGS]: 'Auditor',
+      [OrgUserRoleNames.USER]: 'User',
+      [CfUserRoleParams.ORGANIZATIONS]: 'User'
     },
     long: {
       [OrgUserRoleNames.MANAGER]: 'Org Manager',
+      [CfUserRoleParams.MANAGED_ORGS]: 'Org Manager',
       [OrgUserRoleNames.BILLING_MANAGERS]: 'Org Billing Manager',
+      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Org Billing Manager',
       [OrgUserRoleNames.AUDITOR]: 'Org Auditor',
-      [OrgUserRoleNames.USER]: 'Org User'
+      [CfUserRoleParams.AUDITED_ORGS]: 'Org Auditor',
+      [OrgUserRoleNames.USER]: 'Org User',
+      [CfUserRoleParams.ORGANIZATIONS]: 'Org User'
     }
   },
   space: {
     short: {
       [SpaceUserRoleNames.MANAGER]: 'Manager',
+      [CfUserRoleParams.MANAGED_SPACES]: 'Manager',
       [SpaceUserRoleNames.DEVELOPER]: 'Developer',
+      [CfUserRoleParams.SPACES]: 'Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Auditor',
+      [CfUserRoleParams.AUDITED_SPACES]: 'Auditor',
     },
     long: {
       [SpaceUserRoleNames.MANAGER]: 'Space Manager',
+      [CfUserRoleParams.MANAGED_SPACES]: 'Space Manager',
       [SpaceUserRoleNames.DEVELOPER]: 'Space Developer',
+      [CfUserRoleParams.SPACES]: 'Space Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
+      [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
     }
   }
 };

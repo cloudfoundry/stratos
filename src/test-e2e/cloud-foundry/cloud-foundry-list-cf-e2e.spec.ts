@@ -1,16 +1,17 @@
+import { browser } from 'protractor';
 
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
-import { EndpointsPage } from '../endpoints/endpoints.po';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { SideNavMenuItem, SideNavigation } from '../po/side-nav.po';
+import { ListComponent } from '../po/list.po';
+import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
+import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 
-describe('CF Endpoints Dashboard', () => {
-  const cloudFoundry = new CloudFoundryPage();
+describe('CF Endpoints Dashboard - ', () => {
+  const cloudFoundry = new CfTopLevelPage();
   const nav = new SideNavigation();
   const cfEndpoint = e2e.secrets.getDefaultCFEndpoint();
 
-  describe('No endpoints', () => {
+  describe('No endpoints - ', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
         .clearAllEndpoints();
@@ -18,18 +19,19 @@ describe('CF Endpoints Dashboard', () => {
 
     beforeEach(() => {
       nav.goto(SideNavMenuItem.CloudFoundry);
+      cloudFoundry.loadingIndicator.waitUntilNotShown();
     });
 
-    it('should be the CF Endpoints page', () => {
+    it('should be the Endpoints page', () => {
       expect(cloudFoundry.isActivePage()).toBeTruthy();
     });
 
     it('should show the `no registered endpoints` message', () => {
-      expect(cloudFoundry.hasNoCloudFoundryMesasge).toBeTruthy();
+      expect(cloudFoundry.hasNoCloudFoundryMessage).toBeTruthy();
     });
   });
 
-  describe('Single endpoint', () => {
+  describe('Single endpoint - ', () => {
     beforeAll(() => {
       // Only register and connect a single Cloud Foundry endpoint
       e2e.setup(ConsoleUserType.admin)
@@ -52,7 +54,7 @@ describe('CF Endpoints Dashboard', () => {
     });
   });
 
-  describe('Multiple endpoints', () => {
+  describe('Multiple endpoints - ', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
         .clearAllEndpoints()
@@ -66,7 +68,8 @@ describe('CF Endpoints Dashboard', () => {
     });
 
     it('should be the CF Endpoints page', () => {
-      cloudFoundry.list.cards.getCards().then(cards => {
+      const list = new ListComponent();
+      list.cards.getCards().then(cards => {
         expect(cards.length).toBeGreaterThan(1);
         cards[0].click();
         expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);

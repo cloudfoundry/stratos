@@ -43,7 +43,7 @@ $ docker network create --driver=bridge dev-bridge
 
 1. Bring up the single container Console
 ```
-$ docker run -p 4443:443 --net=dev-bridge splatform/stratos-ui --name console
+$ docker run -p 4443:443 --net=dev-bridge splatform/stratos --name console
 ```
 
 2. Bring up the UAA

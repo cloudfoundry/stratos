@@ -7,7 +7,7 @@ import {
   Subscription
 } from 'rxjs';
 
-import { startWith, catchError, filter, map, switchMap, takeWhile } from 'rxjs/operators';
+import { startWith, catchError, filter, map, switchMap, takeWhile, tap, distinctUntilChanged, first } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
@@ -37,10 +37,9 @@ const APP_CHECK_INTERVAL = 3000;
 export class DeployApplicationStep3Component implements OnDestroy {
 
   @Input('appGuid') appGuid: string;
-  fetchedApp = false;
 
-  // Validation poller
-  valid$ = this.createValidationPoller();
+  // Validation observable
+  valid$: Observable<boolean>;
 
   error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
@@ -50,6 +49,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   private deploySub: Subscription;
   private errorSub: Subscription;
+  private validSub: Subscription;
 
   private fsData: FileScannerInfo;
 
@@ -64,6 +64,21 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
     ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
+
+    const appGuid$ = this.deployer.applicationGuid$.pipe(
+      filter((appGuid) => appGuid !== null),
+      first(),
+    );
+
+    this.valid$ = appGuid$.pipe(
+      map(guid => !!guid),
+    );
+
+    this.validSub = appGuid$.subscribe(guid => {
+      this.appGuid = guid;
+      this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+      this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.deployer.cfGuid));
+    });
 
     this.closeable$ = observableCombineLatest(
       this.valid$.pipe(startWith(false)),
@@ -84,6 +99,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private destroyDeployer() {
     this.deploySub.unsubscribe();
     this.errorSub.unsubscribe();
+    this.validSub.unsubscribe();
   }
 
   ngOnDestroy() {
@@ -119,45 +135,5 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
     }
     return observableOf({ success: true });
-  }
-
-  /**
-   * Create a poller that will be used to periodically check for the new application.
-   */
-  private createValidationPoller(): Observable<boolean> {
-    return interval(APP_CHECK_INTERVAL).pipe(
-      takeWhile(() => !this.fetchedApp),
-      filter(() => this.deployer.deploying),
-      switchMap(() => {
-        const { cfGuid, spaceGuid, appData, proxyAPIVersion } = this.deployer;
-        if (this.appGuid) {
-          this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-          this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
-          this.fetchedApp = true;
-          return observableOf(true);
-        } else {
-          const headers = new HttpHeaders({ 'x-cap-cnsi-list': cfGuid });
-          return this.http.get(`/pp/${proxyAPIVersion}/proxy/v2/apps?q=space_guid:${spaceGuid}&q=name:${appData.Name}`,
-            { headers: headers }).pipe(
-              map(info => {
-                if (info && info[cfGuid]) {
-                  const apps = info[cfGuid];
-                  if (apps.total_results === 1) {
-                    this.appGuid = apps.resources[0].metadata.guid;
-                    this.fetchedApp = true;
-                    // New app - so refresh the application wall data
-                    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-                    return true;
-                  }
-                }
-                return false;
-              }),
-              catchError(err => [
-                // ignore
-              ])
-            );
-        }
-      })
-    );
   }
 }

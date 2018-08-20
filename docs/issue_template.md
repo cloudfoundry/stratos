@@ -10,7 +10,7 @@
 * [ ] npm run start
 * [ ] Other (please specify below)
 
-### Backend (portal-proxy) Deployment type
+### Backend (Jet Stream) Deployment type
 <!--- Where is the backend deployed?  -->
 <!--- Put an 'x' in one or more boxes below.  -->
 * [ ] Cloud Foundry Application (cf push)

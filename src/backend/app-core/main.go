@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/sha1"
 	"crypto/tls"
 	"database/sql"
 	"encoding/gob"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -14,6 +16,7 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -27,13 +30,13 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 
-	"github.com/SUSE/stratos-ui/config"
-	"github.com/SUSE/stratos-ui/datastore"
-	"github.com/SUSE/stratos-ui/repository/cnsis"
-	"github.com/SUSE/stratos-ui/repository/console_config"
-	"github.com/SUSE/stratos-ui/repository/crypto"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	"github.com/SUSE/stratos-ui/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/config"
+	"github.com/cloudfoundry-incubator/stratos/datastore"
+	"github.com/cloudfoundry-incubator/stratos/repository/cnsis"
+	"github.com/cloudfoundry-incubator/stratos/repository/console_config"
+	"github.com/cloudfoundry-incubator/stratos/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -323,6 +326,8 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		domain = ""
 	}
 
+	log.Infof("Session Cookie Domain: %s", domain)
+
 	// Store depends on the DB Type
 	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
@@ -446,12 +451,30 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 
 func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options) *portalProxy {
 	log.Debug("newPortalProxy")
+
+	// Generate cookie name - avoids issues if the cookie domain is changed
+	cookieName := jetstreamSessionName
+	domain := pc.CookieDomain
+	if len(domain) > 0 && domain != "-" {
+		h := sha1.New()
+		io.WriteString(h, domain)
+		hash := fmt.Sprintf("%x", h.Sum(nil))
+		cookieName = fmt.Sprintf("%s-%s", jetstreamSessionName, hash[0:10])
+	}
+
+	log.Infof("Session Cookie name: %s", cookieName)
+
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
 		SessionStore:           ss,
 		SessionStoreOptions:    sessionStoreOptions,
+		SessionCookieName:      cookieName,
+		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 	}
+
+	// Get Diagnostics and store them once
+	pp.StoreDiagnostics()
 
 	return pp
 }
@@ -512,6 +535,9 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		AllowOrigins:     config.AllowedOrigins,
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
+	}))
+	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
+		XFrameOptions: "DENY",
 	}))
 
 	if !isUpgrade {
@@ -706,6 +732,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	// Serve up static resources
 	if err == nil {
+		log.Debug("Add URL Check Middleware")
+		e.Use(p.urlCheckMiddleware)
+		e.Use(middleware.Gzip())
 		e.Static("/", staticDir)
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
@@ -732,7 +761,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 }
 
 func getStaticFiles() (string, error) {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	dir, err := filepath.Abs(".")
 	if err == nil {
 		// Look for a folder named 'ui'
 		_, err := os.Stat(dir + "/ui")

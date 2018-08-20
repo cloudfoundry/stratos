@@ -15,7 +15,7 @@ import {
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../store/helpers/entity-relations.types';
+} from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';

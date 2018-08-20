@@ -38,7 +38,7 @@ export class Component {
   }
 
   waitUntilNotShown(): promise.Promise<void> {
-    return Component.waitUntilNotShown(this.locator);
+    return browser.wait(until.invisibilityOf(this.locator), 20000);
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {

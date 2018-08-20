@@ -49,7 +49,7 @@ import {
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
 

@@ -9,7 +9,7 @@
 /node_modules
 
 # IDEs and editors
-/.idea
+.idea
 .project
 .classpath
 .c9/
@@ -35,7 +35,6 @@ testem.log
 yarn-error.log
 
 # e2e
-src/test-e2e/*.js
 src/test-e2e/*.map
 src/test-e2e/e2e.secrets.ts
 
@@ -91,6 +90,7 @@ src/backend/app-core/load_plugins.go
 secrets.yaml
 build/dev_config.json
 e2e-reports/
+.stratos-git-metadata.json
 
 # Customisations
 
@@ -103,3 +103,8 @@ src/frontend/app/custom.module.ts
 src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom
+src/frontend/index.html
+
+# Prebuild package
+
+stratos-frontend-prebuild.zip

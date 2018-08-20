@@ -7,6 +7,7 @@ const {
 
 const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
+const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 
 var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
 
@@ -38,7 +39,7 @@ try {
 
 
 exports.config = {
-  allScriptsTimeout: 11000,
+  allScriptsTimeout: 30000,
   suites: {
     e2e: [
       './src/test-e2e/login/*-e2e.spec.ts',
@@ -67,6 +68,7 @@ exports.config = {
   },
   params: secrets,
   onPrepare() {
+    skipPlugin.install(jasmine);
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
@@ -78,12 +80,13 @@ exports.config = {
       logIgnore: [
         /\/auth\/session\/verify - Failed to load resource/g
       ]
-   }).getJasmine2Reporter());
+    }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
         displayStacktrace: true
       }
     }));
+    jasmine.getEnv().addReporter(skipPlugin.reporter());
   }
 };
 

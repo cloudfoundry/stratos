@@ -8,7 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 )
 
 func (p *portalProxy) GetUserTokenInfo(tok string) (u *interfaces.JWTUserTokenInfo, err error) {

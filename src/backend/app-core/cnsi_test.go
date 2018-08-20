@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	_ "github.com/satori/go.uuid"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -25,13 +25,15 @@ func TestRegisterCFCluster(t *testing.T) {
 		"cnsi_name":           "Some fancy CF Cluster",
 		"api_endpoint":        mockV2Info.URL,
 		"skip_ssl_validation": "true",
+		"cnsi_client_id":			mockClientId,
+		"cnsi_client_secret":		mockClientSecret,
 	})
 
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true).
+		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err != nil {
