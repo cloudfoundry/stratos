@@ -10,7 +10,7 @@ echo "$FULL_STATUS"
 STATUS=$(echo "$FULL_STATUS" | head -n 1 -)
 if [ "$STATUS" == "Not Created" ]; then
   echo "PCF DEV not created... starting"
-  cf pcfdev start -m 8192
+  cf pcfdev start -m 10240 -c 3
 else if [ "$STATUS" == "Stopped" ]; then
         echo "PCF DEV stopped... starting"
         cf pcfdev start
@@ -150,7 +150,7 @@ set +e
 
 # Pause the PCF Dev instance for now
 sleep 10
-cf pcfdev stop
+echo "Suspending PCF Dev"
 cf pcfdev suspend
 cf pcfdev status
 
