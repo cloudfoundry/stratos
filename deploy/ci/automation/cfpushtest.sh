@@ -31,7 +31,8 @@ cf apps
 # We should be running in the Stratos GitHub folder
 
 # Optionally bring up a database and create a user provided service for the database
-HOST=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+ETH_DEVICE=$(ip -o link show | awk '{print $2,$9}' | grep UP | grep eth | sed -n 1p | cut -d: -f1)
+HOST=$(ip -4 addr show $ETH_DEVICE | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 USERNAME=stratos_mysql
 PASSWORD=stratos_mysql_passw0rd
 DB_NAME=stratos_db
