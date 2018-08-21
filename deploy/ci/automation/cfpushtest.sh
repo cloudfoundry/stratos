@@ -145,8 +145,14 @@ if [ -n "$DB_DOCKER_PID" ]; then
   docker kill $DB_DOCKER_PID
 fi
 
+
+set +e
+
 # Pause the PCF Dev instance for now
+sleep 10
+cf pcfdev stop
 cf pcfdev suspend
+cf pcfdev status
 
 # Return exit code form the e2e tests
 exit $RET
