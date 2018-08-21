@@ -47,8 +47,6 @@ if [ "$1" == "mysql" ]; then
   echo "Using MYSQL database"
   echo "Starting MySQL Database..."
   docker kill $(docker ps -q --filter "ancestor=mysql:latest")
-  #DB_DOCKER_PID=$(docker run -d -p $PORT:3306 --env MYSQL_ROOT_PASSWORD=stratos --env MYSQL_DATABASE=$DB_NAME --env MYSQL_USER=$USERNAME --env MYSQL_PASSWORD==$PASSWORD mysql:latest --default-authentication-plugin=mysql_native_password)
-
   DB_DOCKER_PID=$(docker run -d -p $PORT:3306 --env MYSQL_ROOT_PASSWORD=stratos mysql:latest --default-authentication-plugin=mysql_native_password)
   echo "Waiting for mysql"
   until mysql -h $HOST -uroot -pstratos -e "SHOW DATABASES;" &> /dev/null
@@ -69,7 +67,6 @@ if [ "$1" == "pgsql" ]; then
   echo "Using Postgres database"
   echo "Starting Postgres Database..."
   docker kill $(docker ps -q --filter "ancestor=postgres:latest")
-  # POSTGRES_PASSWORD, POSTGRES_USER< POSTGRES_DB
   DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=stratos --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
 fi
 
@@ -81,9 +78,6 @@ cf delete -f -r console
 cf ds -f $DB
 
 CONFIG='{"dbname":"'$DB_NAME'","name":"'$DB_NAME'","username":"'$USERNAME'","password":"'$PASSWORD'","uri":"'${DB_TYPE}'://database","port":"'$PORT'","hostname":"'$HOST'"}'
-echo "HERE..."
-echo $CONFIG
-
 echo "Creating user provided service for the database..."
 cf cups ${DB} -p "'${CONFIG}'"
 
@@ -143,7 +137,7 @@ export E2E_REPORT_FOLDER=./e2e-reports
 RET=$?
 
 # Delete the app
-#cf delete -f -r console
+cf delete -f -r console
 
 rm $MANIFEST
 
@@ -153,11 +147,10 @@ if [ -n "$DB_DOCKER_PID" ]; then
   docker kill $DB_DOCKER_PID
 fi
 
-
 set +e
 
 # Pause the PCF Dev instance for now
-sleep 10
+sleep 5
 echo "Suspending PCF Dev"
 cf pcfdev suspend
 cf pcfdev status
