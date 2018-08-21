@@ -6,6 +6,7 @@ import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageEventsTab } from './po/application-page-events.po';
@@ -148,6 +149,10 @@ describe('Application Deploy -', function () {
 
     beforeAll(() => {
       browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(appName)
+        .then(res => {
+          expect(res).toBeTruthy('Failed to fetch app, is it deployed in the default space?');
+          return res;
+        })
         .then(res => { appDetails = res; })
         .then(() => {
           appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.app.metadata.guid);
@@ -303,6 +308,73 @@ describe('Application Deploy -', function () {
           });
         });
       }
+    });
+
+    it('Instance scaling', () => {
+      const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appInstances.goToInstancesTab();
+
+      // Initial state
+      appInstances.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+      expect(appInstances.cardInstances.editCountButton().isDisplayed()).toBeTruthy();
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      expect(appInstances.cardInstances.increaseCountButton().isDisplayed()).toBeTruthy();
+
+      // Scale using edit count form
+      appInstances.cardInstances.editInstanceCount(2);
+      appInstances.cardInstances.waitForRunningInstancesText('2 / 2');
+      expect(appInstances.list.getTotalResults()).toBe(2);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+      expect(appInstances.list.table.getCell(1, 1).getText()).toBe('RUNNING');
+
+      appInstances.cardInstances.editInstanceCount(1);
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(1);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+
+      // Scale using +/- buttons
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      appInstances.cardInstances.decreaseCountButton().click();
+      const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
+      expect(confirm.getMessage()).toBe('Are you sure you want to set the instance count to 0?');
+      confirm.confirm();
+      appInstances.cardInstances.waitForRunningInstancesText('0 / 0');
+      // Content of empty instance table is tested elsewhere
+      expect(appInstances.list.getTotalResults()).toBe(0);
+
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      appInstances.cardInstances.increaseCountButton().click();
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(1);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+    });
+
+    it('Instance termination', () => {
+      const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appInstances.goToInstancesTab();
+
+      // Initial state
+      appInstances.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+
+      // Terminate an instance
+      appInstances.list.table.openRowActionMenuByIndex(0).clickItem('Terminate');
+      const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
+      expect(confirm.getMessage()).toBe('Are you sure you want to terminate instance 0?');
+      confirm.confirm();
+      appInstances.cardInstances.waitForRunningInstancesText('0 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(0);
     });
 
   });
