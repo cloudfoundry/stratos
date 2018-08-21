@@ -10,9 +10,9 @@ import { CFRequestHelpers } from './cf-request-helpers';
 
 export class CFHelpers {
   cfRequestHelper: CFRequestHelpers;
-  cachedDefaultCfGuid: string;
-  cachedDefaultOrgGuid: string;
-  cachedDefaultSpaceGuid: string;
+  static cachedDefaultCfGuid: string;
+  static cachedDefaultOrgGuid: string;
+  static cachedDefaultSpaceGuid: string;
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
@@ -191,17 +191,17 @@ export class CFHelpers {
 
 
   fetchDefaultCfGuid = (fromCache = true): promise.Promise<string> => {
-    return fromCache && this.cachedDefaultCfGuid ?
-      promise.fullyResolved(this.cachedDefaultCfGuid) :
+    return fromCache && CFHelpers.cachedDefaultCfGuid ?
+      promise.fullyResolved(CFHelpers.cachedDefaultCfGuid) :
       this.cfRequestHelper.getCfGuid().then(guid => {
-        this.cachedDefaultCfGuid = guid;
-        return this.cachedDefaultCfGuid;
+        CFHelpers.cachedDefaultCfGuid = guid;
+        return CFHelpers.cachedDefaultCfGuid;
       });
   }
 
   fetchDefaultOrgGuid = (fromCache = true): promise.Promise<string> => {
-    return fromCache && this.cachedDefaultOrgGuid ?
-      promise.fullyResolved(this.cachedDefaultOrgGuid) :
+    return fromCache && CFHelpers.cachedDefaultOrgGuid ?
+      promise.fullyResolved(CFHelpers.cachedDefaultOrgGuid) :
       this.fetchDefaultCfGuid(true)
         .then(guid => this.addOrgIfMissingForEndpointUsers(
           guid,
@@ -209,27 +209,27 @@ export class CFHelpers {
           e2e.secrets.getDefaultCFEndpoint().testOrg
         ))
         .then(org => {
-          this.cachedDefaultOrgGuid = org.metadata.guid;
-          return this.cachedDefaultOrgGuid;
+          CFHelpers.cachedDefaultOrgGuid = org.metadata.guid;
+          return CFHelpers.cachedDefaultOrgGuid;
         });
   }
 
   fetchDefaultSpaceGuid = (fromCache = true): promise.Promise<string> => {
-    return fromCache && this.cachedDefaultSpaceGuid ?
-      promise.fullyResolved(this.cachedDefaultSpaceGuid) :
+    return fromCache && CFHelpers.cachedDefaultSpaceGuid ?
+      promise.fullyResolved(CFHelpers.cachedDefaultSpaceGuid) :
       this.fetchDefaultOrgGuid(true)
         .then(orgGuid =>
           this.addSpaceIfMissingForEndpointUsers(
-            this.cachedDefaultCfGuid,
-            this.cachedDefaultOrgGuid,
+            CFHelpers.cachedDefaultCfGuid,
+            CFHelpers.cachedDefaultOrgGuid,
             e2e.secrets.getDefaultCFEndpoint().testOrg,
             e2e.secrets.getDefaultCFEndpoint().testSpace,
             e2e.secrets.getDefaultCFEndpoint()
           )
         )
         .then(space => {
-          this.cachedDefaultSpaceGuid = space.metadata.guid;
-          return this.cachedDefaultSpaceGuid;
+          CFHelpers.cachedDefaultSpaceGuid = space.metadata.guid;
+          return CFHelpers.cachedDefaultSpaceGuid;
         });
   }
 

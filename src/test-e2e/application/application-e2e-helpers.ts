@@ -43,7 +43,7 @@ export class ApplicationE2eHelper {
       return appName ? this.fetchApp(cfGuid1, spaceGuid1, appName) : this.fetchAppByGuid(cfGuid1, appGuid);
     });
 
-    return appP.then(app => ({ cfGuid: this.cfHelper.cachedDefaultCfGuid, app })).catch(e => {
+    return appP.then(app => ({ cfGuid: CFHelpers.cachedDefaultCfGuid, app })).catch(e => {
       e2e.log('Failed to fetch application in default cf, org and space: ' + e);
       throw e;
     });
