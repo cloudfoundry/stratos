@@ -48,9 +48,14 @@ describe('Create Service Instance with binding', () => {
       }).then(cardTitles => {
         promise.all(cardTitles).then(titles => {
           expect(titles.filter((t, idx) => {
-            const isCorrectCard = t === serviceName;
+            const isCorrectCard = (t === serviceName);
             if (isCorrectCard) {
               cardIdx = idx;
+              /* tslint:disable */
+                console.log('IS Correct card: ' + idx)
+                console.log('Service Name is: ' + serviceName)
+              /* tslint:enable */
+
               const card = servicesWall.serviceInstancesList.cards.getCard(cardIdx);
               card.getMetaCardItems().then(metaCardRows => {
                 expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
