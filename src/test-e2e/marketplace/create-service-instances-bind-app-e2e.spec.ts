@@ -61,6 +61,7 @@ describe('Create Service Instance with binding', () => {
   });
 
   it('- should have correct number in services card view', () => {
+    browser.sleep(1000);
     servicesWall.navigateTo();
     servicesWall.waitForPage();
     const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;
