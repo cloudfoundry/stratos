@@ -22,13 +22,13 @@ describe('Application View -', function () {
 
   function createTestAppAndNav(): promise.Promise<any> {
     return cfHelper.basicCreateApp(
-      cfHelper.cachedDefaultCfGuid,
-      cfHelper.cachedDefaultSpaceGuid,
+      CFHelpers.cachedDefaultCfGuid,
+      CFHelpers.cachedDefaultSpaceGuid,
       appName
     )
       .then(pApp => app = pApp)
       .then(() => {
-        appSummary = new ApplicationPageSummaryTab(cfHelper.cachedDefaultCfGuid, app.metadata.guid);
+        appSummary = new ApplicationPageSummaryTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
         appSummary.navigateTo();
         appSummary.waitForPage();
       });
@@ -107,8 +107,8 @@ describe('Application View -', function () {
     });
 
     it('Info', () => {
-      expect(appSummary.cardInfo.memQuota.getValue()).toBe('256 MB');
-      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('512 MB');
+      expect(appSummary.cardInfo.memQuota.getValue()).toBe('1 GB');
+      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('1 GB');
       expect(appSummary.cardInfo.appState.getValue()).toBe('STOPPED');
       expect(appSummary.cardInfo.packageState.getValue()).toBe('PENDING');
       expect(appSummary.cardInfo.services.getValue()).toBe('0');
@@ -125,7 +125,7 @@ describe('Application View -', function () {
 
     it('Build Info', () => {
       expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('-');
-      expect(appSummary.cardBuildInfo.stack.getValue()).toBe('cflinuxfs2');
+      expect(appSummary.cardBuildInfo.stack.getValue()).toBe('opensuse42');
     });
 
     it('Deployment Info', () => {
@@ -137,7 +137,7 @@ describe('Application View -', function () {
     let appInstances: ApplicationPageInstancesTab;
 
     beforeAll(() => {
-      appInstances = new ApplicationPageInstancesTab(cfHelper.cachedDefaultCfGuid, app.metadata.guid);
+      appInstances = new ApplicationPageInstancesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
       appInstances.navigateTo();
       appInstances.waitForPage();
     });
@@ -165,7 +165,7 @@ describe('Application View -', function () {
     let appRoutes: ApplicationPageRoutesTab;
 
     beforeAll(() => {
-      appRoutes = new ApplicationPageRoutesTab(cfHelper.cachedDefaultCfGuid, app.metadata.guid);
+      appRoutes = new ApplicationPageRoutesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
       appRoutes.navigateTo();
       appRoutes.waitForPage();
     });
@@ -183,7 +183,7 @@ describe('Application View -', function () {
     let appVariables: ApplicationPageVariablesTab;
 
     beforeAll(() => {
-      appVariables = new ApplicationPageVariablesTab(cfHelper.cachedDefaultCfGuid, app.metadata.guid);
+      appVariables = new ApplicationPageVariablesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
       appVariables.navigateTo();
       appVariables.waitForPage();
     });
@@ -199,7 +199,7 @@ describe('Application View -', function () {
     let appEvents: ApplicationPageEventsTab;
 
     beforeAll(() => {
-      appEvents = new ApplicationPageEventsTab(cfHelper.cachedDefaultCfGuid, app.metadata.guid);
+      appEvents = new ApplicationPageEventsTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
       appEvents.navigateTo();
       appEvents.waitForPage();
     });

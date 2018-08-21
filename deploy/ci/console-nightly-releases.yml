@@ -106,7 +106,6 @@ jobs:
           build: stratos/
           target_name:  prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
           build_args_file: image-tag/build-args
       - put: postflight-image
         params:
@@ -114,20 +113,17 @@ jobs:
           build: stratos/
           target_name:  postflight-job
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
       - put: ui-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
           prebuild_script: build/store-git-metadata.sh
 - name: create-chart
   plan:
