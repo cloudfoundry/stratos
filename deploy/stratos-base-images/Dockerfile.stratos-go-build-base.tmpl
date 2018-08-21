@@ -2,15 +2,9 @@ FROM {{BASE_IMAGE}}
 
 RUN zypper -n ref && \
 zypper -n up && \
-<<<<<<< HEAD
-zypper in -y wget which tar git gcc curl
-RUN wget https://storage.googleapis.com/golang/go1.8.4.linux-amd64.tar.gz && \
-    tar -xzf go1.8.4.linux-amd64.tar.gz -C /usr/local/ && \
-=======
-zypper in -y wget curl which tar git gcc
+zypper in -y which tar git gcc curl
 RUN wget https://storage.googleapis.com/golang/go1.9.7.linux-amd64.tar.gz && \
     tar -xzf go1.9.7.linux-amd64.tar.gz -C /usr/local/ && \
->>>>>>> origin/backend-rework
     mkdir -p /home/stratos/go/bin && \
     mkdir -p /home/stratos/go/src
     
