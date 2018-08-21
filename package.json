@@ -22,6 +22,7 @@
     "start": "npm run customize && ng serve",
     "start-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
     "start-prod": "ng serve --prod",
+    "start-dev": "ng serve --aot=false",
     "test": "ng test --code-coverage",
     "test-debug": "ng test --watch=true --source-map=true",
     "test-headless": "HEADLESS=true npm run test",

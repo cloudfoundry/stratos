@@ -132,6 +132,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Store database provider name for diagnostics
+	portalConfig.DatabaseProviderName = dc.DatabaseProvider
+
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
