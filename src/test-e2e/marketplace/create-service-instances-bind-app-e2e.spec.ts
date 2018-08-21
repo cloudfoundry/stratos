@@ -51,6 +51,12 @@ describe('Create Service Instance with binding', () => {
             const isCorrectCard = t === serviceName;
             if (isCorrectCard) {
               cardIdx = idx;
+              const card = servicesWall.serviceInstancesList.cards.getCard(cardIdx);
+              card.getMetaCardItems().then(metaCardRows => {
+                expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
+                expect(metaCardRows[2].value).toBe('shared');
+                expect(metaCardRows[3].value).toBe('1');
+              }).catch(e => fail(e));
             }
             return isCorrectCard;
           }).length).toBe(1);
@@ -58,19 +64,6 @@ describe('Create Service Instance with binding', () => {
       }).catch(e => fail(e));
 
 
-  });
-
-  it('- should have correct number in services card view', () => {
-    browser.sleep(1000);
-    servicesWall.navigateTo();
-    servicesWall.waitForPage();
-    const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;
-    const card = servicesWall.serviceInstancesList.cards.getCard(cardIdx);
-    card.getMetaCardItems().then(metaCardRows => {
-      expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
-      expect(metaCardRows[2].value).toBe('shared');
-      expect(metaCardRows[3].value).toBe('1');
-    }).catch(e => fail(e));
   });
 
   it('- should have correct number in list view', () => {
