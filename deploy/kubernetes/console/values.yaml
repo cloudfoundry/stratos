@@ -10,6 +10,7 @@ dbProvider: mysql
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
+imagePullPolicy: IfNotPresent
 useLb: false
 console:
   port: 443

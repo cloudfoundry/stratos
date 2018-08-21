@@ -3,16 +3,14 @@ package cfapppush
 import (
 	"errors"
 
-	"code.cloudfoundry.org/cli/cf/commands/application"
-	"code.cloudfoundry.org/cli/cf/flags"
+	"github.com/cloudfoundry-incubator/stratos/plugins/cfapppush/pushapp"
 	"github.com/cloudfoundry-incubator/stratos/repository/interfaces"
 	"github.com/labstack/echo"
 )
 
 type CFAppPush struct {
 	portalProxy interfaces.PortalProxy
-	pushCommand *application.Push
-	flagContext flags.FlagContext
+	cfPush      pushapp.CFPush
 }
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
