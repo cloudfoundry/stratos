@@ -8,13 +8,13 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationPageEventsTab } from './application-page-events.po';
-import { ApplicationPageGithubTab } from './application-page-github.po';
-import { ApplicationPageInstancesTab } from './application-page-instances.po';
-import { ApplicationPageRoutesTab } from './application-page-routes.po';
-import { ApplicationPageSummaryTab } from './application-page-summary.po';
-import { ApplicationPageVariablesTab } from './application-page-variables.po';
-import { ApplicationBasePage } from './application-page.po';
+import { ApplicationPageEventsTab } from './po/application-page-events.po';
+import { ApplicationPageGithubTab } from './po/application-page-github.po';
+import { ApplicationPageInstancesTab } from './po/application-page-instances.po';
+import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
+import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
+import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
+import { ApplicationBasePage } from './po/application-page.po';
 
 const until = protractor.ExpectedConditions;
 

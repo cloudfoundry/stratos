@@ -1,8 +1,8 @@
-import { ListComponent } from '../po/list.po';
+import { ListComponent } from '../../po/list.po';
 import { ApplicationBasePage } from './application-page.po';
-import { CardGithubCommitInfo } from './po/card-github-commit-info.po';
-import { CardGithubDeployInfo } from './po/card-github-deploy-info.po';
-import { CardGithubRepoInfo } from './po/card-github-repo-info.po';
+import { CardGithubCommitInfo } from './card-github-commit-info.po';
+import { CardGithubDeployInfo } from './card-github-deploy-info.po';
+import { CardGithubRepoInfo } from './card-github-repo-info.po';
 
 export class ApplicationPageGithubTab extends ApplicationBasePage {
 

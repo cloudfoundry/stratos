@@ -7,11 +7,11 @@ import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationPageEventsTab } from './application-page-events.po';
-import { ApplicationPageInstancesTab } from './application-page-instances.po';
-import { ApplicationPageRoutesTab } from './application-page-routes.po';
-import { ApplicationPageSummaryTab } from './application-page-summary.po';
-import { ApplicationPageVariablesTab } from './application-page-variables.po';
+import { ApplicationPageEventsTab } from './po/application-page-events.po';
+import { ApplicationPageInstancesTab } from './po/application-page-instances.po';
+import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
+import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
+import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 
 describe('Application View -', function () {
   let cfHelper: CFHelpers;

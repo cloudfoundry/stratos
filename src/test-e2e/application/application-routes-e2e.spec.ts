@@ -1,13 +1,13 @@
-import { protractor, promise } from 'protractor';
+import { promise, protractor } from 'protractor';
 
-import { IApp } from '../../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../../frontend/app/store/types/api.types';
-import { e2e } from '../../e2e';
-import { ConsoleUserType } from '../../helpers/e2e-helpers';
-import { ConfirmDialogComponent } from '../../po/confirm-dialog';
-import { ApplicationE2eHelper } from '../application-e2e-helpers';
-import { ApplicationPageRoutesTab } from '../application-page-routes.po';
-import { CreateRoutesPage } from './routes-create-pages.po';
+import { IApp } from '../../frontend/app/core/cf-api.types';
+import { APIResource } from '../../frontend/app/store/types/api.types';
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { ApplicationE2eHelper } from './application-e2e-helpers';
+import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
+import { CreateRoutesPage } from './po/routes-create-page.po';
 
 describe('Application Routes -', () => {
 
