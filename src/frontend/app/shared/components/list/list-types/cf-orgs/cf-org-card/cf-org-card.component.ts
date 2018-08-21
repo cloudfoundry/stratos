@@ -47,6 +47,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   @Input()
   public config: { linkButton: boolean };
+  public linkButton: boolean;
 
   constructor(
     private cfUserService: CfUserService,
@@ -62,6 +63,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   }
 
   ngOnInit() {
+    this.linkButton = this.config ? this.config.linkButton : false;
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         // This is null if the endpoint is disconnected. Probably related to https://github.com/cloudfoundry-incubator/stratos/issues/1727

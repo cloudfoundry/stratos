@@ -1,4 +1,4 @@
-<app-meta-card class="space-card" [routerLink]="!config.linkButton ? ['/cloud-foundry', row.entity.cfGuid, 'organizations', orgGuid, 'spaces', spaceGuid] : []" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
+<app-meta-card class="space-card" [routerLink]="!linkButton ? ['/cloud-foundry', row.entity.cfGuid, 'organizations', orgGuid, 'spaces', spaceGuid] : []" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
   <app-meta-card-title class="space-card__title">
     <div class="space-card__title-link">{{ row.entity.name }}</div>
   </app-meta-card-title>
@@ -24,7 +24,7 @@
     </app-meta-card-value>
     <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="config.linkButton">
+  <app-meta-card-item *ngIf="linkButton">
     <app-meta-card-value>
       <a [routerLink]="['/cloud-foundry', row.entity.cfGuid, 'organizations', orgGuid, 'spaces', spaceGuid]">View ></a>
     </app-meta-card-value>

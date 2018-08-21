@@ -50,6 +50,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
+  public linkButton: any;
 
   constructor(
     private cfUserService: CfUserService,
@@ -63,6 +64,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   }
 
   ngOnInit() {
+    this.linkButton = this.config ? this.config.linkButton : false;
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
     this.orgGuid = this.row.entity.organization_guid;

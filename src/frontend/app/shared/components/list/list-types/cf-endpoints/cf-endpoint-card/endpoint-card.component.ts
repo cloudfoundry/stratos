@@ -32,7 +32,6 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
   }
 
   ngOnInit() {
-    console.log(this.config);
     this.linkButton = this.config ? this.config.linkButton : false;
     this.status$.next(this.mapStatus(this.row));
   }

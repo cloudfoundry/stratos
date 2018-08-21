@@ -6,7 +6,7 @@ import { GetAllOrganizationSpaces } from '../../../store/actions/organization.ac
 import { GetAllAppsInSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { endpointSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { DrillDownDefinition } from './../../../shared/components/drill-down/drill-down.component';
@@ -93,7 +93,14 @@ export class HomePageComponent implements OnInit {
           getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => new GetAllAppsInSpace(
             cf.guid,
             space.entity.guid,
-            createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down'
+            createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down',
+            [
+              createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+              createEntityRelationKey(applicationSchemaKey, organizationSchemaKey),
+              createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+              createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
+            ],
+            false
           ),
 
         })

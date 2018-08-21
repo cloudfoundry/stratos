@@ -25,6 +25,8 @@ import { TableCellDefaultComponent } from './shared/components/list/list-table/a
 import { TableCellEndpointStatusComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellActionsComponent } from './shared/components/list/list-table/table-cell-actions/table-cell-actions.component';
 import { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellAppNameComponent } from './shared/components/list/list-types/app/table-cell-app-name/table-cell-app-name.component';
+import { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 
 
 // Create action for router navigation. See
@@ -88,7 +90,9 @@ export class CustomRouterStateSerializer
     TableCellDefaultComponent,
     TableCellEndpointStatusComponent,
     TableCellActionsComponent,
-    TableCellEndpointNameComponent
+    TableCellEndpointNameComponent,
+    TableCellAppNameComponent,
+    TableCellAppStatusComponent
   ],
   providers: [
     LoggedInService,
