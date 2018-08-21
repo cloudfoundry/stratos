@@ -11,12 +11,17 @@ STATUS=$(echo "$FULL_STATUS" | head -n 1 -)
 if [ "$STATUS" == "Not Created" ]; then
   echo "PCF DEV not created... starting"
   cf pcfdev start -m 10240 -c 3
-else if [ "$STATUS" == "Stopped" ]; then
-        echo "PCF DEV stopped... starting"
+  else if [ "$STATUS" == "Stopped" ]; then
+    echo "PCF DEV stopped... starting"
+    cf pcfdev start
+    else if [ "$STATUS" == "Suspended" ]; then
+      echo "Resuming PCF DEV"
+      cf pcfdev resume
+      else
+        echo "Stopping and starting PCF DEV"
+        cf pcfdev stop
         cf pcfdev start
-      else if [ "$STATUS" == "Suspended" ]; then
-        echo "Resuming PCF DEV"
-        cf pcfdev resume
+      fi
     fi
   fi
 fi
