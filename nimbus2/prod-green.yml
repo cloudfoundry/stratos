@@ -1,0 +1,8 @@
+applications:
+- name: console-green
+  memory: 1G
+  disk_quota: 256M
+  host: console-nimbus-green
+  timeout: 180
+  buildpack: https://github.com/SUSE/stratos-buildpack
+  health-check-type: port
