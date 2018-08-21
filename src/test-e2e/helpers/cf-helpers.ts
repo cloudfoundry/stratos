@@ -152,7 +152,7 @@ export class CFHelpers {
   }
 
   fetchRoutesInSpace(cnsiGuid: string, spaceGuid: string): promise.Promise<APIResource<IRoute>[]> {
-    return this.cfRequestHelper.sendCfGet<CFResponse<IRoute>>(cnsiGuid, `/spaces/spaceGuid/routes?results-per-page=100`)
+    return this.cfRequestHelper.sendCfGet<CFResponse<IRoute>>(cnsiGuid, `/spaces/${spaceGuid}/routes?results-per-page=100`)
       .then(json => {
         if (json.total_results > 100) {
           fail('Number of routes in space is over the max page size of 100, requires de-paginating');

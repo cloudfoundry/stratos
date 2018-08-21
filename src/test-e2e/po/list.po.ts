@@ -102,7 +102,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData() {
+  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
