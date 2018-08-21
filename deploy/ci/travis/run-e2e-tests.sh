@@ -41,7 +41,7 @@ if [ "${RUN_TYPE}" == "quick" ]; then
   dep version
   
   npm run build
-  npm run build-backend-dev
+  npm run build-backend
   # Patch the config file so local version runs on port 443
   pushd outputs
   ./portal-proxy > backend.log &

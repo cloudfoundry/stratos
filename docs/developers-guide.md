@@ -172,7 +172,7 @@ This env var can be set in `outputs/config.properties` if running the backend lo
     - Copy `portal-proxy-output/dev-certs` to `./`
 2. Navigate to the root of the project
 3. run `npm install`
-4. Run `npm run build-backend-dev`
+4. Run `npm run build-backend`
 5. cd ./outputs
 6. Update `config.propeties` and ensure that..
     - the UAA points to a valid instance

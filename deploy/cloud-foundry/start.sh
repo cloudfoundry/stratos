@@ -29,4 +29,4 @@ else
 fi
 
 echo "Starting..."
-./portal-proxy
+./jetstream
