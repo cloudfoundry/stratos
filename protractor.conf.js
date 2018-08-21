@@ -36,7 +36,7 @@ try {
 }
 
 // This is the maximum amount of time ALL before/after/it's must execute in
-const timeout = 30000
+const timeout = 40000
 
 exports.config = {
   allScriptsTimeout: timeout,

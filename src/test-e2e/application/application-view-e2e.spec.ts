@@ -50,9 +50,7 @@ describe('Application View -', function () {
 
   afterAll(() => {
     if (app) {
-      // console.log('!!!!! ', app);
-      // TODO: will it have routes?
-      return applicationE2eHelper.deleteApplication(null, { appGuid: app.metadata.guid });
+      return applicationE2eHelper.deleteApplication(null, { appGuid: app.metadata.guid }, false);
     }
   });
 
@@ -70,7 +68,9 @@ describe('Application View -', function () {
     it('From App Wall', () => {
       const appWall = new ApplicationsPage();
       appWall.navigateTo();
+      appWall.waitForPage();
       appSummary.navigateTo();
+      appSummary.waitForPage();
       testApplicationsBreadcrumb();
     });
   });

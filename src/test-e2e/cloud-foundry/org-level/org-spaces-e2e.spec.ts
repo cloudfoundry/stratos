@@ -11,7 +11,7 @@ import { CfOrgLevelPage } from './cf-org-level-page.po';
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-org-spaces-test';
 
-describe('Org Spaces List- ', () => {
+describe('Org Spaces List -', () => {
 
   let cfHelper: CFHelpers;
   let defaultCf: E2EConfigCloudFoundry;
@@ -89,7 +89,7 @@ describe('Org Spaces List- ', () => {
 
   function tearDown(orgName: string) {
     expect(orgName).not.toBeNull();
-    cfHelper.deleteOrgIfExisting(endpointGuid, orgName);
+    browser.wait(cfHelper.deleteOrgIfExisting(endpointGuid, orgName));
   }
 
   beforeAll(() => {
