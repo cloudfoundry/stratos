@@ -71,7 +71,7 @@ export class ApplicationE2eHelper {
     maxChain: number,
     abortChainFc: (val: T) => boolean,
     count = 0): promise.Promise<T> {
-    if (count > maxChain || abortChainFc(currentValue)) {
+    if (count >= maxChain || abortChainFc(currentValue)) {
       return promise.fullyResolved(currentValue);
     }
     e2e.log('Chaining requests. Count: ' + count);
@@ -93,7 +93,8 @@ export class ApplicationE2eHelper {
     needApp?: {
       appName?: string,
       appGuid?: string
-    }
+    },
+    pollForMissingRoutes = true
   ): promise.Promise<any> => {
     if (!haveApp && !needApp) {
       e2e.log(`Skipping Deleting App...`);
@@ -129,7 +130,7 @@ export class ApplicationE2eHelper {
         const routes: promise.Promise<APIResource<IRoute>[]> = this.chain<APIResource<IRoute>[]>(
           app.entity.routes,
           () => this.cfHelper.fetchAppRoutes(cfGuid, app.metadata.guid),
-          10,
+          pollForMissingRoutes ? 10 : 0,
           (res) => !!res && !!res.length
         );
 
