@@ -152,12 +152,12 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 
 #### Introduction
 * Golang
-* Dependency Management (Glide)
+* Dependency Management (dep)
 
 #### Dependencies
 * go
   * GOPATH, GOBIN env vars set to default values
-* glide
+* dep
 * npm
 * UAA instance
 
