@@ -1,18 +1,18 @@
 import { browser } from 'protractor';
 
-import { ApplicationE2eHelper } from '../../application/application-e2e-helpers';
 import { e2e, E2ESetup } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
+import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
 
 
-describe('CF - Space Level - ', () => {
+describe('CF - Space Level -', () => {
 
   let spacePage: CfSpaceLevelPage;
   let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
-  let applicationE2eHelper: ApplicationE2eHelper;
+  let cfHelper: CFHelpers;
 
   function setup(user: ConsoleUserType) {
     e2eSetup = e2e.setup(ConsoleUserType.admin)
@@ -22,7 +22,7 @@ describe('CF - Space Level - ', () => {
       .connectAllEndpoints(ConsoleUserType.user)
       .loginAs(user)
       .getInfo();
-    applicationE2eHelper = new ApplicationE2eHelper(e2eSetup);
+    cfHelper = new CFHelpers(e2eSetup);
   }
 
   function testBreadcrumb() {
@@ -45,43 +45,47 @@ describe('CF - Space Level - ', () => {
 
   function navToPage() {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    browser.wait(applicationE2eHelper.cfHelper.fetchSpace(endpointGuid, defaultCf.testSpace).then((space => {
-      spacePage = CfSpaceLevelPage.forEndpoint(endpointGuid, space.entity.organization_guid, space.metadata.guid);
-      spacePage.navigateTo();
-      spacePage.waitForPageOrChildPage();
-      spacePage.loadingIndicator.waitUntilNotShown();
-    })));
+    browser.wait(
+      cfHelper.fetchDefaultSpaceGuid(true)
+        .then(spaceGuid => {
+          spacePage = CfSpaceLevelPage.forEndpoint(
+            cfHelper.cachedDefaultCfGuid,
+            cfHelper.cachedDefaultOrgGuid,
+            cfHelper.cachedDefaultSpaceGuid
+          );
+          return spacePage.navigateTo();
+        })
+        .then(() => spacePage.waitForPageOrChildPage())
+        .then(() => spacePage.loadingIndicator.waitUntilNotShown())
+    );
   }
 
-  describe('As Admin', () => {
+  describe('As Admin -', () => {
     beforeEach(() => {
       setup(ConsoleUserType.admin);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
       beforeEach(navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
-
     });
 
   });
 
-  describe('As User', () => {
+  describe('As User -', () => {
     beforeEach(() => {
       setup(ConsoleUserType.user);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
       beforeEach(navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
-
     });
   });
 

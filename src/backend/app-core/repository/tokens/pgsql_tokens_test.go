@@ -392,9 +392,9 @@ func TestDeleteCNSIToken(t *testing.T) {
 			So(err, ShouldNotBeNil)
 		})
 
-		Convey("should through exception when encoutring DB error", func() {
+		Convey("should throw exception when encountering DB error", func() {
 			mock.ExpectExec(deleteFromTokensSql).
-				WillReturnError(errors.New("doesnt exist"))
+				WillReturnError(errors.New("doesn't exist"))
 			err := repository.DeleteCNSIToken(mockCNSIToken, mockUserGuid)
 
 			So(err, ShouldNotBeNil)
@@ -406,6 +406,46 @@ func TestDeleteCNSIToken(t *testing.T) {
 			mock.ExpectExec(deleteFromTokensSql).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 			err := repository.DeleteCNSIToken(mockCNSIToken, mockUserGuid)
+
+			So(err, ShouldBeNil)
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+
+		})
+
+		Reset(func() {
+			db.Close()
+		})
+
+	})
+
+}
+
+func TestDeleteCNSITokens(t *testing.T) {
+
+	Convey("DeleteCNSITokens Tests", t, func() {
+
+		db, mock, repository := initialiseRepo(t)
+
+		Convey("should fail to delete token with an invalid CNSI GUID", func() {
+			var cnsiGuid string = ""
+			err := repository.DeleteCNSITokens(cnsiGuid)
+			So(err, ShouldNotBeNil)
+		})
+
+		Convey("should throw exception when encountering DB error", func() {
+			mock.ExpectExec(deleteFromTokensSql).
+				WillReturnError(errors.New("doesn't exist"))
+			err := repository.DeleteCNSITokens(mockCNSIToken)
+
+			So(err, ShouldNotBeNil)
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+
+		})
+
+		Convey("Test successful path", func() {
+			mock.ExpectExec(deleteFromTokensSql).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+			err := repository.DeleteCNSITokens(mockCNSIToken)
 
 			So(err, ShouldBeNil)
 			So(mock.ExpectationsWereMet(), ShouldBeNil)

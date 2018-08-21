@@ -20,6 +20,7 @@ import {
   GetAppSummaryAction,
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
+import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   appEnvVarsSchemaKey,
@@ -32,6 +33,7 @@ import {
   routeSchemaKey,
   serviceBindingSchemaKey,
   spaceSchemaKey,
+  spaceWithOrgKey,
   stackSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
@@ -51,8 +53,6 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-
-
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -184,7 +184,17 @@ export class ApplicationService {
       map(entityInfo => entityInfo.entity.entity), );
     this.appSpace$ = moreWaiting$.pipe(
       first(),
-      switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid))), );
+      switchMap(app => {
+        return this.entityServiceFactory.create<APIResource<ISpace>>(
+          spaceSchemaKey,
+          entityFactory(spaceWithOrgKey),
+          app.space_guid,
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
+        ).waitForEntity$.pipe(
+          map(entityInfo => entityInfo.entity)
+        );
+      })
+    );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
       switchMap(app => this.appSpace$.pipe(
@@ -193,7 +203,8 @@ export class ApplicationService {
           return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
         }),
         filter(org => !!org)
-      )), );
+      ))
+    );
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount(), );
 

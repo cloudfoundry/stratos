@@ -21,7 +21,9 @@ run:
       LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
 
       if [ ! -z ${TAG_SUFFIX} ]; then
-        LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+        if [ "${TAG_SUFFIX}" != "null" ]; then
+          LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+        fi
       fi
 
 

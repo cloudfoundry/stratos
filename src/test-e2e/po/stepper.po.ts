@@ -74,10 +74,14 @@ export class StepperComponent extends Component {
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
+  isStepDisabled(stepName: string): promise.Promise<boolean> {
+    return this.getStep(stepName).element(by.css('app-dot-content span.disabled')).isPresent();
+  }
+
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
 
   hasStep(name: string) {
-    return this.locator.element(by.cssContainingText('.steppers__header .steppers__header-text', name)).isPresent();
+    return this.getStep(name).isPresent();
   }
 
   getStepNames() {
@@ -86,6 +90,10 @@ export class StepperComponent extends Component {
 
   getActiveStepName(): promise.Promise<string> {
     return element(by.css('.steppers__header--active .steppers__header-text')).getText();
+  }
+
+  getStep(stepName) {
+    return this.locator.element(by.cssContainingText('.steppers__header', stepName));
   }
 
 }
