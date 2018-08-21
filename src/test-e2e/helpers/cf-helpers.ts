@@ -35,12 +35,15 @@ export class CFHelpers {
   addOrgIfMissingForEndpointUsers(
     guid: string,
     endpoint: E2EConfigCloudFoundry,
-    testOrgName: string
+    testOrgName: string,
+    skipExistsCheck = false
   ): promise.Promise<APIResource<IOrganization>> {
     return this.assignAdminAndUserGuids(guid, endpoint).then(() => {
       expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
       expect(endpoint.creds.admin.guid).not.toBeNull();
-      return this.addOrgIfMissing(guid, testOrgName, endpoint.creds.admin.guid, endpoint.creds.nonAdmin.guid);
+      return skipExistsCheck ?
+        this.baseAddOrg(guid, testOrgName) :
+        this.addOrgIfMissing(guid, testOrgName, endpoint.creds.admin.guid, endpoint.creds.nonAdmin.guid);
     });
   }
 
@@ -50,10 +53,11 @@ export class CFHelpers {
 
   addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid): promise.Promise<APIResource<IOrganization>> {
     let added;
+
     return this.fetchOrg(cnsiGuid, orgName).then(org => {
       if (!org) {
         added = true;
-        return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
+        return this.baseAddOrg(cnsiGuid, orgName);
       }
       return org;
     }).then(newOrg => {
@@ -188,6 +192,10 @@ export class CFHelpers {
       });
   }
 
+  baseAddOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<IOrganization>> {
+    return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
+  }
+
   fetchAppRoutes(cnsiGuid: string, appGuid: string): promise.Promise<APIResource<IRoute>[]> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, `apps/${appGuid}/routes`).then(res => res.resources);
   }
@@ -241,6 +249,48 @@ export class CFHelpers {
           CFHelpers.cachedDefaultSpaceGuid = space.metadata.guid;
           return CFHelpers.cachedDefaultSpaceGuid;
         });
+  }
+
+  addOrgUserRole(cfGuid, orgGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'organizations/' + orgGuid + '/users', {
+      username: userName
+    });
+  }
+
+  addOrgUserManager(cfGuid, orgGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'organizations/' + orgGuid + '/managers', {
+      username: userName
+    });
+  }
+
+  addOrgUserAuditor(cfGuid, orgGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'organizations/' + orgGuid + '/auditors', {
+      username: userName
+    });
+  }
+
+  addOrgUserBillingManager(cfGuid, orgGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'organizations/' + orgGuid + '/billing_managers', {
+      username: userName
+    });
+  }
+
+  addSpaceDeveloper(cfGuid, spaceGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'spaces/' + spaceGuid + '/developers', {
+      username: userName
+    });
+  }
+
+  addSpaceAuditor(cfGuid, spaceGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'spaces/' + spaceGuid + '/auditors', {
+      username: userName
+    });
+  }
+
+  addSpaceManager(cfGuid, spaceGuid, userName) {
+    return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'spaces/' + spaceGuid + '/managers', {
+      username: userName
+    });
   }
 
 }
