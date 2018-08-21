@@ -323,9 +323,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.headerSort.direction = sort.direction;
     }));
 
-    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((f: ListFilter) => {
-      this.filterString = f.string;
-      this.multiFilters = { ...f.items };
+    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
+      this.filterString = paginationFilter.string;
+      this.multiFilters = { ...paginationFilter.items };
     }));
 
     // Multi filters (e.g. cf/org/space)

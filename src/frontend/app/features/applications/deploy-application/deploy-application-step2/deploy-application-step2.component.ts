@@ -122,7 +122,6 @@ export class DeployApplicationStep2Component
       this.stepperText = 'Review source details';
     }
 
-    let action;
     this.sourceType$ = this.store.select(selectSourceType);
 
     this.sourceTypeGithub$ = this.sourceType$.pipe(
@@ -143,13 +142,13 @@ export class DeployApplicationStep2Component
           if (this.branchesSubscription) {
             this.branchesSubscription.unsubscribe();
           }
-          action = new FetchBranchesForProject(p.name);
+          const fetchBranchesAction = new FetchBranchesForProject(p.name);
           this.branchesSubscription = getPaginationObservables<APIResource>(
             {
               store: this.store,
-              action,
+              action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
-                action.paginationKey,
+                fetchBranchesAction.paginationKey,
                 entityFactory(githubBranchesSchemaKey)
               )
             },
@@ -161,7 +160,7 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(fetchBranches);
 
-    action = {
+    const paginationAction = {
       entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
@@ -181,7 +180,7 @@ export class DeployApplicationStep2Component
     const deployCommit$ = this.store.select(selectNewProjectCommit);
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
-      action.paginationKey,
+      paginationAction.paginationKey,
       entityFactory(githubBranchesSchemaKey)
     );
 
