@@ -1,10 +1,9 @@
-import { Component, Input, OnInit, ViewChild, ViewChildren, QueryList, ElementRef, ComponentFactoryResolver, Type } from '@angular/core';
+import { Component, ComponentFactoryResolver, ElementRef, Input, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { PageEvent } from '@angular/material';
 import { Observable, of } from 'rxjs';
 import { delay, distinctUntilChanged, map } from 'rxjs/operators';
 import { ListPagination } from '../../../store/actions/list.actions';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-import { PageEvent } from '@angular/material';
-import { CardCell } from '../list/list.types';
 
 export interface IDrillDownLevelPagination {
   state$: Observable<ListPagination>;

@@ -65,7 +65,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   ngOnInit() {
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
-    this.orgGuid = this.cfOrgService.orgGuid;
+    this.orgGuid = this.row.entity.organization_guid;
     this.cardMenu = [
       {
         label: 'Edit',

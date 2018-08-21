@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -45,27 +45,19 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
 
+  @Input()
+  public config: { linkButton: boolean };
+
   constructor(
     private cfUserService: CfUserService,
-    private cfEndpointService: CloudFoundryEndpointService,
     private store: Store<AppState>,
+    public cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
   ) {
     super();
 
-    this.cardMenu = [
-      {
-        label: 'Edit',
-        action: this.edit,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
-      },
-      {
-        label: 'Delete',
-        action: this.delete,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
-      }
-    ];
+
 
   }
 
@@ -93,6 +85,19 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
+
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.row.entity.cfGuid)
+      },
+      {
+        label: 'Delete',
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.row.entity.cfGuid)
+      }
+    ];
   }
 
   setCounts = (apps: APIResource<any>[]) => {
@@ -119,7 +124,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'edit-org']
+        path: ['cloud-foundry', this.row.entity.cfGuid, 'organizations', this.row.metadata.guid, 'edit-org']
       })
     );
   }
@@ -134,12 +139,12 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.confirmDialog.open(confirmation, () => {
       this.cfEndpointService.deleteOrg(
         this.row.metadata.guid,
-        this.cfEndpointService.cfGuid
+        this.row.entity.cfGuid
       );
     });
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({
-    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid]
+    path: ['cloud-foundry', this.row.entity.cfGuid, 'organizations', this.orgGuid]
   }))
 }

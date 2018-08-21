@@ -19,11 +19,22 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { ApiRequestDrillDownLevel } from '../../../shared/components/drill-down/drill-down-levels/api-request-drill-down-level';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
 import { CfEndpointCardComponent } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
+import { CfOrgCardComponent } from '../../../shared/components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CloudFoundryOrganizationService } from '../../cloud-foundry/services/cloud-foundry-organization.service';
+import { CfSpaceCardComponent } from '../../../shared/components/list/list-types/cf-spaces/cf-space-card/cf-space-card.component';
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
-  styleUrls: ['./home-page.component.scss']
+  styleUrls: ['./home-page.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider,
+    CfUserService,
+    CloudFoundryEndpointService,
+    CloudFoundryOrganizationService
+  ]
 })
 export class HomePageComponent implements OnInit {
   public definition: DrillDownDefinition;
@@ -46,28 +57,35 @@ export class HomePageComponent implements OnInit {
             .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
         }
       },
-      new ApiRequestDrillDownLevel(this.store, {
-        title: 'Organizations',
-        getAction: (cf: EndpointModel) => {
-          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
-          action.paginationKey += '-drill-down';
-          action.includeRelations = [];
-          return action;
-        }
-      }),
-      new ApiRequestDrillDownLevel(this.store, {
-        title: 'Spaces',
-        getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
-          const action = new GetAllOrganizationSpaces(
-            createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid) + '-drill-down',
-            org.entity.guid,
-            cf.guid
-          );
-          action.initialParams['results-per-page'] = 50;
-          action.flattenPagination = false;
-          return action;
-        }
-      }),
+      {
+        component: CfOrgCardComponent,
+        ...new ApiRequestDrillDownLevel(this.store, {
+          title: 'Organizations',
+
+          getAction: (cf: EndpointModel) => {
+            const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
+            action.paginationKey += '-drill-down';
+            action.includeRelations = [];
+            return action;
+          }
+        })
+      },
+      {
+        component: CfSpaceCardComponent,
+        ...new ApiRequestDrillDownLevel(this.store, {
+          title: 'Spaces',
+          getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
+            const action = new GetAllOrganizationSpaces(
+              createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid) + '-drill-down',
+              org.entity.guid,
+              cf.guid
+            );
+            action.initialParams['results-per-page'] = 50;
+            action.flattenPagination = false;
+            return action;
+          }
+        })
+      },
       {
         component: CardAppComponent,
         ...new ApiRequestDrillDownLevel(this.store, {
