@@ -43,41 +43,36 @@ export class ServicesHelperE2E {
   }
 
   createService = () => {
-    browser.wait(this.canBindAppStep()
-      .then(canBindApp => {
-        this.createServiceInstance.waitForPage();
+    this.createServiceInstance.waitForPage();
 
-        // Select CF/Org/Space
-        this.setCfOrgSpace();
+    // Select CF/Org/Space
+    this.setCfOrgSpace();
+    this.createServiceInstance.stepper.next();
+
+    // Select Service
+    this.setServiceSelection();
+    this.createServiceInstance.stepper.next();
+
+    // Select Service Plan
+    this.setServicePlan();
+    this.createServiceInstance.stepper.next();
+
+    // Bind App
+    this.createServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
+      if (!bindAppDisabled) {
+        this.setBindApp();
         this.createServiceInstance.stepper.next();
+      }
 
-        // Select Service
-        this.setServiceSelection();
-        this.createServiceInstance.stepper.next();
+      this.setServiceInstanceDetail();
 
-        // Select Service Plan
-        this.setServicePlan();
-        this.createServiceInstance.stepper.next();
-
-        // Bind App
-        if (canBindApp) {
-          this.setBindApp();
-          this.createServiceInstance.stepper.next();
-        }
-
-        this.setServiceInstanceDetail();
-
-        this.createServiceInstance.stepper.next();
-      })
-    );
+      this.createServiceInstance.stepper.next();
+    });
   }
 
   canBindAppStep = (): promise.Promise<boolean> => {
-    const cf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, cf.name);
-    return this.cfHelper.fetchSpace(endpointGuid, cf.testSpace)
-      .then(space => space.metadata.guid)
-      .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(endpointGuid, spaceGuid))
+    return this.cfHelper.fetchDefaultSpaceGuid(true)
+      .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(this.cfHelper.cachedDefaultCfGuid, spaceGuid))
       .then(totalAppsInSpace => !!totalAppsInSpace);
   }
 
@@ -137,9 +132,7 @@ export class ServicesHelperE2E {
       if (serviceInstance) {
         return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
       }
-      const p = promise.defer<any>();
-      p.fulfill(createEmptyCfResponse());
-      return p;
+      return promise.fullyResolved(createEmptyCfResponse());
     });
   }
 

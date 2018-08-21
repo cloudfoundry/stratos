@@ -1,4 +1,4 @@
-import { browser, ElementFinder, promise } from 'protractor';
+import { ElementFinder, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -98,30 +98,29 @@ describe('Create Service Instance', () => {
   });
 
   it('- should return user to Service summary when cancelled on service instance details', () => {
-    browser.wait(servicesHelperE2E.canBindAppStep()
-      .then(canBindApp => {
-        // Select CF/Org/Space
-        servicesHelperE2E.setCfOrgSpace();
+    // Select CF/Org/Space
+    servicesHelperE2E.setCfOrgSpace();
+    createServiceInstance.stepper.next();
+
+    // Select Service
+    servicesHelperE2E.setServiceSelection();
+    createServiceInstance.stepper.next();
+
+    // Select Service Plan
+    servicesHelperE2E.setServicePlan();
+    createServiceInstance.stepper.next();
+
+    createServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
+      if (!bindAppDisabled) {
+        // Bind App
+        servicesHelperE2E.setBindApp();
         createServiceInstance.stepper.next();
+      }
 
-        // Select Service
-        servicesHelperE2E.setServiceSelection();
-        createServiceInstance.stepper.next();
+      createServiceInstance.stepper.cancel();
 
-        // Select Service Plan
-        servicesHelperE2E.setServicePlan();
-        createServiceInstance.stepper.next();
-
-        if (canBindApp) {
-          // Bind App
-          servicesHelperE2E.setBindApp();
-          createServiceInstance.stepper.next();
-        }
-
-        createServiceInstance.stepper.cancel();
-
-        servicesWall.isActivePage();
-      }));
+      servicesWall.isActivePage();
+    });
   });
 
   afterAll((done) => {

@@ -1,18 +1,27 @@
-import { CFResponse, APIResource } from '../../frontend/app/store/types/api.types';
-import { CFRequestHelpers } from './cf-request-helpers';
-import { e2e, E2ESetup } from '../e2e';
 import { promise } from 'protractor';
+
+import { IOrganization, IRoute } from '../../frontend/app/core/cf-api.types';
+import { APIResource } from '../../frontend/app/store/types/api.types';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
+import { CFRequestHelpers } from './cf-request-helpers';
 
 
 export class CFHelpers {
   cfRequestHelper: CFRequestHelpers;
+  cachedDefaultCfGuid: string;
+  cachedDefaultOrgGuid: string;
+  cachedDefaultSpaceGuid: string;
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
   }
 
-  addOrgIfMissingForEndpointUsers(guid: string, endpoint: E2EConfigCloudFoundry, testOrgName: string) {
+  addOrgIfMissingForEndpointUsers(
+    guid: string,
+    endpoint: E2EConfigCloudFoundry,
+    testOrgName: string
+  ): promise.Promise<APIResource<IOrganization>> {
     let testAdminUser, testUser;
     return this.fetchUsers(guid).then(users => {
       testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
@@ -27,21 +36,20 @@ export class CFHelpers {
     return users.find(user => user && user.entity && user.entity.username === name);
   }
 
-  addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid) {
+  addOrgIfMissing(cnsiGuid, orgName, adminGuid?: string, userGuid?: string): promise.Promise<APIResource<IOrganization>> {
     let added;
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results === 0) {
         added = true;
-        return this.cfRequestHelper.sendCfPost(cnsiGuid, 'organizations', { name: orgName });
+        return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
       }
-      return json;
+      return json.resources[0];
     }).then(newOrg => {
-      if (!added) {
+      if (!added || !adminGuid || !userGuid) {
         // No need to mess around with permissions, it exists already.
         return newOrg;
       }
-      const org = newOrg.resources ? newOrg.resources[0] as any : newOrg;
-      const orgGuid = org.metadata.guid;
+      const orgGuid = newOrg.metadata.guid;
       const p1 = this.cfRequestHelper.sendCfPut(cnsiGuid, 'organizations/' + orgGuid + '/users/' + adminGuid);
       const p2 = this.cfRequestHelper.sendCfPut(cnsiGuid, 'organizations/' + orgGuid + '/users/' + userGuid);
       // Add user to org users
@@ -72,20 +80,6 @@ export class CFHelpers {
               developer_guids: [userGuid, adminGuid],
               organization_guid: orgGuid
             });
-        }
-      });
-  }
-
-  fetchApp(cnsiGuid, appName) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid,
-      'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName)
-      .then(json => {
-        if (json.total_results < 1) {
-          return null;
-        } else if (json.total_results === 1) {
-          return json.resources[0];
-        } else {
-          throw new Error('There should only be one app, found multiple. Add Name: ' + appName);
         }
       });
   }
@@ -137,8 +131,8 @@ export class CFHelpers {
     });
   }
 
-  fetchSpace(cnsiGuid: string, spaceName: string) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName).then(json => {
+  fetchSpace(cnsiGuid: string, orgGuid: string, spaceName: string) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'spaces?q=name IN ' + spaceName + '&organization_guid=' + orgGuid).then(json => {
       if (json.total_results > 0) {
         const space = json.resources[0];
         return space;
@@ -153,12 +147,61 @@ export class CFHelpers {
     });
   }
 
-  createApp(cnsiGuid: string, spaceGuid: string, appName: string) {
+  // For fully fleshed out fetch see application-e2e-helpers
+  basicFetchApp(cnsiGuid: string, spaceGuid: string, appName: string) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid,
+      `apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ${appName},space_guid IN ${spaceGuid}`);
+  }
+
+  // For fully fleshed our create see application-e2e-helpers
+  basicCreateApp(cnsiGuid: string, spaceGuid: string, appName: string) {
     return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
   }
 
-  deleteApp(cnsiGuid: string, appGuid: string) {
+  // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)
+  basicDeleteApp(cnsiGuid: string, appGuid: string) {
     return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
+  }
+
+  fetchAppRoutes(cnsiGuid: string, appGuid: string): promise.Promise<APIResource<IRoute>[]> {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, `apps/${appGuid}/routes`).then(res => res.resources);
+  }
+
+  updateDefaultCfOrgSpace = (): promise.Promise<any> => {
+    // Fetch cf guid, org guid, or space guid from ... cache or jetstream
+    return this.fetchDefaultCfGuid(false)
+      .then(() => this.fetchDefaultOrgGuid(false))
+      .then(() => this.fetchDefaultSpaceGuid(false));
+  }
+
+
+  fetchDefaultCfGuid = (fromCache = true): promise.Promise<string> => {
+    return fromCache && this.cachedDefaultCfGuid ?
+      promise.fullyResolved(this.cachedDefaultCfGuid) :
+      this.cfRequestHelper.getCfGuid().then(guid => {
+        this.cachedDefaultCfGuid = guid;
+        return this.cachedDefaultCfGuid;
+      });
+  }
+
+  fetchDefaultOrgGuid = (fromCache = true): promise.Promise<string> => {
+    return fromCache && this.cachedDefaultOrgGuid ?
+      promise.fullyResolved(this.cachedDefaultOrgGuid) :
+      this.fetchDefaultCfGuid(true).then(guid => this.fetchOrg(guid, e2e.secrets.getDefaultCFEndpoint().testOrg).then(org => {
+        this.cachedDefaultOrgGuid = org.metadata.guid;
+        return this.cachedDefaultOrgGuid;
+      }));
+  }
+
+  fetchDefaultSpaceGuid = (fromCache = true): promise.Promise<string> => {
+    return fromCache && this.cachedDefaultSpaceGuid ?
+      promise.fullyResolved(this.cachedDefaultSpaceGuid) :
+      this.fetchDefaultOrgGuid(true).then(orgGuid =>
+        this.fetchSpace(this.cachedDefaultCfGuid, orgGuid, e2e.secrets.getDefaultCFEndpoint().testSpace)
+      ).then(space => {
+        this.cachedDefaultSpaceGuid = space.metadata.guid;
+        return this.cachedDefaultSpaceGuid;
+      });
   }
 
 }

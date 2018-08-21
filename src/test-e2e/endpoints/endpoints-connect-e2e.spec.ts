@@ -1,3 +1,5 @@
+import { browser } from 'protractor';
+
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -28,7 +30,7 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
-        connectDialog.snackBar.close();
+        connectDialog.snackBar.safeClose();
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {

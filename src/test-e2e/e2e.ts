@@ -38,14 +38,14 @@ export class E2E {
   /**
    * Convenience for sleep
    */
-  sleep(duration) {
+  sleep(duration: number) {
     browser.driver.sleep(duration);
   }
 
   /**
    * Log message in the control flow
    */
-  log(log) {
+  log(log: string) {
     protractor.promise.controlFlow().execute(() => console.log(log));
   }
 }
