@@ -7,7 +7,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-describe('Create Service Instance with binding', () => {
+fdescribe('Create Service Instance with binding', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
