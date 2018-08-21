@@ -7,7 +7,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-fdescribe('Create Service Instance with binding', () => {
+describe('Create Service Instance with binding', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -51,10 +51,6 @@ fdescribe('Create Service Instance with binding', () => {
             const isCorrectCard = (t === serviceName);
             if (isCorrectCard) {
               cardIdx = idx;
-              /* tslint:disable */
-                console.log('IS Correct card: ' + idx)
-                console.log('Service Name is: ' + serviceName)
-              /* tslint:enable */
 
               const card = servicesWall.serviceInstancesList.cards.getCard(cardIdx);
               card.getMetaCardItems().then(metaCardRows => {
