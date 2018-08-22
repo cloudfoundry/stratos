@@ -11,7 +11,7 @@ type PortalProxy interface {
 	GetHttpClient(skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
 
-	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo InfoFunc) (CNSIRecord, error)
+	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, fetchInfo InfoFunc) (CNSIRecord, error)
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
@@ -33,8 +33,6 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
-
-	GetClientId(cnsiType string) (string, error)
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)

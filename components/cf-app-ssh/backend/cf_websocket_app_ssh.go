@@ -96,14 +96,9 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 	// cf:APP-GUID/APP-INSTANCE-INDEX@SSH-ENDPOINT
 	username := fmt.Sprintf("cf:%s/%s@%s", appGUID, appInstance, host)
 
-	clientID, err := p.GetClientId("cf")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get client ID forCloud Foundry")
-	}
-
 	// Need to get SSH Code
 	// Refresh token first - makes sure it will be valid when we make the request to get the code
-	refreshedTokenRec, err := p.RefreshToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, clientID, "", cnsiRecord.TokenEndpoint)
+	refreshedTokenRec, err := p.RefreshToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
 	if err != nil {
 		return fmt.Errorf("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}

@@ -9,7 +9,6 @@ import (
 
 	"errors"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
@@ -45,14 +44,6 @@ func (c *CloudFoundrySpecification) GetType() string {
 	return EndpointType
 }
 
-func (c *CloudFoundrySpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
-		return clientId
-	}
-
-	return "cf"
-}
-
 func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	log.Info("CloudFoundry Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
@@ -81,7 +72,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, cfEndpointSpec.Info)
 		if err != nil {
 			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
 			return nil

@@ -7,7 +7,6 @@ import (
 type EndpointPlugin interface {
 	Info(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
 	GetType() string
-	GetClientId() string
 	Register(echoContext echo.Context) error
 }
 

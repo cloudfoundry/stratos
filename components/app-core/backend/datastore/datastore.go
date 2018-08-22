@@ -99,6 +99,8 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
+		} else {
+			return dc, fmt.Errorf("Invalid SSL mode: %v", dc.SSLMode)
 		}
 	} else if dc.DatabaseProvider == MYSQL {
 		return dc, nil
@@ -267,7 +269,7 @@ func Ping(db *sql.DB) error {
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
 	if databaseProvider == SQLITE || databaseProvider == MYSQL {
-		sqlParamReplace := regexp.MustCompile("\\$[0-9]")
+		sqlParamReplace := regexp.MustCompile("\\$[0-9]+")
 		return sqlParamReplace.ReplaceAllString(sql, "?")
 	}
 
