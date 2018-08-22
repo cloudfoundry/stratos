@@ -7,7 +7,8 @@ nginx/pcre-8.40.tar.gz:
   size: 2065161
   object_id: 44706e8c-255c-4ff3-9737-23ab55a1a214
   sha: 10384eb3d411794cc15f55b9d837d3f69e35391e
-golang/go1.8.3.linux-amd64.tar.gz:
-  size: 90029041
+golang/go1.9.7.linux-amd64.tar.gz:
+  size: 118297141
   object_id: 53346f1f-edfc-40d5-54b9-04126e05fdf3
-  sha: 838c415896ef5ecd395dfabde5e7e6f8ac943c8e
+  sha: fa74941098fcf91fdcf1a45f6275a0de3ac67f1f
+
