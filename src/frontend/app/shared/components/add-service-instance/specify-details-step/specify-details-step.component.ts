@@ -19,7 +19,7 @@ import {
   tap
 } from 'rxjs/operators';
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
+import { getServiceJsonParams, safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -40,7 +40,6 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -90,8 +89,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
   spaceScopeSub: Subscription;
+  selectedServiceSubscription: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
+  selectedFramework = 'material-design';
+  schema: any;
+  showJsonSchema: boolean;
+  jsonFormOptions: any = { addSubmit: false };
+  formValidationErrors: any;
 
   static isValidJsonValidatorFn = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
@@ -179,7 +184,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  onEnter = () => {
+  onEnter = (selectedService$?) => {
+    if (selectedService$ instanceof Observable) {
+      this.selectedServiceSubscription = selectedService$
+        .subscribe(selectedService => {
+          if (!!this.modeService.isEditServiceInstanceMode()) {
+            this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters);
+          } else { this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_instance.update.parameters); }
+        });
+    }
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
@@ -198,6 +211,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ).subscribe();
     }
     this.subscriptions.push(this.setupFormValidatorData());
+  }
+
+  private filterSchema = (schema: any): any => {
+    return Object.keys(schema).reduce((obj, key) => {
+      if (key !== '$schema') { obj[key] = schema[key]; }
+      return obj;
+    }, {});
   }
 
   resetForms = (mode: FormMode) => {
@@ -247,10 +267,28 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
+    safeUnsubscribe(this.selectedServiceSubscription);
   }
 
   ngAfterContentInit() {
     this.setupValidate();
+  }
+
+  onFormChange(jsonData) {
+    if (!!jsonData) {
+      try {
+        const stringData = JSON.stringify(jsonData);
+        this.createNewInstanceForm.get('params').setValue(stringData);
+      } catch { }
+    }
+  }
+
+  validationErrors(data: any): void {
+    this.formValidationErrors = data;
+  }
+
+  get prettyValidationErrors() {
+    return prettyValidationErrors(this.formValidationErrors);
   }
 
   onNext = (): Observable<StepOnNextResult> => {
@@ -410,8 +448,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       filter(a => !a.creating),
       switchMap(a => {
         const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
-        if ( (isEditMode && !!updating && updating.error) || (a.error) ) {
-            return create$;
+        if ((isEditMode && !!updating && updating.error) || (a.error)) {
+          return create$;
         }
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);

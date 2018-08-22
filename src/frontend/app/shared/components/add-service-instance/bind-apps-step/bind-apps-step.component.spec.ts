@@ -6,6 +6,7 @@ import { ServicesService } from '../../../../features/service-catalog/services.s
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CsiGuidsService } from '../csi-guids.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
 
 describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
@@ -14,7 +15,7 @@ describe('BindAppsStepComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [BindAppsStepComponent],
-      imports: [BaseTestModulesNoShared],
+      imports: [BaseTestModulesNoShared , MaterialDesignFrameworkModule],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
         CsiGuidsService,

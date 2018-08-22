@@ -14,4 +14,25 @@
       </mat-error>
     </mat-form-field>
   </form>
+  <div *ngIf="!!schema" class="json-schema">
+    <mat-card class="json-schema-form">
+      <mat-card-header>
+        <mat-card-title><b>Generated Form</b><button mat-button color="accent" (click)="showJsonSchema=!showJsonSchema">Json schema</button>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <json-schema-form loadExternalAssets="true" [options]="jsonFormOptions" [schema]="schema" [framework]="selectedFramework" (validationErrors)="validationErrors($event)" (onChanges)="onFormChange($event)">
+        </json-schema-form>
+        <div *ngIf="!!prettyValidationErrors" class="data-bad" [innerHTML]="prettyValidationErrors"></div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card *ngIf="showJsonSchema" class="json-schema-data">
+      <mat-card-header>
+        <mat-card-title><b>Json schema</b></mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <pre class="display-json">{{schema | json}} </pre>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

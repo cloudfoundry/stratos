@@ -19,6 +19,7 @@ import { createEntityRelationPaginationKey } from '../../store/helpers/entity-re
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { JsonPointer } from 'angular6-json-schema-form';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
@@ -90,23 +91,34 @@ export const getServicePlans = (
   cfGuid: string,
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
-): Observable<APIResource<IServicePlan>[]>  => {
+): Observable<APIResource<IServicePlan>[]> => {
   return service$.pipe(
     filter(p => !!p),
     switchMap(service => {
-    if (service.entity.service_plans && service.entity.service_plans.length > 0) {
-      return observableOf(service.entity.service_plans);
-    } else {
-      const guid = service.metadata.guid;
-      const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
-      const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
-      // Could be a space-scoped service, make a request to fetch the plan
-      return getPaginationObservables<APIResource<IServicePlan>>({
-        store: store,
-        action: getServicePlansAction,
-        paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
-      }, true)
-        .entities$.pipe(share(), first());
-    }
-  }));
+      if (service.entity.service_plans && service.entity.service_plans.length > 0) {
+        return observableOf(service.entity.service_plans);
+      } else {
+        const guid = service.metadata.guid;
+        const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
+        const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
+        // Could be a space-scoped service, make a request to fetch the plan
+        return getPaginationObservables<APIResource<IServicePlan>>({
+          store: store,
+          action: getServicePlansAction,
+          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
+        }, true)
+          .entities$.pipe(share(), first());
+      }
+    }));
+};
+
+export const prettyValidationErrors = (formValidationErrors: any[]): string => {
+  if (!formValidationErrors) { return null; }
+  return formValidationErrors.reduce((a, c) => {
+      const arrMessage = JsonPointer.parse(c.dataPath).reduce((aa, cc) => {
+          const dd = /^\d+$/.test(cc) ? `[${cc}]` : `.${cc}`;
+          return aa + dd;
+      }, '');
+      return `${a} ${arrMessage} ${c.message} <br>`;
+  }, '');
 };

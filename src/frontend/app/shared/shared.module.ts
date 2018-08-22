@@ -133,7 +133,7 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-
+import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
 @NgModule({
   imports: [
     CommonModule,
@@ -144,6 +144,7 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MaterialDesignFrameworkModule
   ],
   declarations: [
     LoadingPageComponent,

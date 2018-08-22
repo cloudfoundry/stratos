@@ -1,3 +1,4 @@
+@import '../bind-apps-step/bind-apps-step.component';
 :host {
   flex: 1;
 }
@@ -23,3 +24,5 @@
     }
   }
 }
+
+@include json-schema-component();

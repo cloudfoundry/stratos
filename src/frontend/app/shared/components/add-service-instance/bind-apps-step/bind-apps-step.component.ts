@@ -18,6 +18,7 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
+import { safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -35,6 +36,14 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   stepperForm: FormGroup;
   apps$: Observable<APIResource<IApp>[]>;
   guideText = 'Specify the application to bind (Optional)';
+
+  selectedFramework = 'material-design';
+  schema: any;
+  showJsonSchema: boolean;
+  jsonFormOptions: any = { addSubmit: false };
+  selectedServiceSubscription: Subscription;
+  formValidationErrors: any;
+  selectedService$: any;
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
@@ -51,6 +60,23 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       this.stepperForm.controls.apps.disable();
       this.guideText = 'Specify binding params (optional)';
     }
+  }
+
+  onFormChange(jsonData) {
+    if (!!jsonData) {
+      try {
+        const stringData = JSON.stringify(jsonData);
+        this.stepperForm.get('params').setValue(stringData);
+      } catch { }
+    }
+  }
+
+  validationErrors(data: any): void {
+    this.formValidationErrors = data;
+  }
+
+  get prettyValidationErrors() {
+    return prettyValidationErrors(this.formValidationErrors);
   }
 
   ngAfterContentInit() {
@@ -80,9 +106,27 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.setBoundApp();
   }
 
+  onEnter = (selectedService$?) => {
+    this.selectedService$ = selectedService$;
+    if (selectedService$ instanceof Observable) {
+      this.selectedServiceSubscription = selectedService$.pipe(
+        first()
+      ).subscribe(selectedService => {
+        this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters);
+      });
+    }
+  }
+
+  private filterSchema = (schema: any): any => {
+    return Object.keys(schema).reduce((obj, key) => {
+      if (key !== '$schema') { obj[key] = schema[key]; }
+      return obj;
+    }, {});
+  }
+
   submit = (): Observable<StepOnNextResult> => {
     this.setApp();
-    return observableOf({ success: true });
+    return observableOf({ success: true, data: this.selectedService$ });
   }
 
   setApp = () => this.store.dispatch(
@@ -91,6 +135,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   ngOnDestroy(): void {
     this.validateSubscription.unsubscribe();
+    safeUnsubscribe(this.selectedServiceSubscription);
   }
 
 }
