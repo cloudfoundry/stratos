@@ -12,11 +12,11 @@ Stratos comprises of two main components:
 - A front-end UI that runs in your web browser. This is written in [Typescript](https://www.typescriptlang.org/) and uses the [Angular](https://angular.io/) framework.
 - A back-end that provides a web-based API to the front-end. This is written in Go.
 
-Depending on what you are contributing, you will need to develop with the front-end, back-end ot both.
+Depending on what you are contributing, you will need to develop with the front-end, back-end or both.
 
 ## Frontend Development
 
-### Intro to the stack
+### Introduction to the stack
 
 Have a look through the [Env + Tech](developers-guide-env-tech.md) page to get acquainted with some of the new technologies used in v2.
 These include video's, tutorials and examples of Angular 2+, Typescript and Redux. There's also some advice on helpful plugins to use if
@@ -140,7 +140,10 @@ Jetstream is the back-end for Stratos. It is written in Go.
 
 We use [dep](https://golang.github.io/dep/) for dependency management.
 
-### Dependencies
+### Pre-requisites
+
+You will need the following installed/available:
+
 * go 1.9 or later.
 * dep
 * UAA instance - you will need a UAA running for authentication
@@ -149,7 +152,7 @@ We use [dep](https://golang.github.io/dep/) for dependency management.
 
 You will need to ensure that Stratos is cloned into a folder within your GOPATH that matches the Stratos package structure, i.e.
 
-````
+```
 $GOPATH/src/github.com/cloudfoundry-incubator/stratos
 ```
 
