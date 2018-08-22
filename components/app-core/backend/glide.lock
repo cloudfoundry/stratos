@@ -1,5 +1,5 @@
-hash: c790bcfd2741c2e94175d40e1a44d7c595d4d57fd34753a61b065fecdfcc5f76
-updated: 2017-08-21T09:55:31.917609969+01:00
+hash: efd9b757b1bdad35eb93d2a625839b8638c62c575e1010d3c99db25a6f453199
+updated: 2018-05-03T17:04:49.212602-04:00
 imports:
 - name: github.com/antonlindstrom/pgstore
   version: 4f1dbba445e540bf071eb9572262edb8fe4a593a
@@ -54,7 +54,7 @@ imports:
 - name: github.com/mattn/go-sqlite3
   version: ca5e3819723d8eeaf170ad510e7da1d6d2e94a08
 - name: github.com/nwmac/sqlitestore
-  version: 3f93bd4dbffb827c47572d6d1342272be36bd6b0
+  version: ea2757e5ec127ab4aaef609f6401ebaa2cf189f1
 - name: github.com/pkg/errors
   version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: github.com/satori/go.uuid

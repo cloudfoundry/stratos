@@ -40,6 +40,10 @@
   .login-right {
     min-width: 362px;
     min-height: 410px;
+
+    &.login-sso {
+      min-height: 0;
+    }
   }
 
 }

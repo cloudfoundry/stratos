@@ -19,7 +19,13 @@ import (
 
 const cfSessionCookieName = "JSESSIONID"
 
-func handleSessionError(err error) error {
+func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error) error {
+
+	// Add header so front-end knows SSO login is enabled
+	if config.SSOLogin {
+		c.Response().Header().Set("x-stratos-sso-login", "true")
+	}
+
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(
 			http.StatusServiceUnavailable,
@@ -46,7 +52,8 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("user_id", userID)
 			return h(c)
 		}
-		return handleSessionError(err)
+
+		return handleSessionError(p.Config, c, err)
 	}
 }
 
@@ -80,7 +87,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		return handleSessionError(err)
+		return handleSessionError(p.Config, c, err)
 	}
 }
 

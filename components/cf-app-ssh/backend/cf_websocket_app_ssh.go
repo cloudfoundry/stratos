@@ -108,7 +108,7 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 		return fmt.Errorf("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}
 
-	code, err := getSSHCode(cnsiRecord.AuthorizationEndpoint, cfInfo.AppSSHOauthCLient, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
+	code, err := getSSHCode(cnsiRecord.TokenEndpoint, cfInfo.AppSSHOauthCLient, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
 	if err != nil {
 		return fmt.Errorf("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}
@@ -275,7 +275,7 @@ func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation boo
 	values.Set("grant_type", "authorization_code")
 	values.Set("client_id", clientID)
 
-	authorizeURL.Path = "/oauth/authorize"
+	authorizeURL.Path += "/oauth/authorize"
 	authorizeURL.RawQuery = values.Encode()
 
 	authorizeReq, err := http.NewRequest("GET", authorizeURL.String(), nil)
