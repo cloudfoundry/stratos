@@ -156,7 +156,7 @@ You will need to ensure that Stratos is cloned into a folder within your GOPATH 
 $GOPATH/src/github.com/cloudfoundry-incubator/stratos
 ```
 
-From the stratos folder, ensure that dep has downloaded the required dependencie sby running:
+From the stratos folder, ensure that dep has downloaded the required dependencies by running:
 
 ```
 dep ensure -vendor-only -v
@@ -168,13 +168,13 @@ From the `src/jetstream` folder, build the Stratos back-end with:
 go build
 ```
 
-The back-end executable is named `jetstream` and should be created within the `src/jetstream' folder.
+The back-end executable is named `jetstream` and should be created within the `src/jetstream` folder.
 
 To run, ensure you have set the following environment variables:
 
-UAA_ENDPOINT - the URL of your UAA (for example for PCF Dev, use: UAA_ENDPOINT=https://login.local.pcfdev.io)
-CONSOLE_CLIENT - the Client ID to use when authenticating against your UAA (defaults to: 'cf')
-CONSOLE_CLIENT_SECRET - the Client ID to use when authenticating against your UAA (defaults to empty)
+`UAA_ENDPOINT` - the URL of your UAA (for example for PCF Dev, use: `UAA_ENDPOINT=https://login.local.pcfdev.io`)
+`CONSOLE_CLIENT` - the Client ID to use when authenticating against your UAA (defaults to: 'cf')
+`CONSOLE_CLIENT_SECRET` - the Client ID to use when authenticating against your UAA (defaults to empty)
 
 then run:
 
@@ -190,12 +190,12 @@ By default, the configuration in the file `src/jetstream/default.config.properti
 
 To modify the configuration, copy this file to `src/jetstream/config.properties` and edit this file. The backend will load its configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings by setting the corresponding environment variable.
 
-> **Note** The properties are saved to the database on first run. Any subsequent changes require the db to be reset. For the default db provider (`sqlite`, see `config.properties` `DATABASE_PROVIDER` value), this can be done by deleting `./outputs/console-database.db` 
+> **Note** The properties are saved to the database on first run. Any subsequent changes require the db to be reset. For the default sqlite db provider this can be done by deleting `src/jetstream/console-database.db` 
 
 #### Automatically register and connect to an existing endpoint
-To automatically register a Cloud Foundry add the environment variable/config setting below
+To automatically register a Cloud Foundry add the environment variable/config setting below:
 
-> **Note** On log in the console will also attempt to auto-connect to the cloud foundry using the username/password provided.
+> **Note** On login, Stratos will also attempt to auto-connect to the Cloud Foundry using the username/password provided.
 
 ```
 AUTO_REG_CF_URL=<api url of cf>
