@@ -12,7 +12,7 @@
   var path = require('path');
   var os = require('os');
   var zip = require('gulp-zip');
-  var fs = require('fs');
+  var fs = require('fs-extra');
 
   var config = require('./gulp.config');
   var paths = config.paths;
