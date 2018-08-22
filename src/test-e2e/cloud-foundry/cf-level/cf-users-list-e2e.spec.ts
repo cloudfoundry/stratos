@@ -3,8 +3,9 @@ import { browser, promise, protractor } from 'protractor';
 import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
-import { CFUsersListComponent } from '../../po/cf-users-list.po';
+import { CFUsersListComponent, UserRoleChip } from '../../po/cf-users-list.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
+import { ChipComponent } from '../../po/chip.po';
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-cf-users';
 
@@ -73,26 +74,57 @@ fdescribe('Cf Users List -', () => {
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
     expect(usersTable.getTotalResults()).toBe(1);
-    usersTable.getUserRoles(0).then(userRoles => {
-      const users = userRoles.filter(userRole => userRole.username === userName);
-      expect(users).toBeTruthy();
-      expect(users.length).toBe(1);
-      expect(users[0][CFUsersListComponent.orgHeader][orgName]).toBeTruthy('Unable to find roles for org: ' + orgName);
-      const orgRoles: string[] = users[0][CFUsersListComponent.orgHeader][orgName].roles;
+    const userRowIndex = 0;
+    // Check for specific roles (could chop)... then check each pill
+    usersTable.getUserRoles(userRowIndex).then(userRoles => {
+      expect(userRoles.orgRoles[orgName]).toBeTruthy('Unable to find roles for org: ' + orgName);
+      const orgRoles: string[] = userRoles.orgRoles[orgName].roles;
       expect(orgRoles).toBeTruthy();
       expect(orgRoles.indexOf('Manager')).toBeGreaterThanOrEqual(0);
       expect(orgRoles.indexOf('User')).toBeGreaterThanOrEqual(0);
       expect(orgRoles.indexOf('Billing Manager')).toBeGreaterThanOrEqual(0);
       expect(orgRoles.indexOf('Auditor')).toBeGreaterThanOrEqual(0);
-      const spaceRoles: string[] = users[0][CFUsersListComponent.spaceHeader][orgName].spaces[spaceName];
+      const spaceRoles: string[] = userRoles.spaceRoles[orgName].spaces[spaceName];
       expect(spaceRoles).toBeTruthy();
       expect(spaceRoles.indexOf('Manager')).toBeGreaterThanOrEqual(0);
       expect(spaceRoles.indexOf('Developer')).toBeGreaterThanOrEqual(0);
       expect(spaceRoles.indexOf('Auditor')).toBeGreaterThanOrEqual(0);
+
+      // chip list needs to have been expanded, which is done as part of getUserRoles
+      // Check user pill is present and cannot remove
+      const orgUserChip = usersTable.getPermissionChip(userRowIndex, orgName, null, true, 'User');
+      orgUserChip.check(false);
+
+      // Check other pills are present, can be removed and remove
+      const spaceDeveloperChip = usersTable.getPermissionChip(userRowIndex, orgName, spaceName, false, 'Developer');
+      spaceDeveloperChip.check(true);
+      spaceDeveloperChip.remove();
+      const spaceAuditorChip = usersTable.getPermissionChip(userRowIndex, orgName, spaceName, false, 'Auditor');
+      spaceAuditorChip.check(true);
+      spaceAuditorChip.remove();
+      const spaceManagerChip = usersTable.getPermissionChip(userRowIndex, orgName, spaceName, false, 'Manager');
+      spaceManagerChip.check(true);
+      spaceManagerChip.remove();
+      const orgBillingManagerChip = usersTable.getPermissionChip(userRowIndex, orgName, null, true, 'Billing Manager');
+      orgBillingManagerChip.check(true);
+      orgBillingManagerChip.remove();
+      const orgAuditorChip = usersTable.getPermissionChip(userRowIndex, orgName, null, true, 'Auditor');
+      orgAuditorChip.check(true);
+      orgAuditorChip.remove();
+      const orgManagerChip = usersTable.getPermissionChip(userRowIndex, orgName, null, true, 'Manager');
+      orgManagerChip.check(true);
+      orgManagerChip.remove();
+
+      // Check user pill can now be removed and remove it
+      orgUserChip.check(true);
+      orgUserChip.remove();
+
     });
+
   });
 
+
   afterAll(() => {
-    return cfHelper.deleteOrgIfExisting(cfGuid, orgName);
+    // return cfHelper.deleteOrgIfExisting(cfGuid, orgName);
   });
 });
