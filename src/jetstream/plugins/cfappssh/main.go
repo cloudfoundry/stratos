@@ -7,38 +7,39 @@ import (
 	"github.com/labstack/echo"
 )
 
-type CFAppSsh struct {
+// CFAppSSH - Plugin to allow SSH into an application instance
+type CFAppSSH struct {
 	portalProxy interfaces.PortalProxy
 }
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	return &CFAppSsh{portalProxy: portalProxy}, nil
+	return &CFAppSSH{portalProxy: portalProxy}, nil
 }
 
-func (cfAppSsh *CFAppSsh) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
-	return nil, errors.New("Not implemented!")
-
-}
-
-func (cfAppSsh *CFAppSsh) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
-	return nil, errors.New("Not implemented!")
-}
-
-func (cfAppSsh *CFAppSsh) GetRoutePlugin() (interfaces.RoutePlugin, error) {
-	return cfAppSsh, nil
+func (CFAppSSH *CFAppSSH) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+	return nil, errors.New("Not implemented")
 
 }
 
-func (cfAppSsh *CFAppSsh) AddAdminGroupRoutes(echoGroup *echo.Group) {
+func (CFAppSSH *CFAppSSH) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (CFAppSSH *CFAppSSH) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+	return CFAppSSH, nil
+
+}
+
+func (CFAppSSH *CFAppSSH) AddAdminGroupRoutes(echoGroup *echo.Group) {
 	// no-op
 }
 
-func (cfAppSsh *CFAppSsh) AddSessionGroupRoutes(echoGroup *echo.Group) {
+func (CFAppSSH *CFAppSSH) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Application SSH
-	echoGroup.GET("/:cnsiGuid/apps/:appGuid/ssh/:appInstance", cfAppSsh.appSSH)
+	echoGroup.GET("/:cnsiGuid/apps/:appGuid/ssh/:appInstance", CFAppSSH.appSSH)
 }
 
-func (cfAppSsh *CFAppSsh) Init() error {
+func (CFAppSSH *CFAppSSH) Init() error {
 
 	return nil
 }
