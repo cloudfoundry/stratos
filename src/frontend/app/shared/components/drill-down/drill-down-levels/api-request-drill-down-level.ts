@@ -1,3 +1,4 @@
+import { APIResource } from './../../../../store/types/api.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory } from '../../../../store/helpers/entity-factory';
@@ -9,15 +10,18 @@ import { SetPage } from '../../../../store/actions/pagination.actions';
 import { PageEvent } from '@angular/material';
 
 type getApiDrillDownAction<T> = (parent?: T, allAncestors?: any[]) => PaginatedAction;
-interface IApiRequestDrillDownLevelConfig<T> {
+interface IApiRequestDrillDownLevelConfig<T = any> {
   getAction: getApiDrillDownAction<T>;
   title?: string;
+  entityNameParam: string;
 }
-export class ApiRequestDrillDownLevel<T> implements DrillDownLevel {
+export class ApiRequestDrillDownLevel implements DrillDownLevel<APIResource, APIResource> {
+  private getAction: getApiDrillDownAction<APIResource>;
+  private entityNameParam: string;
   public title: string;
-  private getAction: getApiDrillDownAction<T>;
+  public getItemName = (entity: APIResource) => entity.entity[this.entityNameParam];
 
-  public request = (parent?: T, allAncestors?: any[]) => {
+  public request = (parent?, allAncestors?) => {
     const action = this.getAction(parent, allAncestors);
     const { paginationKey, entityKey } = action;
     const schema = entityFactory(entityKey);
@@ -43,10 +47,11 @@ export class ApiRequestDrillDownLevel<T> implements DrillDownLevel {
     });
   }
 
-  constructor(private store: Store<AppState>, config: IApiRequestDrillDownLevelConfig<T>) {
+  constructor(private store: Store<AppState>, config: IApiRequestDrillDownLevelConfig) {
     const { getAction, title } = config;
     this.title = title;
     this.getAction = getAction;
+    this.entityNameParam = config.entityNameParam;
   }
 
 }

@@ -14,11 +14,12 @@ export interface IDrillDownLevelRequest {
   state$?: Observable<ActionState>;
   pagination?: IDrillDownLevelPagination;
 }
-export interface DrillDownLevel {
+export interface DrillDownLevel<E = any, P = any> {
   title: string;
   component?;
-  request: ((parent?: any, allAncestors?: any[]) => IDrillDownLevelRequest) | IDrillDownLevelRequest;
-  selectItem?: (parent?: any, allAncestors?: any[]) => void;
+  request: ((parent?: P, allAncestors?: any) => IDrillDownLevelRequest) | IDrillDownLevelRequest;
+  selectItem?: (parent?: P, allAncestors?: any) => void;
+  getItemName: (entity: E) => string;
 }
 
 export type DrillDownDefinition = DrillDownLevel[];
@@ -36,6 +37,7 @@ interface DrillDownLevelData {
   hasErrored$: Observable<boolean>;
   pagination?: IDrillDownLevelPagination;
   component: any;
+  getItemName: (entity) => string;
 }
 
 @Component({
@@ -43,7 +45,7 @@ interface DrillDownLevelData {
   templateUrl: './drill-down.component.html',
   styleUrls: ['./drill-down.component.scss']
 })
-export class DrillDownComponent implements OnInit {
+export class DrillDownComponent<E = any, P = any> implements OnInit {
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
@@ -55,18 +57,23 @@ export class DrillDownComponent implements OnInit {
 
   public levelData: DrillDownLevelData[] = [];
 
-  public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
+  public goToLevel(levelIndex: number) {
     this.reduceLevels(levelIndex + 1);
+    this.resetLevelSelection(levelIndex);
+    this.positionDrillDown(levelIndex);
+  }
+
+  public clickItem(item, itemIndex: number, levelIndex: number, $event: MouseEvent) {
     if (this.levelData[levelIndex].selected.index === itemIndex) {
-      this.resetLevelSelection(levelIndex);
-      this.positionDrillDown(levelIndex - 1);
+      this.goToLevel(levelIndex);
     } else {
       const nextIndex = levelIndex + 1;
       if (this.definition[nextIndex]) {
+        this.reduceLevels(levelIndex + 1);
         const element = $event.srcElement;
         this.addLevel(nextIndex, item);
         this.setSelectedForLevel(itemIndex, levelIndex, item, element);
-        this.positionDrillDown(levelIndex);
+        this.positionDrillDown(levelIndex + 1);
       }
     }
   }
@@ -81,6 +88,7 @@ export class DrillDownComponent implements OnInit {
 
   public positionDrillDown(levelIndex: number) {
     setTimeout(() => {
+      console.log(levelIndex);
       if (levelIndex <= 0) {
         this.drillDown.nativeElement.style.marginTop = `-${0}px`;
       } else {
@@ -138,7 +146,8 @@ export class DrillDownComponent implements OnInit {
         isBusy$,
         hasErrored$,
         pagination,
-        component: levelDefinition.component || null
+        component: levelDefinition.component || null,
+        getItemName: levelDefinition.getItemName
       };
     }
   }

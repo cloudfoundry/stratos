@@ -1,25 +1,34 @@
+<mat-toolbar color="primary" class="drill-down__breadcrumbs">
+  <div class="drill-down__breadcrumb" *ngFor="let level of levelData; index as levelIndex">
+    <span class="drill-down__breadcrumb-inner" (click)="goToLevel(levelIndex)" *ngIf="level.selected.item"><span class="drill-down__breadcrumb-chevron"
+        *ngIf="levelIndex > 0">
+        > </span> <h1>{{ level.getItemName(level.selected.item) }} </h1> </span>
+  </div>
+</mat-toolbar>
 <div class="drill-down">
   <div class="drill-down__scroller" #drillDown>
-    <div class="drill-down__level-wrapper" #drillDownLevel *ngFor="let level of levelData; index as levelIndex">
+    <div class="drill-down__level-wrapper" #drillDownLevel *ngFor="let level of levelData; index as levelIndex; last as lastLevel"
+      [ngClass]="{
+      'drill-down__level-current': lastLevel
+    }">
       <h2>{{ levelData[levelIndex].title }}</h2>
       <div class="drill-down__level-inner">
-        <div class="drill-down__loading" *ngIf="levelData[levelIndex].isBusy$ | async">
+        <div class="drill-down__loading" *ngIf="level.isBusy$ | async">
           <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
         </div>
         <div class="drill-down__level">
           <div class="drill-down__item" [ngClass]="{
-          'drill-down__item--selected': levelData[levelIndex].selected.index === itemIndex,
-          'drill-down__item--hidden': levelData[levelIndex].selected.index !== null && levelData[levelIndex].selected.index !== itemIndex
+          'drill-down__item--selected': level.selected.index === itemIndex,
+          'drill-down__item--hidden': level.selected.index !== null && level.selected.index !== itemIndex
         }" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
-            <app-table-cell [config]="{ linkButton: true }" *ngIf="levelData[levelIndex].component as component" [component]="component"
-              [row]="data">
+            <app-table-cell [config]="{ linkButton: true }" *ngIf="level.component as component" [component]="component" [row]="data">
             </app-table-cell>
           </div>
         </div>
-        <div *ngIf="levelData[levelIndex].pagination as pagination">
+        <div *ngIf="level.pagination as pagination">
           <div *ngIf="pagination.state$ | async as state">
-            <mat-paginator [hidden]="levelData[levelIndex].selected.index === null && state.pageCount > 1" [length]="state.totalResults"
-              [pageSize]="state.pageSize" (page)="pagination.page($event)">
+            <mat-paginator [hidden]="level.selected.index === null && state.pageCount > 1" [length]="state.totalResults" [pageSize]="state.pageSize"
+              (page)="pagination.page($event)">
             </mat-paginator>
           </div>
         </div>
