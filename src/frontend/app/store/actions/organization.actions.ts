@@ -1,17 +1,12 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateOrganization } from '../../core/cf-api.types';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-  cfUserSchemaKey,
-} from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
-import { PaginatedAction, PaginationAction } from '../types/pagination.types';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
+import { createDefaultUserRelations } from './users.actions';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -28,6 +23,10 @@ export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed
 export const DELETE_ORGANIZATION = '[Organization] Delete organization';
 export const DELETE_ORGANIZATION_SUCCESS = '[Organization] Delete organization success';
 export const DELETE_ORGANIZATION_FAILED = '[Organization] Delete organization failed';
+
+export const GET_ORGANIZATION_USERS = '[Organization] Get all org users';
+export const GET_ORGANIZATION_USERS_SUCCESS = '[Organization] Get all org users success';
+export const GET_ORGANIZATION_USERS_FAILED = '[Organization] Get all org users failed';
 
 export class GetOrganization extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string,
@@ -161,26 +160,25 @@ export class UpdateOrganization extends CFStartAction implements ICFAction {
 }
 
 export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+
   constructor(
     public guid: string,
     public paginationKey: string,
     public endpointGuid: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
-    ],
-    public populateMissing = true) {
+    public isAdmin: boolean,
+    public includeRelations: string[] = createDefaultUserRelations()) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations/${guid}/users`;
     this.options.method = 'get';
+    // Only admin's can use the url supplied by cf to fetch missing params. These are used by validation and fail for non-admins
+    this.skipValidation = !isAdmin;
   }
-  actions = getActions('Organizations', 'List all users');
+  actions = [
+    GET_ORGANIZATION_USERS,
+    GET_ORGANIZATION_USERS_SUCCESS,
+    GET_ORGANIZATION_USERS_FAILED
+  ];
   entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
   options: RequestOptions;
@@ -191,4 +189,6 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'username',
   };
   flattenPagination = true;
+  skipValidation;
+  populateMissing = true;
 }

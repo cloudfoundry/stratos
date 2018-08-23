@@ -6,6 +6,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
+import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
@@ -15,7 +16,9 @@ import { GithubEffects } from './effects/github.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
+import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { RequestEffect } from './effects/request.effects';
+import { RouteEffect } from './effects/route.effects';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
@@ -24,8 +27,8 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
-import { AppReducersModule } from './reducers.module';
 import { UsersEffects } from './effects/users.effects';
+import { AppReducersModule } from './reducers.module';
 
 @NgModule({
   imports: [
@@ -55,7 +58,10 @@ import { UsersEffects } from './effects/users.effects';
       UsersRolesEffects,
       PermissionsEffects,
       PermissionEffects,
-      UsersEffects
+      UsersEffects,
+      RecursiveDeleteEffect,
+      AppEffects,
+      RouteEffect,
     ])
   ]
 })

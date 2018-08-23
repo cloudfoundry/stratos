@@ -5,22 +5,24 @@ import {
   applicationSchemaKey,
   entityFactory,
   routeSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  cfUserSchemaKey,
-  organizationSchemaKey,
-  serviceSchemaKey,
-  servicePlanSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesWithSpaceSchemaKey,
 } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
+import {
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction, PaginationAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { RouteEvents } from './route.actions';
 import { GetAllOrgUsers } from './organization.actions';
+import { RouteEvents } from './route.actions';
+import { getServiceInstanceRelations } from './service-instances.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -206,27 +208,12 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     public guid: string,
     public paginationKey: string,
     public endpointGuid: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
-      createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
-      createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
-    ],
-    public populateMissing = true) {
-    super(guid, paginationKey, endpointGuid, includeRelations, populateMissing);
+    public isAdmin: boolean,
+    includeRelations?: string[]) {
+    super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
     this.options.url = `spaces/${guid}/user_roles`;
   }
   actions = getActions('Spaces', 'List all user roles');
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'username',
-  };
-  flattenPagination = true;
 }
 
 
@@ -266,14 +253,7 @@ export class GetServiceInstancesForSpace
     public endpointGuid: string,
     public paginationKey: string,
     public q: QParam[] = null,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public flattenPagination = true
   ) {
@@ -288,7 +268,7 @@ export class GetServiceInstancesForSpace
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Space', 'Get all service instances');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
   initialParams = {

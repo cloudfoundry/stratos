@@ -30,6 +30,34 @@ Note:
 3. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
 4. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
+### Pre-building the UI
+
+Due to the memory usage of the Angular compiler (see below), when deployed to Cloud Foundry via `cf push`, Stratos does not use AOT (Ahead-of-Time) complilation.
+
+If you wish to enable AOT or reduce the push time, you can pre-build the UI before pushing.
+
+This can be done with:
+
+```
+git clone https://github.com/cloudfoundry-incubator/stratos
+cd stratos
+npm install
+npm run prebuild-ui
+cf push
+```
+
+You will need a recent version of Node installed locally to do this.
+
+The `prebuild-ui` npm script performs a build of the front-end UI and then zips up the resulting folder into a package named `stratos-frontend-prebuild.zip`. The Stratos buildpack will unpack this zip file and use its contents instead of building the UI during staging, when this file is present.
+
+
+### Memory Usage
+
+The Stratos Cloud Foundry `manifest.yml` states that the application requires
+`1512MB` of memory. This is required during the build process of the
+application since building an angular2 app is a memory intensive process. The
+memory limit can be scaled down after the app has been pushed, using the cf CLI.
+
 ## Associate Cloud Foundry database service
 Follow instructions [here](db-migration/README.md).
 
@@ -59,7 +87,7 @@ To create a log file of recent console output
 ```
 cf logs console --recent | tee cfconsole.log
 ```
->**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement 
+>**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement
 
 ### Application Security Groups
 
@@ -102,17 +130,17 @@ cf bind-security-group NAME ORG SPACE
 
 ### Console fails to start
 
-The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.  
-To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`. 
+The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.
+To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`.
 
 ```
 $ cf env console
 Getting env variables for app console in org SUSE / space dev as admin...
 OK
- 
+
 System-Provided:
- 
- 
+
+
  {
   "VCAP_APPLICATION": {
    "application_id": ...,
@@ -122,7 +150,7 @@ System-Provided:
    "cf_api": "http://api.cf-dev.io",
    ...
  }
- 
+
  No user-defined env variables have been set
  ...
 ```

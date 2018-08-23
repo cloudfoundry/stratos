@@ -1,3 +1,12 @@
+---
+resource_types:
+- name: docker-image
+  type: docker-image
+  privileged: true
+  source:
+    repository: ((docker-image-resource))
+    tag: ((docker-image-resource-tag))
+
 resources:
 - name: stratos
   type: git
@@ -17,6 +26,56 @@ resources:
     start: 12:00 AM
     stop: 2:00 AM
     location: UTC
+    # Docker Images
+- name: jetstream-dc-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-dc-jetstream
+- name: dc-db-migrator-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-dc-db-migrator
+- name: mariadb-dc-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-dc-mariadb
+- name: ui-dc-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-dc-console
+- name: jetstream-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-jetstream
+- name: postflight-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-postflight-job
+- name: mariadb-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-mariadb
+- name: ui-helm-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-console
+
 groups:
 - name: tests
   jobs:
@@ -30,33 +89,61 @@ jobs:
   - get: stratos
   - get: after-midnight
     trigger: true
-  - do:
-    - task: generete-certs
-      timeout: 2m
-      file: stratos/deploy/ci/tasks/build-images/generate-certs.yml
-    - task: build
-      privileged: true
-      timeout: 30m
-      file: stratos/deploy/ci/tasks/build-images/build-helm.yml
-      params:
-        DOCKER_USERNAME: ((docker-username))
-        DOCKER_PASSWORD: ((docker-password))
+  - aggregate:
+    - do:
+      - put: jetstream-helm-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  prod-build
+          tag_as_latest: true
+      - put: postflight-helm-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  postflight-job
+          tag_as_latest: true
+      - put: mariadb-helm-image
+        params:
+          dockerfile: stratos/deploy/db/Dockerfile.mariadb
+          build: stratos/deploy/db
+          tag_as_latest: true
+      - put: ui-helm-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.ui
+          build: stratos/
+          target_name: prod-build
+          tag_as_latest: true
 - name: build-dc-images
   plan:
   - get: stratos
   - get: after-midnight
     trigger: true
-  - do:
-    - task: generete-certs
-      timeout: 2m
-      file: stratos/deploy/ci/tasks/build-images/generate-certs.yml
-    - task: build
-      privileged: true
-      timeout: 30m
-      file: stratos/deploy/ci/tasks/build-images/build-dc.yml
-      params:
-        DOCKER_USERNAME: ((docker-username))
-        DOCKER_PASSWORD: ((docker-password))
+  - aggregate:
+    - do:
+      - put: jetstream-dc-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  dev-build
+          tag_as_latest: true
+      - put: dc-db-migrator-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  db-migrator
+          tag_as_latest: true
+      - put: mariadb-dc-image
+        params:
+          dockerfile: stratos/deploy/db/Dockerfile.mariadb
+          build: stratos/deploy/db
+          tag_as_latest: true
+      - put: ui-dc-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.ui
+          build: stratos/
+          target_name: prod-build
+          tag_as_latest: true
 
 - name: build-aio-image
   public: true

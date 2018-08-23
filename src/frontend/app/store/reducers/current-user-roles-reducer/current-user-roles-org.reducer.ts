@@ -1,7 +1,7 @@
 import { UserRelationTypes } from '../../actions/permissions.actions';
 import { IOrgRoleState } from '../../types/current-user-roles.types';
 
-const defaultOrgRoleStateState = {
+export const defaultUserOrgRoleState: IOrgRoleState = {
   isManager: false,
   isAuditor: false,
   isBillingManager: false,
@@ -10,9 +10,9 @@ const defaultOrgRoleStateState = {
 };
 
 export const createOrgRoleStateState = () => ({
-  ...defaultOrgRoleStateState,
+  ...defaultUserOrgRoleState,
   spaceGuids: [
-    ...defaultOrgRoleStateState.spaceGuids
+    ...defaultUserOrgRoleState.spaceGuids
   ]
 });
 

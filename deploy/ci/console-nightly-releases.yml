@@ -19,11 +19,11 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
-- name: stratos-master
+- name: helm-repo
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: master
+    uri: git@github.com:((helm-repo-github-organization))/((helm-repo-github-repository))
+    branch: ((helm-repo-branch))
     private_key: ((github-private-key))
 # Docker Images
 - name: jetstream-image
@@ -80,12 +80,11 @@ jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
+  - get: midnight
     trigger: true
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
-      params:
-        NIGHTLY_BUILD: "true"
     - put: image-tag
       params:
         file: image-tag/*.tar
@@ -93,7 +92,7 @@ jobs:
 - name: build-images
   plan:
   - get: stratos
-  - get: midnight
+    passed: [generate-tag-files]
     trigger: true
   - get: image-tag
     passed: [generate-tag-files]
@@ -107,7 +106,6 @@ jobs:
           build: stratos/
           target_name:  prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
           build_args_file: image-tag/build-args
       - put: postflight-image
         params:
@@ -115,26 +113,24 @@ jobs:
           build: stratos/
           target_name:  postflight-job
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
       - put: ui-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
+          prebuild_script: build/store-git-metadata.sh
 - name: create-chart
   plan:
   - get: stratos
     passed: [build-images]
     trigger: true
-  - get: stratos-master
+  - get: helm-repo
   - do:
     - task: build
       privileged: true
@@ -146,6 +142,7 @@ jobs:
         GITHUB_ORG: ((github-organization))
         GITHUB_REPO: ((github-repository))
         GIT_PRIVATE_KEY: ((github-private-key))
+        HELM_REPO_BRANCH: ((helm-repo-branch))
         DOCKER_ORG: ((artifact-docker-organization))
         DOCKER_REGISTRY: ((artifact-docker-registry))
     - put: helm-chart-tarball

@@ -1,4 +1,4 @@
-import { by, element, browser, protractor } from 'protractor';
+import { by, element, browser, protractor, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
@@ -54,11 +54,46 @@ export class StepperComponent extends Component {
     return this.isPresentNotDisabled(element(by.id('stepper_previous')));
   }
 
+  hasPrevious() {
+    return element(by.id('stepper_previous')).isPresent();
+  }
+
+  getNextLabel() {
+    return this.locator.element(by.id('stepper_next')).getText().then(label => label.trim());
+  }
+
+  waitUntilCanNext(nextButtonLabel = 'Close') {
+    const nextButton = this.locator.element(by.id('stepper_next'));
+    return browser.wait(until.textToBePresentInElement(nextButton, nextButtonLabel)).then(() => {
+      return browser.wait(until.elementToBeClickable(nextButton));
+    });
+  }
+
   waitForStep(stepName: string) {
-    const lastActiveHeader = element.all(by.css('.steppers__header.steppers__header--active')).last();
+    const lastActiveHeader = this.locator.all(by.css('.steppers__header.steppers__header--active')).last();
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
+  isStepDisabled(stepName: string): promise.Promise<boolean> {
+    return this.getStep(stepName).element(by.css('app-dot-content span.disabled')).isPresent();
+  }
+
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
+
+  hasStep(name: string) {
+    return this.getStep(name).isPresent();
+  }
+
+  getStepNames() {
+    return this.locator.all(by.css('.steppers__header .steppers__header-text')).map(step => step.getText());
+  }
+
+  getActiveStepName(): promise.Promise<string> {
+    return element(by.css('.steppers__header--active .steppers__header-text')).getText();
+  }
+
+  getStep(stepName) {
+    return this.locator.element(by.cssContainingText('.steppers__header', stepName));
+  }
 
 }

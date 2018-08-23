@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
@@ -42,7 +42,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private openCloseSub: Subscription;
   private closeSub: Subscription;
 
-  private fullView: boolean;
+  public fullView: boolean;
 
   private routeChangeSubscription: Subscription;
 
@@ -70,12 +70,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     },
     {
       text: 'Services',
-      matIcon: 'library_books',
+      matIcon: 'service',
+      matIconFont: 'stratos-icons',
       link: '/services'
     },
     {
       text: 'Cloud Foundry',
-      matIcon: 'cloud',
+      matIcon: 'cloud_foundry',
+      matIconFont: 'stratos-icons',
       link: '/cloud-foundry'
     },
     {

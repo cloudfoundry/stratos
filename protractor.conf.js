@@ -5,6 +5,14 @@ const {
   SpecReporter
 } = require('jasmine-spec-reporter');
 
+const HtmlReporter = require('stratos-protractor-reporter');
+const moment = require('moment');
+const skipPlugin = require('./src/test-e2e/skip-plugin.js');
+
+var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
+
+var reportFolderName = 'stratos-e2e-' + timestamp;
+
 const SECRETS_FILE = 'secrets.yaml';
 
 var fs = require('fs');
@@ -28,7 +36,7 @@ try {
 }
 
 exports.config = {
-  allScriptsTimeout: 11000,
+  allScriptsTimeout: 30000,
   specs: [
     './src/test-e2e/**/*-e2e.spec.ts',
   ],
@@ -50,14 +58,25 @@ exports.config = {
   },
   params: secrets,
   onPrepare() {
+    skipPlugin.install(jasmine);
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
+    jasmine.getEnv().addReporter(new HtmlReporter({
+      baseDirectory: './e2e-reports/' + reportFolderName,
+      takeScreenShotsOnlyForFailedSpecs: true,
+      docTitle: 'E2E Test Report: ' + timestamp,
+      docName: 'index.html',
+      logIgnore: [
+        /\/auth\/session\/verify - Failed to load resource/g
+      ]
+    }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
         displayStacktrace: true
       }
     }));
+    jasmine.getEnv().addReporter(skipPlugin.reporter());
   }
 };
 

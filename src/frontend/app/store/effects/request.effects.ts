@@ -1,9 +1,8 @@
-
-import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -15,17 +14,17 @@ import {
   ValidateEntitiesStart,
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
-import { validateEntityRelations } from '../helpers/entity-relations';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { validateEntityRelations } from '../helpers/entity-relations/entity-relations';
+import {
+  completeApiRequest,
+  getFailApiRequestActions,
+  getRequestTypeFromMethod,
+} from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
-import {
-  APISuccessOrFailedAction,
-  UpdateCfAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from '../types/request.types';
+import { UpdateCfAction } from '../types/request.types';
+
 
 @Injectable()
 export class RequestEffect {
@@ -81,15 +80,20 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          return validateEntityRelations({
+          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
+          const entities = apiResponse ? apiResponse.response.entities : null;
+          return apiAction.skipValidation ? {
+            started: false,
+            completed: Promise.resolve(apiResponse),
+          } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
             allPagination,
-            newEntities: apiResponse ? apiResponse.response.entities : null,
+            apiResponse,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
-            populateMissing: true,
+            populateMissing: true
           });
         }),
         mergeMap(validation => {
@@ -97,15 +101,16 @@ export class RequestEffect {
           if (independentUpdates) {
             this.update(apiAction, true, null);
           }
-          return validation.completed.then(() => ({
+          return validation.completed.then(validatedApiResponse => ({
+            validatedApiResponse,
             independentUpdates,
             validation
           }));
         }),
-        mergeMap(({ independentUpdates, validation }) => {
+        mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
           return [new EntitiesPipelineCompleted(
             apiAction,
-            apiResponse,
+            validatedApiResponse,
             validateAction,
             validation,
             independentUpdates
@@ -114,14 +119,7 @@ export class RequestEffect {
       ).pipe(catchError(error => {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
-          return [
-            new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
-            new WrapperRequestActionFailed(
-              error.message,
-              apiAction,
-              requestType
-            )
-          ];
+          return getFailApiRequestActions(apiAction, error, requestType);
         } else {
           this.update(apiAction, false, error.message);
           return [];
@@ -148,19 +146,12 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
-        actions.push(new WrapperRequestActionSuccess(
-          apiResponse.response,
-          apiAction,
-          requestType,
-          apiResponse.totalResults,
-          apiResponse.totalPages
-        ));
+        completeApiRequest(this.store, apiAction, apiResponse, requestType);
 
         if (
           !apiAction.updatingKey &&
-          apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
-          apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
+          (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
+            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -169,7 +160,6 @@ export class RequestEffect {
           }
         }
       }
-
       return actions;
     }));
 

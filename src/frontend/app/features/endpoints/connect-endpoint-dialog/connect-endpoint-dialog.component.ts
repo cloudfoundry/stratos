@@ -55,9 +55,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   ];
 
   private hasAttemptedConnect: boolean;
-  private authTypesForEndpoint = [];
+  public authTypesForEndpoint = [];
 
-  private canShareEndpointToken = false;
+  public canShareEndpointToken = false;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
@@ -198,7 +198,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
-  submit(event) {
+  submit() {
     this.hasAttemptedConnect = true;
     const { guid, authType, authValues, systemShared } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(

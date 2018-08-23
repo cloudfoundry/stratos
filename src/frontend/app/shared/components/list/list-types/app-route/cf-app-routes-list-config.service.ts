@@ -142,7 +142,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
-      new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
+      new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid, this.appService.appGuid)
     );
   }
 

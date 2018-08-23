@@ -1,8 +1,10 @@
 import { PermissionStrings } from '../../../core/current-user-permissions.config';
 import { ChangeUserRole } from '../../actions/users.actions';
-import { ICfRolesState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
+import { ICfRolesState, ICurrentUserRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
+import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
+import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
 
 export function updateAfterRoleChange(
   state: ICurrentUserRolesState,
@@ -17,27 +19,37 @@ export function updateAfterRoleChange(
   const entityType = changePerm.isSpace ? 'spaces' : 'organizations';
 
   const cf = state.cf[changePerm.endpointGuid];
-  const entity = cf[entityType][changePerm.entityGuid];
-
+  const entity = cf[entityType][changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
   const permissionType = userRoleNameToPermissionName(changePerm.permissionTypeKey);
-  const currentValue = entity[permissionType];
 
-  if (currentValue === isAdd) {
+  if (entity && entity[permissionType] === isAdd) {
     // No change, just return the state. Unlikely to happen
     return state;
   }
 
-  const newCf = {
-    ...cf,
-    [entityType]: {
-      ...cf[entityType],
-      [changePerm.entityGuid]: {
-        ...entity,
-        [permissionType]: isAdd
-      }
-    }
-  };
-  return spreadState(state, changePerm.endpointGuid, newCf);
+  // For space... update the space role AND org space guids list... for org just update the org role
+  if (changePerm.isSpace) {
+    return handleSpaceRoleChange(
+      state,
+      changePerm.endpointGuid,
+      cf,
+      changePerm.orgGuid,
+      changePerm.entityGuid,
+      entity as ISpaceRoleState,
+      permissionType,
+      isAdd);
+  } else {
+    return handleOrgRoleChange(state, changePerm.endpointGuid, cf, changePerm.entityGuid, entity as IOrgRoleState, permissionType, isAdd);
+  }
+}
+
+function createEmptyState(isSpace: boolean, orgId?: string): ISpaceRoleState | IOrgRoleState {
+  return isSpace ? {
+    ...defaultUserSpaceRoleState,
+    orgId
+  } : {
+      ...defaultUserOrgRoleState,
+    };
 }
 
 function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRoleNames): PermissionStrings {
@@ -57,6 +69,69 @@ function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRole
     case SpaceUserRoleNames.MANAGER:
       return PermissionStrings.SPACE_MANAGER;
   }
+}
+
+function handleOrgRoleChange(
+  state: ICurrentUserRolesState,
+  endpointGuid: string,
+  cf: ICfRolesState,
+  orgGuid: string,
+  orgState: IOrgRoleState,
+  permType: string,
+  isAdd: boolean) {
+  return spreadState(state, endpointGuid, {
+    ...cf,
+    organizations: {
+      ...cf.organizations,
+      [orgGuid]: {
+        ...orgState,
+        [permType]: isAdd
+      }
+    }
+  });
+}
+/**
+ * Update the space role AND org space guids list
+ */
+function handleSpaceRoleChange(
+  state: ICurrentUserRolesState,
+  endpointGuid: string,
+  cf: ICfRolesState,
+  orgGuid: string,
+  spaceGuid: string,
+  spaceState: ISpaceRoleState,
+  permType: string,
+  isAdd: boolean) {
+  const spacePermissions = {
+    ...spaceState,
+    [permType]: isAdd
+  };
+  let spaceGuids = cf.organizations[orgGuid].spaceGuids;
+  const spaceGuidIndex = spaceGuids.indexOf(spaceGuid);
+  if (isAdd && spaceGuidIndex < 0) {
+    // Add the space guid to the org's space guid list
+    spaceGuids = [...spaceGuids, spaceGuid];
+  } else if (
+    !isAdd &&
+    spaceGuidIndex >= 0 &&
+    !spacePermissions.isAuditor && !spacePermissions.isDeveloper && !spacePermissions.isManager) {
+    // Remove the space guid from the org's space guid list
+    spaceGuids = spaceGuids.filter(guid => guid !== spaceGuid);
+  }
+  return spreadState(state, endpointGuid, {
+    ...cf,
+    organizations: {
+      ...cf.organizations,
+      [orgGuid]: {
+        ...cf.organizations[orgGuid],
+        spaceGuids
+      }
+    },
+    spaces: {
+      ...cf.spaces,
+      [spaceGuid]: spacePermissions
+    }
+  });
 }
 
 function spreadState(state: ICurrentUserRolesState, cfGuid: string, cf: ICfRolesState): ICurrentUserRolesState {

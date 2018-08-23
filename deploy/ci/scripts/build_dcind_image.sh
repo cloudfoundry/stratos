@@ -3,7 +3,6 @@
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_REGISTRY=ci-registry.capbristol.com:5000
 TAG=${TAG:-latest}
-REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-ci-registry.ngrok.io}
 REGISTRY_USER=${REGISTRY_USER:-ubuntu}
 
 DOWNLOAD_FOLDER=${DIRPATH}/tmp
@@ -16,7 +15,7 @@ PUBLIC_KEY=$(docker run -v $PWD:/key splatform/alpine-dropbear dropbearkey -t rs
 TMP_FILE=$(mktemp)
 ssh-keyscan ${REGISTRY_ADDRESS} > $TMP_FILE 2> /dev/null
 ECDSA_FINGERPRINT=$(cat $TMP_FILE | grep ecdsa)
-echo ${PUBLIC_KEY} | ssh ${REGISTRY_USER}@${REGISTRY_ADDRESS} "cat >> ~/.ssh/authorized_keys"
+echo ${PUBLIC_KEY} | ssh ${REGISTRY_USER}@${DOCKER_REGISTRY} "cat >> ~/.ssh/authorized_keys"
 
 cat << EOT > Dockerfile.dcind
 FROM amidos/dcind:latest

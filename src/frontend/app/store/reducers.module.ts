@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
+import { StoreModule, ActionReducerMap } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { ActionReducerMap } from '@ngrx/store/src/models';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
 
@@ -54,23 +53,21 @@ if (!environment.production) {
     metaReducers.push(logger);
   }
 }
-
-const imports = [
-  StoreModule.forRoot(
-    appReducers,
-    {
-      metaReducers
-    }
-  )
-];
-
-if (!environment.production) {
-  imports.push(
+const store = StoreModule.forRoot(
+  appReducers,
+  {
+    metaReducers
+  }
+);
+const imports = environment.production ? [
+  store
+] : [
+    store,
     StoreDevtoolsModule.instrument({
       maxAge: 100,
+      logOnly: !environment.production
     })
-  );
-}
+  ];
 
 @NgModule({
   imports

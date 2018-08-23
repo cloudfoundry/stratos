@@ -2,6 +2,90 @@
 
 Weekly status updates are published here.
 
+## 17th August 2018
+
+Update for this week:
+
+- 2.0.1 - We tagged a 2.0.1 release. This is identical to 2.0.0 and only fixes an issue with a broken dependency - one of the pinned dependencies was no longer working. This issue only affects you if you were pushing to Cloud Foundry from the 2.0.0 tag.
+
+- Pre-built UI - We added the ability to pre-build the UI before pushing to Cloud Foundry. This allows you to build the UI with AOT (Ahead-of-time) compilation enabled and push to CF. This will also reduce push time. See the doc [Pre-building the UI](https://github.com/cloudfoundry-incubator/stratos/tree/v2-master/deploy/cloud-foundry#pre-building-the-ui).
+
+- Go-backend re-structure. Work is almost complete on re-structuring the go backend to make it easier to develop with and contribute to. See issue [#2815](https://github.com/cloudfoundry-incubator/stratos/issues/2815).
+
+- Extended end-to-end test suite
+
+## 10th August 2018
+A similar update to last week, focusing on metrics, testing and the community.
+
+- Testing the new metrics deployment process.
+- Improving the end to end test setup process, this will enable better coverage of service tests.
+- Improving test coverage, both unit and end to end, of the often used list component.
+- Improving test coverage of entity validation, another often used component.
+- Manage application stats requests better in the application wall when there are many many started apps.
+- Investigating, solving and shepherding community issues. Some of the stand out ones..
+  - Stratos URLs are now consistent. Previously for the same CF the id would change every time it's registered, meaning bookmarks would need updating following every re-registration. Now as long as the CF API url doesn't change the CF id in the url will remain the same. - https://github.com/cloudfoundry-incubator/stratos/issues/2798
+  - Correctly report application instance counts with respect to app state - https://github.com/cloudfoundry-incubator/stratos/issues/2797
+  - Apply permissions to application actions (start, restart, etc) - https://github.com/cloudfoundry-incubator/stratos/issues/2806
+
+## 3 August 2018
+This week we've focused on..
+
+- Making metrics components easier to deploy. This will help us apply polish and publicise CF metrics in the coming weeks.
+- Improving test suites and coverage.
+- Responding to community issues. There's been an increase in use and some great contributions.
+- Fixing older, but still valid, issues that haven't quite been important to address at the time.
+
+In addition we’ve created a short (a few minutes) survey to get a better idea how the community plan to use Stratos. Answers and feedback will directly impact the direction we take Stratos, so the quicker we have responses the quicker we can act on them. Follow this link to start answering https://www.surveymonkey.com/r/2L8XWST
+
+## 27 July 2018
+
+The main news this week is that we have released a first version of Stratos 2.0.
+
+We've been focused over the past weeks on fixing bugs and improving tests and we're delighted to have reached this milestone.
+
+The release details are available here - https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.0.0.
+
+We've also started to catch up on some of the outstanding PRs, especially submitted from the community, for example:
+
+- Change DB schema and backend to support storing a client/secret for each Endpoint [\#2622](https://github.com/cloudfoundry-incubator/stratos/pull/2622)
+- Fix migrate script to work in Postgresql [\#2601](https://github.com/cloudfoundry-incubator/stratos/pull/2601)
+
+## 20 July 2018
+
+This week the focus has been on further testing and refinement of Release Candidate 2.
+
+We will be publishing a Release Candidate 3 on Monday 23 July. We expect this to be the final RC and will most likely promote this to be the final Version 2 release later next week.
+
+We've been focused on more test automation and building out more end-to-end tests, in addition to fixing a few bugs.
+
+We had an issue with the Angular AOT + build optimization which pushed the final RC into next week. This took a while to get to the bottom of.
+
+For a full list of merged PRs this week, see: [Merged PRs](https://github.com/cloudfoundry-incubator/stratos/pulls?page=1&q=is%3Apr+is%3Amerged+updated%3A%3E%3D2018-07-13&utf8=%E2%9C%93).
+
+## 13 July 2018
+
+The SUSE team has been participating in SUSE Hack Week, so there is no change in status this week.
+
+Work resumes next week on getting a first 2.0 release published.
+
+## 06 July 2018
+
+This week the focus has been on further testing and refinement of Release Candidate 2.
+
+We've been identifying and fixing issues - see: [Merged PRs](
+https://github.com/cloudfoundry-incubator/stratos/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+updated%3A%3E%3D2018-07-02+).
+
+## 29 June 2018
+
+This week the focus has been on creating a Release Candidate of Version 2.
+
+In fact, we published two Release Candidates - at the start and end of the week - full details here:
+https://github.com/cloudfoundry-incubator/stratos/releases
+
+A large number of bugs and smaller issues have been resolved since last week's Beta 2 release - full details here: https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0-beta-002...2.0.0-rc2
+
+Work has been focused on testing the Release Candidates and fixing defects.
+
 ## 22 June 2018
 
 This week the focus has been on creating a second Beta release of Version 2.

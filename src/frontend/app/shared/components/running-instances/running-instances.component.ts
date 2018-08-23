@@ -21,7 +21,7 @@ export class RunningInstancesComponent implements OnInit {
   @Input('appGuid') appGuid;
 
   // Observable on the running instances count for the application
-  private runningInstances$: Observable<number>;
+  public runningInstances$: Observable<number>;
 
   constructor(
     private store: Store<AppState>,

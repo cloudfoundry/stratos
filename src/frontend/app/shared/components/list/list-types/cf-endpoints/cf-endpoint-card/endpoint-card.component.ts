@@ -15,7 +15,7 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
 
   static columns = 2;
 
-  private status$ = new ReplaySubject<CardStatus>();
+  public status$ = new ReplaySubject<CardStatus>();
 
   @Input('row')
   row: EndpointModel;
@@ -33,7 +33,7 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
     this.status$.next(this.mapStatus(row));
   }
 
-  private getEndpointUrl(row: EndpointModel) {
+  public getEndpointUrl(row: EndpointModel) {
     return getFullEndpointApiUrl(row);
   }
 

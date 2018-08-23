@@ -1,7 +1,6 @@
 
 import { of as observableOf, Observable, combineLatest, BehaviorSubject } from 'rxjs';
-import { Component, Input } from '@angular/core';
-import { OnInit } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
@@ -30,8 +29,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private busy$: Observable<boolean>;
-  private show$: Observable<boolean>;
+  public busy$: Observable<boolean>;
+  public show$: Observable<boolean>;
 
   actions: IListAction<T>[];
   obs: {

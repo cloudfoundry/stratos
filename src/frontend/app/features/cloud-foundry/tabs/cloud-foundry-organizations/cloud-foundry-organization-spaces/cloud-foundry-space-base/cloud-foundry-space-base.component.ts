@@ -1,14 +1,15 @@
-
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
+
 import { environment } from '../../../../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
+import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -25,6 +26,7 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
   styleUrls: ['./cloud-foundry-space-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
+    CfUserService,
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService
   ]
@@ -73,7 +75,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfSpaceService: CloudFoundrySpaceService,
-    private cfOrgService: CloudFoundryOrganizationService,
+    public cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
     currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
@@ -93,7 +95,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       cfSpaceService.orgGuid,
       cfSpaceService.spaceGuid);
 
-    this.deleteRedirectSub = this.cfSpaceService.spaceEntityService.entityObs$.pipe(
+    this.deleteRedirectSub = this.cfSpaceService.space$.pipe(
       tap(({ entityRequestInfo }) => {
         if (entityRequestInfo.deleting.deleted) {
           this.store.dispatch(new RouterNav({

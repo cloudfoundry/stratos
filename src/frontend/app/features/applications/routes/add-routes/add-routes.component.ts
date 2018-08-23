@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -25,7 +24,7 @@ import {
   routeSchemaKey,
   spaceSchemaKey,
 } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';

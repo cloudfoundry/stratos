@@ -16,14 +16,14 @@
   <app-meta-card-item>
     <app-meta-card-key>Active</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.active" type="yes-no" subtle="true">
+      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.active" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Bindable</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.bindable" type="yes-no" subtle="true">
+      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.bindable" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
@@ -41,6 +41,12 @@
       <a [href]="supportUrl" target="_blank" appClickStopPropagation>
         <mat-icon>launch</mat-icon>
       </a>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="servicesService.getServiceProviderName() | async as providerName">
+    <app-meta-card-key>Provider</app-meta-card-key>
+    <app-meta-card-value>
+        {{ servicesService.getServiceProviderName() | async }}
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item customStyle="column">

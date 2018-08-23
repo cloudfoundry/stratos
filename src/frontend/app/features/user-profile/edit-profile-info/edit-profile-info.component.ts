@@ -52,9 +52,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
 
   // Only allow password change if user has the 'password.write' group
-  private canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
+  public canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
 
-  private passwordRequired = false;
+  public passwordRequired = false;
 
   ngOnInit() {
     this.userProfileService.fetchUserProfile();

@@ -1,5 +1,7 @@
 import { InvalidSession, LOGIN } from '../actions/auth.actions';
 import { RouterActions, RouterNav } from '../actions/router.actions';
+import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
+import { AppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import {
   LOGIN_FAILED,
@@ -12,7 +14,6 @@ import {
   VERIFY_SESSION,
 } from './../actions/auth.actions';
 import { RouterRedirect } from './routing.reducer';
-import { AppState } from '../app-state';
 
 export interface AuthUser {
   guid: string;
@@ -70,8 +71,11 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
       const sessionInvalid: InvalidSession = action;
       return {
         ...state,
-        sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
-          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null },
+        sessionData: {
+        sessionData: {
+          valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
+          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null
+        },
         verifying: false
       };
     case RouterActions.GO:
@@ -82,6 +86,16 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
       };
     case RESET_AUTH:
       return defaultState;
+    case GET_SYSTEM_INFO_SUCCESS:
+      return {
+        ...state,
+        sessionData: {
+          ...state.sessionData,
+          endpoints: {
+            ...action.payload.endpoints
+          }
+        },
+      };
     default:
       return state;
   }

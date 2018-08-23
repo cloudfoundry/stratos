@@ -20,12 +20,16 @@ import {
   endpointSchemaKey,
   entityFactory,
   organizationSchemaKey,
+  privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
+  routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
@@ -73,7 +77,9 @@ export class CloudFoundryEndpointService {
       paginationKey,
       cfGuid, [
         createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
         createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
@@ -138,20 +144,8 @@ export class CloudFoundryEndpointService {
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
     this.allApps$ = this.orgs$.pipe(
-      map(p => {
-        return p
-          .filter(o => !!o.entity.spaces)
-          .map(o => {
-            return o.entity.spaces.map(space => space.entity.apps || []);
-          });
-      }),
-      map(a => {
-        let flatArray = [];
-        a.forEach(
-          appsInSpace => (flatArray = flatArray.concat(...appsInSpace))
-        );
-        return flatArray;
-      })
+      map(orgs => [].concat(...orgs.map(org => org.entity.spaces))),
+      map((spaces: APIResource<ISpace>[]) => [].concat(...spaces.map(space => space ? space.entity.apps : [])))
     );
 
     this.fetchDomains();
@@ -209,7 +203,7 @@ export class CloudFoundryEndpointService {
     statMetric: string
   ): number {
     return apps ? apps
-      .filter(a => a.entity.state !== CfApplicationState.STOPPED)
+      .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
   }

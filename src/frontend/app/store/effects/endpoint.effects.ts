@@ -1,10 +1,9 @@
-
-import {catchError,  mergeMap } from 'rxjs/operators';
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { PaginatedAction } from './../types/pagination.types';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, mergeMap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -16,6 +15,7 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
+  EndpointActionComplete,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -25,7 +25,6 @@ import {
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
-  EndpointActionComplete,
 } from '../actions/endpoint.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
@@ -39,6 +38,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+
 
 @Injectable()
 export class EndpointsEffect {
@@ -202,7 +202,7 @@ export class EndpointsEffect {
   }
 
   private doEndpointAction(
-    apiAction: IRequestAction,
+    apiAction: IRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',

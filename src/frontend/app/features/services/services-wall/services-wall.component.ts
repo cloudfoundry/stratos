@@ -36,7 +36,10 @@ export class ServicesWallComponent implements OnDestroy {
 
     this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+      map(endpoints => endpoints
+        .filter(endpoint => endpoint.connectionStatus === 'connected')
+        .map(endpoint => endpoint.guid)
+      )
     );
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,

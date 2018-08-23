@@ -6,7 +6,7 @@ const until = protractor.ExpectedConditions;
 /**
  * Page Object for generic base component
  */
-export abstract class Component {
+export class Component {
 
   constructor(protected locator: ElementFinder) { }
 
@@ -33,7 +33,7 @@ export abstract class Component {
   }
 
   waitUntilNotShown(): promise.Promise<void> {
-    return browser.wait(until.invisibilityOf(this.locator), 5000);
+    return browser.wait(until.invisibilityOf(this.locator), 20000);
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {

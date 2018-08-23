@@ -1,9 +1,12 @@
-import { browser, promise, protractor } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
 
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
+import { LoadingIndicatorComponent } from './loading-indicator.po';
 import { PageHeader } from './page-header.po';
+import { PageSubHeaderComponent } from './page-subheader.po';
 import { SideNavigation } from './side-nav.po';
+
 
 const until = protractor.ExpectedConditions;
 
@@ -18,8 +21,14 @@ export abstract class Page {
   // Top header bar (if present)
   public header = new PageHeader();
 
+  // Subheader (if present)
+  public subHeader = new PageSubHeaderComponent();
+
   // Breadcrumbs (if present)
   public breadcrumbs = new BreadcrumbsComponent();
+
+  // Loading page indicator (if present)
+  public loadingIndicator = new LoadingIndicatorComponent();
 
   // Helpers
   public helpers = new E2EHelpers();
@@ -42,10 +51,33 @@ export abstract class Page {
     });
   }
 
-  waitForPage() {
-    expect(this.navLink.startsWith('/')).toBeTruthy();
-    browser.wait(until.urlIs(this.getUrl()), 20000);
+  isChildPage(childPath: string): promise.Promise<boolean> {
+    if (!childPath.startsWith('/')) {
+      childPath = '/' + childPath;
+    }
+    return browser.getCurrentUrl().then(url => {
+      return url === browser.baseUrl + this.navLink + childPath;
+    });
   }
 
+  waitForPage() {
+    expect(this.navLink.startsWith('/')).toBeTruthy();
+    browser.wait(until.urlIs(this.getUrl()), 20000, `Failed to wait for page with navlink '${this.navLink}'`);
+  }
+
+  waitForPageDataLoaded() {
+    this.waitForPage();
+    browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
+  }
+
+  waitForPageOrChildPage() {
+    expect(this.navLink.startsWith('/')).toBeTruthy();
+    browser.wait(until.urlContains(this.getUrl()), 20000);
+  }
+
+  waitForChildPage(childPath: string) {
+    expect(this.navLink.startsWith('/')).toBeTruthy();
+    browser.wait(until.urlContains(browser.baseUrl + this.navLink + childPath), 20000);
+  }
   private getUrl = () => browser.baseUrl + this.navLink;
 }

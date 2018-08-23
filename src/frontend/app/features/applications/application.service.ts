@@ -1,9 +1,7 @@
-
-import { of as observableOf, Observable } from 'rxjs';
-
-import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
@@ -12,6 +10,7 @@ import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
+import { APP_GUID, CF_GUID } from '../../shared/entity.tokens';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import {
@@ -21,6 +20,7 @@ import {
   GetAppSummaryAction,
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
+import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   appEnvVarsSchemaKey,
@@ -33,9 +33,10 @@ import {
   routeSchemaKey,
   serviceBindingSchemaKey,
   spaceSchemaKey,
+  spaceWithOrgKey,
   stackSchemaKey,
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
@@ -52,6 +53,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -81,8 +83,8 @@ export class ApplicationService {
   private appSummaryEntityService: EntityService;
 
   constructor(
-    public cfGuid: string,
-    public appGuid: string,
+    @Inject(CF_GUID) public cfGuid,
+    @Inject(APP_GUID) public appGuid,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
@@ -182,7 +184,17 @@ export class ApplicationService {
       map(entityInfo => entityInfo.entity.entity), );
     this.appSpace$ = moreWaiting$.pipe(
       first(),
-      switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid))), );
+      switchMap(app => {
+        return this.entityServiceFactory.create<APIResource<ISpace>>(
+          spaceSchemaKey,
+          entityFactory(spaceWithOrgKey),
+          app.space_guid,
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
+        ).waitForEntity$.pipe(
+          map(entityInfo => entityInfo.entity)
+        );
+      })
+    );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
       switchMap(app => this.appSpace$.pipe(
@@ -191,7 +203,8 @@ export class ApplicationService {
           return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
         }),
         filter(org => !!org)
-      )), );
+      ))
+    );
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount(), );
 
@@ -294,13 +307,18 @@ export class ApplicationService {
         }
         return null;
       }),
-      filter(entRoute => !!entRoute && !!entRoute.entity && !!entRoute.entity.domain),
-      map(entRoute => getRoute(entRoute, true, false, {
-        entityRequestInfo: undefined,
-        entity: entRoute.entity.domain
-      }))
+      map(entRoute => {
+        if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
+          return getRoute(entRoute, true, false, {
+            entityRequestInfo: undefined,
+            entity: entRoute.entity.domain
+          });
+        }
+        return null;
+      })
     );
   }
+
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {

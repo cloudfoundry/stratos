@@ -49,7 +49,7 @@ import {
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
 
@@ -297,7 +297,7 @@ export class ApplicationDeleteComponent<T> {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
             this.selectedRoutes.forEach(route => {
-              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid));
             });
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {

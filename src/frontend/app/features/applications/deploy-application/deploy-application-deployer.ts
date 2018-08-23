@@ -37,7 +37,6 @@ export class DeployApplicationDeployer {
   streamTitle = 'Preparing...';
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  appGuid: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
@@ -47,6 +46,9 @@ export class DeployApplicationDeployer {
     error: false,
     deploying: false
   });
+
+  // Observable on the application GUID of the application being deployed
+  applicationGuid$ = new BehaviorSubject<string>(null);
 
   // Status of file transfers
   fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
@@ -205,6 +207,10 @@ export class DeployApplicationDeployer {
         this.streamTitle = 'Starting deployment...';
         // This info is will be used to retrieve the app Id
         this.appData = JSON.parse(log.message).Applications[0];
+        break;
+      case SocketEventTypes.APP_GUID_NOTIFY:
+        // Notification of the application GUID for the application
+        this.applicationGuid$.next(log.message);
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';

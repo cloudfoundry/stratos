@@ -19,26 +19,40 @@ export class CFRequestHelpers extends RequestHelpers {
     'x-cap-passthrough': true
   })
 
-  getCfCnsi = (cfName?: string): promise.Promise<EndpointModel> => {
+  getCfInfo = (cfName?: string): promise.Promise<EndpointModel> => {
     cfName = cfName || this.e2eHelper.secrets.getDefaultCFEndpoint().name;
     return this.sendRequestAdminSession('pp/v1/cnsis', 'GET', {})
-      .then(response => {
-        const cnsis: EndpointModel[] = JSON.parse(response);
-        const promises = [];
+      .then((response: string) => {
+        const cnsis = JSON.parse(response) as EndpointModel[];
         return cnsis.find(cnsi => cnsi.name === cfName);
       });
   }
 
-  sendCfGet = (cfGuid: string, url: string): promise.Promise<CFResponse> => this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  getCfGuid = (cfName?: string): promise.Promise<string> =>
+    this.getCfInfo(cfName).then((endpoint: EndpointModel) => endpoint ? endpoint.guid : null)
+
+  sendCfGet<T = CFResponse>(cfGuid: string, url: string): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  }
+
+  sendCfPost<T = CFResponse>(cfGuid: string, url: string, body: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse);
+  }
+
+  sendCfPut<T = CFResponse>(cfGuid: string, url: string, body?: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse);
+  }
 
   sendCfDelete = (cfGuid: string, url: string): promise.Promise<any> => this.sendCfRequest(cfGuid, url, 'DELETE');
 
-  private sendCfRequest = (cfGuid: string, url: string, method: string): promise.Promise<any> =>
-    this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid))
+  private sendCfRequest = (cfGuid: string, url: string, method: string, body?: string): promise.Promise<any> =>
+    this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
 
-  private sendRequestAdminSession = (url: string, method: string, headers: object) => this.sendRequest(this.e2eSetup.adminReq, {
-    headers,
-    method,
-    url
-  })
+  private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) =>
+    this.sendRequest(this.e2eSetup.adminReq, {
+      headers,
+      method,
+      url
+    }, body)
+
 }

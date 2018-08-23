@@ -28,7 +28,7 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
@@ -159,6 +159,18 @@ export class ServicesService {
             return extraInfo.displayName;
           } else {
             return service.entity.label;
+          }
+        }));
+  }
+
+  getServiceProviderName = () => {
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
+      .pipe(
+        map(([extraInfo, service]) => {
+          if (extraInfo && extraInfo.providerDisplayName) {
+            return extraInfo.providerDisplayName;
+          } else {
+            return '';
           }
         }));
   }

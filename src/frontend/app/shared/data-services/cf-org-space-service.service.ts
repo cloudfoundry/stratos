@@ -7,7 +7,7 @@ import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -94,10 +94,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    @Optional() private _selectMode: CfOrgSpaceSelectMode
   ) {
-    // Note - normal optional parameter notation won't work with injectable
-    this.selectMode = _selectMode || this.selectMode;
     this.createCf();
     this.init();
     this.createOrg();
