@@ -656,8 +656,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
 	pp.POST("/v1/auth/logout", p.logout)
 
-	// Only add SO routes if SSO Login is enabled
-	if !p.Config.SSOLogin {
+	// Only add SSO routes if SSO Login is enabled
+	if p.Config.SSOLogin {
 		pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 		pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 		pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
