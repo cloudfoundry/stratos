@@ -6,6 +6,7 @@
   "scripts": {
     "build-backend": "./build/bk-build.sh",
     "build-backend-dev": "STRATOS_BACKEND_DEV=true npm run build-backend",
+    "fetch-backend-deps": "./build/bk-fetch-deps.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend-dev",
     "bosh-build-backend": "gulp bosh-build-backend",
     "test-backend": "./build/bk-build.sh test",

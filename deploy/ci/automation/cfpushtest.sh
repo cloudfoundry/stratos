@@ -83,6 +83,9 @@ cf cups ${DB} -p "'${CONFIG}'"
 
 set -e
 
+echo "Fetching backend dependencies"
+npm run fetch-backend-deps
+
 echo "Performing cf push of Stratos"
 date
 
