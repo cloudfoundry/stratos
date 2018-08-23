@@ -124,9 +124,16 @@ export class CFHelpers {
     });
   }
 
-  fetchUsers(cnsiGuid) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'users').then(json => {
+  fetchUsers(cnsiGuid): promise.Promise<APIResource<CfUser>[]> {
+    return this.cfRequestHelper.sendCfGet<CFResponse<CfUser>>(cnsiGuid, 'users').then(json => {
       return json.resources;
+    });
+  }
+
+  fetchUser(cnsiGuid: string, userName: string) {
+    return this.fetchUsers(cnsiGuid).then(users => {
+      const foundUsers = users.filter(user => user.entity.username === userName);
+      return foundUsers.length === 1 ? foundUsers[0] : null;
     });
   }
 

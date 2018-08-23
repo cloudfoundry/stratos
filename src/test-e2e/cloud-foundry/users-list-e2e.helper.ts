@@ -9,7 +9,8 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 export function setUpTestOrgSpaceE2eTest(
   orgName: string,
   spaceName: string,
-  userName: string
+  userName: string,
+  dropBillingManager = false
 ) {
   const e2eSetup = e2e.setup(ConsoleUserType.admin)
     .clearAllEndpoints()
@@ -22,7 +23,14 @@ export function setUpTestOrgSpaceE2eTest(
     const defaultCf = e2e.secrets.getDefaultCFEndpoint();
     // Only available until after `info` call has completed as part of setup
     const cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    return browser.wait(setUpTestOrgSpaceUserRoles(cfGuid, defaultCf, orgName, spaceName, userName, new CFHelpers(e2eSetup)));
+    return browser.wait(setUpTestOrgSpaceUserRoles(
+      cfGuid,
+      defaultCf,
+      orgName,
+      spaceName,
+      userName,
+      new CFHelpers(e2eSetup),
+      dropBillingManager));
   });
 }
 
@@ -32,7 +40,8 @@ export function setUpTestOrgSpaceUserRoles(
   orgName: string,
   spaceName: string,
   userName: string,
-  cfHelper: CFHelpers
+  cfHelper: CFHelpers,
+  dropBillingManager = false
 ): promise.Promise<{ cfGuid: string, orgGuid: string, spaceGuid: string, cfHelper: CFHelpers }> {
   let orgGuid, spaceGuid;
   return cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, defaultCf, orgName)
@@ -45,7 +54,7 @@ export function setUpTestOrgSpaceUserRoles(
     .then(() => promise.all([
       cfHelper.addOrgUserManager(cfGuid, orgGuid, userName),
       cfHelper.addOrgUserAuditor(cfGuid, orgGuid, userName),
-      cfHelper.addOrgUserBillingManager(cfGuid, orgGuid, userName),
+      dropBillingManager ? promise.fullyResolved('') : cfHelper.addOrgUserBillingManager(cfGuid, orgGuid, userName),
       cfHelper.addSpaceDeveloper(cfGuid, spaceGuid, userName),
       cfHelper.addSpaceAuditor(cfGuid, spaceGuid, userName),
       cfHelper.addSpaceManager(cfGuid, spaceGuid, userName),

@@ -133,7 +133,7 @@ export class FormComponent extends Component {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value = fields[field];
-        expect(ctrl).toBeDefined();
+        expect(ctrl).toBeDefined(`Could not find form control with id '${field}'. Found ctrls with ids '${Object.keys(ctrls)}'`);
         if (!ctrl) {
           return;
         }
