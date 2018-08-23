@@ -199,6 +199,9 @@ func main() {
 
 	log.Info("Plugins initialized")
 
+	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
+	portalProxy.StoreDiagnostics()
+
 	// Start the back-end
 	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
 		log.Fatalf("Unable to start: %v", err)
@@ -475,9 +478,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 	}
-
-	// Get Diagnostics and store them once
-	pp.StoreDiagnostics()
 
 	return pp
 }
