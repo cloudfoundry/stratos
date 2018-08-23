@@ -53,6 +53,11 @@ jobs:
     - npm test
     - npm run codecov
   - stage: Backend Lint
+    before_script:
+    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+    - chmod +x ~/bin/gimme
+    - eval "$(gimme 1.9)"
+    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - go lint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
