@@ -87,20 +87,23 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
   }
 
   public positionDrillDown(levelIndex: number) {
-    setTimeout(() => {
-      console.log(levelIndex);
-      if (levelIndex <= 0) {
-        this.drillDown.nativeElement.style.marginTop = `-${0}px`;
-      } else {
-        const levels = this.drillDownLevel.toArray().slice(0, levelIndex);
-        if (levels.length) {
-          const marginTop = levels.reduce((total: number, level: ElementRef) => {
-            return level.nativeElement.offsetHeight + total;
-          }, 0);
-          this.drillDown.nativeElement.style.marginTop = `-${marginTop}px`;
-        }
+    const drillDownLevelArray = this.drillDownLevel.toArray();
+    const currentLevel = drillDownLevelArray[levelIndex];
+    if (currentLevel) {
+      currentLevel.nativeElement.style.height = 'auto';
+    }
+    if (levelIndex <= 0) {
+      this.drillDown.nativeElement.style.marginTop = `-${0}px`;
+    } else {
+      const levels = drillDownLevelArray.slice(0, levelIndex);
+      if (levels.length) {
+        const marginTop = levels.reduce((total: number, level: ElementRef) => {
+          level.nativeElement.style.height = `${level.nativeElement.offsetHeight}px`;
+          return level.nativeElement.offsetHeight + total;
+        }, 0);
+        this.drillDown.nativeElement.style.marginTop = `-${marginTop}px`;
       }
-    }, 0);
+    }
   }
 
   private reduceLevels(levelIndex: number) {

@@ -52,14 +52,12 @@ export class HomePageComponent implements OnInit {
       {
         title: 'Cloud Foundrys',
         getItemName: (endpoint: EndpointModel) => endpoint.name,
-        component: CfEndpointCardComponent,
         request: {
           data$: paginationMonitorFactory
             .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
         }
       },
       {
-        component: CfOrgCardComponent,
         ...new ApiRequestDrillDownLevel(this.store, {
           title: 'Organizations',
           entityNameParam: 'name',
@@ -72,7 +70,6 @@ export class HomePageComponent implements OnInit {
         })
       },
       {
-        component: CfSpaceCardComponent,
         ...new ApiRequestDrillDownLevel(this.store, {
           title: 'Spaces',
           entityNameParam: 'name',
@@ -80,32 +77,32 @@ export class HomePageComponent implements OnInit {
             const action = new GetAllOrganizationSpaces(
               createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid) + '-drill-down',
               org.entity.guid,
-              cf.guid
+              cf.guid,
+              [],
+              false
             );
-            action.initialParams['results-per-page'] = 50;
             action.flattenPagination = false;
+            action.initialParams['results-per-page'] = 50;
             return action;
           }
         })
       },
       {
-        component: CardAppComponent,
         ...new ApiRequestDrillDownLevel(this.store, {
           title: 'Applications',
           entityNameParam: 'name',
-          getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => new GetAllAppsInSpace(
-            cf.guid,
-            space.entity.guid,
-            createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down',
-            [
-              createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-              createEntityRelationKey(applicationSchemaKey, organizationSchemaKey),
-              createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-              createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
-            ],
-            false
-          ),
-
+          getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => {
+            const action = new GetAllAppsInSpace(
+              cf.guid,
+              space.entity.guid,
+              createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down',
+              [],
+              false
+            );
+            action.flattenPagination = false;
+            action.initialParams['results-per-page'] = 50;
+            return action;
+          }
         })
       }
     ];

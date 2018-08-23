@@ -1,35 +1,50 @@
-<mat-toolbar color="primary" class="drill-down__breadcrumbs">
-  <div class="drill-down__breadcrumb" *ngFor="let level of levelData; index as levelIndex">
-    <span class="drill-down__breadcrumb-inner" (click)="goToLevel(levelIndex)" *ngIf="level.selected.item"><span class="drill-down__breadcrumb-chevron"
-        *ngIf="levelIndex > 0">
-        > </span> <h1>{{ level.getItemName(level.selected.item) }} </h1> </span>
-  </div>
-</mat-toolbar>
-<div class="drill-down">
-  <div class="drill-down__scroller" #drillDown>
-    <div class="drill-down__level-wrapper" #drillDownLevel *ngFor="let level of levelData; index as levelIndex; last as lastLevel"
-      [ngClass]="{
+<div class="drill-down__outer">
+  <mat-toolbar color="primary" class="drill-down__breadcrumbs">
+    <h1 *ngIf="levelData.length <= 1">Drill down</h1>
+    <div class="drill-down__breadcrumbs-wrapper">
+      <div class="drill-down__breadcrumb" *ngFor="let level of levelData; index as levelIndex">
+        <span class="drill-down__breadcrumb-inner" (click)="goToLevel(levelIndex)" *ngIf="level.selected.item">
+          <span class="drill-down__breadcrumb-chevron" *ngIf="levelIndex > 0">
+            <mat-icon>
+              chevron_right
+            </mat-icon>
+          </span>
+          <h1>{{ level.getItemName(level.selected.item) }} </h1> </span>
+      </div>
+    </div>
+    <mat-icon class="drill-down__breadcrumbs-clear" *ngIf="levelData.length > 1" (click)="goToLevel(0)">clear</mat-icon>
+  </mat-toolbar>
+  <div class="drill-down">
+    <div class="drill-down__scroller" #drillDown>
+      <div class="drill-down__level-wrapper" #drillDownLevel *ngFor="let level of levelData; index as levelIndex; last as lastLevel"
+        [ngClass]="{
       'drill-down__level-current': lastLevel
     }">
-      <h2>{{ levelData[levelIndex].title }}</h2>
-      <div class="drill-down__level-inner">
-        <div class="drill-down__loading" *ngIf="level.isBusy$ | async">
-          <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        <div class="drill-down__level-header">
+          <h2>{{ levelData[levelIndex].title }}</h2>
+          <mat-icon class="drill-down__level-go-up" *ngIf="levelData.length > 1" (click)="goToLevel(levelIndex - 1)">arrow_upward</mat-icon>
         </div>
-        <div class="drill-down__level">
-          <div class="drill-down__item" [ngClass]="{
-          'drill-down__item--selected': level.selected.index === itemIndex,
-          'drill-down__item--hidden': level.selected.index !== null && level.selected.index !== itemIndex
-        }" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
-            <app-table-cell [config]="{ linkButton: true }" *ngIf="level.component as component" [component]="component" [row]="data">
-            </app-table-cell>
+        <div class="drill-down__level-inner">
+          <div class="drill-down__loading" *ngIf="level.isBusy$ | async">
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
           </div>
-        </div>
-        <div *ngIf="level.pagination as pagination">
-          <div *ngIf="pagination.state$ | async as state">
-            <mat-paginator [hidden]="level.selected.index === null && state.pageCount > 1" [length]="state.totalResults" [pageSize]="state.pageSize"
-              (page)="pagination.page($event)">
-            </mat-paginator>
+          <div class="drill-down__level">
+            <div class="drill-down__item" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
+              <mat-card *ngIf="!level.component">
+                {{ level.getItemName(data) }}
+              </mat-card>
+              <app-table-cell [config]="{ linkButton: true }" *ngIf="level.component as component" [component]="component" [row]="data">
+              </app-table-cell>
+            </div>
+            <div *ngIf="!(level.isBusy$ | async) && (level.data$ | async)?.length === 0">
+              <div>No results</div>
+            </div>
+          </div>
+          <div *ngIf="level.pagination as pagination">
+            <div *ngIf="pagination.state$ | async as state">
+              <mat-paginator *ngIf="state.pageCount > 1" [length]="state.totalResults" [pageSize]="state.pageSize" (page)="pagination.page($event)">
+              </mat-paginator>
+            </div>
           </div>
         </div>
       </div>

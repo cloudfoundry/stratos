@@ -1,8 +1,20 @@
 .drill-down {
   $transition-function: cubic-bezier(.215, .61, .355, 1);
+  overflow: hidden;
+  &__outer {
+    position: relative;
+  }
   &__breadcrumbs {
-
-  } 
+    align-content: center;
+    display: flex;
+    justify-content: space-between;
+    &-clear {
+      cursor: pointer;
+    }
+    &-wrapper {
+      display: flex;
+    }
+  }
   &__breadcrumb {
     cursor: pointer;
     &-inner {
@@ -10,13 +22,15 @@
       flex-direction: row;
     }
     &-chevron {
-      padding: 0 10px;   
+      align-items: center;
+      display: flex;
+      padding: 0 5px;
     }
   }
-  overflow: hidden;
   &__scroller {
     display: flex;
     flex-direction: column;
+    padding: 0 20px;
     transition: margin-top .25s $transition-function;
   }
   &__loading {
@@ -32,29 +46,30 @@
     z-index: 2;
   }
   &__level {
+    $space: 10px;
     display: grid;
-    grid-column-gap: 20px;
-    grid-row-gap: 20px;
-    grid-template-columns: repeat(4, 1fr);
-    padding: 20px 0;
+    grid-column-gap: $space;
+    grid-row-gap: $space;
+    grid-template-columns: repeat(5, 1fr);
+    min-height: 100px;
+    overflow: auto;
+    padding-bottom: $space;
     &-inner {
       position: relative;
     }
-    &-wrapper {
-      opacity: 0;
-      transition: opacity .25s $transition-function;
-    }
-    &-current {
-      opacity: 1;
+    &-header {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+    }    
+    &-go-up {
+      cursor: pointer;
     }
   }
   &__item {
     cursor: pointer;
     padding: 5px;
     z-index: 1;
-    &--selected {
-
-    }
     &--hidden {
       display: none;
     }
