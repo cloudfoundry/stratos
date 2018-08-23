@@ -3,15 +3,12 @@ import { browser, promise, protractor } from 'protractor';
 import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
-import { CFUsersListComponent, UserRoleChip } from '../../po/cf-users-list.po';
+import { CFUsersListComponent } from '../../po/cf-users-list.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
-import { ChipComponent } from '../../po/chip.po';
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-cf-users';
 
-
-fdescribe('Cf Users List -', () => {
-
+describe('Cf Users List -', () => {
 
   let cfHelper: CFHelpers, cfGuid, defaultCf, cfPage: CfTopLevelPage;
   let orgGuid, spaceGuid;
@@ -69,7 +66,7 @@ fdescribe('Cf Users List -', () => {
     });
   });
 
-  it('Test initial state', () => {
+  it('Correct role pills shown, pills removed successfully', () => {
     expect(cfPage.isActivePageOrChildPage()).toBeTruthy();
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);

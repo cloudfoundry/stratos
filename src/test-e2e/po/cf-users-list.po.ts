@@ -18,6 +18,7 @@ export class UserRoleChip extends ChipComponent {
   constructor(locator: ElementFinder, public roleText: string) {
     super(locator);
   }
+
   check(canClose: boolean) {
     expect(this.isDisplayed()).toBeTruthy();
     if (canClose) {
@@ -26,15 +27,16 @@ export class UserRoleChip extends ChipComponent {
       expect(this.getCross().isPresent()).toBeFalsy();
     }
   }
+
   remove(): promise.Promise<void> {
     this.getCross().click();
     const confirm = new ConfirmDialogComponent();
     confirm.getMessage().then(message => {
       expect(message).toContain(this.roleText);
     });
-    const conf = confirm.confirm();
-    expect(this.isPresent()).toBeFalsy();
-    return conf;
+    confirm.confirm();
+    confirm.waitUntilNotShown();
+    return this.waitUntilNotShown();
   }
 }
 
@@ -124,7 +126,6 @@ export class CFUsersListComponent extends ListComponent {
 
   getPermissionChip(rowIndex: number, orgName: string, spaceName: string, isOrgRole: boolean, roleName: string)
     : UserRoleChip {
-    console.log(rowIndex, isOrgRole);
     const userRolesCell = isOrgRole ? new UserRolesCell(this.table.getCell(rowIndex, 2))
       : new UserRolesCell(this.table.getCell(rowIndex, 3));
     let chipString = '';
@@ -135,6 +136,6 @@ export class CFUsersListComponent extends ListComponent {
       chipString += spaceName + ': ';
     }
     chipString += roleName;
-    return new UserRoleChip(userRolesCell.getCellWithText(chipString).getComponent().locator(), chipString);
+    return new UserRoleChip(userRolesCell.getCellWithText(chipString).getComponent(), chipString);
   }
 }

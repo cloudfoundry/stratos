@@ -10,16 +10,7 @@ export class ChipsComponent extends Component {
   }
 
   getChips(): promise.Promise<ChipComponent[]> {
-    // return this.locator.all(by.tagName('mat-chip')).map(ef => {
-    //   ef.getText().then(text => console.log(text));
-    //   return new ChipComponent(ef);
-    // });
-    return this.locator.all(by.tagName('mat-chip')).then((efs: ElementFinder[]) => {
-      console.log('!!!!! ', efs.length);
-      return efs.map((ef: ElementFinder) => new ChipComponent(ef));
-      // ef.getText().then(text => console.log(text));
-      // return new ChipComponent(ef);
-    });
+    return this.locator.all(by.tagName('mat-chip')).then((efs: ElementFinder[]) => efs.map((ef: ElementFinder) => new ChipComponent(ef)));
   }
 
   getExpandCollapseChips() {
