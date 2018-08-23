@@ -186,6 +186,8 @@ func main() {
 		return
 	}
 
+	showSSOConfig(portalProxy)
+
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
@@ -250,6 +252,13 @@ func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
 	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
+}
+
+func showSSOConfig(portalProxy *portalProxy) {
+	// Show SSO Configuration
+	log.Infof("SSO Configuration:")
+	log.Infof("... SSO Enabled         : %t", portalProxy.Config.SSOLogin)
+	log.Infof("... SSO Options         : %s", portalProxy.Config.SSOOptions)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
