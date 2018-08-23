@@ -52,7 +52,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		}
 	}
 
-	statusCode, body, err := userInfo.doApiRequest(sessionUser, url, c.Request())
+	statusCode, body, err := userInfo.doAPIRequest(sessionUser, url, c.Request())
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		statusCode, body, err = userInfo.doApiRequest(sessionUser, url, c.Request())
+		statusCode, body, err = userInfo.doAPIRequest(sessionUser, url, c.Request())
 		if err != nil {
 			return err
 		}
@@ -88,9 +88,9 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	return nil
 }
 
-func (userInfo *UserInfo) doApiRequest(sessionUser string, url string, echoReq engine.Request) (stausCode int, body []byte, err error) {
+func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq engine.Request) (stausCode int, body []byte, err error) {
 	// Proxy the request to the UAA on behalf of the user
-	log.Debugf("doApiRequest: %s", url)
+	log.Debugf("doAPIRequest: %s", url)
 
 	tokenRec, err := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
 	if err != nil {

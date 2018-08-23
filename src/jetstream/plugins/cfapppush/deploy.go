@@ -65,16 +65,16 @@ const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
 
-// Interface for sending a message over a web socket
+// DeployAppMessageSender is the interface for sending a message over a web socket
 type DeployAppMessageSender interface {
 	SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string)
 }
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
-	cnsiGUID := echoContext.Param("cnsiGuid")
-	orgGuid := echoContext.Param("orgGuid")
-	spaceGuid := echoContext.Param("spaceGuid")
+	cnsiGUID := echoContext.Param("cnsiGUID")
+	orgGUID := echoContext.Param("orgGUID")
+	spaceGUID := echoContext.Param("spaceGUID")
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
@@ -115,7 +115,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	case SOURCE_FOLDER:
 		sourceEnvVarMetadata, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
 	case SOURCE_GITURL:
-		sourceEnvVarMetadata, appDir, err = getGitUrlSource(clientWebSocket, tempDir, msg)
+		sourceEnvVarMetadata, appDir, err = getGitURLSource(clientWebSocket, tempDir, msg)
 	default:
 		err = errors.New("Unsupported source type; don't know how to get the source for the application")
 	}
@@ -143,7 +143,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	socketWriter := &SocketWriter{
 		clientWebSocket: clientWebSocket,
 	}
-	pushConfig, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName, clientWebSocket)
+	pushConfig, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGUID, spaceGUID, spaceName, orgName, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to initialise config due to error %+v", err)
 		return err
@@ -306,8 +306,8 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		DeploySource: info,
 	}
 
-	marshalledJson, _ := json.Marshal(stratosProject)
-	return string(marshalledJson), tempDir, nil
+	marshalledJSON, _ := json.Marshal(stratosProject)
+	return string(marshalledJSON), tempDir, nil
 }
 
 // Check the suffix of the file name and return an archiver that can handle that file type
@@ -355,11 +355,11 @@ func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		DeploySource: info,
 	}
 
-	marshalledJson, _ := json.Marshal(stratosProject)
-	return string(marshalledJson), tempDir, nil
+	marshalledJSON, _ := json.Marshal(stratosProject)
+	return string(marshalledJSON), tempDir, nil
 }
 
-func getGitUrlSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, string, error) {
+func getGitURLSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, string, error) {
 
 	var (
 		err error
@@ -391,8 +391,8 @@ func getGitUrlSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		DeploySource: info,
 	}
 
-	marshalledJson, _ := json.Marshal(stratosProject)
-	return string(marshalledJson), tempDir, nil
+	marshalledJSON, _ := json.Marshal(stratosProject)
+	return string(marshalledJSON), tempDir, nil
 }
 
 func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, error) {
@@ -402,30 +402,29 @@ func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, e
 		Timestamp: time.Now().Unix(),
 		Type:      messageType,
 	}
-	marshalledJson, err := json.Marshal(messageStruct)
-	return marshalledJson, err
-
+	marshalledJSON, err := json.Marshal(messageStruct)
+	return marshalledJSON, err
 }
 
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*pushapp.CFPushAppConfig, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID string, orgGUID string, spaceGUID string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*pushapp.CFPushAppConfig, error) {
 
-	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)
+	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {
-		log.Warnf("Failed to retrieve record for CNSI %s, error is %+v", cnsiGuid, err)
+		log.Warnf("Failed to retrieve record for CNSI %s, error is %+v", cnsiGUID, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI)
 		return nil, err
 	}
 
-	userId, err := cfAppPush.portalProxy.GetSessionStringValue(echoContext, "user_id")
+	userID, err := cfAppPush.portalProxy.GetSessionStringValue(echoContext, "user_id")
 
 	if err != nil {
 		log.Warnf("Failed to retrieve session user")
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
 		return nil, err
 	}
-	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGuid, userId)
+	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGUID, userID)
 	if !found {
-		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGuid)
+		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGUID)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
 		return nil, errors.New("Failed to find token record")
 	}
@@ -439,9 +438,9 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 		SkipSSLValidation:      cnsiRecord.SkipSSLValidation,
 		AuthToken:              cnsiTokenRecord.AuthToken,
 		RefreshToken:           cnsiTokenRecord.RefreshToken,
-		OrgGUID:                orgGuid,
+		OrgGUID:                orgGUID,
 		OrgName:                orgName,
-		SpaceGUID:              spaceGuid,
+		SpaceGUID:              spaceGUID,
 		SpaceName:              spaceName,
 	}
 
@@ -556,8 +555,8 @@ func sendManifest(manifest Applications, clientWebSocket *websocket.Conn) error 
 	if err != nil {
 		return err
 	}
-	manifestJson := string(manifestBytes)
-	message, _ := getMarshalledSocketMessage(manifestJson, MANIFEST)
+	manifestJSON := string(manifestBytes)
+	message, _ := getMarshalledSocketMessage(manifestJSON, MANIFEST)
 
 	clientWebSocket.WriteMessage(websocket.TextMessage, message)
 	return nil
@@ -573,6 +572,7 @@ func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
 }
 
+// SendEvent sends a message over the web socket
 func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
 	msg, _ := getMarshalledSocketMessage(data, event)
 	clientWebSocket.WriteMessage(websocket.TextMessage, msg)

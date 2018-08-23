@@ -21,8 +21,8 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 	// Use the passthrough mechanism to get the App metadata from Cloud Foundry
 	appID := c.Param("appId")
 	prometheusOp := c.Param("op")
-	appUrl, _ := url.Parse("/v2/apps/" + appID)
-	responses, err := m.portalProxy.ProxyRequest(c, appUrl)
+	appURL, _ := url.Parse("/v2/apps/" + appID)
+	responses, err := m.portalProxy.ProxyRequest(c, appURL)
 	if err != nil {
 		return err
 	}
