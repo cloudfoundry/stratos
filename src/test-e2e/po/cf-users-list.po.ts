@@ -41,93 +41,34 @@ export class UserRoleChip extends ChipComponent {
 }
 
 class UserRolesCell extends ChipsComponent {
-  static unknownOrgSpace = '??unknown';
-
   constructor(cell: ElementFinder) {
     super(cell.element(by.css('app-chips')));
   }
-
-  getUserRoles(isOrg = true): promise.Promise<CfUserRoles> {
-    return this.getChips()
-      .then(chips => promise.all(chips.map(chip => chip.getText())))
-      .then(chipTexts => this.cleanRolesList(chipTexts, isOrg));
-  }
-
-  private cleanRolesList(roles: string[], isOrg = true): CfUserRoles {
-    return roles.reduce((res, role, index) => {
-      const cleanRole = role.replace('\nclose', '');
-      const split = cleanRole.split(': ');
-      let org, space, value;
-      switch (split.length) {
-        case 3:
-          org = split[0];
-          space = split[1];
-          value = split[2];
-          break;
-        case 2:
-          if (isOrg) {
-            org = split[0];
-            value = split[1];
-          } else {
-            org = UserRolesCell.unknownOrgSpace;
-            space = split[0];
-            value = split[1];
-          }
-          break;
-        case 1:
-          org = UserRolesCell.unknownOrgSpace;
-          space = UserRolesCell.unknownOrgSpace;
-          value = split[0];
-          break;
-      }
-
-      if (!res[org]) {
-        res[org] = {
-          roles: [],
-          spaces: {}
-        };
-      }
-      if (isOrg) {
-        res[org].roles.push(value);
-        return res;
-      }
-
-      if (!res[org].spaces[space]) {
-        res[org].spaces[space] = [];
-      }
-      res[org].spaces[space].push(value);
-      return res;
-    }, {});
-  }
-
-
 }
+
 export class CFUsersListComponent extends ListComponent {
 
-  getUserRoles(rowIndex: number): promise.Promise<{ orgRoles: CfUserRoles, spaceRoles: CfUserRoles }> {
-    const orgs = new UserRolesCell(this.table.getCell(rowIndex, 2));
-    const spaces = new UserRolesCell(this.table.getCell(rowIndex, 3));
+  expandOrgsChips(rowIndex: number) {
+    return this.expandPermissionChip(rowIndex, true);
+  }
 
-    return promise.all([
-      orgs.expandIfCan(),
-      spaces.expandIfCan(),
-    ])
-      .then(() => promise.all([
-        orgs.getUserRoles(true),
-        spaces.getUserRoles(false)
-      ])
-      )
-      .then(([orgRoles, spaceRoles]) => ({
-        orgRoles,
-        spaceRoles
-      })
-      );
+  expandSpaceChips(rowIndex: number) {
+    return this.expandPermissionChip(rowIndex, false);
+  }
+
+  private expandPermissionChip(rowIndex: number, isOrg = true) {
+    return this.getPermissions(rowIndex, isOrg).expandIfCan();
+  }
+
+  getPermissions(rowIndex: number, isOrg = true) {
+    return isOrg ?
+      new UserRolesCell(this.table.getCell(rowIndex, 2)) :
+      new UserRolesCell(this.table.getCell(rowIndex, 3));
   }
 
   getPermissionChip(rowIndex: number, orgName: string, spaceName: string, isOrgRole: boolean, roleName: string)
     : UserRoleChip {
-    const userRolesCell = isOrgRole ? new UserRolesCell(this.table.getCell(rowIndex, 2))
-      : new UserRolesCell(this.table.getCell(rowIndex, 3));
+    const userRolesCell = this.getPermissions(rowIndex, isOrgRole);
     let chipString = '';
     if (orgName) {
       chipString = orgName + ': ';

@@ -1,4 +1,4 @@
-import { by, element, ElementFinder, promise } from 'protractor';
+import { by, element, ElementFinder, promise, ElementArrayFinder } from 'protractor';
 
 import { ChipComponent } from './chip.po';
 import { Component } from './component.po';
@@ -9,8 +9,12 @@ export class ChipsComponent extends Component {
     super(locator.element(by.css('mat-chip-list')));
   }
 
+  getChipElements(): ElementArrayFinder {
+    return this.locator.all(by.tagName('mat-chip'));
+  }
+
   getChips(): promise.Promise<ChipComponent[]> {
-    return this.locator.all(by.tagName('mat-chip')).then((efs: ElementFinder[]) => efs.map((ef: ElementFinder) => new ChipComponent(ef)));
+    return this.getChipElements().then((efs: ElementFinder[]) => efs.map((ef: ElementFinder) => new ChipComponent(ef)));
   }
 
   getExpandCollapseChips() {

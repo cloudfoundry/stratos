@@ -9,10 +9,11 @@ import { CFRequestHelpers } from './cf-request-helpers';
 
 
 export class CFHelpers {
-  cfRequestHelper: CFRequestHelpers;
   static cachedDefaultCfGuid: string;
   static cachedDefaultOrgGuid: string;
   static cachedDefaultSpaceGuid: string;
+
+  cfRequestHelper: CFRequestHelpers;
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
