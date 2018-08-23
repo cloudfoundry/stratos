@@ -103,12 +103,11 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 }
 
 func getSSORedirectURI(base string, state string) string {
-	baseURL, _ := url.Parse(state)
+	baseURL, _ := url.Parse(base)
 	baseURL.Path = ""
 	baseURL.RawQuery = ""
 	baseURLString := strings.TrimRight(baseURL.String(), "?")
-	//return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", baseURLString, url.QueryEscape(state))
-	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", base, url.QueryEscape(state))
+	return fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", baseURLString, url.QueryEscape(state))
 }
 
 // Logout of the UAA
