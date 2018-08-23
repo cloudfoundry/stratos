@@ -57,6 +57,7 @@ jobs:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
     - eval "$(gimme 1.9)"
+    - go get -u golang.org/x/lint/golint
     script:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
