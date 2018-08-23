@@ -4,4 +4,7 @@
     flex-direction: row;
     justify-content: space-between;
   }
+  &__description {
+    line-height: 1.5em;
+  }
 }

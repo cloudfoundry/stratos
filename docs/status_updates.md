@@ -2,6 +2,13 @@
 
 Weekly status updates are published here.
 
+## 22 June 2018
+
+This week the focus has been on creating a second Beta release of Version 2.
+
+A large number of bugs and smaller issues have been resolved - full details here: https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.0.0-beta-002.
+
+
 ## 15 June 2018
 
 We are working towards a release of V2. We are now functionally complete and are working through priority 1 issues and defects.

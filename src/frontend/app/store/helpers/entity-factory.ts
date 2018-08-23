@@ -1,6 +1,8 @@
 import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { APIResource } from '../types/api.types';
+import { CfUser } from '../types/user.types';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -114,15 +116,15 @@ const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
   // correct values - so remove them to avoid this
   processStrategy: (value) => {
     const newValue = {
-      entity: {...value.entity},
-      metadata: {...value.metadata}
+      entity: { ...value.entity },
+      metadata: { ...value.metadata }
     };
     if (newValue.entity.router_group_type === null) {
       delete newValue.entity.router_group_type;
     }
     return newValue;
   }
- });
+});
 entityCache[domainSchemaKey] = DomainSchema;
 
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {
@@ -359,7 +361,22 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
     managed_spaces: [SpaceManagedSchema],
     audited_spaces: [SpaceAuditedSchema],
   }
-}, { idAttribute: getAPIResourceGuid });
+}, {
+    idAttribute: getAPIResourceGuid,
+    processStrategy: (user: APIResource<CfUser>) => {
+      if (user.entity.username) {
+        return user;
+      }
+
+      return {
+        entity: {
+          ...user.entity,
+          username: user.metadata.guid
+        },
+        metadata: { ...user.metadata }
+      };
+    }
+  });
 entityCache[cfUserSchemaKey] = CFUserSchema;
 
 export function entityFactory(key: string): EntitySchema {

@@ -11,6 +11,20 @@ import { RouterNav } from '../store/actions/router.actions';
 import { AppState } from '../store/app-state';
 import { AuthState } from '../store/reducers/auth.reducer';
 
+export function queryParamMap() {
+  const map = {};
+  const query = window.location.search.substring(1);
+  if (query.length === 0) {
+    return map;
+  }
+  const vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
+    map[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+  }
+  return map;
+}
+
 @Injectable()
 export class AuthGuardService implements CanActivate {
 

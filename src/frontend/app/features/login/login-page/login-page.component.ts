@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
@@ -11,6 +11,7 @@ import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { RouterRedirect } from '../../../store/reducers/routing.reducer';
 import { EndpointState } from '../../../store/types/endpoint.types';
+import { queryParamMap } from '../../../core/auth-guard.service';
 
 @Component({
   selector: 'app-login-page',
@@ -35,6 +36,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   error: boolean;
 
   ssoLogin: boolean;
+  ssoOptions: string;
 
   busy$: Observable<boolean>;
 
@@ -77,14 +79,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   login() {
     if (this.ssoLogin) {
-        const returnUrl = encodeURI(window.location.protocol + '//' + window.location.hostname +
-            (window.location.port ? ':' + window.location.port : ''));
-        window.open('/pp/v1/auth/sso_login?state=' + returnUrl , '_self');
-        this.busy$ = new Observable<boolean>((observer) => {
-          observer.next(true);
-          observer.complete();
-        });
-        return;
+      return this.doSSOLogin();
     }
     this.message = '';
     this.store.dispatch(new Login(this.username, this.password));
@@ -105,7 +100,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.loggedIn = auth.loggedIn;
     this.loggingIn = auth.loggingIn;
     this.verifying = auth.verifying;
-    this.ssoLogin = auth.sessionData && auth.sessionData.isSSOLogin;
+    this.ssoOptions = auth.sessionData && auth.sessionData.ssoOptions;
+    this.ssoLogin = !!this.ssoOptions;
+
+    const params = queryParamMap();
+    const ssoMessage = params['SSO_Message'];
 
     // Upgrade in progress
     if (auth.sessionData && auth.sessionData.upgradeInProgress) {
@@ -128,6 +127,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       return false;
     }
 
+    // Check for SSO Login without splash page - i.e. redirect straight to SSO Login UI
+    if (!this.loggedIn && this.ssoNoSplashPage() && !ssoMessage) {
+      return this.doSSOLogin();
+    }
+
     // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
     // a valid session
     this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid) && !this.ssoLogin;
@@ -144,6 +148,21 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         this.message = `Couldn't log in, please try again.`;
       }
     }
+
+    if (!!ssoMessage) {
+      this.message = ssoMessage;
+    }
+  }
+
+  private ssoNoSplashPage() {
+    return this.ssoLogin && this.ssoOptions.indexOf('nosplash') >= 0;
+  }
+
+  private doSSOLogin() {
+    const returnUrl = encodeURI(window.location.protocol + '//' + window.location.hostname +
+    (window.location.port ? ':' + window.location.port : ''));
+    window.open('/pp/v1/auth/sso_login?state=' + returnUrl , '_self');
+    this.busy$ = observableOf(true);
   }
 
 }

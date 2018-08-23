@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Input, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-meta-card-title',
@@ -10,6 +10,8 @@ export class MetaCardTitleComponent implements OnInit {
 
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
+
+  @Input('noMargin') noMargin;
 
   constructor() { }
 

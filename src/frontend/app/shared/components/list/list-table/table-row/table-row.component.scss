@@ -2,6 +2,9 @@
   &__blocked {
     .table-row {
       cursor: not-allowed;
+      mat-checkbox {
+        cursor: not-allowed;
+      }
       &__inner {
         * {
           opacity: .65;
@@ -57,16 +60,16 @@
     }
   }
   &__error {
+    align-items: center;
     display: none;
-    justify-content: middle;
     &-message {
       flex: 1;
       line-height: 20px;
-      margin: 15px 20%;
-      text-align: center;
+      margin: 15px 36px;
+      text-align: left;
     }
     &-icon {
-      padding-left: 18px;
+      padding-left: 24px;
     }
   }
   &__blocker {

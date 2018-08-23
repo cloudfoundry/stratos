@@ -115,6 +115,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Take user to applications
     const { cfGuid } = this.deployer;
     this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
+    if (this.appGuid) {
+      this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+    }
     return observableOf({ success: true });
   }
 
