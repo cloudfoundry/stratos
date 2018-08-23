@@ -55,6 +55,9 @@ export class HomePageComponent implements OnInit {
         request: {
           data$: paginationMonitorFactory
             .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
+        },
+        getViewLink: (cf: EndpointModel) => {
+          return `/cloud-foundry/${cf.guid}`;
         }
       },
       {

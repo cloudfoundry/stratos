@@ -65,6 +65,9 @@
     &-go-up {
       cursor: pointer;
     }
+    &-wrapper {
+      overflow: auto;
+    }
   }
   &__item {
     cursor: pointer;

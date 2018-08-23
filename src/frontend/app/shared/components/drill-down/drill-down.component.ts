@@ -17,9 +17,10 @@ export interface IDrillDownLevelRequest {
 export interface DrillDownLevel<E = any, P = any> {
   title: string;
   component?;
-  request: ((parent?: P, allAncestors?: any) => IDrillDownLevelRequest) | IDrillDownLevelRequest;
-  selectItem?: (parent?: P, allAncestors?: any) => void;
+  request: ((parent?: P, allAncestors?: any[]) => IDrillDownLevelRequest) | IDrillDownLevelRequest;
+  selectItem?: (parent?: P, allAncestors?: any[]) => void;
   getItemName: (entity: E) => string;
+  getViewLink?: (entity: E, allAncestors?: any[]) => string;
 }
 
 export type DrillDownDefinition = DrillDownLevel[];
@@ -37,7 +38,6 @@ interface DrillDownLevelData {
   hasErrored$: Observable<boolean>;
   pagination?: IDrillDownLevelPagination;
   component: any;
-  getItemName: (entity) => string;
 }
 
 @Component({
@@ -106,6 +106,14 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
     }
   }
 
+  public getViewLink(currentIndex: number, item: any) {
+    const def = this.definition[currentIndex];
+    if (def && def.getViewLink) {
+      return def.getViewLink(item, this.getAllSelectedItems());
+    }
+    return null;
+  }
+
   private reduceLevels(levelIndex: number) {
     this.levelData = this.levelData.slice(0, levelIndex);
   }
@@ -118,11 +126,15 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
     return request;
   }
 
+  private getAllSelectedItems() {
+    return this.levelData.map(level => level.selected.item);
+  }
+
   public addLevel(levelIndex: number, item?: any) {
     const levelDefinition = this.definition[levelIndex];
     if (levelDefinition) {
       const { selectItem, title } = levelDefinition;
-      const allSelected = this.levelData.map(level => level.selected.item);
+      const allSelected = this.getAllSelectedItems();
       if (selectItem) {
         selectItem(item, allSelected);
       }
