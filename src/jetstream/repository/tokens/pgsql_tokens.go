@@ -26,11 +26,19 @@ var updateAuthToken = `UPDATE tokens
 									SET auth_token = $1, refresh_token = $2, token_expiry = $3
 									WHERE user_guid = $4 AND token_type = $5`
 
-var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid
+var getCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+									FROM tokens
+									WHERE user_guid = $1 AND token_guid = $2`
+
+var getCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+									FROM tokens
+									WHERE user_guid = $1 AND token_guid = $2 AND disconnected = '0'`
+
+var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi'`
 
-var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid
+var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi' AND disconnected = '0'`
 
@@ -315,13 +323,14 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		authType               string
 		metadata               sql.NullString
 		tokenUserGUID          sql.NullString
+		linkedTokenGUID        sql.NullString
 	)
 
 	var err error
 	if includeDisconnected {
-		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID)
+		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
 	} else {
-		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID)
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
 	}
 
 	if err != nil {
@@ -332,6 +341,26 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 			log.Errorf(msg, err)
 		}
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+	}
+
+	// If this token is linked - fetch that token and use it instead
+	// Currently we don't recurse - we only support one level of linked token - you can't link to another linked token
+	if linkedTokenGUID.Valid {
+		if includeDisconnected {
+			err = p.db.QueryRow(getCNSIToken, userGUID, linkedTokenGUID.String).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		} else {
+			err = p.db.QueryRow(getCNSITokenConnected, userGUID, linkedTokenGUID.String).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		}
+
+		if err != nil {
+			msg := "Unable to Find CNSI token: %v"
+			if err == sql.ErrNoRows {
+				log.Debugf(msg, err)
+			} else {
+				log.Errorf(msg, err)
+			}
+			return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+		}
 	}
 
 	log.Debug("Decrypting Auth Token")

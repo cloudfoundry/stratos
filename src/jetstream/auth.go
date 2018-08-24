@@ -606,26 +606,6 @@ func (p *portalProxy) InitEndpointTokenRecord(expiry int64, authTok string, refr
 	return tokenRecord
 }
 
-func (p *portalProxy) removed_saveCNSIToken(cnsiID string, u interfaces.JWTUserTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
-	log.Debug("saveCNSIToken")
-
-	tokenRecord := interfaces.TokenRecord{
-		AuthToken:    authTok,
-		RefreshToken: refreshTok,
-		TokenExpiry:  u.TokenExpiry,
-		Disconnected: disconnect,
-		AuthType:     interfaces.AuthTypeOAuth2,
-	}
-
-	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
-	if err != nil {
-		log.Errorf("%v", err)
-		return interfaces.TokenRecord{}, err
-	}
-
-	return tokenRecord, nil
-}
-
 func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 	log.Debug("deleteCNSIToken")
 
