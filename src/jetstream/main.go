@@ -643,6 +643,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		pp = e.Group("")
 	}
 
+	pp.Use(p.setSecureCacheContentMiddleware)
+
 	// Add middleware to block requests if unconfigured
 	if addSetupMiddleware.addSetup {
 		go p.SetupPoller(addSetupMiddleware)
@@ -730,6 +732,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	// Serve up static resources
 	if err == nil {
+		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
 		e.Use(middleware.Gzip())
