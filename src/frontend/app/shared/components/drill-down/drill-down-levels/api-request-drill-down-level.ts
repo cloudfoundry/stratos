@@ -14,11 +14,14 @@ interface IApiRequestDrillDownLevelConfig<T = any> {
   getAction: getApiDrillDownAction<T>;
   title?: string;
   entityNameParam: string;
+  getViewLink: (entity?: T, allAncestors?: any[]) => string;
 }
 export class ApiRequestDrillDownLevel implements DrillDownLevel<APIResource, APIResource> {
   private getAction: getApiDrillDownAction<APIResource>;
   private entityNameParam: string;
   public title: string;
+  public getViewLink: (entity: APIResource, allAncestors?: any[]) => string;
+
   public getItemName = (entity: APIResource) => entity.entity[this.entityNameParam];
 
   public request = (parent?, allAncestors?) => {
@@ -52,6 +55,7 @@ export class ApiRequestDrillDownLevel implements DrillDownLevel<APIResource, API
     this.title = title;
     this.getAction = getAction;
     this.entityNameParam = config.entityNameParam;
+    this.getViewLink = config.getViewLink;
   }
 
 }

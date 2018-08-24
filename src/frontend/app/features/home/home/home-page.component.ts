@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { IOrganization, ISpace } from '../../../core/cf-api.types';
+import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
 import { ApiRequestDrillDownLevel } from '../../../shared/components/drill-down/drill-down-levels/api-request-drill-down-level';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
 import { CfEndpointCardComponent } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
@@ -69,6 +69,9 @@ export class HomePageComponent implements OnInit {
             action.paginationKey += '-drill-down';
             action.includeRelations = [];
             return action;
+          },
+          getViewLink: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
+            return `/cloud-foundry/${cf.guid}/organizations/${org.entity.guid}`;
           }
         })
       },
@@ -87,6 +90,9 @@ export class HomePageComponent implements OnInit {
             action.flattenPagination = false;
             action.initialParams['results-per-page'] = 50;
             return action;
+          },
+          getViewLink: (space: APIResource<ISpace>, [cf, org]: [EndpointModel, APIResource<IOrganization>]) => {
+            return `/cloud-foundry/${cf.guid}/organizations/${org.entity.guid}/spaces/${space.entity.guid}`;
           }
         })
       },
@@ -105,6 +111,9 @@ export class HomePageComponent implements OnInit {
             action.flattenPagination = false;
             action.initialParams['results-per-page'] = 50;
             return action;
+          },
+          getViewLink: (app: APIResource<IApp>, [space, org, cf]: [APIResource<ISpace>, APIResource<IOrganization>, EndpointModel]) => {
+            return `/applications/${cf.guid}/${app.entity.guid}`;
           }
         })
       }

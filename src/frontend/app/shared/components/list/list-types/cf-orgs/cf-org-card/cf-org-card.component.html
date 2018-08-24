@@ -1,4 +1,4 @@
-<app-meta-card class="org-card" [routerLink]="!linkButton ? ['cloud-foundry', cfEndpointService.cfGuid, 'organizations', orgGuid] : []" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
+<app-meta-card class="org-card" [routerLink]="!linkButton ? ['/cloud-foundry', row.entity.cfGuid, 'organizations', orgGuid] : []" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
   <app-meta-card-title class="org-card__title">
     <div class="org-card__title-link">{{ row.entity.name }}</div>
   </app-meta-card-title>
