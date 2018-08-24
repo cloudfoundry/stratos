@@ -367,6 +367,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 		}
 
 		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+			uaaToken.LinkedGUID = uaaToken.TokenGUID
 			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
 			return err
 		} else {
