@@ -320,11 +320,6 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
-	setSecureCookie := true
-
-	if config.IsSet(VCapApplication) {
-		setSecureCookie = false
-	}
 
 	// Allow the cookie domain to be configured
 	domain := pc.CookieDomain
@@ -341,7 +336,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = setSecureCookie
+		sessionStore.Options.Secure = true
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
@@ -354,7 +349,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = setSecureCookie
+		sessionStore.Options.Secure = true
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
@@ -366,7 +361,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
-	sessionStore.Options.Secure = setSecureCookie
+	sessionStore.Options.Secure = true
 	if len(domain) > 0 {
 		sessionStore.Options.Domain = domain
 	}

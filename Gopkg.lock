@@ -523,12 +523,12 @@
   revision = "e06696f847aeda6f39a8f0b7cdff193b7690aef6"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c469936ff0749af353f267a7b5a7cd0af302e848c795d3cfc487d290434186ed"
+  digest = "1:9d4fb82a563c38e615189f8829392e56a08f19f2cc9ef905f19d49451b46506b"
   name = "github.com/nwmac/sqlitestore"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ea2757e5ec127ab4aaef609f6401ebaa2cf189f1"
+  revision = "7d2ab221fb3f85d000f66c511b2bf1a54cb98777"
+  version = "1.0.0"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
