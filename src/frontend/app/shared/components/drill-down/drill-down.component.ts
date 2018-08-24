@@ -122,6 +122,10 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
     return '';
   }
 
+  public stopPropagation(e: Event) {
+    e.stopPropagation();
+  }
+
   private reduceLevels(levelIndex: number) {
     this.levelData = this.levelData.slice(0, levelIndex);
   }

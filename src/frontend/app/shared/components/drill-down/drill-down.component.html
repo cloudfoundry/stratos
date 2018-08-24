@@ -30,9 +30,16 @@
           </div>
           <div class="drill-down__level">
             <div class="drill-down__item" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
-              <mat-card *ngIf="!level.component">
-                <div>{{ getItemName(levelIndex, data) }}</div>
-                <a *ngIf="getViewLink(levelIndex, data) as viewLink" [routerLink]="viewLink">View ></a>
+              <mat-card class="drill-down__item-card" *ngIf="!level.component">
+                <div class="drill-down__item-text--small">name</div>
+                <div class="drill-down__item-card-bottom">
+                  <div class="drill-down__item-text">
+                    {{ getItemName(levelIndex, data) }}
+                  </div>
+                  <a class="drill-down__item-view" (click)="stopPropagation($event)" *ngIf="getViewLink(levelIndex, data) as viewLink" [routerLink]="viewLink">
+                    View
+                  </a>
+                </div>
               </mat-card>
               <app-table-cell [config]="{ linkButton: true }" *ngIf="level.component as component" [component]="component" [row]="data">
               </app-table-cell>

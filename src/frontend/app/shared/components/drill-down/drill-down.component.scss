@@ -61,7 +61,7 @@
       align-items: center;
       display: flex;
       justify-content: space-between;
-    }    
+    }
     &-go-up {
       cursor: pointer;
     }
@@ -72,7 +72,42 @@
   &__item {
     cursor: pointer;
     padding: 5px;
+    overflow: hidden;
     z-index: 1;
+    &:hover {
+      .drill-down__item-view {
+        display: inline-block;
+      }
+    }
+    &-view {
+      background: linear-gradient(to right, transparent, white 35%);
+      display: none;
+      font-size: 14px;
+      padding-left: 20px;
+      position: absolute;
+      right: 0;
+      text-decoration: none;
+    }
+    &-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      &--small {
+        font-size: 12px;
+        color: rgba(0, 0, 0, .5);
+        padding-bottom: 5px;
+      }
+    }
+    &-card {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    &-card-bottom {
+      display: flex;
+      position: relative;
+      justify-content: space-between;
+    }
     &--hidden {
       display: none;
     }
