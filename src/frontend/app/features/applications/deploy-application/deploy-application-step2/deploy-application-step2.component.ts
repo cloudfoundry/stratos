@@ -1,10 +1,10 @@
 
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, take, tap ,  withLatestFrom } from 'rxjs/operators';
+import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -40,7 +40,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
 
-  @Input('isRedeploy') isRedeploy = false;
+  @Input() isRedeploy = false;
 
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
@@ -142,13 +142,13 @@ export class DeployApplicationStep2Component
           if (this.branchesSubscription) {
             this.branchesSubscription.unsubscribe();
           }
-          const action = new FetchBranchesForProject(p.name);
+          const fetchBranchesAction = new FetchBranchesForProject(p.name);
           this.branchesSubscription = getPaginationObservables<APIResource>(
             {
               store: this.store,
-              action,
+              action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
-                action.paginationKey,
+                fetchBranchesAction.paginationKey,
                 entityFactory(githubBranchesSchemaKey)
               )
             },
@@ -160,7 +160,7 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(fetchBranches);
 
-    const action = {
+    const paginationAction = {
       entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
@@ -180,7 +180,7 @@ export class DeployApplicationStep2Component
     const deployCommit$ = this.store.select(selectNewProjectCommit);
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
-      action.paginationKey,
+      paginationAction.paginationKey,
       entityFactory(githubBranchesSchemaKey)
     );
 
