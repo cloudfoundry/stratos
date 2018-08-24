@@ -114,6 +114,14 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
     return null;
   }
 
+  public getItemName(currentIndex: number, item: any) {
+    const def = this.definition[currentIndex];
+    if (def && def.getItemName) {
+      return def.getItemName(item);
+    }
+    return '';
+  }
+
   private reduceLevels(levelIndex: number) {
     this.levelData = this.levelData.slice(0, levelIndex);
   }
@@ -161,8 +169,7 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
         isBusy$,
         hasErrored$,
         pagination,
-        component: levelDefinition.component || null,
-        getItemName: levelDefinition.getItemName
+        component: levelDefinition.component || null
       };
     }
   }

@@ -9,19 +9,19 @@
               chevron_right
             </mat-icon>
           </span>
-          <h1>{{ levelData[levelIndex].getItemName(level.selected.item) }} </h1> </span>
+        <h1>{{ getItemName(levelIndex, level.selected.item) }} </h1>
+        </span>
       </div>
     </div>
     <mat-icon class="drill-down__breadcrumbs-clear" *ngIf="levelData.length > 1" (click)="goToLevel(0)">clear</mat-icon>
   </mat-toolbar>
   <div class="drill-down">
     <div class="drill-down__scroller" #drillDown>
-      <div class="drill-down__level-wrapper" #drillDownLevel *ngFor="let level of levelData; index as levelIndex; last as lastLevel"
-        [ngClass]="{
+      <div class="drill-down__level-wrapper" #drillDownLevel *ngFor="let level of levelData; index as levelIndex; last as lastLevel" [ngClass]="{
       'drill-down__level-current': lastLevel
     }">
         <div class="drill-down__level-header">
-          <h2>{{ levelData[levelIndex].title }}</h2>
+          <h2>{{ level.title }}</h2>
           <mat-icon class="drill-down__level-go-up" *ngIf="levelData.length > 1" (click)="goToLevel(levelIndex - 1)">arrow_upward</mat-icon>
         </div>
         <div class="drill-down__level-inner">
@@ -31,7 +31,7 @@
           <div class="drill-down__level">
             <div class="drill-down__item" (click)="clickItem(data, itemIndex, levelIndex, $event)" *ngFor="let data of level.data$ | async; index as itemIndex">
               <mat-card *ngIf="!level.component">
-                <div>{{ levelData[levelIndex].getItemName(data) }}</div>
+                <div>{{ getItemName(levelIndex, data) }}</div>
                 <a *ngIf="getViewLink(levelIndex, data) as viewLink" [routerLink]="viewLink">View ></a>
               </mat-card>
               <app-table-cell [config]="{ linkButton: true }" *ngIf="level.component as component" [component]="component" [row]="data">

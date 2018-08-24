@@ -50,7 +50,7 @@ export class HomePageComponent implements OnInit {
   constructor(private store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) {
     this.definition = [
       {
-        title: 'Cloud Foundrys',
+        title: 'Cloud Foundry',
         getItemName: (endpoint: EndpointModel) => endpoint.name,
         request: {
           data$: paginationMonitorFactory
@@ -62,7 +62,7 @@ export class HomePageComponent implements OnInit {
       },
       {
         ...new ApiRequestDrillDownLevel(this.store, {
-          title: 'Organizations',
+          title: 'Organization',
           entityNameParam: 'name',
           getAction: (cf: EndpointModel) => {
             const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
@@ -74,7 +74,7 @@ export class HomePageComponent implements OnInit {
       },
       {
         ...new ApiRequestDrillDownLevel(this.store, {
-          title: 'Spaces',
+          title: 'Space',
           entityNameParam: 'name',
           getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
             const action = new GetAllOrganizationSpaces(
@@ -92,7 +92,7 @@ export class HomePageComponent implements OnInit {
       },
       {
         ...new ApiRequestDrillDownLevel(this.store, {
-          title: 'Applications',
+          title: 'Application',
           entityNameParam: 'name',
           getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => {
             const action = new GetAllAppsInSpace(
