@@ -21,7 +21,7 @@ import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input('app') app;
+  @Input() app;
 
   applicationState$: Observable<ApplicationStateData>;
 

@@ -5,8 +5,8 @@ mkdir -p $GOPATH/bin
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 cd ${BUILD_DIR}/stratos
 
-# Install Glide
-build/tools/get-glide.sh
+# Install dep
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # Build backend
 npm install
