@@ -132,6 +132,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Store database provider name for diagnostics
+	portalConfig.DatabaseProviderName = dc.DatabaseProvider
+
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
@@ -195,6 +198,9 @@ func main() {
 	}
 
 	log.Info("Plugins initialized")
+
+	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
+	portalProxy.StoreDiagnostics()
 
 	// Start the back-end
 	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
@@ -472,9 +478,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 	}
-
-	// Get Diagnostics and store them once
-	pp.StoreDiagnostics()
 
 	return pp
 }
