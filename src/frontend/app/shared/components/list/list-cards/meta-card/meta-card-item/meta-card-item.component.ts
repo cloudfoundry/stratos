@@ -27,7 +27,7 @@ export class MetaCardItemComponent implements OnInit {
 
   @ViewChild('content') content: TemplateRef<any>;
 
-  @Input('customStyle') customStyle = 'row';
+  @Input() customStyle = 'row';
 
   constructor() {
   }
