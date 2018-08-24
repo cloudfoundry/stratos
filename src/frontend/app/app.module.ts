@@ -22,9 +22,13 @@ import { PageNotFoundComponentComponent } from './core/page-not-found-component/
 import { XSRFModule } from './xsrf.module';
 import { listCardComponents } from './shared/components/list/list-cards/card.types';
 import { TableCellDefaultComponent } from './shared/components/list/list-table/app-table-cell-default/app-table-cell-default.component';
-import { TableCellEndpointStatusComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import {
+  TableCellEndpointStatusComponent
+} from './shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellActionsComponent } from './shared/components/list/list-table/table-cell-actions/table-cell-actions.component';
-import { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import {
+  TableCellEndpointNameComponent
+} from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellAppNameComponent } from './shared/components/list/list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 

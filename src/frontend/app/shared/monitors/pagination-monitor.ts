@@ -178,7 +178,7 @@ export class PaginationMonitor<T = any> {
     pagination$: Observable<PaginationEntityState>,
   ) => pagination$.pipe(
     map(this.getCurrentPageRequestInfo)
-  );
+  )
 
   private createErrorObservable(
     pagination$: Observable<PaginationEntityState>,
