@@ -67,6 +67,7 @@ type EndpointTokenRecord struct {
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
 type TokenRecord struct {
+	// TokenGUID    string
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64
@@ -74,6 +75,7 @@ type TokenRecord struct {
 	AuthType     string
 	Metadata     string
 	SystemShared bool
+	LinkedGUID   string // Indicates the GUID of the token that this token is linked to (if any)
 }
 
 type CFInfo struct {
