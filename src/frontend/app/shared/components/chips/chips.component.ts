@@ -16,6 +16,10 @@ export class AppChip<T = string> implements IAppChip<T> {
   hideClearButton$?: Observable<boolean>;
   busy?: Observable<boolean>;
   color?: string;
+  url?: {
+    link: string,
+    params?: string
+  };
 }
 
 @Component({

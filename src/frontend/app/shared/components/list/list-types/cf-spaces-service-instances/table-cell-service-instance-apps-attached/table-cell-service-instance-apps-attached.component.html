@@ -1,6 +1,1 @@
-<div class="bound-apps" *ngFor="let app of boundApps">
-  <a [routerLink]="[app.url]" [queryParams]="{ 'breadcrumbs': config?.breadcrumbs }">{{app.appName}}</a>
-</div>
-<div *ngIf="boundApps && boundApps.length===0">
-  None
-</div>
+<app-chips [chips]="boundApps$ | async" [stacked]="false" lowerLimit="5" displayProperty="value"></app-chips>
