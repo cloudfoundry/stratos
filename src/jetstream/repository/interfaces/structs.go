@@ -65,9 +65,9 @@ type EndpointTokenRecord struct {
 	LoggingEndpoint string
 }
 
-//TODO this could be moved back to tokens subpackage, and extensions could import it?
+// TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
-	// TokenGUID    string
+	TokenGUID    string
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64

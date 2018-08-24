@@ -65,6 +65,7 @@ const mockCFGUID = "some-cf-guid-1234"
 const mockCEGUID = "some-hce-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
 const mockAdminGUID = tokens.SystemSharedUserGuid
+const mockTokenGUID = "mock-token-guid"
 
 const mockURLString = "http://localhost:9999/some/fake/url/"
 
@@ -170,15 +171,15 @@ func expectCFAndCERows() sqlmock.Rows {
 }
 
 func expectTokenRow() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
-		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
+	return sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
+		AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
 }
 
 func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
 
 	encryptedUaaToken, _ := crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
-		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
+	return sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
+		AddRow(mockTokenGUID, encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
 }
 
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {

@@ -22,8 +22,17 @@ func init() {
 		}
 
 		// Ensure any existing tokens have an ID
-		ensureTokenID := "UPDATE tokens SET token_guid='default-token' WHERE token_guid IS NULL"
-		_, err = txn.Exec(ensureTokenID)
+
+		// For UAA tokens, use the user id
+		ensureUAATokenID := "UPDATE tokens SET token_guid=user_guid WHERE token_guid IS NULL AND token_type='uaa'"
+		_, err = txn.Exec(ensureUAATokenID)
+		if err != nil {
+			return err
+		}
+
+		// For CNSI tokens, use the cnsi guid
+		ensureCNSITokenID := "UPDATE tokens SET token_guid=cnsi_guid WHERE token_guid IS NULL"
+		_, err = txn.Exec(ensureCNSITokenID)
 		if err != nil {
 			return err
 		}
