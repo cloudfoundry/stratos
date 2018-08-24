@@ -26,6 +26,9 @@ module.exports = function (config) {
       fixWebpackSourcePaths: true
     },
     reporters: ['spec', 'kjhtml', 'stratos'],
+    specReporter: {
+      suppressSkipped: true, // skip result of skipped tests
+    },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,

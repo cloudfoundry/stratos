@@ -31,7 +31,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
       this.row.entity.service_guid,
       new GetService(this.row.entity.service_guid, this.row.entity.cfGuid),
       false
-    ).entityObs$.pipe(
+    ).waitForEntity$.pipe(
       filter(s => !!s),
       map(s => {
         let serviceLabel = s.entity.entity.label;

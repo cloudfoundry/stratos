@@ -1,7 +1,8 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy } from '@angular/core';
-
 import { Store } from '@ngrx/store';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
@@ -12,9 +13,6 @@ import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/da
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-
-import { map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-application-wall',
@@ -36,7 +34,8 @@ import { Observable, Subscription } from 'rxjs';
     provide: ListConfig,
     useClass: CfAppConfigService
   },
-    CfOrgSpaceDataService]
+    CfOrgSpaceDataService
+  ]
 })
 export class ApplicationWallComponent implements OnDestroy {
 

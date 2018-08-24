@@ -6,7 +6,7 @@ import { GetAppEnvVarsAction } from '../../../../../store/actions/app-metadata.a
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../store/actions/app-variables.actions';
 import { AppState } from '../../../../../store/app-state';
 import { appEnvVarsSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

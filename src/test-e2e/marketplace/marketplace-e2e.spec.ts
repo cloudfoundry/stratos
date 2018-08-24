@@ -8,6 +8,9 @@ describe('Marketplace', () => {
   const marketplacePage = new MarketplacePage();
   const secretsHelper = new SecretsHelpers();
   const serviceSearchText = 'app';
+
+  const navigateToServiceSummary = () => marketplacePage.servicesList.cards.getCards().first().click();
+
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -71,5 +74,12 @@ describe('Marketplace', () => {
 
   it('- should have a refresh button', () => {
     expect(marketplacePage.servicesList.header.getRefreshListButton().isPresent()).toBeTruthy();
+  });
+
+  it('- should be able to navigate to service summary', () => {
+    navigateToServiceSummary();
+    browser.getCurrentUrl().then(url => {
+      expect(url.endsWith('summary')).toBeTruthy();
+    });
   });
 });
