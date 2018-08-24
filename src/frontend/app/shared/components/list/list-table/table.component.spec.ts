@@ -12,6 +12,8 @@ import { SharedModule } from '../../../shared.module';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './table.types';
 import { TableComponent } from './table.component';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 
 describe('TableComponent', () => {
 
@@ -112,8 +114,12 @@ describe('TableComponent', () => {
       providers: [
         UtilsService,
       ]
-    })
-      .compileComponents();
+    });
+    TestBed.overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [TableHeaderSelectComponent],
+      },
+    }).compileComponents();
   }));
 
   beforeEach(() => {

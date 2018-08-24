@@ -11,6 +11,10 @@ import { createBasicStoreModule } from '../../../../../../test-framework/store-t
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { VariablesTabComponent } from './variables-tab.component';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+import {
+  TableHeaderSelectComponent
+} from '../../../../../../shared/components/list/list-table/table-header-select/table-header-select.component';
 
 describe('VariablesTabComponent', () => {
   let component: VariablesTabComponent;
@@ -32,8 +36,12 @@ describe('VariablesTabComponent', () => {
         ApplicationStateService,
         ApplicationEnvVarsService,
       ]
-    })
-      .compileComponents();
+    });
+    TestBed.overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [TableHeaderSelectComponent],
+      },
+    }).compileComponents();
   }));
 
   beforeEach(() => {

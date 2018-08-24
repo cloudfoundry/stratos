@@ -179,6 +179,8 @@ export class DrillDownComponent<E = any, P = any> implements OnInit {
   }
 
   ngOnInit() {
-    this.addLevel(0);
+    if (this.definition && this.definition.length) {
+      this.addLevel(0);
+    }
   }
 }

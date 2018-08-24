@@ -4,6 +4,10 @@ import { RoutesTabComponent } from './routes-tab.component';
 import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { ApplicationEnvVarsService } from '../../build-tab/application-env-vars.service';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+import {
+  TableHeaderSelectComponent
+} from '../../../../../../../shared/components/list/list-table/table-header-select/table-header-select.component';
 
 describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;
@@ -17,8 +21,12 @@ describe('RoutesTabComponent', () => {
         generateTestApplicationServiceProvider('test', 'test'),
         ApplicationEnvVarsService
       ]
-    })
-      .compileComponents();
+    });
+    TestBed.overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [TableHeaderSelectComponent],
+      },
+    }).compileComponents();
   }));
 
   beforeEach(() => {

@@ -10,6 +10,10 @@ import { GetApplication } from '../../../../store/actions/application.actions';
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
 import { ApplicationEnvVarsService } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DatePipe } from '@angular/common';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+import {
+  TableHeaderSelectComponent
+} from '../../../../shared/components/list/list-table/table-header-select/table-header-select.component';
 
 describe('DeleteAppRoutesComponent', () => {
   let component: DeleteAppRoutesComponent;
@@ -31,8 +35,12 @@ describe('DeleteAppRoutesComponent', () => {
         DatePipe
       ]
 
-    })
-      .compileComponents();
+    });
+    TestBed.overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [TableHeaderSelectComponent],
+      },
+    }).compileComponents();
   }));
 
   beforeEach(() => {

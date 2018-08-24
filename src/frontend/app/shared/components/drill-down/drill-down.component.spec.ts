@@ -14,7 +14,7 @@ describe('DrillDownComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CommonModule,
         CoreModule,
         SharedModule,
@@ -22,7 +22,8 @@ describe('DrillDownComponent', () => {
         StoreModule.forRoot(
           appReducers
         )
-      ]
+      ],
+      declarations: []
     })
       .compileComponents();
   }));
