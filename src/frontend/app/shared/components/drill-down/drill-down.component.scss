@@ -71,8 +71,8 @@
   }
   &__item {
     cursor: pointer;
-    padding: 5px;
     overflow: hidden;
+    padding: 5px;
     z-index: 1;
     &:hover {
       .drill-down__item-view {
@@ -80,7 +80,7 @@
       }
     }
     &-view {
-      background: linear-gradient(to right, transparent, white 35%);
+      background: linear-gradient(to right, transparent, ffffff 35%);
       display: none;
       font-size: 14px;
       padding-left: 20px;
@@ -93,8 +93,8 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       &--small {
-        font-size: 12px;
         color: rgba(0, 0, 0, .5);
+        font-size: 12px;
         padding-bottom: 5px;
       }
     }
@@ -105,8 +105,8 @@
     }
     &-card-bottom {
       display: flex;
-      position: relative;
       justify-content: space-between;
+      position: relative;
     }
     &--hidden {
       display: none;

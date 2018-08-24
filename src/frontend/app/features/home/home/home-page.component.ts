@@ -37,7 +37,76 @@ import { EndpointModel } from './../../../store/types/endpoint.types';
   ]
 })
 export class HomePageComponent implements OnInit {
-  public definition: DrillDownDefinition;
+  public definition = [
+    {
+      title: 'Cloud Foundry',
+      getItemName: (endpoint: EndpointModel) => endpoint.name,
+      request: {
+        data$: this.paginationMonitorFactory
+          .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
+      },
+      getViewLink: (cf: EndpointModel) => {
+        return `/cloud-foundry/${cf.guid}`;
+      }
+    },
+    {
+      ...new ApiRequestDrillDownLevel(this.store, {
+        title: 'Organization',
+        entityNameParam: 'name',
+        getAction: (cf: EndpointModel) => {
+          const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
+          action.paginationKey += '-drill-down';
+          action.includeRelations = [];
+          return action;
+        },
+        getViewLink: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
+          return `/cloud-foundry/${cf.guid}/organizations/${org.entity.guid}`;
+        }
+      })
+    },
+    {
+      ...new ApiRequestDrillDownLevel(this.store, {
+        title: 'Space',
+        entityNameParam: 'name',
+        getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
+          const action = new GetAllOrganizationSpaces(
+            createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid) + '-drill-down',
+            org.entity.guid,
+            cf.guid,
+            [],
+            false
+          );
+          action.flattenPagination = false;
+          action.initialParams['results-per-page'] = 50;
+          return action;
+        },
+        getViewLink: (space: APIResource<ISpace>, [cf, org]: [EndpointModel, APIResource<IOrganization>]) => {
+          return `/cloud-foundry/${cf.guid}/organizations/${org.entity.guid}/spaces/${space.entity.guid}`;
+        }
+      })
+    },
+    {
+      ...new ApiRequestDrillDownLevel(this.store, {
+        title: 'Application',
+        entityNameParam: 'name',
+        getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => {
+          const action = new GetAllAppsInSpace(
+            cf.guid,
+            space.entity.guid,
+            createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down',
+            [],
+            false
+          );
+          action.flattenPagination = false;
+          action.initialParams['results-per-page'] = 50;
+          return action;
+        },
+        getViewLink: (app: APIResource<IApp>, [space, org, cf]: [APIResource<ISpace>, APIResource<IOrganization>, EndpointModel]) => {
+          return `/applications/${cf.guid}/${app.entity.guid}`;
+        }
+      })
+    }
+  ];
 
   public getPagination(action: PaginatedAction, paginationMonitor: PaginationMonitor) {
     return getPaginationObservables({
@@ -47,78 +116,7 @@ export class HomePageComponent implements OnInit {
     });
   }
 
-  constructor(private store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) {
-    this.definition = [
-      {
-        title: 'Cloud Foundry',
-        getItemName: (endpoint: EndpointModel) => endpoint.name,
-        request: {
-          data$: paginationMonitorFactory
-            .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
-        },
-        getViewLink: (cf: EndpointModel) => {
-          return `/cloud-foundry/${cf.guid}`;
-        }
-      },
-      {
-        ...new ApiRequestDrillDownLevel(this.store, {
-          title: 'Organization',
-          entityNameParam: 'name',
-          getAction: (cf: EndpointModel) => {
-            const action = CloudFoundryEndpointService.createGetAllOrganizations(cf.guid);
-            action.paginationKey += '-drill-down';
-            action.includeRelations = [];
-            return action;
-          },
-          getViewLink: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
-            return `/cloud-foundry/${cf.guid}/organizations/${org.entity.guid}`;
-          }
-        })
-      },
-      {
-        ...new ApiRequestDrillDownLevel(this.store, {
-          title: 'Space',
-          entityNameParam: 'name',
-          getAction: (org: APIResource<IOrganization>, [cf]: [EndpointModel]) => {
-            const action = new GetAllOrganizationSpaces(
-              createEntityRelationPaginationKey(organizationSchemaKey, org.entity.guid) + '-drill-down',
-              org.entity.guid,
-              cf.guid,
-              [],
-              false
-            );
-            action.flattenPagination = false;
-            action.initialParams['results-per-page'] = 50;
-            return action;
-          },
-          getViewLink: (space: APIResource<ISpace>, [cf, org]: [EndpointModel, APIResource<IOrganization>]) => {
-            return `/cloud-foundry/${cf.guid}/organizations/${org.entity.guid}/spaces/${space.entity.guid}`;
-          }
-        })
-      },
-      {
-        ...new ApiRequestDrillDownLevel(this.store, {
-          title: 'Application',
-          entityNameParam: 'name',
-          getAction: (space: APIResource<ISpace>, [cf]: [EndpointModel]) => {
-            const action = new GetAllAppsInSpace(
-              cf.guid,
-              space.entity.guid,
-              createEntityRelationPaginationKey(spaceSchemaKey, space.entity.guid) + '-drill-down',
-              [],
-              false
-            );
-            action.flattenPagination = false;
-            action.initialParams['results-per-page'] = 50;
-            return action;
-          },
-          getViewLink: (app: APIResource<IApp>, [space, org, cf]: [APIResource<ISpace>, APIResource<IOrganization>, EndpointModel]) => {
-            return `/applications/${cf.guid}/${app.entity.guid}`;
-          }
-        })
-      }
-    ];
-  }
+  constructor(private store: Store<AppState>, private paginationMonitorFactory: PaginationMonitorFactory) { }
 
   ngOnInit() { }
 }
