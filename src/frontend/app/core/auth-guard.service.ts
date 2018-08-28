@@ -22,7 +22,7 @@ export function queryParamMap() {
     const pair = vars[i].split('=');
     paramMap[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
   }
-  return map;
+  return paramMap;
 }
 
 @Injectable()
