@@ -10,7 +10,7 @@ import { GetAllServices } from '../../../store/actions/service.actions';
 import { GetServicesForSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, serviceSchemaKey } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../store/types/api.types';
 
@@ -20,7 +20,6 @@ export class ServicesWallService {
 
   constructor(
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.services$ = this.initServicesObservable();

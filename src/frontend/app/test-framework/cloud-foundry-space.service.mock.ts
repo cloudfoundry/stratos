@@ -4,7 +4,7 @@ import { GetAllSpaceUsers } from '../store/actions/space.actions';
 
 export class CloudFoundrySpaceServiceMock {
 
-  allSpaceUsersAction = new GetAllSpaceUsers('guid', 'guid-key', 'guid');
+  allSpaceUsersAction = new GetAllSpaceUsers('guid', 'guid-key', 'guid', true);
   space$: Observable<any> = observableOf(
     {
       entity: {

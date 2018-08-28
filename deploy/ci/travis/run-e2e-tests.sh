@@ -32,13 +32,13 @@ if [ "${RUN_TYPE}" == "quick" ]; then
   # Start a local UAA - this will take a few seconds to come up in the background
   docker run -d -p 8080:8080 splatform/stratos-uaa
 
-  # Get go 1.0 and glide
+  # Get go 1.0 and dep
   curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
   chmod +x ~/bin/gimme
   eval "$(gimme 1.9)"
-  curl https://glide.sh/get | sh
+  curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   go version
-  glide --version
+  dep version
   
   npm run build
   npm run build-backend-dev
@@ -85,6 +85,13 @@ if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
   #docker-compose logs proxy 
   docker-compose down
   popd
+fi
+
+# Output backend log if the tests failed
+if [ "${RUN_TYPE}" == "quick" ]; then
+  if [ $RESULT -ne 0 ]; then
+    cat outputs/backend.log
+  fi
 fi
 
 # Check environment variable that will ignore E2E failures

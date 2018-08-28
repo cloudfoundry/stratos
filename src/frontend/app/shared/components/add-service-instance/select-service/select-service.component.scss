@@ -5,6 +5,11 @@
 .select-service__select-wrapper {
   align-items: center;
   display: flex;
+  &__fields {
+    display: inherit;
+    flex-direction: column;
+    width: 500px;
+  }
 }
 
 .service-busy-indicator {

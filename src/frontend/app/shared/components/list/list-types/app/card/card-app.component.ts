@@ -26,7 +26,7 @@ import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
 
-  @Input('row') row: APIResource<IApp>;
+  @Input() row: APIResource<IApp>;
   applicationState$: Observable<ApplicationStateData>;
 
   appStatus$: Observable<CardStatus>;

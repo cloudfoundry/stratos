@@ -9,7 +9,7 @@ import { isTCPRoute } from '../../../../../../features/applications/routes/route
 })
 export class TableCellTCPRouteComponent<T> extends TableCellCustom<T> {
 
-  @Input('row') row;
+  @Input() row;
   constructor() {
     super();
   }

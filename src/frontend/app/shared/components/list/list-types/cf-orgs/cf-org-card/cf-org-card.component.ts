@@ -4,6 +4,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
+import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
@@ -96,11 +97,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   setCounts = (apps: APIResource<any>[]) => {
     this.appCount = apps.length;
-    let count = 0;
-    apps.forEach(a => {
-      count += a.entity.instances;
-    });
-    this.instancesCount = count;
+    this.instancesCount = getStartedAppInstanceCount(apps);
   }
 
   setValues = (role: string, apps: APIResource<IApp>[]) => {

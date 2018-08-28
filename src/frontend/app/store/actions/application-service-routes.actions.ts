@@ -13,7 +13,7 @@ import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-} from '../helpers/entity-relations.types';
+} from '../helpers/entity-relations/entity-relations.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 

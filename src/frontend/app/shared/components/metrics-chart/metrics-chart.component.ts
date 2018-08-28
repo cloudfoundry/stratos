@@ -31,11 +31,11 @@ export interface MetricsChartConfig {
   styleUrls: ['./metrics-chart.component.scss']
 })
 export class MetricsChartComponent implements OnInit, OnDestroy {
-  @Input('metricsConfig')
+  @Input()
   public metricsConfig: MetricsConfig;
-  @Input('chartConfig')
+  @Input()
   public chartConfig: MetricsChartConfig;
-  @Input('title')
+  @Input()
   public title: string;
 
   public chartTypes = MetricsChartTypes;

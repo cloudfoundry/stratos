@@ -25,9 +25,9 @@ run:
       HELM_REPO=${ROOT_DIR}/helm-repo
       cd ${STRATOS}/deploy/kubernetes/
       TAG=$(nightlyTag)
-      IMAGE_TAG=$(fetchImageTag)
+      IMAGE_TAG=${TAG}
       # Patch Helm chart
-      patchHelmChart ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      patchHelmChartDev ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
 
       # Generate Helm package
       helm package console

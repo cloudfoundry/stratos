@@ -62,6 +62,9 @@ if [ -n "${BUILD_ARGS}" ]; then
   echo -e "- RUN_ARGS:\t'${RUN_ARGS}'"
 fi
 
+# Grab and store the git metadata so we can report in this in the UI Diagnostics
+${STRATOS_PATH}/build/store-git-metadata.sh
+
 function updateTagForRelease {
   # Reset the TAG variable for a release to be of the form:
   #   <version>-<commit#>-<prefix><hash>

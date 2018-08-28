@@ -20,7 +20,7 @@ import { map } from 'rxjs/operators';
 export class DetachAppsComponent implements OnDestroy {
 
   validate$: Observable<boolean>;
-  @Output('selectedApps')
+  @Output()
   public selectedApps = new EventEmitter<APIResource<IServiceBinding>[]>();
   selectedSub: Subscription;
   constructor(private config: ListConfig<APIResource>) {

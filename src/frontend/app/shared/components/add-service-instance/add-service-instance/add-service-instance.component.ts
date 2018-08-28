@@ -32,7 +32,7 @@ import {
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../store/helpers/entity-relations.types';
+} from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
