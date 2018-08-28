@@ -1,5 +1,20 @@
 #!/bin/bash
 
+function clean_orgs {
+
+ORGS=$(cf orgs | tail -n +3)
+echo "Cleaning up orgs"
+echo $ORGS
+
+while read -r ORG; do
+ if [[ $ORG == "acceptance-*" ]]; then
+   echo "Deleting org: $ORG"
+   cf delete-org $ORG -f
+ fi
+done <<< "$ORGS"
+
+}
+
 echo "===================="
 echo "Stratos CF Push Test"
 echo "===================="
@@ -30,6 +45,9 @@ fi
 
 cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o e2e -s e2e
 cf apps
+
+# Clean up any old organisations
+clean_orgs
 
 # We should be running in the Stratos GitHub folder
 
