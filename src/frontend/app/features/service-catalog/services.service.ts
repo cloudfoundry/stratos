@@ -149,8 +149,6 @@ export class ServicesService {
     );
   }
 
-
-
   getServiceName = () => {
     return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
