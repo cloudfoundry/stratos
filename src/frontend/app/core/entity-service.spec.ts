@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HttpModule, XHRBackend } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
+import { schema as normalizrSchema } from 'normalizr';
 import { filter, first, tap, pairwise, map } from 'rxjs/operators';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
@@ -28,7 +28,7 @@ describe('EntityServiceService', () => {
   function createTestService(
     store: Store<AppState>,
     guid: string,
-    schema: schema.Entity,
+    schema: normalizrSchema.Entity,
     action: IRequestAction,
   ) {
     const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);

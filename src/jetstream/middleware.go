@@ -148,6 +148,21 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("setStaticContentHeadersMiddleware")
+		c.Response().Header().Set("cache-control", "no-cache")
+		return h(c)
+	}
+}
+
+func (p *portalProxy) setSecureCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("cache-control", "no-store")
+		return h(c)
+	}
+}
+
 func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// if user is an admin, passthrough request

@@ -9,12 +9,12 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 })
 export class NestedTabsComponent implements OnInit {
 
-  @Input('tabs')
+  @Input()
   tabs: ISubHeaderTabs[];
   constructor() {
 
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
 }
