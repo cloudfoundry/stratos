@@ -42,7 +42,8 @@ if [ "${RUN_TYPE}" == "quick" ]; then
   
   npm run build
   npm run build-backend
-  # Patch the config file so local version runs on port 443
+  # Copy travis config.properties file
+  cp deploy/ci/travis/config.properties src/jetstream/
   pushd src/jetstream
   ./jetstream > backend.log &
   popd
