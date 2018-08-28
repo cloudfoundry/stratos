@@ -63,6 +63,9 @@ func (ch *CFHosting) Init() error {
 	if config.IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
 
+		// Record that we are deployed in Cloud Foundry
+		ch.portalProxy.GetConfig().IsCloudFoundry = true
+
 		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient

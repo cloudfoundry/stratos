@@ -132,6 +132,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Store database provider name for diagnostics
+	portalConfig.DatabaseProviderName = dc.DatabaseProvider
+
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
@@ -195,6 +198,9 @@ func main() {
 	}
 
 	log.Info("Plugins initialized")
+
+	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
+	portalProxy.StoreDiagnostics()
 
 	// Start the back-end
 	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
@@ -319,11 +325,6 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
-	setSecureCookie := true
-
-	if config.IsSet(VCapApplication) {
-		setSecureCookie = false
-	}
 
 	// Allow the cookie domain to be configured
 	domain := pc.CookieDomain
@@ -340,7 +341,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = setSecureCookie
+		sessionStore.Options.Secure = true
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
@@ -353,7 +354,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = setSecureCookie
+		sessionStore.Options.Secure = true
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
@@ -365,7 +366,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
-	sessionStore.Options.Secure = setSecureCookie
+	sessionStore.Options.Secure = true
 	if len(domain) > 0 {
 		sessionStore.Options.Domain = domain
 	}
@@ -481,9 +482,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 	}
-
-	// Get Diagnostics and store them once
-	pp.StoreDiagnostics()
 
 	return pp
 }
@@ -654,6 +652,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		pp = e.Group("")
 	}
 
+	pp.Use(p.setSecureCacheContentMiddleware)
+
 	// Add middleware to block requests if unconfigured
 	if addSetupMiddleware.addSetup {
 		go p.SetupPoller(addSetupMiddleware)
@@ -740,6 +740,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	// Serve up static resources
 	if err == nil {
+		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
 		e.Use(middleware.Gzip())

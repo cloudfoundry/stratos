@@ -54,5 +54,7 @@ func (p *portalProxy) StoreDiagnostics() {
 		diagnostics.DeploymentType = "Development"
 	}
 
+	diagnostics.DatabaseBackend = p.Config.DatabaseProviderName
+
 	p.Diagnostics = diagnostics
 }

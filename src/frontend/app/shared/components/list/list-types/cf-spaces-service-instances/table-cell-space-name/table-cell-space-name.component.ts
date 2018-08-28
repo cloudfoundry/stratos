@@ -15,20 +15,20 @@ export class TableCellSpaceNameComponent<T> extends TableCellCustom<APIResource<
   breadcrumbs: {};
   spaceUrl: string[];
   spaceName: Observable<string>;
-  @Input('row') row;
+  @Input() row;
   constructor() {
     super();
   }
   ngOnInit(): void {
     this.spaceUrl = [
       '/cloud-foundry',
-       this.row.entity.cfGuid,
-       'organizations',
-       this.row.entity.space.entity.organization_guid,
-       'spaces',
-       this.row.entity.space_guid,
-       'summary'
-      ];
-      this.breadcrumbs = { 'breadcrumbs': 'services-wall'};
+      this.row.entity.cfGuid,
+      'organizations',
+      this.row.entity.space.entity.organization_guid,
+      'spaces',
+      this.row.entity.space_guid,
+      'summary'
+    ];
+    this.breadcrumbs = { 'breadcrumbs': 'services-wall' };
   }
 }

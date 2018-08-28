@@ -7,8 +7,8 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class UserProfileBannerComponent implements OnInit {
 
-  @Input('name') name: string;
-  @Input('email') email: string;
+  @Input() name: string;
+  @Input() email: string;
 
   constructor() { }
 
