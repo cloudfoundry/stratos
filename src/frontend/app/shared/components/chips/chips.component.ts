@@ -18,7 +18,7 @@ export class AppChip<T = string> implements IAppChip<T> {
   color?: string;
   url?: {
     link: string,
-    params?: string
+    queryParams: { [paramName: string]: string }
   };
 }
 

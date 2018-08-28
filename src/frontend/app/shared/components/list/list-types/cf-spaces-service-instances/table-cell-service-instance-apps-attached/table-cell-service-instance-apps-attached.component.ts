@@ -1,11 +1,11 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { TableCellCustom } from '../../../list.types';
-import { first, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-table-cell-service-instance-apps-attached',
@@ -34,13 +34,14 @@ export class TableCellServiceInstanceAppsAttachedComponent extends TableCellCust
       this.row$
     ]).pipe(
       map(([config, row]) => {
-        console.log('!!!!!!!!!');
         return row ? row.entity.service_bindings.map(binding => {
           return {
             value: binding.entity.app.entity.name,
             url: {
               link: `/applications/${binding.entity.cfGuid}/${binding.entity.app.metadata.guid}`,
-              params: config.breadcrumbs,
+              params: {
+                breadcrumbs: config.breadcrumbs
+              },
             }
           };
         }) : [];
