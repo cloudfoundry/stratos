@@ -250,13 +250,8 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WithArgs(mockCNSIGUID, mockUserGUID, mockAdminGUID).
 			WillReturnRows(expectedCNSITokenRecordRow)
 
-		mock.ExpectQuery(selectAnyFromTokens).
-			WithArgs(mockCNSIGUID, mockUserGUID).
-			WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
-
-		// Expect the INSERT
-		mock.ExpectExec(insertIntoTokens).
-			//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, mockTokenRecord.TokenExpiry).
+		// A token refresh attempt will be made - which is just an update
+		mock.ExpectExec(updateTokens).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		//

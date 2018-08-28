@@ -218,7 +218,7 @@ func TestSaveCNSITokens(t *testing.T) {
 						WillReturnRows(rs)
 
 					mock.ExpectExec(insertTokenSql).
-						WithArgs(sqlmock.AnyArg(), mockCNSIGuid, mockUserGuid, "cnsi", sqlmock.AnyArg(), sqlmock.AnyArg(), tokenRecord.TokenExpiry, false, "", "").
+						WithArgs(sqlmock.AnyArg(), mockCNSIGuid, mockUserGuid, "cnsi", sqlmock.AnyArg(), sqlmock.AnyArg(), tokenRecord.TokenExpiry, false, "", "", sqlmock.AnyArg()).
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
 					err := repository.SaveCNSIToken(mockCNSIGuid, mockUserGuid, tokenRecord, mockEncryptionKey)

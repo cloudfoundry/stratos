@@ -58,7 +58,7 @@ var deleteCNSIToken = `DELETE FROM tokens
 var deleteCNSITokens = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
-// TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
+var updateToken = `UPDATE tokens SET auth_token = $1, refresh_token = $2, token_expiry = $3 WHERE token_guid = $7 AND user_guid = $8`
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
 type PgsqlTokenRepository struct {
@@ -416,6 +416,10 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
 	}
 
+	if linkedTokenGUID.Valid {
+		tr.LinkedGUID = linkedTokenGUID.String
+	}
+
 	return *tr, nil
 }
 
@@ -458,6 +462,78 @@ func (p *PgsqlTokenRepository) DeleteCNSITokens(cnsiGUID string) error {
 		log.Debugf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
+
+	return nil
+}
+
+// UpdateTokenAuth - Update a token's auth data
+func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
+	log.Debug("UpdateTokenAuth")
+
+	if userGUID == "" {
+		msg := "Unable to save Token without a valid User GUID."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	if tr.AuthToken == "" {
+		msg := "Unable to save Token without a valid Auth Token."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	if tr.RefreshToken == "" {
+		msg := "Unable to save Token without a valid Refresh Token."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	var ciphertextAuthToken, ciphertextRefreshToken []byte
+	var err error
+
+	var tokenGUID string
+
+	// Linked token? if so, update the linked token
+	if tr.LinkedGUID == "" {
+		tokenGUID = tr.TokenGUID
+	} else {
+		tokenGUID = tr.LinkedGUID
+	}
+
+	log.Debug("Encrypting Auth Token")
+	ciphertextAuthToken, err = crypto.EncryptToken(encryptionKey, tr.AuthToken)
+	if err != nil {
+		return err
+	}
+	if tr.RefreshToken != "" {
+		log.Debug("Encrypting Refresh Token")
+		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
+		if err != nil {
+			return err
+		}
+	}
+
+	result, err := p.db.Exec(updateToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, tokenGUID, userGUID)
+	if err != nil {
+		msg := "Unable to UPDATE token: %v"
+		log.Debugf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	rowsUpdates, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("Unable to UPDATE token: could not determine number of rows that were updated")
+	}
+
+	if rowsUpdates < 1 {
+		return errors.New("Unable to UPDATE token: no rows were updated")
+	}
+
+	if rowsUpdates > 1 {
+		log.Warn("UPDATE token: More than 1 row was updated (expected only 1)")
+	}
+
+	log.Debug("Token UPDATE complete")
 
 	return nil
 }
