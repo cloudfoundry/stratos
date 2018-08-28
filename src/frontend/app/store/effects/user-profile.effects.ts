@@ -1,3 +1,5 @@
+
+import {switchMap, mergeMap, catchError} from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -38,31 +40,31 @@ export class UserProfileEffect {
     private httpClient: HttpClient,
   ) { }
 
-  @Effect() getUserProfileInfo$ = this.actions$.ofType<FetchUserProfileAction>(GET_USERPROFILE)
-    .mergeMap(action => {
+  @Effect() getUserProfileInfo$ = this.actions$.ofType<FetchUserProfileAction>(GET_USERPROFILE).pipe(
+    mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,
         guid: UserProfileEffect.guid,
         type: action.type,
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      return this.httpClient.get(`/pp/${proxyAPIVersion}/uaa/Users/${action.guid}`)
-        .mergeMap((info: UserProfileInfo) => {
+      return this.httpClient.get(`/pp/${proxyAPIVersion}/uaa/Users/${action.guid}`).pipe(
+        mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
               entities: { [userProfileStoreNames.type]: { [UserProfileEffect.guid]: info } },
               result: [UserProfileEffect.guid]
             }, apiAction)
           ];
-        }).catch((e) => {
+        }), catchError((e) => {
           return [
             new WrapperRequestActionFailed('Could not get User Profile Info', apiAction),
           ];
-        });
-    });
+        }), );
+    }));
 
-  @Effect() updateUserProfileInfo$ = this.actions$.ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE)
-    .mergeMap(action => {
+  @Effect() updateUserProfileInfo$ = this.actions$.ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE).pipe(
+    mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,
         guid: UserProfileEffect.guid,
@@ -78,23 +80,23 @@ export class UserProfileEffect {
         headers['x-stratos-password'] = action.password;
       }
 
-      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}`, action.profile, { headers })
-        .mergeMap((info: UserProfileInfo) => {
+      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}`, action.profile, { headers }).pipe(
+        mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
               entities: { [userProfileStoreNames.type]: { [UserProfileEffect.guid]: info } },
               result: [UserProfileEffect.guid]
             }, apiAction)
           ];
-        }).catch((e) => {
+        }), catchError((e) => {
           return [
             new WrapperRequestActionFailed('Could not update User Profile Info', apiAction),
           ];
-        });
-    });
+        }), );
+    }));
 
-  @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD)
-    .mergeMap(action => {
+  @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD).pipe(
+    mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,
         guid: UserProfileEffect.guid,
@@ -109,18 +111,18 @@ export class UserProfileEffect {
         'x-stratos-password': action.passwordChanges.oldPassword,
         'x-stratos-password-new': action.passwordChanges.password
       };
-      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}/password`, action.passwordChanges, { headers })
-        .switchMap((info: UserProfileInfo) => {
+      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}/password`, action.passwordChanges, { headers }).pipe(
+        switchMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
               entities: {},
               result: []
             }, apiAction)
           ];
-        }).catch((e) => {
+        }), catchError((e) => {
           return [
             new WrapperRequestActionFailed('Could not update User Password', apiAction),
           ];
-        });
-    });
+        }), );
+    }));
 }

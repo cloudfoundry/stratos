@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../features/applications/application.service';
@@ -16,7 +16,7 @@ import { TableCellCustom } from '../../../list.types';
 })
 export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  @Input('row') row;
+  @Input() row;
   applicationState: ApplicationStateData;
   @Input('config')
   set config(value: { hideIcon: boolean, initialStateOnly: boolean }) {

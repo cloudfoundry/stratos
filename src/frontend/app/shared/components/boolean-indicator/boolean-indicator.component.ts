@@ -17,16 +17,21 @@ export enum BooleanIndicatorType {
 })
 export class BooleanIndicatorComponent implements OnInit {
 
-  @Input('isTrue') isTrue: boolean;
-  @Input('type') type: BooleanIndicatorType;
+  @Input() isTrue: boolean;
+  @Input() type: BooleanIndicatorType;
+
+  // Should we use a subtle display - this won't show the No option as dandger (typically red)
+  @Input() subtle = true;
 
   private icons = {
     Yes: 'check_circle',
     Enabled: 'check_circle',
     True: 'check_circle',
+    Add: 'add_circle',
     No: 'highlight_off',
     Disabled: 'highlight_off',
     False: 'highlight_off',
+    Remove: 'remove_circle',
     Locked: 'lock_outline',
     Unlocked: 'lock_open',
   };

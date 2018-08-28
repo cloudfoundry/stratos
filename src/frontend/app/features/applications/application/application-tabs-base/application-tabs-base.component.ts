@@ -1,27 +1,28 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+
+import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { delay, filter, first, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
-
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
+import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { appStatsSchemaKey } from '../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -53,16 +54,17 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
-
-
+  public schema = entityFactory(applicationSchemaKey);
+  public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private applicationService: ApplicationService,
-    private entityService: EntityService<APIResource>,
+    public applicationService: ApplicationService,
+    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
-    private endpointsService: EndpointsService
+    private endpointsService: EndpointsService,
+    private ngZone: NgZone
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -108,10 +110,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
+  appActions$: Observable<{ [key: string]: boolean }>;
 
-  autoRefreshing$ = this.entityService.updatingSection$.map(
+  autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }
-  );
+  ));
 
   tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
@@ -158,7 +161,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       {
         key: 'marketplace-services',
         breadcrumbs: [
-          { value: 'Marketplace', routerLink: `/service-catalog` }
+          { value: 'Marketplace', routerLink: `/marketplace` }
         ]
       },
       {
@@ -239,14 +242,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         first(),
         mergeMap(appData => {
           this.applicationService.updateApplication({ state: 'STOPPED' }, [], appData.app.entity);
-          return combineLatest(
-            Observable.of(appData),
-            this.pollEntityService('stopping', 'STOPPED').first()
+          return observableCombineLatest(
+            observableOf(appData),
+            this.pollEntityService('stopping', 'STOPPED').pipe(first())
           );
         }),
         mergeMap(([appData, updateData]) => {
           this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
-          return this.pollEntityService('starting', 'STARTED').first();
+          return this.pollEntityService('starting', 'STARTED').pipe(first());
         }),
       ).subscribe(null, this.dispatchAppStats, this.dispatchAppStats);
 
@@ -260,15 +263,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
     // Auto refresh
-    this.entityServiceAppRefresh$ = this.entityService
-      .poll(10000, this.autoRefreshString)
-      .do(({ resource }) => {
-        this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-        if (resource && resource.entity && resource.entity.state === 'STARTED') {
-          this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-        }
-      })
-      .subscribe();
+    this.ngZone.runOutsideAngular(() => {
+      this.entityServiceAppRefresh$ = this.entityService
+        .poll(10000, this.autoRefreshString).pipe(
+          tap(({ resource }) => {
+            this.ngZone.run(() => {
+              this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+              if (resource && resource.entity && resource.entity.state === 'STARTED') {
+                this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+              }
+            });
+          }))
+        .subscribe();
+    });
 
     this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
@@ -281,25 +288,29 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
-    const initialFetch$ = Observable.combineLatest(
+    const initialFetch$ = observableCombineLatest(
       this.applicationService.isFetchingApp$,
       this.applicationService.isFetchingEnvVars$,
       this.applicationService.isFetchingStats$
-    )
-      .map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
+    ).pipe(
+      map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
         return isFetchingApp || isFetchingEnvVars || isFetchingStats;
-      });
+      }));
 
-    this.summaryDataChanging$ = Observable.combineLatest(
+    this.summaryDataChanging$ = observableCombineLatest(
       initialFetch$,
       this.applicationService.isUpdatingApp$,
       this.autoRefreshing$
-    ).map(([isFetchingApp, isUpdating, autoRefresh]) => {
+    ).pipe(map(([isFetchingApp, isUpdating, autoRefresh]) => {
       if (autoRefresh.busy) {
         return false;
       }
       return !!(isFetchingApp || isUpdating);
-    });
+    }));
+
+    this.appActions$ = this.applicationService.applicationState$.pipe(
+      map(app => app.actions)
+    );
   }
 
   ngOnDestroy() {

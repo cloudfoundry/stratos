@@ -1,5 +1,6 @@
 import { Action } from '@ngrx/store';
 
+import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginationAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
@@ -18,12 +19,9 @@ export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
 
-export function getPaginationKey(entityKey, endpointGuid, guid = null) {
-  if (guid) {
-    return `${entityKey}:${endpointGuid}:${guid}`;
-  } else {
-    return `${entityKey}:${endpointGuid}`;
-  }
+export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
+  const key = `${type}-${id}`;
+  return endpointGuid ? `${endpointGuid}:${key}` : key;
 }
 
 export class ClearPaginationOfType implements Action {

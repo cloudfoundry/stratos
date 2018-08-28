@@ -10,9 +10,9 @@
         <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" icon="domain" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
-      <app-tile>
+      <app-tile *ngIf="(cfEndpointService.users$ | async)?.length">
         <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>

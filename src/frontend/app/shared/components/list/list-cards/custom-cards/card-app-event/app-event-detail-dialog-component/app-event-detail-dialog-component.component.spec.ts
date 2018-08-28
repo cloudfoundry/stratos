@@ -6,6 +6,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppEventDetailDialogComponentComponent } from './app-event-detail-dialog-component.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RequestInfoState } from '../../../../../../../store/reducers/api-request-reducer/types';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('AppEventDetailDialogComponentComponent', () => {
   let component: AppEventDetailDialogComponentComponent;
@@ -34,6 +35,7 @@ describe('AppEventDetailDialogComponentComponent', () => {
         ValuesPipe
       ],
       imports: [
+        NoopAnimationsModule,
         CoreModule,
       ]
     })

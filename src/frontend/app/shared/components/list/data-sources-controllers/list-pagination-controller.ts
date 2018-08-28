@@ -1,7 +1,7 @@
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { filter, first, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, map, distinctUntilChanged } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort } from '../../../../store/actions/list.actions';
 import {
@@ -16,6 +16,7 @@ import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagi
 import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource } from './list-data-source-types';
+import { tag } from 'rxjs-spy/operators';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
@@ -136,16 +137,16 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
   }
 
-  private cloneMultiFilter(filter: PaginationClientFilter) {
+  private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {
     return {
-      ...filter,
-      items: { ...filter.items }
+      ...paginationClientFilter,
+      items: { ...paginationClientFilter.items }
     };
   }
   private createPaginationObservable(dataSource: IListDataSource<T>): Observable<ListPagination> {
-    return dataSource.pagination$
-      .filter(pag => !!pag)
-      .map(pag => {
+    return dataSource.pagination$.pipe(
+      filter(pag => !!pag),
+      map(pag => {
         const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
@@ -155,20 +156,26 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           pageSize,
           pageIndex
         };
-      })
-      .distinctUntilChanged((x, y) => {
+      }),
+      distinctUntilChanged((x, y) => {
         return x.pageIndex === y.pageIndex && x.pageSize === y.pageSize && x.totalResults === y.totalResults;
-      })
-      .tag('list-pagination');
+      }),
+      tag('list-pagination')
+    );
   }
 
   private createSortObservable(dataSource: IListDataSource<T>): Observable<ListSort> {
-    return dataSource.pagination$.map(pag => ({
-      direction: pag.params['order-direction'] as SortDirection,
-      field: pag.params['order-direction-field']
-    })).filter(x => !!x).distinctUntilChanged((x, y) => {
-      return x.direction === y.direction && x.field === y.field;
-    }).tag('list-sort');
+    return dataSource.pagination$.pipe(
+      map(pag => ({
+        direction: pag.params['order-direction'] as SortDirection,
+        field: pag.params['order-direction-field']
+      })),
+      filter(x => !!x),
+      distinctUntilChanged((x, y) => {
+        return x.direction === y.direction && x.field === y.field;
+      }),
+      tag('list-sort')
+    );
   }
 
   private createFilterObservable(dataSource: IListDataSource<T>): Observable<ListFilter> {
@@ -176,13 +183,14 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       map(pag => ({
         string: dataSource.isLocal ? pag.clientPagination.filter.string : dataSource.getFilterFromParams(pag),
         items: { ...pag.clientPagination.filter.items }
-      }))
-    ).tag('list-filter');
+      })),
+      tag('list-filter')
+    );
   }
 
-  private cleanFilterParam(filter) {
+  private cleanFilterParam(filterVal) {
     // Flatten some specific falsies into the same value.
-    if (filter === null || filter === undefined || filter === '') {
+    if (filterVal === null || filterVal === undefined || filterVal === '') {
       return undefined;
     }
     return filter;

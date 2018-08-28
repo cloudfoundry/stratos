@@ -1,15 +1,10 @@
-import { Store, compose } from '@ngrx/store';
-import { denormalize, schema } from 'normalizr';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, startWith, withLatestFrom, tap, share } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
-import {
-  getAPIRequestDataState,
-  selectEntity,
-  selectRequestInfo,
-  getUpdateSectionById,
-  getEntityUpdateSections
-} from '../../store/selectors/api.selectors';
+
+import { Store } from '@ngrx/store';
+import { denormalize, schema as normalizrSchema } from 'normalizr';
+import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
+import { tag } from 'rxjs-spy/operators/tag';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
 import { AppState } from './../../store/app-state';
 import {
@@ -17,16 +12,15 @@ import {
   getDefaultActionState,
   getDefaultRequestState,
   RequestInfoState,
-  UpdatingSection,
+  UpdatingSection
 } from './../../store/reducers/api-request-reducer/types';
-import { tag } from 'rxjs-spy/operators/tag';
 
 export class EntityMonitor<T = any> {
   constructor(
     private store: Store<AppState>,
     public id: string,
     public entityKey: string,
-    public schema: schema.Entity,
+    public schema: normalizrSchema.Entity,
   ) {
     const defaultRequestState = getDefaultRequestState();
     this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
@@ -35,16 +29,17 @@ export class EntityMonitor<T = any> {
       startWith(defaultRequestState),
       publishReplay(1), refCount()
     );
-    this.isDeletingEntity$ = this.entityRequest$.map(request => request.deleting.busy).pipe(
+    this.isDeletingEntity$ = this.entityRequest$.pipe(map(request => request.deleting.busy)).pipe(
       distinctUntilChanged()
     );
-    this.isFetchingEntity$ = this.entityRequest$.map(request => request.fetching).pipe(
+    this.isFetchingEntity$ = this.entityRequest$.pipe(map(request => request.fetching)).pipe(
       distinctUntilChanged()
     );
-    this.updatingSection$ = this.entityRequest$.map(request => request.updating).pipe(
-      distinctUntilChanged(),
+    this.updatingSection$ = this.entityRequest$.pipe(map(request => request.updating)).pipe(
+      distinctUntilChanged()
     );
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).publishReplay(1).refCount();
+
+    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount(), );
     this.entity$ = this.getEntityObservable(
       schema,
       store.select(selectEntity<T>(entityKey, id)),
@@ -93,7 +88,7 @@ export class EntityMonitor<T = any> {
   }
 
   private getEntityObservable = (
-    schema: schema.Entity,
+    schema: normalizrSchema.Entity,
     entitySelect$: Observable<T>,
     entityRequestSelect$: Observable<RequestInfoState>,
     entities$: Observable<IRequestDataState>
@@ -107,7 +102,7 @@ export class EntityMonitor<T = any> {
       }),
       withLatestFrom(entities$),
       map(([
-        [entity, entityRequestInfo],
+        [entity],
         entities
       ]) => {
         return entity ? denormalize(entity, schema, entities) : null;
@@ -122,7 +117,7 @@ export class EntityMonitor<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, action: Function, getActionState: (request: RequestInfoState) => ActionState) {
-    return Observable.interval(interval)
+    return observableInterval(interval)
       .pipe(
         tag('poll'),
         withLatestFrom(

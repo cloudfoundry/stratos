@@ -1,11 +1,9 @@
+import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { DataSource } from '@angular/cdk/table';
+import { PaginationEntityState } from '../../../../store/types/pagination.types';
 
 export interface AppEvent {
   actee_name: string;
@@ -33,12 +31,17 @@ export class ListActionConfig<T> {
   enabled: (row: T) => boolean;
 }
 
-export interface ITableListDataSource<T> extends DataSource<T> {
+interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-  getRowState?(row: T): Observable<RowsState>;
+  getRowState?(row: T): Observable<RowState>;
   trackBy(index: number, item: T);
 }
-export interface IListDataSource<T> extends ITableListDataSource<T> {
+
+export interface ITableListDataSource<T> extends ICoreListDataSource<T> {
+  isTableLoading$: Observable<boolean>;
+}
+
+export interface IListDataSource<T> extends ICoreListDataSource<T> {
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((
@@ -62,7 +65,7 @@ export interface IListDataSource<T> extends ITableListDataSource<T> {
   selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
   selectClear();
 
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
@@ -85,6 +88,7 @@ export interface RowState {
   message?: string;
   blocked?: boolean;
   highlighted?: boolean;
+  deleting?: boolean;
   [customState: string]: any;
 }
 
@@ -92,5 +96,6 @@ export const getDefaultRowState = (): RowState => ({
   busy: false,
   error: false,
   blocked: false,
+  deleting: false,
   message: null
 });

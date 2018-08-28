@@ -1,5 +1,18 @@
-import { ActionState } from '../reducers/api-request-reducer/types';
-import { APIResource } from './api.types';
+import { ScopeStrings } from '../../core/current-user-permissions.config';
+
+export interface RolesRequestState {
+  initialised: boolean;
+  fetching: boolean;
+  error: boolean;
+}
+
+export function getDefaultRolesRequestState(): RolesRequestState {
+  return {
+    initialised: false,
+    fetching: false,
+    error: false
+  };
+}
 
 export function getDefaultEndpointRoles(): ICfRolesState {
   return {
@@ -16,11 +29,15 @@ export function getDefaultEndpointRoles(): ICfRolesState {
     },
     organizations: {
 
-    }
+    },
+    state: getDefaultRolesRequestState()
   };
 }
 
-
+export enum RoleEntities {
+  ORGS = 'organizations',
+  SPACES = 'spaces'
+}
 export interface IGlobalRolesState {
   isAdmin: boolean;
   isReadOnlyAdmin: boolean;
@@ -30,6 +47,7 @@ export interface IGlobalRolesState {
   scopes: string[];
 }
 export interface ISpaceRoleState {
+  orgId: string;
   isManager: boolean;
   isAuditor: boolean;
   isDeveloper: boolean;
@@ -42,6 +60,7 @@ export interface IOrgRoleState {
   isAuditor: boolean;
   isBillingManager: boolean;
   isUser: boolean;
+  spaceGuids: string[];
 }
 export interface IOrgsRoleState {
   [orgId: string]: IOrgRoleState;
@@ -50,6 +69,7 @@ export interface ICfRolesState {
   global: IGlobalRolesState;
   spaces: ISpacesRoleState;
   organizations: IOrgsRoleState;
+  state: RolesRequestState;
 }
 
 export interface IAllCfRolesState {
@@ -58,10 +78,11 @@ export interface IAllCfRolesState {
 
 export interface IStratosRolesState {
   isAdmin: boolean;
-  scopes: string[];
+  scopes: ScopeStrings[];
 }
 
 export interface ICurrentUserRolesState {
   internal: IStratosRolesState;
   cf: IAllCfRolesState;
+  state: RolesRequestState;
 }

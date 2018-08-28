@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -21,7 +21,7 @@ import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input('app') app;
+  @Input() app;
 
   applicationState$: Observable<ApplicationStateData>;
 

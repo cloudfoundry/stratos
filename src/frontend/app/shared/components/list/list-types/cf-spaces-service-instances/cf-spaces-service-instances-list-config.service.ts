@@ -10,6 +10,7 @@ import { ServiceActionHelperService } from '../../../../data-services/service-ac
 import { IListConfig } from '../../list.component.types';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 
 /**
  * Service instance list shown for `cf / org / space / service instances` tab
@@ -27,16 +28,15 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
     store: Store<AppState>,
     cfSpaceService: CloudFoundrySpaceService,
     datePipe: DatePipe,
-    serviceActionHelperService: ServiceActionHelperService
-  ) {
-    super(store, datePipe, serviceActionHelperService);
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    serviceActionHelperService: ServiceActionHelperService) {
+    super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'space-services'
     };
   }
 
-  getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 
 }

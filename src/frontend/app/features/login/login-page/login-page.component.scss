@@ -23,6 +23,9 @@
     height: 180px;
     opacity: 1;
     transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
+    &.login-sso {
+      height: auto;
+    }
   }
   &__loading {
     display: none;

@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
   CfServicesListConfigService,
 } from '../../../shared/components/list/list-types/cf-services/cf-services-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { APIResource } from '../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
 
 @Component({
@@ -27,10 +25,12 @@ export class ServiceCatalogPageComponent {
 
   public cfIds$: Observable<string[]>;
 
-  constructor(private listConfig: ListConfig<APIResource>, public cloudFoundryService: CloudFoundryService) {
-    const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
+  constructor(public cloudFoundryService: CloudFoundryService) {
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+      map(endpoints => endpoints
+        .filter(endpoint => endpoint.connectionStatus === 'connected')
+        .map(endpoint => endpoint.guid)
+      )
     );
   }
 }

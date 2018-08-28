@@ -1,13 +1,12 @@
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
-import { populatePaginationFromParent } from '../../helpers/entity-relations';
+import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam, PaginationClientPagination } from '../../types/pagination.types';
@@ -128,7 +127,7 @@ function getObservables<T = any>(
     // publishReplay(1),
     // refCount()
   );
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -169,8 +168,8 @@ function getObservables<T = any>(
             ));
           }
         }),
-        switchMap(() => paginationMonitor.currentPage$),
-    );
+        switchMap(() => paginationMonitor.currentPage$)
+      );
 
   return {
     pagination$: pagination$.pipe(

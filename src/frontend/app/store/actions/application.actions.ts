@@ -2,7 +2,7 @@ import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IApp } from '../../core/cf-api.types';
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
-import { EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
@@ -53,6 +53,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entity = [applicationEntitySchema];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
+  endpointGuid: string = null;
   initialParams = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
@@ -160,6 +161,7 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     const endpointPassthroughHeader = 'x-cap-passthrough';
     this.options.headers.set(endpointPassthroughHeader, 'true');
     this.options.params = new URLSearchParams();
+    // Delete the service instance and route bindings, but not the service instance and route themselves
     this.options.params.set('recursive', 'true');
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];

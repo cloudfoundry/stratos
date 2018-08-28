@@ -79,6 +79,14 @@ build_and_push_image() {
         docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     fi
 }
+tag_and_push_image() {
+    TAG_FROM=$1
+    TAG_TO=$2
+    docker tag ${REGISTRY}/${ORGANIZATION}/${TAG_FROM}:${TAG} ${REGISTRY}/${ORGANIZATION}/${TAG_TO}:${TAG}
+    if [ ! -z ${PUSH_IMAGES} ]; then
+        docker push ${REGISTRY}/${ORGANIZATION}/${TAG_TO}:${TAG}
+    fi
+}
 # Base image with node installed
 build_go_base(){
    build_and_push_image stratos-go-build-base Dockerfile.stratos-go-build-base
@@ -107,7 +115,7 @@ build_mariadb_base(){
 }
 
 build_aio_base(){
-    build_and_push_image stratos-aio-base Dockerfile.stratos-aio-base
+    tag_and_push_image stratos-bk-build-base stratos-aio-base
 }
 
 # Base with go

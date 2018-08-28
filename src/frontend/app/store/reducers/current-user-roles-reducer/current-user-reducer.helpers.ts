@@ -1,14 +1,17 @@
-import { ISpacesRoleState, IOrgRoleState } from '../../types/current-user-roles.types';
 import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
+import { ISpace } from '../../../core/cf-api.types';
+import { APIResource } from '../../types/api.types';
 
 export interface IKeyedByIDObject<T> {
   [id: string]: T;
 }
 
-export type roleFinalReducer<T> = (
+export type roleFinalReducer<T, Y = any> = (
   state: T,
   relationType: UserRelationTypes,
-  userHasRelation: boolean) => T;
+  userHasRelation: boolean,
+  data?: APIResource<Y>
+) => T;
 
 export function addNewRoles<T>(
   state: IKeyedByIDObject<T>,
@@ -20,7 +23,7 @@ export function addNewRoles<T>(
     return {
       newState: {
         ...currentState,
-        [data.metadata.guid]: reducer(currentState[data.metadata.guid], action.relationType, true)
+        [data.metadata.guid]: reducer(currentState[data.metadata.guid], action.relationType, true, data)
       },
       addedIds: config.addedIds.concat([data.metadata.guid])
     };

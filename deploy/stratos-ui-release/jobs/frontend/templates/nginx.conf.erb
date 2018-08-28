@@ -13,8 +13,6 @@ http {
         keepalive                   32;
     }
 
-    add_header                      X-Frame-Options DENY;
-
     include                         /var/vcap/packages/nginx/conf/mime.types;
     default_type                    application/octet-stream;
     keepalive_timeout               70;
@@ -69,6 +67,7 @@ http {
 
         location / {
             root                    /var/vcap/packages/frontend;
+            add_header X-Frame-Options DENY;
             add_header Cache-Control no-cache;
         }
     }

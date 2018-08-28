@@ -13,23 +13,23 @@ import { IMetricApplication } from '../../../../store/types/metric.types';
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
-  @Input('appGuid')
+  @Input()
   private appGuid: string;
 
-  @Input('endpointGuid')
+  @Input()
   private endpointGuid: string;
 
-  @Input('yAxisLabel')
+  @Input()
   private yAxisLabel: string;
 
-  @Input('metricName')
+  @Input()
   private metricName: string;
 
-  @Input('seriesTranslation')
+  @Input()
   private seriesTranslation: string;
 
-  @Input('title')
-  private title: string;
+  @Input()
+  public title: string;
 
   public instanceChartConfig: MetricsLineChartConfig;
 

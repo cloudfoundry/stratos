@@ -11,11 +11,14 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
+import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
+import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'applications', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'upgrade', component: UpgradePageComponent },
+  { path: 'domainMismatch', component: DomainMismatchComponent },
   { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
   {
     path: '',
@@ -48,6 +51,10 @@ const appRoutes: Routes = [
     path: 'noendpoints',
     component: NoEndpointsNonAdminComponent,
     canActivate: [AuthGuardService],
+  },
+  {
+    path: '**',
+    component: PageNotFoundComponentComponent
   }
 ];
 

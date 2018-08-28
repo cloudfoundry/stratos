@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { endpointSchemaKey } from './../../../store/helpers/entity-factory';
 import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -26,24 +26,24 @@ export class PageHeaderComponent {
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
 
-  @Input('hideSideNavButton') hideSideNavButton = false;
+  @Input() hideSideNavButton = false;
 
-  @Input('hideMenu') hideMenu = false;
+  @Input() hideMenu = false;
 
-  @Input('endpointIds$')
+  @Input()
   endpointIds$: Observable<string[]>;
 
-  @Input('tabs')
+  @Input()
   tabs: ISubHeaderTabs[];
-  @Input('showUnderFlow') showUnderFlow = false;
+  @Input() showUnderFlow = false;
 
-  @Input('breadcrumbs')
+  @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
   }
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
-  @Input('logoutOnly') logoutOnly: boolean;
+  @Input() logoutOnly: boolean;
 
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
     if (!breadcrumbs || !breadcrumbs.length) {

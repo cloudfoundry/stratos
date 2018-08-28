@@ -42,7 +42,7 @@ export class ResetsHelpers {
   }
 
   /**
-   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * Get all of the registered Endpoints and connect all of them for which credentials
    * have been configured
    */
   connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
@@ -65,6 +65,15 @@ export class ResetsHelpers {
       });
   }
 
+  getInfo(req, setup) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/info' })
+      .then(response => {
+        const info = JSON.parse(response);
+        setup.info = info;
+        return info;
+      });
+  }
+
   /**
    *
    * Ensure we have multiple Cloud Foundries registered
@@ -82,7 +91,7 @@ export class ResetsHelpers {
         fail('You must configure multiple Cloud Foundry endpoints in secrets.yaml');
       }
       endpointsOfType.forEach((ep) => {
-         p.then(() => reqHelpers.sendRequest(
+        p.then(() => reqHelpers.sendRequest(
           req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
         ));
       });

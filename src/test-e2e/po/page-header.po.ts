@@ -1,5 +1,6 @@
-import { browser, by, element, promise } from 'protractor';
+import { browser, by, element as protractorElement, ElementFinder, promise, protractor } from 'protractor';
 import { ElementArrayFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 import { MenuComponent } from './menu.po';
 
@@ -9,8 +10,10 @@ import { MenuComponent } from './menu.po';
 export class PageHeader extends Component {
 
   constructor() {
-    super(element(by.tagName('app-page-header')));
+    super(protractorElement(by.tagName('app-page-header')));
   }
+  private readonly until = protractor.ExpectedConditions;
+  private readonly pageTitleSelector = '.page-header h1';
 
   getIconButtons(): ElementArrayFinder {
     return this.locator.all(by.css('.page-header button.mat-icon-button'));
@@ -33,8 +36,18 @@ export class PageHeader extends Component {
     return this.getIconButton(iconName).then(btn => btn && btn.isDisplayed());
   }
 
-  getTitle(): promise.Promise<string> {
-    return this.locator.element(by.css('.page-header h1')).getText();
+  getTitle(): ElementFinder {
+    const element = this.locator.element(by.css(this.pageTitleSelector));
+    browser.wait(this.until.presenceOf(element), 20000);
+    return element;
+  }
+
+  getTitleText(): promise.Promise<string> {
+    return this.getTitle().getText();
+  }
+
+  waitForTitleText(text: string) {
+    browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000, `Failed to wait for page header with text ${text}`);
   }
 
   logout(): promise.Promise<any> {

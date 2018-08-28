@@ -1,7 +1,9 @@
+
+import { distinct, map, combineLatest } from 'rxjs/operators';
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 import { AppState } from '../../../../../../store/app-state';
 import { EntityInfo } from '../../../../../../store/types/api.types';
@@ -29,13 +31,26 @@ export class BuildTabComponent implements OnInit {
 
   getFullApiUrl = getFullEndpointApiUrl;
 
+  sshStatus$: Observable<string>;
+
   ngOnInit() {
-    this.cardTwoFetching$ = this.applicationService.application$
-      .combineLatest(
+    this.cardTwoFetching$ = this.applicationService.application$.pipe(
+      combineLatest(
         this.applicationService.appSummary$
-      )
-      .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
+      ),
+      map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
-      }).distinct();
+      }), distinct(), );
+
+    this.sshStatus$ = this.applicationService.application$.pipe(
+      combineLatest(this.applicationService.appSpace$),
+      map(([app, space]) => {
+        if (! space.entity.allow_ssh) {
+          return 'Disabled by the space';
+        } else {
+          return app.app.entity.enable_ssh ? 'Yes' : 'No';
+       }
+      })
+    );
   }
 }

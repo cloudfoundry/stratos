@@ -1,4 +1,8 @@
 import { InvalidSession, LOGIN } from '../actions/auth.actions';
+import { RouterActions, RouterNav } from '../actions/router.actions';
+import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
+import { AppState } from '../app-state';
+import { SessionData } from '../types/auth.types';
 import {
   LOGIN_FAILED,
   LOGIN_SUCCESS,
@@ -9,8 +13,7 @@ import {
   SESSION_VERIFIED,
   VERIFY_SESSION,
 } from './../actions/auth.actions';
-import { SessionData } from '../types/auth.types';
-import { RouterNav, RouterActions } from '../actions/router.actions';
+import { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {
   guid: string;
@@ -26,7 +29,7 @@ export interface AuthState {
   errorResponse: any;
   sessionData: SessionData;
   verifying: boolean;
-  redirectPath?: string;
+  redirect?: RouterRedirect;
 }
 
 const defaultState: AuthState = {
@@ -37,10 +40,9 @@ const defaultState: AuthState = {
   errorResponse: '',
   sessionData: null,
   verifying: false,
-  redirectPath: null,
 };
 
-export function authReducer(state: AuthState = defaultState, action) {
+export function authReducer(state: AuthState = defaultState, action): AuthState {
   switch (action.type) {
     case LOGIN:
       return { ...state, loggingIn: true, loggedIn: false, error: false };
@@ -56,7 +58,7 @@ export function authReducer(state: AuthState = defaultState, action) {
       return {
         ...state,
         error: false,
-        errorMessage: '',
+        errorResponse: '',
         sessionData: {
           ...action.sessionData,
           valid: true,
@@ -68,22 +70,36 @@ export function authReducer(state: AuthState = defaultState, action) {
     case SESSION_INVALID:
       const sessionInvalid: InvalidSession = action;
       return {
-        ...state, sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress },
+        ...state,
+        sessionData: {
+          valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
+          domainMismatch: action.domainMismatch, isSSOLogin: action.isSSOLogin, sessionExpiresOn: null
+        },
         verifying: false
       };
     case RouterActions.GO:
       const goToState: RouterNav = action;
       return {
         ...state,
-        redirectPath: goToState.redirectPath !== undefined ? goToState.redirectPath : state.redirectPath
+        redirect: goToState.redirect || state.redirect
       };
     case RESET_AUTH:
       return defaultState;
+    case GET_SYSTEM_INFO_SUCCESS:
+      return {
+        ...state,
+        sessionData: {
+          ...state.sessionData,
+          endpoints: {
+            ...action.payload.endpoints
+          }
+        },
+      };
     default:
       return state;
   }
 }
 
 export function selectSessionData() {
-  return (state) => state.auth.sessionData;
+  return (state: AppState) => state.auth.sessionData;
 }

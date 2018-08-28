@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -38,7 +38,7 @@ export class CardCfRecentAppsComponent implements OnInit {
           !!this.activeRouteCfOrgSpace.orgGuid && org.metadata.guid === this.activeRouteCfOrgSpace.orgGuid);
       }),
       map((orgs: APIResource<IOrganization>[]) => {
-        return [].concat(...orgs.map((org) => org.entity.spaces));
+        return [].concat(...orgs.map((org) => org.entity.spaces ? org.entity.spaces : []));
       }),
       map((spaces: APIResource<ISpace>[]) => {
         return spaces.filter((space) => !this.activeRouteCfOrgSpace.spaceGuid ||

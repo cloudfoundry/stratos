@@ -1,0 +1,143 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "stratos": {
+      "root": "",
+      "sourceRoot": "src/frontend",
+      "projectType": "application",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "preserveSymlinks": true,
+            "outputPath": "dist",
+            "index": "src/frontend/index.html",
+            "main": "src/frontend/main.ts",
+            "tsConfig": "src/frontend/tsconfig.app.json",
+            "polyfills": "src/frontend/polyfills.ts",
+            "assets": [
+              "src/frontend/assets",
+              "src/frontend/favicon.ico"
+            ],
+            "styles": [
+              "src/frontend/styles.scss",
+              "node_modules/xterm/dist/xterm.css"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "fileReplacements": [{
+                "replace": "src/frontend/environments/environment.ts",
+                "with": "src/frontend/environments/environment.prod.ts"
+              }]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "aot": true,
+            "sslCert": "dev-ssl/server.crt",
+            "proxyConfig": "proxy.conf.js",
+            "ssl": true,
+            "sslKey": "dev-ssl/server.key",
+            "browserTarget": "stratos:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "stratos:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "stratos:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "sourceMap": false,
+            "main": "src/frontend/test.ts",
+            "karmaConfig": "./karma.conf.js",
+            "sourceMap": false,
+            "polyfills": "src/frontend/polyfills.ts",
+            "tsConfig": "src/frontend/tsconfig.spec.json",
+            "scripts": [],
+            "styles": [
+              "src/frontend/styles.scss",
+              "node_modules/xterm/dist/xterm.css"
+            ],
+            "assets": [
+              "src/frontend/assets",
+              "src/frontend/favicon.ico"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "typeCheck": true,
+            "format": "stylish",
+            "tsConfig": [
+              "src/frontend/tsconfig.app.json",
+              "src/frontend/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "stratos-e2e": {
+      "root": "",
+      "sourceRoot": "",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "./protractor.conf.js",
+            "devServerTarget": "stratos:serve"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/test-e2e/tsconfig.e2e.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "stratos",
+  "schematics": {
+    "@schematics/angular:component": {
+      "prefix": "app",
+      "styleext": "scss"
+    },
+    "@schematics/angular:directive": {
+      "prefix": "app"
+    }
+  }
+}

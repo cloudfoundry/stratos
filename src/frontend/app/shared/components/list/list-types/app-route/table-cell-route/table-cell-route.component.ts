@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 import { AppState } from '../../../../../../store/app-state';
@@ -17,7 +17,7 @@ import { TableCellCustom } from '../../../list.types';
 export class TableCellRouteComponent<T> extends TableCellCustom<T>
   implements OnInit {
   domainSubscription: Subscription;
-  @Input('row') row;
+  @Input() row;
   routeUrl: string;
   isRouteTCP: boolean;
   constructor(private store: Store<AppState>) {

@@ -1,3 +1,4 @@
+import { ScopeStrings } from '../../core/current-user-permissions.config';
 
 export interface SessionDataEndpoint {
   guid: string;
@@ -7,7 +8,7 @@ export interface SessionDataEndpoint {
     admin: boolean,
     guid: string,
     name: string,
-    scopes: string[];
+    scopes: ScopeStrings[];
   };
   type: string;
 }
@@ -15,12 +16,13 @@ export interface SessionUser {
   admin: boolean;
   guid: string;
   name: string;
-  scopes: string[];
+  scopes: ScopeStrings[];
 }
 export interface SessionEndpoints {
-  [type: string]: {
-    [guid: string]: SessionDataEndpoint
-  };
+  [type: string]: SessionEndpoint;
+}
+export interface SessionEndpoint {
+  [guid: string]: SessionDataEndpoint;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;
@@ -32,5 +34,17 @@ export interface SessionData {
   valid: boolean;
   uaaError?: boolean;
   upgradeInProgress?: boolean;
+  isSSOLogin?: boolean;
   sessionExpiresOn: number;
+  domainMismatch?: boolean;
+  diagnostics?: Diagnostics;
+}
+export interface Diagnostics {
+  deploymentType?: string;
+  gitClientVersion?: string;
+  databaseMigrations?: any;
+  helmName?: string;
+  helmRevision?: string;
+  helmChartVersion?: string;
+  helmLastModified?: string;
 }

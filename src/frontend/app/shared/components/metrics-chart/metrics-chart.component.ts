@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
@@ -31,11 +31,11 @@ export interface MetricsChartConfig {
   styleUrls: ['./metrics-chart.component.scss']
 })
 export class MetricsChartComponent implements OnInit, OnDestroy {
-  @Input('metricsConfig')
+  @Input()
   public metricsConfig: MetricsConfig;
-  @Input('chartConfig')
+  @Input()
   public chartConfig: MetricsChartConfig;
-  @Input('title')
+  @Input()
   public title: string;
 
   public chartTypes = MetricsChartTypes;

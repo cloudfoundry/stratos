@@ -1,3 +1,4 @@
+
 ---
 platform: linux
 inputs:
@@ -16,14 +17,20 @@ run:
     - -exc
     - |
       cd stratos
-      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | grep 'alpha' | tail -1)
-      ALPHA_RELEASE_NUMBER=$(echo $LATEST_ALPHA_TAG | grep -o '...$')
-      if [ -z "$ALPHA_RELEASE_NUMBER" ]; then
-        ALPHA_RELEASE_NUMBER='000'
+
+      LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
+
+      if [ ! -z ${TAG_SUFFIX} ]; then
+        if [ "${TAG_SUFFIX}" != "null" ]; then
+          LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+        fi
       fi
-      let ALPHA_RELEASE_NUMBER++
-      ALPHA_RELEASE_NUMBER=$(printf "%03d" $ALPHA_RELEASE_NUMBER)
-      FILENAME="2.0.0-${ALPHA_RELEASE_NUMBER}"
+
+
       cd ../image-tag
-      echo "2.0.0-alpha-$ALPHA_RELEASE_NUMBER" > v2-alpha-tag
-      tar -cf v${FILENAME}.tar v2-alpha-tag
+      echo "$LATEST_TAG" > v2-alpha-tag
+      FILENAME="release-${LATEST_TAG}"
+      cat > build-args << EOF
+      { "stratos_version": "${LATEST_TAG}" }
+      EOF
+      tar -cf ${FILENAME}.tar v2-alpha-tag build-args

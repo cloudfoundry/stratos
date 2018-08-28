@@ -6,7 +6,6 @@ import { GithubCommit, GitBranch } from './github.types';
 export interface SourceType {
   name: string;
   id: string;
-  subType?: string;
 }
 
 export enum DeployState {
@@ -23,6 +22,7 @@ export enum SocketEventTypes {
   DATA = 20000,
   MANIFEST = 20001,
   CLOSE_SUCCESS = 20002,
+  APP_GUID_NOTIFY = 20003,
   CLOSE_PUSH_ERROR = 40000,
   CLOSE_NO_MANIFEST = 40001,
   CLOSE_INVALID_MANIFEST = 40002,

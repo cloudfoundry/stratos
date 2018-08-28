@@ -1,41 +1,63 @@
 import { Action } from '@ngrx/store';
 
-import { pathGet } from '../../../core/utils.service';
-import { fetchEntityTree } from '../../helpers/entity-relations.tree';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  isEntityInlineChildAction,
-} from '../../helpers/entity-relations.types';
+import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
 import { deepMergeState } from '../../helpers/reducer.helper';
+import { IFlatTree } from '../../helpers/schema-tree-traverse';
+import { IRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
 
+
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
-  const [startAction, successAction, failedAction] = actions;
+  const successAction = actions[1];
   const defaultState = generateDefaultState(entityList);
-  return function entitiesReducer(state = defaultState, action: Action) {
+  return function entitiesReducer(state = defaultState, action: Action): IRequestDataState {
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
-          // Does the entity associated with the action have a parent property that requires the result to be stored with it?
-          // For example we have fetched a list of spaces that need to be stored in an organization's entity?
-          const entities = populateParentEntity(state, success) || success.response.entities;
-          return deepMergeState(state, entities);
+          return deepMergeState(state, success.response.entities);
         }
         return state;
+      case RECURSIVE_ENTITY_SET_DELETED:
+        return cleanStateFromFlatTree(state, action as SetTreeDeleted);
       default:
         return state;
     }
   };
 }
 
+function cleanStateFromFlatTree(state: IRequestDataState, action: SetTreeDeleted): IRequestDataState {
+  const { tree } = action;
+  return Object.keys(tree).reduce(reduceTreeToState(tree), { ...state });
+}
+
+function reduceTreeToState(tree: IFlatTree) {
+  return (state: IRequestDataState, entityKey: string) => {
+    const ids = tree[entityKey];
+    return Array.from(ids).reduce(reduceIdsToState(entityKey), state);
+  };
+}
+
+function reduceIdsToState(entityKey: string) {
+  return (state: IRequestDataState, id: string) => {
+    const {
+      [id]: omit,
+      ...newState
+    } = state[entityKey];
+
+    return {
+      ...state,
+      [entityKey]: newState
+    };
+  };
+}
+
 function deleteEntity(state, entityKey, guid) {
-  const newState = {};
+  const newState = {} as IRequestDataState;
   for (const entityTypeKey in state) {
     if (entityTypeKey === entityKey) {
       newState[entityTypeKey] = {};
@@ -49,49 +71,4 @@ function deleteEntity(state, entityKey, guid) {
     }
   }
   return newState;
-}
-
-function populateParentEntity(state, successAction) {
-  if (!isEntityInlineChildAction(successAction.apiAction)) {
-    return;
-  }
-
-  const action: EntityInlineChildAction = successAction.apiAction as EntityInlineChildAction;
-  const response = successAction.response;
-  const entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
-  if (!Object.values(entities)) {
-    return;
-  }
-
-  // Create a new entity with the inline result. For instance an new organization containing a list of spaces
-  // First create the required consts
-  const parentGuid = action.parentGuid;
-  const parentEntityKey = action.parentEntitySchema.key;
-  // We need to find out the entity param name. For instance an org with spaces in will store them in a `spaces` property
-  const parentEntityTree = fetchEntityTree({
-    type: '',
-    entity: action.parentEntitySchema,
-    entityKey: parentEntityKey,
-    includeRelations: [createEntityRelationKey(parentEntityKey, successAction.apiAction.entityKey)],
-    populateMissing: null,
-  });
-  const childRelation = parentEntityTree.rootRelation.childRelations.find(rel => rel.entityKey === successAction.apiAction.entityKey);
-  const entityParamName = childRelation.paramName;
-
-  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || {};
-  newParentEntity = {
-    ...newParentEntity,
-    entity: {
-      ...newParentEntity.entity,
-      [entityParamName]: childRelation.isArray ? successAction.response.result : successAction.response.result[0]
-    }
-  };
-
-  // Apply the new entity to the response which will me merged into the store's state
-  successAction.response.entities[parentEntityKey] = {
-    ...successAction.response.entities[parentEntityKey],
-    [parentGuid]: newParentEntity
-  };
-
-  return successAction.response.entities;
 }

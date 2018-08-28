@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { of as observableOf } from 'rxjs';
 
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
@@ -8,7 +9,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
 
-interface Tag {
+export interface ServiceTag {
   value: string;
   key: APIResource<IService>;
 }
@@ -17,30 +18,42 @@ interface Tag {
   templateUrl: './cf-service-card.component.html',
   styleUrls: ['./cf-service-card.component.scss']
 })
-export class CfServiceCardComponent extends CardCell<APIResource<IService>> implements OnInit {
+export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
-  @Input('row') row: APIResource<IService>;
-  extraInfo: IServiceExtra;
-  tags: AppChip<Tag>[] = [];
-  constructor(private store: Store<AppState>) {
-    super();
+  serviceEntity: APIResource<IService>;
+  @Input() disableCardClick = false;
+
+  @Input('row')
+  set row(row: APIResource<IService>) {
+    if (row) {
+      this.serviceEntity = row;
+      this.extraInfo = null;
+      if (this.serviceEntity.entity.extra) {
+        try {
+          this.extraInfo = JSON.parse(this.serviceEntity.entity.extra);
+        } catch { }
+      }
+      this.serviceEntity.entity.tags.forEach(t => {
+        this.tags.push({
+          value: t,
+          hideClearButton$: observableOf(true)
+        });
+      });
+    }
   }
 
-  ngOnInit() {
-    this.extraInfo = this.row.entity.extra ? JSON.parse(this.row.entity.extra) : null;
-    this.row.entity.tags.forEach(t => {
-      this.tags.push({
-        value: t,
-        hideClearButton: true
-      });
-    });
+
+  extraInfo: IServiceExtra;
+  tags: AppChip<ServiceTag>[] = [];
+  constructor(private store: Store<AppState>) {
+    super();
   }
 
   getDisplayName() {
     if (this.extraInfo && this.extraInfo.displayName) {
       return this.extraInfo.displayName;
     }
-    return this.row.entity.label;
+    return this.serviceEntity.entity.label;
   }
 
 
@@ -60,6 +73,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
 
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({
-      path: ['marketplace', this.row.entity.cfGuid, this.row.metadata.guid]
+      path: ['marketplace', this.serviceEntity.entity.cfGuid, this.serviceEntity.metadata.guid]
     }))
 }

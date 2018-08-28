@@ -1,47 +1,57 @@
 import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
+
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
-import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
-import { CfAppRoutesListConfigService } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
-import { TableCellRouteComponent } from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
 import {
-  TableCellTCPRouteComponent
+  AppMonitorComponentTypes,
+} from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { DataFunctionDefinition } from '../../../shared/components/list/data-sources-controllers/list-data-source';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import {
+  CfAppRoutesListConfigService,
+} from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import {
+  TableCellRouteComponent,
+} from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
+import {
+  TableCellTCPRouteComponent,
 } from '../../../shared/components/list/list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
 import {
-  AppServiceBindingDataSource
+  AppServiceBindingDataSource,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import {
-  AppServiceBindingListConfigService
+  AppServiceBindingListConfigService,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import {
-  TableCellAppInstancesComponent
+  TableCellAppInstancesComponent,
 } from '../../../shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 import {
-  TableCellAppStatusComponent
+  TableCellAppStatusComponent,
 } from '../../../shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
 import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
 import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
 import { AppState } from '../../../store/app-state';
 import {
-  applicationSchemaKey, entityFactory, routeSchemaKey, serviceBindingSchemaKey, serviceInstancesSchemaKey
+  applicationSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
-import { DataFunctionDefinition } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 
 
 @Component({
@@ -214,7 +224,7 @@ export class ApplicationDeleteComponent<T> {
     const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
-    const routesAction = CfAppRoutesListConfigService.createAction(appGuid, cfGuid);
+    const routesAction = new GetAppRoutes(appGuid, cfGuid);
     const instancePaginationKey = instanceAction.paginationKey;
     const routesPaginationKey = routesAction.paginationKey;
 
@@ -287,7 +297,7 @@ export class ApplicationDeleteComponent<T> {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
             this.selectedRoutes.forEach(route => {
-              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid));
             });
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {

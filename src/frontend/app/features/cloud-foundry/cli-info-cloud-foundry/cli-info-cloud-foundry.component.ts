@@ -1,28 +1,25 @@
-import { Component, OnInit, ViewEncapsulation, Optional } from '@angular/core';
-import { AppState } from '../../../store/app-state';
+
+import {of as observableOf,  BehaviorSubject ,  Observable ,  combineLatest } from 'rxjs';
+import { Component, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { getPreviousRoutingState, RoutingEvent } from '../../../store/types/routing.type';
-import { first, map, filter } from 'rxjs/operators';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { ActivatedRoute } from '@angular/router';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
-import { Observable } from 'rxjs/Observable';
-import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { first, map } from 'rxjs/operators';
+
+import { IOrganization, ISpace } from '../../../core/cf-api.types';
+import { CurrentUserPermissionsChecker } from '../../../core/current-user-permissions.checker';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { RouterNav } from '../../../store/actions/router.actions';
+import { AppState } from '../../../store/app-state';
+import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { EndpointModel } from '../../../store/types/endpoint.types';
+import { getPreviousRoutingState } from '../../../store/types/routing.type';
+import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
-import { EndpointModel } from '../../../store/types/endpoint.types';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
 
 @Component({
   selector: 'app-cli-info-cloud-foundry',
@@ -36,6 +33,12 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
+
+  permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
+  permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
+
+  orgGuid: string;
+  spaceGuid: string;
 
   cfEndpointEntityService: any;
   public previousUrl: string;
@@ -55,12 +58,16 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   constructor(
     private store: Store<AppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfEndpointService: CloudFoundryEndpointService,
     @Optional() private cfOrgService: CloudFoundryOrganizationService,
     @Optional() private cfSpaceService: CloudFoundrySpaceService
   ) {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
+    if (activeRouteCfOrgSpace.orgGuid) {
+      this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;
+    }
   }
 
   ngOnInit() {
@@ -101,8 +108,8 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   private setupObservables() {
     const { cfGuid, orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
-    const org$ = orgGuid ? this.cfOrgService.org$ : Observable.of(null);
-    const space$ = spaceGuid ? this.cfSpaceService.space$ : Observable.of(null);
+    const org$ = orgGuid ? this.cfOrgService.org$ : observableOf(null);
+    const space$ = spaceGuid ? this.cfSpaceService.space$ : observableOf(null);
     this.endpointOrgSpace$ = combineLatest(
       this.cfEndpointService.endpoint$,
       org$,

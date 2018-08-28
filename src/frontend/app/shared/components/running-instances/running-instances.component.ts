@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
@@ -16,12 +16,12 @@ import { appStatsSchemaKey } from '../../../store/helpers/entity-factory';
 })
 export class RunningInstancesComponent implements OnInit {
 
-  @Input('instances') instances;
-  @Input('cfGuid') cfGuid;
-  @Input('appGuid') appGuid;
+  @Input() instances;
+  @Input() cfGuid;
+  @Input() appGuid;
 
   // Observable on the running instances count for the application
-  private runningInstances$: Observable<number>;
+  public runningInstances$: Observable<number>;
 
   constructor(
     private store: Store<AppState>,

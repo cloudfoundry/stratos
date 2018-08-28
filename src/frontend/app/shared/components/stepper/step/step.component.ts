@@ -1,8 +1,5 @@
-import 'rxjs/add/observable/of';
-
-import { Component, Input, OnInit, TemplateRef, ViewChild, Output, EventEmitter } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Observable, of as observableOf } from 'rxjs';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -10,13 +7,17 @@ export interface IStepperStep {
   onEnter?: (data?: any) => void;
 }
 
-export type StepOnNextFunction = () => Observable<{
-  success: boolean,
-  message?: string,
+export interface StepOnNextResult {
+  success: boolean;
+  message?: string;
   // Should we redirect to the store previous state?
-  redirect?: boolean,
-  data?: any,
-}>;
+  redirect?: boolean;
+  // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
+  ignoreSuccess?: boolean;
+  data?: any;
+}
+
+export type StepOnNextFunction = () => Observable<StepOnNextResult>;
 
 @Component({
   selector: 'app-step',
@@ -38,9 +39,9 @@ export class StepComponent {
   @Input()
   title: string;
 
-  @Output() onHidden= new EventEmitter<boolean>();
+  @Output() onHidden = new EventEmitter<boolean>();
 
-  @Input('hidden')
+  @Input()
   set hidden(hidden: boolean) {
     this._hidden = hidden;
     this.onHidden.emit(this._hidden);
@@ -50,28 +51,28 @@ export class StepComponent {
     return this._hidden;
   }
 
-  @Input('valid')
+  @Input()
   valid = true;
 
-  @Input('canClose')
+  @Input()
   canClose = true;
 
-  @Input('nextButtonText')
+  @Input()
   nextButtonText = 'Next';
 
-  @Input('finishButtonText')
+  @Input()
   finishButtonText = 'Finish';
 
-  @Input('cancelButtonText')
+  @Input()
   cancelButtonText = 'Cancel';
 
-  @Input('disablePrevious')
+  @Input()
   disablePrevious = false;
 
-  @Input('blocked')
-  blocked: boolean;
+  @Input()
+  blocked = false;
 
-  @Input('destructiveStep')
+  @Input()
   public destructiveStep = false;
 
   @ViewChild(TemplateRef)
@@ -81,7 +82,7 @@ export class StepComponent {
   skip = false;
 
   @Input()
-  onNext: StepOnNextFunction = () => Observable.of({ success: true })
+  onNext: StepOnNextFunction = () => observableOf({ success: true })
 
   @Input()
   onEnter: (data: any) => void = () => { }

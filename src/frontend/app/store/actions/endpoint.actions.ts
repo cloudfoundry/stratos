@@ -1,8 +1,9 @@
 import { Action } from '@ngrx/store';
 
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { EndpointModel, EndpointType, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { EndpointType } from '../types/endpoint.types';
+import { CloudFoundryService } from '../../shared/data-services/cloud-foundry.service';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -26,6 +27,15 @@ export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
+export class EndpointActionComplete implements Action {
+  constructor(
+    public type: string,
+    public guid: string,
+    public endpointType: EndpointType,
+    public endpoint: EndpointModel | INewlyConnectedEndpointInfo
+  ) { }
+}
+
 export class EndpointAction implements Action {
   type: string;
   endpointType: EndpointType = 'cf';
@@ -45,7 +55,7 @@ export interface AuthParamsToken {
 export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 
 export class GetAllEndpoints implements PaginatedAction {
-  public static storeKey = 'endpoint-list';
+  public static storeKey = CloudFoundryService.EndpointList;
   constructor(public login = false) { }
   entityKey = endpointSchemaKey;
   paginationKey = GetAllEndpoints.storeKey;
@@ -53,7 +63,7 @@ export class GetAllEndpoints implements PaginatedAction {
   actions = [
     GET_ENDPOINTS_START,
     GET_ENDPOINTS_SUCCESS,
-    GET_ENDPOINTS_SUCCESS
+    GET_ENDPOINTS_FAILED
   ];
   initialParams = {
     'order-direction': 'desc',
@@ -79,6 +89,7 @@ export class ConnectEndpoint extends EndpointAction {
     public endpointType: EndpointType,
     public authType: string,
     public authValues: AuthParams,
+    public systemShared: boolean,
     public body: string,
   ) {
     super();

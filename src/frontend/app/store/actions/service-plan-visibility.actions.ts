@@ -7,7 +7,7 @@ import {
   servicePlanVisibilitySchemaKey,
   spaceSchemaKey,
 } from '../helpers/entity-factory';
-import { createEntityRelationKey } from '../helpers/entity-relations.types';
+import { createEntityRelationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';

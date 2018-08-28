@@ -1,8 +1,36 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { filter, map, share, switchMap, tap } from 'rxjs/operators';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs/Rx';
 
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  combineLatest as observableCombineLatest,
+  fromEvent as observableFromEvent,
+  interval as observableInterval,
+  never as observableNever
+} from 'rxjs';
+import {
+  buffer,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  sampleTime,
+  scan,
+  share,
+  startWith,
+  switchMap,
+  tap,
+  throttle,
+  timeInterval,
+  catchError
+} from 'rxjs/operators';
 import { AnsiColors } from './ansi-colors';
+
+interface LogStreamMessage {
+  message: string;
+  isError?: boolean;
+}
 
 @Component({
   selector: 'app-log-viewer',
@@ -12,11 +40,11 @@ import { AnsiColors } from './ansi-colors';
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input('filter') filter: Function;
+  @Input() filter: Function;
 
-  @Input('status') status: Observable<number>;
+  @Input() status: Observable<number>;
 
-  @Input('logStream') logStream: Observable<any>;
+  @Input() logStream: Observable<any>;
 
   @ViewChild('container') container: ElementRef;
 
@@ -38,7 +66,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public maxLogLines = 1000;
   public isHighThroughput$: Observable<boolean>;
   public isLocked$: Observable<boolean>;
-  public message: string;
+  public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
 
   public ngOnInit() {
     const contentElement = this.content.nativeElement;
@@ -48,52 +76,53 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     const stoppableLogStream$ = this.stopped$.pipe(
       switchMap(
-        stopped => (stopped ? Observable.never() : this.logStream)
+        stopped => (stopped ? observableNever() : this.logStream)
       ),
       share()
     );
 
     // Locked indicates auto-scroll - scroll position is "locked" to the bottom
     // If the user scrolls off the bottom then disable auto-scroll
-    this.isLocked$ = Observable.fromEvent<MouseEvent>(
+    this.isLocked$ = observableFromEvent<MouseEvent>(
       containerElement,
       'scroll'
-    )
-      .scan(() => {
+    ).pipe(
+      map(() => {
         return containerElement.scrollTop + containerElement.clientHeight >= contentElement.clientHeight;
-      })
-      .startWith(true);
+      }),
+      startWith(true)
+    );
 
     // When we resize the window, we need to re-enable auto-scroll - if the height changes
     // we will determine that the user scrolled off the bottom, when in fact this is due to the resize event
-    this.resizeSub = Observable.fromEvent(window, 'resize')
-      .combineLatest(this.isLocked$)
+    this.resizeSub = observableFromEvent(window, 'resize').pipe(
+      combineLatest(this.isLocked$))
       .subscribe(([event, locked]) => {
         if (locked) {
           this.scrollToBottom();
         }
       });
 
-    this.isHighThroughput$ = stoppableLogStream$
-      .timeInterval()
-      .sampleTime(500)
-      .map(x => {
+    this.isHighThroughput$ = stoppableLogStream$.pipe(
+      timeInterval(),
+      sampleTime(500),
+      map(x => {
         const high = x.interval < this.highThroughputTimeMS;
         return high;
-      })
-      .distinctUntilChanged()
-      .startWith(false);
+      }),
+      distinctUntilChanged(),
+      startWith(false), );
 
-    const buffer$ = Observable.interval()
-      .combineLatest(this.isHighThroughput$)
-      .throttle(([t, high]) => {
-        return Observable.interval(
+    const buffer$ = observableInterval().pipe(
+      combineLatest(this.isHighThroughput$),
+      throttle(([t, high]) => {
+        return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
         );
-      });
+      }), );
 
-    const addedLogs$ = stoppableLogStream$
-      .buffer(buffer$)
+    const addedLogs$ = stoppableLogStream$.pipe(
+      buffer(buffer$))
       .pipe(
         filter(log => !!log.length),
         // Apply filter to messages if applicable
@@ -121,22 +150,27 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         })
       );
 
-    this.listeningSub = Observable.combineLatest(this.isLocked$, addedLogs$)
-      .do(([isLocked, logs]) => {
+    this.listeningSub = observableCombineLatest(this.isLocked$, addedLogs$).pipe(
+      tap(([isLocked, logs]) => {
         if (isLocked) {
           containerElement.scrollTop = contentElement.clientHeight;
         }
-      })
-      .subscribe();
+      }))
+      .subscribe(undefined, e => {
+        this.statusMessage$.next({
+          message: 'An error occurred connecting to the log stream websocket',
+          isError: true
+        });
+      });
 
     if (this.status) {
       this.statusSub = this.status.subscribe((wsStatus => {
         switch (wsStatus) {
           case 0:
-            this.message = 'Connecting....';
+            this.statusMessage$.next({ message: 'Connecting....' });
             break;
           default:
-            this.message = undefined;
+            this.statusMessage$.next({ message: '' });
             break;
         }
       }));

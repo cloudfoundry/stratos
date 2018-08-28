@@ -8,5 +8,5 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 })
 export class CloudFoundrySpaceSummaryComponent {
 
-  constructor(private cfSpaceService: CloudFoundrySpaceService) { }
+  constructor(public cfSpaceService: CloudFoundrySpaceService) { }
 }

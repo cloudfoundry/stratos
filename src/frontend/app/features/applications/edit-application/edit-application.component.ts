@@ -1,21 +1,19 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ApplicationService } from '../application.service';
-import { EntityService } from '../../../core/entity-service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { selectNewAppState } from '../../../store/effects/create-app-effects';
 
-// import { UpdateApplication } from '../../../store/actions/application.actions';
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Router } from '@angular/router';
-import { AppNameUniqueDirective, AppNameUniqueChecking } from '../app-name-unique.directive/app-name-unique.directive';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
+
+import { map, filter, take } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { SetNewAppName, SetCFDetails } from '../../../store/actions/create-applications-page.actions';
+import { Store } from '@ngrx/store';
+
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
+import { AppState } from '../../../store/app-state';
+import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-edit-application',
@@ -34,8 +32,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   constructor(
-    private applicationService: ApplicationService,
-    private entityService: EntityService,
+    public applicationService: ApplicationService,
     private store: Store<AppState>,
     private fb: FormBuilder,
     private http: Http,
@@ -58,8 +55,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
         Validators.required,
         Validators.min(0)
       ]],
-      enable_ssh: false,
-      production: false
+      enable_ssh: false
     });
   }
 
@@ -72,7 +68,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private error = false;
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.filter(app => app.app.entity).take(1).map(app => app.app.entity).subscribe(app => {
+    this.sub = this.applicationService.application$.pipe(
+      filter(app => app.app.entity),
+      take(1),
+      map(app => app.app.entity)
+    ).subscribe(app => {
       this.app = app;
       this.store.dispatch(new SetCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
@@ -86,7 +86,6 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
         instances: this.app.instances,
         memory: this.app.memory,
         disk_quota: this.app.disk_quota,
-        production: this.app.production,
         enable_ssh: this.app.enable_ssh,
       });
       // Don't want the values to change while the user is editing
@@ -94,7 +93,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateApp = () => {
+  updateApp: StepOnNextFunction = () => {
     const updates = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editAppForm.value)) {
@@ -106,18 +105,21 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     let obs$: Observable<any>;
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
-      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).map(v => ({ success: !v.error }));
+      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => (
+        {
+          success: !v.error,
+          message: `Could not update application: ${v.message}`
+        })));
     } else {
-      obs$ = Observable.of({ success: true });
+      obs$ = observableOf({ success: true });
     }
 
-    return obs$.take(1).map(res => {
-      this.error = !res.success;
+    return obs$.pipe(take(1), map(res => {
       return {
-        success: res.success,
+        ...res,
         redirect: res.success
       };
-    });
+    }));
   }
 
   clearSub() {

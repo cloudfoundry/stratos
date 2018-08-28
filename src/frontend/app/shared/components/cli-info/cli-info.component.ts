@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 // Context used in the CLI Info template
 export interface CFAppCLIInfoContext {
@@ -17,7 +17,7 @@ export interface CFAppCLIInfoContext {
 })
 export class CliInfoComponent {
 
-  @Input('context') context: CFAppCLIInfoContext;
+  @Input() context: CFAppCLIInfoContext;
 
   constructor() { }
 }

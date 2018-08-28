@@ -1,20 +1,18 @@
 import { Store } from '@ngrx/store';
+import { of as observableOf } from 'rxjs';
 
-import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
-import { CreatePagination } from '../../../../../store/actions/pagination.actions';
+import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../../store/app-state';
-import { entityFactory, EntitySchema, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { EndpointModel } from '../../../../../store/types/endpoint.types';
+import { EntitySchema, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { APIResource } from '../../../../../store/types/api.types';
+import { GithubCommit } from '../../../../../store/types/github.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
-import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
-import { APIResource } from '../../../../../store/types/api.types';
-import { Observable } from 'rxjs/Observable';
+
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
   store: Store<AppState>;
+
   /**
    * Creates an instance of GithubCommitsDataSource.
    * @param {Store<AppState>} store
@@ -32,7 +30,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
   ) {
     const action = new FetchCommits(projectName, sha);
     const paginationKey = action.paginationKey;
-    const rowsState = Observable.of(commitSha ? {
+    const rowsState = observableOf(commitSha ? {
       [commitSha]: {
         highlighted: true
       }

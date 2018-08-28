@@ -1,14 +1,13 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { GetAllStacks } from '../../../../../store/actions/stack.action';
 import { AppState } from '../../../../../store/app-state';
-import { entityFactory, stackSchemaKey, endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory, stackSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { GetAllStacks } from '../../../../../store/actions/stack.action';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {

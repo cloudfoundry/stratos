@@ -1,5 +1,5 @@
 FROM splatform/stratos-ui-build-base:opensuse as base-build
-COPY . /usr/src/app
+COPY --chown=stratos:users . /usr/src/app
 WORKDIR /usr/src/app
 RUN bash deploy/provision.sh -u
 

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
@@ -19,7 +19,7 @@ import { AppDeleteServiceInstancesListConfigService } from './app-delete-instanc
 })
 export class DeleteAppServiceInstancesComponent implements OnDestroy {
 
-  @Output('selected')
+  @Output()
   public selected = new EventEmitter<APIResource<IServiceInstance>[]>();
 
   private selectedSub: Subscription;

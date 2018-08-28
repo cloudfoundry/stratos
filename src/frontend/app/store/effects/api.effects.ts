@@ -1,33 +1,68 @@
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
-
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, URLSearchParams } from '@angular/http';
+import {
+  Headers,
+  Http,
+  Request,
+  RequestOptions,
+  URLSearchParams,
+} from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { forkJoin } from 'rxjs/observable/forkJoin';
-import { map, mergeMap } from 'rxjs/operators';
-
+import { Observable } from 'rxjs';
+import { map, mergeMap, withLatestFrom, catchError } from 'rxjs/operators';
 import { LoggerService } from '../../core/logger.service';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { SendEventAction } from '../actions/internal-events.actions';
+import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
+import {
+  EntityInlineParentAction,
+  isEntityInlineParentAction,
+} from '../helpers/entity-relations/entity-relations.types';
+import {
+  CfAPIFlattener,
+  flattenPagination,
+} from '../helpers/paginated-request-helpers';
+import { getRequestTypeFromMethod, startApiRequest, getFailApiRequestActions } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
-import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
+import {
+  resultPerPageParam,
+  resultPerPageParamDefault,
+} from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAction } from '../types/request.types';
+import { InternalEventSeverity } from '../types/internal-events.types';
+import {
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
+} from '../types/pagination.types';
+import {
+  APISuccessOrFailedAction,
+  ICFAction,
+  IRequestAction,
+  RequestEntityLocation,
+} from '../types/request.types';
 import { environment } from './../../../environments/environment';
-import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
+import {
+  ApiActionTypes,
+  ValidateEntitiesStart,
+} from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import { APIResource, NormalizedResponse, instanceOfAPIResource } from './../types/api.types';
-import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
-import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
-import { listEntityRelations } from '../helpers/entity-relations';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { SendEventAction } from '../actions/internal-events.actions';
-import { InternalEventSeverity, APIEventState } from '../types/internal-events.types';
+import {
+  APIResource,
+  instanceOfAPIResource,
+  NormalizedResponse,
+} from './../types/api.types';
+import {
+  StartRequestAction,
+  WrapperRequestActionFailed,
+} from './../types/request.types';
+import {
+  RecursiveDelete,
+  RecursiveDeleteComplete,
+  RecursiveDeleteFailed,
+} from './recursive-entity-delete.effect';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -56,30 +91,36 @@ interface JetStreamCFErrorResponse {
 
 @Injectable()
 export class APIEffect {
-
   constructor(
     private logger: LoggerService,
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
   ) { }
 
-  @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
-    .withLatestFrom(this.store)
-    .mergeMap(([action, state]) => {
-      return this.doApiRequest(action, state);
-    });
+  @Effect()
+  apiRequest$ = this.actions$
+    .ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
+    .pipe(
+      withLatestFrom(this.store),
+      mergeMap(([action, state]) => {
+        return this.doApiRequest(action, state);
+      }),
+  );
 
-  private doApiRequest(action, state) {
+  private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
-    const paramsObject = {};
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
-    const options = { ...apiAction.options };
+    const options = { ...apiAction.options } as RequestOptions;
     const requestType = getRequestTypeFromMethod(apiAction);
+    if (this.shouldRecursivelyDelete(requestType, apiAction)) {
+      this.store.dispatch(
+        new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)),
+      );
+    }
 
-    this.store.dispatch(new StartRequestAction(actionClone, requestType));
-    this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+    startApiRequest(this.store, action, requestType);
 
     // Apply the params from the store
     if (paginatedAction.paginationKey) {
@@ -91,20 +132,39 @@ export class APIEffect {
       }
 
       // Set params from store
-      const paginationState = selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state);
+      const paginationState = selectPaginationState(
+        apiAction.entityKey,
+        paginatedAction.paginationKey,
+      )(state);
       const paginationParams = this.getPaginationParams(paginationState);
-      paginatedAction.pageNumber = paginationState ? paginationState.currentPage : 1;
+      paginatedAction.pageNumber = paginationState
+        ? paginationState.currentPage
+        : 1;
       this.setRequestParams(options.params, paginationParams);
       if (!options.params.has(resultPerPageParam)) {
-        options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
+        options.params.set(
+          resultPerPageParam,
+          resultPerPageParamDefault.toString(),
+        );
       }
     }
 
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
-    options.headers = this.addBaseHeaders(
-      apiAction.endpointGuid ||
-      state.requestData.endpoint, options.headers
-    );
+
+    const availableEndpoints =
+      apiAction.endpointGuid || state.requestData.endpoint;
+    if (typeof availableEndpoints !== 'string') {
+      // Filter out endpoints that are currently being disconnected
+      const disconnectedEndpoints = Object.keys(availableEndpoints).filter(
+        endpointGuid => {
+          const updating = state.request.endpoint[endpointGuid].updating;
+          return !!updating.disconnecting && updating.disconnecting.busy;
+        },
+      );
+      disconnectedEndpoints.forEach(guid => delete availableEndpoints[guid]);
+    }
+
+    options.headers = this.addBaseHeaders(availableEndpoints, options.headers);
 
     if (paginatedAction.flattenPagination) {
       options.params.set('page', '1');
@@ -116,7 +176,10 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
-      request = this.flattenPagination(request, options);
+      request = flattenPagination(
+        request,
+        new CfAPIFlattener(this.http, options as RequestOptions),
+      );
     }
 
     return request.pipe(
@@ -124,76 +187,144 @@ export class APIEffect {
         return this.handleMultiEndpoints(response, actionClone);
       }),
       mergeMap(response => {
-        const { entities, totalResults, totalPages, errors = [] } = response;
-        errors.forEach(error => {
+        const {
+          entities,
+          totalResults,
+          totalPages,
+          errorsCheck = [],
+        } = response;
+        if (
+          requestType === 'fetch' &&
+          (errorsCheck && errorsCheck.length > 0)
+        ) {
+          this.handleApiEvents(errorsCheck);
+        }
+
+        let fakedAction, errorMessage;
+        errorsCheck.forEach(error => {
           if (error.error) {
-            const fakedAction = { ...actionClone, endpointGuid: error.guid };
-            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
-            this.store.dispatch(new WrapperRequestActionFailed(
-              error.errorCode,
-              { ...actionClone, endpointGuid: error.guid },
-              requestType
-            ));
+            // Dispatch a error action for the specific endpoint that's failed
+            fakedAction = { ...actionClone, endpointGuid: error.guid };
+            errorMessage = error.errorResponse
+              ? error.errorResponse.description || error.errorCode
+              : error.errorCode;
+            this.store.dispatch(
+              new APISuccessOrFailedAction(
+                fakedAction.actions[2],
+                fakedAction,
+                errorMessage,
+              ),
+            );
           }
         });
-        const hasError = errors.findIndex(error => error.error) >= 0;
-        if (hasError) {
+
+        // If this request only went out to a single endpoint ... and it failed... send the failed action now and avoid response validation.
+        // This allows requests sent to multiple endpoints to proceed even if one of those endpoints failed.
+        if (errorsCheck.length === 1 && errorsCheck[0].error) {
+          if (this.shouldRecursivelyDelete(requestType, apiAction)) {
+            this.store.dispatch(
+              new RecursiveDeleteFailed(
+                apiAction.guid,
+                apiAction.endpointGuid,
+                entityFactory(apiAction.entityKey),
+              ),
+            );
+          }
+          this.store.dispatch(
+            new WrapperRequestActionFailed(
+              errorMessage,
+              { ...actionClone, endpointGuid: errorsCheck[0].guid },
+              requestType,
+            ),
+          );
           return [];
         }
-        return [new ValidateEntitiesStart(
-          actionClone,
-          entities.result,
-          true,
-          {
+
+        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
+          this.store.dispatch(
+            new RecursiveDeleteComplete(
+              apiAction.guid,
+              apiAction.endpointGuid,
+              entityFactory(apiAction.entityKey),
+            ),
+          );
+        }
+
+        return [
+          new ValidateEntitiesStart(actionClone, entities.result, true, {
             response: entities,
             totalResults,
-            totalPages
-          }
-        )];
+            totalPages,
+          }),
+        ];
       }),
-    ).catch(error => {
-      const endpoints: string[] = options.headers.get(endpointHeader).split((','));
-      endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
-        eventCode: error.status || '500',
-        severity: InternalEventSeverity.ERROR,
-        message: 'Jetstream API request error',
-        metadata: {
-          url: error.url || apiAction.options.url
+      catchError(error => {
+        const endpointString = options.headers.get(endpointHeader) || '';
+        const endpoints: string[] = endpointString.split(',');
+        endpoints.forEach(endpoint =>
+          this.store.dispatch(
+            new SendEventAction(endpointSchemaKey, endpoint, {
+              eventCode: error.status || '500',
+              severity: InternalEventSeverity.ERROR,
+              message: 'Jetstream API request error',
+              metadata: {
+                error,
+                url: error.url || apiAction.options.url,
+              },
+            }),
+          ),
+        );
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
+          this.store.dispatch(new RecursiveDeleteFailed(
+            apiAction.guid,
+            apiAction.endpointGuid,
+            entityFactory(apiAction.entityKey),
+          ), );
         }
-      })));
-      return [
-        new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
-        new WrapperRequestActionFailed(
-          error.message,
-          actionClone,
-          requestType
-        )
-      ];
-    });
+        return errorActions;
+      }),
+    );
   }
 
-  private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
+  private completeResourceEntity(
+    resource: APIResource | any,
+    cfGuid: string,
+    guid: string,
+  ): APIResource {
     if (!resource) {
       return resource;
     }
 
-    const result = resource.metadata ? {
-      entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
-      metadata: resource.metadata
-    } : {
+    const result = resource.metadata
+      ? {
+        entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
+        metadata: resource.metadata,
+      }
+      : {
         entity: { ...resource, cfGuid },
-        metadata: { guid: guid }
+        metadata: { guid: guid },
       };
 
     // Inject `cfGuid` in nested entities
     Object.keys(result.entity).forEach(resourceKey => {
       const nestedResource = result.entity[resourceKey];
       if (instanceOfAPIResource(nestedResource)) {
-        result.entity[resourceKey] = this.completeResourceEntity(nestedResource, cfGuid, nestedResource.metadata.guid);
+        result.entity[resourceKey] = this.completeResourceEntity(
+          nestedResource,
+          cfGuid,
+          nestedResource.metadata.guid,
+        );
       } else if (Array.isArray(nestedResource)) {
         result.entity[resourceKey] = nestedResource.map(nested => {
           return nested && typeof nested === 'object'
-            ? this.completeResourceEntity(nested, cfGuid, nested.metadata ? nested.metadata.guid : guid + '-' + resourceKey)
+            ? this.completeResourceEntity(
+              nested,
+              cfGuid,
+              nested.metadata
+                ? nested.metadata.guid
+                : guid + '-' + resourceKey,
+            )
             : nested;
         });
       }
@@ -205,62 +336,85 @@ export class APIEffect {
   checkForErrors(resData, action): APIErrorCheck[] {
     if (!resData) {
       if (action.endpointGuid) {
-        return [{
-          error: false,
-          errorCode: '200',
-          guid: action.endpointGuid,
-          url: action.options.url
-        }];
+        return [
+          {
+            error: false,
+            errorCode: '200',
+            guid: action.endpointGuid,
+            url: action.options.url,
+            errorResponse: null,
+          },
+        ];
       }
       return null;
     }
-    return Object.keys(resData)
-      .map(cfGuid => {
-        // Return list of guid+error objects for those endpoints with errors
-        const endpoint = resData ? resData[cfGuid] as JetStreamError : null;
-        const succeeded = !endpoint || !endpoint.error;
-        const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
-        const errorResponse = endpoint ? endpoint.errorResponse : { code: 0, description: 'Unknown', error_code: '0' };
-        return {
-          error: !succeeded,
-          errorCode: succeeded ? '200' : errorCode,
-          guid: cfGuid,
-          url: action.options.url,
-          errorResponse: succeeded ? null : errorResponse,
-        };
-      });
+    return Object.keys(resData).map(cfGuid => {
+      // Return list of guid+error objects for those endpoints with errors
+      const endpoint = resData ? (resData[cfGuid] as JetStreamError) : null;
+      const succeeded = !endpoint || !endpoint.error;
+      const errorCode =
+        endpoint && endpoint.error
+          ? endpoint.error.statusCode.toString()
+          : '500';
+      let errorResponse = null;
+      if (!succeeded) {
+        errorResponse =
+          endpoint &&
+            (!!endpoint.errorResponse &&
+              typeof endpoint.errorResponse !== 'string')
+            ? endpoint.errorResponse
+            : ({} as JetStreamCFErrorResponse);
+        // Use defaults if values are not provided
+        errorResponse.code = errorResponse.code || 0;
+        errorResponse.description = errorResponse.description || 'Unknown';
+        errorResponse.error_code = errorResponse.error_code || '0';
+      }
+      return {
+        error: !succeeded,
+        errorCode: succeeded ? '200' : errorCode,
+        guid: cfGuid,
+        url: action.options.url,
+        errorResponse: errorResponse,
+      };
+    });
   }
 
   handleApiEvents(errorChecks: APIErrorCheck[]) {
     errorChecks.forEach(check => {
       if (check.error) {
         this.store.dispatch(
-          new SendEventAction(
-            endpointSchemaKey,
-            check.guid,
-            {
-              eventCode: check.errorCode,
-              severity: InternalEventSeverity.ERROR,
-              message: 'API request error',
-              metadata: {
-                url: check.url,
-                errorResponse: check.errorResponse,
-              }
-            }
-          ));
+          new SendEventAction(endpointSchemaKey, check.guid, {
+            eventCode: check.errorCode,
+            severity: InternalEventSeverity.ERROR,
+            message: 'API request error',
+            metadata: {
+              url: check.url,
+              errorResponse: check.errorResponse,
+            },
+          }),
+        );
       }
     });
   }
 
-  getEntities(apiAction: IRequestAction, data): {
-    entities: NormalizedResponse
-    totalResults: number,
-    totalPages: number,
-  } {
+  getEntities(
+    apiAction: IRequestAction,
+    data,
+    errorCheck: APIErrorCheck[],
+  ): {
+      entities: NormalizedResponse;
+      totalResults: number;
+      totalPages: number;
+    } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
-      .filter(guid => data[guid] !== null)
+      .filter(
+        guid =>
+          data[guid] !== null &&
+          errorCheck.findIndex(error => error.guid === guid && !error.error) >=
+          0,
+    )
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
@@ -270,7 +424,11 @@ export class APIEffect {
             totalPages = 1;
             return keys.map(key => {
               const guid = apiAction.guid + '-' + key;
-              const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
+              const result = this.completeResourceEntity(
+                cfData[key],
+                cfGuid,
+                guid,
+              );
               result.entity.guid = guid;
               return result;
             });
@@ -280,7 +438,11 @@ export class APIEffect {
           default:
             if (!cfData.resources) {
               // Treat the response as RequestEntityLocation.OBJECT
-              return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+              return this.completeResourceEntity(
+                cfData,
+                cfGuid,
+                apiAction.guid,
+              );
             }
             totalResults += cfData['total_results'];
             totalPages += cfData['total_pages'];
@@ -288,7 +450,11 @@ export class APIEffect {
               return null;
             }
             return cfData.resources.map(resource => {
-              return this.completeResourceEntity(resource, cfGuid, resource.guid);
+              return this.completeResourceEntity(
+                resource,
+                cfGuid,
+                resource.guid,
+              );
             });
         }
       });
@@ -303,9 +469,11 @@ export class APIEffect {
     }
 
     return {
-      entities: flatEntities.length ? normalize(flatEntities, entityArray) : null,
+      entities: flatEntities.length
+        ? normalize(flatEntities, entityArray)
+        : null,
       totalResults,
-      totalPages
+      totalPages,
     };
   }
 
@@ -313,7 +481,10 @@ export class APIEffect {
     return { ...entity, ...metadata, cfGuid };
   }
 
-  addBaseHeaders(endpoints: IRequestEntityTypeState<EndpointModel> | string, header: Headers): Headers {
+  addBaseHeaders(
+    endpoints: IRequestEntityTypeState<EndpointModel> | string,
+    header: Headers,
+  ): Headers {
     const headers = header || new Headers();
     if (typeof endpoints === 'string') {
       headers.set(endpointHeader, endpoints);
@@ -330,46 +501,47 @@ export class APIEffect {
     return headers;
   }
 
-  getActionFromString(type: string) {
-    return { type };
-  }
 
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
-    return paginationState ? {
-      ...paginationState.params,
-      page: paginationState.currentPage.toString(),
-    } : {};
+    return paginationState
+      ? {
+        ...paginationState.params,
+        page: paginationState.currentPage.toString(),
+      }
+      : {};
   }
 
   private makeRequest(options): Observable<any> {
-    return this.http.request(new Request(options)).map(response => {
-      let resData;
-      try {
-        resData = response.json();
-      } catch (e) {
-        resData = null;
-      }
-      return resData;
-    });
+    return this.http.request(new Request(options)).pipe(
+      map(response => {
+        let resData;
+        try {
+          resData = response.json();
+        } catch (e) {
+          resData = null;
+        }
+        return resData;
+      }),
+    );
   }
 
-  private handleMultiEndpoints(resData, apiAction: IRequestAction): {
+  private handleMultiEndpoints(
     resData,
-    entities,
-    totalResults,
-    totalPages,
-    errors: APIErrorCheck[]
-  } {
-    const endpointChecks = this.checkForErrors(resData, apiAction);
-    if (endpointChecks) {
-      this.handleApiEvents(endpointChecks);
-    }
+    apiAction: IRequestAction,
+  ): {
+      resData;
+      entities;
+      totalResults;
+      totalPages;
+      errorsCheck: APIErrorCheck[];
+    } {
+    const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
     let totalPages = 0;
 
     if (resData) {
-      const entityData = this.getEntities(apiAction, resData);
+      const entityData = this.getEntities(apiAction, resData, errorsCheck);
       entities = entityData.entities;
       totalResults = entityData.totalResults;
       totalPages = entityData.totalPages;
@@ -377,7 +549,7 @@ export class APIEffect {
 
     entities = entities || {
       entities: {},
-      result: []
+      result: [],
     };
 
     return {
@@ -385,64 +557,35 @@ export class APIEffect {
       entities,
       totalResults,
       totalPages,
-      errors: endpointChecks
+      errorsCheck,
     };
-  }
-
-  private flattenPagination(firstRequest: Observable<{ resData }>, options) {
-    return firstRequest.pipe(
-      mergeMap(firstResData => {
-        // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
-        // endpoints
-        let maxPages = 0;
-        Object.keys(firstResData).forEach(endpointGuid => {
-          const endpoint = firstResData[endpointGuid];
-          if (maxPages < endpoint.total_pages) {
-            maxPages = endpoint.total_pages;
-          }
-        });
-        // Make those requests
-        const requests = [];
-        requests.push(Observable.of(firstResData)); // Already made the first request, don't repeat it
-        for (let i = 2; i <= maxPages; i++) { // Make any additional page requests
-          const requestOption = { ...options };
-          requestOption.params.set('page', i.toString());
-          requests.push(this.makeRequest(requestOption));
-        }
-        return forkJoin(requests);
-      }),
-      map((responses: Array<any>) => {
-        // Merge all responses into the first page
-        const newResData = responses[0];
-        const endpointGuids = Object.keys(newResData);
-        for (let i = 1; i < responses.length; i++) { // Make any additional page requests
-          const endpointResponse = responses[i];
-          endpointGuids.forEach(endpointGuid => {
-            const endpoint = endpointResponse[endpointGuid];
-            if (endpoint && endpoint.resources && endpoint.resources.length) {
-              newResData[endpointGuid].resources = newResData[endpointGuid].resources.concat(endpoint.resources);
-            }
-          });
-        }
-        return newResData;
-      })
-    );
   }
 
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
-      const relationInfo = listEntityRelations(action as EntityInlineParentAction);
+      const relationInfo = listEntityRelations(
+        action as EntityInlineParentAction,
+      );
       options.params = options.params || new URLSearchParams();
       if (relationInfo.maxDepth > 0) {
-        options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
+        options.params.set(
+          'inline-relations-depth',
+          relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth,
+        );
       }
       if (relationInfo.relations.length) {
-        options.params.set('include-relations', relationInfo.relations.join(','));
+        options.params.set(
+          'include-relations',
+          relationInfo.relations.join(','),
+        );
       }
     }
   }
 
-  private setRequestParams(requestParams: URLSearchParams, params: { [key: string]: any }) {
+  private setRequestParams(
+    requestParams: URLSearchParams,
+    params: { [key: string]: any },
+  ) {
     if (params.hasOwnProperty('q')) {
       // Convert q into a cf q string
       params.qString = qParamsToString(params.q);
@@ -459,5 +602,7 @@ export class APIEffect {
       }
     }
   }
+  private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
+    return requestType === 'delete' && !apiAction.updatingKey;
+  }
 }
-

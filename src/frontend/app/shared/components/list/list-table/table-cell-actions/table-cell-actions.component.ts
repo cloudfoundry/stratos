@@ -1,14 +1,13 @@
-import { Component, Input } from '@angular/core';
-import { OnInit } from '@angular/core/src/metadata/lifecycle_hooks';
+
+import { of as observableOf, Observable, combineLatest, BehaviorSubject } from 'rxjs';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -17,7 +16,7 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 })
 export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  @Input('rowState')
+  @Input()
   rowState: Observable<RowState>;
 
   private _row: T;
@@ -30,14 +29,16 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private busy$: Observable<boolean>;
-  private show$: Observable<boolean>;
+  public busy$: Observable<boolean>;
+  public show$: Observable<boolean>;
 
   actions: IListAction<T>[];
   obs: {
     visible: { [action: string]: Observable<boolean> },
     enabled: { [action: string]: Observable<boolean> }
   };
+
+  private subjects: BehaviorSubject<T>[] = [];
 
   constructor(private store: Store<AppState>, public listConfig: ListConfig<T>) {
     super();
@@ -52,19 +53,30 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
 
   initialise(row) {
     if (this.obs) {
-      return;
+      return this.updateActionButtons(row);
     }
     this.obs = {
       visible: {},
       enabled: {}
     };
+    const subject = new BehaviorSubject(row);
+    this.subjects.push(subject);
+
     this.actions.forEach(action => {
-      this.obs.visible[action.label] = action.createVisible ? action.createVisible(row) : Observable.of(true);
-      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(row) : Observable.of(true);
+      this.obs.visible[action.label] = action.createVisible ? action.createVisible(subject) : observableOf(true);
+      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(subject) : observableOf(true);
     });
 
     this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(
       map(visibles => visibles.some(visible => visible))
     );
+  }
+
+  private updateActionButtons(row: T) {
+    if (this.subjects.length > 0) {
+      this.subjects.forEach(subject => {
+        subject.next(row);
+      });
+    }
   }
 }

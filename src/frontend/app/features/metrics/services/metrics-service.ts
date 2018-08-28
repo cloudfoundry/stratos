@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
@@ -10,6 +10,7 @@ import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;
@@ -29,7 +30,7 @@ export class MetricsService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.endpointsMonitor = this.paginationMonitorFactory.create(
-      'endpoint-list',
+      CloudFoundryService.EndpointList,
       entityFactory(endpointSchemaKey)
     );
 

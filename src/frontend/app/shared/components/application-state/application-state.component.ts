@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CardStatus, ApplicationStateData } from './application-state.service';
-import { Observable } from 'rxjs/Observable';
-import { map, tap } from 'rxjs/operators';
-import { startWith } from 'rxjs/operators/startWith';
+import { Observable } from 'rxjs';
+import { map, tap, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-application-state',
@@ -11,7 +10,7 @@ import { startWith } from 'rxjs/operators/startWith';
 })
 export class ApplicationStateComponent implements OnInit {
 
-  @Input('state')
+  @Input()
   public state: Observable<ApplicationStateData>;
 
   public status$: Observable<CardStatus>;
@@ -20,10 +19,10 @@ export class ApplicationStateComponent implements OnInit {
 
   public label$: Observable<string>;
 
-  @Input('hideIcon')
+  @Input()
   public hideIcon = false;
 
-  @Input('initialStateOnly')
+  @Input()
   public initialStateOnly = false;
 
   constructor() { }
