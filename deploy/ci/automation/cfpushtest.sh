@@ -7,7 +7,7 @@ echo "Cleaning up orgs"
 echo $ORGS
 
 while read -r ORG; do
- if [[ $ORG == "acceptance-*" ]]; then
+ if [[ $ORG == "acceptance.e2e.*" ]]; then
    echo "Deleting org: $ORG"
    cf delete-org $ORG -f
  fi
