@@ -161,6 +161,8 @@ export class EndpointsEffect {
           'cnsi_name': action.name,
           'api_endpoint': action.endpoint,
           'skip_ssl_validation': action.skipSslValidation ? 'true' : 'false',
+          'cnsi_client_id': action.clientID,
+          'cnsi_client_secret': action.clientSecret,
         }
       });
 

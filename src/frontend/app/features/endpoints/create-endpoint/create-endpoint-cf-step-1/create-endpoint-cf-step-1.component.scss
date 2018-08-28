@@ -2,3 +2,14 @@
 mat-checkbox {
   padding-top: 40px;
 }
+
+.create-endpoint {
+
+  &__section {
+    margin-top: 48px;
+    
+    &-title {
+      font-size: 16px;
+    }
+  }
+}

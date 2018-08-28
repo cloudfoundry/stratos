@@ -14,7 +14,7 @@ import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/enti
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl, EndpointTypeHelper } from '../../endpoint-helpers';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
@@ -38,11 +38,16 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
 
+  // Optional Client ID and Client Secret
+  @ViewChild('clientIDField') clientIDField: NgModel;
+  @ViewChild('clientSecretField') clientSecretField: NgModel;
+
   typeValue: any;
 
   endpointTypes = getEndpointTypes();
   urlValidation: string;
 
+  showAdvancedFields = false;
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
@@ -73,7 +78,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.typeField.value,
       this.nameField.value,
       this.urlField.value,
-      !!this.skipSllField.value
+      !!this.skipSllField.value,
+      this.clientIDField.value,
+      this.clientSecretField.value,
     );
 
     this.store.dispatch(action);
@@ -110,5 +117,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   setUrlValidation(endpointValue: string) {
     const endpoint = this.endpointTypes.find(e => e.value === endpointValue);
     this.urlValidation = endpoint ? endpoint.urlValidation : '';
+    this.setAdvancedFields(endpoint);
+  }
+
+  // Only show the Client ID and Client Secret fields if the endpoint type if Cloud Foundry
+  setAdvancedFields(endpoint: EndpointTypeHelper) {
+    this.showAdvancedFields = endpoint.value === 'cf';
   }
 }
