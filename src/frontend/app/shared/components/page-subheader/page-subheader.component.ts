@@ -33,10 +33,10 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
   @ViewChild('rightButton')
   rightButton: MatButton;
 
-  @Input('tabs')
+  @Input()
   tabs: ISubHeaderTabs[];
 
-  @Input('nested')
+  @Input()
   nested: boolean;
 
   className: string;

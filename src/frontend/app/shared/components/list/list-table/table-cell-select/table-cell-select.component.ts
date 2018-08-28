@@ -16,7 +16,7 @@ export class TableCellSelectComponent<T> extends TableCellCustom<T> implements O
 
   disable$: Observable<boolean>;
 
-  @Input('rowState')
+  @Input()
   rowState: Observable<RowState>;
 
   ngOnInit() {

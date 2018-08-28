@@ -140,6 +140,7 @@ type Diagnostics struct {
 	DeploymentType   string                  `json:"deploymentType"`
 	GitClientVersion string                  `json:"gitClientVersion"`
 	DBMigrations     []*GooseDBVersionRecord `json:"databaseMigrations"`
+	DatabaseBackend  string                  `json:"databaseBackend"`
 	HelmName         string                  `json:"helmName,omitempty"`
 	HelmRevision     string                  `json:"helmRevision,omitempty"`
 	HelmChartVersion string                  `json:"helmChartVersion,omitempty"`
@@ -237,4 +238,5 @@ type PortalConfig struct {
 	SessionStore                    SessionStorer
 	ConsoleConfig                   *ConsoleConfig
 	PluginConfig                    map[string]string
+	DatabaseProviderName            string
 }
