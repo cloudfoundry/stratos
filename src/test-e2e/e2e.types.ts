@@ -1,13 +1,11 @@
 export interface E2ECred {
   username: string;
   password: string;
-  guid?: string;
 }
 
 export interface E2ECreds {
   admin: E2ECred;
   nonAdmin?: E2ECred;
-  guid: string;
 }
 
 export interface E2EEndpointConfig {

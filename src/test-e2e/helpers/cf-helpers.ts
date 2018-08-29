@@ -13,13 +13,15 @@ export class CFHelpers {
   cachedDefaultCfGuid: string;
   cachedDefaultOrgGuid: string;
   cachedDefaultSpaceGuid: string;
+  cachedAdminGuid: string;
+  cachedNonAdminGuid: string;
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
   }
 
   private assignAdminAndUserGuids(cnsiGuid: string, endpoint: E2EConfigCloudFoundry): promise.Promise<any> {
-    if (endpoint.creds.admin.guid && endpoint.creds.nonAdmin.guid) {
+    if (this.cachedAdminGuid && this.cachedNonAdminGuid) {
       return promise.fullyResolved({});
     }
     return this.fetchUsers(cnsiGuid).then(users => {
@@ -27,8 +29,8 @@ export class CFHelpers {
       const testAdminUser = this.findUser(users, endpoint.creds.admin.username);
       expect(testUser).toBeDefined();
       expect(testAdminUser).toBeDefined();
-      endpoint.creds.nonAdmin.guid = testUser.metadata.guid;
-      endpoint.creds.admin.guid = testAdminUser.metadata.guid;
+      this.cachedNonAdminGuid = testUser.metadata.guid;
+      this.cachedAdminGuid = testAdminUser.metadata.guid;
     });
   }
 
@@ -38,9 +40,9 @@ export class CFHelpers {
     testOrgName: string
   ): promise.Promise<APIResource<IOrganization>> {
     return this.assignAdminAndUserGuids(guid, endpoint).then(() => {
-      expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
-      expect(endpoint.creds.admin.guid).not.toBeNull();
-      return this.addOrgIfMissing(guid, testOrgName, endpoint.creds.admin.guid, endpoint.creds.nonAdmin.guid);
+      expect(this.cachedNonAdminGuid).not.toBeNull();
+      expect(this.cachedAdminGuid).not.toBeNull();
+      return this.addOrgIfMissing(guid, testOrgName, this.cachedAdminGuid, this.cachedNonAdminGuid);
     });
   }
 
@@ -81,10 +83,10 @@ export class CFHelpers {
     skipExistsCheck = false,
   ): promise.Promise<APIResource<ISpace>> {
     return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
-      expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
+      expect(this.cachedNonAdminGuid).not.toBeNull();
       return skipExistsCheck ?
-        this.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid) :
-        this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
+        this.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, this.cachedNonAdminGuid) :
+        this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, this.cachedNonAdminGuid);
 
     });
   }
