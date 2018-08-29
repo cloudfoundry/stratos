@@ -89,6 +89,7 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 	u.UserGUID = userGUID
 
 	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	tokenRecord.TokenGUID = userToken.TokenGUID
 	err = p.updateTokenAuth(userGUID, tokenRecord)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't update token: %v", err)

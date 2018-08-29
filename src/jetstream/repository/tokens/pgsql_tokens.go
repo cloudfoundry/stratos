@@ -206,7 +206,6 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	if metadata.Valid {
 		tr.Metadata = metadata.String
 	}
-
 	return *tr, nil
 }
 
@@ -415,7 +414,6 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	if tokenUserGUID.Valid {
 		tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
 	}
-
 	if linkedTokenGUID.Valid {
 		tr.LinkedGUID = linkedTokenGUID.String
 	}
@@ -499,6 +497,13 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr interfaces.To
 	} else {
 		tokenGUID = tr.LinkedGUID
 	}
+
+	if tr.RefreshToken == "" {
+		msg := "Unable to save Token without a valid Token GUID"
+		return errors.New(msg)
+	}
+
+	log.Infof("Updating token %s", tokenGUID)
 
 	log.Debug("Encrypting Auth Token")
 	ciphertextAuthToken, err = crypto.EncryptToken(encryptionKey, tr.AuthToken)
