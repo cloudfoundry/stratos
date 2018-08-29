@@ -9,7 +9,7 @@ import { CaaspEndpointsListConfigService } from '../list-types/caasp-endpoints/c
 import { CaaspService } from '../services/cassp-service';
 
 import { filter, first, map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-caasp',

@@ -9,15 +9,17 @@ import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesService } from './services/kubernetes.service';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
+import { KubernetesRoutingModule } from './kubernetes.routing';
+import { KubernetesNodeCapacityComponent } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
 
 @NgModule({
   imports: [
     CoreModule,
     CommonModule,
     SharedModule,
-    //KubernetesRoutingModule,
+    KubernetesRoutingModule,
   ],
-  declarations: [KubernetesComponent, KubernetesNodesTabComponent, KubernetesTabBaseComponent],
+  declarations: [KubernetesComponent, KubernetesNodesTabComponent, KubernetesTabBaseComponent, KubernetesNodeCapacityComponent],
   providers: [
     KubernetesService,
     BaseKubeGuid,
@@ -29,5 +31,5 @@ export class KubernetesModule {
   // constructor(private ext: ExtensionManager) {
   //   console.log(this.ext.getExtensions());
   // }
- }
+}
 

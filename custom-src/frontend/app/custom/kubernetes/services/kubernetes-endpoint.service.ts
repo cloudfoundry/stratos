@@ -13,7 +13,7 @@ import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types
 import { BaseKubeGuid } from '../kubernetes-page.types';
 
 import { map, shareReplay } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 
 @Injectable()

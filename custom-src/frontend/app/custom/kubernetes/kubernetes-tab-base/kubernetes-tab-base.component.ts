@@ -1,17 +1,9 @@
 import { Component, OnInit, Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of as ObservableOf } from 'rxjs';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesService } from '../services/kubernetes.service';
-
-function getKubeIdFromUrl(activatedRoute: ActivatedRoute) {
-  console.log('GUID for BaseKubeGuid');
-  console.log(activatedRoute.snapshot.params.kubeId);
-  return {
-    guid: activatedRoute.snapshot.params.kubeId
-  };
-}
 
 @Component({
   selector: 'app-kubernetes-tab-base',
@@ -20,7 +12,13 @@ function getKubeIdFromUrl(activatedRoute: ActivatedRoute) {
   providers: [
     {
       provide: BaseKubeGuid,
-      useFactory: getKubeIdFromUrl,
+      useFactory: (activatedRoute: ActivatedRoute) => {
+        console.log('GUID for BaseKubeGuid');
+        console.log(activatedRoute.snapshot.params.kubeId);
+        return {
+          guid: activatedRoute.snapshot.params.kubeId
+        };
+      },
       deps: [
         ActivatedRoute
       ]
@@ -41,7 +39,7 @@ export class KubernetesTabBaseComponent implements OnInit {
   constructor(private kubeEndpointService: KubernetesEndpointService) { }
 
   ngOnInit() {
-    this.isFetching$ = Observable.of(false);
+    this.isFetching$ = ObservableOf(false);
   }
 
 }

@@ -14,8 +14,7 @@ import {
 } from '../../../store/types/request.types';
 import { CAASP_INFO_ENTITY_KEY, GET_INFO, GetCaaspInfo } from './caasp.actions';
 
-import { catchError } from 'rxjs/operators/catchError';
-import { flatMap, mergeMap } from 'rxjs/operators';
+import { flatMap, mergeMap, catchError } from 'rxjs/operators';
 
 @Injectable()
 export class CaaspEffects {

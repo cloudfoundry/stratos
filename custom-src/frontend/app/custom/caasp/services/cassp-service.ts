@@ -10,7 +10,7 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 
 import { map, shareReplay } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class CaaspService {

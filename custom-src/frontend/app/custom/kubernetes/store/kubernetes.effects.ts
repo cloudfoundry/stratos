@@ -13,9 +13,8 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../store/types/request.types';
 import { GET_INFO, GetKubernetesInfo, KUBE_INFO_ENTITY_KEY } from './kubernetes.actions';
+import { flatMap, mergeMap, catchError } from 'rxjs/operators';
 
-import { catchError } from 'rxjs/operators/catchError';
-import { flatMap, mergeMap } from 'rxjs/operators';
 
 @Injectable()
 export class KubernetesEffects {

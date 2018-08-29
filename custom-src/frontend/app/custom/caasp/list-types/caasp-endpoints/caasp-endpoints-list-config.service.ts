@@ -13,6 +13,7 @@ import { AppState } from '../../../../store/app-state';
 import { selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../store/types/endpoint.types';
 import { CaaspEndpointsDataSource } from './caasp-endpoints-data-source';
+import { pairwise } from 'rxjs/operators';
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
   return endpoint.cnsi_type === 'caasp' ? 'CaaSP' : endpoint.cnsi_type;
@@ -38,14 +39,14 @@ export class CaaspEndpointsListConfigService implements IListConfig<EndpointMode
       endpointStoreNames.type,
       item.guid,
       effectKey,
-    ))
-      .pairwise()
-      .subscribe(([oldVal, newVal]) => {
-        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-          handleChange([oldVal, newVal]);
-          disSub.unsubscribe();
-        }
-      });
+    )).pipe(
+      pairwise()
+    ).subscribe(([oldVal, newVal]) => {
+      if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+        handleChange([oldVal, newVal]);
+        disSub.unsubscribe();
+      }
+    });
   }
 
   constructor(
