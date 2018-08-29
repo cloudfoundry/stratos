@@ -43,7 +43,9 @@ export enum SocketEventTypes {
   SOURCE_FILE_DATA = 30004,
   SOURCE_FILE_ACK = 30005,
   SOURCE_GITURL = 30006,
-  SOURCE_WAIT_ACK = 30007
+  SOURCE_WAIT_ACK = 30007,
+  OVERRIDES_REQUIRED = 50000,
+  OVERRIDES_SUPPLIED = 50001
 }
 
 export interface DeployApplicationSource {
@@ -59,6 +61,20 @@ export interface GitAppDetails {
   branch: GitBranch;
 }
 
+export interface OverrideAppDetails {
+  name: string;
+  buildpack: string;
+  instances: number;
+  diskQuota: string;
+  memQuota: string;
+  doNotStart: boolean;
+  noRoute: boolean;
+  randomRoute: boolean;
+  host: string;
+  domain: string;
+  path: string;
+}
+
 export interface ProjectExists {
   checking: boolean;
   exists: boolean;
@@ -68,6 +84,7 @@ export interface ProjectExists {
 export interface DeployApplicationState {
   cloudFoundryDetails: NewAppCFDetails;
   applicationSource?: DeployApplicationSource;
+  applicationOverrides?: OverrideAppDetails;
   projectExists?: ProjectExists;
 }
 

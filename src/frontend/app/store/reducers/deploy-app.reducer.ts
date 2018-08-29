@@ -1,14 +1,15 @@
 import {
-  PROJECT_EXISTS,
-  PROJECT_DOESNT_EXIST,
   CHECK_PROJECT_EXISTS,
-  FETCH_BRANCHES_FOR_PROJECT,
-  SAVE_APP_DETAILS,
-  SET_DEPLOY_CF_SETTINGS,
-  SET_APP_SOURCE_DETAILS,
   DELETE_DEPLOY_APP_SECTION,
+  FETCH_BRANCHES_FOR_PROJECT,
+  PROJECT_DOESNT_EXIST,
+  PROJECT_EXISTS,
+  SAVE_APP_DETAILS,
+  SAVE_APP_OVERRIDE_DETAILS,
+  SET_APP_SOURCE_DETAILS,
   SET_BRANCH,
   SET_DEPLOY_BRANCH,
+  SET_DEPLOY_CF_SETTINGS,
   SET_DEPLOY_COMMIT,
 } from '../actions/deploy-applications.actions';
 import { DeployApplicationState } from '../types/deploy-application.types';
@@ -19,6 +20,7 @@ const defaultState: DeployApplicationState = {
   applicationSource: {
     type: null
   },
+  applicationOverrides: null,
   projectExists: {
     checking: false,
     exists: false,
@@ -76,6 +78,10 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
       return {
         ...state, applicationSource:
           { ...state.applicationSource, ...action.appDetails }
+      };
+    case SAVE_APP_OVERRIDE_DETAILS:
+      return {
+        ...state, applicationOverrides: { ...action.appOverrideDetails }
       };
     case SET_BRANCH:
       return {

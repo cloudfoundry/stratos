@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"code.cloudfoundry.org/cli/cf/api/applications"
@@ -29,6 +30,7 @@ import (
 	"code.cloudfoundry.org/cli/util"
 	"code.cloudfoundry.org/cli/util/randomword"
 	uuid "github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
 
 	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/flags"
@@ -57,6 +59,20 @@ type CFPushAppConfig struct {
 	DialTimeout            string
 }
 
+type CFPushAppOverrides struct {
+	Name        string `json:"name"`
+	Buildpack   string `json:"buildpack"`
+	Instances   *int   `json:"instances"`
+	DiskQuota   string `json:"diskQuota"`
+	MemQuota    string `json:"memQuota"`
+	DoNotStart  bool   `json:"doNotStart"`
+	NoRoute     bool   `json:"noRoute"`
+	RandomRoute bool   `json:"randomRoute"`
+	Host        string `json:"host"`
+	Domain      string `json:"domain"`
+	Path        string `json:"path"`
+}
+
 // ErrorType default error returned
 type ErrorType int
 
@@ -69,7 +85,7 @@ const (
 
 // CFPush Interface
 type CFPush interface {
-	Init(appDir string, manifestPath string) error
+	Init(appDir string, manifestPath string, overrides CFPushAppOverrides) error
 	Push() error
 	GetDeps() commandregistry.Dependency
 	PatchApplicationRepository(repo applications.Repository)
@@ -81,7 +97,7 @@ type PushError struct {
 }
 
 func (p *PushError) Error() string {
-	return fmt.Sprintf("Failed due to: %s", p.Err)
+	return fmt.Sprintf("Push error: %s", p.Err)
 }
 
 func Constructor(config *CFPushAppConfig) CFPush {
@@ -210,9 +226,48 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 
 }
 
-func (c *CFPushApp) Init(appDir string, manifestPath string) error {
+func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushAppOverrides) error {
 
-	err := c.flagContext.Parse("-p", appDir, "-f", manifestPath)
+	var flags []string
+
+	if len(overrides.Name) != 0 {
+		flags = append(flags, overrides.Name)
+	}
+	if len(overrides.Buildpack) != 0 {
+		flags = append(flags, "-b", overrides.Buildpack)
+	}
+	if len(overrides.DiskQuota) != 0 {
+		flags = append(flags, "-k", overrides.DiskQuota)
+	}
+	if len(overrides.Domain) != 0 {
+		flags = append(flags, "-d", overrides.Domain)
+	}
+
+	flags = append(flags, "--no-start", strconv.FormatBool(overrides.DoNotStart))
+
+	if len(overrides.Host) != 0 {
+		flags = append(flags, "--hostname", overrides.Host)
+	}
+	if overrides.Instances != nil {
+		flags = append(flags, "-i", strconv.Itoa(*overrides.Instances))
+	}
+	if len(overrides.MemQuota) != 0 {
+		flags = append(flags, "-m", overrides.MemQuota)
+	}
+
+	flags = append(flags, "--no-route", strconv.FormatBool(overrides.NoRoute))
+
+	if len(overrides.Path) != 0 {
+		flags = append(flags, "--route-path", overrides.Path)
+	}
+
+	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
+
+	flags = append(flags, "-p", appDir, "-f", manifestPath)
+
+	log.Infof("Cf Push Overrides: %v", flags)
+
+	err := c.flagContext.Parse(flags...)
 	if err != nil {
 		return &PushError{Err: err, Type: GeneralFailure}
 	}

@@ -61,6 +61,12 @@ const (
 	SOURCE_WAIT_ACK
 )
 
+// Application Overrides messages
+const (
+	OVERRIDES_REQUIRED MessageType = iota + 50000
+	OVERRIDES_SUPPLIED
+)
+
 const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
@@ -86,7 +92,26 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	defer clientWebSocket.Close()
 	defer pingTicker.Stop()
 
-	// We use a simple protocol to get the source to use for cf push
+	// We use a simple protocol to get the source to use for cf push and any cf push cli overrides
+
+	// Send a message to the client to say that we are awaiting application overrides
+	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
+
+	// Wait for a message from the client
+	log.Info("Waiting for app overrides from client")
+
+	msgOverrides := SocketMessage{}
+	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
+		log.Errorf("Error reading JSON: %v+", err)
+		return err
+	}
+
+	log.Infof("Overrides: %v+", msgOverrides)
+	overrides := pushapp.CFPushAppOverrides{}
+	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
+		log.Errorf("Error marshalling json: %v+", err)
+		return err
+	}
 
 	// Send a message to the client to say that we are awaiting source details
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
@@ -100,7 +125,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		return err
 	}
 
-	log.Infof("%v+", msg)
+	log.Infof("Source %v+", msg)
 
 	// Temporary folder for the application source
 	tempDir, err := ioutil.TempDir("", "cf-push-")
@@ -162,7 +187,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	var repo = deps.RepoLocator.GetApplicationRepository()
 	cfAppPush.cfPush.PatchApplicationRepository(NewRepositoryIntercept(repo, cfAppPush, clientWebSocket))
 
-	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml")
+	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml", overrides)
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)

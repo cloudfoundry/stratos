@@ -1,10 +1,10 @@
 import { Action } from '@ngrx/store';
 
-import { GitAppDetails, SourceType } from '../types/deploy-application.types';
+import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
+import { GitAppDetails, SourceType, OverrideAppDetails } from '../types/deploy-application.types';
 import { GitBranch, GithubCommit } from '../types/github.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -12,6 +12,7 @@ export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';
 export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
 export const SAVE_APP_DETAILS = '[Deploy App] Save app details';
+export const SAVE_APP_OVERRIDE_DETAILS = '[Deploy App] Save app override details';
 export const FETCH_COMMIT = '[Deploy App] Fetch commit';
 export const FETCH_COMMITS = '[Deploy App] Fetch commits';
 export const SET_DEPLOY_CF_SETTINGS = '[Deploy App] Set CF Settings';
@@ -63,6 +64,11 @@ export class FetchBranchesForProject implements PaginatedAction {
 export class SaveAppDetails implements Action {
   constructor(public appDetails: GitAppDetails) { }
   type = SAVE_APP_DETAILS;
+}
+
+export class SaveAppOverrides implements Action {
+  constructor(public appOverrideDetails: OverrideAppDetails) { }
+  type = SAVE_APP_OVERRIDE_DETAILS;
 }
 
 export class FetchCommit implements IRequestAction {
