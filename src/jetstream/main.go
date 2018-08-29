@@ -677,9 +677,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// Only add SSO routes if SSO Login is enabled
 	if p.Config.SSOLogin {
 		pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-		pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 		pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 	}
+
+	// Callback is use dby both login to Stratos and login to an Endpoint
+	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
@@ -698,10 +700,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
-	// Connect to CF cluster
+	// Connect to endpoint
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
-	// Disconnect CF cluster
+	// Connect to Enpoint (SSO)
+	sessionGroup.GET("/auth/login/cnsi", p.ssoLoginToCNSI)
+
+	// Disconnect endpoint
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
 	// Verify Session
