@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { PaginationMonitor } from './pagination-monitor';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { schema } from 'normalizr';
+import { schema as normalizrSchema } from 'normalizr';
 
 @Injectable()
 export class PaginationMonitorFactory {
@@ -15,7 +15,7 @@ export class PaginationMonitorFactory {
 
   public create<T = any>(
     paginationKey: string,
-    schema: schema.Entity,
+    schema: normalizrSchema.Entity,
   ) {
     const cacheKey = paginationKey + schema.key;
     if (this.monitorCache[cacheKey]) {

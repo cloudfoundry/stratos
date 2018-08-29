@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, first } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -87,7 +87,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.row.entity.service_instance_guid,
       new GetServiceInstance(this.row.entity.service_instance_guid, this.appService.cfGuid),
       true
-    ).entityObs$;
+    ).waitForEntity$;
 
     this.service$ = this.serviceInstance$.pipe(
       switchMap(o => this.entityServiceFactory.create<APIResource<IService>>(
@@ -96,7 +96,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         o.entity.entity.service_guid,
         new GetService(o.entity.entity.service_guid, this.appService.cfGuid),
         true
-      ).entityObs$),
+      ).waitForEntity$),
       filter(service => !!service)
     );
 
@@ -126,9 +126,10 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
     this.envVarsAvailable$ = observableCombineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
+        first(),
         map(([service, serviceInstance, allEnvVars]) => {
           const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
-          const serviceInstanceName = (serviceInstance as EntityInfo<APIResource<IServiceInstance>>).entity.entity.name;
+          const serviceInstanceName = serviceInstance.entity.entity.name;
           const serviceLabel = (service as EntityInfo<APIResource<IService>>).entity.entity.label;
 
           if (systemEnvJson['VCAP_SERVICES'][serviceLabel]) {

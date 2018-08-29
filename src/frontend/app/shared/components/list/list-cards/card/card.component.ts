@@ -51,9 +51,9 @@ export const listCards = [
 })
 export class CardComponent<T> implements OnInit, OnChanges {
 
-  @Input('component') component: Type<{}>;
-  @Input('item') item: T;
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input() component: Type<{}>;
+  @Input() item: T;
+  @Input() dataSource = null as IListDataSource<T>;
 
   @ViewChild('target', { read: ViewContainerRef }) target;
 

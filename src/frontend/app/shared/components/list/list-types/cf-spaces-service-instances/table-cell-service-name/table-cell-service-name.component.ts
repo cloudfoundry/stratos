@@ -19,7 +19,7 @@ import { TableCellCustom } from '../../../list.types';
 export class TableCellServiceNameComponent<T> extends TableCellCustom<T> implements OnInit {
 
   serviceName$: Observable<string>;
-  @Input('row') row;
+  @Input() row;
   constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory) {
     super();
   }
@@ -31,7 +31,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
       this.row.entity.service_guid,
       new GetService(this.row.entity.service_guid, this.row.entity.cfGuid),
       false
-    ).entityObs$.pipe(
+    ).waitForEntity$.pipe(
       filter(s => !!s),
       map(s => {
         let serviceLabel = s.entity.entity.label;

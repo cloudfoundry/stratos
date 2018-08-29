@@ -40,11 +40,11 @@ interface LogStreamMessage {
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input('filter') filter: Function;
+  @Input() filter: Function;
 
-  @Input('status') status: Observable<number>;
+  @Input() status: Observable<number>;
 
-  @Input('logStream') logStream: Observable<any>;
+  @Input() logStream: Observable<any>;
 
   @ViewChild('container') container: ElementRef;
 
@@ -66,7 +66,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public maxLogLines = 1000;
   public isHighThroughput$: Observable<boolean>;
   public isLocked$: Observable<boolean>;
-  public statusMessage$ = new BehaviorSubject<LogStreamMessage>({message: ''});
+  public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
 
   public ngOnInit() {
     const contentElement = this.content.nativeElement;
@@ -167,10 +167,10 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       this.statusSub = this.status.subscribe((wsStatus => {
         switch (wsStatus) {
           case 0:
-            this.statusMessage$.next({message: 'Connecting....'});
+            this.statusMessage$.next({ message: 'Connecting....' });
             break;
           default:
-            this.statusMessage$.next({message: ''});
+            this.statusMessage$.next({ message: '' });
             break;
         }
       }));

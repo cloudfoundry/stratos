@@ -39,6 +39,9 @@
     display: flex;
     flex-direction: row;
   }
+  &__admin-text {
+    flex: 1;
+  }
   &__warning-icon {
     margin-right: 8px;
   }

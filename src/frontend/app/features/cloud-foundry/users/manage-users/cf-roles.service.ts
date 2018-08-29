@@ -1,4 +1,3 @@
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -23,11 +22,16 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { GetAllOrganizations, GetOrganization } from '../../../../store/actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey, endpointSchemaKey } from '../../../../store/helpers/entity-factory';
+import {
+  endpointSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  spaceSchemaKey,
+} from '../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../store/helpers/entity-relations.types';
+} from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import {
@@ -38,6 +42,7 @@ import {
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
 
 
@@ -163,6 +168,9 @@ export class CfRolesService {
     });
     // ... and for each space, populate space roles
     spaceRoles.forEach(space => {
+      if (!mappedUser[space.orgGuid]) {
+        mappedUser[space.orgGuid] = createDefaultOrgRoles(space.orgGuid);
+      }
       mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
         ...space
       };

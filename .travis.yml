@@ -20,6 +20,7 @@ before_install:
 install:
 - npm install npm@5.6.0 -g
 - npm install
+- ssh-keyscan -t rsa bitbucket.org >> ~/.ssh/known_hosts
 filter_secrets: false
 branches:
   only:
@@ -34,11 +35,12 @@ cache:
 stages:
 - Frontend Lint
 - Frontend Unit Tests
-- Backend
+- Backend Lint
+- Backend Unit Tests
 - name: E2E tests
-  if: type != pull_request
+  if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
 - name: E2E tests quick
-  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
+  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
 jobs:
   include:
   - stage: Frontend Lint
@@ -50,12 +52,21 @@ jobs:
     script:
     - npm test
     - npm run codecov
-  - stage: Backend
+  - stage: Backend Lint
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
     - eval "$(gimme 1.9)"
-    - curl https://glide.sh/get | sh
+    - go get -u golang.org/x/lint/golint
+    script:
+    - golint src/jetstream/...
+    - ./deploy/ci/travis/update-go-report-card.sh
+  - stage: Backend Unit Tests
+    before_script:
+    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+    - chmod +x ~/bin/gimme
+    - eval "$(gimme 1.9)"
+    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - npm run test-backend
   - stage: E2E tests

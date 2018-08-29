@@ -7,7 +7,7 @@ import {
   appSummarySchemaKey,
   entityFactory,
 } from '../helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction, RequestEntityLocation } from '../types/request.types';
 

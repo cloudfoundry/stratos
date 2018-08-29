@@ -22,7 +22,7 @@ import {
   organizationSchemaKey,
   routeSchemaKey,
 } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getDefaultRequestState, RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';

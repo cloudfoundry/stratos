@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginationAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';

@@ -7,7 +7,7 @@ import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,

@@ -22,16 +22,16 @@ import { Observable, Subject, Subscription } from 'rxjs';
 })
 export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
 
-  @Input('errorMessage')
+  @Input()
   errorMessage: string;
 
-  @Input('sshStream')
+  @Input()
   sshStream: Observable<any>;
 
-  @Input('sshInput')
+  @Input()
   sshInput: Subject<string>;
 
-  @Input('connectionStatus')
+  @Input()
   public connectionStatus: Observable<number>;
 
   public isConnected = false;

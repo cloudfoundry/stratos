@@ -17,7 +17,7 @@ export interface CFAppCLIInfoContext {
 })
 export class CliInfoComponent {
 
-  @Input('context') context: CFAppCLIInfoContext;
+  @Input() context: CFAppCLIInfoContext;
 
   constructor() { }
 }

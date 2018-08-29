@@ -10,7 +10,7 @@ import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-se
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
@@ -26,7 +26,7 @@ import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-det
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
-  @Input('boundAppId')
+  @Input()
   boundAppId: string;
 
   validateSubscription: Subscription;
