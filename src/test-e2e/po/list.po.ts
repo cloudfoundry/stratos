@@ -13,63 +13,6 @@ export interface CardMetadata {
   click: Function;
 }
 
-/**
- * Page Object for the List component
- */
-export class ListComponent extends Component {
-
-  public table: ListTableComponent;
-
-  public cards: ListCardComponent;
-
-  public header: ListHeaderComponent;
-
-  public pagination: ListPaginationComponent;
-
-  public empty: ListEmptyComponent;
-
-  constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
-    super(locator);
-    this.table = new ListTableComponent(locator);
-    this.cards = new ListCardComponent(locator);
-    this.header = new ListHeaderComponent(locator);
-    this.pagination = new ListPaginationComponent(locator);
-    this.empty = new ListEmptyComponent(locator);
-  }
-
-  isTableView(): promise.Promise<boolean> {
-    const listElement = this.locator.element(by.css('.list-component'));
-    return this.hasClass('list-component__table', listElement);
-  }
-
-  isCardsView(): promise.Promise<boolean> {
-    const listElement = this.locator.element(by.css('.list-component'));
-    return this.hasClass('list-component__cards', listElement);
-  }
-
-  refresh() {
-    this.locator.element(by.id('app-list-refresh-button')).click();
-    const refreshIcon = element(by.css('.refresh-icon.refreshing'));
-    return browser.wait(until.invisibilityOf(refreshIcon), 10000);
-  }
-
-  getTotalResults() {
-    // const paginator = new PaginatorComponent();
-    return this.pagination.isDisplayed().then(havePaginator => {
-      if (havePaginator) {
-        return this.pagination.getTotalResults();
-      }
-      return this.isCardsView().then(haveCardsView => {
-        if (haveCardsView) {
-          return this.cards.getCards().count();
-        }
-        return this.table.getRows().count();
-      });
-    });
-  }
-
-}
-
 // Page Object for the List Table View
 export class ListTableComponent extends Component {
 
@@ -328,3 +271,60 @@ export class ListEmptyComponent extends Component {
     return this.getCustom().getComponent().element(by.css('.first-line')).getText();
   }
 }
+/**
+ * Page Object for the List component
+ */
+export class ListComponent extends Component {
+
+  public table: ListTableComponent;
+
+  public cards: ListCardComponent;
+
+  public header: ListHeaderComponent;
+
+  public pagination: ListPaginationComponent;
+
+  public empty: ListEmptyComponent;
+
+  constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
+    super(locator);
+    this.table = new ListTableComponent(locator);
+    this.cards = new ListCardComponent(locator);
+    this.header = new ListHeaderComponent(locator);
+    this.pagination = new ListPaginationComponent(locator);
+    this.empty = new ListEmptyComponent(locator);
+  }
+
+  isTableView(): promise.Promise<boolean> {
+    const listElement = this.locator.element(by.css('.list-component'));
+    return this.hasClass('list-component__table', listElement);
+  }
+
+  isCardsView(): promise.Promise<boolean> {
+    const listElement = this.locator.element(by.css('.list-component'));
+    return this.hasClass('list-component__cards', listElement);
+  }
+
+  refresh() {
+    this.locator.element(by.id('app-list-refresh-button')).click();
+    const refreshIcon = element(by.css('.refresh-icon.refreshing'));
+    return browser.wait(until.invisibilityOf(refreshIcon), 10000);
+  }
+
+  getTotalResults() {
+    // const paginator = new PaginatorComponent();
+    return this.pagination.isDisplayed().then(havePaginator => {
+      if (havePaginator) {
+        return this.pagination.getTotalResults();
+      }
+      return this.isCardsView().then(haveCardsView => {
+        if (haveCardsView) {
+          return this.cards.getCards().count();
+        }
+        return this.table.getRows().count();
+      });
+    });
+  }
+
+}
+

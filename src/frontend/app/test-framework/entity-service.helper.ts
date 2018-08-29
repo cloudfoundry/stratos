@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
+import { schema as normalizrSchema } from 'normalizr';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { AppState } from '../store/app-state';
@@ -8,7 +8,7 @@ import { IRequestAction } from '../store/types/request.types';
 
 export function generateTestEntityServiceProvider(
   guid: string,
-  schema: schema.Entity,
+  schema: normalizrSchema.Entity,
   action: IRequestAction
 ) {
   function useFactory(

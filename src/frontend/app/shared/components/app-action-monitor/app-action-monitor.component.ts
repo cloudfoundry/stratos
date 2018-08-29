@@ -19,34 +19,34 @@ import { ITableColumn } from '../list/list-table/table.types';
 })
 export class AppActionMonitorComponent<T> implements OnInit {
 
-  @Input('data$')
+  @Input()
   private data$: Observable<Array<T>> = observableNever();
 
-  @Input('entityKey')
+  @Input()
   public entityKey: string;
 
-  @Input('schema')
+  @Input()
   public schema: schema.Entity;
 
-  @Input('monitorState')
+  @Input()
   public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
 
-  @Input('updateKey')
+  @Input()
   public updateKey = rootUpdatingKey;
 
-  @Input('getId')
+  @Input()
   public getId: (element) => string;
 
-  @Input('trackBy')
+  @Input()
   public trackBy = ((index: number, item: T) => index.toString());
 
-  @Input('getCellConfig')
+  @Input()
   public getCellConfig: (element) => ITableCellRequestMonitorIconConfig;
 
-  @Input('columns')
+  @Input()
   public columns: ITableColumn<T>[] = [];
 
-  @Output('currentState')
+  @Output()
   public currentState: EventEmitter<IApplicationMonitorComponentState>;
 
   public dataSource: DataSource<T>;
