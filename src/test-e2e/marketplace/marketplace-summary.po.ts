@@ -12,7 +12,7 @@ export class MarketplaceSummaryPage extends Page {
    }
 
   getServiceSummaryCard() {
-    return this.locator.element(by.css('.service-summary'))
+    return this.locator.element(by.css('.service-summary'));
   }
 
   getRecentInstances() {

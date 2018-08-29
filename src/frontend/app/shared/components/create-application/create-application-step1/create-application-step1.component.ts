@@ -21,7 +21,7 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  @Input('isMarketplaceMode')
+  @Input()
   isMarketplaceMode: boolean;
   constructor(
     private store: Store<AppState>,
@@ -35,11 +35,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @ViewChild('cfForm')
   cfForm: NgForm;
 
-  @Input('isRedeploy') isRedeploy = false;
+  @Input() isRedeploy = false;
 
   validate: Observable<boolean>;
 
-  @Input('stepperText')
+  @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
   onNext: StepOnNextFunction = () => {

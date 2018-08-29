@@ -12,35 +12,21 @@ import { AppState } from '../store/app-state';
 import { AuthState } from '../store/reducers/auth.reducer';
 
 export function queryParamMap() {
-  const map = {};
+  const paramMap = {};
   const query = window.location.search.substring(1);
   if (query.length === 0) {
-    return map;
+    return paramMap;
   }
   const vars = query.split('&');
   for (let i = 0; i < vars.length; i++) {
     const pair = vars[i].split('=');
-    map[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+    paramMap[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
   }
-  return map;
+  return paramMap;
 }
 
 @Injectable()
 export class AuthGuardService implements CanActivate {
-
-  queryParamMap() {
-    const map = {};
-    const query = window.location.search.substring(1);
-    if (query.length === 0) {
-      return map;
-    }
-    const vars = query.split('&');
-    for (let i = 0; i < vars.length; i++) {
-      const pair = vars[i].split('=');
-      map[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-    }
-    return map;
-  }
 
   constructor(
     private store: Store<AppState>,
@@ -56,7 +42,7 @@ export class AuthGuardService implements CanActivate {
             path: ['/login']
           }, {
               path: window.location.pathname,
-              queryParams: this.queryParamMap()
+              queryParams: queryParamMap()
             }));
           return false;
         }

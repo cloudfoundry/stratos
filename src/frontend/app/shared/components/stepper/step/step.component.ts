@@ -41,7 +41,7 @@ export class StepComponent {
 
   @Output() onHidden = new EventEmitter<boolean>();
 
-  @Input('hidden')
+  @Input()
   set hidden(hidden: boolean) {
     this._hidden = hidden;
     this.onHidden.emit(this._hidden);
@@ -51,28 +51,28 @@ export class StepComponent {
     return this._hidden;
   }
 
-  @Input('valid')
+  @Input()
   valid = true;
 
-  @Input('canClose')
+  @Input()
   canClose = true;
 
-  @Input('nextButtonText')
+  @Input()
   nextButtonText = 'Next';
 
-  @Input('finishButtonText')
+  @Input()
   finishButtonText = 'Finish';
 
-  @Input('cancelButtonText')
+  @Input()
   cancelButtonText = 'Cancel';
 
-  @Input('disablePrevious')
+  @Input()
   disablePrevious = false;
 
-  @Input('blocked')
+  @Input()
   blocked = false;
 
-  @Input('destructiveStep')
+  @Input()
   public destructiveStep = false;
 
   @ViewChild(TemplateRef)

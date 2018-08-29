@@ -29,10 +29,10 @@ export class MetaCardComponent {
   @ContentChild(MetaCardTitleComponent)
   title: MetaCardTitleComponent;
 
-  @Input('status$')
+  @Input()
   status$: Observable<CardStatus>;
 
-  @Input('entityConfig')
+  @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
     if (entityConfig) {
       const entityMonitor = this.entityMonitorFactory.create(
@@ -62,7 +62,7 @@ export class MetaCardComponent {
   public _actionMenu: MetaCardMenuItem[];
   public showMenu$: Observable<boolean>;
 
-  @Input('clickAction')
+  @Input()
   clickAction: Function = null;
 
   constructor(private entityMonitorFactory: EntityMonitorFactory) {
