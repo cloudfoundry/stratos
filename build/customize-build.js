@@ -67,8 +67,8 @@
     doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
     doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
 
-    const backendBaseFolder = path.resolve(__dirname, '../src/backend');
-    const backendCustomBaseFolder = path.resolve(__dirname, '../custom-src/backend');
+    const backendBaseFolder = path.resolve(__dirname, '../src/jetstream/plugins');
+    const backendCustomBaseFolder = path.resolve(__dirname, '../custom-src/jetstream');
 
     // There are no defaults for the backend - its the same as removing all of the custom plugins that are there
     doCustomizeBackend(forceDefaults || reset, backendBaseFolder, backendCustomBaseFolder);
