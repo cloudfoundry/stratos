@@ -97,6 +97,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
+
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state)))
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 	return nil
@@ -120,8 +121,24 @@ func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	redirectURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout")))
+
+	// Redirect to the UAA to logout of the UAA session as well (if configured to do so), otherwise redirect back to the UI login page
+	var redirectURL string
+	if p.hasSSOOption("logout") {
+		redirectURL = fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout")))
+	} else {
+		redirectURL = "/login?SSO_Message=You+have+been+logged+out"
+	}
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+}
+
+func (p *portalProxy) hasSSOOption(option string) bool {
+	// Remove all spaces
+	opts := RemoveSpaces(p.Config.SSOOptions)
+
+	// Split based on ','
+	options := strings.Split(opts, ",")
+	return ArrayContainsString(options, option)
 }
 
 // Callback - invoked after the UAA login flow has completed and during logout
@@ -367,6 +384,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 		}
 
 		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+			uaaToken.LinkedGUID = uaaToken.TokenGUID
 			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
 			return err
 		} else {
@@ -669,26 +687,6 @@ func (p *portalProxy) InitEndpointTokenRecord(expiry int64, authTok string, refr
 	}
 
 	return tokenRecord
-}
-
-func (p *portalProxy) removed_saveCNSIToken(cnsiID string, u interfaces.JWTUserTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
-	log.Debug("saveCNSIToken")
-
-	tokenRecord := interfaces.TokenRecord{
-		AuthToken:    authTok,
-		RefreshToken: refreshTok,
-		TokenExpiry:  u.TokenExpiry,
-		Disconnected: disconnect,
-		AuthType:     interfaces.AuthTypeOAuth2,
-	}
-
-	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
-	if err != nil {
-		log.Errorf("%v", err)
-		return interfaces.TokenRecord{}, err
-	}
-
-	return tokenRecord, nil
 }
 
 func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
