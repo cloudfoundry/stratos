@@ -10,11 +10,11 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	"github.com/SUSE/stratos-ui/config"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	log "github.com/sirupsen/logrus"
 
 	"gopkg.in/yaml.v2"
 

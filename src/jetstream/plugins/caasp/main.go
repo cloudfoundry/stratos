@@ -3,14 +3,15 @@ package caasp
 import (
 	"errors"
 	"fmt"
-	"github.com/SUSE/stratos-ui/config"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 )
 
 type CaaspSpecification struct {

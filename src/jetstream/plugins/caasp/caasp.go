@@ -3,9 +3,6 @@ package caasp
 import (
 	"errors"
 	"fmt"
-	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
@@ -14,6 +11,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 )
 
 // Get the Caasp metadata from the admin dashboard node
@@ -38,7 +39,7 @@ func (m *CaaspSpecification) getCaaspMetadata(c echo.Context) error {
 	// Currently this is not cached, so we must get it each time
 
 	endpointToken, ok := m.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID)
-	if !ok{
+	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get endpoint token information for the user")
 	}
 	log.Info(endpointToken)
@@ -157,7 +158,7 @@ func (m *CaaspSpecification) getCaaspKubeConfig(c echo.Context) error {
 	// Currently this is not cached, so we must get it each time
 
 	endpointToken, ok := m.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID)
-	if !ok{
+	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get endpoint token information for the user")
 	}
 	log.Info(endpointToken)
@@ -166,7 +167,7 @@ func (m *CaaspSpecification) getCaaspKubeConfig(c echo.Context) error {
 	cookieJar, _ := cookiejar.New(nil)
 
 	// Fetch the auth page for getting the kueb config
-	req, err := http.NewRequest("GET", adminDashboard + "/kubectl-config", nil)
+	req, err := http.NewRequest("GET", adminDashboard+"/kubectl-config", nil)
 	if err != nil {
 		panic("Could not make request")
 	}
@@ -225,7 +226,6 @@ func (m *CaaspSpecification) getCaaspKubeConfig(c echo.Context) error {
 	defer res.Body.Close()
 	body, _ = ioutil.ReadAll(res.Body)
 
-
 	c.Response().Header().Set("Content-Disposition", "attachment; filename=kubeconfig.yaml")
 	c.String(http.StatusOK, string(body))
 	return nil
@@ -281,8 +281,6 @@ func getKubeConfigAuthEndpoint(body string) string {
 	return ""
 }
 
-
-
 //window.location.href = "https://caasp-admin.devenv.capbristol.com/oidc/kubeconfig?client_id=caasp-cli&amp;client_secret=swac7qakes7AvucH8bRucucH&amp;email=test%40test.com&amp;id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImQzNmJiODcxNjMwNjFkOTIzZTgyYmYwMTVhOTkwZGI2ZGQ5NzQ0MTYifQ.eyJpc3MiOiJodHRwczovL2t1YmUtYXBpLmRldmVudi5jYXBicmlzdG9sLmNvbTozMjAwMCIsInN1YiI6IkNpMTFhV1E5ZEdWemRDeHZkVDFRWlc5d2JHVXNaR005YVc1bWNtRXNaR005WTJGaGMzQXNaR005Ykc5allXd1NCR3hrWVhBIiwiYXVkIjoiY2Fhc3AtY2xpIiwiZXhwIjoxNTE5NzI4NzQyLCJpYXQiOjE1MTk2NDIzNDIsIm5vbmNlIjoiYTVlZGY2ZTljYThhOTA1ZDhhMTdlYzYwNzlkYWVjOTUiLCJhdF9oYXNoIjoiNzk5Z0pBUjlGeGZFeXZtR215TmhRZyIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJncm91cHMiOlsiQWRtaW5pc3RyYXRvcnMiXSwibmFtZSI6IkEgVXNlciJ9.EuBNvpvbmtGtrtqjqrqqyLLSSPYVFhEDjYfEtAm-CJAa24AW2FIXexezm0b_UptIvaU8X0U34k9teMhf1WnGvxmkNONC_vnskV07hP3yvc5iEvaH0q0mhuGPrgWGrRKosL3whovJzGrnpBQnnFhHIRZq9hKU4UtNe-2T7EmDAtANdaf1UhHX3EZF1IbwO62QJc87d-uuQclPw3UNmRKbG4NmsUT2BTrwLFl9_XYqvVo5-oUojLIljhyCED_U-541vsop730caP3BnmAEKAOoxyjTpckvKH0XwX2V7wOc8Xo-R28AjNhvsqlDD1gdHna-uxP0owHisF41xRGo6I6cPw&amp;idp_issuer_url=https%3A%2F%2Fkube-api.devenv.capbristol.com%3A32000&amp;refresh_token=Chl5ZWpwdG5oZGs2bWtheHczZGtsdG43eTVmEhl4MmJqcDRpMmxqdHNrenFqbTVmYTR0aXo0"
 
 func getKubeConfigDownloadEndpoint(body string) string {
@@ -302,4 +300,3 @@ func getKubeConfigDownloadEndpoint(body string) string {
 	baseUrl := reres[1]
 	return baseUrl
 }
-
