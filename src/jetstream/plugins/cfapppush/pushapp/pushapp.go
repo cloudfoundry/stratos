@@ -34,12 +34,14 @@ import (
 	"code.cloudfoundry.org/cli/cf/flags"
 )
 
+// CFPushApp abstracts the push functionality form the CLI library
 type CFPushApp struct {
 	pushCommand *application.Push
 	flagContext flags.FlagContext
 	deps        commandregistry.Dependency
 }
 
+// CFPushAppConfig is the configuration used
 type CFPushAppConfig struct {
 	AuthorizationEndpoint  string
 	CFClient               string
@@ -74,6 +76,8 @@ type CFPush interface {
 	GetDeps() commandregistry.Dependency
 	PatchApplicationRepository(repo applications.Repository)
 }
+
+// PushError is the return error type from pushing
 type PushError struct {
 	error
 	Type ErrorType
@@ -84,6 +88,7 @@ func (p *PushError) Error() string {
 	return fmt.Sprintf("Failed due to: %s", p.Err)
 }
 
+// Constructor returns a CFPush based on the supplied config
 func Constructor(config *CFPushAppConfig) CFPush {
 
 	pushCmd := &application.Push{}
@@ -210,6 +215,7 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 
 }
 
+// Init initializes the push operation with the specified application directory and manifest path
 func (c *CFPushApp) Init(appDir string, manifestPath string) error {
 
 	err := c.flagContext.Parse("-p", appDir, "-f", manifestPath)
@@ -219,15 +225,17 @@ func (c *CFPushApp) Init(appDir string, manifestPath string) error {
 	return nil
 }
 
-// To install watcher
+// GetDeps is used to install watcher
 func (c *CFPushApp) GetDeps() commandregistry.Dependency {
 	return c.deps
 }
 
+// PatchApplicationRepository patches the repository locator so we can determine when the app has been created during push
 func (c *CFPushApp) PatchApplicationRepository(appRepo applications.Repository) {
 	c.deps.RepoLocator = c.deps.RepoLocator.SetApplicationRepository(appRepo)
 }
 
+// Push starts the actual push process
 func (c *CFPushApp) Push() error {
 
 	c.pushCommand.SetDependency(c.deps, false)
