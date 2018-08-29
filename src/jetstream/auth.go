@@ -97,6 +97,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
+
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state)))
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 	return nil
@@ -120,8 +121,24 @@ func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	redirectURL := fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout")))
+
+	// Redirect to the UAA to logout of the UAA session as well (if configured to do so), otherwise redirect back to the UI login page
+	var redirectURL string
+	if p.hasSSOOption("logout") {
+		redirectURL = fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout")))
+	} else {
+		redirectURL = "/login?SSO_Message=You+have+been+logged+out"
+	}
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+}
+
+func (p *portalProxy) hasSSOOption(option string) bool {
+	// Remove all spaces
+	opts := RemoveSpaces(p.Config.SSOOptions)
+
+	// Split based on ','
+	options := strings.Split(opts, ",")
+	return ArrayContainsString(options, option)
 }
 
 // Callback - invoked after the UAA login flow has completed and during logout
