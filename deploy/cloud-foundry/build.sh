@@ -65,13 +65,13 @@ log "Building back-end" $CYAN
 ./build/bk-build.sh
 
 # Copy backend executable here
-cp outputs/portal-proxy .
+cp src/jetstream/jetstream .
 
 # Back-end serves static resources from ui folder not dist
 mv dist ui
 
 # Ensure executable can be run (should be)
-chmod +x portal-proxy
+chmod +x jetstream
 
 # Clean up build folders
 rm -rf ./dist

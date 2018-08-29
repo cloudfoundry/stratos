@@ -16,9 +16,6 @@ STRATOS="`cd "${DIR}/..";pwd`"
 
 pushd ${STRATOS} > /dev/null
 
-# Make outputs folder
-OUTPUTS=$STRATOS/outputs
-mkdir -p ${OUTPUTS}
 
 STRATOS_GOBASE=tmp/go/src/github.com/cloudfoundry-incubator/stratos
 mkdir -p ${STRATOS_GOBASE}/src
@@ -68,9 +65,6 @@ pushd ${STRATOS_GOBASE}/src/jetstream > /dev/null
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
   go build
-  # Legacy name for now - will rename later
-  cp jetstream $OUTPUTS/portal-proxy
-
   # Legacy - we will remove the need for this shortly
   # if [ "$DEV" == "true" ]; then
   #  echo "Copying files to simplify running backend in dev ..."
