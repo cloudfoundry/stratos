@@ -28,4 +28,4 @@ echo "Listing contents..."
 
 echo "Uploading ..."
 # Sync the E2E reports
-./mc cp -r ./e2e-reports s3/${S3_BUCKET} --insecure
+./mc cp --insecure -r ./e2e-reports s3/${S3_BUCKET}
