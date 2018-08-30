@@ -1,5 +1,6 @@
-import { browser, by, element, promise, ElementFinder, protractor } from 'protractor';
+import { browser, by, element as protractorElement, ElementFinder, promise, protractor } from 'protractor';
 import { ElementArrayFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 import { MenuComponent } from './menu.po';
 
@@ -9,7 +10,7 @@ import { MenuComponent } from './menu.po';
 export class PageHeader extends Component {
 
   constructor() {
-    super(element(by.tagName('app-page-header')));
+    super(protractorElement(by.tagName('app-page-header')));
   }
   private readonly until = protractor.ExpectedConditions;
   private readonly pageTitleSelector = '.page-header h1';

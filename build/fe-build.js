@@ -11,6 +11,8 @@
   var spawn = require('child_process').spawn;
   var path = require('path');
   var os = require('os');
+  var zip = require('gulp-zip');
+  var fs = require('fs-extra');
 
   var config = require('./gulp.config');
   var paths = config.paths;
@@ -23,6 +25,23 @@
     del(paths.dist + '**/*', {
       force: true
     }, next);
+  });
+
+  // Package pre-built UI for the buildpack to detect
+  gulp.task('package-prebuild', function () {
+    return gulp.src('dist/**/*')
+      .pipe(zip('stratos-frontend-prebuild.zip'))
+      .pipe(gulp.dest('.'))
+  });
+
+  gulp.task('dev-setup', function (cb) {
+    // Copy proxy.conf.js so the front-end is all ready to go against a local backend - if not already exsiting
+    var proxyConf = path.resolve(__dirname, '../proxy.conf.js');
+    var localProxyConf = path.resolve(__dirname, './proxy.conf.localdev.js');
+    if (!fs.existsSync(proxyConf)) {
+      fs.copySync(localProxyConf, proxyConf);
+    }
+    cb();
   });
 
   // Legacy task name

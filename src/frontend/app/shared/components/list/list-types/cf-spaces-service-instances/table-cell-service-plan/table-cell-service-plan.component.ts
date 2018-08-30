@@ -16,15 +16,15 @@ import { TableCellCustom } from '../../../list.types';
 })
 export class TableCellServicePlanComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  @Input('row') row;
+  @Input() row;
   servicePlanName$: Observable<string>;
 
   constructor(private store: Store<AppState>) { super(); }
   ngOnInit() {
     this.servicePlanName$ = this.store.select(selectEntity<APIResource<IServicePlan>>('servicePlan', this.row.entity.service_plan_guid))
       .pipe(
-      filter(s => !!s),
-      map(s => s.entity.name)
+        filter(s => !!s),
+        map(s => s.entity.name)
       );
   }
 }
