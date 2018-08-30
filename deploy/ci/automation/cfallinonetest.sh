@@ -16,9 +16,12 @@ set -e
 ./build/store-git-metadata.sh
 docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
 
+echo "Running Stratos All-in-one"
+
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
 CONTAINER_ID=$(docker run \
+-d
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
 -e UAA_ENDPOINT='http://localhost:8080' \
