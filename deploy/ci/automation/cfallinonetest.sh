@@ -6,7 +6,7 @@ echo "Stratos Docker All-in-one Test"
 echo "=============================="
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source ${DIRPATH}/cfutils.sh
+source "${DIRPATH}/cfutils.sh"
 
 # We should be running in the Stratos GitHub folder
 

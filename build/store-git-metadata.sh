@@ -5,7 +5,7 @@
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ${DIRPATH}
-GIT_METADATA_FILE=${DIRPATH}/../.stratos-git-metadata.json
+GIT_METADATA_FILE="${DIRPATH}/../.stratos-git-metadata.json"
 echo ${GIT_METADATA_FILE}
 
 GIT_PROJECT=$(git config --get remote.origin.url)
