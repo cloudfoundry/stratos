@@ -110,6 +110,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         this.deployOptionsForm.controls.domain.enable();
         this.deployOptionsForm.controls.path.enable();
         if (!this.appGuid) {
+          // This can only be enabled if this is not a redeploy
           this.deployOptionsForm.controls.random_route.enable();
         }
       }
