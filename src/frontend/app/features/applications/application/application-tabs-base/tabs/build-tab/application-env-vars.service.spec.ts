@@ -1,15 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { ApplicationEnvVarsService } from './application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 
 describe('ApplicationEnvVarsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ApplicationEnvVarsService]
+      providers: [ApplicationEnvVarsHelper]
     });
   });
 
-  it('should be created', inject([ApplicationEnvVarsService], (service: ApplicationEnvVarsService) => {
+  it('should be created', inject([ApplicationEnvVarsHelper], (service: ApplicationEnvVarsHelper) => {
     expect(service).toBeTruthy();
   }));
 });

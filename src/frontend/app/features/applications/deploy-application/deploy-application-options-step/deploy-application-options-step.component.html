@@ -18,7 +18,7 @@
       <mat-form-field>
         <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number">
       </mat-form-field>
-      <mat-checkbox matInput formControlName="no_start">Do not start the application after pushing</mat-checkbox>
+      <mat-checkbox matInput formControlName="no_start">Do not start the application</mat-checkbox>
     </div>
     <div class="deploy-options__form-sections__form-section">
       <div class="deploy-options__title"><b>Application Route</b></div>
@@ -30,7 +30,12 @@
         <input matInput placeholder="Host" formControlName="host">
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Domain" formControlName="domain">
+        <mat-select placeholder="Domain" formControlName="domain">
+          <mat-option>None</mat-option>
+          <mat-option *ngFor="let domain of domains$ | async" [value]="domain.entity.name">
+            {{ domain.entity.name }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
       <mat-form-field>
         <input matInput placeholder="Path" formControlName="path">

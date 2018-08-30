@@ -1,14 +1,25 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../../store/app-state';
-import { SaveAppOverrides } from '../../../../store/actions/deploy-applications.actions';
-import { OverrideAppDetails } from '../../../../store/types/deploy-application.types';
+import { IDomain } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { SaveAppOverrides } from '../../../../store/actions/deploy-applications.actions';
+import { FetchAllDomains } from '../../../../store/actions/domains.actions';
+import { AppState } from '../../../../store/app-state';
+import { entityFactory } from '../../../../store/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectCfDetails } from '../../../../store/selectors/deploy-application.selector';
+import { APIResource } from '../../../../store/types/api.types';
+import { OverrideAppDetails } from '../../../../store/types/deploy-application.types';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -21,10 +32,18 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
 
   valid$: Observable<boolean>;
+  domains$: Observable<APIResource<IDomain>[]>;
   deployOptionsForm: FormGroup;
   subs: Subscription[] = [];
+  appGuid: string;
 
-  constructor(private fb: FormBuilder, private store: Store<AppState>) {
+  constructor(
+    private fb: FormBuilder,
+    private store: Store<AppState>,
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private appEnvVarsService: ApplicationEnvVarsHelper,
+    private activatedRoute: ActivatedRoute
+  ) {
     this.deployOptionsForm = this.fb.group({
       name: null,
       instances: [null, [
@@ -54,6 +73,32 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
+    const cfDetails$ = this.store.select(selectCfDetails).pipe(
+      filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
+    );
+
+    // Create the domains list for the domains drop down
+    this.domains$ = cfDetails$.pipe(
+      switchMap(cfDetails => {
+        const action = new FetchAllDomains(cfDetails.cloudFoundry);
+        return getPaginationObservables<APIResource<IDomain>>(
+          {
+            store: this.store,
+            action,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              action.paginationKey,
+              entityFactory(action.entityKey)
+            )
+          },
+          true
+        ).entities$;
+      }),
+      // cf push overrides do not support tcp routes (no way to specify port)
+      map(domains => domains.filter(domain => domain.entity.router_group_type !== 'tcp')),
+      share()
+    );
+
+    // Ensure that when the no route + random route options are checked the host, domain and path fields are enabled/disabled
     this.subs.push(noRouteChanged$.subscribe(value => {
       if (value) {
         this.deployOptionsForm.controls.host.disable();
@@ -64,7 +109,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         this.deployOptionsForm.controls.host.enable();
         this.deployOptionsForm.controls.domain.enable();
         this.deployOptionsForm.controls.path.enable();
-        this.deployOptionsForm.controls.random_route.enable();
+        if (!this.appGuid) {
+          this.deployOptionsForm.controls.random_route.enable();
+        }
       }
     }));
     this.subs.push(combineLatest([
@@ -83,6 +130,17 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         this.deployOptionsForm.controls.path.enable();
       }
     }));
+
+    // Extract any existing values from the app's env var and assign to form
+    this.appGuid = this.activatedRoute.snapshot.queryParams['appGuid'];
+    if (this.appGuid) {
+      combineLatest(this.domains$, cfDetails$).pipe(
+        switchMap(([domains, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
+        map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
+        first()
+      ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
+    }
+
   }
 
   ngOnDestroy() {
@@ -107,8 +165,23 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     };
   }
 
-  objToForm(obj: OverrideAppDetails) {
-    // TODO: RC store in stratos env var. fetch from env var
+  objToForm(overrides: OverrideAppDetails) {
+    const controls = this.deployOptionsForm.controls;
+    controls.name.setValue(overrides.name);
+    // If we have existing values this is a re-deploy. As such don't allow the app name to change (making it a new app on deploy)
+    controls.name.disable();
+    controls.buildpack.setValue(overrides.buildpack);
+    controls.instances.setValue(overrides.instances);
+    controls.disk_quota.setValue(overrides.diskQuota.replace('MB', ''));
+    controls.memory.setValue(overrides.memQuota.replace('MB', ''));
+    controls.no_start.setValue(overrides.doNotStart);
+    controls.no_route.setValue(overrides.noRoute);
+    // Random route has no affect on redeploy, so disable.
+    controls.random_route.disable();
+    // Don't repopulate previous routes. Editing might suggest existing route is changed instead of new route created
+    // controls.host.setValue(overrides.host);
+    // controls.domain.setValue(overrides.domain);
+    // controls.path.setValue(overrides.path);
   }
 
   onNext: StepOnNextFunction = () => {

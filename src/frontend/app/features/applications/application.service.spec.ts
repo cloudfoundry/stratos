@@ -11,7 +11,7 @@ import { AppStoreModule } from '../../store/store.module';
 import { generateTestApplicationServiceProvider } from '../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { ApplicationService } from './application.service';
-import { ApplicationEnvVarsService } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 describe('ApplicationService', () => {
 
@@ -33,7 +33,7 @@ describe('ApplicationService', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
         EntityMonitorFactory,
         PaginationMonitorFactory
       ]

@@ -15,7 +15,7 @@ import { AppStoreModule } from '../../../../../../store/store.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
 
 
@@ -49,7 +49,7 @@ describe('LogStreamTabComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         AppStoreModule,
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
         EntityMonitorFactory,
         PaginationMonitorFactory
       ]
