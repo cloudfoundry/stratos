@@ -6,6 +6,44 @@ import { ListComponent, ListTableComponent } from '../po/list.po';
 import { Page } from '../po/page.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 
+export class EndpointsTable extends ListTableComponent {
+
+  constructor(locator: ElementFinder) {
+    super(locator);
+  }
+
+  getEndpointData(row: ElementFinder) {
+    // Get all of the columns
+    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then(data => {
+      return {
+        name: data[0],
+        connected: data[1] === 'cloud_done',
+        type: data[2],
+        url: data[3]
+      } as EndpointMetadata;
+    });
+  }
+
+  getAllData() {
+    return this.getRows().map(row => this.getEndpointData(row));
+  }
+
+  getRowForEndpoint(name: string) {
+    return this.getAllData().then(data => {
+      const index = data.findIndex((ep: E2EEndpointConfig) => ep.name === name);
+      return this.getRows().get(index);
+    });
+  }
+
+  getEndpointDataForEndpoint(name: string) {
+    return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
+  }
+
+  openActionMenu(row: ElementFinder) {
+    row.element(by.css('app-table-cell-actions button')).click();
+  }
+
+}
 export function resetToLoggedIn(stateSetter, isAdmin) {
   return browser.driver.wait(stateSetter())
     .then(() => {
@@ -84,41 +122,3 @@ export interface EndpointMetadata {
   connected: boolean;
 }
 
-export class EndpointsTable extends ListTableComponent {
-
-  constructor(locator: ElementFinder) {
-    super(locator);
-  }
-
-  getEndpointData(row: ElementFinder) {
-    // Get all of the columns
-    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then(data => {
-      return {
-        name: data[0],
-        connected: data[1] === 'cloud_done',
-        type: data[2],
-        url: data[3]
-      } as EndpointMetadata;
-    });
-  }
-
-  getAllData() {
-    return this.getRows().map(row => this.getEndpointData(row));
-  }
-
-  getRowForEndpoint(name: string) {
-    return this.getAllData().then(data => {
-      const index = data.findIndex((ep: E2EEndpointConfig) => ep.name === name);
-      return this.getRows().get(index);
-    });
-  }
-
-  getEndpointDataForEndpoint(name: string) {
-    return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
-  }
-
-  openActionMenu(row: ElementFinder) {
-    row.element(by.css('app-table-cell-actions button')).click();
-  }
-
-}

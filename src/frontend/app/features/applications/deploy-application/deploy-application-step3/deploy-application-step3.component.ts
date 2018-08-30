@@ -34,7 +34,7 @@ const APP_CHECK_INTERVAL = 3000;
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 
-  @Input('appGuid') appGuid: string;
+  @Input() appGuid: string;
 
   // Validation observable
   valid$: Observable<boolean>;

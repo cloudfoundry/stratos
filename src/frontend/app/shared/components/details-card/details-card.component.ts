@@ -10,10 +10,10 @@ export class DetailsCardComponent implements OnInit {
 
   constructor() { }
 
-  @Input('title')
+  @Input()
   title: string;
 
-  @Input('busy')
+  @Input()
   busy: boolean;
 
   ngOnInit() {
