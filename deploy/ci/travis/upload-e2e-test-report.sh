@@ -24,7 +24,7 @@ echo "Configuring upload client"
 ./mc config host add s3 ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
 
 echo "Listing contents..."
-./mc ls s3
+./mc ls s3 --insecure
 
 echo "Uploading ..."
 # Sync the E2E reports
