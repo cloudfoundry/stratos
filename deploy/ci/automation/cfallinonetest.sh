@@ -21,7 +21,7 @@ echo "Running Stratos All-in-one"
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
 CONTAINER_ID=$(docker run \
--d
+-d \
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
 -e UAA_ENDPOINT='http://localhost:8080' \
