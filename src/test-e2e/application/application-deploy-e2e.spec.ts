@@ -22,7 +22,7 @@ const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
 const appName = 'cf-quick-app';
 
-describe('Application Deploy', function () {
+xdescribe('Application Deploy', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
 
