@@ -1,5 +1,5 @@
 import { ElementFinder, protractor } from 'protractor/built';
-import { browser, element, promise } from 'protractor';
+import { browser, promise } from 'protractor';
 
 const until = protractor.ExpectedConditions;
 

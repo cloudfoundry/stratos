@@ -26,22 +26,22 @@ export interface IApplicationMonitorComponentState {
 })
 export class AppActionMonitorIconComponent implements OnInit {
 
-  @Input('entityKey')
+  @Input()
   public entityKey: string;
 
-  @Input('id')
+  @Input()
   public id: string;
 
-  @Input('schema')
+  @Input()
   public schema: schema.Entity;
 
-  @Input('monitorState')
+  @Input()
   public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
 
-  @Input('updateKey')
+  @Input()
   public updateKey = rootUpdatingKey;
 
-  @Output('currentState')
+  @Output()
   public currentState: Observable<IApplicationMonitorComponentState>;
 
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }

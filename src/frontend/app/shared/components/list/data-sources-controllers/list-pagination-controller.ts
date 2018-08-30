@@ -137,10 +137,10 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
   }
 
-  private cloneMultiFilter(filter: PaginationClientFilter) {
+  private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {
     return {
-      ...filter,
-      items: { ...filter.items }
+      ...paginationClientFilter,
+      items: { ...paginationClientFilter.items }
     };
   }
   private createPaginationObservable(dataSource: IListDataSource<T>): Observable<ListPagination> {
@@ -188,9 +188,9 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     );
   }
 
-  private cleanFilterParam(filter) {
+  private cleanFilterParam(filterVal) {
     // Flatten some specific falsies into the same value.
-    if (filter === null || filter === undefined || filter === '') {
+    if (filterVal === null || filterVal === undefined || filterVal === '') {
       return undefined;
     }
     return filter;

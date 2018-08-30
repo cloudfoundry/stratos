@@ -35,7 +35,8 @@ cache:
 stages:
 - Frontend Lint
 - Frontend Unit Tests
-- Backend
+- Backend Lint
+- Backend Unit Tests
 - name: E2E tests
   if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
 - name: E2E tests quick
@@ -51,7 +52,16 @@ jobs:
     script:
     - npm test
     - npm run codecov
-  - stage: Backend
+  - stage: Backend Lint
+    before_script:
+    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+    - chmod +x ~/bin/gimme
+    - eval "$(gimme 1.9)"
+    - go get -u golang.org/x/lint/golint
+    script:
+    - golint src/jetstream/...
+    - ./deploy/ci/travis/update-go-report-card.sh
+  - stage: Backend Unit Tests
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme

@@ -11,7 +11,7 @@ import { AppChip } from '../../chips/chips.component';
 export class CompactServiceInstanceCardComponent implements OnInit {
   serviceInstanceTags: AppChip[];
 
-  @Input('serviceInstance') serviceInstance: APIResource<IServiceInstance>;
+  @Input() serviceInstance: APIResource<IServiceInstance>;
   constructor() { }
 
   ngOnInit() {
