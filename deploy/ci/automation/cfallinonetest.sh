@@ -14,7 +14,7 @@ pwd
 set -e
 
 ./build/store-git-metadata.sh
-docker build -f deploy/Dockerfile.all-in-one . -t stratos-aio
+docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
 
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
