@@ -26,6 +26,12 @@ echo "Configuring upload client"
 echo "Listing contents..."
 ./mc ls s3 --insecure
 
+ls ./e2e-reports
+
 echo "Uploading ..."
 # Sync the E2E reports
 ./mc cp --insecure -r ./e2e-reports s3/${S3_BUCKET}
+
+
+./mc ls s3/${S3_BUCKET} --insecure
+
