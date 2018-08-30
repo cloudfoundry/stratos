@@ -24,7 +24,7 @@ CONTAINER_ID=$(docker run \
 -d \
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
--e UAA_ENDPOINT='http://localhost:8080' \
+-e UAA_ENDPOINT='https://login.local.pcfdev.io' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
 stratos-aio)
 
