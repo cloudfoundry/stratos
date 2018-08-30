@@ -19,7 +19,10 @@ docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
 echo "Running Stratos All-in-one"
 
 # Kill any existing docker all-in-one docker containers
-docker kill $(docker ps -q --filter "ancestor=stratos-aio:latest")
+RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")
+if [ -n "$RUNNING" ]
+  docker kill $RUNNING
+fi
   
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
