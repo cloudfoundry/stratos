@@ -1,6 +1,6 @@
-<app-meta-card class="app-service-card" [actionMenu]="cardMenu" [entityConfig]="entityConfig">
+<app-meta-card *ngIf="serviceInstanceEntity" class="app-service-card" [actionMenu]="cardMenu" [entityConfig]="entityConfig">
   <app-meta-card-title>
-    <div class="app-service-card__title">{{ serviceInstanceEntity?.entity.name }}</div>
+    <div class="app-service-card__title">{{ serviceInstanceEntity.entity.name }}</div>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Space</app-meta-card-key>
@@ -14,20 +14,20 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Plan</app-meta-card-key>
-    <app-meta-card-value>{{ serviceInstanceEntity?.entity.service_plan?.entity.name}} </app-meta-card-value>
+    <app-meta-card-value>{{ serviceInstanceEntity.entity.service_plan?.entity.name}} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Applications Attached</app-meta-card-key>
-    <app-meta-card-value>{{ serviceInstanceEntity?.entity.service_bindings.length }} </app-meta-card-value>
+    <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings.length }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Last Updated</app-meta-card-key>
-    <app-meta-card-value>{{ serviceInstanceEntity?.entity.last_operation?.updated_at | date:'medium' }} </app-meta-card-value>
+    <app-meta-card-value>{{ serviceInstanceEntity.entity.last_operation?.updated_at | date:'medium' }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Dashboard</app-meta-card-key>
     <app-meta-card-value>
-      <div *ngIf="!!serviceInstanceEntity?.entity.dashboard_url ; then dashboardUrl; else none"></div>
+      <div *ngIf="!!serviceInstanceEntity.entity.dashboard_url ; then dashboardUrl; else none"></div>
       <ng-template #dashboardUrl>
         <div class="service-instance-card__link">
           <a class="service-instance-card__icon-link" [href]="serviceInstanceEntity.entity.dashboard_url" target="_blank" appClickStopPropagation>

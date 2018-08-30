@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IService } from '../../../core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAllServices } from '../../../store/actions/service.actions';
 import { GetServicesForSpace } from '../../../store/actions/space.actions';
