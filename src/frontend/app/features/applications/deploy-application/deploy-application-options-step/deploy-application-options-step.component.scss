@@ -1,57 +1,37 @@
 @import '../../../../../sass/mixins';
+
 :host {
   width: 100%;
 }
 
 .deploy-options {
   max-width: none;
+
   &__form-sections {
     display: flex;
     flex-direction: column;
+
     @include breakpoint(tablet) {
       flex-direction: row;
     }
+
     &__form-section {
-      max-width: 450px;
       display: flex;
-      flex-direction: column;
-      padding: 15px 35px 10px 0;
       flex: 1;
+      flex-direction: column;
+      max-width: 450px;
+      padding: 15px 35px 10px 0;
     }
   }
+
   &__route {
     &__base-options {
       display: flex;
       padding-top: 25px;
+
       mat-checkbox {
         padding-right: 15px;
       }
     }
-  } // max-width: none;
-  &__title {
-    // padding: 10px 0;
   }
-  mat-checkbox {
-    // padding: 10px 0;
-  } // &__col {
-  //   //max-width: 480px;
-  //   width: 100%;
-  //   flex: 1;
-  //   &:first-child {
-  //     margin-right: 12px;
-  //   }
-  //   &:not(:first-child) {
-  //     margin-left: 12px;
-  //   }
-  // }
-  // // &__buttons {
-  // //   text-align: right;
-  // // }
-  // // &__toggler {
-  // //   margin: 12px 0;
-  // // }
-  // &__error {
-  //   font-weight: 600;
-  //   padding: 8px;
-  // }
 }
