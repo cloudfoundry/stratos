@@ -15,7 +15,7 @@ chmod +x mc
 
 echo "Uploading test report...."
 
-./mc config host add e2e-reports ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} 
+./mc config host add e2e-reports ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
 
 # Sync the E2E reports
-./mc cp -r ./e2e-reports e2e-reports/${S3_BUCKET}
+./mc cp -r ./e2e-reports e2e-reports/${S3_BUCKET} --insecure
