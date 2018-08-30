@@ -13,7 +13,7 @@ describe('Endpoints', () => {
 
     describe('As Admin -', () => {
 
-      describe('Single endpoint -', () => {
+      fdescribe('Single endpoint -', () => {
 
         beforeAll(() => {
           // Only register the default Cloud Foundry endpoint

@@ -28,14 +28,14 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-- Frontend Lint
-- Frontend Unit Tests
-- Backend Lint
-- Backend Unit Tests
 - name: E2E tests
   if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
 - name: E2E tests quick
   if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
+- Frontend Lint
+- Frontend Unit Tests
+- Backend Lint
+- Backend Unit Tests
 jobs:
   include:
   - stage: Frontend Lint
