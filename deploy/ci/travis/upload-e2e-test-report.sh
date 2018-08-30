@@ -16,7 +16,9 @@ chmod +x mc
 echo "Uploading test report...."
 
 mkdir ./e2e-reports
-cat "This is a test" > ./e2e-reports/test.txt
+echo "This is a test" > ./e2e-reports/test.txt
+echo "This is a test" > ./e2e-reports/test2.txt
+echo "This is a test" > ./e2e-reports/test3.txt
 
 ./mc config host add e2e-reports ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
 
