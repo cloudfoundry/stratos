@@ -36,7 +36,7 @@ export class KubernetesTabBaseComponent implements OnInit {
 
   isFetching$: Observable<boolean>;
 
-  constructor(private kubeEndpointService: KubernetesEndpointService) { }
+  constructor(public kubeEndpointService: KubernetesEndpointService) { }
 
   ngOnInit() {
     this.isFetching$ = ObservableOf(false);
