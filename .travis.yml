@@ -28,14 +28,15 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-- name: E2E tests
-  if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
-- name: E2E tests quick
-  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
-- Frontend Lint
-- Frontend Unit Tests
-- Backend Lint
-- Backend Unit Tests
+- E2E Test Reports
+# - name: E2E tests
+#   if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
+# - name: E2E tests quick
+#   if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
+# - Frontend Lint
+# - Frontend Unit Tests
+# - Backend Lint
+# - Backend Unit Tests
 jobs:
   include:
   - stage: Frontend Lint
@@ -75,6 +76,9 @@ jobs:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     script:
     - "./deploy/ci/travis/run-e2e-tests.sh quick"
+    - "./deploy/ci/travis/upload-e2e-test-report.sh"
+  - stage: E2E Test Reports
+    script:
     - "./deploy/ci/travis/upload-e2e-test-report.sh"
 notifications:
   slack:
