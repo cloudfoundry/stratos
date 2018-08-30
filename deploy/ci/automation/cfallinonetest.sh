@@ -5,13 +5,15 @@ echo "=============================="
 echo "Stratos Docker All-in-one Test"
 echo "=============================="
 
-source ./cfutils.sh
+DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source ${DIRPATH}/cfutils.sh
 
 # We should be running in the Stratos GitHub folder
 
+pwd
 set -e
 
-build/store-git-metadata.sh
+./build/store-git-metadata.sh
 docker build -f deploy/Dockerfile.all-in-one . -t stratos-aio
 
 # Run the all-in-one Stratos
