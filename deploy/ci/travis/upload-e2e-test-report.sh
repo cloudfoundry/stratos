@@ -10,12 +10,12 @@ if [ -z "${AWS_ENDPOINT}" ]; then
   exit 1
 fi
 
-echo "Insatlling AWS CLI"
-curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-unzip awscli-bundle.zip
-./awscli-bundle/install -b ~/bin/aws
+wget https://dl.minio.io/client/mc/release/linux-amd64/mc
+chmod +x mc
 
 echo "Uploading test report...."
 
-# Sync the E2E reports to S3
-~/bin/aws --endpoint-url ${AWS_ENDPOINT} s3 sync ./e2e-reports s3://${S3_BUCKET}
+./mc config host add e2e-reports ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} 
+
+# Sync the E2E reports
+./mc cp -r ./e2e-reports e2e-reports/${S3_BUCKET}
