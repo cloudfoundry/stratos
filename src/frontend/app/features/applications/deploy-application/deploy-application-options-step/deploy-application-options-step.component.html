@@ -18,13 +18,13 @@
       <mat-form-field>
         <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number">
       </mat-form-field>
-      <mat-checkbox matInput formControlName="no_start">Do not start the application</mat-checkbox>
+      <mat-checkbox matInput name="no_start" formControlName="no_start">Do not start the application</mat-checkbox>
     </div>
     <div class="deploy-options__form-sections__form-section">
       <div class="deploy-options__title"><b>Application Route</b></div>
       <div class="deploy-options__route__base-options">
-        <mat-checkbox matInput formControlName="no_route">Do not create a route</mat-checkbox>
-        <mat-checkbox matInput formControlName="random_route">Create a random route</mat-checkbox>
+        <mat-checkbox matInput name="no_route" formControlName="no_route">Do not create a route</mat-checkbox>
+        <mat-checkbox matInput name="random_route" formControlName="random_route">Create a random route</mat-checkbox>
       </div>
       <mat-form-field>
         <input matInput placeholder="Host" formControlName="host">

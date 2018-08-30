@@ -19,11 +19,10 @@ const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
-const appName = 'cf-quick-app';
-
 describe('Application Deploy', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
+  const testAppName = ApplicationE2eHelper.createApplicationName();
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -53,11 +52,12 @@ describe('Application Deploy', function () {
 
     // Check the steps
     deployApp.stepper.getStepNames().then(steps => {
-      expect(steps.length).toBe(4);
+      expect(steps.length).toBe(5);
       expect(steps[0]).toBe('Cloud Foundry');
       expect(steps[1]).toBe('Source');
       expect(steps[2]).toBe('Source Config');
-      expect(steps[3]).toBe('Deploy');
+      expect(steps[3]).toBe('Overrides (Optional)');
+      expect(steps[4]).toBe('Deploy');
     });
     expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
     promise.all([
@@ -99,6 +99,14 @@ describe('Application Deploy', function () {
       commits.selectRow(0);
       expect(deployApp.stepper.canNext()).toBeTruthy();
 
+      // Press next to get to overrides step
+      deployApp.stepper.next();
+      expect(deployApp.stepper.canNext()).toBeTruthy();
+
+      const overrides = deployApp.getOverridesForm();
+      overrides.waitUntilShown();
+      overrides.fill({ name: testAppName, random_route: true });
+
       // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
       // waiting for angular if we don't turn off.
       browser.waitForAngularEnabled(false);
@@ -116,10 +124,10 @@ describe('Application Deploy', function () {
       browser.wait(ApplicationSummary.detect()
         .then(appSummary => {
           appSummary.waitForPage();
-          appSummary.header.waitForTitleText(appName);
+          appSummary.header.waitForTitleText(testAppName);
           return appSummary.cfGuid;
         })
-        .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName })));
+        .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName: testAppName })));
     });
 
   });
