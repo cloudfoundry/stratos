@@ -46,6 +46,7 @@ describe('Application Deploy', function () {
   beforeEach(() => nav.goto(SideNavMenuItem.Applications));
 
   it('Should deploy app from GitHub', () => {
+    const loggingPrefix = 'Application Deploy: Deploy from Github:';
     expect(appWall.isActivePage()).toBeTruthy();
 
     // Should be on deploy app modal
@@ -53,6 +54,7 @@ describe('Application Deploy', function () {
     expect(deployApp.header.getTitleText()).toBe('Deploy');
 
     // Check the steps
+    e2e.log(`${loggingPrefix} Checking Steps`);
     deployApp.stepper.getStepNames().then(steps => {
       expect(steps.length).toBe(4);
       expect(steps[0]).toBe('Cloud Foundry');
@@ -60,6 +62,7 @@ describe('Application Deploy', function () {
       expect(steps[2]).toBe('Source Config');
       expect(steps[3]).toBe('Deploy');
     });
+    e2e.log(`${loggingPrefix} Cf/Org/Space Step`);
     expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
     promise.all([
       deployApp.stepper.getStepperForm().getText('cf'),
@@ -80,12 +83,15 @@ describe('Application Deploy', function () {
     expect(deployApp.stepper.canNext()).toBeTruthy();
     deployApp.stepper.next();
 
+    e2e.log(`${loggingPrefix} Source Step`);
     expect(deployApp.stepper.getActiveStepName()).toBe('Source');
     expect(deployApp.stepper.canNext()).toBeFalsy();
     deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
 
     deployApp.stepper.waitUntilCanNext('Next');
     deployApp.stepper.next();
+
+    e2e.log(`${loggingPrefix} Source Config Step`);
     expect(deployApp.stepper.getActiveStepName()).toBe('Source Config');
 
     const commits = deployApp.getCommitList();
@@ -100,6 +106,8 @@ describe('Application Deploy', function () {
       commits.selectRow(0);
       expect(deployApp.stepper.canNext()).toBeTruthy();
 
+      e2e.log(`${loggingPrefix} Select a commit (selected)`);
+
       // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
       // waiting for angular if we don't turn off.
       browser.waitForAngularEnabled(false);
@@ -107,12 +115,15 @@ describe('Application Deploy', function () {
       // Press next to deploy the app
       deployApp.stepper.next();
 
+      e2e.log(`${loggingPrefix} Deploying Step (wait)`);
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
+      e2e.log(`${loggingPrefix} Deploying Step (after wait)`);
       // Click next
       deployApp.stepper.next();
 
+      e2e.log(`${loggingPrefix} Waiting For Application Summary Page`);
       // Should be app summary
       browser.wait(ApplicationSummary.detect()
         .then(appSummary => {
@@ -120,7 +131,10 @@ describe('Application Deploy', function () {
           appSummary.header.waitForTitleText(appName);
           return appSummary.cfGuid;
         })
-        .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName })));
+        .then(cfGuid => {
+          e2e.log(`${loggingPrefix} Starting application delete`);
+          return applicationE2eHelper.deleteApplication(null, { appName });
+        }));
     });
 
   });
