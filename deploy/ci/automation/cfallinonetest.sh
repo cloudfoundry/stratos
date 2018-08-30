@@ -18,10 +18,12 @@ docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
 
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
-CONTAINER_ID=$(docker run -p 5443:443 stratos-aio \
+CONTAINER_ID=$(docker run \
+-p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
 -e UAA_ENDPOINT='http://localhost:8080' \
--e CONSOLE_ADMIN_SCOPE='cloud_controller.admin')
+-e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
+stratos-aio)
 
 # Get the E2E config
 wget ${TEST_CONFIG_URL} -O secrets.yaml --no-check-certificate
