@@ -64,7 +64,7 @@ export class ListTableComponent extends Component {
       return rows[index].element(by.css('.mat-radio-button')).click();
     });
   }
-  
+
   waitUntilNotBusy() {
     return Component.waitUntilNotShown(
       this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
