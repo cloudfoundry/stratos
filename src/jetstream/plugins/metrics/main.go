@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// MetricsSpecification is a plugin to support the metrics endpoint type
 type MetricsSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
@@ -43,28 +44,32 @@ type EndpointMetricsRelation struct {
 	endpoint *interfaces.ConnectedEndpoint
 }
 
+// Init creates a new MetricsSpecification
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &MetricsSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
+// GetEndpointPlugin gets the endpoint plugin for this plugin
 func (m *MetricsSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return m, nil
 }
 
+// GetRoutePlugin gets the route plugin for this plugin
 func (m *MetricsSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return m, nil
 }
 
+// GetMiddlewarePlugin gets the middleware plugin for this plugin
 func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-// Metrics endpoints - admin
+// AddAdminGroupRoutes adds the admin routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
-// Metrics API endpoints - non-admin
+// AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
 }
@@ -136,6 +141,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	return tr, false, nil
 }
 
+// Init performs plugin initialization
 func (m *MetricsSpecification) Init() error {
 	return nil
 }

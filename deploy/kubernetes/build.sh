@@ -168,6 +168,9 @@ buildPostflightJob
 buildMariaDb
 buildUI
 
+# Fetch subcharts
+helm dependency update
+
 if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   # Patch Values.yaml file
   cp values.yaml.tmpl values.yaml
