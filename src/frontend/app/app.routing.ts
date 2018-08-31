@@ -43,8 +43,6 @@ const appRoutes: Routes = [
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
-      //{ path: 'caasp', loadChildren: 'app/custom/caasp/caasp.module#CaaspModule' },
-      // { path: 'kubernetes', loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule' },
     ]
   },
   {

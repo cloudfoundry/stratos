@@ -11,7 +11,6 @@ import { KubernetesService } from './services/kubernetes.service';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesNodeCapacityComponent } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
-import { ExtensionManager } from '../../core/extension/extension-manager-service';
 
 @NgModule({
   imports: [
@@ -29,20 +28,5 @@ import { ExtensionManager } from '../../core/extension/extension-manager-service
 })
 export class KubernetesModule {
 
-  constructor(private ext: ExtensionManager) {
-
-    console.log('Caasp Setup Module init');
-
-    ext.registerSideNav({
-      text: 'Kubernetes',
-      matIcon: 'apps',
-      link: '/kubernetes'
-    }).registerEndpointType({
-      type: 'k8s',
-      label: 'Kubernetes',
-      authTypes: ['creds']
-    });
-
-  }
 }
 
