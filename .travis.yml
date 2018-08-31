@@ -42,10 +42,10 @@ stages:
 jobs:
   include:
   - stage: Lint
-    # Front-end lint
+    name: Front-end lint
     script:
     - npm run lint
-  - #stage: Backend Lint
+  - name: Backend Lint
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
@@ -55,13 +55,13 @@ jobs:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
-    # Frontend Unit Tests
+    name: Frontend Unit Tests
     env:
     - CI_ENV=true
     script:
     - npm test
     - npm run codecov
-  - #stage: Backend Unit Tests
+  - name: Backend Unit Tests
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
@@ -69,7 +69,7 @@ jobs:
     - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - npm run test-backend
-  - #stage: E2E tests quick
+  - name: E2E Tests
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     script:
