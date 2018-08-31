@@ -171,6 +171,7 @@ export class EndpointsEffect {
           'cnsi_name': action.name,
           'api_endpoint': action.endpoint,
           'skip_ssl_validation': action.skipSslValidation ? 'true' : 'false',
+          'sso_allowed': action.ssoAllowed ? 'true' : 'false',
         }
       });
 

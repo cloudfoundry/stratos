@@ -79,6 +79,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       name: string,
       guid: string,
       type: EndpointType,
+      ssoAllowed: boolean,
     }
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
@@ -87,6 +88,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         this.authTypesForEndpoint.push(authType);
       }
     });
+
+    // Remove SSO if not allowed on this endpoint
+    this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || data.ssoAllowed);
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);

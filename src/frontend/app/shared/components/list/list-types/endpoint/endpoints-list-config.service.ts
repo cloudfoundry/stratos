@@ -144,6 +144,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
           name: item.name,
           guid: item.guid,
           type: item.cnsi_type,
+          ssoAllowed: item.sso_allowed
         },
         disableClose: true
       });
