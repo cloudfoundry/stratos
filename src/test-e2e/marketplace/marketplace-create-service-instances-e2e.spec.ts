@@ -119,10 +119,10 @@ function createService(marketplaceSummaryPage: MarketplaceSummaryPage,
   button.then(bt => bt.click());
   browser.getCurrentUrl().then(url => {
     expect(url.endsWith('create?isSpaceScoped=false')).toBeTruthy();
-    // Proceeed to create a service instance
+    // Proceed to create a service instance
     servicesHelperE2E.createService(serviceName, true);
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
     const createdServiceInstanceName = servicesHelperE2E.serviceInstanceName;
 

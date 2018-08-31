@@ -33,7 +33,7 @@ describe('Edit Service Instance', () => {
     createServiceInstance.waitForPage();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
 
@@ -56,7 +56,7 @@ describe('Edit Service Instance', () => {
 
   it('- should have edited service instance', () => {
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
     const editedServiceName = servicesHelperE2E.serviceInstanceName;
     getCardWithTitle(servicesWall, editedServiceName).then((card: MetaCard) => {
       expect(card).toBeDefined();
@@ -65,7 +65,7 @@ describe('Edit Service Instance', () => {
 
   it('- should be able to delete service instance', () => {
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
     const editedServiceName = servicesHelperE2E.serviceInstanceName;
     getCardWithTitle(servicesWall, editedServiceName).then((card: MetaCard) => {
       card.openActionMenu().then(menu => {
