@@ -39,6 +39,14 @@ const endpointAuthTypes = [
     },
     types: new Array<EndpointType>('cf', 'metrics')
   },
+  {
+    name: 'Kubernetes Config',
+    value: 'kubeconfig',
+    form: {
+      kubeconfig: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
 ];
 
 const endpointTypesMap = {};

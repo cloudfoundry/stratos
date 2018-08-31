@@ -46,7 +46,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private hasAttemptedConnect: boolean;
   public authTypesForEndpoint = [];
-
+  public upload = true;
+  private kubeconfig = '';
   public canShareEndpointToken = false;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
@@ -111,6 +112,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
       });
+  }
+
+  dealWithKubeConfigFile($event) {
+    const file = $event[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.kubeconfig = reader.result;
+    };
+    reader.readAsText(file);
   }
 
   setupObservables() {
@@ -188,17 +198,25 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
+  toggleAccept() {
+    this.upload = !this.upload;
+  }
+
   submit() {
     this.hasAttemptedConnect = true;
     const { guid, authType, authValues, systemShared } = this.endpointForm.value;
+    const authVal = authValues;
+    if (this.endpointForm.value.authType === 'kubeconfig') {
+      this.bodyContent = this.kubeconfig;
+    }
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,
       authType,
-      authValues,
+      authVal,
       systemShared,
       this.bodyContent,
-    ));
+    )); { }
   }
 
   ngOnDestroy() {

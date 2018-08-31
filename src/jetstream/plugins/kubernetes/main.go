@@ -6,6 +6,7 @@ import (
 	// "fmt"
 	// "io"
 	"net/url"
+	"strings"
 
 	"errors"
 
@@ -63,7 +64,7 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
-	if connectType != AuthConnectTypeKubeConfig {
+	if !strings.EqualFold(connectType, AuthConnectTypeKubeConfig) {
 		return nil, false, errors.New("Only Kubernetes config is accepted for Kubernetes endpoints")
 	}
 
