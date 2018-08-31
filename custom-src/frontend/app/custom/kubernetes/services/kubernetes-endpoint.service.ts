@@ -37,7 +37,8 @@ export class KubernetesEndpointService {
       endpointSchemaKey,
       entityFactory(endpointSchemaKey),
       this.kubeGuid,
-      new GetAllEndpoints()
+      new GetAllEndpoints(),
+      false
     );
 
     // this.cfInfoEntityService = this.entityServiceFactory.create(

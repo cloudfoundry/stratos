@@ -11,6 +11,7 @@ export function startRequest(state, action: IStartRequestAction) {
     return state;
   }
   const apiAction = action.apiAction as IRequestAction;
+  console.log('Starting Request....' + JSON.stringify(apiAction));
   let requestState = getEntityRequestState(state, apiAction);
 
   if (apiAction.updatingKey) {

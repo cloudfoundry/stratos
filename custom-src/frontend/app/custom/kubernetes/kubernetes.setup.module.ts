@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { ExtensionManager } from '../../core/extension/extension-manager-service';
-import { KubernetesModule } from './kubernetes.module';
-import { KubernetesRoutingModule } from './kubernetes.routing';
 
 
 const kubernetes: Routes = [{

@@ -28,6 +28,8 @@ export class KubernetesEffects {
   @Effect()
   fetchInfo$ = this.actions$.ofType<GetKubernetesInfo>(GET_INFO).pipe(
     flatMap(action => {
+
+      console.log('hitting this!');
       this.store.dispatch(new StartRequestAction(action));
       const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {

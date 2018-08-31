@@ -7,6 +7,8 @@ import { schema } from 'normalizr';
 export const KUBE_INFO_ENTITY_KEY = 'kubernetesInfo';
 
 export const GET_INFO = '[KUBERNETES Endpoint] Get Info';
+export const GET_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Info Success';
+export const GET_INFO_FAILURE = '[KUBERNETES Endpoint] Get Info Failure';
 
 export const KubernetesInfoSchema = new schema.Entity(KUBE_INFO_ENTITY_KEY);
 
@@ -22,9 +24,9 @@ export class GetKubernetesInfo implements PaginatedAction {
   entityKey = KubernetesInfoSchema.key;
   entity = [entityFactory(KubernetesInfoSchema.key)];
   actions = [
-    // GET_INFO,
-    // GET_INFO_SUCCESS,
-    // GET_INFO_SUCCESS
+    GET_INFO,
+    GET_INFO_SUCCESS,
+    GET_INFO_FAILURE
   ];
   paginationKey: string;
 }
