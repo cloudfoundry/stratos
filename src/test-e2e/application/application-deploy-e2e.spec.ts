@@ -8,6 +8,7 @@ import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
 
+
 const until = protractor.ExpectedConditions;
 
 let nav: SideNavigation;
@@ -44,6 +45,7 @@ describe('Application Deploy', function () {
   beforeEach(() => nav.goto(SideNavMenuItem.Applications));
 
   it('Should deploy app from GitHub', () => {
+    const loggingPrefix = 'Application Deploy: Deploy from Github:';
     expect(appWall.isActivePage()).toBeTruthy();
 
     // Should be on deploy app modal
@@ -51,6 +53,7 @@ describe('Application Deploy', function () {
     expect(deployApp.header.getTitleText()).toBe('Deploy');
 
     // Check the steps
+    e2e.log(`${loggingPrefix} Checking Steps`);
     deployApp.stepper.getStepNames().then(steps => {
       expect(steps.length).toBe(5);
       expect(steps[0]).toBe('Cloud Foundry');
@@ -59,6 +62,7 @@ describe('Application Deploy', function () {
       expect(steps[3]).toBe('Overrides (Optional)');
       expect(steps[4]).toBe('Deploy');
     });
+    e2e.log(`${loggingPrefix} Cf/Org/Space Step`);
     expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
     promise.all([
       deployApp.stepper.getStepperForm().getText('cf'),
@@ -79,12 +83,15 @@ describe('Application Deploy', function () {
     expect(deployApp.stepper.canNext()).toBeTruthy();
     deployApp.stepper.next();
 
+    e2e.log(`${loggingPrefix} Source Step`);
     expect(deployApp.stepper.getActiveStepName()).toBe('Source');
     expect(deployApp.stepper.canNext()).toBeFalsy();
     deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
 
     deployApp.stepper.waitUntilCanNext('Next');
     deployApp.stepper.next();
+
+    e2e.log(`${loggingPrefix} Source Config Step`);
     expect(deployApp.stepper.getActiveStepName()).toBe('Source Config');
 
     const commits = deployApp.getCommitList();
@@ -101,11 +108,15 @@ describe('Application Deploy', function () {
 
       // Press next to get to overrides step
       deployApp.stepper.next();
+
+      e2e.log(`${loggingPrefix} Overrides Step`);
       expect(deployApp.stepper.canNext()).toBeTruthy();
 
       const overrides = deployApp.getOverridesForm();
       overrides.waitUntilShown();
       overrides.fill({ name: testAppName, random_route: true });
+
+      e2e.log(`${loggingPrefix} Overrides Step - overrides set`);
 
       // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
       // waiting for angular if we don't turn off.
@@ -114,12 +125,15 @@ describe('Application Deploy', function () {
       // Press next to deploy the app
       deployApp.stepper.next();
 
+      e2e.log(`${loggingPrefix} Deploying Step (wait)`);
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
+      e2e.log(`${loggingPrefix} Deploying Step (after wait)`);
       // Click next
       deployApp.stepper.next();
 
+      e2e.log(`${loggingPrefix} Waiting For Application Summary Page`);
       // Should be app summary
       browser.wait(ApplicationSummary.detect()
         .then(appSummary => {
@@ -127,7 +141,10 @@ describe('Application Deploy', function () {
           appSummary.header.waitForTitleText(testAppName);
           return appSummary.cfGuid;
         })
-        .then(cfGuid => applicationE2eHelper.deleteApplication(null, { appName: testAppName })));
+        .then(cfGuid => {
+          e2e.log(`${loggingPrefix} Starting application delete`);
+          return applicationE2eHelper.deleteApplication(null, { appName: testAppName });
+        }));
     });
 
   });
