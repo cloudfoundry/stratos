@@ -4,7 +4,7 @@ import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 
 
-fdescribe('CF - Top Level - ', () => {
+describe('CF - Top Level - ', () => {
 
   let cfPage: CfTopLevelPage;
   let e2eSetup: E2ESetup;
