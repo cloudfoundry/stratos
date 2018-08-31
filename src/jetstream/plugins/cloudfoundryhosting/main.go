@@ -19,6 +19,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
+// Constants
 const (
 	VCapApplication        = "VCAP_APPLICATION"
 	CFApiURLOverride       = "CF_API_URL"
@@ -27,15 +28,18 @@ const (
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 )
 
+// CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
 }
 
+// Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
+// GetMiddlewarePlugin gets the middleware plugin for this plugin
 func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	if config.IsSet(VCapApplication) {
 		return ch, nil
@@ -43,14 +47,17 @@ func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) 
 	return nil, errors.New("Not running as a Cloud Foundry application")
 }
 
+// GetEndpointPlugin gets the endpoint plugin for this plugin
 func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
-	return nil, errors.New("Not implemented!")
+	return nil, errors.New("Not implemented")
 }
 
+// GetRoutePlugin gets the route plugin for this plugin
 func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
-	return nil, errors.New("Not implemented!")
+	return nil, errors.New("Not implemented")
 }
 
+// Init performs plugin initialization
 func (ch *CFHosting) Init() error {
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if config.IsSet(VCapApplication) {
@@ -103,9 +110,9 @@ func (ch *CFHosting) Init() error {
 
 		// Allow the URL to be overridden by an application environment variable
 		if config.IsSet(CFApiURLOverride) {
-			apiUrl, _ := config.GetValue(CFApiURLOverride)
-			appData.API = apiUrl
-			log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
+			apiURL, _ := config.GetValue(CFApiURLOverride)
+			appData.API = apiURL
+			log.Infof("Overriden CF API URL from environment variable %s", apiURL)
 		}
 
 		if config.IsSet(CFApiForceSecure) {
@@ -185,6 +192,7 @@ func (ch *CFHosting) Init() error {
 	return nil
 }
 
+// EchoMiddleware is the Echo server middleware provided by this plugin
 func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
@@ -213,6 +221,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// SessionEchoMiddleware is the Echo server session middleware provided by this plugin
 // For cloud foundry session affinity
 // Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
 func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {

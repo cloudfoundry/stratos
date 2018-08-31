@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-backend": "./build/bk-build.sh",
-    "build-backend-dev": "STRATOS_BACKEND_DEV=true npm run build-backend",
-    "full-build-dev": "npm run build-dev; npm run build-backend-dev",
+    "full-build-dev": "npm run build-dev; npm run build-backend",
     "bosh-build-backend": "gulp bosh-build-backend",
     "test-backend": "./build/bk-build.sh test",
     "update-webdriver": "webdriver-manager update",
@@ -35,7 +34,7 @@
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "npm run customize"
+    "postinstall": "npm run customize && gulp dev-setup"
   },
   "author": "",
   "license": "Apache-2.0",

@@ -271,6 +271,11 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 		return key32bytes, nil
 	}
 
+	// Check we have volume and filename
+	if len(pc.EncryptionKeyVolume) == 0 && len(pc.EncryptionKeyFilename) == 0 {
+		return nil, errors.New("You must configure either an Encryption key or the Encryption key filename")
+	}
+
 	// Read the key from the shared volume
 	key, err := crypto.ReadEncryptionKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
@@ -371,7 +376,11 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	config.LoadConfigFile("./config.properties")
+	// Load config.properties if it exists, otherwise look for default.config.properties
+	err := config.LoadConfigFile("./config.properties")
+	if os.IsNotExist(err) {
+		config.LoadConfigFile("./default.config.properties")
+	}
 
 	if err := config.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
@@ -724,7 +733,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		if err == nil {
 			routePlugin.AddAdminGroupRoutes(adminGroup)
 		}
-
 	}
 
 	adminGroup.POST("/unregister", p.unregisterCluster)
@@ -740,7 +748,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
 	}
-
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
@@ -762,12 +769,18 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 }
 
 func getStaticFiles() (string, error) {
-	dir, err := filepath.Abs(".")
+
+	uiFolder, _ := config.GetValue("UI_PATH")
+	if len(uiFolder) == 0 {
+		uiFolder = "./ui"
+	}
+
+	dir, err := filepath.Abs(uiFolder)
 	if err == nil {
-		// Look for a folder named 'ui'
-		_, err := os.Stat(dir + "/ui")
+		// Check if folder exists
+		_, err := os.Stat(dir)
 		if err == nil || !os.IsNotExist(err) {
-			return dir + "/ui", nil
+			return dir, nil
 		}
 	}
 	return "", errors.New("UI folder not found")

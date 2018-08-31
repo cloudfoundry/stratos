@@ -41,10 +41,11 @@ if [ "${RUN_TYPE}" == "quick" ]; then
   dep version
   
   npm run build
-  npm run build-backend-dev
-  # Patch the config file so local version runs on port 443
-  pushd outputs
-  ./portal-proxy > backend.log &
+  npm run build-backend
+  # Copy travis config.properties file
+  cp deploy/ci/travis/config.properties src/jetstream/
+  pushd src/jetstream
+  ./jetstream > backend.log &
   popd
 
   E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
@@ -90,7 +91,7 @@ fi
 # Output backend log if the tests failed
 if [ "${RUN_TYPE}" == "quick" ]; then
   if [ $RESULT -ne 0 ]; then
-    cat outputs/backend.log
+    cat src/jetstream/backend.log
   fi
 fi
 
