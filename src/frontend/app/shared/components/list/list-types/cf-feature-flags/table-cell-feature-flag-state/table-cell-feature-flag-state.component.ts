@@ -9,7 +9,7 @@ import { IFeatureFlag } from '../../../../../../core/cf-api.types';
 })
 export class TableCellFeatureFlagStateComponent implements OnInit {
 
-  @Input('row') row: APIResource<IFeatureFlag>;
+  @Input() row: APIResource<IFeatureFlag>;
   constructor() { }
 
   ngOnInit() {

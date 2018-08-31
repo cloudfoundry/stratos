@@ -21,7 +21,7 @@ export interface ServiceTag {
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
   serviceEntity: APIResource<IService>;
-  @Input('disableCardClick') disableCardClick = false;
+  @Input() disableCardClick = false;
 
   @Input('row')
   set row(row: APIResource<IService>) {
