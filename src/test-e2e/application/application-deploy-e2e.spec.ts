@@ -81,6 +81,8 @@ describe('Application Deploy', function () {
     deployApp.stepper.getStepperForm().fill({ 'org': orgName });
     deployApp.stepper.getStepperForm().fill({ 'space': spaceName });
     expect(deployApp.stepper.canNext()).toBeTruthy();
+
+    // Press next to get to source step
     deployApp.stepper.next();
 
     e2e.log(`${loggingPrefix} Source Step`);
@@ -89,6 +91,7 @@ describe('Application Deploy', function () {
     deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
 
     deployApp.stepper.waitUntilCanNext('Next');
+    // Press next to get to source config step
     deployApp.stepper.next();
 
     e2e.log(`${loggingPrefix} Source Config Step`);
