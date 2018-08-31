@@ -210,7 +210,7 @@ spec:
         - name: SSO_LOGIN
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS
-          value: {{default "" .Values.console.ssoOptions | quote}}"
+          value: {{default "" .Values.console.ssoOptions | quote}}
         ports:
         - containerPort: 3003
           name: proxy
