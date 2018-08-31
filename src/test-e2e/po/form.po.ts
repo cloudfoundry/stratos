@@ -163,7 +163,8 @@ export class FormComponent extends Component {
   }
 
   // Fill the form fields in the specified object
-  fill(fields: { [fieldKey: string]: string | boolean }): promise.Promise<void> {
+  fill(fields: { [fieldKey: string]: string | boolean }, expectFailure = false): promise.Promise<void> {
+
     return this.getControlsMap().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
@@ -184,13 +185,21 @@ export class FormComponent extends Component {
             ctrl.click();
             ctrl.sendKeys(value);
             ctrl.sendKeys(Key.RETURN);
-            expect(this.getText(field)).toBe(value);
+            if (!expectFailure) {
+              expect(this.getText(field)).toBe(value);
+            } else {
+              expect(this.getText(field)).not.toBe(value);
+            }
             break;
           default:
             ctrl.click();
             ctrl.clear();
             ctrl.sendKeys(value);
-            expect(this.getText(field)).toBe(value);
+            if (!expectFailure) {
+              expect(this.getText(field)).toBe(value);
+            } else {
+              expect(this.getText(field)).not.toBe(value);
+            }
             break;
         }
       });

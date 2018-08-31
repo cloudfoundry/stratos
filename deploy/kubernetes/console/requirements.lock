@@ -1,0 +1,6 @@
+dependencies:
+- name: metrics
+  repository: https://cloudfoundry-incubator.github.io/stratos
+  version: 2.0.0-metrics-dev
+digest: sha256:82dc83e153f6c8115db7c2e0030c9d378bbeaa08bdddad97cf23a559aa9a12c8
+generated: 2018-08-02T11:02:52.066583002+01:00
