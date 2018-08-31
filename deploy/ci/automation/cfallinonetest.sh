@@ -13,17 +13,17 @@ source "${DIRPATH}/cfutils.sh"
 pwd
 set -e
 
-./build/store-git-metadata.sh
-docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
-
-echo "Running Stratos All-in-one"
-
 # Kill any existing docker all-in-one docker containers
 RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")
 if [ -n "$RUNNING" ]; then
   docker kill $RUNNING
 fi
-  
+
+./build/store-git-metadata.sh
+docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
+
+echo "Running Stratos All-in-one"
+
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
 CONTAINER_ID=$(docker run \
