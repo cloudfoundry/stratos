@@ -19,6 +19,7 @@ export interface E2EConfigCloudFoundry extends E2EEndpointConfig {
   testOrg: string;
   testSpace: string;
   testDeployApp: string;
+  testDeployAppStack: string;
   testService: string;
 }
 
