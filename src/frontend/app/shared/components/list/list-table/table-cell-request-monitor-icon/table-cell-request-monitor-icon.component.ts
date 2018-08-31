@@ -20,10 +20,10 @@ export interface ITableCellRequestMonitorIconConfig {
 export class TableCellRequestMonitorIconComponent implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;
 
-  @Input('config')
+  @Input()
   public config: (element) => ITableCellRequestMonitorIconConfig;
 
-  @Input('row')
+  @Input()
   public row;
 
   public id: string;

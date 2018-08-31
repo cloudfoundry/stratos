@@ -22,7 +22,7 @@ import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 })
 export class DeleteAppRoutesComponent implements OnDestroy {
 
-  @Output('selected')
+  @Output()
   public selected = new EventEmitter<APIResource<IServiceBinding>[]>();
 
   private selectedSub: Subscription;

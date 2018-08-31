@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { CardStatus } from '../../application-state/application-state.service';
 
 
@@ -10,7 +10,7 @@ import { CardStatus } from '../../application-state/application-state.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardStatusComponent {
-  @Input('status$') status$: Observable<CardStatus>;
+  @Input() status$: Observable<CardStatus>;
 
   private cardStatus = CardStatus;
 

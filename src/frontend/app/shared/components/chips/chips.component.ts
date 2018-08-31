@@ -29,19 +29,19 @@ export class AppChipsComponent implements OnInit {
 
   public atLowerLimit = true;
 
-  @Input('chips')
+  @Input()
   public chips: AppChip[] = [];
 
-  @Input('stacked')
+  @Input()
   stacked = false;
 
-  @Input('orientation')
+  @Input()
   orientation: 'rtl' | 'ltr' = 'ltr';
 
-  @Input('lowerLimit')
+  @Input()
   lowerLimit = 3;
 
-  @Input('displayProperty')
+  @Input()
   displayProperty = 'value';
 
   public limit;

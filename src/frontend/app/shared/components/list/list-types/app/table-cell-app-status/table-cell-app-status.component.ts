@@ -16,7 +16,7 @@ import { TableCellCustom } from '../../../list.types';
 })
 export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  @Input('row') row;
+  @Input() row;
   applicationState: ApplicationStateData;
   @Input('config')
   set config(value: { hideIcon: boolean, initialStateOnly: boolean }) {

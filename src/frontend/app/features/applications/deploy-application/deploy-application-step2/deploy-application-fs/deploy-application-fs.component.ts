@@ -2,7 +2,7 @@ import { Component, OnInit, Input, forwardRef, ViewChild } from '@angular/core';
 import { DeployApplicatioNFsUtils } from './deploy-application-fs-utils';
 import { filter, first, map } from 'rxjs/operators';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
-import { BehaviorSubject ,  Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { FileScannerInfo } from './deploy-application-fs-scanner';
 
 @Component({
@@ -22,7 +22,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   private propagateChange: Function;
   constructor() { }
 
-  @Input('sourceType') sourceType: string;
+  @Input() sourceType: string;
 
   sourceData$ = new BehaviorSubject<FileScannerInfo>(undefined);
 
