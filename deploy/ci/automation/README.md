@@ -6,7 +6,9 @@ The Stratos team uses these scripts with a Jenkins instance to monitor systems a
 
 - cfpushtest.sh - Pushes Stratos to a local PCF Dev instance and runs the E2E tests. This can also run MySQL or Postgres in a docker container and bind these are services in order to validate running Stratos with these databases.
 
-- cfallinonetest.sh - Builds the Docker All-in-One image, runs it locally and runs the E2E tests.
+- cfallinonetest.sh - Builds the Docker All-in-One image, runs it locally and then runs the E2E tests.
+
+- cfdockercomposetest.sh - Builds the Docker Compose images, runs it locally and then runs the E2E tests.
 
 - check-cf.sh - Simple check that a CF System is responding to API requests.
 
