@@ -38,7 +38,7 @@ stages:
 jobs:
   include:
   - stage: Lint
-    name: Frontend lint
+    name: Frontend Lint
     script:
     - npm run lint
   - name: Backend Lint
