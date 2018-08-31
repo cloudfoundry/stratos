@@ -1,13 +1,12 @@
-import { browser, ElementFinder, promise } from 'protractor';
-
-import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
+import { e2e } from '../e2e';
+import { ElementFinder, promise } from 'protractor';
 import { CreateServiceInstance } from './create-service-instance.po';
-import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
+import { MetaCard } from '../po/meta-card.po';
+import { ServicesHelperE2E } from './services-helper-e2e';
 
-describe('Create Service Instance', () => {
+describe('Create Service Instance of Private Service', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -16,8 +15,7 @@ describe('Create Service Instance', () => {
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
-      .connectAllEndpoints(ConsoleUserType.admin)
-      .getInfo();
+      .connectAllEndpoints(ConsoleUserType.admin);
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
   });
 
@@ -32,15 +30,16 @@ describe('Create Service Instance', () => {
 
   it('- should be able to to create a service instance', () => {
 
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    servicesWall.waitForPage();
+    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.privateService.name);
+
+    servicesWall.isActivePage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
 
     servicesWall.serviceInstancesList.cards.getCards().then(
       (cards: ElementFinder[]) => {
         return cards.map(card => {
-          const metaCard = new MetaCard(card, MetaCardTitleType.CUSTOM);
+          const metaCard = new MetaCard(card);
           return metaCard.getTitle();
         });
       }).then(cardTitles => {
@@ -69,7 +68,7 @@ describe('Create Service Instance', () => {
     createServiceInstance.stepper.next();
 
     // Select Service
-    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.privateService.name);
     createServiceInstance.stepper.next();
 
     createServiceInstance.stepper.cancel();
@@ -78,51 +77,18 @@ describe('Create Service Instance', () => {
 
   });
 
-  it('- should return user to Service summary when cancelled on App binding selection', () => {
+  it('- should not show service plan if wrong org/space are selected', () => {
 
     // Select CF/Org/Space
-    servicesHelperE2E.setCfOrgSpace();
+    servicesHelperE2E.setCfOrgSpace(e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidOrgName,
+      e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidSpaceName);
     createServiceInstance.stepper.next();
 
     // Select Service
-    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    createServiceInstance.stepper.next();
-
-    // Select Service Plan
-    servicesHelperE2E.setServicePlan();
-    createServiceInstance.stepper.next();
-
-    createServiceInstance.stepper.cancel();
-
-    servicesWall.isActivePage();
+    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.privateService.name, true);
 
   });
 
-  it('- should return user to Service summary when cancelled on service instance details', () => {
-    // Select CF/Org/Space
-    servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.next();
-
-    // Select Service
-    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    createServiceInstance.stepper.next();
-
-    // Select Service Plan
-    servicesHelperE2E.setServicePlan();
-    createServiceInstance.stepper.next();
-
-    createServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
-      if (!bindAppDisabled) {
-        // Bind App
-        servicesHelperE2E.setBindApp();
-        createServiceInstance.stepper.next();
-      }
-
-      createServiceInstance.stepper.cancel();
-
-      servicesWall.isActivePage();
-    });
-  });
 
   afterAll((done) => {
     servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());

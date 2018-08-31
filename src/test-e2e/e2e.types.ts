@@ -15,12 +15,23 @@ export interface E2EEndpointConfig {
   creds: E2ECreds;
 }
 
+export interface ServiceConfig {
+  invalidOrgName?: string;
+  invalidSpaceName?: string;
+  name: string;
+}
+export interface E2EServicesConfig {
+  publicService: ServiceConfig;
+  privateService: ServiceConfig;
+  spaceScopedService: ServiceConfig;
+}
+
 export interface E2EConfigCloudFoundry extends E2EEndpointConfig {
   testOrg: string;
   testSpace: string;
   testDeployApp: string;
   testDeployAppStack: string;
-  testService: string;
+  services: E2EServicesConfig;
 }
 
 export interface E2EEndpointTypeConfig extends E2EEndpointConfig {
