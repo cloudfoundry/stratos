@@ -6,15 +6,15 @@ import { TestBed } from '@angular/core/testing';
  * a global beforeEach so we don't have to add it to all the necessary
  * spec files.
  */
-beforeEach( () => {
+beforeEach(() => {
   TestBed.configureTestingModule({
-    providers: [ { provide: APP_BASE_HREF, useValue: '/' } ]
+    providers: [{ provide: APP_BASE_HREF, useValue: '/' }]
   });
 });
 
 /**
  * Bump up the Jasmine timeout from 5 seconds
  */
-beforeAll( () => {
+beforeAll(() => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 });

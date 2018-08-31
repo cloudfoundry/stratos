@@ -11,7 +11,7 @@
     getCorePath: function (srcPath, executable) {
       return path.join(srcPath, executable ? executable : '');
     },
-    coreName: 'portal-proxy',
+    coreName: 'jetstream',
     outputPath: path.join(__dirname, '..', 'outputs'),
     srcPath: path.join(__dirname, 'src', 'backend'),
     pluginFolder: path.join(__dirname, '..', 'src', 'backend'),
