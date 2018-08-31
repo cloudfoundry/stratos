@@ -78,8 +78,8 @@ describe('Application Delete', function () {
       // We created the app after the wall loaded, so refresh to make sure app wall shows the new app
       appWall.appList.refresh();
 
-      let appCount = 0;
-      appWall.appList.getTotalResults().then(count => appCount = count);
+      appWall.appList.header.setSearchText(testAppName);
+      expect(appWall.appList.getTotalResults()).toBe(1);
 
       e2e.sleep(5000);
 
@@ -122,8 +122,8 @@ describe('Application Delete', function () {
       // We deleted the app, so don't try and do this on cleanup
       app = null;
 
-      // Check that we have 1 less app
-      appWall.appList.getTotalResults().then(count => expect(count).toBe(appCount - 1));
+      appWall.appList.header.setSearchText(testAppName);
+      expect(appWall.appList.getTotalResults()).toBe(0);
     });
   });
 
