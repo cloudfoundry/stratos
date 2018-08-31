@@ -72,9 +72,9 @@ type DeployAppMessageSender interface {
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
-	cnsiGUID := echoContext.Param("cnsiGUID")
-	orgGUID := echoContext.Param("orgGUID")
-	spaceGUID := echoContext.Param("spaceGUID")
+	cnsiGUID := echoContext.Param("cnsiGuid")
+	orgGUID := echoContext.Param("orgGuid")
+	spaceGUID := echoContext.Param("spaceGuid")
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
