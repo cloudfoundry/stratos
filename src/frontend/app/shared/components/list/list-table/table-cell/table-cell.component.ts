@@ -1,4 +1,7 @@
 import {
+  TableCellEndpointIsAdminComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+import {
   Component,
   ComponentFactoryResolver,
   Input,
@@ -141,7 +144,8 @@ export const listTableCells = [
   TableCellRequestMonitorIconComponent,
   TableCellSpaceNameComponent,
   TableCellAppCfOrgSpaceHeaderComponent,
-  TableCellAppCfOrgSpaceComponent
+  TableCellAppCfOrgSpaceComponent,
+  TableCellEndpointIsAdminComponent
 ];
 
 @Component({
@@ -157,13 +161,13 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;
 
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input() dataSource = null as IListDataSource<T>;
 
-  @Input('component') component: Type<{}>;
-  @Input('cellDefinition') cellDefinition: ICellDefinition<T>;
-  @Input('func') func: () => string;
-  @Input('row') row: T;
-  @Input('config') config: any;
+  @Input() component: Type<{}>;
+  @Input() cellDefinition: ICellDefinition<T>;
+  @Input() func: () => string;
+  @Input() row: T;
+  @Input() config: any;
 
   private cellComponent: TableCellCustom<T>;
 

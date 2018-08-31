@@ -20,7 +20,7 @@ describe('Marketplace Summary', () => {
 
   describe('', () => {
     beforeAll((done) => {
-      const getCfCnsi = servicesHelperE2E.cfRequestHelper.getCfCnsi();
+      const getCfCnsi = servicesHelperE2E.cfRequestHelper.getCfInfo();
       getCfCnsi.then(endpointModel => {
         cfGuid = endpointModel.guid;
         return servicesHelperE2E.fetchServices(cfGuid);

@@ -6,5 +6,5 @@ import { Component, OnInit, Input } from '@angular/core';
   styleUrls: ['./dot-content.component.scss']
 })
 export class DotContentComponent {
-  @Input('disabled') disabled: boolean;
+  @Input() disabled: boolean;
 }

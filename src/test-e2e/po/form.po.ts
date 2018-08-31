@@ -24,7 +24,43 @@ export interface FormItem {
   tag: string;
   valid: string;
   error: string;
+  id: string;
 }
+
+// Page Object for a form field
+export class FormField {
+
+  public element: ElementFinder;
+
+  constructor(public form: FormComponent, public name: string) {
+    this.element = this.form.getField(name);
+  }
+
+  set(v: string): promise.Promise<void> {
+    return this.form.fill({ [this.name]: v });
+  }
+
+  clear(): promise.Promise<void> {
+    return this.form.clearField(this.name);
+  }
+
+  isDisabled(): promise.Promise<boolean> {
+    return this.form.isFieldDisabled(this.name);
+  }
+
+  isInvalid(): promise.Promise<boolean> {
+    return this.form.isFieldInvalid(this.name);
+  }
+
+  getError(): promise.Promise<string> {
+    return this.form.getFieldErrorText(this.name);
+  }
+
+  focus(): promise.Promise<void> {
+    return this.form.focusField(this.name);
+  }
+}
+
 
 /**
  * Page Object for a form
@@ -61,17 +97,20 @@ export class FormComponent extends Component {
       clear: elm.clear,
       click: elm.click,
       tag: elm.getTagName(),
+      id: elm.getAttribute('id')
     };
   }
 
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
     const fields = this.getFields().filter((elm => {
-      return elm.getAttribute('name').then(name => {
-        return elm.getAttribute('formcontrolname').then(formcontrolname => {
-          const nameAtt = name || formcontrolname;
-          return nameAtt.toLowerCase() === ctrlName;
-        });
+      return promise.all([
+        elm.getAttribute('name'),
+        elm.getAttribute('formcontrolname'),
+        elm.getAttribute('id')
+      ]).then(([name, formcontrolname, id]) => {
+        const nameAtt = name || formcontrolname || id;
+        return nameAtt.toLowerCase() === ctrlName;
       });
     }));
     expect(fields.count()).toBe(1);
@@ -116,7 +155,7 @@ export class FormComponent extends Component {
     return this.getFieldsMapped().then(items => {
       const form = {};
       items.forEach((item: FormItem) => {
-        const id = item.name || item.formControlName;
+        const id = item.name || item.formControlName || item.id;
         form[id.toLowerCase()] = item;
       });
       return form;
@@ -169,36 +208,3 @@ export class FormComponent extends Component {
 }
 
 
-// Page Object for a form field
-export class FormField {
-
-  public element: ElementFinder;
-
-  constructor(public form: FormComponent, public name: string) {
-    this.element = this.form.getField(name);
-  }
-
-  set(v: string): promise.Promise<void> {
-    return this.form.fill({ [this.name]: v });
-  }
-
-  clear(): promise.Promise<void> {
-    return this.form.clearField(this.name);
-  }
-
-  isDisabled(): promise.Promise<boolean> {
-    return this.form.isFieldDisabled(this.name);
-  }
-
-  isInvalid(): promise.Promise<boolean> {
-    return this.form.isFieldInvalid(this.name);
-  }
-
-  getError(): promise.Promise<string> {
-    return this.form.getFieldErrorText(this.name);
-  }
-
-  focus(): promise.Promise<void> {
-    return this.form.focusField(this.name);
-  }
-}

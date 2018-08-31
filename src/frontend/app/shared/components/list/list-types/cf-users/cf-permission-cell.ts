@@ -41,7 +41,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
     this.userEntity.next(row.entity);
   }
 
-  @Input('config')
+  @Input()
   set config(config: any) {
     this.configSubject.next(config);
   }

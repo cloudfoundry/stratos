@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -33,7 +33,7 @@ import { ToggleHeaderEvent } from '../../../../store/actions/dashboard-actions';
   ]
 })
 export class PageHeaderEventsComponent implements OnInit {
-  @Input('endpointIds$')
+  @Input()
   public endpointIds$: Observable<string[]>;
 
   public eventMinimized$: Observable<boolean>;

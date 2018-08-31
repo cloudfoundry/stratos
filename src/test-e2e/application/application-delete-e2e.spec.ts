@@ -1,12 +1,10 @@
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
+import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
-import { CreateApplicationStepper } from './create-application-stepper.po';
-import { CFHelpers } from '../helpers/cf-helpers';
-import { ExpectedConditions } from 'protractor';
 
 
 describe('Application Delete', function () {
@@ -26,7 +24,7 @@ describe('Application Delete', function () {
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
-      .getInfo(ConsoleUserType.admin)
+      .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
     cfHelper = new CFHelpers(setup);
   });
@@ -36,16 +34,25 @@ describe('Application Delete', function () {
   // Delete tests for a simple app with no routes
   describe('Simple App', () => {
     beforeAll(() => {
-      const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
+      const defaultCf = e2e.secrets.getDefaultCFEndpoint();
+      const endpointName = defaultCf.name;
       cfGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
       const testTime = (new Date()).toISOString();
       testAppName = ApplicationE2eHelper.createApplicationName(testTime);
-      return applicationE2eHelper.createApp(cfGuid, e2e.secrets.getDefaultCFEndpoint().testSpace, testAppName).then(appl => {
-        app = appl;
-      });
+      return applicationE2eHelper.createApp(
+        cfGuid,
+        e2e.secrets.getDefaultCFEndpoint().testOrg,
+        e2e.secrets.getDefaultCFEndpoint().testSpace,
+        testAppName,
+        defaultCf
+      ).then(appl => app = appl);
     });
 
-    afterAll(() => applicationE2eHelper.deleteApplication(cfGuid, app));
+    afterAll(() => {
+      if (app) {
+        applicationE2eHelper.deleteApplication({ cfGuid, app });
+      }
+    });
 
     it('Should return to summary page after cancel', () => {
       const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
@@ -116,9 +123,8 @@ describe('Application Delete', function () {
       app = null;
 
       // Check that we have 1 less app
-      appWall.appList.getTotalResults().then(count =>expect(count).toBe(appCount - 1));
+      appWall.appList.getTotalResults().then(count => expect(count).toBe(appCount - 1));
     });
   });
-
 
 });

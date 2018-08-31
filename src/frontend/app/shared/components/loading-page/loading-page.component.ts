@@ -1,11 +1,12 @@
-
-import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
-import { filter, first, startWith, map } from 'rxjs/operators';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { schema } from 'normalizr';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
+
 import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+
 
 @Component({
   selector: 'app-loading-page',
@@ -24,25 +25,24 @@ import { EntityMonitor } from '../../monitors/entity-monitor';
 })
 export class LoadingPageComponent implements OnInit {
 
-
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
-  @Input('isLoading')
+  @Input()
   isLoading: Observable<boolean>;
 
-  @Input('text')
+  @Input()
   text = 'Retrieving your data';
 
-  @Input('deleteText')
+  @Input()
   deleteText = 'Deleting data';
 
-  @Input('alert')
+  @Input()
   alert = '';
 
-  @Input('entityId')
+  @Input()
   private entityId: string;
 
-  @Input('entitySchema')
+  @Input()
   private entitySchema: schema.Entity;
 
   public isDeleting: Observable<boolean>;
@@ -78,7 +78,7 @@ export class LoadingPageComponent implements OnInit {
   }
 
   private buildFromMonitor(monitor: EntityMonitor) {
-    this.isLoading = monitor.isFetchingEntity$;
     this.isDeleting = monitor.isDeletingEntity$;
+    this.isLoading = monitor.isFetchingEntity$;
   }
 }

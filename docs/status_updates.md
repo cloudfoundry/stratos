@@ -2,6 +2,33 @@
 
 Weekly status updates are published here.
 
+## 24th August 2018
+
+Update for this week:
+
+- Go-backend re-structure - This work has now been merged and should make it easier to develop with and contribute to. Some additional clean up was done and is awaiting PR review.
+
+- Extended end-to-end test suite - Further work to build-out the E2E test suite. See:
+  - Services E2E: Service Instance creation with App Binding [#2855](https://github.com/cloudfoundry-incubator/stratos/pull/2855)
+  - E2E: Basic Application Routes tests [#2862](https://github.com/cloudfoundry-incubator/stratos/pull/2862)
+  - E2E: Basic Application Instances tests [#2863](https://github.com/cloudfoundry-incubator/stratos/pull/2863)
+  - E2E: Basic test for Cf/Org/Space users tables [#2904](https://github.com/cloudfoundry-incubator/stratos/pull/2904)
+
+- Small improvements and fixes for the Diagnostics page [#2860](https://github.com/cloudfoundry-incubator/stratos/pull/2860)
+
+
+## 17th August 2018
+
+Update for this week:
+
+- 2.0.1 - We tagged a 2.0.1 release. This is identical to 2.0.0 and only fixes an issue with a broken dependency - one of the pinned dependencies was no longer working. This issue only affects you if you were pushing to Cloud Foundry from the 2.0.0 tag.
+
+- Pre-built UI - We added the ability to pre-build the UI before pushing to Cloud Foundry. This allows you to build the UI with AOT (Ahead-of-time) compilation enabled and push to CF. This will also reduce push time. See the doc [Pre-building the UI](https://github.com/cloudfoundry-incubator/stratos/tree/v2-master/deploy/cloud-foundry#pre-building-the-ui).
+
+- Go-backend re-structure. Work is almost complete on re-structuring the go backend to make it easier to develop with and contribute to. See issue [#2815](https://github.com/cloudfoundry-incubator/stratos/issues/2815).
+
+- Extended end-to-end test suite
+
 ## 10th August 2018
 A similar update to last week, focusing on metrics, testing and the community.
 

@@ -1,10 +1,11 @@
+import { browser, promise, protractor } from 'protractor';
+
 import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
 
-import { browser, promise, protractor } from 'protractor';
-
+/* tslint:disable */
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
  */
@@ -38,14 +39,14 @@ export class E2E {
   /**
    * Convenience for sleep
    */
-  sleep(duration) {
+  sleep(duration: number) {
     browser.driver.sleep(duration);
   }
 
   /**
    * Log message in the control flow
    */
-  log(log) {
+  log(log: string) {
     protractor.promise.controlFlow().execute(() => console.log(log));
   }
 }
@@ -80,7 +81,7 @@ export class E2ESetup {
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
     const that = this;
     protractor.promise.controlFlow().execute(() => {
-      E2E.debugLog('Logging in as user: ' + (userType === ConsoleUserType.admin ? 'admin' : 'user'));
+      E2E.debugLog('Logging in as user: ' + (that.loginUserType === ConsoleUserType.admin ? 'admin' : 'user'));
       return e2e.helper.setupApp(that.loginUserType);
     });
   }
@@ -94,6 +95,7 @@ export class E2ESetup {
   // Don't login after setup is done
   doNotLogin() {
     this.loginUserType = null;
+    return this;
   }
 
   // Ensure that an admin session is created, even if it is not needed by the setup process
@@ -153,7 +155,7 @@ export class E2ESetup {
   }
 
 
-  // NOTE: You don't need to explictly call createSession
+  // NOTE: You don't need to explicitly call createSession
   // Create a new session with Stratos so that we can make API requests
   private createSession = (req, userType) => {
     return protractor.promise.controlFlow().execute(() => {
@@ -211,3 +213,4 @@ export class E2ESetup {
 export const e2e = new E2E();
 
 
+/* tslint:enable */

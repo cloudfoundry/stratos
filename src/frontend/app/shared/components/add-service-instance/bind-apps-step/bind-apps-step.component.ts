@@ -26,7 +26,7 @@ import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-det
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
-  @Input('boundAppId')
+  @Input()
   boundAppId: string;
 
   validateSubscription: Subscription;
