@@ -1,3 +1,4 @@
+import { E2EConfigCloudFoundry } from '../e2e.types';
 import { browser, promise } from 'protractor';
 
 import { IApp, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
@@ -159,12 +160,10 @@ export class ApplicationE2eHelper {
       .catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
   }
 
-  createApp(cfGuid: string, orgName: string, spaceName: string, appName: string) {
+  createApp(cfGuid: string, orgName: string, spaceName: string, appName: string, endpoint: E2EConfigCloudFoundry) {
     return browser.driver.wait(
-      this.cfHelper.addOrgIfMissing(cfGuid, orgName)
-        .then(org => {
-          return this.cfHelper.fetchSpace(cfGuid, org.metadata.guid, spaceName);
-        })
+      this.cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, endpoint, orgName)
+        .then(org => this.cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, org.entity.name, spaceName, endpoint))
         .then(space => {
           expect(space).not.toBeNull();
           return promise.all([
