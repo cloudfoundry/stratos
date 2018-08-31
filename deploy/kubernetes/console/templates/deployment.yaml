@@ -207,6 +207,10 @@ spec:
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
           value: "{{ .Release.Time }}"
+        - name: SSO_LOGIN
+          value: {{default "false" .Values.console.ssoLogin | quote}}
+        - name: SSO_OPTIONS
+          value: {{default "" .Values.console.ssoOptions | quote}}"
         ports:
         - containerPort: 3003
           name: proxy
