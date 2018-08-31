@@ -48,7 +48,7 @@ describe('CF - Top Level - ', () => {
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.admin.username);
-        expect(cfPage.waitForAdministrator().getValue()).toBe('Yes');
+        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('Yes');
       });
 
       it('Walk Tabs', () => {
@@ -82,7 +82,7 @@ describe('CF - Top Level - ', () => {
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
-        expect(cfPage.waitForAdministrator().getValue()).toBe('No');
+        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('No');
       });
 
       it('Walk Tabs', () => {

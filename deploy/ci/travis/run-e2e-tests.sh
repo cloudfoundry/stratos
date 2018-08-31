@@ -91,7 +91,7 @@ fi
 # Output backend log if the tests failed
 if [ "${RUN_TYPE}" == "quick" ]; then
   if [ $RESULT -ne 0 ]; then
-    cat outputs/backend.log
+    cat src/jetstream/backend.log
   fi
 fi
 
