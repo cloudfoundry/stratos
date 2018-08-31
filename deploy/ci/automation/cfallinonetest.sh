@@ -20,7 +20,7 @@ echo "Running Stratos All-in-one"
 
 # Kill any existing docker all-in-one docker containers
 RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")
-if [ -n "$RUNNING" ]
+if [ -n "$RUNNING" ]; then
   docker kill $RUNNING
 fi
   
