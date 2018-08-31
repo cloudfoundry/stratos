@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { AppChipsComponent } from '../../../../chips/chips.component';
 import { TableCellServiceInstanceAppsAttachedComponent } from './table-cell-service-instance-apps-attached.component';
 
 describe('TableCellServiceInstanceAppsAttachedComponent', () => {
@@ -9,7 +10,7 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellServiceInstanceAppsAttachedComponent],
+      declarations: [TableCellServiceInstanceAppsAttachedComponent, AppChipsComponent],
       imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
@@ -20,18 +21,16 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        service_bindings: [],
-        active: true,
-        bindable: true,
-        description: 'test',
-        extra: '',
-        label: '',
-        info_url: '',
-        long_description: '',
-        plan_updateable: false,
-        tags: [],
-        url: '',
-        version: ''
+        service_plan_guid: 'service_plan',
+        space_guid: 'space',
+        dashboard_url: 'dashboard_url',
+        type: 'type',
+        service_guid: 'service_guid',
+        service_plan_url: 'service_plan_url',
+        service_bindings_url: 'service_bindings_url',
+        service_keys_url: 'service_keys_url',
+        routes_url: 'routes_url',
+        service_url: 'service_url',
       },
       metadata: null
     };
