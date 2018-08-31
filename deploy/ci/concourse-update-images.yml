@@ -10,7 +10,7 @@ resources:
     access_token: {{github-access-token}}
     branch: {{stratos-ui-branch}}
     repo: SUSE/stratos-ui
-    uri: https://github.com/SUSE/stratos-ui.git
+    uri: https://github.com/cloudfoundry-incubator/stratos.git
     base_url: {{base-url}}
 
 - name: send-email

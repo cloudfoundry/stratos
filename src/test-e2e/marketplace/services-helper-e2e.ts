@@ -1,8 +1,9 @@
-import { CFResponse } from '../../frontend/app/store/types/api.types';
-import { E2ESetup, e2e } from '../e2e';
-import { CFRequestHelpers } from '../helpers/cf-request-helpers';
-import { promise } from 'protractor';
+import { browser, promise } from 'protractor';
+
+import { CFResponse, createEmptyCfResponse } from '../../frontend/app/store/types/api.types';
+import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
+import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 
 export class ServicesHelperE2E {
@@ -42,6 +43,7 @@ export class ServicesHelperE2E {
   }
 
   createService = () => {
+    this.createServiceInstance.waitForPage();
 
     // Select CF/Org/Space
     this.setCfOrgSpace();
@@ -56,13 +58,22 @@ export class ServicesHelperE2E {
     this.createServiceInstance.stepper.next();
 
     // Bind App
-    this.setBindApp();
-    this.createServiceInstance.stepper.next();
+    this.createServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
+      if (!bindAppDisabled) {
+        this.setBindApp();
+        this.createServiceInstance.stepper.next();
+      }
 
-    this.setServiceInstanceDetail();
+      this.setServiceInstanceDetail();
 
-    this.createServiceInstance.stepper.next();
+      this.createServiceInstance.stepper.next();
+    });
+  }
 
+  canBindAppStep = (): promise.Promise<boolean> => {
+    return this.cfHelper.fetchDefaultSpaceGuid(true)
+      .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(this.cfHelper.cachedDefaultCfGuid, spaceGuid))
+      .then(totalAppsInSpace => !!totalAppsInSpace);
   }
 
   setServiceInstanceDetail = () => {
@@ -71,6 +82,7 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
     this.createServiceInstance.stepper.setServiceName(this.serviceInstanceName);
+    expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
   }
 
   setBindApp = () => {
@@ -90,15 +102,16 @@ export class ServicesHelperE2E {
   }
 
   setServiceSelection = () => {
+    this.createServiceInstance.stepper.waitForStep('Select Service');
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
-    this.createServiceInstance.stepper.waitForStep('Select Service');
     this.createServiceInstance.stepper.setService(e2e.secrets.getDefaultCFEndpoint().testService);
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
 
   setCfOrgSpace = () => {
+    this.createServiceInstance.stepper.waitForStep('Cloud Foundry');
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
     this.createServiceInstance.stepper.setOrg(e2e.secrets.getDefaultCFEndpoint().testOrg);
@@ -107,16 +120,19 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
 
-  cleanupServiceInstance(serviceIntanceName: string): promise.Promise<any> {
-    const getCfCnsi = this.cfRequestHelper.getCfCnsi();
+  cleanUpServiceInstance(serviceInstanceName: string): promise.Promise<any> {
+    const getCfCnsi = this.cfRequestHelper.getCfGuid();
     let cfGuid: string;
-    return getCfCnsi.then(endpointModel => {
-      cfGuid = endpointModel.guid;
+    return getCfCnsi.then(guid => {
+      cfGuid = guid;
       return this.fetchServicesInstances(cfGuid);
     }).then(response => {
       const services = response.resources;
-      const serviceInstance = services.filter(service => service.entity.name === serviceIntanceName)[0];
-      return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
+      const serviceInstance = services.filter(service => service.entity.name === serviceInstanceName)[0];
+      if (serviceInstance) {
+        return this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid);
+      }
+      return promise.fullyResolved(createEmptyCfResponse());
     });
   }
 

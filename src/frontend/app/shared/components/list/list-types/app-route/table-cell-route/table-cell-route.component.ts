@@ -17,7 +17,7 @@ import { TableCellCustom } from '../../../list.types';
 export class TableCellRouteComponent<T> extends TableCellCustom<T>
   implements OnInit {
   domainSubscription: Subscription;
-  @Input('row') row;
+  @Input() row;
   routeUrl: string;
   isRouteTCP: boolean;
   constructor(private store: Store<AppState>) {

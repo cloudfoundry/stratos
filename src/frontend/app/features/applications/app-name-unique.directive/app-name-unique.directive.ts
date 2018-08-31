@@ -1,7 +1,7 @@
 
-import {throwError as observableThrowError, timer as observableTimer, of as observableOf,  Observable } from 'rxjs';
+import { throwError as observableThrowError, timer as observableTimer, of as observableOf, Observable } from 'rxjs';
 
-import {take, combineLatest, switchMap, map, catchError} from 'rxjs/operators';
+import { take, combineLatest, switchMap, map, catchError } from 'rxjs/operators';
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
@@ -46,7 +46,7 @@ export class AppNameUniqueChecking {
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
-  @Input('appApplicationNameUnique') appApplicationNameUnique: AppNameUniqueChecking;
+  @Input() appApplicationNameUnique: AppNameUniqueChecking;
 
   constructor(
     private store: Store<AppState>,

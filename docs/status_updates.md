@@ -2,6 +2,46 @@
 
 Weekly status updates are published here.
 
+## 24th August 2018
+
+Update for this week:
+
+- Go-backend re-structure - This work has now been merged and should make it easier to develop with and contribute to. Some additional clean up was done and is awaiting PR review.
+
+- Extended end-to-end test suite - Further work to build-out the E2E test suite. See:
+  - Services E2E: Service Instance creation with App Binding [#2855](https://github.com/cloudfoundry-incubator/stratos/pull/2855)
+  - E2E: Basic Application Routes tests [#2862](https://github.com/cloudfoundry-incubator/stratos/pull/2862)
+  - E2E: Basic Application Instances tests [#2863](https://github.com/cloudfoundry-incubator/stratos/pull/2863)
+  - E2E: Basic test for Cf/Org/Space users tables [#2904](https://github.com/cloudfoundry-incubator/stratos/pull/2904)
+
+- Small improvements and fixes for the Diagnostics page [#2860](https://github.com/cloudfoundry-incubator/stratos/pull/2860)
+
+
+## 17th August 2018
+
+Update for this week:
+
+- 2.0.1 - We tagged a 2.0.1 release. This is identical to 2.0.0 and only fixes an issue with a broken dependency - one of the pinned dependencies was no longer working. This issue only affects you if you were pushing to Cloud Foundry from the 2.0.0 tag.
+
+- Pre-built UI - We added the ability to pre-build the UI before pushing to Cloud Foundry. This allows you to build the UI with AOT (Ahead-of-time) compilation enabled and push to CF. This will also reduce push time. See the doc [Pre-building the UI](https://github.com/cloudfoundry-incubator/stratos/tree/v2-master/deploy/cloud-foundry#pre-building-the-ui).
+
+- Go-backend re-structure. Work is almost complete on re-structuring the go backend to make it easier to develop with and contribute to. See issue [#2815](https://github.com/cloudfoundry-incubator/stratos/issues/2815).
+
+- Extended end-to-end test suite
+
+## 10th August 2018
+A similar update to last week, focusing on metrics, testing and the community.
+
+- Testing the new metrics deployment process.
+- Improving the end to end test setup process, this will enable better coverage of service tests.
+- Improving test coverage, both unit and end to end, of the often used list component.
+- Improving test coverage of entity validation, another often used component.
+- Manage application stats requests better in the application wall when there are many many started apps.
+- Investigating, solving and shepherding community issues. Some of the stand out ones..
+  - Stratos URLs are now consistent. Previously for the same CF the id would change every time it's registered, meaning bookmarks would need updating following every re-registration. Now as long as the CF API url doesn't change the CF id in the url will remain the same. - https://github.com/cloudfoundry-incubator/stratos/issues/2798
+  - Correctly report application instance counts with respect to app state - https://github.com/cloudfoundry-incubator/stratos/issues/2797
+  - Apply permissions to application actions (start, restart, etc) - https://github.com/cloudfoundry-incubator/stratos/issues/2806
+
 ## 3 August 2018
 This week we've focused on..
 

@@ -16,7 +16,7 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 })
 export class TableRowComponent extends CdkRow implements OnInit {
 
-  @Input('rowState')
+  @Input()
   rowState: Observable<RowState>;
 
   public inErrorState$: Observable<boolean>;

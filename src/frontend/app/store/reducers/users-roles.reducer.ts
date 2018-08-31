@@ -85,27 +85,27 @@ export function UsersRolesReducer(state: UsersRolesState = defaultState, action:
   return state;
 }
 
-function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, role: string, setRole: boolean) {
-  if (roles.permissions[role] === setRole) {
+function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, role: string, applyRole: boolean) {
+  if (roles.permissions[role] === applyRole) {
     return false;
   }
   roles.permissions = {
     ...roles.permissions,
-    [role]: setRole
+    [role]: applyRole
   };
   return true;
 }
 
-function setRole(existingState: UsersRolesState, orgGuid: string, spaceGuid: string, role: string, setRole: boolean): UsersRolesState {
+function setRole(existingState: UsersRolesState, orgGuid: string, spaceGuid: string, role: string, applyRole: boolean): UsersRolesState {
   // Create a fresh instance of the org roles
   let newOrgRoles = cloneOrgRoles(existingState.newRoles, orgGuid);
 
   if (spaceGuid) {
     // Space role change
-    setSpaceRole(newOrgRoles, orgGuid, spaceGuid, role, setRole);
+    setSpaceRole(newOrgRoles, orgGuid, spaceGuid, role, applyRole);
   } else {
     // Org role change
-    newOrgRoles = setOrgRole(newOrgRoles, orgGuid, role, setRole);
+    newOrgRoles = setOrgRole(newOrgRoles, orgGuid, role, applyRole);
   }
 
   // There's been no change to the existing state, just return the existing state;
@@ -130,16 +130,16 @@ function cloneOrgRoles(orgRoles: IUserPermissionInOrg, orgGuid: string): IUserPe
   } : createDefaultOrgRoles(orgGuid);
 }
 
-function setSpaceRole(orgRoles: IUserPermissionInOrg, orgGuid: string, spaceGuid: string, role: string, setRole: boolean) {
+function setSpaceRole(orgRoles: IUserPermissionInOrg, orgGuid: string, spaceGuid: string, role: string, applyRole: boolean) {
   if (!orgRoles.spaces[spaceGuid]) {
     orgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, spaceGuid);
   }
   const spaceRoles = orgRoles.spaces[spaceGuid] = {
     ...orgRoles.spaces[spaceGuid]
   };
-  orgRoles = setPermission(spaceRoles, role, setRole) ? orgRoles : null;
+  orgRoles = setPermission(spaceRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied any space role they must also have the org user role applied too.
-  if (orgRoles && setRole) {
+  if (orgRoles && applyRole) {
     orgRoles.permissions = {
       ...orgRoles.permissions,
       [OrgUserRoleNames.USER]: true
@@ -147,10 +147,10 @@ function setSpaceRole(orgRoles: IUserPermissionInOrg, orgGuid: string, spaceGuid
   }
 }
 
-function setOrgRole(orgRoles: IUserPermissionInOrg, orgGuid: string, role: string, setRole: boolean): IUserPermissionInOrg {
-  orgRoles = setPermission(orgRoles, role, setRole) ? orgRoles : null;
+function setOrgRole(orgRoles: IUserPermissionInOrg, orgGuid: string, role: string, applyRole: boolean): IUserPermissionInOrg {
+  orgRoles = setPermission(orgRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied the org manager, auditor or billing manager role they must also have the org user role applied too.
-  if (orgRoles && role !== 'user' && setRole) {
+  if (orgRoles && role !== 'user' && applyRole) {
     orgRoles.permissions = {
       ...orgRoles.permissions,
       [OrgUserRoleNames.USER]: true
