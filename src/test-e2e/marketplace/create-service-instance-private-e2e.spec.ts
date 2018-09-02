@@ -30,9 +30,9 @@ describe('Create Service Instance of Private Service', () => {
 
   it('- should be able to to create a service instance', () => {
 
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.privateService.name);
+    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.privateService.name, false);
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
 
@@ -57,7 +57,7 @@ describe('Create Service Instance of Private Service', () => {
     servicesHelperE2E.setCfOrgSpace();
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -73,7 +73,7 @@ describe('Create Service Instance of Private Service', () => {
 
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 

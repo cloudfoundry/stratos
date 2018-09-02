@@ -31,7 +31,7 @@ describe('Create Service Instance of Space Scoped Service', () => {
   it('- should be able to to create a service instance', () => {
 
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name);
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
 
