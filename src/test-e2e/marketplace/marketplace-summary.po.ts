@@ -8,8 +8,8 @@ export class MarketplaceSummaryPage extends Page {
 
   constructor(cfGuid: string, serviceGuid: string) {
     super(`/marketplace/${cfGuid}/${serviceGuid}/summary`);
-    this.locator = element(by.css('summary'));
-   }
+    this.locator = element(by.css('.summary'));
+  }
 
   getServiceSummaryCard() {
     return this.locator.element(by.css('.service-summary'));
@@ -17,6 +17,10 @@ export class MarketplaceSummaryPage extends Page {
 
   getRecentInstances() {
     return this.locator.element(by.css('.recent-instances'));
+  }
+
+  getAddServiceInstanceButton() {
+    return element(by.name('add-service-instance'));
   }
 
 }
