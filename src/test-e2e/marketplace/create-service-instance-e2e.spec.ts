@@ -58,7 +58,7 @@ describe('Create Service Instance', () => {
     servicesHelperE2E.setCfOrgSpace();
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -74,7 +74,7 @@ describe('Create Service Instance', () => {
 
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -94,7 +94,7 @@ describe('Create Service Instance', () => {
 
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -120,7 +120,7 @@ describe('Create Service Instance', () => {
 
       createServiceInstance.stepper.cancel();
 
-      servicesWall.isActivePage();
+      servicesWall.waitForPage();
     });
   });
 
