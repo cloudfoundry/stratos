@@ -2,6 +2,41 @@
 
 Weekly status updates are published here.
 
+
+## 31st August 2018
+
+Update for this week:
+
+- Go-backend re-structure - The additional cleanup work has been merged.
+
+- Single-Sign-On - Further work on Single-Sign On:
+  - Improvements - improve error handling, add navigate straight to login option [#2522](https://github.com/cloudfoundry-incubator/stratos/pull/2522)
+  - Link tokens rather than copying them [#2916](https://github.com/cloudfoundry-incubator/stratos/pull/2916)
+  - Allow a Cloud Foundry endpoint to be connected with SSO login [#2928](https://github.com/cloudfoundry-incubator/stratos/pull/2928)
+
+- Allow Client ID and Secret to be set when registering an endpoint [#2920](https://github.com/cloudfoundry-incubator/stratos/pull/2920)
+
+- Scalability:
+  - Change application list in service instance table row from vertical to chip list [#2915](https://github.com/cloudfoundry-incubator/stratos/pull/2915)
+  - Convert space apps list from local to remote [#2913](https://github.com/cloudfoundry-incubator/stratos/pull/2913)
+
+- Metrics - Work has started on tidying up and improving the metrics views
+
+## 24th August 2018
+
+Update for this week:
+
+- Go-backend re-structure - This work has now been merged and should make it easier to develop with and contribute to. Some additional clean up was done and is awaiting PR review.
+
+- Extended end-to-end test suite - Further work to build-out the E2E test suite. See:
+  - Services E2E: Service Instance creation with App Binding [#2855](https://github.com/cloudfoundry-incubator/stratos/pull/2855)
+  - E2E: Basic Application Routes tests [#2862](https://github.com/cloudfoundry-incubator/stratos/pull/2862)
+  - E2E: Basic Application Instances tests [#2863](https://github.com/cloudfoundry-incubator/stratos/pull/2863)
+  - E2E: Basic test for Cf/Org/Space users tables [#2904](https://github.com/cloudfoundry-incubator/stratos/pull/2904)
+
+- Small improvements and fixes for the Diagnostics page [#2860](https://github.com/cloudfoundry-incubator/stratos/pull/2860)
+
+
 ## 17th August 2018
 
 Update for this week:

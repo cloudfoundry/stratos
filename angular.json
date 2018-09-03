@@ -119,7 +119,7 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "e2e/frontend/test-e2e/tsconfig.e2e.json"
+              "src/test-e2e/tsconfig.e2e.json"
             ],
             "exclude": [
               "**/node_modules/**"

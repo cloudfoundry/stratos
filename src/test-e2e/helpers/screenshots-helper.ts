@@ -17,11 +17,13 @@ export class E2eScreenshot {
     browser.takeScreenshot().then(function (data) {
       const base64Data = data.replace(/^data:image\/png;base64,/, '');
       writeFile(filePath, base64Data, 'base64', function (err) {
+        /* tslint:disable */
         if (err) {
           console.log(`Failed to save screenshot '${filePath}'`, err);
         } else {
           console.log('Wrote screenshot to ', filePath);
         }
+        /* tslint:enable */
       });
     });
   }

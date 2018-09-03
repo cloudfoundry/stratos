@@ -7,6 +7,7 @@ import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { SessionData } from '../../../store/types/auth.types';
 import { Meta } from '@angular/platform-browser';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-diagnostics-page',
@@ -18,6 +19,7 @@ export class DiagnosticsPageComponent implements OnInit {
   sessionData$: Observable<SessionData>;
   versionNumber$: Observable<string>;
   userIsAdmin$: Observable<boolean>;
+  helmLastModified$: Observable<Date>;
 
   public breadcrumbs = [
     {
@@ -37,6 +39,9 @@ export class DiagnosticsPageComponent implements OnInit {
   constructor(private meta: Meta, private store: Store<AppState>, @Inject(Customizations) public customizations: CustomizationsMetadata) { }
 
   ngOnInit() {
+
+    const helmLastModifiedRegEx = /seconds:([0-9]*)/;
+
     this.sessionData$ = this.store.select(s => s.auth).pipe(
       filter(auth => !!(auth && auth.sessionData)),
       filter(auth => !!(auth.sessionData.diagnostics)),
@@ -54,10 +59,26 @@ export class DiagnosticsPageComponent implements OnInit {
       })
     );
 
+    this.helmLastModified$ = this.sessionData$.pipe(
+      map((sessionData: SessionData) => {
+        const lastModified = sessionData.diagnostics.helmLastModified;
+        const match = helmLastModifiedRegEx.exec(lastModified);
+        if (match.length === 2) {
+          return new Date(parseInt(match[1], 10) * 1000);
+        }
+        return new Date(0);
+      })
+    );
+
     this.gitProject = this.getMeta('stratos_git_project');
     this.gitBranch = this.getMeta('stratos_git_branch');
     this.gitCommit = this.getMeta('stratos_git_commit');
     this.buildDate = this.getMeta('stratos_build_date');
+
+    // Don't show branch if it is recorded as HEAD
+    if (this.gitBranch === 'HEAD') {
+      this.gitBranch = null;
+    }
 
     this.gitHubRepository = this.getGitHubProject(this.gitProject);
     if (!!this.gitHubRepository) {
