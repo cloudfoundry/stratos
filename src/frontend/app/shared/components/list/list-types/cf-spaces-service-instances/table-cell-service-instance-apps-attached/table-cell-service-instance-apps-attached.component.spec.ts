@@ -19,6 +19,9 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceInstanceAppsAttachedComponent);
     component = fixture.componentInstance;
+    component.config = {
+      breadcrumbs: ''
+    };
     component.row = {
       entity: {
         service_plan_guid: 'service_plan',
@@ -28,16 +31,22 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
         service_guid: 'service_guid',
         service_plan_url: 'service_plan_url',
         service_bindings_url: 'service_bindings_url',
+        service_bindings: [],
         service_keys_url: 'service_keys_url',
         routes_url: 'routes_url',
         service_url: 'service_url',
       },
-      metadata: null
+      metadata: {
+        created_at: '',
+        guid: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create', async(() => {
     expect(component).toBeTruthy();
-  });
+  }));
 });
