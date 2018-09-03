@@ -16,9 +16,15 @@ export class ServicesHelperE2E {
   constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateServiceInstance = null) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
     this.cfHelper = new CFHelpers(e2eSetup);
-    this.createServiceInstance = createServiceInstance;
     const testTime = (new Date()).toISOString();
     this.serviceInstanceName = `serviceInstance-${testTime}`;
+    if (!!createServiceInstance) {
+      this.createServiceInstance = createServiceInstance;
+    }
+  }
+
+  setCreateServiceInstance = (createServiceInstance: CreateServiceInstance) => {
+    this.createServiceInstance = createServiceInstance;
   }
 
   fetchServices = (cfGuid: string): promise.Promise<CFResponse> => {
@@ -42,20 +48,23 @@ export class ServicesHelperE2E {
     );
   }
 
-  createService = () => {
+  createService = (serviceName: string, marketplaceMode = false) => {
     this.createServiceInstance.waitForPage();
 
     // Select CF/Org/Space
-    this.setCfOrgSpace();
+    this.setCfOrgSpace(null, null, marketplaceMode);
     this.createServiceInstance.stepper.next();
 
     // Select Service
-    this.setServiceSelection();
-    this.createServiceInstance.stepper.next();
+    if (!marketplaceMode) {
+       // Select Service
+       this.setServiceSelection(serviceName);
+       this.createServiceInstance.stepper.next();
+     }
 
-    // Select Service Plan
-    this.setServicePlan();
-    this.createServiceInstance.stepper.next();
+     // Select Service Plan
+     this.setServicePlan();
+     this.createServiceInstance.stepper.next();
 
     // Bind App
     this.createServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
@@ -76,13 +85,13 @@ export class ServicesHelperE2E {
       .then(totalAppsInSpace => !!totalAppsInSpace);
   }
 
+
   setServiceInstanceDetail = () => {
     this.createServiceInstance.stepper.waitForStep('Service Instance');
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
     this.createServiceInstance.stepper.setServiceName(this.serviceInstanceName);
-    expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
   }
 
   setBindApp = () => {
@@ -101,21 +110,24 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }
 
-  setServiceSelection = () => {
-    this.createServiceInstance.stepper.waitForStep('Select Service');
+  setServiceSelection = (serviceName: string, expectFailure = false) => {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
-    this.createServiceInstance.stepper.setService(e2e.secrets.getDefaultCFEndpoint().testService);
-    expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
-    expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
+    this.createServiceInstance.stepper.waitForStep('Select Service');
+    this.createServiceInstance.stepper.setService(serviceName, expectFailure);
+    if (!expectFailure) {
+      expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
+      expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
+    }
   }
 
-  setCfOrgSpace = () => {
-    this.createServiceInstance.stepper.waitForStep('Cloud Foundry');
-    expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
-    this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
-    this.createServiceInstance.stepper.setOrg(e2e.secrets.getDefaultCFEndpoint().testOrg);
-    this.createServiceInstance.stepper.setSpace(e2e.secrets.getDefaultCFEndpoint().testSpace);
+  setCfOrgSpace = (orgName: string = null, spaceName: string = null, marketplaceMode = false) => {
+
+    if (!marketplaceMode) {
+      this.createServiceInstance.stepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
+    }
+    this.createServiceInstance.stepper.setOrg(!!orgName ? orgName : e2e.secrets.getDefaultCFEndpoint().testOrg);
+    this.createServiceInstance.stepper.setSpace(!!spaceName ? spaceName : e2e.secrets.getDefaultCFEndpoint().testSpace);
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
   }

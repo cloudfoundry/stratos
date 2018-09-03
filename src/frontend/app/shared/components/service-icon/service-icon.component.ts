@@ -12,9 +12,9 @@ export class ServiceIconComponent implements OnInit {
   image = '';
 
   extraInfo: IServiceExtra;
-  @Input('service') service: APIResource<IService>;
+  @Input() service: APIResource<IService>;
 
-  @Input('addMenuPadding') addMenuPadding = false;
+  @Input() addMenuPadding = false;
   constructor() { }
 
   ngOnInit() {

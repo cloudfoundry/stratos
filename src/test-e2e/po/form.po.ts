@@ -27,6 +27,41 @@ export interface FormItem {
   id: string;
 }
 
+// Page Object for a form field
+export class FormField {
+
+  public element: ElementFinder;
+
+  constructor(public form: FormComponent, public name: string) {
+    this.element = this.form.getField(name);
+  }
+
+  set(v: string): promise.Promise<void> {
+    return this.form.fill({ [this.name]: v });
+  }
+
+  clear(): promise.Promise<void> {
+    return this.form.clearField(this.name);
+  }
+
+  isDisabled(): promise.Promise<boolean> {
+    return this.form.isFieldDisabled(this.name);
+  }
+
+  isInvalid(): promise.Promise<boolean> {
+    return this.form.isFieldInvalid(this.name);
+  }
+
+  getError(): promise.Promise<string> {
+    return this.form.getFieldErrorText(this.name);
+  }
+
+  focus(): promise.Promise<void> {
+    return this.form.focusField(this.name);
+  }
+}
+
+
 /**
  * Page Object for a form
  */
@@ -128,7 +163,8 @@ export class FormComponent extends Component {
   }
 
   // Fill the form fields in the specified object
-  fill(fields: { [fieldKey: string]: string | boolean }): promise.Promise<void> {
+  fill(fields: { [fieldKey: string]: string | boolean }, expectFailure = false): promise.Promise<void> {
+
     return this.getControlsMap().then(ctrls => {
       // console.log(Object.keys(fields));
       // console.log(Object.keys(ctrls));
@@ -153,13 +189,21 @@ export class FormComponent extends Component {
             ctrl.click();
             ctrl.sendKeys(value);
             ctrl.sendKeys(Key.RETURN);
-            expect(this.getText(field)).toBe(value);
+            if (!expectFailure) {
+              expect(this.getText(field)).toBe(value);
+            } else {
+              expect(this.getText(field)).not.toBe(value);
+            }
             break;
           default:
             ctrl.click();
             ctrl.clear();
             ctrl.sendKeys(value);
-            expect(this.getText(field)).toBe(value);
+            if (!expectFailure) {
+              expect(this.getText(field)).toBe(value);
+            } else {
+              expect(this.getText(field)).not.toBe(value);
+            }
             break;
         }
       });
@@ -177,36 +221,3 @@ export class FormComponent extends Component {
 }
 
 
-// Page Object for a form field
-export class FormField {
-
-  public element: ElementFinder;
-
-  constructor(public form: FormComponent, public name: string) {
-    this.element = this.form.getField(name);
-  }
-
-  set(v: string): promise.Promise<void> {
-    return this.form.fill({ [this.name]: v });
-  }
-
-  clear(): promise.Promise<void> {
-    return this.form.clearField(this.name);
-  }
-
-  isDisabled(): promise.Promise<boolean> {
-    return this.form.isFieldDisabled(this.name);
-  }
-
-  isInvalid(): promise.Promise<boolean> {
-    return this.form.isFieldInvalid(this.name);
-  }
-
-  getError(): promise.Promise<string> {
-    return this.form.getFieldErrorText(this.name);
-  }
-
-  focus(): promise.Promise<void> {
-    return this.form.focusField(this.name);
-  }
-}

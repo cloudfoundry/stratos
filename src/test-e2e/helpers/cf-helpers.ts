@@ -1,6 +1,6 @@
 import { promise } from 'protractor';
 
-import { IOrganization, IRoute, ISpace, IApp } from '../../frontend/app/core/cf-api.types';
+import { IApp, IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { CfUser } from '../../frontend/app/store/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -9,17 +9,20 @@ import { CFRequestHelpers } from './cf-request-helpers';
 
 
 export class CFHelpers {
-  cfRequestHelper: CFRequestHelpers;
   static cachedDefaultCfGuid: string;
   static cachedDefaultOrgGuid: string;
   static cachedDefaultSpaceGuid: string;
+  static cachedAdminGuid: string;
+  static cachedNonAdminGuid: string;
+
+  cfRequestHelper: CFRequestHelpers;
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
   }
 
   private assignAdminAndUserGuids(cnsiGuid: string, endpoint: E2EConfigCloudFoundry): promise.Promise<any> {
-    if (endpoint.creds.admin.guid && endpoint.creds.nonAdmin.guid) {
+    if (CFHelpers.cachedAdminGuid && CFHelpers.cachedNonAdminGuid) {
       return promise.fullyResolved({});
     }
     return this.fetchUsers(cnsiGuid).then(users => {
@@ -27,8 +30,8 @@ export class CFHelpers {
       const testAdminUser = this.findUser(users, endpoint.creds.admin.username);
       expect(testUser).toBeDefined();
       expect(testAdminUser).toBeDefined();
-      endpoint.creds.nonAdmin.guid = testUser.metadata.guid;
-      endpoint.creds.admin.guid = testAdminUser.metadata.guid;
+      CFHelpers.cachedNonAdminGuid = testUser.metadata.guid;
+      CFHelpers.cachedAdminGuid = testAdminUser.metadata.guid;
     });
   }
 
@@ -38,9 +41,9 @@ export class CFHelpers {
     testOrgName: string
   ): promise.Promise<APIResource<IOrganization>> {
     return this.assignAdminAndUserGuids(guid, endpoint).then(() => {
-      expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
-      expect(endpoint.creds.admin.guid).not.toBeNull();
-      return this.addOrgIfMissing(guid, testOrgName, endpoint.creds.admin.guid, endpoint.creds.nonAdmin.guid);
+      expect(CFHelpers.cachedNonAdminGuid).not.toBeNull();
+      expect(CFHelpers.cachedAdminGuid).not.toBeNull();
+      return this.addOrgIfMissing(guid, testOrgName, CFHelpers.cachedAdminGuid, CFHelpers.cachedNonAdminGuid);
     });
   }
 
@@ -81,10 +84,10 @@ export class CFHelpers {
     skipExistsCheck = false,
   ): promise.Promise<APIResource<ISpace>> {
     return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
-      expect(endpoint.creds.nonAdmin.guid).not.toBeNull();
+      expect(CFHelpers.cachedNonAdminGuid).not.toBeNull();
       return skipExistsCheck ?
-        this.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid) :
-        this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, endpoint.creds.nonAdmin.guid);
+        this.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, CFHelpers.cachedNonAdminGuid) :
+        this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, CFHelpers.cachedNonAdminGuid);
 
     });
   }

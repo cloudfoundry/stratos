@@ -41,7 +41,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
     this.userEntity.next(row.entity);
   }
 
-  @Input('config')
+  @Input()
   set config(config: any) {
     this.configSubject.next(config);
   }
@@ -75,17 +75,17 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
       };
       chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
         map(can => !can),
-        switchMap(can => {
-          if (!can) {
+        switchMap(hide => {
+          if (!hide) {
             if (perm.string === UserRoleLabels.org.short.users) {
               // If there are other roles than Org User, disable clear button
               return this.userEntity.pipe(
                 filter(p => !!p),
-                map((entity: CfUser) => this.cfUserService.hasRolesInOrg(entity, perm.orgGuid)),
+                map((entity: CfUser) => this.cfUserService.hasRolesInOrg(entity, perm.orgGuid, true)),
               );
             }
           }
-          return observableOf(can);
+          return observableOf(hide);
         })
       );
       return chipConfig;

@@ -1,6 +1,6 @@
 
 import { Store } from '@ngrx/store';
-import { denormalize, schema } from 'normalizr';
+import { denormalize, schema as normalizrSchema } from 'normalizr';
 import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
@@ -20,7 +20,7 @@ export class EntityMonitor<T = any> {
     private store: Store<AppState>,
     public id: string,
     public entityKey: string,
-    public schema: schema.Entity,
+    public schema: normalizrSchema.Entity,
   ) {
     const defaultRequestState = getDefaultRequestState();
     this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
@@ -88,7 +88,7 @@ export class EntityMonitor<T = any> {
   }
 
   private getEntityObservable = (
-    schema: schema.Entity,
+    schema: normalizrSchema.Entity,
     entitySelect$: Observable<T>,
     entityRequestSelect$: Observable<RequestInfoState>,
     entities$: Observable<IRequestDataState>

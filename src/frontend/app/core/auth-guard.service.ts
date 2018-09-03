@@ -15,17 +15,17 @@ import { AuthState } from '../store/reducers/auth.reducer';
 export class AuthGuardService implements CanActivate {
 
   queryParamMap() {
-    const map = {};
+    const paramMap = {};
     const query = window.location.search.substring(1);
     if (query.length === 0) {
-      return map;
+      return paramMap;
     }
     const vars = query.split('&');
     for (let i = 0; i < vars.length; i++) {
       const pair = vars[i].split('=');
-      map[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+      paramMap[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
     }
-    return map;
+    return paramMap;
   }
 
   constructor(

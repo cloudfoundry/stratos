@@ -10,9 +10,9 @@ import { CardCell } from '../list.types';
 })
 export class CardsComponent<T> {
   public columns = CardCell.columns;
-  @Input('dataSource') dataSource: IListDataSource<T>;
+  @Input() dataSource: IListDataSource<T>;
   private _component: CardCell<T>;
-  @Input('component')
+  @Input()
   get component() { return this._component; }
   set component(cardCell) {
     this._component = cardCell;

@@ -8,5 +8,5 @@ import { Component, OnInit, ViewEncapsulation, HostBinding, Input } from '@angul
 })
 export class TileGridComponent {
   @HostBinding('class.app-tile-grid-fit')
-  @Input('fit') private fit = false;
+  @Input() private fit = false;
 }

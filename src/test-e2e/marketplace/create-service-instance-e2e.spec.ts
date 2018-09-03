@@ -1,4 +1,4 @@
-import { ElementFinder, promise } from 'protractor';
+import { browser, ElementFinder, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -12,9 +12,10 @@ describe('Create Service Instance', () => {
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.admin)
+    const e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
@@ -30,8 +31,8 @@ describe('Create Service Instance', () => {
   });
 
   it('- should be able to to create a service instance', () => {
-    servicesHelperE2E.createService();
 
+    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     servicesWall.waitForPage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
@@ -68,7 +69,7 @@ describe('Create Service Instance', () => {
     createServiceInstance.stepper.next();
 
     // Select Service
-    servicesHelperE2E.setServiceSelection();
+    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     createServiceInstance.stepper.next();
 
     createServiceInstance.stepper.cancel();
@@ -84,7 +85,7 @@ describe('Create Service Instance', () => {
     createServiceInstance.stepper.next();
 
     // Select Service
-    servicesHelperE2E.setServiceSelection();
+    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     createServiceInstance.stepper.next();
 
     // Select Service Plan
@@ -103,7 +104,7 @@ describe('Create Service Instance', () => {
     createServiceInstance.stepper.next();
 
     // Select Service
-    servicesHelperE2E.setServiceSelection();
+    servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     createServiceInstance.stepper.next();
 
     // Select Service Plan

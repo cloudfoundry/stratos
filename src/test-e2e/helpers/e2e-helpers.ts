@@ -1,4 +1,4 @@
-import { ElementArrayFinder, browser, by, element } from 'protractor';
+import { ElementArrayFinder, browser, by, element as protractorElement} from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
@@ -78,7 +78,7 @@ export class E2EHelpers {
    * Form helpers
    */
   getForm(formName): ElementFinder {
-    return element(by.css('form[name="' + formName + '"]'));
+    return protractorElement(by.css('form[name="' + formName + '"]'));
   }
 
   getFormFields(formName): ElementArrayFinder {
