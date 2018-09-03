@@ -1,9 +1,9 @@
-
-import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { map, take, tap } from 'rxjs/operators';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
@@ -23,6 +23,7 @@ import {
 import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+
 
 @Component({
   selector: 'app-github-tab',
@@ -51,21 +52,30 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   deployAppSubscription: Subscription;
   stratosProject$: Observable<EnvVarStratosProject>;
   gitHubRepo$: Observable<GithubRepo>;
+  githubRepoErrorSub: Subscription;
   commit$: Observable<GithubCommit>;
   isHead$: Observable<boolean>;
   initialised$: Observable<boolean>;
   private githubProjectEntityService: EntityService;
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
   ngOnDestroy(): void {
     if (this.deployAppSubscription) {
       this.deployAppSubscription.unsubscribe();
+    }
+    if (this.snackBarRef) {
+      this.snackBarRef.dismiss();
+    }
+    if (this.githubRepoErrorSub) {
+      this.githubRepoErrorSub.unsubscribe();
     }
   }
 
   constructor(
     private applicationService: ApplicationService,
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
@@ -104,6 +114,17 @@ export class GithubTabComponent implements OnInit, OnDestroy {
         this.gitHubRepo$ = this.gitHubRepoEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity.entity)
         );
+
+        this.githubRepoErrorSub = this.gitHubRepoEntityService.entityMonitor.entityRequest$.pipe(
+          filter(request => !!request.error),
+          map(request => request.message),
+          distinctUntilChanged(),
+        ).subscribe(errorMessage => {
+          if (this.snackBarRef) {
+            this.snackBarRef.dismiss();
+          }
+          this.snackBarRef = this.snackBar.open(`Unable to fetch Github project: ${errorMessage}`, 'Dismiss');
+        });
 
         this.commit$ = this.gitCommitEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity.entity)

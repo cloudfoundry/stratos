@@ -6,6 +6,7 @@ import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
+import { parseHttpPipeError } from '../../core/utils.service';
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
@@ -32,6 +33,14 @@ import {
 import { AppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
+export function createFailedGithubRequestMessage(error) {
+  const response = parseHttpPipeError(error);
+  const message = response['message'] || '';
+  return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
+    'Github ' + message.substring(0, message.indexOf('(')) :
+    'Github request failed';
+}
+
 @Injectable()
 export class DeployAppEffects {
   constructor(
@@ -54,7 +63,7 @@ export class DeployAppEffects {
             map(res => new ProjectExists(action.projectName, res)),
             catchError(err => observableOf(err.status === 404 ?
               new ProjectDoesntExist(action.projectName) :
-              new ProjectFetchFail(action.projectName, this.createFailedProjectMessage(err.status, this.parseResponseBody(err)['message']))
+              new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err))
             ))
           );
       })
@@ -95,7 +104,7 @@ export class DeployAppEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(err.message, apiAction, actionType)
+              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]), );
       }));
 
@@ -123,7 +132,7 @@ export class DeployAppEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(err.message, apiAction, actionType)
+              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]), );
       }));
 
@@ -154,7 +163,7 @@ export class DeployAppEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(err.message, apiAction, actionType)
+              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]), );
       }));
 
@@ -167,18 +176,4 @@ export class DeployAppEffects {
     mappedData.result.push(id);
   }
 
-  private parseResponseBody(res): {} {
-    try {
-      return res.json();
-    } catch (e) {
-      this.logger.warn('Failed to parse response body', e);
-    }
-    return {};
-  }
-
-  private createFailedProjectMessage(status: number, message = '') {
-    return status === 403 && message.startsWith('API rate limit exceeded for') ?
-      'Github ' + message.substring(0, message.indexOf('(')) :
-      'Failed to fetch Github project';
-  }
 }

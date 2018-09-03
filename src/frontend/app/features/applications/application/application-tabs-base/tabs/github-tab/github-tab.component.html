@@ -82,5 +82,5 @@
       </mat-card>
     </app-tile>
   </app-tile-group>
-  <app-list></app-list>
+  <app-list *ngIf="gitHubRepo$ | async as githubRepo"></app-list>
 </app-tile-grid>

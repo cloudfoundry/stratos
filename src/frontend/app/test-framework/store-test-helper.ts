@@ -616,7 +616,8 @@ export function getInitialTestStoreState(): AppState {
       projectExists: {
         checking: false,
         exists: false,
-        name: ''
+        name: '',
+        error: false
       }
     },
     request: {

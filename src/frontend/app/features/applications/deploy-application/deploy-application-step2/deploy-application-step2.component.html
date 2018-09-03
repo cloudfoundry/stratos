@@ -19,7 +19,7 @@
               <mat-form-field>
                 <input matInput [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
                 <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
-                  Project doesn't exist
+                  Project does not exist
                 </mat-error>
                 <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
                   {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
