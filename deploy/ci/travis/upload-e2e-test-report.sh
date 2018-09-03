@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo "Stratos e2e test report upload"
 echo "=============================="
 
@@ -22,3 +20,5 @@ echo "Uploading ..."
 # Sync the E2E reports
 ./mc cp --insecure -r e2e-reports s3/${S3_BUCKET}
 
+# Test report upload failure will not fail the Travis job
+exit 0

@@ -8,7 +8,6 @@ services:
 addons:
   chrome: stable
 before_install:
-- pip install --user awscli
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - sleep 3 # give xvfb some time to start  
@@ -28,14 +27,14 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-- name: E2E tests quick
-  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
-- name: E2E tests
-  if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
 - Frontend Lint
 - Frontend Unit Tests
 - Backend Lint
 - Backend Unit Tests
+- name: E2E tests quick
+  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
+- name: E2E tests
+  if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
 jobs:
   include:
   - stage: Frontend Lint

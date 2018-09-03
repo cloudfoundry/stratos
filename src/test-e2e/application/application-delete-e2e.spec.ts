@@ -34,7 +34,8 @@ describe('Application Delete', function () {
   // Delete tests for a simple app with no routes
   describe('Simple App', () => {
     beforeAll(() => {
-      const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
+      const defaultCf = e2e.secrets.getDefaultCFEndpoint();
+      const endpointName = defaultCf.name;
       cfGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
       const testTime = (new Date()).toISOString();
       testAppName = ApplicationE2eHelper.createApplicationName(testTime);
@@ -42,7 +43,8 @@ describe('Application Delete', function () {
         cfGuid,
         e2e.secrets.getDefaultCFEndpoint().testOrg,
         e2e.secrets.getDefaultCFEndpoint().testSpace,
-        testAppName
+        testAppName,
+        defaultCf
       ).then(appl => app = appl);
     });
 
