@@ -62,6 +62,7 @@ export interface GitAppDetails {
 export interface ProjectExists {
   checking: boolean;
   exists: boolean;
+  error: boolean;
   name: string;
   data?: any;
 }

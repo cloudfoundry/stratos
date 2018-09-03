@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { LoggerService } from '../../core/logger.service';
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
@@ -16,6 +17,7 @@ import {
   FetchCommits,
   ProjectDoesntExist,
   ProjectExists,
+  ProjectFetchFail,
 } from '../../store/actions/deploy-applications.actions';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
@@ -30,15 +32,13 @@ import {
 import { AppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
-
-
-
 @Injectable()
 export class DeployAppEffects {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private logger: LoggerService
   ) { }
 
   @Effect()
@@ -52,10 +52,13 @@ export class DeployAppEffects {
         return this.http
           .get(`https://api.github.com/repos/${action.projectName}`).pipe(
             map(res => new ProjectExists(action.projectName, res)),
-            catchError(err => {
-              return observableOf(new ProjectDoesntExist(action.projectName));
-            }), );
-      }), );
+            catchError(err => observableOf(err.status === 404 ?
+              new ProjectDoesntExist(action.projectName) :
+              new ProjectFetchFail(action.projectName, this.createFailedProjectMessage(err.status, this.parseResponseBody(err)['message']))
+            ))
+          );
+      })
+    );
 
   @Effect()
   fetchBranches$ = this.actions$
@@ -162,5 +165,20 @@ export class DeployAppEffects {
       metadata: {}
     };
     mappedData.result.push(id);
+  }
+
+  private parseResponseBody(res): {} {
+    try {
+      return res.json();
+    } catch (e) {
+      this.logger.warn('Failed to parse response body', e);
+    }
+    return {};
+  }
+
+  private createFailedProjectMessage(status: number, message = '') {
+    return status === 403 && message.startsWith('API rate limit exceeded for') ?
+      'Github ' + message.substring(0, message.indexOf('(')) :
+      'Failed to fetch Github project';
   }
 }

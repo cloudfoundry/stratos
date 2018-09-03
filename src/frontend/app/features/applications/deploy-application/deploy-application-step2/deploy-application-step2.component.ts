@@ -1,12 +1,12 @@
-
-import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   FetchBranchesForProject,
@@ -27,10 +27,10 @@ import {
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { SourceType, GitAppDetails } from '../../../../store/types/deploy-application.types';
+import { GitAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -137,12 +137,12 @@ export class DeployApplicationStep2Component
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-        filter(state => state && !state.checking && state.exists),
-        tap(p => {
+        filter(state => state && !state.checking && !state.error && state.exists),
+        tap(state => {
           if (this.branchesSubscription) {
             this.branchesSubscription.unsubscribe();
           }
-          const fetchBranchesAction = new FetchBranchesForProject(p.name);
+          const fetchBranchesAction = new FetchBranchesForProject(state.name);
           this.branchesSubscription = getPaginationObservables<APIResource>(
             {
               store: this.store,
@@ -165,9 +165,7 @@ export class DeployApplicationStep2Component
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
-      filter(p => {
-        return p && !!p.data;
-      }),
+      filter(p => p && !!p.exists && !!p.data),
       map(p => p.data),
       tap(p => {
         if (!this.isRedeploy) {
@@ -221,11 +219,8 @@ export class DeployApplicationStep2Component
           }
           this.commitSubscription = commitEntityService.waitForEntity$.pipe(
             map(p => p.entity.entity),
-            tap(p => {
-              this.commitInfo = p;
-            })
-          )
-            .subscribe();
+            tap(p => this.commitInfo = p)
+          ).subscribe();
         }
       })
     );
