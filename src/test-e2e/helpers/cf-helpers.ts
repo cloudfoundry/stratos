@@ -1,7 +1,7 @@
 import { promise } from 'protractor';
 
 import { IApp, IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { CfUser } from '../../frontend/app/store/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
