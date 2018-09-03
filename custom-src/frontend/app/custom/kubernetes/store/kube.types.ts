@@ -9,6 +9,12 @@ export const KubernetesDefaultState = {
   nodes: {}
 };
 
+export interface KubeAPIResource {
+  metadata: Metadata;
+  status: BaseStatus;
+  spec: any;
+}
+
 export interface KubernetesNode {
   metadata: Metadata;
   status: NodeStatus;
