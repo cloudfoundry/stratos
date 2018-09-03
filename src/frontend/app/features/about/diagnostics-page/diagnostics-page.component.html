@@ -1,12 +1,5 @@
 <app-page-header [breadcrumbs]="breadcrumbs">
   <h1>Diagnostics</h1>
-  <div class="page-header-right">
-    <span>
-        <button mat-icon-button [routerLink]="['/about']">
-          <mat-icon matTooltip="Back to About">close</mat-icon>
-        </button>
-      </span>
-  </div>
 </app-page-header>
 
 <div *ngIf="(sessionData$ | async) as session">
@@ -25,7 +18,7 @@
         <app-metadata-item icon="storage" label="GitHub Repository">
           <a  [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
         </app-metadata-item>
-        <app-metadata-item icon="storage" label="Branch">
+        <app-metadata-item *ngIf="!!gitBranch" icon="storage" label="Branch">
           <a *ngIf="!!gitBranch" [href]="gitBranchLink" rel="noopener noreferrer" target="_blank">{{ gitBranch }}</a>
           <span *ngIf="!gitBranch">Not available</span>
         </app-metadata-item>
@@ -42,15 +35,14 @@
         <app-metadata-item icon="storage" label="Helm Chart Version">{{ session.diagnostics.helmChartVersion || 'N/A' }}</app-metadata-item>
         <app-metadata-item icon="storage" label="Helm Release">{{ session.diagnostics.helmName || 'N/A' }}</app-metadata-item>
         <app-metadata-item icon="storage" label="Helm Revision">{{ session.diagnostics.helmRevision || 'N/A' }}</app-metadata-item>
-        <app-metadata-item icon="date_range" label="Helm Last Modified">{{ session.diagnostics.helmLastModified || 'N/A' }}</app-metadata-item>
+        <app-metadata-item icon="date_range" label="Helm Last Modified">{{ helmLastModified$ | async | date:'medium' }}</app-metadata-item>
       </div>
     </div>
   </mat-card>
 
   <mat-card class="diagnostics-page__card">
-    <mat-card-header>
-      <div>Database Migrations</div>
-    </mat-card-header>
+    <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}</app-metadata-item>
+    <app-metadata-item icon="storage" label="Database Migrations"></app-metadata-item>
     <table mat-table [dataSource]="session.diagnostics.databaseMigrations" class="diagnostics-page__migrations">
       <ng-container matColumnDef="id">
         <th mat-header-cell *matHeaderCellDef> ID </th>

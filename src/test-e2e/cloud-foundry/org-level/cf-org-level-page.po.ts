@@ -1,7 +1,7 @@
 import { browser, by, element } from 'protractor';
 
 import { ListComponent } from '../../po/list.po';
-import { MetaDataItemComponent } from '../../po/meta-data-time.po';
+import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 import { CFPage } from '../../po/cf-page.po';
 
 

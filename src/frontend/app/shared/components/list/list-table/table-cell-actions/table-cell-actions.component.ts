@@ -16,7 +16,7 @@ import { TableCellCustom } from '../../list.types';
 })
 export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  @Input('rowState')
+  @Input()
   rowState: Observable<RowState>;
 
   private _row: T;

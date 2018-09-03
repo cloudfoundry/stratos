@@ -19,7 +19,7 @@ import { TableCellCustom } from '../../../list.types';
 export class TableCellServiceNameComponent<T> extends TableCellCustom<T> implements OnInit {
 
   serviceName$: Observable<string>;
-  @Input('row') row;
+  @Input() row;
   constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory) {
     super();
   }

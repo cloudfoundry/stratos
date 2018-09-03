@@ -68,10 +68,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       key: FormMode.BindServiceInstance
     }
   ];
-  @Input('showModeSelection')
+  @Input()
   showModeSelection = false;
 
-  @Input('appId') appId: string;
+  @Input() appId: string;
 
   formMode: FormMode;
 
@@ -410,8 +410,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       filter(a => !a.creating),
       switchMap(a => {
         const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
-        if ( (isEditMode && !!updating && updating.error) || (a.error) ) {
-            return create$;
+        if ((isEditMode && !!updating && updating.error) || (a.error)) {
+          return create$;
         }
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);

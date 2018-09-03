@@ -27,22 +27,22 @@ export class LoadingPageComponent implements OnInit {
 
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
-  @Input('isLoading')
+  @Input()
   isLoading: Observable<boolean>;
 
-  @Input('text')
+  @Input()
   text = 'Retrieving your data';
 
-  @Input('deleteText')
+  @Input()
   deleteText = 'Deleting data';
 
-  @Input('alert')
+  @Input()
   alert = '';
 
-  @Input('entityId')
+  @Input()
   private entityId: string;
 
-  @Input('entitySchema')
+  @Input()
   private entitySchema: schema.Entity;
 
   public isDeleting: Observable<boolean>;
