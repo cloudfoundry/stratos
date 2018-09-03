@@ -743,8 +743,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
-		e.Use(middleware.Gzip())
-		e.Static("/", staticDir)
+		e.Group("", middleware.Gzip()).Static("/", staticDir)
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
 	}

@@ -21,6 +21,7 @@ export interface ServiceConfig {
   name: string;
 }
 export interface E2EServicesConfig {
+  bindApp: string;
   publicService: ServiceConfig;
   privateService: ServiceConfig;
   spaceScopedService: ServiceConfig;
