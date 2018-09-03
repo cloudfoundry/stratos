@@ -8,6 +8,7 @@ const {
 const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
+const globby = require('globby');
 
 var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
 
@@ -40,12 +41,23 @@ const timeout = 40000
 
 exports.config = {
   allScriptsTimeout: timeout,
-  specs: [
-    './src/test-e2e/**/*-e2e.spec.ts',
-  ],
+  // Exclude the dashboard tests from all suites for now
   exclude: [
     './src/test-e2e/dashboard/dashboard-e2e.spec.ts',
   ],
+  // Suites - use globby to give us more control over included test specs
+  suites: {
+    e2e: globby.sync([
+      './src/test-e2e/**/*-e2e.spec.ts',
+      '!./src/test-e2e/login/*-sso-e2e.spec.ts'
+    ]),
+    sso: globby.sync([
+      './src/test-e2e/**/*-e2e.spec.ts',
+      '!./src/test-e2e/login/login-e2e.spec.ts'
+    ])
+  },
+  // Default test suite is the E2E test suite
+  suite: 'e2e',
   capabilities: {
     'browserName': 'chrome',
     chromeOptions: {
