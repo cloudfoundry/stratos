@@ -36,6 +36,7 @@ export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const kubernetesSchemaKey = 'kubernetesInfo';
 export const kubernetesNodesSchemaKey = 'kubernetesNode';
+export const kubernetesPodsSchemaKey = 'kubernetesPod';
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
@@ -93,6 +94,8 @@ entityCache[kubernetesSchemaKey] = kubernetesSchema;
 
 const kubernetesNodesSchema = new EntitySchema(kubernetesNodesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[kubernetesNodesSchemaKey] = kubernetesNodesSchema;
+const kubernetesPodsSchema = new EntitySchema(kubernetesPodsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[kubernetesPodsSchemaKey] = kubernetesPodsSchema;
 
 const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appStatsSchemaKey] = AppStatSchema;

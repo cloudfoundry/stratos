@@ -3,12 +3,12 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
 
 @Component({
-  selector: 'app-kubernetes-node-capacity',
-  templateUrl: './kubernetes-node-capacity.component.html',
-  styleUrls: ['./kubernetes-node-capacity.component.scss'],
+  selector: 'app-kubernetes-pod-capacity',
+  templateUrl: './kubernetes-pod-capacity.component.html',
+  styleUrls: ['./kubernetes-pod-capacity.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> implements OnInit {
+export class KubernetesPodCapacityComponent<T> extends TableCellCustom<T> implements OnInit {
 
   constructor() {
     super();

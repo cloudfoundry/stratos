@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
+import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -24,6 +25,10 @@ const kubernetes: Routes = [{
     {
       path: 'nodes',
       component: KubernetesNodesTabComponent
+    },
+    {
+      path: 'pods',
+      component: KubernetesPodsTabComponent
     },
   ]
 }];
