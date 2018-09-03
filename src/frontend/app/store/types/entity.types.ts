@@ -36,6 +36,7 @@ import {
   githubCommitSchemaKey,
   serviceBrokerSchemaKey,
   kubernetesSchemaKey,
+  kubernetesNodesSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -44,6 +45,7 @@ import { EndpointModel } from './endpoint.types';
 import { GitBranch, GithubCommit } from './github.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
+import { KubernetesNode } from '../../custom/kubernetes/store/kube.types';
 
 export interface IRequestDataState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<EndpointModel>;
@@ -67,6 +69,7 @@ export interface IRequestDataState extends IRequestTypeState {
   servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   metrics: IRequestEntityTypeState<IMetrics>;
+  kubernetesNodes: IRequestEntityTypeState<KubernetesNode>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -90,6 +93,7 @@ export interface IRequestState extends IRequestTypeState {
   securityGroup: IRequestEntityTypeState<RequestInfoState>;
   servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
   serviceBroker: IRequestEntityTypeState<RequestInfoState>;
+  kubernetesNodes: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -120,5 +124,5 @@ export const defaultCfEntitiesState = {
   [metricSchemaKey]: {},
   [servicePlanVisibilitySchemaKey]: {},
   [serviceBrokerSchemaKey]: {},
-  [kubernetesSchemaKey]: {}
+  [kubernetesNodesSchemaKey]: {}
 };

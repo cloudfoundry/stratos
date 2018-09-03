@@ -5,14 +5,15 @@ import { IListConfig } from '../../../../shared/components/list/list.component.t
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { GetKubernetesInfo, KubernetesInfoSchema } from '../../store/kubernetes.actions';
+import { GetKubernetesNodes } from '../../store/kubernetes.actions';
 
 import { map } from 'rxjs/operators';
+import { entityFactory, kubernetesNodesSchemaKey } from '../../../../store/helpers/entity-factory';
 
 export interface KubernetesNodeInfo {
   metadata: {
     name: string;
-  },
+  };
 }
 
 export class KubernetesNodesDataSource extends ListDataSource<KubernetesNodeInfo, any> {
@@ -24,11 +25,11 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNodeInfo
   ) {
     super({
       store,
-      action: new GetKubernetesInfo(kubeGuid.guid),
-      schema: KubernetesInfoSchema,
+      action: new GetKubernetesNodes(kubeGuid.guid),
+      schema: entityFactory(kubernetesNodesSchemaKey),
       getRowUniqueId: object => object.name,
-    //   getEmptyType: () => ({ name: '', value: '', }),
-      paginationKey: getPaginationKey(KubernetesInfoSchema.key, kubeGuid.guid ),
+      //   getEmptyType: () => ({ name: '', value: '', }),
+      paginationKey: getPaginationKey(kubernetesNodesSchemaKey, kubeGuid.guid),
       transformEntity: map(variables => {
         console.log('HERE');
         console.log(variables);
@@ -36,14 +37,14 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNodeInfo
           return [];
         }
         const data = variables[0];
-        //const rows = [...Object.values(variables[0])];
-        //const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
+        // const rows = [...Object.values(variables[0])];
+        // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
         const rows = <KubernetesNodeInfo[]>Object.values(data);
         console.log(rows);
         return rows;
       }),
       isLocal: true,
-      //transformEntities: [{ type: 'filter', field: 'name' }],
+      // transformEntities: [{ type: 'filter', field: 'name' }],
       listConfig
     });
   }

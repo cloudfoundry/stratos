@@ -1,32 +1,25 @@
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
-import { entityFactory } from '../../../store/helpers/entity-factory';
 import { PaginatedAction } from '../../../store/types/pagination.types';
+import { kubernetesNodesSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 
-import { schema } from 'normalizr';
-
-export const KUBE_INFO_ENTITY_KEY = 'kubernetesInfo';
-
-export const GET_INFO = '[KUBERNETES Endpoint] Get Info';
-export const GET_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Info Success';
-export const GET_INFO_FAILURE = '[KUBERNETES Endpoint] Get Info Failure';
-
-export const KubernetesInfoSchema = new schema.Entity(KUBE_INFO_ENTITY_KEY);
+export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
+export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
+export const GET_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Nodes Info Failure';
 
 /**
  * Action to request the information for a given Kubernetes cluster
  */
-export class GetKubernetesInfo implements PaginatedAction {
+export class GetKubernetesNodes implements PaginatedAction {
   constructor(public kubeGuid) {
-    console.log('>>>' + kubeGuid);
-    this.paginationKey = getPaginationKey(KubernetesInfoSchema.key, kubeGuid);
+    this.paginationKey = getPaginationKey(kubernetesNodesSchemaKey, kubeGuid);
   }
-  type = GET_INFO;
-  entityKey = KubernetesInfoSchema.key;
-  entity = [entityFactory(KubernetesInfoSchema.key)];
+  type = GET_NODE_INFO;
+  entityKey = kubernetesNodesSchemaKey;
+  entity = [entityFactory(kubernetesNodesSchemaKey)];
   actions = [
-    GET_INFO,
-    GET_INFO_SUCCESS,
-    GET_INFO_FAILURE
+    GET_NODE_INFO,
+    GET_NODE_INFO_SUCCESS,
+    GET_NODE_INFO_FAILURE
   ];
   paginationKey: string;
 }

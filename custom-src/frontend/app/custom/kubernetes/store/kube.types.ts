@@ -8,3 +8,8 @@ export const KubernetesDefaultState = {
   namespaces: {},
   nodes: {}
 };
+
+export interface KubernetesNode {
+  node: any;
+  id: string;
+}

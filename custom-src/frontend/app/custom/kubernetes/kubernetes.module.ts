@@ -24,6 +24,9 @@ import { KubernetesNodeCapacityComponent } from './list-types/kubernetes-nodes/k
     KubernetesService,
     BaseKubeGuid,
     KubernetesEndpointService,
+  ],
+  entryComponents: [
+    KubernetesNodeCapacityComponent
   ]
 })
 export class KubernetesModule {

@@ -12,6 +12,7 @@ export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 /* tslint:disable */
 export function getInitialTestStoreState(): AppState {
   return {
+    kubernetesInfo:{},
     auth: {
       loggedIn: true,
       loggingIn: false,

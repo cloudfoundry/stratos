@@ -12,8 +12,9 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../store/types/request.types';
-import { GET_INFO, GetKubernetesInfo, KUBE_INFO_ENTITY_KEY } from './kubernetes.actions';
+import { GetKubernetesNodes, GET_NODE_INFO } from './kubernetes.actions';
 import { flatMap, mergeMap, catchError } from 'rxjs/operators';
+import { kubernetesNodesSchemaKey } from '../../../store/helpers/entity-factory';
 
 
 @Injectable()
@@ -26,10 +27,9 @@ export class KubernetesEffects {
   ) { }
 
   @Effect()
-  fetchInfo$ = this.actions$.ofType<GetKubernetesInfo>(GET_INFO).pipe(
+  fetchInfo$ = this.actions$.ofType<GetKubernetesNodes>(GET_NODE_INFO).pipe(
     flatMap(action => {
 
-      console.log('hitting this!');
       this.store.dispatch(new StartRequestAction(action));
       const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
@@ -39,13 +39,14 @@ export class KubernetesEffects {
         .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`, requestArgs)
         .pipe(
           mergeMap(response => {
+            console.log('In Response!');
             const info = response.json();
             const mappedData = {
-              entities: { kubernetesInfo: {} },
+              entities: { [kubernetesNodesSchemaKey]: {} },
               result: []
             } as NormalizedResponse;
             const id = action.kubeGuid;
-            mappedData.entities[KUBE_INFO_ENTITY_KEY][id] = info[id].items;
+            mappedData.entities[kubernetesNodesSchemaKey][id] = info[id].items;
             mappedData.result.push(id);
             console.log('KUBE DATA');
             console.log(info[id].items);
