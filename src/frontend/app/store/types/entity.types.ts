@@ -38,6 +38,7 @@ import {
   kubernetesSchemaKey,
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
+  kubernetesNamespacesSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -46,7 +47,7 @@ import { EndpointModel } from './endpoint.types';
 import { GitBranch, GithubCommit } from './github.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
-import { KubernetesNode, KubernetesPod } from '../../custom/kubernetes/store/kube.types';
+import { KubernetesNode, KubernetesPod, KubernetesNamespace } from '../../custom/kubernetes/store/kube.types';
 
 export interface IRequestDataState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<EndpointModel>;
@@ -72,6 +73,7 @@ export interface IRequestDataState extends IRequestTypeState {
   metrics: IRequestEntityTypeState<IMetrics>;
   kubernetesNode: IRequestEntityTypeState<KubernetesNode>;
   kubernetesPod: IRequestEntityTypeState<KubernetesPod>;
+  kubernetesNamespace: IRequestEntityTypeState<KubernetesNamespace>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -97,6 +99,7 @@ export interface IRequestState extends IRequestTypeState {
   serviceBroker: IRequestEntityTypeState<RequestInfoState>;
   kubernetesNode: IRequestEntityTypeState<RequestInfoState>;
   kubernetesPod: IRequestEntityTypeState<RequestInfoState>;
+  kubernetesNamespace: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -129,4 +132,5 @@ export const defaultCfEntitiesState = {
   [serviceBrokerSchemaKey]: {},
   [kubernetesNodesSchemaKey]: {},
   [kubernetesPodsSchemaKey]: {},
+  [kubernetesNamespacesSchemaKey]: {},
 };

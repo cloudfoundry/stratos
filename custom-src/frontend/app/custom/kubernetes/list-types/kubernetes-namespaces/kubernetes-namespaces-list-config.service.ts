@@ -7,13 +7,14 @@ import { ITableColumn } from '../../../../shared/components/list/list-table/tabl
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesPodInfo, KubernetesPodsDataSource } from './kubernetes-pods-data-source';
+import { KubernetesNamespace } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
+import { KubernetesNamespacesDataSource } from '../../../../../../../src/frontend/app/custom/kubernetes/list-types/kubernetes-namespaces/kubernetes-namespaces-data-source';
 
 @Injectable()
-export class KubernetesPodsListConfigService implements IListConfig<KubernetesPodInfo> {
-  podsDataSource: KubernetesPodsDataSource;
+export class KubernetesNamespacesListConfigService implements IListConfig<KubernetesNamespace> {
+  podsDataSource: KubernetesNamespacesDataSource;
 
-  columns: Array<ITableColumn<KubernetesPodInfo>> = [
+  columns: Array<ITableColumn<KubernetesNamespace>> = [
     {
       columnId: 'name', headerCell: () => 'ID',
       cellDefinition: {
@@ -47,7 +48,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     private activatedRoute: ActivatedRoute,
     private kubeId: BaseKubeGuid,
   ) {
-    this.podsDataSource = new KubernetesPodsDataSource(this.store, kubeId, this);
+    this.podsDataSource = new KubernetesNamespacesDataSource(this.store, kubeId, this);
   }
 
 }

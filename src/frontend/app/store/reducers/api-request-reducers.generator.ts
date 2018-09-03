@@ -27,6 +27,7 @@ import {
   userProfileSchemaKey,
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
+  kubernetesNamespacesSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -113,6 +114,7 @@ const entities = [
   serviceBrokerSchemaKey,
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
+  kubernetesNamespacesSchemaKey,
 ];
 
 
