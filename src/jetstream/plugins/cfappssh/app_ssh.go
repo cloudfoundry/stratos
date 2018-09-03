@@ -35,13 +35,14 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
+// KeyCode - JSON object that is passed from the front-end to notify of a key press or a term resize
 type KeyCode struct {
 	Key  string `json:"key"`
 	Cols int    `json:"cols"`
 	Rows int    `json:"rows"`
 }
 
-func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
+func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 	// Need to get info for the endpoint
 	// Get the CNSI and app IDs from route parameters
 	cnsiGUID := c.Param("cnsiGuid")
@@ -158,6 +159,7 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 		_, r, err := ws.ReadMessage()
 		if err != nil {
 			log.Error("Error reading message from web socket")
+			log.Warnf("%v+", err)
 			return err
 		}
 
@@ -173,9 +175,6 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 			}
 		}
 	}
-
-	// Web socket has closed
-	return nil
 }
 
 func sendSSHError(format string, a ...interface{}) error {
@@ -241,6 +240,7 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 	}
 }
 
+// ErrPreventRedirect - Error to indicate a redirect - used to make a redirect that we want to prevent later
 var ErrPreventRedirect = errors.New("prevent-redirect")
 
 func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation bool) (string, error) {
