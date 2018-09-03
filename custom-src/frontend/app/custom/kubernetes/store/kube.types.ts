@@ -10,12 +10,89 @@ export const KubernetesDefaultState = {
 };
 
 export interface KubernetesNode {
-  node: any;
-  id: string;
+  metadata: Metadata;
+  status: NodeStatus;
+  spec: PodSpec;
 }
+
+export interface NodeStatus {
+  capacity: Capacity;
+  allocatable: Allocatable;
+  conditions: Condition[];
+  addresses: Address[];
+  daemonEndpoints: DaemonEndpoints;
+  nodeInfo: NodeInfo;
+  images: Image[];
+}
+
+
+export interface Taint {
+  key: string;
+  effect: string;
+}
+
+export interface Spec {
+  podCIDR: string;
+  externalID: string;
+  taints: Taint[];
+}
+
+export interface Capacity {
+  cpu: string;
+  memory: string;
+  pods: string;
+}
+
+export interface Allocatable {
+  cpu: string;
+  memory: string;
+  pods: string;
+}
+
+export interface Condition {
+  type: string;
+  status: string;
+  lastHeartbeatTime: Date;
+  lastTransitionTime: Date;
+  reason: string;
+  message: string;
+}
+
+export interface Address {
+  type: string;
+  address: string;
+}
+
+export interface KubeletEndpoint {
+  Port: number;
+}
+
+export interface DaemonEndpoints {
+  kubeletEndpoint: KubeletEndpoint;
+}
+
+export interface NodeInfo {
+  machineID: string;
+  systemUUID: string;
+  bootID: string;
+  kernelVersion: string;
+  osImage: string;
+  containerRuntimeVersion: string;
+  kubeletVersion: string;
+  kubeProxyVersion: string;
+  operatingSystem: string;
+  architecture: string;
+}
+
+export interface Image {
+  names: string[];
+  sizeBytes: number;
+}
+
+
 export interface KubernetesPod {
   metadata: Metadata;
-  status: Status;
+  status: PodStatus;
   spec: PodSpec;
 }
 
@@ -28,10 +105,14 @@ export interface KubernetesNamespace {
   spec: {
     finalizers: string[];
   };
-  status: Status;
+  status: BaseStatus;
 }
 
-export interface Status {
+export interface BaseStatus {
+  phase: KubernetesStatus;
+}
+
+export interface PodStatus {
   phase: KubernetesStatus;
   conditions?: Condition[];
   message?: string;

@@ -9,19 +9,14 @@ import { GetKubernetesPods } from '../../store/kubernetes.actions';
 
 import { map } from 'rxjs/operators';
 import { entityFactory, kubernetesPodsSchemaKey } from '../../../../store/helpers/entity-factory';
+import { KubernetesPod } from '../../store/kube.types';
 
-export interface KubernetesPodInfo {
-  metadata: {
-    name: string;
-  };
-}
-
-export class KubernetesPodsDataSource extends ListDataSource<KubernetesPodInfo, any> {
+export class KubernetesPodsDataSource extends ListDataSource<KubernetesPod, any> {
 
   constructor(
     store: Store<AppState>,
     kubeGuid: BaseKubeGuid,
-    listConfig: IListConfig<KubernetesPodInfo>
+    listConfig: IListConfig<KubernetesPod>
   ) {
     super({
       store,
@@ -39,7 +34,7 @@ export class KubernetesPodsDataSource extends ListDataSource<KubernetesPodInfo, 
         const data = variables[0];
         // const rows = [...Object.values(variables[0])];
         // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
-        const rows = <KubernetesPodInfo[]>Object.values(data);
+        const rows = <KubernetesPod[]>Object.values(data);
         console.log(rows);
         return rows;
       }),

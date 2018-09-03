@@ -9,19 +9,14 @@ import { GetKubernetesNodes } from '../../store/kubernetes.actions';
 
 import { map } from 'rxjs/operators';
 import { entityFactory, kubernetesNodesSchemaKey } from '../../../../store/helpers/entity-factory';
+import { KubernetesNode } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
 
-export interface KubernetesNodeInfo {
-  metadata: {
-    name: string;
-  };
-}
-
-export class KubernetesNodesDataSource extends ListDataSource<KubernetesNodeInfo, any> {
+export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode, any> {
 
   constructor(
     store: Store<AppState>,
     kubeGuid: BaseKubeGuid,
-    listConfig: IListConfig<KubernetesNodeInfo>
+    listConfig: IListConfig<KubernetesNode>
   ) {
     super({
       store,
@@ -39,7 +34,7 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNodeInfo
         const data = variables[0];
         // const rows = [...Object.values(variables[0])];
         // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
-        const rows = <KubernetesNodeInfo[]>Object.values(data);
+        const rows = <KubernetesNode[]>Object.values(data);
         console.log(rows);
         return rows;
       }),

@@ -7,13 +7,14 @@ import { ITableColumn } from '../../../../shared/components/list/list-table/tabl
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesPodInfo, KubernetesPodsDataSource } from './kubernetes-pods-data-source';
+import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
+import { KubernetesPod } from '../../store/kube.types';
 
 @Injectable()
-export class KubernetesPodsListConfigService implements IListConfig<KubernetesPodInfo> {
+export class KubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
   podsDataSource: KubernetesPodsDataSource;
 
-  columns: Array<ITableColumn<KubernetesPodInfo>> = [
+  columns: Array<ITableColumn<KubernetesPod>> = [
     {
       columnId: 'name', headerCell: () => 'ID',
       cellDefinition: {

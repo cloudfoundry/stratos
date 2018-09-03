@@ -8,13 +8,14 @@ import { IListConfig, ListViewTypes } from '../../../../shared/components/list/l
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
-import { KubernetesNodeInfo, KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
+import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
+import { KubernetesNode } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
 
 @Injectable()
-export class KubernetesNodesListConfigService implements IListConfig<KubernetesNodeInfo> {
+export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
   nodesDataSource: KubernetesNodesDataSource;
 
-  columns: Array<ITableColumn<KubernetesNodeInfo>> = [
+  columns: Array<ITableColumn<KubernetesNode>> = [
     {
       columnId: 'name', headerCell: () => 'ID',
       cellDefinition: {
