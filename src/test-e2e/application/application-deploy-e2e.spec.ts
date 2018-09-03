@@ -32,7 +32,7 @@ const appName = 'cf-quick-app';
 describe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
-  const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack || 'opensuse42'; // cflinuxfs2
+  const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack || 'opensuse42';
   let deployedCommit: promise.Promise<string>;
 
   beforeAll(() => {
@@ -316,20 +316,22 @@ describe('Application Deploy -', function () {
 
         expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
         expect(appEvents.list.isTableView()).toBeTruthy();
-        expect(appEvents.list.getTotalResults()).toBe(4);
+        // Ensure that the earliest events are at the top
+        appEvents.list.table.toggleSort('Timestamp');
+
         const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
         // Create
-        expect(appEvents.list.table.getCell(3, 1).getText()).toBe('audit\napp\ncreate');
-        expect(appEvents.list.table.getCell(3, 2).getText()).toBe(`person\n${currentUser}`);
-        // Map Route
-        expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nmap-route');
-        expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
-        // Update (route)
-        expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nupdate');
-        expect(appEvents.list.table.getCell(1, 2).getText()).toBe(`person\n${currentUser}`);
-        // Update (started)
-        expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\nupdate');
+        expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
         expect(appEvents.list.table.getCell(0, 2).getText()).toBe(`person\n${currentUser}`);
+        // Map Route
+        expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nmap-route');
+        expect(appEvents.list.table.getCell(1, 2).getText()).toBe(`person\n${currentUser}`);
+        // Update (route)
+        expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
+        expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
+        // Update (started)
+        expect(appEvents.list.table.getCell(3, 1).getText()).toBe('audit\napp\nupdate');
+        expect(appEvents.list.table.getCell(3, 2).getText()).toBe(`person\n${currentUser}`);
       });
     });
 

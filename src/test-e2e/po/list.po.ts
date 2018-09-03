@@ -20,7 +20,7 @@ export class ListTableComponent extends Component {
     super(locator);
   }
 
-  getHeaderText() {
+  getHeaderText(): promise.Promise<string> {
     return this.locator.element(by.css('.list-component__header__left--text')).getText();
   }
 
@@ -33,7 +33,7 @@ export class ListTableComponent extends Component {
   }
 
   // Get the data in the table
-  getTableDataRaw() {
+  getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
     const getRows = this.locator.all(by.css('.app-table__row')).map(row => row.all(by.css('.app-table__cell')).map(cell => cell.getText()));
     return promise.all([getHeaders, getRows]).then(([headers, rows]) => {
@@ -44,7 +44,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData() {
+  getTableData(): promise.Promise<any> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -59,7 +59,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number) {
+  selectRow(index: number): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
       return rows[index].element(by.css('.mat-radio-button')).click();
@@ -80,6 +80,10 @@ export class ListTableComponent extends Component {
         }
         return -1;
       });
+  }
+
+  toggleSort(headerTitle: string): promise.Promise<any> {
+    return this.locator.element(by.cssContainingText('mat-header-row app-table-cell', headerTitle)).click();
   }
 }
 
