@@ -133,6 +133,8 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 
 @NgModule({
   imports: [
@@ -236,6 +238,8 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
     CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
   ],
   exports: [
     FormsModule,
