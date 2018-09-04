@@ -27,12 +27,73 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       },
       cellFlex: '5',
     },
+    {
+      columnId: 'containers', headerCell: () => 'No. of Containers',
+      cellDefinition: {
+        getValue: (row) => `${row.spec.containers.length}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'containers',
+        field: 'containers'
+      },
+      cellFlex: '1',
+    },
+    {
+      columnId: 'image', headerCell: () => 'Image',
+      cellDefinition: {
+        // Assuming 1 pod = 1 container
+        getValue: (row) => `${row.spec.containers.map(c => c.image)}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'image',
+        field: 'image'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'namespace', headerCell: () => 'Namespace',
+      cellDefinition: {
+        getValue: (row) => `${row.metadata.namespace}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'namespace',
+        field: 'namespace'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'node', headerCell: () => 'Node',
+      cellDefinition: {
+        getValue: (row) => `${row.spec.nodeName}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'node',
+        field: 'node'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'status', headerCell: () => 'Status',
+      cellDefinition: {
+        getValue: (row) => `${row.status.phase}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'status',
+        field: 'status'
+      },
+      cellFlex: '5',
+    },
   ];
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Nodes'
+    title: 'Pods'
   };
   enableTextFilter = false;
 

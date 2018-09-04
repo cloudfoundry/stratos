@@ -27,12 +27,24 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
+    {
+      columnId: 'status', headerCell: () => 'Status',
+      cellDefinition: {
+        getValue: (row) => `${row.status.phase}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'status',
+        field: 'status'
+      },
+      cellFlex: '5',
+    },
   ];
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Nodes'
+    title: 'Namespaces'
   };
   enableTextFilter = false;
 

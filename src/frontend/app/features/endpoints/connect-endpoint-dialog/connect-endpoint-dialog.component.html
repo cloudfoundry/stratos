@@ -23,9 +23,10 @@
         </mat-form-field>
       </div>
       <div *ngIf="endpointForm.value.authType === 'kubeconfig'" formGroupName="authValues" class="connection-dialog__auth">
+        <span>Specify `kubeconfig` file:</span>
         <app-file-input placeholder="kubeconfig" (onFileSelect)="dealWithKubeConfigFile($event)" [accept]="upload">
         </app-file-input>
-        <mat-form-field>
+        <mat-form-field hidden=true>
           <input matInput formControlName="kubeconfig" hidden=true>
         </mat-form-field>
       </div>
