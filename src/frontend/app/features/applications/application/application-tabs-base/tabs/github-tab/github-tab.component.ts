@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { GITHUB_API_URL } from '../../../../../../core/github.helpers';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
@@ -75,7 +76,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   ngOnInit() {
@@ -98,7 +100,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           githubCommitSchemaKey,
           entityFactory(githubCommitSchemaKey),
           commitEntityKey,
-          new FetchCommit(commitId, projectName),
+          new FetchCommit(commitId, projectName, this.gitHubURL),
           false
         );
 

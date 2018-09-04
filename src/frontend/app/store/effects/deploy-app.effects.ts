@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { GITHUB_API_URL } from '../../core/github.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { parseHttpPipeError } from '../../core/utils.service';
 import {
@@ -47,7 +48,8 @@ export class DeployAppEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-    private logger: LoggerService
+    private logger: LoggerService,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   @Effect()
@@ -59,7 +61,7 @@ export class DeployAppEffects {
       }),
       switchMap(([action, state]: any) => {
         return this.http
-          .get(`https://api.github.com/repos/${action.projectName}`).pipe(
+          .get(`${this.gitHubURL}/repos/${action.projectName}`).pipe(
             map(res => new ProjectExists(action.projectName, res)),
             catchError(err => observableOf(err.status === 404 ?
               new ProjectDoesntExist(action.projectName) :
@@ -81,7 +83,7 @@ export class DeployAppEffects {
         } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return this.http
-          .get(`https://api.github.com/repos/${action.projectName}/branches`).pipe(
+          .get(`${this.gitHubURL}/repos/${action.projectName}/branches`).pipe(
             mergeMap(response => {
               const branches = response.json();
               const mappedData = {
@@ -148,7 +150,7 @@ export class DeployAppEffects {
         } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return this.http
-          .get(`https://api.github.com/repos/${action.projectName}/commits?sha=${action.sha}`).pipe(
+          .get(`${this.gitHubURL}/repos/${action.projectName}/commits?sha=${action.sha}`).pipe(
             mergeMap(response => {
               const commits: GithubCommit[] = response.json();
               const mappedData = {

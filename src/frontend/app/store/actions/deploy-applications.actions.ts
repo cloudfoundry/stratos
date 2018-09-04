@@ -74,10 +74,10 @@ export class SaveAppDetails implements Action {
 export class FetchCommit implements IRequestAction {
   commit: GithubCommit;
 
-  constructor(public commitSha: string, public projectName: string) {
+  constructor(public commitSha: string, public projectName: string, private gitHubURL: string) {
     this.commit = {
       sha: commitSha,
-      url: `https://api.github.com/repos/${projectName}/commits/${commitSha}`
+      url: `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`
     };
   }
   type = FETCH_COMMIT;

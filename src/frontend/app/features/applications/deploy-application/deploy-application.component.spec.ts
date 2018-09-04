@@ -19,6 +19,7 @@ import {
   DeployApplicationStepSourceUploadComponent
 } from './deploy-application-step-source-upload/deploy-application-step-source-upload.component';
 import { DeployApplicationFsComponent } from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
@@ -36,7 +37,10 @@ describe('DeployApplicationComponent', () => {
         DeployApplicationFsComponent,
         CommitListWrapperComponent
       ],
-      providers: [CfOrgSpaceDataService],
+      providers: [
+        CfOrgSpaceDataService,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
+      ],
       imports: [
         SharedModule,
         CoreModule,

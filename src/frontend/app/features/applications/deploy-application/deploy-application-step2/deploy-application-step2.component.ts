@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -6,6 +6,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { GITHUB_API_URL } from '../../../../core/github.helpers';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
@@ -30,7 +31,6 @@ import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { GitAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
-
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -93,7 +93,8 @@ export class DeployApplicationStep2Component
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   onNext: StepOnNextFunction = () => {
@@ -211,7 +212,7 @@ export class DeployApplicationStep2Component
             githubCommitSchemaKey,
             entityFactory(githubCommitSchemaKey),
             entityKey,
-            new FetchCommit(commitSha, projectInfo.full_name),
+            new FetchCommit(commitSha, projectInfo.full_name, this.gitHubURL),
           );
 
           if (this.commitSubscription) {

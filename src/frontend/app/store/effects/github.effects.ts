@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
+import { GITHUB_API_URL } from '../../core/github.helpers';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
 import { AppState } from '../app-state';
 import { githubRepoSchemaKey } from '../helpers/entity-factory';
@@ -17,7 +18,8 @@ export class GithubEffects {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
   @Effect()
   fetchCommit$ = this.actions$
@@ -32,7 +34,7 @@ export class GithubEffects {
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return this.http
           .get(
-            `https://api.github.com/repos/${
+            `${this.gitHubURL}/repos/${
             action.stProject.deploySource.project
             }`
           ).pipe(
