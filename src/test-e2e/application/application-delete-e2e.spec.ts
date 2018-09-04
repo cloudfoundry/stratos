@@ -81,8 +81,6 @@ describe('Application Delete', function () {
       appWall.appList.header.setSearchText(testAppName);
       expect(appWall.appList.getTotalResults()).toBe(1);
 
-      e2e.sleep(5000);
-
       // Open delete app dialog
       const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
       appSummaryPage.navigateTo();
@@ -116,8 +114,7 @@ describe('Application Delete', function () {
       // Should go back to app wall
       appWall.waitForPage();
 
-      e2e.sleep(5000);
-
+      appWall.appList.header.waitUntilShown();
 
       // We deleted the app, so don't try and do this on cleanup
       app = null;
