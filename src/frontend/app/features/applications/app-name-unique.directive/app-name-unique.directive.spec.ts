@@ -12,6 +12,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 import { MockBackend } from '@angular/http/testing';
 import { HttpModule, Http, ConnectionBackend } from '@angular/http';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -32,7 +33,8 @@ describe('AppNameUniqueDirective', () => {
           provide: ConnectionBackend,
           useClass: MockBackend
         },
-        Http
+        Http,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
     });
   });
