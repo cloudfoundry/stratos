@@ -51,4 +51,5 @@ export interface E2EConfig {
   endpoints: E2EEndpointsConfig;
   skipSSLValidation: boolean;
   headless: boolean;
+  stratosGitHubApiUrl: string;
 }

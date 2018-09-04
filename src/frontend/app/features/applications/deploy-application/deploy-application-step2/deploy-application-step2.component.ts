@@ -1,6 +1,6 @@
 
 import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, Inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -31,6 +31,7 @@ import { SourceType, GitAppDetails } from '../../../../store/types/deploy-applic
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { GITHUB_API_URL } from '../../../../core/github.helpers';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -93,7 +94,8 @@ export class DeployApplicationStep2Component
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   onNext: StepOnNextFunction = () => {
@@ -213,7 +215,7 @@ export class DeployApplicationStep2Component
             githubCommitSchemaKey,
             entityFactory(githubCommitSchemaKey),
             entityKey,
-            new FetchCommit(commitSha, projectInfo.full_name),
+            new FetchCommit(commitSha, projectInfo.full_name, this.gitHubURL),
           );
 
           if (this.commitSubscription) {
