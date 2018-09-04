@@ -120,8 +120,6 @@ export class DeployApplicationStep2Component
   }
 
   ngOnInit() {
-
-    console.log('GITHUB API URL is: ' + this.gitHubURL);
     if (this.isRedeploy) {
       this.stepperText = 'Review source details';
     }
