@@ -8,6 +8,10 @@ import { CheckProjectExists } from '../../../store/actions/deploy-applications.a
 import { AppState } from '../../../store/app-state';
 import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';
 
+interface GithubProjectExistsResponse {
+  githubProjectDoesNotExist: boolean;
+  githubProjectError: string;
+}
 
 /* tslint:disable:no-use-before-declare  */
 const GITHUB_PROJECT_EXISTS = {
@@ -24,7 +28,7 @@ export class GithubProjectExistsDirective implements Validator {
 
   constructor(private store: Store<AppState>) { }
 
-  validate(c: AbstractControl): Observable<{ githubProjectDoesNotExist: boolean, githubProjectError: boolean } | null> {
+  validate(c: AbstractControl): Observable<GithubProjectExistsResponse> {
     if (c.value) {
       return this.store.select(selectDeployAppState).pipe(
         debounceTime(250),
@@ -37,10 +41,10 @@ export class GithubProjectExistsDirective implements Validator {
           !createAppState.projectExists.checking &&
           createAppState.projectExists.name === c.value
         ),
-        map(createAppState =>
+        map((createAppState): GithubProjectExistsResponse =>
           createAppState.projectExists.exists ? null : {
             githubProjectDoesNotExist: !createAppState.projectExists.exists,
-            githubProjectError: createAppState.projectExists.error ? createAppState.projectExists.data || true : false
+            githubProjectError: createAppState.projectExists.error ? createAppState.projectExists.data || '' : ''
           }),
         first()
       );
