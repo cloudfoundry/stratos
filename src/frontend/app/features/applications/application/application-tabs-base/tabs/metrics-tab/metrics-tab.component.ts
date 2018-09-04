@@ -1,8 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { MetricsLineChartConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
-import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
-import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
-import { FetchApplicationMetricsAction } from '../../../../../../store/actions/metrics.actions';
+import { Component } from '@angular/core';
 import { ApplicationService } from '../../../../application.service';
 
 @Component({

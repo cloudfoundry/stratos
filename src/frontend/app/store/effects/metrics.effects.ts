@@ -1,5 +1,5 @@
 
-import {catchError, mergeMap,  map } from 'rxjs/operators';
+import { catchError, mergeMap, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -59,7 +59,7 @@ export class MetricsEffect {
     }));
 
   private buildFullUrl(action: MetricsAction) {
-    return `${action.url}/query?query=${action.query}`;
+    return `${action.url}/${action.queryType}?query=${action.query}`;
   }
 }
 

@@ -65,12 +65,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
       })
     );
     this.store.dispatch(this.metricsConfig.metricsAction);
-    this.pollSub = metricsMonitor.poll(
-      30000,
-      () => this.store.dispatch(this.metricsConfig.metricsAction),
-      request => ({ busy: request.fetching, error: request.error, message: request.message })
-    )
-      .subscribe();
+    this.pollSub = metricsMonitor
+      .poll(
+        30000,
+        () => this.store.dispatch(this.metricsConfig.metricsAction),
+        request => ({ busy: request.fetching, error: request.error, message: request.message })
+      ).subscribe();
   }
 
   ngOnDestroy() {
