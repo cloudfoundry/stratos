@@ -2,6 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../core/core.module';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/github.helpers';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
@@ -35,7 +36,8 @@ describe('ApplicationService', () => {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         EntityMonitorFactory,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
     });
   });

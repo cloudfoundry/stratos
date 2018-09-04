@@ -6,6 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../core/core.module';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../core/github.helpers';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { appReducers } from '../../../store/reducers.module';
@@ -46,7 +47,8 @@ describe('DeployApplicationComponent', () => {
       ],
       providers: [
         CfOrgSpaceDataService,
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ],
       imports: [
         SharedModule,

@@ -21,6 +21,7 @@ export interface ServiceConfig {
   name: string;
 }
 export interface E2EServicesConfig {
+  bindApp: string;
   publicService: ServiceConfig;
   privateService: ServiceConfig;
   spaceScopedService: ServiceConfig;
@@ -49,4 +50,5 @@ export interface E2EConfig {
   endpoints: E2EEndpointsConfig;
   skipSSLValidation: boolean;
   headless: boolean;
+  stratosGitHubApiUrl: string;
 }
