@@ -12,6 +12,7 @@ import { generateTestApplicationServiceProvider } from '../../test-framework/app
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { ApplicationService } from './application.service';
 import { ApplicationEnvVarsService } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../core/github.helpers';
 
 describe('ApplicationService', () => {
 
@@ -35,7 +36,8 @@ describe('ApplicationService', () => {
         ApplicationStateService,
         ApplicationEnvVarsService,
         EntityMonitorFactory,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
     });
   });

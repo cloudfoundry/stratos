@@ -1,7 +1,7 @@
 
 import { of as observableOf, Observable, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, take, tap } from 'rxjs/operators';
 
@@ -23,6 +23,7 @@ import {
 import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import { GITHUB_API_URL } from '../../../../../../core/github.helpers';
 
 @Component({
   selector: 'app-github-tab',
@@ -65,7 +66,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   constructor(
     private applicationService: ApplicationService,
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   ngOnInit() {
@@ -88,7 +90,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           githubCommitSchemaKey,
           entityFactory(githubCommitSchemaKey),
           commitEntityKey,
-          new FetchCommit(commitId, projectName),
+          new FetchCommit(commitId, projectName, this.gitHubURL),
           false
         );
 
