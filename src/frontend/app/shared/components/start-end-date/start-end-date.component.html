@@ -1,3 +1,13 @@
-<p>
-  start-end-date works!
-</p>
+<div class="start-end-date">
+  <div class="start-end-date__selector">
+    <div class="start-end-date__header">Start Date</div>
+    <app-date-time [(dateTime)]="start"></app-date-time>
+  </div>
+  <div class="start-end-date__arrow">
+    <mat-icon>arrow_forward</mat-icon>
+  </div>
+  <div class="start-end-date__selector">
+    <div class="start-end-date__header">End Date</div>
+    <app-date-time [(dateTime)]="end"></app-date-time>
+  </div>
+</div>

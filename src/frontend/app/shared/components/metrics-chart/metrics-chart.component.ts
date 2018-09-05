@@ -42,7 +42,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
 
   public chartTypes = MetricsChartTypes;
 
-  public dateTime = moment(moment.now());
+  public from = moment(moment.now());
+  public to = moment(moment.now());
 
   private pollSub: Subscription;
 

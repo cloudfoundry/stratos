@@ -1,7 +1,6 @@
 <div class="metrics-chart__outer">
   <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
-  <app-date-time [(dateTime)]="dateTime"></app-date-time>
-  {{dateTime}}
+  <app-start-end-date [(start)]="from" [(end)]="to"></app-start-end-date>
   <mat-progress-bar *ngIf="!(results$ | async)" class="metrics-chart__loading" [color]="'primary'" mode="indeterminate">
   </mat-progress-bar>
   <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
