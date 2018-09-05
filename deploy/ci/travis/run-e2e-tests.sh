@@ -73,7 +73,7 @@ fi
 
 # Test report folder name override
 TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
-export E2E_REPORT_FOLDER='./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}'
+export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
 
 set +e
 echo "Running e2e tests"
