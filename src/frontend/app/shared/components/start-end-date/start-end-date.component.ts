@@ -6,7 +6,7 @@ import * as moment from 'moment';
   templateUrl: './start-end-date.component.html',
   styleUrls: ['./start-end-date.component.scss']
 })
-export class StartEndDateComponent implements OnInit {
+export class StartEndDateComponent {
   @Output()
   public endChange = new EventEmitter<moment.Moment>();
   @Output()
@@ -15,10 +15,17 @@ export class StartEndDateComponent implements OnInit {
   private startValue: moment.Moment;
   private endValue: moment.Moment;
 
+  private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
+    return !oldDate || !oldDate.isSame(newDate);
+  }
+
   @Input()
   set start(start: moment.Moment) {
-    this.startValue = start;
-    this.startChange.emit(start);
+    if (this.isDifferentDate(this.startValue, start)) {
+      const clone = start.clone();
+      this.startValue = clone;
+      this.startChange.emit(this.startValue);
+    }
   }
 
   get start() {
@@ -27,16 +34,14 @@ export class StartEndDateComponent implements OnInit {
 
   @Input()
   set end(end: moment.Moment) {
-    this.endValue = end;
-    this.endChange.emit(end);
+    if (this.isDifferentDate(this.endValue, end)) {
+      const clone = end.clone();
+      this.endValue = clone;
+      this.endChange.emit(this.endValue);
+    }
   }
 
   get end() {
     return this.endValue;
-  }
-
-  constructor() { }
-
-  ngOnInit() {
   }
 }

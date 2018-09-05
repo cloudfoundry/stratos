@@ -10,7 +10,7 @@ import { combineLatest, Subscription } from 'rxjs';
   templateUrl: './date-time.component.html',
   styleUrls: ['./date-time.component.scss']
 })
-export class DateTimeComponent implements OnInit, OnDestroy {
+export class DateTimeComponent implements OnDestroy {
 
   public date = new FormControl();
   public time = new FormControl();
@@ -29,8 +29,12 @@ export class DateTimeComponent implements OnInit, OnDestroy {
   set dateTime(dateTime: moment.Moment) {
     if (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue)) {
       this.dateTimeValue = dateTime;
-      this.dateTimeChange.emit(this.dateTime);
+      this.dateTimeChange.emit(this.dateTimeValue);
     }
+  }
+
+  private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
+    return !oldDate || !oldDate.isSame(newDate);
   }
 
   private setupInputSub() {
@@ -38,6 +42,7 @@ export class DateTimeComponent implements OnInit, OnDestroy {
       this.time.valueChanges,
       this.date.valueChanges,
     ).pipe(
+      filter(([time, date]) => time && date),
       map(([time, date]: [string, moment.Moment]) => {
         const [hour, minute] = time.split(':');
         return [
@@ -50,27 +55,32 @@ export class DateTimeComponent implements OnInit, OnDestroy {
         return !isNaN(hour + minute);
       }),
       tap(([hour, minute, date]: [number, number, moment.Moment]) => {
-        this.dateTime = date.clone().set({
+        const newDate = date.clone().set({
           hour,
           minute
         });
+        if (this.isDifferentDate(this.dateTime, newDate)) {
+          this.dateTime = newDate;
+        }
       })
     ).subscribe();
   }
 
   private setupChangeSub() {
     this.changeSub = this.dateTimeChange.pipe(
-      tap((dateTime: moment.Moment) => {
+      filter(dateTime => !!dateTime),
+      tap(dateTime => {
         this.date.setValue(dateTime);
         this.time.setValue(dateTime.format('HH:MM'));
       })
     ).subscribe();
   }
 
-  ngOnInit() {
+  constructor() {
     this.setupInputSub();
     this.setupChangeSub();
   }
+
   ngOnDestroy() {
     this.sub.unsubscribe();
     this.changeSub.unsubscribe();

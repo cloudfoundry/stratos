@@ -31,7 +31,7 @@ export abstract class MetricsAction implements Action {
 
 export class FetchCFMetricsAction extends MetricsAction {
   public cfGuid: string;
-  constructor(public guid: string, public query: string) {
+  constructor(public guid: string, public query: string, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(guid, query);
     this.cfGuid = guid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
