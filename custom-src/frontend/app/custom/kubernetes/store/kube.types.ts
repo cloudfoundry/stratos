@@ -312,6 +312,11 @@ export interface Labels {
   [key: string]: string;
 }
 
+export interface PodLabel {
+  key: string;
+  value: string;
+}
+
 export interface Annotations {
   [key: string]: string;
 }

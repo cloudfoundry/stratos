@@ -9,6 +9,7 @@ import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { KubernetesPod } from '../../store/kube.types';
+import { KubernetesPodTagsComponent } from './kubernetes-pod-tags/kubernetes-pod-tags.component';
 
 @Injectable()
 export class KubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
@@ -25,6 +26,11 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
         orderKey: 'name',
         field: 'name'
       },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'tags', headerCell: () => 'Tags',
+      cellComponent: KubernetesPodTagsComponent,
       cellFlex: '5',
     },
     {

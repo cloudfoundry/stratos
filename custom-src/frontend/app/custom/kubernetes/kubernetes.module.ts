@@ -12,8 +12,8 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesNodeCapacityComponent } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
-import { KubernetesPodCapacityComponent } from './list-types/kubernetes-pods/kubernetes-pod-capacity/kubernetes-pod-capacity.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
+import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
 
 @NgModule({
   imports: [
@@ -28,7 +28,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
     KubernetesTabBaseComponent,
     KubernetesNodeCapacityComponent,
     KubernetesPodsTabComponent,
-    KubernetesPodCapacityComponent,
+    KubernetesPodTagsComponent,
     KubernetesNamespacesTabComponent,
   ],
   providers: [
@@ -38,7 +38,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
   ],
   entryComponents: [
     KubernetesNodeCapacityComponent,
-    KubernetesPodCapacityComponent,
+    KubernetesPodTagsComponent
   ]
 })
 export class KubernetesModule {
