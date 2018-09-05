@@ -9,9 +9,12 @@ const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 
-var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
-
-var reportFolderName = 'stratos-e2e-' + timestamp;
+// Test report folder name
+var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
+var reportFolderName = timestamp + '-e2e';
+if (process.env['TRAVIS_JOB_NUMBER']) {
+  reportFolderName += '-' + process.env['TRAVIS_JOB_NUMBER'];
+}
 
 const SECRETS_FILE = 'secrets.yaml';
 
