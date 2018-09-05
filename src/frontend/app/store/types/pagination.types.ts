@@ -45,6 +45,7 @@ export class PaginationEntityState {
    * The pagination key from where we share our values.
    */
   seed?: string;
+  maxResults?: number;
 }
 
 export interface PaginationAction extends Action {
@@ -55,6 +56,7 @@ export interface PaginationAction extends Action {
 export interface PaginatedAction extends PaginationAction, IRequestAction {
   actions: string[];
   flattenPagination?: boolean;
+  flattenPaginationMax?: number;
   initialParams?: PaginationParam;
   pageNumber?: number;
   options?: {

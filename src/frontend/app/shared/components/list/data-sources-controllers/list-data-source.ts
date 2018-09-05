@@ -1,21 +1,26 @@
-
-import { of as observableOf, BehaviorSubject, OperatorFunction, Observable, Subscription, ReplaySubject } from 'rxjs';
-
-import { tap, distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
+import { BehaviorSubject, Observable, of as observableOf, OperatorFunction, ReplaySubject, Subscription } from 'rxjs';
+import { tag } from 'rxjs-spy/operators';
+import { publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
-import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
+import {
+  getRowUniqueId,
+  IListDataSource,
+  ListPaginationMultiFilterChange,
+  RowsState,
+  RowState,
+} from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { tag } from 'rxjs-spy/operators';
+
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -275,4 +280,24 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public setFilterParam(filterParam: string, pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
   }
+
+  public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
+
+  }
+
+  protected setQParam(setQ: QParam, qs: QParam[]) {
+    const existing = qs.find((q: QParam) => q.key === setQ.key);
+    if (setQ.value && setQ.value.length) {
+      if (existing) {
+        existing.value = setQ.value;
+      } else {
+        qs.push(setQ);
+      }
+    } else {
+      if (existing) {
+        qs.splice(qs.indexOf(existing), 1);
+      }
+    }
+  }
+
 }

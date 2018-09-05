@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
 
 export interface AppEvent {
   actee_name: string;
@@ -72,8 +72,18 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
   destroy();
+  /**
+   * Set's data source specific text filter param
+   */
+  setFilterParam(filterParam: string, pag: PaginationEntityState);
+  /**
+   * Gets data source specific text filter param
+   */
   getFilterFromParams(pag: PaginationEntityState): string;
-  setFilterParam(filter: string, pag: PaginationEntityState);
+  /**
+   * Set's data source specific multi filter properties
+   */
+  setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam);
   refresh();
 }
 
@@ -99,3 +109,8 @@ export const getDefaultRowState = (): RowState => ({
   deleting: false,
   message: null
 });
+
+export interface ListPaginationMultiFilterChange {
+  key: string;
+  value: string;
+}

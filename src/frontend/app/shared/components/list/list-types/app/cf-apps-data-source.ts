@@ -1,5 +1,4 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
@@ -8,7 +7,7 @@ import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
-import { CreatePagination } from '../../../../../store/actions/pagination.actions';
+import { CreatePagination, SetParams } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -19,8 +18,9 @@ import {
 } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
+import { PaginationEntityState, PaginationParam, QParam } from '../../../../../store/types/pagination.types';
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
@@ -48,6 +48,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
   private statsSub: Subscription;
+  private subs: Subscription[];
+  public action: GetAllApplications;
 
   constructor(
     store: Store<AppState>,
@@ -82,10 +84,12 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       isLocal: true,
       transformEntities: transformEntities,
       listConfig,
-      destroy: () => this.statsSub.unsubscribe()
+      destroy: () => this.subs.forEach(sub => sub.unsubscribe())
     });
 
-    this.statsSub = this.page$.pipe(
+    this.action = action;
+
+    const statsSub = this.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
       withLatestFrom(this.pagination$),
@@ -112,5 +116,36 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       }),
       dispatchSequencer.sequence.bind(dispatchSequencer),
       tag('stat-obs')).subscribe();
+
+
+    this.subs = [statsSub];
   }
+
+  public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
+    if (!changes.length) {
+      return;
+    }
+
+    const qChanges = changes.reduce((qs: QParam[], change) => {
+      switch (change.key) {
+        case 'cf':
+          this.action.endpointGuid = change.value;
+          this.setQParam(new QParam('organization_guid', '', ' IN '), qs);
+          this.setQParam(new QParam('space_guid', '', ' IN '), qs);
+          break;
+        case 'org':
+          this.setQParam(new QParam('organization_guid', change.value, ' IN '), qs);
+          break;
+        case 'space':
+          this.setQParam(new QParam('space_guid', change.value, ' IN '), qs);
+          break;
+      }
+      return qs;
+    }, params.q || []);
+
+    params.q = qChanges;
+    this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, params, false, true));
+
+  }
+
 }

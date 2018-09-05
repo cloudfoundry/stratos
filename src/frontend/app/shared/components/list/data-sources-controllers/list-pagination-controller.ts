@@ -1,7 +1,8 @@
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, first, map, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tag } from 'rxjs-spy/operators';
+import { bufferTime, distinctUntilChanged, filter, first, map, tap } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort } from '../../../../store/actions/list.actions';
 import {
@@ -15,13 +16,13 @@ import { AppState } from '../../../../store/app-state';
 import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
 import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListMultiFilterConfig } from '../list.component.types';
-import { IListDataSource } from './list-data-source-types';
-import { tag } from 'rxjs-spy/operators';
+import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filterByString: (filterString: string) => void;
   multiFilter: (filterConfig: IListMultiFilterConfig, filterValue: string) => void;
+  multiFilterChanges$: Observable<any>;
   filter$: Observable<ListFilter>;
   sort: (listSort: ListSort) => void;
   sort$: Observable<ListSort>;
@@ -50,10 +51,22 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
     this.filter$ = this.createFilterObservable(dataSource);
 
+    // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
+    // filter resets other filters.
+    this.multiFilterChanges$ = this.multiFilterStream.asObservable().pipe(
+      filter(change => !!change),
+      bufferTime(50),
+      filter(changes => !!changes.length),
+      tap(this.handleMultiFilter),
+    );
+
   }
   pagination$: Observable<ListPagination>;
   sort$: Observable<ListSort>;
   filter$: Observable<ListFilter>;
+  private multiFilterStream = new BehaviorSubject<ListPaginationMultiFilterChange>(null);
+  multiFilterChanges$: Observable<any>;
+
   page(pageIndex: number) {
     const page = pageIndex + 1;
     if (this.dataSource.isLocal) {
@@ -115,26 +128,52 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
     });
   }
-  multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
+
+  handleMultiFilter = (changes: ListPaginationMultiFilterChange[]) => {
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-      if (this.dataSource.isLocal && paginationEntityState) {
-        // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
-        // chained actions from firing.
-        const storeFilterParamValue = this.cleanFilterParam(paginationEntityState.clientPagination.filter.items[filterConfig.key]);
-        const newFilterParamValue = this.cleanFilterParam(filterValue);
-        if (storeFilterParamValue !== newFilterParamValue) {
-          const newFilter = this.cloneMultiFilter(paginationEntityState.clientPagination.filter);
-          newFilter.items[filterConfig.key] = filterValue;
-          this.store.dispatch(new SetClientFilter(
-            this.dataSource.entityKey,
-            this.dataSource.paginationKey,
-            newFilter
-          ));
-        }
+      if (!paginationEntityState) {
+        return;
       }
+
+      // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
+      // chained actions from firing.
+      const cleanChanges = changes.reduce((cleanChanges, change) => {
+        const storeFilterParamValue = this.cleanFilterParam(paginationEntityState.clientPagination.filter.items[change.key]);
+        const newFilterParamValue = this.cleanFilterParam(change.value);
+        if (storeFilterParamValue !== newFilterParamValue) {
+          cleanChanges[change.key] = change.value;
+        }
+        return cleanChanges;
+      }, {});
+
+      if (Object.keys(cleanChanges).length > 0) {
+        const currentFilter = paginationEntityState.clientPagination.filter;
+        const newFilter = {
+          ...currentFilter,
+          items: {
+            ...currentFilter.items,
+            ...cleanChanges
+          }
+        };
+        this.store.dispatch(new SetClientFilter(
+          this.dataSource.entityKey,
+          this.dataSource.paginationKey,
+          newFilter
+        ));
+      }
+
+      if (paginationEntityState.maxResults) {
+        this.dataSource.setMultiFilter(changes, paginationEntityState.params);
+      }
+
     });
+  }
 
-
+  multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
+    if (!this.dataSource.isLocal) {
+      return;
+    }
+    this.multiFilterStream.next({ key: filterConfig.key, value: filterValue });
   }
 
   private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {
@@ -193,6 +232,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     if (filterVal === null || filterVal === undefined || filterVal === '') {
       return undefined;
     }
-    return filter;
+    return filterVal;
   }
 }

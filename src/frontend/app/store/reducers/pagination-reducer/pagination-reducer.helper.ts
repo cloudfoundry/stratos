@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
@@ -9,7 +9,13 @@ import { AppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam, PaginationClientPagination } from '../../types/pagination.types';
+import {
+  PaginatedAction,
+  PaginationClientPagination,
+  PaginationEntityState,
+  PaginationParam,
+  QParam,
+} from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
@@ -111,6 +117,44 @@ export const getPaginationObservables = <T = any>(
   return obs;
 };
 
+function hasPaginationParamsChanged(o: PaginationParam, n: PaginationParam): boolean {
+  try {
+    return JSON.stringify(o) !== JSON.stringify(n);
+  } catch { }
+  return false;
+}
+
+function shouldFetchMaxedList(pagination: PaginationEntityState, previousPaginationParams: PaginationParam): boolean {
+  // No maxResults? ignore
+  if (pagination.maxResults === null || pagination.maxResults === undefined) {
+    return;
+  }
+  const maxedResults = pagination.maxResults || 0;
+  const totalResults = pagination.totalResults || 0;
+  return maxedResults !== totalResults &&
+    !isFetchingPage(pagination) &&
+    hasPaginationParamsChanged(previousPaginationParams, pagination.params);
+}
+
+function shouldFetchLocalList(hasDispatchedOnce, pagination: PaginationEntityState, previousPaginationParams: PaginationParam): boolean {
+  // This could be written more succinctly, however clearer in this more verbose form
+  if (hasError(pagination)) {
+    return false;
+  }
+
+  const shouldFetchLocal = !hasDispatchedOnce && !hasValidOrGettingPage(pagination);
+  if (shouldFetchLocal) {
+    return true;
+  }
+
+  const shouldReFetchMaxed = shouldFetchMaxedList(pagination, previousPaginationParams);
+  return shouldReFetchMaxed;
+}
+
+function shouldFetchNonLocalList(pagination): boolean {
+  return !hasError(pagination) && !hasValidOrGettingPage(pagination);
+}
+
 function getObservables<T = any>(
   store: Store<AppState>,
   entityKey: string,
@@ -121,22 +165,22 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
-  let lastValidationFootprint: string;
+  let previousPaginationParams: PaginationParam;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    // publishReplay(1),
-    // refCount()
-  );
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
     tap(pagination => {
+      // This could be written more succinctly, however clearer in this more verbose form
       if (
         (!pagination && !hasDispatchedOnce) ||
-        !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
+        (isLocal && shouldFetchLocalList(hasDispatchedOnce, pagination, previousPaginationParams)) ||
+        (!isLocal && shouldFetchNonLocalList(pagination))
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
+        previousPaginationParams = spreadPaginationParams(pagination.params);
         populatePaginationFromParent(store, action).pipe(
           first(),
           tap(newAction => {
@@ -147,6 +191,7 @@ function getObservables<T = any>(
     })
   );
 
+  let lastValidationFootprint: string;
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
@@ -237,5 +282,12 @@ export function spreadClientPagination(pag: PaginationClientPagination): Paginat
         ...pag.filter.items
       }
     }
+  };
+}
+
+export function spreadPaginationParams(params: PaginationParam): PaginationParam {
+  return {
+    ...params,
+    q: [...params.q]
   };
 }

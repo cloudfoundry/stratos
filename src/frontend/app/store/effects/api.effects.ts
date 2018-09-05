@@ -177,8 +177,12 @@ export class APIEffect {
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
       request = flattenPagination(
+        this.store,
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
+        paginatedAction.flattenPaginationMax,
+        paginatedAction.entityKey,
+        paginatedAction.paginationKey
       );
     }
 

@@ -90,6 +90,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
 
+  @Input() noEntriesMaxedResults: TemplateRef<any>;
+
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator) {
       return;
@@ -151,6 +153,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
+  private multiFilterChangesSub: Subscription;
 
   globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
@@ -175,6 +178,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
+  maxedResults$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -275,9 +279,23 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     }));
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
+    this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
-    this.hasRows$ = this.dataSource.page$.pipe(
-      map(pag => !!(pag && pag.length)),
+    this.maxedResults$ = observableCombineLatest(this.dataSource.pagination$, this.paginationController.filter$).pipe(
+      distinctUntilChanged(),
+      map(([pagination, filters]) => {
+        const maxResults = pagination.maxResults || 0;
+        const totalResults = this.dataSource.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
+        return !filters.string && maxResults > totalResults;
+      }),
+    );
+
+    const hasPages$ = this.dataSource.page$.pipe(
+      map(pag => !!(pag && pag.length))
+    );
+
+    this.hasRows$ = observableCombineLatest(hasPages$, this.maxedResults$).pipe(
+      map(([hasPages, maxedResults]) => !maxedResults && hasPages),
       startWith(false)
     );
 
@@ -358,27 +376,20 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       })
     );
 
-    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
-      map(([hasRows, isFiltering]) => {
-        return !hasRows && isFiltering;
-      })
+    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.maxedResults$).pipe(
+      map(([hasRows, isFiltering, maxedResults]) => !hasRows && isFiltering && !maxedResults)
     );
-    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
-      map(([hasRows, isFiltering]) => {
-        return !hasRows && !isFiltering;
-      })
+
+    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.maxedResults$).pipe(
+      map(([hasRows, isFiltering, maxedResults]) => !hasRows && !isFiltering && !maxedResults)
     );
 
     this.hasRowsOrIsFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
-      map(([hasRows, isFiltering]) => {
-        return hasRows || isFiltering;
-      })
+      map(([hasRows, isFiltering]) => hasRows || isFiltering)
     );
 
     this.disableActions$ = observableCombineLatest(this.dataSource.isLoadingPage$, this.noRowsHaveFilter$).pipe(
-      map(([isLoading, noRowsHaveFilter]) => {
-        return isLoading || noRowsHaveFilter;
-      })
+      map(([isLoading, noRowsHaveFilter]) => isLoading || noRowsHaveFilter)
     );
 
     // Multi actions can be a list of actions that aren't visible. For those case, in effect, we don't have multi actions
@@ -480,6 +491,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.dataSource) {
       this.dataSource.destroy();
+    }
+    if (this.multiFilterChangesSub) {
+      this.multiFilterChangesSub.unsubscribe();
     }
   }
 
