@@ -11,12 +11,11 @@ const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
-var reportFolderName = timestamp + '-e2e';
-if (process.env['TRAVIS_JOB_NUMBER']) {
-  reportFolderName += '-' + process.env['TRAVIS_JOB_NUMBER'];
-}
+var reportFolderName = timestamp + '-e2e-report';
 
 const SECRETS_FILE = 'secrets.yaml';
+
+const E2E_REPORT_FOLDER = process.env['E2E_REPORT_FOLDER'] || './e2e-reports/' + reportFolderName;
 
 var fs = require('fs');
 var path = require('path');
@@ -69,7 +68,7 @@ exports.config = {
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
     jasmine.getEnv().addReporter(new HtmlReporter({
-      baseDirectory: './e2e-reports/' + reportFolderName,
+      baseDirectory: E2E_REPORT_FOLDER,
       takeScreenShotsOnlyForFailedSpecs: true,
       docTitle: 'E2E Test Report: ' + timestamp,
       docName: 'index.html',

@@ -71,6 +71,10 @@ else
   mv /tmp/node_modules ./node_modules
 fi
 
+# Test report folder name override
+TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
+export E2E_REPORT_FOLDER='./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}'
+
 set +e
 echo "Running e2e tests"
 npm run ${E2E_TARGET}
@@ -88,10 +92,10 @@ if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
   popd
 fi
 
-# Output backend log if the tests failed
+# Copy the backend log to the test report folder if the tests failed
 if [ "${RUN_TYPE}" == "quick" ]; then
   if [ $RESULT -ne 0 ]; then
-    cat src/jetstream/backend.log
+    cp src/jetstream/backend.log ${E2E_REPORT_FOLDER}/jetstream.log
   fi
 fi
 
