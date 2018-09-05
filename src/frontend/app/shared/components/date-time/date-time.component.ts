@@ -27,9 +27,7 @@ export class DateTimeComponent implements OnInit, OnDestroy {
   }
 
   set dateTime(dateTime: moment.Moment) {
-    console.log(dateTime, this.dateTimeValue);
     if (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue)) {
-      console.log('!same')
       this.dateTimeValue = dateTime;
       this.dateTimeChange.emit(this.dateTime);
     }
@@ -41,7 +39,6 @@ export class DateTimeComponent implements OnInit, OnDestroy {
       this.date.valueChanges,
     ).pipe(
       map(([time, date]: [string, moment.Moment]) => {
-        console.log(time, date);
         const [hour, minute] = time.split(':');
         return [
           parseInt(hour, 10),
@@ -53,8 +50,7 @@ export class DateTimeComponent implements OnInit, OnDestroy {
         return !isNaN(hour + minute);
       }),
       tap(([hour, minute, date]: [number, number, moment.Moment]) => {
-        debugger;
-        this.dateTime = date.set({
+        this.dateTime = date.clone().set({
           hour,
           minute
         });
@@ -66,7 +62,6 @@ export class DateTimeComponent implements OnInit, OnDestroy {
     this.changeSub = this.dateTimeChange.pipe(
       tap((dateTime: moment.Moment) => {
         this.date.setValue(dateTime);
-        console.log(dateTime.format('HH:MM'));
         this.time.setValue(dateTime.format('HH:MM'));
       })
     ).subscribe();

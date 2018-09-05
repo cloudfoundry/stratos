@@ -11,6 +11,8 @@ import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.se
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
+import * as moment from 'moment';
+
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
   getSeriesName: (T) => string;
@@ -39,6 +41,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   public title: string;
 
   public chartTypes = MetricsChartTypes;
+
+  public dateTime = moment(moment.now());
 
   private pollSub: Subscription;
 
