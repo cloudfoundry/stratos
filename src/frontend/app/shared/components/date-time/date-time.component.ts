@@ -38,12 +38,14 @@ export class DateTimeComponent implements OnDestroy {
   }
 
   private setupInputSub() {
+    this.stopInputSub();
     this.sub = combineLatest(
       this.time.valueChanges,
       this.date.valueChanges,
     ).pipe(
       filter(([time, date]) => time && date),
       map(([time, date]: [string, moment.Moment]) => {
+
         const [hour, minute] = time.split(':');
         return [
           parseInt(hour, 10),
@@ -55,6 +57,7 @@ export class DateTimeComponent implements OnDestroy {
         return !isNaN(hour + minute);
       }),
       tap(([hour, minute, date]: [number, number, moment.Moment]) => {
+
         const newDate = date.clone().set({
           hour,
           minute
@@ -66,12 +69,20 @@ export class DateTimeComponent implements OnDestroy {
     ).subscribe();
   }
 
+  private stopInputSub() {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+  }
+
   private setupChangeSub() {
     this.changeSub = this.dateTimeChange.pipe(
       filter(dateTime => !!dateTime),
       tap(dateTime => {
+        this.stopInputSub();
         this.date.setValue(dateTime);
         this.time.setValue(dateTime.format('HH:MM'));
+        this.setupInputSub();
       })
     ).subscribe();
   }
@@ -82,7 +93,7 @@ export class DateTimeComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sub.unsubscribe();
+    this.stopInputSub();
     this.changeSub.unsubscribe();
   }
 }

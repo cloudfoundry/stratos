@@ -22,7 +22,8 @@ export class StartEndDateComponent {
   @Input()
   set start(start: moment.Moment) {
     if (this.isDifferentDate(this.startValue, start)) {
-      const clone = start.clone();
+      const clone = moment(start);
+      console.log(this.startValue === clone)
       this.startValue = clone;
       this.startChange.emit(this.startValue);
     }
@@ -35,7 +36,7 @@ export class StartEndDateComponent {
   @Input()
   set end(end: moment.Moment) {
     if (this.isDifferentDate(this.endValue, end)) {
-      const clone = end.clone();
+      const clone = moment(end);
       this.endValue = clone;
       this.endChange.emit(this.endValue);
     }
