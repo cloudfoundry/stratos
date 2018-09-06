@@ -1,4 +1,4 @@
-import { TitleCasePipe } from '@angular/common';
+import { TitleCasePipe, getCurrencySymbol } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -30,7 +30,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
+import { IServicePlan, IServicePlanExtra, IServicePlanCost } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
 import { ServicePlanAccessibility } from '../../../../features/service-catalog/services.service';
@@ -207,6 +207,15 @@ export class SelectPlanStepComponent implements OnDestroy {
   isYesOrNo = val => val ? 'yes' : 'no';
   isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
   isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
+
+  getCostCurrency = (cost: IServicePlanCost, symbol: boolean) => {
+    const currency = Object.keys(cost.amount)[0];
+    if (!symbol) {
+      return currency;
+    }
+    return getCurrencySymbol(currency.toUpperCase(), 'wide');
+  }
+  getCostValue = (cost: IServicePlanCost) => cost.amount[this.getCostCurrency(cost, false)];
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(
