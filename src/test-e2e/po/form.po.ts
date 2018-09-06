@@ -164,12 +164,7 @@ export class FormComponent extends Component {
 
   // Fill the form fields in the specified object
   fill(fields: { [fieldKey: string]: string | boolean }, expectFailure = false): promise.Promise<void> {
-
     return this.getControlsMap().then(ctrls => {
-      // console.log(Object.keys(fields));
-      // console.log(Object.keys(ctrls));
-      // TODO: RC remove
-
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value = fields[field];

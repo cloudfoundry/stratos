@@ -28,11 +28,10 @@ const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
-const appName = 'cf-quick-app';
-
 describe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
+  const testAppName = ApplicationE2eHelper.createApplicationName();
   const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack || 'opensuse42';
   let deployedCommit: promise.Promise<string>;
 
@@ -67,11 +66,12 @@ describe('Application Deploy -', function () {
       // Check the steps
       e2e.log(`${loggingPrefix} Checking Steps`);
       deployApp.stepper.getStepNames().then(steps => {
-        expect(steps.length).toBe(4);
+        expect(steps.length).toBe(5);
         expect(steps[0]).toBe('Cloud Foundry');
         expect(steps[1]).toBe('Source');
         expect(steps[2]).toBe('Source Config');
-        expect(steps[3]).toBe('Deploy');
+        expect(steps[3]).toBe('Overrides (Optional)');
+        expect(steps[4]).toBe('Deploy');
       });
       e2e.log(`${loggingPrefix} Cf/Org/Space Step`);
       expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
@@ -92,6 +92,8 @@ describe('Application Deploy -', function () {
       deployApp.stepper.getStepperForm().fill({ 'org': orgName });
       deployApp.stepper.getStepperForm().fill({ 'space': spaceName });
       expect(deployApp.stepper.canNext()).toBeTruthy();
+
+      // Press next to get to source step
       deployApp.stepper.next();
 
       e2e.log(`${loggingPrefix} Source Step`);
@@ -99,6 +101,7 @@ describe('Application Deploy -', function () {
       expect(deployApp.stepper.canNext()).toBeFalsy();
       deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
 
+      // Press next to get to source config step
       deployApp.stepper.waitUntilCanNext('Next');
       deployApp.stepper.next();
 
@@ -119,6 +122,18 @@ describe('Application Deploy -', function () {
 
       deployedCommit = commits.getCell(0, 2).getText();
       expect(deployApp.stepper.canNext()).toBeTruthy();
+
+      // Press next to get to overrides step
+      deployApp.stepper.next();
+
+      e2e.log(`${loggingPrefix} Overrides Step`);
+      expect(deployApp.stepper.canNext()).toBeTruthy();
+
+      const overrides = deployApp.getOverridesForm();
+      overrides.waitUntilShown();
+      overrides.fill({ name: testAppName, random_route: true });
+
+      e2e.log(`${loggingPrefix} Overrides Step - overrides set`);
 
       // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
       // waiting for angular if we don't turn off.
@@ -142,7 +157,7 @@ describe('Application Deploy -', function () {
           browser.waitForAngularEnabled(true);
 
           appSummary.waitForPage();
-          appSummary.header.waitForTitleText(appName);
+          appSummary.header.waitForTitleText(testAppName);
           return appSummary.cfGuid;
         })
       );
@@ -161,12 +176,11 @@ describe('Application Deploy -', function () {
     let appBasePage: ApplicationBasePage;
 
     beforeAll(() => {
-      browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(appName)
+      browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName)
         .then(res => {
           expect(res).toBeTruthy('Failed to fetch app, is it deployed in the default space?');
-          return res;
+          appDetails = res;
         })
-        .then(res => { appDetails = res; })
         .then(() => {
           appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.app.metadata.guid);
           return appBasePage.navigateTo();
@@ -305,8 +319,9 @@ describe('Application Deploy -', function () {
         expect(appRoutes.list.empty.getCustom().getComponent().isPresent()).toBeFalsy();
         appRoutes.list.table.getCell(0, 1).getText().then((route: string) => {
           expect(route).not.toBeNull();
-          expect(route.length).toBeGreaterThan(appName.length);
-          expect(route.startsWith(appName)).toBeTruthy();
+          expect(route.length).toBeGreaterThan(testAppName.length);
+          const randomRouteStyleAppName = testAppName.replace(/[\.:]/g, '');
+          expect(route.startsWith(randomRouteStyleAppName)).toBeTruthy();
         });
         appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
           expect(tcpRoute).not.toBeNull();
@@ -321,6 +336,7 @@ describe('Application Deploy -', function () {
 
         expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
         expect(appEvents.list.isTableView()).toBeTruthy();
+        expect(appEvents.list.getTotalResults()).toBeGreaterThanOrEqual(2);
         // Ensure that the earliest events are at the top
         appEvents.list.table.toggleSort('Timestamp');
 
@@ -334,9 +350,6 @@ describe('Application Deploy -', function () {
         // Update (route)
         expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
         expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
-        // Update (started)
-        expect(appEvents.list.table.getCell(3, 1).getText()).toBe('audit\napp\nupdate');
-        expect(appEvents.list.table.getCell(3, 2).getText()).toBe(`person\n${currentUser}`);
       });
     });
 
@@ -411,6 +424,6 @@ describe('Application Deploy -', function () {
 
   });
 
-  afterAll(() => applicationE2eHelper.deleteApplication(null, { appName }));
+  afterAll(() => applicationE2eHelper.deleteApplication(null, { appName: testAppName }));
 
 });
