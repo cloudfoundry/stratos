@@ -106,7 +106,7 @@ describe('ListComponent', () => {
     let component: ListComponent<EndpointModel>;
     let fixture: ComponentFixture<ListComponent<EndpointModel>>;
 
-    beforeEach(() => {
+    beforeEach(async(() => {
       TestBed.configureTestingModule({
         providers: [
           { provide: ListConfig, useClass: EndpointsListConfigService },
@@ -122,19 +122,22 @@ describe('ListComponent', () => {
         ],
       })
         .compileComponents();
+    }));
+
+    beforeEach(() => {
       fixture = TestBed.createComponent<ListComponent<EndpointModel>>(ListComponent);
       component = fixture.componentInstance;
       component.columns = [];
     });
 
-    it('should be created', async(() => {
+    it('should be created', () => {
       fixture.detectChanges();
       expect(component).toBeTruthy();
-    }));
+    });
 
 
     describe('Header', () => {
-      it('Nothing enabled', async(() => {
+      it('Nothing enabled', () => {
         component.config.getMultiFiltersConfigs = () => [];
         component.config.enableTextFilter = false;
         component.config.viewType = ListViewTypes.CARD_ONLY;
@@ -168,9 +171,9 @@ describe('ListComponent', () => {
           expect(hasControls).toBeFalsy();
         });
 
-      }));
+      });
 
-      it('Everything enabled', async(() => {
+      it('Everything enabled', () => {
         component.config.getMultiFiltersConfigs = () => {
           return [
             {
@@ -220,11 +223,11 @@ describe('ListComponent', () => {
         // sort - hard to test for sort, as it relies on
         // const sortSection: HTMLElement = headerRightSection.querySelector('.sort');
         // expect(sortSection.hidden).toBeFalsy();
-      }));
+      });
     });
 
 
-    it('No rows', async(() => {
+    it('No rows', () => {
       fixture.detectChanges();
 
       const hostElement = fixture.nativeElement;
@@ -236,7 +239,7 @@ describe('ListComponent', () => {
       // Shows empty message
       const noEntriesMessage: HTMLElement = hostElement.querySelector('.list-component__default-no-entries');
       expect(noEntriesMessage.hidden).toBeFalsy();
-    }));
+    });
 
   });
 
