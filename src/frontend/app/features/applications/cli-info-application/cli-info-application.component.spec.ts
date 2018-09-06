@@ -10,7 +10,7 @@ import { applicationSchemaKey, entityFactory } from '../../../store/helpers/enti
 import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { ApplicationEnvVarsService } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
 
 describe('CliInfoApplicationComponent', () => {
@@ -38,7 +38,7 @@ describe('CliInfoApplicationComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsHelper
       ]
     })
       .compileComponents();

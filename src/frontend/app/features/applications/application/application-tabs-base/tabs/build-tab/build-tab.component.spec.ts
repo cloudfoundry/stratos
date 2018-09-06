@@ -12,7 +12,7 @@ import { endpointStoreNames } from '../../../../../../store/types/endpoint.types
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
-import { ApplicationEnvVarsService } from './application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
 
@@ -43,7 +43,7 @@ describe('BuildTabComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         AppStoreModule,
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsHelper
       ]
     })
       .compileComponents();
