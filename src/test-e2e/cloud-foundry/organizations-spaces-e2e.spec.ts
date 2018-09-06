@@ -5,7 +5,7 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { ListComponent } from '../po/list.po';
-import { MetaCard } from '../po/meta-card.po';
+import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 
@@ -49,7 +49,7 @@ describe('CF - Manage Organizations and Spaces', () => {
   it('Should validate org name', () => {
     const cardView = cloudFoundry.goToOrgView();
     cardView.cards.getCards().then(cards => {
-      const card = new MetaCard(cards[0]);
+      const card = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
       card.getTitle().then(existingTitle => {
         // Click the add button to add an organization
         cloudFoundry.header.clickIconButton('add');

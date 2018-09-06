@@ -67,7 +67,7 @@ export abstract class Page {
 
   waitForPageDataLoaded() {
     this.waitForPage();
-    browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
+    return browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
   }
 
   waitForPageOrChildPage() {
