@@ -9,6 +9,7 @@ import { IRequestAction } from '../types/request.types';
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
 export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
+export const PROJECT_FETCH_FAILED = '[Deploy App] Project Fetch Failed';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';
 export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
 export const SAVE_APP_DETAILS = '[Deploy App] Save app details';
@@ -39,6 +40,11 @@ export class CheckProjectExists implements Action {
 export class ProjectDoesntExist implements Action {
   constructor(public projectName: string) { }
   type = PROJECT_DOESNT_EXIST;
+}
+
+export class ProjectFetchFail implements Action {
+  constructor(public projectName: string, public error: string) { }
+  type = PROJECT_FETCH_FAILED;
 }
 
 export class ProjectExists implements Action {

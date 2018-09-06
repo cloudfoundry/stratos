@@ -83,7 +83,7 @@ export class ServicesHelperE2E {
   }
   canBindAppStep = (): promise.Promise<boolean> => {
     return this.cfHelper.fetchDefaultSpaceGuid(true)
-      .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(this.cfHelper.cachedDefaultCfGuid, spaceGuid))
+      .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(CFHelpers.cachedDefaultCfGuid, spaceGuid))
       .then(totalAppsInSpace => !!totalAppsInSpace);
   }
 

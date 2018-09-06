@@ -3,7 +3,7 @@ import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
-import { MetaCard } from './meta-card.po';
+import { MetaCard, MetaCardTitleType } from './meta-card.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -20,7 +20,7 @@ export class ListTableComponent extends Component {
     super(locator);
   }
 
-  getHeaderText() {
+  getHeaderText(): promise.Promise<string> {
     return this.locator.element(by.css('.list-component__header__left--text')).getText();
   }
 
@@ -33,7 +33,7 @@ export class ListTableComponent extends Component {
   }
 
   // Get the data in the table
-  getTableDataRaw() {
+  getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
     const getRows = this.locator.all(by.css('.app-table__row')).map(row => row.all(by.css('.app-table__cell')).map(cell => cell.getText()));
     return promise.all([getHeaders, getRows]).then(([headers, rows]) => {
@@ -44,7 +44,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData() {
+  getTableData(): promise.Promise<any> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -59,11 +59,31 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number) {
+  selectRow(index: number): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
       return rows[index].element(by.css('.mat-radio-button')).click();
     });
+  }
+
+  getHighlightedRow(): promise.Promise<number> {
+    return this.locator.all(by.css('.app-table__row'))
+      .map((row, index) => row.getAttribute('class').then(classes => classes.indexOf('table-row-wrapper__highlighted')))
+      .then(isHighlighted => {
+        return promise.all(isHighlighted);
+      })
+      .then(isHighlighted => {
+        for (let i = 0; i < isHighlighted.length; i++) {
+          if (isHighlighted[i]) {
+            return i;
+          }
+        }
+        return -1;
+      });
+  }
+
+  toggleSort(headerTitle: string): promise.Promise<any> {
+    return this.locator.element(by.cssContainingText('mat-header-row app-table-cell', headerTitle)).click();
   }
 }
 
@@ -85,16 +105,16 @@ export class ListCardComponent extends Component {
     return this.locator.all(by.css('app-card:not(.row-filler)'));
   }
 
-  getCard(index: number): MetaCard {
-    return new MetaCard(this.getCards().get(index));
+  getCard(index: number, metaType = MetaCardTitleType.CUSTOM): MetaCard {
+    return new MetaCard(this.getCards().get(index), metaType);
   }
 
-  findCardByTitle(title: string): promise.Promise<MetaCard> {
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
     return this.getCards().filter((elem) => {
       return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
-      return new MetaCard(e[0]);
+      return new MetaCard(e[0], metaType);
     });
   }
 
@@ -245,6 +265,14 @@ export class ListEmptyComponent extends Component {
 
   getDefault(): Component {
     return new Component(element(by.css('.list-component__default-no-entries')));
+  }
+
+  getCustom(): Component {
+    return new Component(element(by.css('app-no-content-message')));
+  }
+
+  getCustomLineOne(): promise.Promise<string> {
+    return this.getCustom().getComponent().element(by.css('.first-line')).getText();
   }
 }
 /**

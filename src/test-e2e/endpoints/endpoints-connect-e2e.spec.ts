@@ -27,7 +27,8 @@ describe('Endpoints', () => {
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
-        expect(endpointsPage.isActivePage()).toBeTruthy();
+        endpointsPage.waitForPage();
+        // expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
         connectDialog.snackBar.safeClose();

@@ -18,8 +18,11 @@
             <div>
               <mat-form-field>
                 <input matInput [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
-                <mat-error *ngIf="sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')">
-                  Project doesn't exist
+                <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
+                  Project does not exist
+                </mat-error>
+                <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
+                  {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
                 </mat-error>
               </mat-form-field>
             </div>
@@ -38,7 +41,7 @@
             </div>
           </div>
           <mat-form-field>
-            <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)"
+            <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)"
               required>
               <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
                 {{ branch.name }}

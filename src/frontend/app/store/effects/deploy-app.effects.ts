@@ -1,10 +1,13 @@
-import { Injectable, Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { GITHUB_API_URL } from '../../core/github.helpers';
+import { LoggerService } from '../../core/logger.service';
+import { parseHttpPipeError } from '../../core/utils.service';
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
@@ -16,6 +19,7 @@ import {
   FetchCommits,
   ProjectDoesntExist,
   ProjectExists,
+  ProjectFetchFail,
 } from '../../store/actions/deploy-applications.actions';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
@@ -29,10 +33,14 @@ import {
 } from '../types/request.types';
 import { AppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
-import { GITHUB_API_URL } from '../../core/github.helpers';
 
-
-
+export function createFailedGithubRequestMessage(error) {
+  const response = parseHttpPipeError(error);
+  const message = response['message'] || '';
+  return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
+    'Github ' + message.substring(0, message.indexOf('(')) :
+    'Github request failed';
+}
 
 @Injectable()
 export class DeployAppEffects {
@@ -40,6 +48,7 @@ export class DeployAppEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
+    private logger: LoggerService,
     @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
@@ -54,10 +63,13 @@ export class DeployAppEffects {
         return this.http
           .get(`${this.gitHubURL}/repos/${action.projectName}`).pipe(
             map(res => new ProjectExists(action.projectName, res)),
-            catchError(err => {
-              return observableOf(new ProjectDoesntExist(action.projectName));
-            }), );
-      }), );
+            catchError(err => observableOf(err.status === 404 ?
+              new ProjectDoesntExist(action.projectName) :
+              new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err))
+            ))
+          );
+      })
+    );
 
   @Effect()
   fetchBranches$ = this.actions$
@@ -94,7 +106,7 @@ export class DeployAppEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(err.message, apiAction, actionType)
+              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]), );
       }));
 
@@ -122,7 +134,7 @@ export class DeployAppEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(err.message, apiAction, actionType)
+              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]), );
       }));
 
@@ -153,7 +165,7 @@ export class DeployAppEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(err.message, apiAction, actionType)
+              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]), );
       }));
 
@@ -165,4 +177,5 @@ export class DeployAppEffects {
     };
     mappedData.result.push(id);
   }
+
 }
