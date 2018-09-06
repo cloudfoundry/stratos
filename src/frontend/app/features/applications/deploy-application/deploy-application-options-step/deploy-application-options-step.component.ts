@@ -179,10 +179,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.no_route.setValue(overrides.noRoute);
     // Random route has no affect on redeploy, so disable.
     controls.random_route.disable();
-    // Don't repopulate previous routes. Editing might suggest existing route is changed instead of new route created
-    // controls.host.setValue(overrides.host);
-    // controls.domain.setValue(overrides.domain);
-    // controls.path.setValue(overrides.path);
+    // Don't repopulate route fields with previous route setting. Editing might suggest existing route is changed instead of new route
+    // created
   }
 
   onNext: StepOnNextFunction = () => {

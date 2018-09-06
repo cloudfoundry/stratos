@@ -168,7 +168,7 @@ export class DeployApplicationDeployer {
     this.inputStream.next(JSON.stringify(msg));
   }
 
-  sentAppOverride = (appOverrides: OverrideAppDetails) => {
+  sendAppOverride = (appOverrides: OverrideAppDetails) => {
     const msg = {
       message: JSON.stringify(appOverrides),
       timestamp: Math.round((new Date()).getTime() / 1000),
@@ -278,7 +278,7 @@ export class DeployApplicationDeployer {
         }
         break;
       case SocketEventTypes.OVERRIDES_REQUIRED:
-        const overrides = this.sentAppOverride(this.applicationOverrides);
+        const overrides = this.sendAppOverride(this.applicationOverrides);
         this.inputStream.next(overrides);
         break;
       case SocketEventTypes.EVENT_CLONED:

@@ -231,47 +231,38 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 
 }
 
+func appendFlag(flags []string, argName string, argValue string) []string {
+	if len(argValue) != 0 {
+		if len(argName) != 0 {
+			return append(flags, argName, argValue)
+		} else {
+			return append(flags, argValue)
+		}
+	}
+	return flags
+}
+
 // Init initializes the push operation with the specified application directory and manifest path
 func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushAppOverrides) error {
 
 	var flags []string
 
-	if len(overrides.Name) != 0 {
-		flags = append(flags, overrides.Name)
-	}
-	if len(overrides.Buildpack) != 0 {
-		flags = append(flags, "-b", overrides.Buildpack)
-	}
-	if len(overrides.DiskQuota) != 0 {
-		flags = append(flags, "-k", overrides.DiskQuota)
-	}
-	if len(overrides.Domain) != 0 {
-		flags = append(flags, "-d", overrides.Domain)
-	}
-
+	flags = appendFlag(flags, "", overrides.Name)
+	flags = appendFlag(flags, "-b", overrides.Buildpack)
+	flags = appendFlag(flags, "-k", overrides.DiskQuota)
+	flags = appendFlag(flags, "-d", overrides.Domain)
 	flags = append(flags, "--no-start", strconv.FormatBool(overrides.DoNotStart))
-
-	if len(overrides.Host) != 0 {
-		flags = append(flags, "--hostname", overrides.Host)
-	}
+	flags = appendFlag(flags, "--hostname", overrides.Host)
+	flags = appendFlag(flags, "-m", overrides.MemQuota)
+	flags = append(flags, "--no-route", strconv.FormatBool(overrides.NoRoute))
+	flags = appendFlag(flags, "--route-path", overrides.Path)
+	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
+	flags = append(flags, "-p", appDir, "-f", manifestPath)
 	if overrides.Instances != nil {
 		flags = append(flags, "-i", strconv.Itoa(*overrides.Instances))
 	}
-	if len(overrides.MemQuota) != 0 {
-		flags = append(flags, "-m", overrides.MemQuota)
-	}
 
-	flags = append(flags, "--no-route", strconv.FormatBool(overrides.NoRoute))
-
-	if len(overrides.Path) != 0 {
-		flags = append(flags, "--route-path", overrides.Path)
-	}
-
-	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
-
-	flags = append(flags, "-p", appDir, "-f", manifestPath)
-
-	log.Infof("Cf Push Overrides: %v", flags)
+	log.Debugf("Cf Push Overrides: %v", flags)
 
 	err := c.flagContext.Parse(flags...)
 	if err != nil {

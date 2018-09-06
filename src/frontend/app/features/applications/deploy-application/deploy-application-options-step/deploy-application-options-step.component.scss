@@ -11,6 +11,10 @@
     display: flex;
     flex-direction: column;
 
+    mat-checkbox {
+      padding-top: 20px;
+    }
+
     @include breakpoint(tablet) {
       flex-direction: row;
     }
@@ -20,17 +24,11 @@
       flex: 1;
       flex-direction: column;
       max-width: 450px;
-      padding: 15px 35px 10px 0;
-    }
-  }
+      padding-bottom: 10px;
+      padding-top: 15px;
 
-  &__route {
-    &__base-options {
-      display: flex;
-      padding-top: 25px;
-
-      mat-checkbox {
-        padding-right: 15px;
+      &:first-of-type {
+        padding-right: 75px;
       }
     }
   }

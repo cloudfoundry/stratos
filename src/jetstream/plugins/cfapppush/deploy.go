@@ -98,7 +98,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
 
 	// Wait for a message from the client
-	log.Info("Waiting for app overrides from client")
+	log.Debug("Waiting for app overrides from client")
 
 	msgOverrides := SocketMessage{}
 	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
@@ -106,7 +106,12 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		return err
 	}
 
-	log.Infof("Overrides: %v+", msgOverrides)
+	if msgOverrides.Type != OVERRIDES_SUPPLIED {
+		log.Errorf("Expected app deploy override but received event with type: %v", msgOverrides.Type)
+		return errors.New("Expected app deploy override message but received another type")
+	}
+
+	log.Debugf("Overrides: %v+", msgOverrides)
 	overrides := pushapp.CFPushAppOverrides{}
 	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
 		log.Errorf("Error marshalling json: %v+", err)
@@ -117,7 +122,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
 
 	// Wait for a message from the client
-	log.Info("Waiting for source information from client")
+	log.Debug("Waiting for source information from client")
 
 	msg := SocketMessage{}
 	if err := clientWebSocket.ReadJSON(&msg); err != nil {
@@ -125,7 +130,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		return err
 	}
 
-	log.Infof("Source %v+", msg)
+	log.Debugf("Source %v+", msg)
 
 	// Temporary folder for the application source
 	tempDir, err := ioutil.TempDir("", "cf-push-")
@@ -363,7 +368,7 @@ func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	}
 
 	info.Url = fmt.Sprintf("https://github.com/%s", info.Project)
-	log.Infof("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, info.Url)
+	log.Debugf("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, info.Url)
 	cloneDetails := CloneDetails{
 		Url:    info.Url,
 		Branch: info.Branch,
@@ -398,7 +403,7 @@ func getGitURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		return StratosProject{}, tempDir, err
 	}
 
-	log.Infof("Git Url Source: %s, branch %s", info.Url, info.Branch)
+	log.Debugf("Git Url Source: %s, branch %s", info.Url, info.Branch)
 	cloneDetails := CloneDetails{
 		Url:    info.Url,
 		Branch: info.Branch,
@@ -497,7 +502,7 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempDir string, vcsGit *vcsCmd) (string, error) {
 
 	if cloneDetails.Commit != "" {
-		log.Infof("Checking out commit %s", cloneDetails.Commit)
+		log.Debugf("Checking out commit %s", cloneDetails.Commit)
 		err := vcsGit.ResetBranchToCommit(tempDir, cloneDetails.Commit)
 		if err != nil {
 			log.Infof("Failed to checkout commit %s", cloneDetails.Commit)
