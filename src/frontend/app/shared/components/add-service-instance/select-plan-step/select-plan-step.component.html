@@ -16,9 +16,11 @@
       <span *ngIf="(getPlanAccessibility(selPlan.entity) | async) !== 'ok'"> ({{ getAccessibilityMessage(selPlan.entity) | async }})</span>
     </app-metadata-item>
     <app-metadata-item label="Free"> {{ isFree(selPlan) | titlecase}} </app-metadata-item>
-    <div *ngFor="let cost of selPlan.extra.costs">
-      <app-metadata-item label="Cost per {{ cost.unit | titlecase }}"> {{ getCostCurrency(cost, true) }}{{ getCostValue(cost) }} </app-metadata-item>
-    </div>
+    <ng-container *ngIf="!isFree(selPlan)">
+      <div *ngFor="let cost of selPlan.extra.costs">
+        <app-metadata-item label="Cost per {{ cost.unit | titlecase }}"> {{ getCostCurrency(cost, true) }}{{ getCostValue(cost) }} </app-metadata-item>
+      </div>
+    </ng-container>
     <app-metadata-item label="Additional Information" *ngIf="hasAdditionalInfo(selPlan)">
       <ul>
         <li *ngFor="let bulletPoint of selPlan.extra.bullets">{{bulletPoint}}</li>
