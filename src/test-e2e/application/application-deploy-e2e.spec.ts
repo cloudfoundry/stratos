@@ -30,6 +30,7 @@ const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 describe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
+  const testAppName = ApplicationE2eHelper.createApplicationName();
   const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack || 'opensuse42';
   let deployedCommit: promise.Promise<string>;
 
@@ -69,7 +70,7 @@ describe('Application Deploy -', function () {
         expect(steps[1]).toBe('Source');
         expect(steps[2]).toBe('Source Config');
         expect(steps[3]).toBe('Overrides (Optional)');
-        expect(steps[3]).toBe('Deploy');
+        expect(steps[4]).toBe('Deploy');
       });
       e2e.log(`${loggingPrefix} Cf/Org/Space Step`);
       expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
@@ -174,7 +175,7 @@ describe('Application Deploy -', function () {
     let appBasePage: ApplicationBasePage;
 
     beforeAll(() => {
-      browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(appName)
+      browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName)
         .then(res => { appDetails = res; })
         .then(() => {
           appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.app.metadata.guid);
@@ -314,8 +315,9 @@ describe('Application Deploy -', function () {
         expect(appRoutes.list.empty.getCustom().getComponent().isPresent()).toBeFalsy();
         appRoutes.list.table.getCell(0, 1).getText().then((route: string) => {
           expect(route).not.toBeNull();
-          expect(route.length).toBeGreaterThan(appName.length);
-          expect(route.startsWith(appName)).toBeTruthy();
+          expect(route.length).toBeGreaterThan(testAppName.length);
+          const randomRouteStyleAppName = testAppName.replace(/[\.:]/g, '');
+          expect(route.startsWith(randomRouteStyleAppName)).toBeTruthy();
         });
         appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
           expect(tcpRoute).not.toBeNull();
@@ -351,6 +353,6 @@ describe('Application Deploy -', function () {
 
   });
 
-  afterAll(() => applicationE2eHelper.deleteApplication(null, { appName }));
+  afterAll(() => applicationE2eHelper.deleteApplication(null, { appName: testAppName }));
 
 });
