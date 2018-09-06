@@ -10,6 +10,7 @@ import {
   SET_BRANCH,
   SET_DEPLOY_BRANCH,
   SET_DEPLOY_COMMIT,
+  PROJECT_FETCH_FAILED,
 } from '../actions/deploy-applications.actions';
 import { DeployApplicationState } from '../types/deploy-application.types';
 
@@ -22,6 +23,7 @@ const defaultState: DeployApplicationState = {
   projectExists: {
     checking: false,
     exists: false,
+    error: false,
     name: ''
   }
 };
@@ -50,7 +52,8 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           checking: false,
           exists: true,
           name: action.projectName,
-          data: action.projectData
+          data: action.projectData,
+          error: false,
         }
       };
     case PROJECT_DOESNT_EXIST:
@@ -58,7 +61,19 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         ...state, projectExists: {
           checking: false,
           exists: false,
-          name: action.projectName
+          name: action.projectName,
+          error: false,
+          data: null
+        }
+      };
+    case PROJECT_FETCH_FAILED:
+      return {
+        ...state, projectExists: {
+          checking: false,
+          exists: false,
+          name: action.projectName,
+          error: true,
+          data: action.error
         }
       };
     case FETCH_BRANCHES_FOR_PROJECT:
