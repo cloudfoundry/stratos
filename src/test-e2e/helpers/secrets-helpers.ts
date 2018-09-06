@@ -42,6 +42,10 @@ export class SecretsHelpers {
     return this.secrets.endpoints.cf;
   }
 
+  getStratosGitHubApiUrl(): string {
+    return this.secrets.stratosGitHubApiUrl;
+  }
+
   getConsoleCredentials(userType: ConsoleUserType): E2ECred {
     const isAdmin = userType === ConsoleUserType.admin;
     return isAdmin ? this.secrets.consoleUsers.admin : this.secrets.consoleUsers.nonAdmin;

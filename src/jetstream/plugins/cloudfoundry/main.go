@@ -174,6 +174,9 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 
 	// Applications Log Streams
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
+
+	// Application Stream
+	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
 }
 
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

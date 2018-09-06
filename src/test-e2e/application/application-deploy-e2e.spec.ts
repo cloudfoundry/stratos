@@ -316,6 +316,7 @@ describe('Application Deploy -', function () {
 
         expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
         expect(appEvents.list.isTableView()).toBeTruthy();
+        expect(appEvents.list.getTotalResults()).toBeGreaterThanOrEqual(2);
         // Ensure that the earliest events are at the top
         appEvents.list.table.toggleSort('Timestamp');
 
@@ -329,9 +330,6 @@ describe('Application Deploy -', function () {
         // Update (route)
         expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
         expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
-        // Update (started)
-        expect(appEvents.list.table.getCell(3, 1).getText()).toBe('audit\napp\nupdate');
-        expect(appEvents.list.table.getCell(3, 2).getText()).toBe(`person\n${currentUser}`);
       });
     });
 
