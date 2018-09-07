@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { MetricsAction, MetricQueryType, FetchCFMetricsAction } from '../../../store/actions/metrics.actions';
+import { MetricsAction, MetricQueryType, FetchCFMetricsAction, FetchApplicationMetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
@@ -42,26 +42,67 @@ export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
 
   public chartTypes = MetricsChartTypes;
 
-  @Input()
-  public start: moment.Moment;
-
-  @Input()
-  public end: moment.Moment;
+  private startEnd: [moment.Moment, moment.Moment] = [null, null];
 
   private pollSub: Subscription;
 
   private commit: Function = null;
 
   public results$;
+
+  private readonly startIndex = 0;
+  private readonly endIndex = 1;
+
+  private commitDate(date: moment.Moment, type: 'start' | 'end') {
+    const index = type === 'start' ? this.startIndex : this.endIndex;
+    const oldDate = this.startEnd[index];
+    if (oldDate && date.isSame(oldDate)) {
+      return;
+    }
+    this.startEnd[index] = date;
+    const [start, end] = this.startEnd;
+    if (start && end) {
+      const startUnix = start.unix();
+      const endUnix = end.unix();
+      const rangeParm = `&start=${startUnix}&end=${endUnix}&step=345`;
+      const oldAction = this.metricsConfig.metricsAction;
+      const action = new FetchApplicationMetricsAction(
+        oldAction.guid,
+        oldAction.cfGuid,
+        this.metricsConfig.metricsAction.query + rangeParm,
+        MetricQueryType.RANGE_QUERY
+      );
+      this.commit = this.getCommitFn(action);
+      this.commit();
+    }
+  }
+
+  set start(start: moment.Moment) {
+    this.commitDate(start, 'start');
+  }
+
+  get start() {
+    return this.startEnd[this.startIndex];
+  }
+
+  set end(end: moment.Moment) {
+    this.commitDate(end, 'end');
+  }
+
+  get end() {
+    return this.startEnd[this.endIndex];
+  }
+
   constructor(
     private store: Store<AppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
 
   ngOnInit() {
-    this.start = moment(moment.now());
-    this.end = moment(moment.now());
-    this.setup(this.metricsConfig.metricsAction);
+    const now = moment(moment.now());
+    this.start = moment(now).subtract(1, 'weeks');
+    this.end = now;
+    // this.setup(this.metricsConfig.metricsAction);
   }
 
   private setup(action: MetricsAction) {
@@ -113,7 +154,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
 
   private getCommitFn(action: MetricsAction) {
     return () => {
-      console.log('commiting')
       this.setup(action);
     };
   }

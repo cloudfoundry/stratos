@@ -2,8 +2,8 @@ import { SetupModule } from './../../../features/setup/setup.module';
 import { Component, OnInit, Output, OnDestroy, Input, EventEmitter } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as moment from 'moment';
-import { tap, map, filter } from 'rxjs/operators';
-import { combineLatest, Subscription } from 'rxjs';
+import { tap, map, filter, shareReplay } from 'rxjs/operators';
+import { combineLatest, Subscription, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-date-time',
@@ -17,6 +17,9 @@ export class DateTimeComponent implements OnDestroy {
   private sub: Subscription;
   private changeSub: Subscription;
   private dateTimeValue: moment.Moment;
+
+  private dateObservable: Observable<moment.Moment>;
+  private timeObservable: Observable<string>;
 
   @Output()
   public dateTimeChange = new EventEmitter<moment.Moment>();
@@ -40,12 +43,11 @@ export class DateTimeComponent implements OnDestroy {
   private setupInputSub() {
     this.stopInputSub();
     this.sub = combineLatest(
-      this.time.valueChanges,
-      this.date.valueChanges,
+      this.timeObservable,
+      this.dateObservable
     ).pipe(
-      filter(([time, date]) => time && date),
+      filter(([time, date]) => !!(time && date)),
       map(([time, date]: [string, moment.Moment]) => {
-
         const [hour, minute] = time.split(':');
         return [
           parseInt(hour, 10),
@@ -63,10 +65,18 @@ export class DateTimeComponent implements OnDestroy {
           minute
         });
         if (this.isDifferentDate(this.dateTime, newDate)) {
+          this.stopChangeSub();
           this.dateTime = newDate;
+          this.setupChangeSub();
         }
       })
     ).subscribe();
+  }
+
+  private replayObservable(obs: Observable<any>) {
+    return obs.pipe(
+      shareReplay(1)
+    );
   }
 
   private stopInputSub() {
@@ -76,18 +86,31 @@ export class DateTimeComponent implements OnDestroy {
   }
 
   private setupChangeSub() {
+    this.stopChangeSub();
     this.changeSub = this.dateTimeChange.pipe(
       filter(dateTime => !!dateTime),
       tap(dateTime => {
         this.stopInputSub();
         this.date.setValue(dateTime);
-        this.time.setValue(dateTime.format('HH:MM'));
+        this.time.setValue(dateTime.format('HH:mm'));
         this.setupInputSub();
       })
     ).subscribe();
   }
 
+  private stopChangeSub() {
+    if (this.changeSub) {
+      this.changeSub.unsubscribe();
+    }
+  }
+
   constructor() {
+    this.dateObservable = this.replayObservable(
+      this.date.valueChanges
+    );
+    this.timeObservable = this.replayObservable(
+      this.time.valueChanges
+    );
     this.setupInputSub();
     this.setupChangeSub();
   }
