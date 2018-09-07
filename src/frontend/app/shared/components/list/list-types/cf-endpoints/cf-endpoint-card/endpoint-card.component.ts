@@ -17,7 +17,7 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
 
   public status$ = new ReplaySubject<CardStatus>();
 
-  @Input('row')
+  @Input()
   row: EndpointModel;
 
   constructor() {

@@ -7,6 +7,6 @@ import { Observable } from 'rxjs';
   styleUrls: ['./enumerate.component.scss']
 })
 export class EnumerateComponent {
-  @Input('collection') collection: Observable<any[]>;
-  @Input('labelPath') labelPath: string;
+  @Input() collection: Observable<any[]>;
+  @Input() labelPath: string;
 }

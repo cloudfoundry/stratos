@@ -9,8 +9,8 @@ export class CliCommandComponent {
 
   constructor() { }
 
-  @Input('name') name: string;
-  @Input('msg') msg: string;
-  @Input('syntax') syntax: string;
+  @Input() name: string;
+  @Input() msg: string;
+  @Input() syntax: string;
 
 }

@@ -19,7 +19,7 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
 
 export class StatefulIconComponent implements OnInit, OnChanges {
 
-  @Input('state')
+  @Input()
   state: string;
 
   @ViewChild('spinner')

@@ -199,7 +199,8 @@ describe('Application Routes -', () => {
 
   afterAll(() => {
     if (app) {
-      applicationE2eHelper.deleteApplication({ cfGuid, app });
+      // Route may or may not have been created. Run delete app such that it checks for routes associated with the app
+      return applicationE2eHelper.deleteApplication({ cfGuid, app });
     }
   });
 });

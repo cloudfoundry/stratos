@@ -2,16 +2,21 @@ FROM {{BASE_IMAGE}}
 
 RUN zypper -n ref && \
 zypper -n up && \
-zypper in -y wget which tar git gcc
-RUN wget https://storage.googleapis.com/golang/go1.8.4.linux-amd64.tar.gz && \
-    tar -xzf go1.8.4.linux-amd64.tar.gz -C /usr/local/ && \
+zypper in -y which tar git gcc curl wget
+RUN wget https://storage.googleapis.com/golang/go1.9.7.linux-amd64.tar.gz && \
+    tar -xzf go1.9.7.linux-amd64.tar.gz -C /usr/local/ && \
     mkdir -p /home/stratos/go/bin && \
     mkdir -p /home/stratos/go/src
     
 ENV PATH $PATH:/usr/local/go/bin:/home/stratos/go/bin
 ENV GOPATH /home/stratos/go
-# Using modified glide install script, because the official one defaults to `curl` which is broken in SLE12
-RUN wget https://gist.githubusercontent.com/irfanhabib/be96a57865a98612ff8311662ab34513/raw/c082f1c2491380f8304c4285c37c35eb5fd361a4/glide-get-with-wget && \
-    chmod +x glide-get-with-wget && \
-    ./glide-get-with-wget
+
+# Install both glide and dep for now, so that this base image can use either
+
+# Install glide for backend go dependency management (legacy)
+RUN curl https://glide.sh/get | sh
+
+# Install dep for backend go dependency management
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
 WORKDIR /home/stratos/go

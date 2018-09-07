@@ -272,7 +272,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // If data source is not local then this method must be overridden
     return '';
   }
-  public setFilterParam(filter: string, pag: PaginationEntityState) {
+  public setFilterParam(filterParam: string, pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
   }
 }

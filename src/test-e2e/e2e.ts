@@ -5,6 +5,7 @@ import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
 
+
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
  */
@@ -24,7 +25,9 @@ export class E2E {
 
   static debugLog(log) {
     if (E2E.DEBUG_LOGGING) {
+      /* tslint:disable:no-console*/
       console.log(log);
+      /* tslint:disable */
     }
   }
 
@@ -46,7 +49,9 @@ export class E2E {
    * Log message in the control flow
    */
   log(log: string) {
+    /* tslint:disable:no-console*/
     protractor.promise.controlFlow().execute(() => console.log(log));
+    /* tslint:disable */
   }
 }
 
@@ -210,5 +215,3 @@ export class E2ESetup {
 
 // This is the 'e2e' global that you should import into your spec files
 export const e2e = new E2E();
-
-

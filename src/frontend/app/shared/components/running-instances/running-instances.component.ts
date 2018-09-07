@@ -16,9 +16,9 @@ import { appStatsSchemaKey } from '../../../store/helpers/entity-factory';
 })
 export class RunningInstancesComponent implements OnInit {
 
-  @Input('instances') instances;
-  @Input('cfGuid') cfGuid;
-  @Input('appGuid') appGuid;
+  @Input() instances;
+  @Input() cfGuid;
+  @Input() appGuid;
 
   // Observable on the running instances count for the application
   public runningInstances$: Observable<number>;

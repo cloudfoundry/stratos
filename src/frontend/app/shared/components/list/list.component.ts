@@ -12,7 +12,7 @@ import {
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
+import { schema as normalizrSchema } from 'normalizr';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -84,7 +84,7 @@ import {
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  @Input('addForm') addForm: NgForm;
+  @Input() addForm: NgForm;
 
   @Input() noEntries: TemplateRef<any>;
 
@@ -113,11 +113,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  @ViewChild('filter') set setFilter(filter: NgModel) {
-    if (!filter) {
+  @ViewChild('filter') set setFilter(filterValue: NgModel) {
+    if (!filterValue) {
       return;
     }
-    this.filterWidgetToStore = filter.valueChanges.pipe(
+    this.filterWidgetToStore = filterValue.valueChanges.pipe(
       debounceTime(this.dataSource.isLocal ? 150 : 250),
       distinctUntilChanged(),
       map(value => value as string),
@@ -323,9 +323,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.headerSort.direction = sort.direction;
     }));
 
-    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((filter: ListFilter) => {
-      this.filterString = filter.string;
-      this.multiFilters = { ...filter.items };
+    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
+      this.filterString = paginationFilter.string;
+      this.multiFilters = { ...paginationFilter.items };
     }));
 
     // Multi filters (e.g. cf/org/space)
@@ -351,9 +351,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     ).subscribe();
 
     this.isFiltering$ = this.paginationController.filter$.pipe(
-      map((filter: ListFilter) => {
-        const isFilteringByString = filter.string ? !!filter.string.length : false;
-        const isFilteringByItems = Object.values(filter.items).filter(value => !!value).length > 0;
+      map((f: ListFilter) => {
+        const isFilteringByString = f.string ? !!f.string.length : false;
+        const isFilteringByItems = Object.values(f.items).filter(value => !!value).length > 0;
         return isFilteringByString || isFilteringByItems;
       })
     );
@@ -546,7 +546,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     return actions;
   }
 
-  private getRowStateGeneratorFromEntityMonitor(entitySchema: schema.Entity, dataSource: IListDataSource<T>) {
+  private getRowStateGeneratorFromEntityMonitor(entitySchema: normalizrSchema.Entity, dataSource: IListDataSource<T>) {
     return (row) => {
       if (!entitySchema || !row) {
         return observableOf(getDefaultRowState());

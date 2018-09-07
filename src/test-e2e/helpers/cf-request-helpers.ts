@@ -49,7 +49,7 @@ export class CFRequestHelpers extends RequestHelpers {
     this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
       .catch(error => {
         // Track the url against the error. Sometimes we don't get this from the stack trace
-        console.log(`Failed to handle request to url: '${url}'. Reason: '${error}'`);
+        e2e.log(`Failed to handle request to url: '${url}'. Reason: '${error}'`);
         throw error;
       })
 

@@ -204,11 +204,9 @@ export class CfUserService {
    * Helper to determine if user has space roles in an organization
    */
   hasSpaceRolesInOrg(user: CfUser, orgGuid: string): boolean {
-    if (this.populatedArray(this.filterByOrg(orgGuid, user.audited_spaces)) ||
+    return this.populatedArray(this.filterByOrg(orgGuid, user.audited_spaces)) ||
       this.populatedArray(this.filterByOrg(orgGuid, user.managed_spaces)) ||
-      this.populatedArray(this.filterByOrg(orgGuid, user.spaces))) {
-      return true;
-    }
+      this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
   getUserRoleInOrg = (
