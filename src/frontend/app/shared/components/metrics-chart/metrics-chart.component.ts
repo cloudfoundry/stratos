@@ -1,17 +1,18 @@
-import { Component, Input, OnDestroy, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, map } from 'rxjs/operators';
+import * as moment from 'moment';
 import { Subscription } from 'rxjs';
-
-import { MetricsAction, MetricQueryType, FetchCFMetricsAction, FetchApplicationMetricsAction } from '../../../store/actions/metrics.actions';
+import { filter, map } from 'rxjs/operators';
+import { FetchApplicationMetricsAction, MetricQueryType, MetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
-import * as moment from 'moment';
+
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -32,7 +33,7 @@ export interface MetricsChartConfig {
   templateUrl: './metrics-chart.component.html',
   styleUrls: ['./metrics-chart.component.scss']
 })
-export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
+export class MetricsChartComponent implements OnInit, OnDestroy {
   @Input()
   public metricsConfig: MetricsConfig;
   @Input()
@@ -52,6 +53,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
 
   private readonly startIndex = 0;
   private readonly endIndex = 1;
+  public metricsMonitor: EntityMonitor<IMetrics>;
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
@@ -62,14 +64,17 @@ export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
     this.startEnd[index] = date;
     const [start, end] = this.startEnd;
     if (start && end) {
-      const startUnix = start.unix();
-      const endUnix = end.unix();
-      const rangeParm = `&start=${startUnix}&end=${endUnix}&step=345`;
+      const startUnix = start.unix() + '';
+      const endUnix = end.unix() + '';
       const oldAction = this.metricsConfig.metricsAction;
       const action = new FetchApplicationMetricsAction(
         oldAction.guid,
         oldAction.cfGuid,
-        this.metricsConfig.metricsAction.query + rangeParm,
+        new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
+          start: startUnix,
+          end: endUnix,
+          step: '365'
+        }),
         MetricQueryType.RANGE_QUERY
       );
       this.commit = this.getCommitFn(action);
@@ -99,33 +104,35 @@ export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
   ) { }
 
   ngOnInit() {
-    const now = moment(moment.now());
-    this.start = moment(now).subtract(1, 'weeks');
-    this.end = now;
-    // this.setup(this.metricsConfig.metricsAction);
-  }
-
-  private setup(action: MetricsAction) {
-    if (this.pollSub) {
-      this.pollSub.unsubscribe();
-    }
-    const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.metricId,
+    this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
+      this.metricsConfig.metricsAction.metricId,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
-    this.results$ = metricsMonitor.entity$.pipe(
+    this.results$ = this.metricsMonitor.entity$.pipe(
       filter(metrics => !!metrics),
       map(metrics => {
         const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
+        if (!metricsArray.length) {
+          return null;
+        }
         if (this.metricsConfig.sort) {
           metricsArray.sort(this.metricsConfig.sort);
         }
         return metricsArray;
       })
     );
+    const now = moment(moment.now());
+    this.start = moment(now).subtract(1, 'weeks');
+    this.end = now;
+  }
+
+  private setup(action: MetricsAction) {
+    if (this.pollSub) {
+      this.pollSub.unsubscribe();
+    }
     this.store.dispatch(action);
-    this.pollSub = metricsMonitor
+    this.pollSub = this.metricsMonitor
       .poll(
         30000,
         () => {
@@ -156,24 +163,5 @@ export class MetricsChartComponent implements OnInit, OnDestroy, OnChanges {
     return () => {
       this.setup(action);
     };
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    console.log(changes)
-    if (changes.start || changes.end) {
-      const startMs = (changes.start.currentValue as moment.Moment).valueOf();
-      const endMs = (changes.end.currentValue as moment.Moment).valueOf();
-      const rangeParm = `&start=${startMs}&end=${endMs}`;
-      const oldAction = this.metricsConfig.metricsAction;
-      const action = new FetchCFMetricsAction(
-        oldAction.guid,
-        this.metricsConfig.metricsAction.query + rangeParm,
-        MetricQueryType.RANGE_QUERY
-      );
-      this.commit = this.getCommitFn(action);
-      this.commit();
-    } else {
-      this.commit = null;
-    }
   }
 }

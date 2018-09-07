@@ -9,7 +9,7 @@ import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, StartRequestAction } from './../types/request.types';
 
 
 @Injectable()
@@ -28,14 +28,14 @@ export class MetricsEffect {
         guid: action.guid,
         entityKey: metricSchemaKey
       } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.cfGuid }
       }).pipe(
         map(metrics => {
           const metric = metrics[action.cfGuid];
-          const metricKey = MetricsAction.buildMetricKey(action.guid, action.query);
           const metricObject = metric ? {
-            [metricKey]: metric.data
+            [action.metricId]: metric.data
           } : {};
           return new WrapperRequestActionSuccess(
             {
@@ -59,7 +59,7 @@ export class MetricsEffect {
     }));
 
   private buildFullUrl(action: MetricsAction) {
-    return `${action.url}/${action.queryType}?query=${action.query}`;
+    return `${action.url}/${action.queryType}?query=${action.query.getFullQuery()}`;
   }
 }
 
