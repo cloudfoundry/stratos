@@ -237,6 +237,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 		} else {
 			showStratosConfig(consoleConfig)
 			portalProxy.Config.ConsoleConfig = consoleConfig
+			setSSOFromConfig(portalProxy, consoleConfig)
 		}
 
 	} else if err == nil && isInitialised {
@@ -246,9 +247,17 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 		}
 		showStratosConfig(consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
+		setSSOFromConfig(portalProxy, consoleConfig)
 	}
 
 	return addSetupMiddleware, nil
+}
+
+func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
+	// For SSO, override the value loaded from the config file, so that this is what we use
+	if !config.IsSet("SSO_LOGIN") {
+		portalProxy.Config.SSOLogin = configuration.UseSSO
+	}
 }
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
@@ -258,6 +267,7 @@ func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
 	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
+	log.Infof("... Use SSO Login       : %t", config.UseSSO)
 }
 
 func showSSOConfig(portalProxy *portalProxy) {
@@ -674,11 +684,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
 	pp.POST("/v1/auth/logout", p.logout)
 
-	// Only add SSO routes if SSO Login is enabled
-	if p.Config.SSOLogin {
-		pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-		pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
-	}
+	// SSO Routes will only respond if SSO is enabled
+	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
+	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
 	// Callback is use dby both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)

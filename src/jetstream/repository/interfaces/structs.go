@@ -190,6 +190,7 @@ type ConsoleConfig struct {
 	ConsoleClientSecret string   `json:"console_client_secret"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
+	UseSSO              bool     `json:"use_sso"`
 }
 
 // CNSIRequest

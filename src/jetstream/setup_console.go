@@ -51,6 +51,11 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Skip SSL Validation value")
 	}
 	consoleConfig.SkipSSLValidation = skipSSLValidation
+	ssoLogin, err := strconv.ParseBool(c.FormValue("use_sso"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Use SSO value")
+	}
+	consoleConfig.UseSSO = ssoLogin
 
 	if err != nil {
 		return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
@@ -102,6 +107,9 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			"Failed to store Console configuration data",
 			"Console configuration data storage failed due to %s", err)
 	}
+
+	setSSOFromConfig(p, consoleConfig)
+
 	c.JSON(http.StatusOK, userTokenInfo)
 	return nil
 }
