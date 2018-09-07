@@ -1,12 +1,13 @@
-
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, take, tap ,  withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { GITHUB_API_URL } from '../../../../core/github.helpers';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   FetchBranchesForProject,
@@ -27,10 +28,9 @@ import {
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { SourceType, GitAppDetails } from '../../../../store/types/deploy-application.types';
+import { GitAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -40,7 +40,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
 
-  @Input('isRedeploy') isRedeploy = false;
+  @Input() isRedeploy = false;
 
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
@@ -93,7 +93,8 @@ export class DeployApplicationStep2Component
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   onNext: StepOnNextFunction = () => {
@@ -137,18 +138,18 @@ export class DeployApplicationStep2Component
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-        filter(state => state && !state.checking && state.exists),
-        tap(p => {
+        filter(state => state && !state.checking && !state.error && state.exists),
+        tap(state => {
           if (this.branchesSubscription) {
             this.branchesSubscription.unsubscribe();
           }
-          const action = new FetchBranchesForProject(p.name);
+          const fetchBranchesAction = new FetchBranchesForProject(state.name);
           this.branchesSubscription = getPaginationObservables<APIResource>(
             {
               store: this.store,
-              action,
+              action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
-                action.paginationKey,
+                fetchBranchesAction.paginationKey,
                 entityFactory(githubBranchesSchemaKey)
               )
             },
@@ -160,14 +161,12 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(fetchBranches);
 
-    const action = {
+    const paginationAction = {
       entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
-      filter(p => {
-        return p && !!p.data;
-      }),
+      filter(p => p && !!p.exists && !!p.data),
       map(p => p.data),
       tap(p => {
         if (!this.isRedeploy) {
@@ -180,7 +179,7 @@ export class DeployApplicationStep2Component
     const deployCommit$ = this.store.select(selectNewProjectCommit);
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
-      action.paginationKey,
+      paginationAction.paginationKey,
       entityFactory(githubBranchesSchemaKey)
     );
 
@@ -213,7 +212,7 @@ export class DeployApplicationStep2Component
             githubCommitSchemaKey,
             entityFactory(githubCommitSchemaKey),
             entityKey,
-            new FetchCommit(commitSha, projectInfo.full_name),
+            new FetchCommit(commitSha, projectInfo.full_name, this.gitHubURL),
           );
 
           if (this.commitSubscription) {
@@ -221,11 +220,8 @@ export class DeployApplicationStep2Component
           }
           this.commitSubscription = commitEntityService.waitForEntity$.pipe(
             map(p => p.entity.entity),
-            tap(p => {
-              this.commitInfo = p;
-            })
-          )
-            .subscribe();
+            tap(p => this.commitInfo = p)
+          ).subscribe();
         }
       })
     );

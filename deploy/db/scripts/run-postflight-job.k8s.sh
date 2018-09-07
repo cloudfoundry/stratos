@@ -40,23 +40,23 @@ echo "DBCONFIG: $DBCONF_KEY"
 echo "Connection string: $DB_USER:********@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
-portal-proxy --env=$DBCONF_KEY dbversion
+jetstream --env=$DBCONF_KEY dbversion
 
 # Check the status
 echo "Checking database status."
-portal-proxy --env=$DBCONF_KEY status
+jetstream --env=$DBCONF_KEY status
 
 # Run migrations
 echo "Attempting database migrations."
-portal-proxy --env=$DBCONF_KEY up
+jetstream --env=$DBCONF_KEY up
 
 # CHeck the status
 echo "Checking database status."
-portal-proxy --env=$DBCONF_KEY status
+jetstream --env=$DBCONF_KEY status
 
 # Check the version
 echo "Checking database version."
-portal-proxy --env=$DBCONF_KEY dbversion
+jetstream --env=$DBCONF_KEY dbversion
 
 echo "Database operation(s) complete."
 

@@ -67,10 +67,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       key: FormMode.BindServiceInstance
     }
   ];
-  @Input('showModeSelection')
+  @Input()
   showModeSelection = false;
 
-  @Input('appId') appId: string;
+  @Input() appId: string;
 
   formMode: FormMode;
 

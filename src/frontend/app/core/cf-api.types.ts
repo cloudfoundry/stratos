@@ -1,6 +1,7 @@
 import { IRoute } from './cf-api.types';
 import { APIResource } from '../store/types/api.types';
 import { IServiceBinding, IService } from './cf-api-svc.types';
+import { CfUser } from '../store/types/user.types';
 
 export interface IRoute {
   host: string;
@@ -152,9 +153,13 @@ export interface IOrganization {
   spaces_url?: string;
   domains_url?: string;
   private_domains_url?: string;
+  users?: APIResource<CfUser>[];
   users_url?: string;
+  managers?: APIResource<CfUser>[];
   managers_url?: string;
+  billing_managers?: APIResource<CfUser>[];
   billing_managers_url?: string;
+  auditors?: APIResource<CfUser>[];
   auditors_url?: string;
   app_events_url?: string;
   space_quota_definitions_url?: string;

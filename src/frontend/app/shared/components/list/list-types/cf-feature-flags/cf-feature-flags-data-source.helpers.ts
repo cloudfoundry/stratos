@@ -1,4 +1,4 @@
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
 import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
 

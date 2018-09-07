@@ -14,6 +14,7 @@ spec:
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         name: ui
         env:
         - name: ENCRYPTION_KEY_VOLUME
@@ -33,6 +34,7 @@ spec:
           name: https
           protocol: TCP
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         name: "postflight"
         env:
         - name: DB_HOST
@@ -83,6 +85,7 @@ spec:
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
         - name: DB_USER
@@ -196,6 +199,18 @@ spec:
         - name: COOKIE_DOMAIN
           value: {{.Values.env.DOMAIN}}
         {{- end }}
+        - name: HELM_NAME
+          value: "{{ .Release.Namespace }}/{{ .Release.Name }}"
+        - name: HELM_REVISION
+          value: "{{ .Release.Revision }}"
+        - name: HELM_CHART_VERSION
+          value: "{{ .Chart.Version }}"
+        - name: HELM_LAST_MODIFIED
+          value: "{{ .Release.Time }}"
+        - name: SSO_LOGIN
+          value: {{default "false" .Values.console.ssoLogin | quote}}
+        - name: SSO_OPTIONS
+          value: {{default "" .Values.console.ssoOptions | quote}}
         ports:
         - containerPort: 3003
           name: proxy
@@ -238,6 +253,7 @@ spec:
       containers:
       - name: mariadb
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         {{- if .Values.mariadb.usePassword }}
         - name: MYSQL_ROOT_PASSWORD

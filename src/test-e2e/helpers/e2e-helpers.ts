@@ -1,4 +1,4 @@
-import { ElementArrayFinder, browser, by, element } from 'protractor';
+import { ElementArrayFinder, browser, by, element as protractorElement} from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
@@ -40,6 +40,11 @@ export class E2EHelpers {
 
     browser.get('/').then(() => {
       browser.executeScript('window.sessionStorage.setItem("STRATOS_DISABLE_ANIMATIONS", true);');
+      // Allow GitHub API Url to be overridden
+      const gitHubUrl = this.secrets.getStratosGitHubApiUrl();
+      if (gitHubUrl) {
+        browser.executeScript('window.sessionStorage.setItem("STRATOS_GITHUB_API_URL", "' + gitHubUrl + '");');
+      }
     });
 
     if (loginUser) {
@@ -78,7 +83,7 @@ export class E2EHelpers {
    * Form helpers
    */
   getForm(formName): ElementFinder {
-    return element(by.css('form[name="' + formName + '"]'));
+    return protractorElement(by.css('form[name="' + formName + '"]'));
   }
 
   getFormFields(formName): ElementArrayFinder {
@@ -160,6 +165,7 @@ export class E2EHelpers {
   }
 
   getEndpointGuid(info, name: string): string {
+    expect(info).toBeDefined();
     expect(info.endpoints).toBeDefined();
 
     let endpointGuid = null;

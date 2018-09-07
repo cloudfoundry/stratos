@@ -1,7 +1,4 @@
-
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
-
-import {catchError,  debounceTime, distinctUntilChanged, filter, first, map, share, startWith, switchMap, tap } from 'rxjs/operators';
+/* tslint:disable:max-line-length */
 import {
   ChangeDetectorRef,
   Component,
@@ -13,14 +10,27 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  share,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 
 import { IOrganization } from '../../../../../core/cf-api.types';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import {
   TableCellRoleOrgSpaceComponent,
-  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
 import {
   TableCellSelectOrgComponent,
@@ -38,8 +48,12 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
+/* tslint:enable:max-line-length */
 
 interface Org { metadata: { guid: string }; }
+interface CfUserWithWarning extends CfUser {
+  showWarning: boolean;
+}
 
 @Component({
   selector: 'app-manage-users-modify',
@@ -95,20 +109,24 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  users$: Observable<CfUser[]>;
+  usersNames$: Observable<string[]>;
   blocked$: Observable<boolean>;
   valid$: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
+  usersWithWarning$: Observable<string[]>;
 
   constructor(
     private store: Store<AppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private componentFactoryResolver: ComponentFactoryResolver,
     private cfRolesService: CfRolesService,
-    private cd: ChangeDetectorRef) {
+    private cd: ChangeDetectorRef,
+    private snackBar: MatSnackBar,
+  ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
   }
 
@@ -150,8 +168,18 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       ).subscribe(orgs => this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid)));
     }
 
-    this.users$ = this.store.select(selectUsersRolesPicked).pipe(
+    const users$: Observable<CfUserWithWarning[]> = this.store.select(selectUsersRolesPicked).pipe(
+      filter(users => !!users),
       distinctUntilChanged(),
+      map(users => users.map(this.mapUser.bind(this)))
+    );
+
+    this.usersNames$ = users$.pipe(
+      map(users => users.map(user => user.showWarning ? '*' + user.username : user.username))
+    );
+
+    this.usersWithWarning$ = users$.pipe(
+      map(users => users.filter(user => !!user.showWarning).map(user => user.username))
     );
 
     this.valid$ = this.store.select(selectUsersRolesRoles).pipe(
@@ -159,6 +187,21 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles.orgGuid)),
       map(changes => !!changes.length)
     );
+  }
+
+  private mapUser(user: CfUser): CfUserWithWarning {
+    // If we're at the org level or lower we guarantee org roles. If we're at the space we guarantee space roles.
+
+    const showWarning = !!user.missingRoles &&
+      ((user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
+        (user.missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid));
+    // Ensure we're in an object where the username is always populated (in some cases it's missing)
+    const newUser = {
+      ...user,
+      showWarning,
+      username: user.username || user.guid
+    };
+    return newUser;
   }
 
   private destroySpacesList() {
@@ -175,6 +218,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       this.orgGuidChangedSub.unsubscribe();
     }
     this.destroySpacesList();
+    if (this.snackBarRef) {
+      this.snackBarRef.dismiss();
+      this.snackBarRef = null;
+    }
   }
 
   updateOrg(orgGuid) {
@@ -195,6 +242,24 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       this.wrapperRef = this.spaceRolesTable.createComponent(this.wrapperFactory);
       this.cd.detectChanges();
     });
+  }
+
+  onEnter = () => {
+    if (!this.snackBarRef) {
+      this.usersWithWarning$.pipe(first()).subscribe((usersWithWarning => {
+        if (usersWithWarning && usersWithWarning.length) {
+          this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
+          navigate to a specific organization or space`, 'Dismiss');
+        }
+      }));
+    }
+  }
+
+  onLeave = (isNext: boolean) => {
+    if (!isNext && this.snackBarRef) {
+      this.snackBarRef.dismiss();
+      this.snackBarRef = null;
+    }
   }
 
   onNext = () => {

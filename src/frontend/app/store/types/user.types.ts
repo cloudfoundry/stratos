@@ -1,6 +1,32 @@
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { APIResource } from './api.types';
 
+export function getDefaultCfUserMissingRoles(): CfUserMissingRoles {
+  return {
+    org: [],
+    space: [],
+  };
+}
+
+export type CfUserMissingOrgRoles = CfUserRoleParams.SPACES | CfUserRoleParams.MANAGED_SPACES | CfUserRoleParams.AUDITED_SPACES;
+export type CfUserMissingSpaceRoles = CfUserRoleParams.ORGANIZATIONS | CfUserRoleParams.MANAGED_ORGS |
+  CfUserRoleParams.BILLING_MANAGER_ORGS | CfUserRoleParams.AUDITED_ORGS;
+
+export enum CfUserRoleParams {
+  ORGANIZATIONS = 'organizations',
+  MANAGED_ORGS = 'managed_organizations',
+  BILLING_MANAGER_ORGS = 'billing_managed_organizations',
+  AUDITED_ORGS = 'audited_organizations',
+  SPACES = 'spaces',
+  MANAGED_SPACES = 'managed_spaces',
+  AUDITED_SPACES = 'audited_spaces'
+}
+
+export interface CfUserMissingRoles {
+  org: CfUserMissingOrgRoles[];
+  space: CfUserMissingSpaceRoles[];
+}
+
 export interface CfUser {
   organizations?: APIResource<IOrganization>[];
   managed_organizations: APIResource<IOrganization>[];
@@ -22,10 +48,11 @@ export interface CfUser {
   managed_spaces_url: string;
   audited_spaces_url: string;
   default_space_guid: string;
+  missingRoles?: CfUserMissingRoles;
 }
 
 /**
- * Org user roles, string values as per CF API
+ * Org user roles, string values as per CF API. Should match org entity role params
  */
 export enum OrgUserRoleNames {
   MANAGER = 'managers',
@@ -34,7 +61,7 @@ export enum OrgUserRoleNames {
   USER = 'users'
 }
 /**
- * Space user roles, string values as per CF API
+ * Space user roles, string values as per CF API. Should match space entity role params
  */
 export enum SpaceUserRoleNames {
   MANAGER = 'managers',

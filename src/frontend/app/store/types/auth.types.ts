@@ -34,7 +34,17 @@ export interface SessionData {
   valid: boolean;
   uaaError?: boolean;
   upgradeInProgress?: boolean;
-  isSSOLogin?: boolean;
+  ssoOptions?: string;
   sessionExpiresOn: number;
   domainMismatch?: boolean;
+  diagnostics?: Diagnostics;
+}
+export interface Diagnostics {
+  deploymentType?: string;
+  gitClientVersion?: string;
+  databaseMigrations?: any;
+  helmName?: string;
+  helmRevision?: string;
+  helmChartVersion?: string;
+  helmLastModified?: string;
 }

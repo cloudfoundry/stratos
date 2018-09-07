@@ -1,5 +1,6 @@
+import { browser } from 'protractor';
+
 import { ApplicationsPage } from '../applications/applications.po';
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
@@ -7,15 +8,11 @@ import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
-import { ServicesPage } from '../services/services.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  const applications = new ApplicationsPage();
-  const services = new ServicesPage();
-  const cloudFoundry = new CloudFoundryPage();
 
   describe('Connect/Disconnect endpoints -', () => {
 
@@ -30,10 +27,11 @@ describe('Endpoints', () => {
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
-        expect(endpointsPage.isActivePage()).toBeTruthy();
+        endpointsPage.waitForPage();
+        // expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
-        connectDialog.snackBar.close();
+        connectDialog.snackBar.safeClose();
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
@@ -142,7 +140,6 @@ describe('Endpoints', () => {
             const snackBar = new SnackBarComponent();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
-            
             endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
               expect(data.connected).toBeFalsy();
             });

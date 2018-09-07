@@ -1,5 +1,5 @@
 import { ApplicationsPage } from '../applications/applications.po';
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
+import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
@@ -12,7 +12,7 @@ describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
-  const cloudFoundry = new CloudFoundryPage();
+  const cloudFoundry = new CfTopLevelPage();
   const register = new RegisterDialog();
 
   const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
@@ -153,7 +153,8 @@ describe('Endpoints', () => {
         const snackBar = new SnackBarComponent();
         snackBar.waitUntilShown();
         /* tslint:disable-line:max-line-length*/
-        expect(snackBar.hasMessage(`SSL error - x509: certificate signed by unknown authority. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"`));
+        expect(snackBar.hasMessage(`SSL error - x509: certificate
+         signed by unknown authority. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"`));
       });
 
       it('Successful register', () => {

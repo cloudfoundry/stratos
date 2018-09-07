@@ -14,15 +14,16 @@
 
 <mat-card *ngIf="(sessionData$ | async) as session" class="about-page__card">
   <app-metadata-item icon="web_asset" label="Stratos Version">{{ session.version.proxy_version }}</app-metadata-item>
-  <app-metadata-item icon="storage" label="Database Version">{{ session.version.database_version }}</app-metadata-item>
   <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
 </mat-card>
-
 
 <mat-card *ngIf="(this.userIsAdmin$ | async)" class="about-page__card about-page__admin-card">
   <div class="about-page__admin">
     <mat-icon class="about-page__warning-icon">security</mat-icon>
-    <div>You have administrative privileges</div>
+    <div class="about-page__admin-text">You have administrative privileges</div>
+    <div>
+      <button [routerLink]="['diagnostics']" mat-button mat-raised-button color="primary">View Diagnostics</button>
+    </div>
   </div>
 </mat-card>
   

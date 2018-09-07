@@ -1,5 +1,5 @@
 import { ElementFinder, protractor } from 'protractor/built';
-import { browser, element, promise } from 'protractor';
+import { browser, promise } from 'protractor';
 
 const until = protractor.ExpectedConditions;
 
@@ -33,7 +33,7 @@ export class Component {
   }
 
   waitUntilNotShown(): promise.Promise<void> {
-    return browser.wait(until.invisibilityOf(this.locator), 5000);
+    return browser.wait(until.invisibilityOf(this.locator), 20000);
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {

@@ -1,16 +1,26 @@
-
-import { Injectable, InjectionToken, Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+
 import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { ApplicationStateData, ApplicationStateService } from '../../shared/components/application-state/application-state.service';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+} from '../../shared/components/application-state/application-state.service';
+import { APP_GUID, CF_GUID } from '../../shared/entity.tokens';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { AppMetadataTypes, GetAppEnvVarsAction, GetAppStatsAction, GetAppSummaryAction } from '../../store/actions/app-metadata.actions';
+import {
+  AppMetadataTypes,
+  GetAppEnvVarsAction,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
+import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   appEnvVarsSchemaKey,
@@ -23,9 +33,10 @@ import {
   routeSchemaKey,
   serviceBindingSchemaKey,
   spaceSchemaKey,
-  stackSchemaKey
+  spaceWithOrgKey,
+  stackSchemaKey,
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
@@ -35,15 +46,13 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
-  PaginationObservables
+  PaginationObservables,
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
-  ApplicationEnvVarsService,
-  EnvVarStratosProject
+  ApplicationEnvVarsHelper,
+  EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { CF_GUID, APP_GUID } from '../../shared/entity.tokens';
-
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -79,7 +88,7 @@ export class ApplicationService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
-    private appEnvVarsService: ApplicationEnvVarsService,
+    private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
@@ -175,7 +184,17 @@ export class ApplicationService {
       map(entityInfo => entityInfo.entity.entity), );
     this.appSpace$ = moreWaiting$.pipe(
       first(),
-      switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid))), );
+      switchMap(app => {
+        return this.entityServiceFactory.create<APIResource<ISpace>>(
+          spaceSchemaKey,
+          entityFactory(spaceWithOrgKey),
+          app.space_guid,
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
+        ).waitForEntity$.pipe(
+          map(entityInfo => entityInfo.entity)
+        );
+      })
+    );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
       switchMap(app => this.appSpace$.pipe(
@@ -184,7 +203,8 @@ export class ApplicationService {
           return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
         }),
         filter(org => !!org)
-      )), );
+      ))
+    );
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount(), );
 
@@ -196,15 +216,8 @@ export class ApplicationService {
       refCount()
     );
     const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
-    this.appEnvVars = getPaginationObservables<APIResource>({
-      store: this.store,
-      action,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
-        entityFactory(appEnvVarsSchemaKey)
-      )
-    }, true);
 
+    this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
   }
 
   private constructAmalgamatedObservables() {
@@ -288,16 +301,16 @@ export class ApplicationService {
         return null;
       }),
       map(entRoute => {
-          if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
-           return  getRoute(entRoute, true, false, {
-              entityRequestInfo: undefined,
-              entity: entRoute.entity.domain
-            });
-          }
-          return null;
+        if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
+          return getRoute(entRoute, true, false, {
+            entityRequestInfo: undefined,
+            entity: entRoute.entity.domain
+          });
+        }
+        return null;
       })
-  );
-}
+    );
+  }
 
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {

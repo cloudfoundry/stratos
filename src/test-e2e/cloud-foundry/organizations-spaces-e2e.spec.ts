@@ -1,15 +1,13 @@
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
+import { browser } from 'protractor';
+
 import { e2e } from '../e2e';
-import { EndpointsPage } from '../endpoints/endpoints.po';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { SideNavMenuItem, SideNavigation } from '../po/side-nav.po';
-import { StepperComponent } from '../po/stepper.po';
-import { ListComponent } from '../po/list.po';
-import { ConfirmDialogComponent } from '../po/confirm-dialog';
-import { MetaCard } from '../po/meta-card.po';
 import { CFHelpers } from '../helpers/cf-helpers';
-import { browser, ElementArrayFinder } from 'protractor';
-import { mergeEntity } from '../../frontend/app/store/helpers/reducer.helper';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { ListComponent } from '../po/list.po';
+import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
+import { StepperComponent } from '../po/stepper.po';
+import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
@@ -17,9 +15,10 @@ describe('CF - Manage Organizations and Spaces', () => {
   const testSpaceName = e2e.helper.getCustomerOrgSpaceLabel(null, 'space');
   let endpointGuid;
 
-  let cloudFoundry: CloudFoundryPage;
+  let cloudFoundry: CfTopLevelPage;
 
   let cfHelper: CFHelpers;
+  const listComponent = new ListComponent();
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
@@ -40,21 +39,17 @@ describe('CF - Manage Organizations and Spaces', () => {
     const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
     endpointGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
     // Go to the org view for this CF
-    cloudFoundry = CloudFoundryPage.forEndpoint(endpointGuid);
+    cloudFoundry = CfTopLevelPage.forEndpoint(endpointGuid);
     cloudFoundry.navigateTo();
     cloudFoundry.waitForPageOrChildPage();
   });
 
-  afterAll(() => {
-    return cfHelper.deleteSpaceIfExisting(endpointGuid, testSpaceName).then(() =>
-      cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName)
-    );
-  });
+  afterAll(() => cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName));
 
   it('Should validate org name', () => {
-    const cardView = cloudFoundry.gotoOrgView();
+    const cardView = cloudFoundry.goToOrgView();
     cardView.cards.getCards().then(cards => {
-      const card = new MetaCard(cards[0]);
+      const card = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
       card.getTitle().then(existingTitle => {
         // Click the add button to add an organization
         cloudFoundry.header.clickIconButton('add');
@@ -84,8 +79,8 @@ describe('CF - Manage Organizations and Spaces', () => {
   it('Create and delete an organization', () => {
     // Count the number of organizations
     let orgCount = 0;
-    const cardView = cloudFoundry.gotoOrgView();
-    cardView.cards.getCards().count().then(count => orgCount = count);
+    const cardView = cloudFoundry.goToOrgView();
+    listComponent.getTotalResults().then(total => orgCount = total);
 
     // Click the add button to add an organization
     cloudFoundry.header.clickIconButton('add');
@@ -97,7 +92,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     modal.next();
 
     cardView.cards.waitUntilShown();
-    cardView.cards.getCards().count().then((newOrgCount) => expect(newOrgCount).toEqual(orgCount + 1));
+    listComponent.getTotalResults().then(newOrgCount => expect(newOrgCount).toEqual(orgCount + 1));
 
     // Delete the org
     cardView.cards.findCardByTitle(testOrgName).then(card => {
@@ -112,7 +107,7 @@ describe('CF - Manage Organizations and Spaces', () => {
 
   it('should show the Organization CLI commands', () => {
     // Open the first org
-    const cardView = cloudFoundry.gotoOrgView();
+    const cardView = cloudFoundry.goToOrgView();
     const card = cardView.cards.getCard(0);
     card.getTitle().then(title => {
       card.click();
@@ -134,14 +129,15 @@ describe('CF - Manage Organizations and Spaces', () => {
     browser.driver.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, ep, testOrgName));
 
     // Go to org tab
-    const cardView = cloudFoundry.gotoOrgView();
-    cloudFoundry.list.refresh();
+    const cardView = cloudFoundry.goToOrgView();
+    const list = new ListComponent();
+    list.refresh();
     cardView.cards.findCardByTitle(testOrgName).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
       cardView.cards.waitUntilShown();
-      cloudFoundry.list.refresh();
+      list.refresh();
 
       // Add space
       // Click the add button to add a space
@@ -162,7 +158,7 @@ describe('CF - Manage Organizations and Spaces', () => {
         space.openActionMenu().then(menu => {
           menu.clickItem('Delete');
           ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space');
-          cardView.cards.getCardCound().then(c => {
+          cardView.cards.getCardCount().then(c => {
             expect(c).toBe(0);
           });
         });

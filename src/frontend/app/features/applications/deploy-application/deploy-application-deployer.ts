@@ -1,10 +1,8 @@
-
-import {of as observableOf,  BehaviorSubject, Observable, Subscription, Subject } from 'rxjs';
-
-import {combineLatest,  catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
+import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -12,8 +10,15 @@ import { AppState } from '../../../store/app-state';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../store/selectors/api.selectors';
 import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';
-import { AppData, DeployApplicationSource, SocketEventTypes } from '../../../store/types/deploy-application.types';
+import {
+  AppData,
+  DeployApplicationSource,
+  DeployApplicationState,
+  OverrideAppDetails,
+  SocketEventTypes,
+} from '../../../store/types/deploy-application.types';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
+
 
 export interface DeployApplicationDeployerStatus {
   error: boolean;
@@ -37,16 +42,19 @@ export class DeployApplicationDeployer {
   streamTitle = 'Preparing...';
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  appGuid: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
   applicationSource: any;
+  applicationOverrides: OverrideAppDetails;
 
   status$ = new BehaviorSubject<DeployApplicationDeployerStatus>({
     error: false,
     deploying: false
   });
+
+  // Observable on the application GUID of the application being deployed
+  applicationGuid$ = new BehaviorSubject<string>(null);
 
   // Status of file transfers
   fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
@@ -99,11 +107,13 @@ export class DeployApplicationDeployer {
       return;
     }
 
-    const readyFilter = this.fsFileInfo ? () => true :
-      (appDetail) => !!appDetail.applicationSource && !!appDetail.applicationSource.projectName;
+    const readyFilter = this.fsFileInfo ?
+      () => true :
+      (appDetail: DeployApplicationState) =>
+        !!appDetail.applicationSource && !!appDetail.applicationSource.projectName && !!appDetail.applicationOverrides;
     this.isOpen = true;
     this.connectSub = this.store.select(selectDeployAppState).pipe(
-      filter(appDetail => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       mergeMap(appDetails => {
         const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, appDetails.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, appDetails.cloudFoundryDetails.space));
@@ -115,6 +125,7 @@ export class DeployApplicationDeployer {
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
         this.applicationSource = appDetail.applicationSource;
+        this.applicationOverrides = appDetail.applicationOverrides;
         const host = window.location.host;
         const streamUrl = (
           `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
@@ -127,7 +138,6 @@ export class DeployApplicationDeployer {
             catchError(e => {
               return [];
             }),
-            share(),
             map(message => {
               const json = JSON.parse(message);
               return json;
@@ -140,8 +150,9 @@ export class DeployApplicationDeployer {
               }
             }),
             filter((log) => log.type === SocketEventTypes.DATA),
-            map((log) => log.message)
-          );
+            map((log) => log.message),
+            share(),
+        );
         this.msgSub = this.messages.subscribe();
       })
     ).subscribe();
@@ -157,11 +168,20 @@ export class DeployApplicationDeployer {
     this.inputStream.next(JSON.stringify(msg));
   }
 
+  sendAppOverride = (appOverrides: OverrideAppDetails) => {
+    const msg = {
+      message: JSON.stringify(appOverrides),
+      timestamp: Math.round((new Date()).getTime() / 1000),
+      type: SocketEventTypes.OVERRIDES_SUPPLIED
+    };
+    return JSON.stringify(msg);
+  }
+
   sendProjectInfo = (appSource: DeployApplicationSource) => {
     if (appSource.type.id === 'github') {
-        return this.sendGitHubSourceMetadata(appSource);
+      return this.sendGitHubSourceMetadata(appSource);
     } else if (appSource.type.id === 'giturl') {
-        return this.sendGitUrlSourceMetadata(appSource);
+      return this.sendGitUrlSourceMetadata(appSource);
     } else if (appSource.type.id === 'file' || appSource.type.id === 'folder') {
       return this.sendLocalSourceMetadata();
     }
@@ -206,6 +226,10 @@ export class DeployApplicationDeployer {
         // This info is will be used to retrieve the app Id
         this.appData = JSON.parse(log.message).Applications[0];
         break;
+      case SocketEventTypes.APP_GUID_NOTIFY:
+        // Notification of the application GUID for the application
+        this.applicationGuid$.next(log.message);
+        break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
         this.deploying = true;
@@ -248,10 +272,14 @@ export class DeployApplicationDeployer {
         const sourceInfo = this.sendProjectInfo(this.applicationSource);
         if (!sourceInfo) {
           this.onClose(log, 'Deploy Failed - Unknown source type',
-          'Failed to deploy the app - unknown source type');
+            'Failed to deploy the app - unknown source type');
         } else {
           this.inputStream.next(sourceInfo);
         }
+        break;
+      case SocketEventTypes.OVERRIDES_REQUIRED:
+        const overrides = this.sendAppOverride(this.applicationOverrides);
+        this.inputStream.next(overrides);
         break;
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:

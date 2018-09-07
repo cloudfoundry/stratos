@@ -98,5 +98,5 @@ export class ServicesServiceMock {
   getSupportUrl = () => '';
   getServiceName = () => '';
   getServiceDescription = () => '';
-
+  getServiceProviderName = () => '';
 }

@@ -21,11 +21,12 @@ import { GetAllOrgUsers } from '../../store/actions/organization.actions';
 import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getCurrentUserCFGlobalStates } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { PaginatedAction } from '../../store/types/pagination.types';
 import {
@@ -192,13 +193,20 @@ export class CfUserService {
     }
 
     // Check space roles
-    if (this.populatedArray(user.audited_spaces) ||
-      this.populatedArray(user.managed_spaces) ||
-      this.populatedArray(user.spaces)) {
-      return true;
-    }
+    return this.hasSpaceRolesInOrg(user, orgGuid);
+  }
 
-    return false;
+  private filterByOrg(orgGuid: string, array?: Array<APIResource<ISpace>>): Array<APIResource<ISpace>> {
+    return array ? array.filter(space => space.entity.organization_guid === orgGuid) : null;
+  }
+
+  /**
+   * Helper to determine if user has space roles in an organization
+   */
+  hasSpaceRolesInOrg(user: CfUser, orgGuid: string): boolean {
+    return this.populatedArray(this.filterByOrg(orgGuid, user.audited_spaces)) ||
+      this.populatedArray(this.filterByOrg(orgGuid, user.managed_spaces)) ||
+      this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
   getUserRoleInOrg = (
@@ -254,7 +262,7 @@ export class CfUserService {
               this.activeRouteCfOrgSpace.spaceGuid
             )
           ) {
-            return this.createPaginationAction(isAdmin).pipe(
+            return this.createPaginationAction(isAdmin, !!this.activeRouteCfOrgSpace.spaceGuid).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
                 store: this.store,
                 action: allUsersAction,
@@ -284,17 +292,17 @@ export class CfUserService {
     });
   }
 
-  public createPaginationAction(isAdmin: boolean): Observable<PaginatedAction> {
+  public createPaginationAction(isAdmin: boolean, isSpace: boolean): Observable<PaginatedAction> {
     if (isAdmin) {
       return observableOf(new GetAllUsersAsAdmin(this.activeRouteCfOrgSpace.cfGuid));
     }
     return this.canFetchAllUsers().pipe(
       map(canFetchAllUsers => {
         if (canFetchAllUsers) {
-          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid);
+          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid, !isSpace);
         } else {
           const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.orgGuid);
-          return new GetAllOrgUsers(this.activeRouteCfOrgSpace.orgGuid, usersPaginationKey, this.activeRouteCfOrgSpace.cfGuid);
+          return new GetAllOrgUsers(this.activeRouteCfOrgSpace.orgGuid, usersPaginationKey, this.activeRouteCfOrgSpace.cfGuid, false);
         }
       })
     );
@@ -322,4 +330,11 @@ export class CfUserService {
         return resData.total_results < 10;
       }));
   }
+
+  public isConnectedUserAdmin = (store, cfGuid: string): Observable<boolean> =>
+    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
+      filter(state => !!state),
+      map(state => state.isAdmin),
+      first()
+    )
 }

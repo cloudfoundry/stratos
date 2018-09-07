@@ -30,18 +30,18 @@
           <!-- Sort Button & Drop down -->
           <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
             <mat-form-field>
-              <mat-select matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
+              <mat-select name="sort-field" matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
                 <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                   {{column.headerCell()}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
             <button mat-icon-button (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='asc'">
-            <mat-icon>sort</mat-icon>
-          </button>
+              <mat-icon>sort</mat-icon>
+            </button>
             <button mat-icon-button (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='desc'">
-            <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
-          </button>
+              <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
+            </button>
           </div>
           <!-- Multi actions (those applied to selection) -->
           <div *ngIf="(dataSource.isSelecting$ | async)">
@@ -77,7 +77,7 @@
           </button>
           </div>
           <!-- Select table or cards view button -->
-          <div *ngIf="config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
+          <div id="list-card-toggle" *ngIf="config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
             <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(view$ | async)==='table'">
             <mat-icon>grid_on</mat-icon>
           </button>

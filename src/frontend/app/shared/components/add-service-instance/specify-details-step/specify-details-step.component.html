@@ -21,7 +21,7 @@
           {{tag.label}}
           <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
         </mat-chip>
-        <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
+        <input placeholder="Tags"  name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
       </mat-chip-list>
     </mat-form-field>
     <mat-form-field>

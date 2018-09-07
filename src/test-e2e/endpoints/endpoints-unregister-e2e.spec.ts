@@ -41,8 +41,8 @@ describe('Endpoints', () => {
         });
       });
 
-      describe('Multiple endpoints -', () => {
-
+      // Skip test if we only have one Cloud Foundry endpoint
+      describe('Multiple endpoints -', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
         beforeAll(() => {
           // Ensure we have multiple endpoints registered
           e2e.setup(ConsoleUserType.admin)

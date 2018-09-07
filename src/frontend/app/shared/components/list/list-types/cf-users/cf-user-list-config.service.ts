@@ -88,7 +88,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Change Roles`,
   };
 
-  createManagerUsersUrl(user: APIResource<CfUser> = null): string {
+  private createManagerUsersUrl(user: APIResource<CfUser> = null): string {
     let route = `/cloud-foundry/${this.cfUserService.activeRouteCfOrgSpace.cfGuid}`;
     if (this.activeRouteCfOrgSpace.orgGuid) {
       route += `/organizations/${this.activeRouteCfOrgSpace.orgGuid}`;
@@ -114,10 +114,10 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignColumnConfig(org$, space$);
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(cf =>
+      switchMap(cf => // `cf` needed to create the second observable
         combineLatest(
           observableOf(cf),
-          cfUserService.createPaginationAction(cf.global.isAdmin)
+          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space)))
         )
       ),
       tap(([cf, action]) => {

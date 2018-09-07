@@ -14,6 +14,14 @@ export class SecretsHelpers {
 
   constructor() { }
 
+  haveMultipleCloudFoundryEndpoints = () => {
+    return Object.keys(this.getCloudFoundryEndpoints()).length > 1;
+  }
+
+  haveSingleCloudFoundryEndpoint = () => {
+    return !this.haveMultipleCloudFoundryEndpoints();
+  }
+
   getConsoleAdminUsername(): string {
     return this.secrets.consoleUsers.admin.username;
   }
@@ -31,7 +39,11 @@ export class SecretsHelpers {
   }
 
   getCloudFoundryEndpoints(): any {
-    throw new Error('Not implemented');
+    return this.secrets.endpoints.cf;
+  }
+
+  getStratosGitHubApiUrl(): string {
+    return this.secrets.stratosGitHubApiUrl;
   }
 
   getConsoleCredentials(userType: ConsoleUserType): E2ECred {
@@ -43,7 +55,7 @@ export class SecretsHelpers {
     return this.secrets.endpoints || {};
   }
 
-  // Get the configration for the default CF Endpoint
+  // Get the configuration for the default CF Endpoint
   getDefaultCFEndpoint(): E2EConfigCloudFoundry {
     if (this.secrets.endpoints.cf) {
       return this.secrets.endpoints.cf.find((ep) => ep.name === DEFAULT_CF_NAME);
