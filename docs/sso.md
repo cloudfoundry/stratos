@@ -1,12 +1,12 @@
-# Single-Sign On
+# Single Sign On
 
 By default, Stratos will authenticate against a UAA using username and password, for both logging into Stratos and when connecting Cloud Foundry endpoints.
 
-UAA can support richer login mechanisms than username and password. To accommodate this, you can configure Stratos to use the UAA's Single-sing on UI for login.
+UAA can support richer login mechanisms than username and password. To accommodate this, you can configure Stratos to use the UAA's Single Sign On UI for login.
 
 This can be enabled by setting the config setting SSO_LOGIN to true.
 
-Most importantly, you will need to ensure that the Client used when communicating with your UAA is configured to allow Stratos to use Single-Sign On - i.e. that the Stratos SSO Login callback URI is registered with the UAA.
+Most importantly, you will need to ensure that the Client used when communicating with your UAA is configured to allow Stratos to use Single Sign On - i.e. that the Stratos SSO Login callback URI is registered with the UAA.
 
 ## Adding the Stratos SSO Callback URI
 
