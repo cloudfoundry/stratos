@@ -64,20 +64,20 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     this.startEnd[index] = date;
     const [start, end] = this.startEnd;
     if (start && end) {
-      const startUnix = start.unix() + '';
-      const endUnix = end.unix() + '';
+      const startUnix = start.unix();
+      const endUnix = end.unix();
       const oldAction = this.metricsConfig.metricsAction;
-      const action = new FetchApplicationMetricsAction(
+      this.metricsConfig.metricsAction = new FetchApplicationMetricsAction(
         oldAction.guid,
         oldAction.cfGuid,
         new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
           start: startUnix,
           end: endUnix,
-          step: '365'
+          step: (endUnix - startUnix) / 100
         }),
         MetricQueryType.RANGE_QUERY
       );
-      this.commit = this.getCommitFn(action);
+      this.commit = this.getCommitFn(this.metricsConfig.metricsAction);
       this.commit();
     }
   }
@@ -103,6 +103,29 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
 
+  private postFetchMiddleware(metricsArray: ChartSeries[]) {
+    if (this.metricsConfig.sort) {
+      const newMetricsArray = [
+        ...metricsArray
+      ];
+      newMetricsArray.sort(this.metricsConfig.sort);
+      if (
+        this.metricsConfig.metricsAction.query.params &&
+        this.metricsConfig.metricsAction.query.params.start &&
+        this.metricsConfig.metricsAction.query.params.end
+      ) {
+        return MetricsChartManager.fillOutTimeOrderedChartSeries(
+          newMetricsArray,
+          this.metricsConfig.metricsAction.query.params.start as number,
+          this.metricsConfig.metricsAction.query.params.end as number,
+          this.metricsConfig.metricsAction.query.params.step as number,
+          this.metricsConfig,
+        )
+      }
+    }
+    return metricsArray;
+  }
+
   ngOnInit() {
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
@@ -116,10 +139,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
         if (!metricsArray.length) {
           return null;
         }
-        if (this.metricsConfig.sort) {
-          metricsArray.sort(this.metricsConfig.sort);
-        }
-        return metricsArray;
+        return this.postFetchMiddleware(metricsArray);
       })
     );
     const now = moment(moment.now());

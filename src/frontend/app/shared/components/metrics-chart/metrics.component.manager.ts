@@ -1,5 +1,6 @@
 import { MetricsConfig } from './metrics-chart.component';
 import { IMetrics, ChartSeries } from '../../../store/types/base-metric.types';
+import { MetricsChartHelpers } from './metrics.component.helpers';
 
 export class MetricsChartManager {
   static mapMatrix<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
@@ -23,5 +24,39 @@ export class MetricsChartManager {
         }]
       })
     );
+  }
+  static fillOutTimeOrderedChartSeries(timeOrdered: ChartSeries[], start: number, end: number, step: number, metricConfig: MetricsConfig) {
+    if (!timeOrdered || !timeOrdered.length) {
+      return timeOrdered;
+    }
+    return timeOrdered.reduce((allSeries, series) => {
+      let pos = 0;
+      const data = series.series;
+      for (let t = start; t <= end; t += step) {
+        const current = data[pos];
+        const name = metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '';
+        if (!current) {
+          data.push({
+            name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
+            value: 0
+          });
+        } else {
+          if (current.name < name) {
+            data.splice(pos, 0, {
+              name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
+              value: 0
+            });
+          } else {
+            data.splice(pos + 1, 0, {
+              name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
+              value: 0
+            });
+            pos += 2;
+          }
+        }
+      }
+      allSeries.push(series);
+      return allSeries;
+    }, []);
   }
 }

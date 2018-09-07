@@ -12,7 +12,7 @@ export enum MetricQueryType {
 }
 export interface IMetricQueryConfigParams {
   window?: string;
-  [key: string]: string;
+  [key: string]: string | number;
 }
 export class MetricQueryConfig {
   constructor(
@@ -26,7 +26,6 @@ export class MetricQueryConfig {
   public joinParams() {
     const {
       window = '',
-      step = '365',
       ...params
     } = this.params;
     const paramString = Object.keys(params).reduce((accum, key) => {
