@@ -208,6 +208,10 @@ export class SelectPlanStepComponent implements OnDestroy {
   isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
   isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
 
+  getCost = (cost: IServicePlanCost, symbol: boolean) => {
+    if (!cost.amount) { return '-'; }
+    return `${this.getCostCurrency(cost, symbol)}${this.getCostValue(cost)}`;
+ }
   getCostCurrency = (cost: IServicePlanCost, symbol: boolean) => {
     const currency = Object.keys(cost.amount)[0];
     if (!symbol) {
