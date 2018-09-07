@@ -8,7 +8,7 @@ import { ApplicationWallComponent } from './application-wall/application-wall.co
 import { ApplicationService } from './application.service';
 import { ApplicationBaseComponent } from './application/application-base.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
-import { ApplicationEnvVarsService } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
 import {
   ViewBuildpackComponent,
@@ -64,7 +64,7 @@ import { DeleteAppServiceInstancesComponent } from './application-delete/delete-
   ],
   providers: [
     ApplicationService,
-    ApplicationEnvVarsService,
+    ApplicationEnvVarsHelper,
     ApplicationMonitorService,
     DatePipe
   ]

@@ -21,6 +21,7 @@ export interface ServiceConfig {
   name: string;
 }
 export interface E2EServicesConfig {
+  bindApp: string;
   publicService: ServiceConfig;
   privateService: ServiceConfig;
   spaceScopedService: ServiceConfig;
@@ -30,6 +31,7 @@ export interface E2EConfigCloudFoundry extends E2EEndpointConfig {
   testOrg: string;
   testSpace: string;
   testDeployApp: string;
+  testDeployAppStack: string;
   services: E2EServicesConfig;
 }
 
@@ -49,4 +51,5 @@ export interface E2EConfig {
   endpoints: E2EEndpointsConfig;
   skipSSLValidation: boolean;
   headless: boolean;
+  stratosGitHubApiUrl: string;
 }

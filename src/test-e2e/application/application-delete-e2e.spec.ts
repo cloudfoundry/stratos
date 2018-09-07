@@ -4,7 +4,7 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationSummary } from './application-summary.po';
+import { ApplicationBasePage } from './application-page.po';
 
 
 describe('Application Delete', function () {
@@ -55,11 +55,11 @@ describe('Application Delete', function () {
     });
 
     it('Should return to summary page after cancel', () => {
-      const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
+      const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
       appSummaryPage.navigateTo();
       appSummaryPage.waitForPage();
       // Open delete app dialog
-      const deleteApp = appSummaryPage.delete();
+      const deleteApp = appSummaryPage.delete(testAppName);
       // App did not have a route, so there should be no routes step
       expect(deleteApp.hasRouteStep()).toBeFalsy();
       // 1 step - np header shown
@@ -84,10 +84,10 @@ describe('Application Delete', function () {
       e2e.sleep(5000);
 
       // Open delete app dialog
-      const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
+      const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
       appSummaryPage.navigateTo();
       appSummaryPage.waitForPage();
-      const deleteApp = appSummaryPage.delete();
+      const deleteApp = appSummaryPage.delete(testAppName);
 
       // App did not have a route, so there should be no routes step
       expect(deleteApp.hasRouteStep()).toBeFalsy();

@@ -2,7 +2,7 @@ import { browser, ElementFinder, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { MetaCard } from '../po/meta-card.po';
+import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -40,7 +40,7 @@ describe('Create Service Instance', () => {
     servicesWall.serviceInstancesList.cards.getCards().then(
       (cards: ElementFinder[]) => {
         return cards.map(card => {
-          const metaCard = new MetaCard(card);
+          const metaCard = new MetaCard(card, MetaCardTitleType.CUSTOM);
           return metaCard.getTitle();
         });
       }).then(cardTitles => {
@@ -58,7 +58,7 @@ describe('Create Service Instance', () => {
     servicesHelperE2E.setCfOrgSpace();
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -74,7 +74,7 @@ describe('Create Service Instance', () => {
 
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -94,7 +94,7 @@ describe('Create Service Instance', () => {
 
     createServiceInstance.stepper.cancel();
 
-    servicesWall.isActivePage();
+    servicesWall.waitForPage();
 
   });
 
@@ -120,7 +120,7 @@ describe('Create Service Instance', () => {
 
       createServiceInstance.stepper.cancel();
 
-      servicesWall.isActivePage();
+      servicesWall.waitForPage();
     });
   });
 
