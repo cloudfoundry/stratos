@@ -1,11 +1,12 @@
-import { MarketplaceSummaryPage } from './marketplace-summary.po';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { e2e, E2ESetup } from '../e2e';
 import { browser, ElementFinder, promise } from 'protractor';
-import { ServicesHelperE2E } from './services-helper-e2e';
+
+import { e2e, E2ESetup } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
+import { MarketplaceSummaryPage } from './marketplace-summary.po';
+import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { MetaCard } from '../po/meta-card.po';
 
 describe('Marketplace', () => {
   let setup: E2ESetup;
@@ -129,7 +130,7 @@ function createService(marketplaceSummaryPage: MarketplaceSummaryPage,
     servicesWall.serviceInstancesList.cards.getCards().then(
       (cards: ElementFinder[]) => {
         return cards.map(card => {
-          const metaCard = new MetaCard(card);
+          const metaCard = new MetaCard(card, MetaCardTitleType.CUSTOM);
           return metaCard.getTitle();
         });
       }).then(cardTitles => {

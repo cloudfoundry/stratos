@@ -2,7 +2,7 @@ import { promise } from 'protractor';
 
 import { CFResponse } from '../../frontend/app/store/types/api.types';
 import { EndpointModel } from '../../frontend/app/store/types/endpoint.types';
-import { E2ESetup } from '../e2e';
+import { E2ESetup, e2e } from '../e2e';
 import { E2EHelpers } from './e2e-helpers';
 import { RequestHelpers } from './request-helpers';
 
@@ -47,6 +47,11 @@ export class CFRequestHelpers extends RequestHelpers {
 
   private sendCfRequest = (cfGuid: string, url: string, method: string, body?: string): promise.Promise<any> =>
     this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
+      .catch(error => {
+        // Track the url against the error. Sometimes we don't get this from the stack trace
+        e2e.log(`Failed to handle request to url: '${url}'. Reason: '${error}'`);
+        throw error;
+      })
 
   private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) =>
     this.sendRequest(this.e2eSetup.adminReq, {

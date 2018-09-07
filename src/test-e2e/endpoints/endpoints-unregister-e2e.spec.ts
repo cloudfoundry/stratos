@@ -30,7 +30,7 @@ describe('Endpoints', () => {
 
           // Get the row in the table for this endpoint
           endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-            endpointsPage.table.openActionMenu(row);
+            endpointsPage.table.openRowActionMenuByRow(row);
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
@@ -59,7 +59,7 @@ describe('Endpoints', () => {
 
           // Get the row in the table for this endpoint
           endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-            endpointsPage.table.openActionMenu(row);
+            endpointsPage.table.openRowActionMenuByRow(row);
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
@@ -88,7 +88,7 @@ describe('Endpoints', () => {
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           menu.getItemMap().then(items => {

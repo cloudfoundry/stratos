@@ -18,7 +18,7 @@ import {
 import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { ApplicationService } from '../application.service';
-import { ApplicationEnvVarsService } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
@@ -50,7 +50,7 @@ describe('EditApplicationComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
       ]
     })
       .compileComponents();

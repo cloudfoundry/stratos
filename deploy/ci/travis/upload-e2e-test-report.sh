@@ -18,7 +18,11 @@ echo "Configuring upload client"
 
 echo "Uploading ..."
 # Sync the E2E reports
-./mc cp --insecure -r e2e-reports s3/${S3_BUCKET}
+./mc cp -q --insecure -r e2e-reports s3/${S3_BUCKET}
+
+if [[ $? != 0 ]]; then
+  echo 'Error uploading test reports: $?'
+fi
 
 # Test report upload failure will not fail the Travis job
 exit 0

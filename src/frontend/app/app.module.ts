@@ -20,10 +20,10 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { XSRFModule } from './xsrf.module';
+import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
 import { ExtensionService, applyRoutesFromExtensions } from './core/extension/extension-service';
 import { Router } from '@angular/router';
 import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
-
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -52,6 +52,7 @@ export class CustomRouterStateSerializer
     return { url, params, queryParams };
   }
 }
+
 
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
@@ -85,6 +86,7 @@ export class CustomRouterStateSerializer
     LoggedInService,
     ExtensionService,
     DynamicExtenstionRoutes,
+    { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
