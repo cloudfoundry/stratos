@@ -21,6 +21,8 @@ export class ApplicationE2eHelper {
   }
 
   static createApplicationName = (isoTime?: string): string => E2EHelpers.createCustomName(customAppLabel, isoTime).toLowerCase();
+  static createRouteName = (isoTime?: string): string =>
+    E2EHelpers.createCustomName('route-' + customAppLabel, isoTime).toLowerCase().replace(/[-:.]+/g, '')
 
   /**
    * Get default sanitized URL name for App

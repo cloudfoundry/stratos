@@ -1,7 +1,7 @@
 import { promise } from 'protractor';
 
 import { IApp, IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { CfUser } from '../../frontend/app/store/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
@@ -152,6 +152,16 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, `spaces/${spaceGuid}/apps`).then(json => {
       return json.total_results;
     });
+  }
+
+  fetchRoutesInSpace(cnsiGuid: string, spaceGuid: string): promise.Promise<APIResource<IRoute>[]> {
+    return this.cfRequestHelper.sendCfGet<CFResponse<IRoute>>(cnsiGuid, `/spaces/${spaceGuid}/routes?results-per-page=100`)
+      .then(json => {
+        if (json.total_results > 100) {
+          fail('Number of routes in space is over the max page size of 100, requires de-paginating');
+        }
+        return json.resources;
+      });
   }
 
   // For fully fleshed out fetch see application-e2e-helpers

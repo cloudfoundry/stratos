@@ -4,7 +4,7 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationBasePage } from './application-page.po';
+import { ApplicationBasePage } from './po/application-page.po';
 
 
 describe('Application Delete', function () {

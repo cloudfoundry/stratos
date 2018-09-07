@@ -1,6 +1,6 @@
-import { browser, promise, protractor, Browser } from 'protractor';
+import { browser, promise } from 'protractor';
 
-import { CFPage } from '../po/cf-page.po';
+import { CFPage } from '../../po/cf-page.po';
 import { DeleteApplication } from './delete-app.po';
 
 export class ApplicationBasePage extends CFPage {

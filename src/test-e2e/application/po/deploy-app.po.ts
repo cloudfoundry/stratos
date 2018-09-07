@@ -1,10 +1,10 @@
 import { by, element } from 'protractor';
 
-import { FormComponent } from '../po/form.po';
-import { ListComponent } from '../po/list.po';
-import { Page } from '../po/page.po';
-import { StepperComponent } from '../po/stepper.po';
-import { TableComponent } from '../po/table.po';
+import { FormComponent } from '../../po/form.po';
+import { ListComponent } from '../../po/list.po';
+import { Page } from '../../po/page.po';
+import { StepperComponent } from '../../po/stepper.po';
+import { TableComponent } from '../../po/table.po';
 
 export class DeployApplication extends Page {
 
