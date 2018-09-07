@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Params, RouterStateSnapshot } from '@angular/router';
+import { Params, RouterStateSnapshot, RouteConfigLoadEnd, Route } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
@@ -20,6 +20,9 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { XSRFModule } from './xsrf.module';
+import { ExtensionService, applyRoutesFromExtensions } from './core/extension/extension-service';
+import { Router } from '@angular/router';
+import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
 
 
 // Create action for router navigation. See
@@ -80,8 +83,14 @@ export class CustomRouterStateSerializer
   ],
   providers: [
     LoggedInService,
+    ExtensionService,
+    DynamicExtenstionRoutes,
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private router: Router, private ext: ExtensionService) {
+    applyRoutesFromExtensions(router);
+  }
+}

@@ -1,0 +1,130 @@
+@import '../../../sass/custom/acme-colors';
+.acme-login {
+  align-items: center;
+  background-color: $acme-blue;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  &__header,
+  &__content,
+  &__footer {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__header {
+    background-color: $acme-secondary;
+    color: $acme-text;
+    flex: 0 0 60px;
+    font-size: 24px;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+  }
+  &__content {
+    align-items: flex-start;
+    color: $acme-text;
+    flex: 1;
+    margin-top: 100px;
+    overflow-y: auto;
+    width: 90%;
+  }
+  &__footer {
+    flex: 0 0 auto;
+    width: 90%;
+    padding: 20px 0;
+  }
+  &__title {
+    width: 90%;
+  }
+  &__copyright {
+    color: $acme-text-gray;
+    flex: 1;
+  }
+  &__logo {
+    img {
+      width: 79px;
+    }
+  }
+  &__intro {
+    flex: 1;
+    margin-right: 24px;
+  }
+  &__box {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
+      .mat-form-field-label {
+        color: $acme-text-gray;
+      }
+      .mat-form-field-underline {
+        background-color: $acme-text-gray;
+      }
+    }
+  }
+  &__submit.mat-raised-button {
+    &.mat-primary[disabled] {
+      color: $acme-button-gray;
+    }
+    margin-top: 24px;
+  }
+  &__headline {
+    color: $acme-primary;
+    font-size: 52px;
+    font-weight: 300;
+    margin: 0;
+  }
+  &__tagline {
+    color: $acme-text-gray;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.5;
+    margin: 24px 0;
+  }
+  &__form-outer {
+    max-width: 400px;
+    opacity: 1;
+    transition: opacity 250ms linear;
+  }
+  &__form-title {
+    color: $acme-text;
+    font-size: 30px;
+    font-weight: 300;
+    margin-bottom: 24px;
+    transition: opacity 250ms linear;
+  }
+  &__loading {
+    display: none;
+    margin-top: 24px;
+    max-width: 400px;
+    opacity: 0;
+    transition: opacity 250ms linear;
+  }
+  &__busy {
+    .acme-login__form-title {
+      opacity: 0.5;
+    }
+    .acme-login__form-outer {
+      opacity: 0.5;
+    }
+    .acme-login__loading {
+      display: block;
+      opacity: 1;
+    }
+  }
+  &__message {
+    font-size: 18px;
+    font-weight: 300;
+    height: 20px;
+    max-width: 400px;
+    padding-top: 20px;
+  }
+}

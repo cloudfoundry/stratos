@@ -54,6 +54,7 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-ta
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
+import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
 
 const usersRoles = [
   {
@@ -158,6 +159,14 @@ const cloudFoundry: Routes = [{
             {
               path: 'security-groups',
               component: CloudFoundrySecurityGroupsComponent
+            },
+            {
+              path: '**',
+              component: CloudFoundrySummaryTabComponent,
+              canActivate: [DynamicExtenstionRoutes],
+              data: {
+                stratosRouteGroup: 'cfTabs'
+              }
             }
           ]
         },
@@ -169,7 +178,7 @@ const cloudFoundry: Routes = [{
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,
               data: {
-                uiFullView: true
+                uiFullView: true,
               },
               children: [
                 {
@@ -188,7 +197,16 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundryOrganizationUsersComponent
-                }]
+                },
+                {
+                  path: '**',
+                  component: CloudFoundryOrganizationSummaryComponent,
+                  canActivate: [DynamicExtenstionRoutes],
+                  data: {
+                    stratosRouteGroup: 'cfOrgTabs'
+                  }
+                }
+              ]
             },
             {
               path: 'organizations/:orgId/spaces/:spaceId',
@@ -221,6 +239,14 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundrySpaceUsersComponent
+                },
+                {
+                  path: '**',
+                  component: CloudFoundrySpaceSummaryComponent,
+                  canActivate: [DynamicExtenstionRoutes],
+                  data: {
+                    stratosRouteGroup: 'cfSpaceTabs'
+                  }
                 }
               ]
             },

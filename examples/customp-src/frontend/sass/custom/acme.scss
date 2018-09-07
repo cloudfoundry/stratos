@@ -1,0 +1,66 @@
+// Style overrides
+// Acme Brand primary colour
+$acme-primary-color: #035a97;
+
+// Secondary blue colour
+$acme-secondary: #035a97;
+$acme-text: #fff;
+$acme-text-gray: #ccc;
+$acme-dark-blue: #06253A;
+$acme-blue: #073155;
+$acme-side-nav: $acme-secondary;
+$acme-side-nav-active: #003358;
+.stratos img.stratos-title__logo {
+  width: 160px;
+}
+
+.stratos .page-header .mat-toolbar.mat-primary {
+  background-color: #fff;
+  color: #333;
+}
+
+.stratos app-page-subheader {
+  .page-subheader {
+    background-color: #fff;
+    color: #333;
+  }
+  .mat-tab-nav-bar.mat-background-primary {
+    .mat-tab-links {
+      background-color: #fff;
+      color: #333;
+    }
+    .mat-tab-link {
+      color: #333;
+    }
+    .mat-ink-bar {
+      background-color: $acme-primary-color;
+    }
+  }
+}
+
+// Use Acme Blue Side Navigation
+.stratos {
+  .side-nav,
+  .side-nav__top,
+  .side-nav__item--active:hover {
+    background-color: $acme-side-nav;
+  }
+  .side-nav__item--active,
+  .side-nav__item:hover {
+    background-color: $acme-side-nav-active;
+  }
+  .side-nav__bottom {
+    color: $acme-text-gray;
+  }
+}
+
+// Remove background image from setup screen (e.g. upgrade screen)
+.stratos app-intro-screen > .intro {
+  background-color: $acme-blue;
+  background-image: none;
+}
+
+// Show the text Stratos beneath the Acme logo
+.stratos .stratos-title > .stratos-title__header {
+  display: inline-block;
+}

@@ -22,6 +22,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { getTabsFromExtensions, StratosTabType, StratosActionMetadata, getActionsFromExtensions, StratosActionType } from '../../../../core/extension/extension-service';
 
 
 // Confirmation dialogs
@@ -56,6 +57,9 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
+
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -102,6 +106,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         });
       }
     });
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;

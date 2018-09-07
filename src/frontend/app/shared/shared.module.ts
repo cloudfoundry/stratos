@@ -133,6 +133,7 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
 
 @NgModule({
   imports: [
@@ -236,6 +237,7 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
     CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
+    ExtensionButtonsComponent,
   ],
   exports: [
     FormsModule,
@@ -324,7 +326,8 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
     BindAppsStepComponent,
     CapitalizeFirstPipe,
     CfEndpointsMissingComponent,
-    RoutingIndicatorComponent
+    RoutingIndicatorComponent,
+    ExtensionButtonsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

@@ -77,10 +77,18 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
 import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
+import { CustomImportModule } from '../../custom-import.module';
 
 
 @NgModule({
-  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
+  imports: [
+    CoreModule,
+    SharedModule,
+    CloudFoundryRoutingModule,
+    RouterModule,
+    NgxChartsModule,
+    CustomImportModule
+  ],
   declarations: [
     CloudFoundryBaseComponent,
     CloudFoundryTabsBaseComponent,
