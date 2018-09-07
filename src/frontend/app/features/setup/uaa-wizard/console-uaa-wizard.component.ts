@@ -116,7 +116,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
     this.uaaForm.valueChanges.subscribe(() => {
       observer.next(this.uaaForm.valid);
     });
-    
+
   }
 
 }
