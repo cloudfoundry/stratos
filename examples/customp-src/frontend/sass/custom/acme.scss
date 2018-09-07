@@ -6,18 +6,10 @@ $acme-primary-color: #035a97;
 $acme-secondary: #035a97;
 $acme-text: #fff;
 $acme-text-gray: #ccc;
-$acme-dark-blue: #06253A;
+$acme-dark-blue: #06253a;
 $acme-blue: #073155;
 $acme-side-nav: $acme-secondary;
 $acme-side-nav-active: #003358;
-.stratos img.stratos-title__logo {
-  width: 160px;
-}
-
-.stratos .page-header .mat-toolbar.mat-primary {
-  background-color: #fff;
-  color: #333;
-}
 
 .stratos app-page-subheader {
   .page-subheader {
@@ -38,8 +30,18 @@ $acme-side-nav-active: #003358;
   }
 }
 
-// Use Acme Blue Side Navigation
 .stratos {
+
+  img.stratos-title__logo {
+    width: 160px;
+  }
+  
+  .page-header .mat-toolbar.mat-primary {
+    background-color: #fff;
+    color: #333;
+  }
+
+  // Use Acme Blue Side Navigation
   .side-nav,
   .side-nav__top,
   .side-nav__item--active:hover {
@@ -52,15 +54,15 @@ $acme-side-nav-active: #003358;
   .side-nav__bottom {
     color: $acme-text-gray;
   }
-}
 
-// Remove background image from setup screen (e.g. upgrade screen)
-.stratos app-intro-screen > .intro {
-  background-color: $acme-blue;
-  background-image: none;
-}
+  // Show the text Stratos beneath the Acme logo
+  .stratos-title > .stratos-title__header {
+    display: inline-block;
+  }
 
-// Show the text Stratos beneath the Acme logo
-.stratos .stratos-title > .stratos-title__header {
-  display: inline-block;
+  // Remove background image from setup screen (e.g. upgrade screen)
+  app-intro-screen > .intro {
+    background-color: $acme-blue;
+    background-image: none;
+  }
 }

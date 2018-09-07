@@ -9,4 +9,4 @@ $acme-theme-primary: mat-palette($acme-primary);
 $acme-theme-warn: mat-palette($mat-red);
 $stratos-theme: mat-light-theme($acme-theme-primary, $acme-theme-primary, $acme-theme-warn);
 
-@import "custom/acme"
+@import 'custom/acme';
