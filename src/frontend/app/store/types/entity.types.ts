@@ -40,6 +40,7 @@ import {
   kubernetesPodsSchemaKey,
   kubernetesNamespacesSchemaKey,
   kubernetesAppsSchemaKey,
+  kubernetesServicesSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -48,7 +49,8 @@ import { EndpointModel } from './endpoint.types';
 import { GitBranch, GithubCommit } from './github.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
-import { KubernetesNode, KubernetesPod, KubernetesNamespace } from '../../custom/kubernetes/store/kube.types';
+import { KubernetesNode, KubernetesPod, KubernetesNamespace, KubernetesApp } from '../../custom/kubernetes/store/kube.types';
+import { KubernetesService } from '../../custom/kubernetes/services/kubernetes.service';
 
 export interface IRequestDataState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<EndpointModel>;
@@ -75,6 +77,8 @@ export interface IRequestDataState extends IRequestTypeState {
   kubernetesNode: IRequestEntityTypeState<KubernetesNode>;
   kubernetesPod: IRequestEntityTypeState<KubernetesPod>;
   kubernetesNamespace: IRequestEntityTypeState<KubernetesNamespace>;
+  kubernetesAppsSchemaKey: IRequestEntityTypeState<KubernetesApp>;
+  kubernetesServicesSchemaKey: IRequestEntityTypeState<KubernetesService>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -101,6 +105,8 @@ export interface IRequestState extends IRequestTypeState {
   kubernetesNode: IRequestEntityTypeState<RequestInfoState>;
   kubernetesPod: IRequestEntityTypeState<RequestInfoState>;
   kubernetesNamespace: IRequestEntityTypeState<RequestInfoState>;
+  kubernetesAppsSchemaKey: IRequestEntityTypeState<RequestInfoState>;
+  kubernetesServicesSchemaKey: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -135,4 +141,5 @@ export const defaultCfEntitiesState = {
   [kubernetesPodsSchemaKey]: {},
   [kubernetesNamespacesSchemaKey]: {},
   [kubernetesAppsSchemaKey]: {},
+  [kubernetesServicesSchemaKey]: {},
 };

@@ -8,6 +8,7 @@ import {
   kubernetesNamespacesSchemaKey,
   kubernetesPodsSchemaKey,
   kubernetesAppsSchemaKey,
+  kubernetesServicesSchemaKey,
 } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
@@ -27,6 +28,8 @@ import {
   GetKubernetesNodes,
   GetKubernetesPods,
   GetKubernetesApps,
+  GetKubernetesServices,
+  GET_SERVICE_INFO,
 } from './kubernetes.actions';
 import { KubernetesInfo, KubernetesPod } from './kube.types';
 
@@ -94,6 +97,40 @@ export class KubernetesEffects {
             } as NormalizedResponse;
             const id = action.kubeGuid;
             mappedData.entities[kubernetesPodsSchemaKey][id] = info[id].items;
+            mappedData.result.push(id);
+            console.log('KUBE DATA');
+            console.log(info[id].items);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(err.message, action)
+          ])
+        );
+    })
+  );
+
+  @Effect()
+  fetchServicesInfo$ = this.actions$.ofType<GetKubernetesServices>(GET_SERVICE_INFO).pipe(
+    flatMap(action => {
+      console.log('Firing off getServices Request');
+      this.store.dispatch(new StartRequestAction(action));
+      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
+      const requestArgs = {
+        headers: headers
+      };
+      return this.http
+        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/services`, requestArgs)
+        .pipe(
+          mergeMap(response => {
+            const info = response.json();
+            const mappedData = {
+              entities: { [kubernetesServicesSchemaKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            const id = action.kubeGuid;
+            mappedData.entities[kubernetesServicesSchemaKey][id] = info[id].items;
             mappedData.result.push(id);
             console.log('KUBE DATA');
             console.log(info[id].items);

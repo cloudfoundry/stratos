@@ -1,7 +1,7 @@
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { kubernetesNodesSchemaKey, entityFactory, kubernetesPodsSchemaKey } from '../../../store/helpers/entity-factory';
-import { kubernetesNamespacesSchemaKey, kubernetesAppsSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
+import { kubernetesNamespacesSchemaKey, kubernetesAppsSchemaKey, kubernetesServicesSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 
 export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
 export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
@@ -18,6 +18,10 @@ export const GET_NAMESPACES_INFO_FAILURE = '[KUBERNETES Endpoint] Get Namespaces
 export const GET_KUBERNETES_APP_INFO = '[KUBERNETES Endpoint] Get Kubernetes App Info';
 export const GET_KUBERNETES_APP_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Kubernetes App Info Success';
 export const GET_KUBERNETES_APP_INFO_FAILURE = '[KUBERNETES Endpoint] Get Kubernetes App Info Failure';
+
+export const GET_SERVICE_INFO = '[KUBERNETES Endpoint] Get Services Info';
+export const GET_SERVICE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Services Info Success';
+export const GET_SERVICE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Services Info Failure';
 
 export class GetKubernetesNodes implements PaginatedAction {
   constructor(public kubeGuid) {
@@ -73,6 +77,20 @@ export class GetKubernetesApps implements PaginatedAction {
     GET_KUBERNETES_APP_INFO,
     GET_KUBERNETES_APP_INFO_SUCCESS,
     GET_KUBERNETES_APP_INFO_FAILURE
+  ];
+  paginationKey: string;
+}
+export class GetKubernetesServices implements PaginatedAction {
+  constructor(public kubeGuid) {
+    this.paginationKey = getPaginationKey(kubernetesServicesSchemaKey, kubeGuid);
+  }
+  type = GET_SERVICE_INFO;
+  entityKey = kubernetesServicesSchemaKey;
+  entity = [entityFactory(kubernetesServicesSchemaKey)];
+  actions = [
+    GET_SERVICE_INFO,
+    GET_SERVICE_INFO_SUCCESS,
+    GET_SERVICE_INFO_FAILURE
   ];
   paginationKey: string;
 }

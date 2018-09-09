@@ -39,6 +39,7 @@ export const kubernetesSchemaKey = 'kubernetesInfo';
 export const kubernetesNodesSchemaKey = 'kubernetesNode';
 export const kubernetesPodsSchemaKey = 'kubernetesPod';
 export const kubernetesNamespacesSchemaKey = 'kubernetesNamespace';
+export const kubernetesServicesSchemaKey = 'kubernetesService';
 export const kubernetesAppsSchemaKey = 'kubernetesApps';
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -103,6 +104,8 @@ const kubernetesPodsSchema = new EntitySchema(kubernetesPodsSchemaKey, {}, { idA
 entityCache[kubernetesPodsSchemaKey] = kubernetesPodsSchema;
 const kubernetesNamespacesSchema = new EntitySchema(kubernetesNamespacesSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
 entityCache[kubernetesNamespacesSchemaKey] = kubernetesNamespacesSchema;
+const kubernetesServicesSchema = new EntitySchema(kubernetesServicesSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
+entityCache[kubernetesServicesSchemaKey] = kubernetesServicesSchema;
 
 const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appStatsSchemaKey] = AppStatSchema;
