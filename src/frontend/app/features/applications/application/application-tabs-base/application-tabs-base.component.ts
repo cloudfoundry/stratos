@@ -22,8 +22,13 @@ import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { getTabsFromExtensions, StratosTabType, StratosActionMetadata, getActionsFromExtensions, StratosActionType } from '../../../../core/extension/extension-service';
-
+import {
+  getTabsFromExtensions,
+  StratosTabType,
+  StratosActionMetadata,
+  getActionsFromExtensions,
+  StratosActionType
+} from '../../../../core/extension/extension-service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
