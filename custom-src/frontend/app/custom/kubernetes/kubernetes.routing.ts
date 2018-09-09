@@ -6,6 +6,7 @@ import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
+import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -34,6 +35,10 @@ const kubernetes: Routes = [{
     {
       path: 'pods',
       component: KubernetesPodsTabComponent
+    },
+    {
+      path: 'apps',
+      component: KubernetesAppsTabComponent
     },
   ]
 }];

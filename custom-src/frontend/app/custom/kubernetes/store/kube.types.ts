@@ -21,6 +21,11 @@ export interface KubernetesNode {
   spec: PodSpec;
 }
 
+export interface KubernetesApp {
+  name: string;
+  pods: KubernetesPod[];
+}
+
 export interface NodeStatus {
   capacity: Capacity;
   allocatable: Allocatable;

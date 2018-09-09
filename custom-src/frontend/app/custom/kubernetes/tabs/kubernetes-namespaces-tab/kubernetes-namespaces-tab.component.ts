@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { KubernetesNamespacesListConfigService } from '../../list-types/kubernetes-namespaces/kubernetes-namespaces-list-config.service';
+import { ListConfig } from '../../../../shared/components/list/list.component.types';
 
 @Component({
   selector: 'app-kubernetes-namespaces-tab',

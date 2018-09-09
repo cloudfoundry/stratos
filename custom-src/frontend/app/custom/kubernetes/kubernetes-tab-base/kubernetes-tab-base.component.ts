@@ -33,6 +33,7 @@ export class KubernetesTabBaseComponent implements OnInit {
     { link: 'nodes', label: 'Nodes' },
     { link: 'namespaces', label: 'Namespaces' },
     { link: 'pods', label: 'Pods' },
+    { link: 'apps', label: 'Applications' },
   ];
 
   isFetching$: Observable<boolean>;
