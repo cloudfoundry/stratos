@@ -1,9 +1,13 @@
+:host {
+  height: 100%;
+  width: 100%;
+}
+
 mat-checkbox {
   padding-top: 40px;
 }
 
 .create-endpoint {
-
   &__section {
     margin-top: 48px;
 

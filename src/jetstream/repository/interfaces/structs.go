@@ -65,8 +65,9 @@ type EndpointTokenRecord struct {
 	LoggingEndpoint string
 }
 
-//TODO this could be moved back to tokens subpackage, and extensions could import it?
+// TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
+	TokenGUID    string
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64
@@ -74,6 +75,7 @@ type TokenRecord struct {
 	AuthType     string
 	Metadata     string
 	SystemShared bool
+	LinkedGUID   string // Indicates the GUID of the token that this token is linked to (if any)
 }
 
 type CFInfo struct {
@@ -225,6 +227,7 @@ type PortalConfig struct {
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
+	SSOOptions                      string   `configName:"SSO_OPTIONS"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                        string   `configName:"LOG_LEVEL"`
 	CFAdminIdentifier               string

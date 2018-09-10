@@ -95,7 +95,7 @@ function getValue(obj, fieldArray: string[], index = 0, castToString = false): s
     }
     return obj;
   }
-  if (typeof obj[field] === 'undefined') {
+  if (!obj[field]) {
     return '';
   }
   return getValue(obj[field], fieldArray, ++index);

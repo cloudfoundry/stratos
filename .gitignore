@@ -87,6 +87,7 @@ build/dev_config.json
 e2e-reports/
 .stratos-git-metadata.json
 src/jetstream/jetstream
+src/jetstream/console-database.db
 
 # Customisations
 

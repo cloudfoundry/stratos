@@ -1,8 +1,10 @@
-import { by, element, promise, browser, protractor, Key } from 'protractor';
+import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
+
 import { Component } from './component.po';
-import { MetaCard } from './meta-card.po';
-import { PaginatorComponent } from './paginator.po';
+import { FormComponent } from './form.po';
+import { MenuComponent } from './menu.po';
+import { MetaCard, MetaCardTitleType } from './meta-card.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -19,7 +21,7 @@ export class ListTableComponent extends Component {
     super(locator);
   }
 
-  getHeaderText() {
+  getHeaderText(): promise.Promise<string> {
     return this.locator.element(by.css('.list-component__header__left--text')).getText();
   }
 
@@ -32,7 +34,7 @@ export class ListTableComponent extends Component {
   }
 
   // Get the data in the table
-  getTableDataRaw() {
+  getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
     const getRows = this.locator.all(by.css('.app-table__row')).map(row => row.all(by.css('.app-table__cell')).map(cell => cell.getText()));
     return promise.all([getHeaders, getRows]).then(([headers, rows]) => {
@@ -43,7 +45,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData() {
+  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -58,11 +60,40 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number) {
+  selectRow(index: number): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
       return rows[index].element(by.css('.mat-radio-button')).click();
     });
+  }
+
+  getHighlightedRow(): promise.Promise<number> {
+    return this.locator.all(by.css('.app-table__row'))
+      .map((row, index) => row.getAttribute('class').then(classes => classes.indexOf('table-row-wrapper__highlighted')))
+      .then(isHighlighted => {
+        return promise.all(isHighlighted);
+      })
+      .then(isHighlighted => {
+        for (let i = 0; i < isHighlighted.length; i++) {
+          if (isHighlighted[i]) {
+            return i;
+          }
+        }
+        return -1;
+      });
+  }
+
+  openRowActionMenuByIndex(index: number): MenuComponent {
+    return this.openRowActionMenuByRow(this.getRows().get(index));
+  }
+
+  openRowActionMenuByRow(row: ElementFinder): MenuComponent {
+    row.element(by.css('app-table-cell-actions button')).click();
+    return new MenuComponent();
+  }
+
+  toggleSort(headerTitle: string): promise.Promise<any> {
+    return this.locator.element(by.cssContainingText('mat-header-row app-table-cell', headerTitle)).click();
   }
 }
 
@@ -73,7 +104,7 @@ export class ListCardComponent extends Component {
     super(locator);
   }
 
-  getCardCound() {
+  getCardCount() {
     const noRows = this.locator.all(by.css('.no-rows'));
     return noRows.count().then(rows => {
       return rows === 1 ? 0 : this.getCards().count();
@@ -84,16 +115,16 @@ export class ListCardComponent extends Component {
     return this.locator.all(by.css('app-card:not(.row-filler)'));
   }
 
-  getCard(index: number): MetaCard {
-    return new MetaCard(this.getCards().get(index));
+  getCard(index: number, metaType = MetaCardTitleType.CUSTOM): MetaCard {
+    return new MetaCard(this.getCards().get(index), metaType);
   }
 
-  findCardByTitle(title: string): promise.Promise<MetaCard> {
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
     return this.getCards().filter((elem) => {
       return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
-      return new MetaCard(e[0]);
+      return new MetaCard(e[0], metaType);
     });
   }
 
@@ -112,21 +143,17 @@ export class ListCardComponent extends Component {
 export class ListHeaderComponent extends Component {
 
   constructor(locator: ElementFinder) {
-    super(locator);
-  }
-
-  getListHeader(): ElementFinder {
-    return this.locator.element(by.css('.list-component__header'));
+    super(locator.element(by.css('.list-component__header')));
   }
 
   getFilterFormField(): ElementArrayFinder {
-    return this.getListHeader()
+    return this.locator
       .element(by.css('.list-component__header__left--multi-filters'))
       .all(by.tagName('mat-form-field'));
   }
 
   getRightHeaderSection(): ElementFinder {
-    return this.getListHeader().element(by.css('.list-component__header__right'));
+    return this.locator.element(by.css('.list-component__header__right'));
   }
 
   getSearchInputField(): ElementFinder {
@@ -136,8 +163,16 @@ export class ListHeaderComponent extends Component {
   setSearchText(text: string): promise.Promise<void> {
     const searchField = this.getSearchInputField();
     searchField.click();
-    searchField.sendKeys(text);
-    return searchField.sendKeys(Key.RETURN);
+    searchField.clear();
+    return searchField.sendKeys(text);
+  }
+
+  clearSearchText() {
+    const searchField = this.getSearchInputField();
+    searchField.click();
+    searchField.clear();
+    searchField.sendKeys('a');
+    searchField.sendKeys(Key.BACK_SPACE);
   }
 
   getSearchText(): promise.Promise<string> {
@@ -169,6 +204,90 @@ export class ListHeaderComponent extends Component {
     return this.getRightHeaderSection().element(by.css('#list-card-toggle'));
   }
 
+  private findSortSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__right .sort'));
+  }
+
+  getSortFieldForm(): FormComponent {
+    return new FormComponent(this.findSortSection());
+  }
+
+  toggleSortOrder() {
+    this.findSortSection().element(by.css('button')).click();
+  }
+
+  getAdd(): ElementFinder {
+    return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
+  }
+
+}
+
+export class ListPaginationComponent extends Component {
+  constructor(listComponent: ElementFinder) {
+    super(listComponent.element(by.tagName('.list-component__paginator')));
+  }
+
+  getTotalResults() {
+    return this.locator.element(by.css('.mat-paginator-range-label')).getText().then(label => {
+      const index = label.indexOf('of ');
+      if (index > 0) {
+        const value = label.substr(index + 3).trim();
+        return parseInt(value, 10);
+      }
+      return -1;
+    });
+  }
+
+  private findPageSizeSection(): ElementFinder {
+    return this.locator.element(by.css('.mat-paginator-page-size'));
+  }
+
+  getPageSize(): promise.Promise<string> {
+    return this.getPageSizeForm().getText('mat-select-1');
+  }
+
+  setPageSize(pageSize): promise.Promise<void> {
+    return this.getPageSizeForm().fill({ 'mat-select-1': pageSize });
+  }
+
+  getPageSizeForm(): FormComponent {
+    return new FormComponent(this.findPageSizeSection());
+  }
+
+  getNavFirstPage(): Component {
+    return new Component(this.locator.element(by.css('.mat-paginator-navigation-first')));
+  }
+
+  getNavLastPage(): Component {
+    return new Component(this.locator.element(by.css('.mat-paginator-navigation-last')));
+  }
+
+  getNavPreviousPage(): Component {
+    return new Component(this.locator.element(by.css('.mat-paginator-navigation-previous')));
+  }
+
+  getNavNextPage(): Component {
+    return new Component(this.locator.element(by.css('.mat-paginator-navigation-next')));
+  }
+
+}
+
+export class ListEmptyComponent extends Component {
+  constructor(listComponent: ElementFinder) {
+    super(listComponent.element(by.css('.list-component__no-entries')));
+  }
+
+  getDefault(): Component {
+    return new Component(element(by.css('.list-component__default-no-entries')));
+  }
+
+  getCustom(): Component {
+    return new Component(element(by.css('app-no-content-message')));
+  }
+
+  getCustomLineOne(): promise.Promise<string> {
+    return this.getCustom().getComponent().element(by.css('.first-line')).getText();
+  }
 }
 /**
  * Page Object for the List component
@@ -181,11 +300,17 @@ export class ListComponent extends Component {
 
   public header: ListHeaderComponent;
 
+  public pagination: ListPaginationComponent;
+
+  public empty: ListEmptyComponent;
+
   constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.cards = new ListCardComponent(locator);
     this.header = new ListHeaderComponent(locator);
+    this.pagination = new ListPaginationComponent(locator);
+    this.empty = new ListEmptyComponent(locator);
   }
 
   isTableView(): promise.Promise<boolean> {
@@ -205,10 +330,10 @@ export class ListComponent extends Component {
   }
 
   getTotalResults() {
-    const paginator = new PaginatorComponent();
-    return paginator.isDisplayed().then(havePaginator => {
+    // const paginator = new PaginatorComponent();
+    return this.pagination.isDisplayed().then(havePaginator => {
       if (havePaginator) {
-        return paginator.getTotalResults();
+        return this.pagination.getTotalResults();
       }
       return this.isCardsView().then(haveCardsView => {
         if (haveCardsView) {
