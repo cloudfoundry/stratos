@@ -24,7 +24,6 @@ export class KubernetesComponent implements OnInit {
           c => c.connectionStatus === 'connected'
         );
         const hasOne = connectedEndpoints.length === 1;
-        console.log('NAV:' + hasOne);
         if (hasOne) {
           this.store.dispatch(new RouterNav({
             path: ['kubernetes', connectedEndpoints[0].guid]

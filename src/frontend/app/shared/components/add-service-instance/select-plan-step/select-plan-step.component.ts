@@ -80,10 +80,8 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
-    private csiGuidsService: CsiGuidsService,
     private componentFactoryResolver: ComponentFactoryResolver,
     private modeService: CsiModeService
 
@@ -128,7 +126,8 @@ export class SelectPlanStepComponent implements OnDestroy {
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),
         map(([valid, servicePlans]) =>
-          servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0])
+          servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0]),
+        tap(p => console.log(p))
       );
   }
 
@@ -206,7 +205,10 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   isYesOrNo = val => val ? 'yes' : 'no';
   isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
-  isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
+  isFree = (selPlan: APIResource<IServicePlan>) => this.isYesOrNo(selPlan.entity.free);
+  getCost = (selPlan: EntityInfo<APIResource<IServicePlan>>) => {
+    return selPlan.entity.entity.extra;
+  }
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(

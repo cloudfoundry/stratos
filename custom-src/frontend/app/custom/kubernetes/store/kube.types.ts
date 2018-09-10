@@ -22,6 +22,7 @@ export interface KubernetesNode {
 }
 
 export interface KubernetesApp {
+  kubeId: string;
   name: string;
   pods: KubernetesPod[];
 }

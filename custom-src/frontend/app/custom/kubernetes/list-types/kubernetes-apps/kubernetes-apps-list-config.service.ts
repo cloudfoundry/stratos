@@ -9,6 +9,7 @@ import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesAppsDataSource } from './kubernetes-apps-data-source';
 import { KubernetesApp } from '../../store/kube.types';
+import { AppLinkComponent } from './app-link/app-link.component';
 
 @Injectable()
 export class KubernetesAppsListConfigService implements IListConfig<KubernetesApp> {
@@ -17,9 +18,7 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
   columns: Array<ITableColumn<KubernetesApp>> = [
     {
       columnId: 'name', headerCell: () => 'Release Name',
-      cellDefinition: {
-        getValue: (row) => `${row.name}`
-      },
+      cellComponent: AppLinkComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',

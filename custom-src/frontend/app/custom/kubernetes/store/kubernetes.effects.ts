@@ -182,7 +182,6 @@ export class KubernetesEffects {
   @Effect()
   fetchKubernetesAppsInfo$ = this.actions$.ofType<GetKubernetesApps>(GET_KUBERNETES_APP_INFO).pipe(
     flatMap(action => {
-      console.log('Firing off getKubeApps request');
       this.store.dispatch(new StartRequestAction(action));
       const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
@@ -200,22 +199,27 @@ export class KubernetesEffects {
 
             const id = action.kubeGuid;
             const releases = info[id].items
-            .filter((pod: KubernetesPod) => !!pod.metadata.labels && !!pod.metadata.labels['release'])
-            .map( (pod: KubernetesPod) =>  pod.metadata.labels['release']);
+              .filter((pod: KubernetesPod) => !!pod.metadata.labels && !!pod.metadata.labels['release'])
+              .map((pod: KubernetesPod) => pod.metadata.labels['release']);
             const appReleases = releases.map((releaseName) => (
               {
                 name: releaseName,
+                kubeId: action.kubeGuid,
                 pods: info[id].items.filter(
-                    (p: KubernetesPod) => !!p.metadata.labels &&
-                   !!p.metadata.labels['release'] &&
+                  (p: KubernetesPod) => !!p.metadata.labels &&
+                    !!p.metadata.labels['release'] &&
                     p.metadata.labels['release'] === releaseName
-                  )
+                )
               })
             );
-            mappedData.entities[kubernetesAppsSchemaKey][id] = appReleases;
-            mappedData.result.push(id);
-            console.log('KUBE DATA');
-            console.log(info[id].items);
+
+            appReleases.forEach(r => {
+              const _id = `${r.kubeId}-${r.name}`;
+              mappedData.entities[kubernetesAppsSchemaKey][_id] = r;
+              if (mappedData.result.indexOf(_id) === -1) {
+                mappedData.result.push(_id);
+              }
+            });
             return [
               new WrapperRequestActionSuccess(mappedData, action)
             ];

@@ -9,7 +9,7 @@ import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 @Injectable()
