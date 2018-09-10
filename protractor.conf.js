@@ -8,6 +8,7 @@ const {
 const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
+const globby = require('globby');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -39,21 +40,29 @@ try {
 
 // This is the maximum amount of time ALL before/after/it's must execute in
 const timeout = 40000;
+const checkSuiteGlob = './src/test-e2e/check/*-e2e.spec.ts';
 
 exports.config = {
   allScriptsTimeout: timeout,
+  // Exclude the dashboard tests from all suites for now
+  exclude: [
+    './src/test-e2e/dashboard/dashboard-e2e.spec.ts',
+  ],
+  // Suites - use globby to give us more control over included test specs
   suites: {
-    e2e: [
-      './src/test-e2e/application/**/*-e2e.spec.ts',
-      './src/test-e2e/applications/**/*-e2e.spec.ts',
-      './src/test-e2e/cloud-foundry/**/*-e2e.spec.ts',
-      './src/test-e2e/dashboard/**/*-e2e.spec.ts',
-      './src/test-e2e/endpoints/**/*-e2e.spec.ts',
-      './src/test-e2e/login/**/*-e2e.spec.ts',
-      './src/test-e2e/marketplace/**/*-e2e.spec.ts',
-    ],
-    check: './src/test-e2e/check/*-e2e.spec.ts',
+    e2e: globby.sync([
+      './src/test-e2e/**/*-e2e.spec.ts',
+      '!./src/test-e2e/login/*-sso-e2e.spec.ts',
+      '!' + checkSuiteGlob
+    ]),
+    sso: globby.sync([
+      './src/test-e2e/**/*-e2e.spec.ts',
+      '!./src/test-e2e/login/login-e2e.spec.ts',
+      '!' + checkSuiteGlob
+    ]),
+    check: checkSuiteGlob,
   },
+  // Default test suite is the E2E test suite
   suite: 'e2e',
   capabilities: {
     'browserName': 'chrome',

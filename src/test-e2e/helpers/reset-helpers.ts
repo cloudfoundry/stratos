@@ -74,6 +74,26 @@ export class ResetsHelpers {
       });
   }
 
+  getSSOLoginStatus(req, setup) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/auth/session/verify' })
+      .then(response => {
+        // Look for the header
+        setup.ssoEnabled = this.parseSSOLoginStatus(response);
+        setup.ssoEnabledFetched = true;
+        return setup.sso;
+      }).catch(e => {
+        // 404 when no session
+        setup.ssoEnabled = this.parseSSOLoginStatus(e.response);
+        setup.ssoEnabledFetched = true;
+        return setup.sso;
+      });
+  }
+
+  private parseSSOLoginStatus(response: any): boolean {
+    const sso = response.headers['x-stratos-sso-login'];
+    return !!sso && sso.length > 0;
+  }
+
   /**
    *
    * Ensure we have multiple Cloud Foundries registered

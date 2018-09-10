@@ -52,6 +52,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       },
       types: new Array<EndpointType>('cf', 'metrics')
     },
+    {
+      name: 'Single sign-on',
+      value: 'sso',
+      form: {},
+      types: new Array<EndpointType>('cf')
+    },
   ];
 
   private hasAttemptedConnect: boolean;
@@ -201,6 +207,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   submit() {
     this.hasAttemptedConnect = true;
     const { guid, authType, authValues, systemShared } = this.endpointForm.value;
+
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,

@@ -89,6 +89,16 @@ export class EndpointsEffect {
   @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS).pipe(
     mergeMap(action => {
       const actionType = 'update';
+
+      // Special-case SSO login - redirect to the back-end
+      if (action.authType === 'sso') {
+        const loc = window.location.protocol + '//' + window.location.hostname +
+        (window.location.port ? ':' + window.location.port : '');
+        const ssoUrl = '/pp/v1/auth/login/cnsi?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
+        window.location.assign(ssoUrl);
+        return [];
+      }
+
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {

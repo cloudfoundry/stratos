@@ -1,9 +1,9 @@
-import { ElementArrayFinder, browser, by, element as protractorElement } from 'protractor';
+import { browser, by, element as protractorElement, ElementArrayFinder } from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
+
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
-import { e2e } from '../e2e';
 
 
 export enum ConsoleUserType {

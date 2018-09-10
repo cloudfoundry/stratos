@@ -1,14 +1,10 @@
 import { browser, by, element, promise, protractor } from 'protractor';
-
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { ssoHelper } from '../helpers/sso-helper';
-import { Component } from '../po/component.po';
-import { SSOLoginPage } from './sso-login.po';
 
-const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
+const LOGIN_FAIL_MSG = 'Unable to verify email or password. Please try again.';
 const until = protractor.ExpectedConditions;
 
-export class LoginPage {
+export class SSOLoginPage {
 
   helpers = new E2EHelpers();
 
@@ -20,16 +16,27 @@ export class LoginPage {
     return browser.getCurrentUrl().then(url => url === browser.baseUrl + '/login');
   }
 
+  isUAALoginPage(): promise.Promise<boolean> {
+    const welcome = element(by.css('.island > h1'));
+    return welcome.getText().then(text => text === 'Welcome!');
+  }
+
   getTitle() {
     return element(by.css('app-root h1')).getText();
   }
 
   enterLogin(username: string, password: string) {
-    const formFields = this.helpers.getFormFields('loginForm');
-    formFields.get(0).clear();
-    formFields.get(1).clear();
-    formFields.get(0).sendKeys(username);
-    return formFields.get(1).sendKeys(password);
+    const usernameField = element(by.css('input[name="username"]'));
+    const passwordField = element(by.css('input[name="password"]'));
+    usernameField.clear();
+    passwordField.clear();
+    usernameField.sendKeys(username);
+    return passwordField.sendKeys(password);
+  }
+
+  submit() {
+    const submitField = element(by.css('input[type="submit"]'));
+    return submitField.click();
   }
 
   loginButton() {
@@ -37,22 +44,17 @@ export class LoginPage {
   }
 
   getLoginError() {
-    return element(by.css('.login-message.login-message--show.login-message-error')).getText();
+    return element(by.css('.alert-error')).getText();
   }
 
   login(username: string, password: string) {
-    if (ssoHelper.ssoEnabled) {
-      const ssoLoginPage = new SSOLoginPage();
-      return ssoLoginPage.login(username, password);
-    } else {
-      return this.nonSSOLogin(username, password);
-    }
-  }
-
-  nonSSOLogin(username: string, password: string) {
+    browser.waitForAngularEnabled(false);
     this.navigateTo();
-    this.enterLogin(username, password);
     this.loginButton().click();
+    this.enterLogin(username, password);
+    this.submit();
+
+    browser.waitForAngularEnabled(true);
 
     browser.wait(() => {
       return browser.getCurrentUrl().then(function (url) {
@@ -89,10 +91,6 @@ export class LoginPage {
 
   waitForNoEndpoints() {
     return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
-  }
-
-  waitForLoading() {
-    return Component.waitUntilNotShown(element(by.css('.login__loading')));
   }
 
 }
