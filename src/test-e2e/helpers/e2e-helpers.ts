@@ -1,4 +1,4 @@
-import { ElementArrayFinder, browser, by, element as protractorElement} from 'protractor';
+import { ElementArrayFinder, browser, by, element as protractorElement } from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
@@ -13,7 +13,7 @@ export enum ConsoleUserType {
 
 export class E2EHelpers {
 
-  static e2eItemPrefix = 'e2e.';
+  static e2eItemPrefix = 'acceptance.e2e.';
   static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
 
   secrets = new SecretsHelpers();

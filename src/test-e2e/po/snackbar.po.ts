@@ -1,9 +1,6 @@
-import { protractor, ElementFinder } from 'protractor';
-import { browser, element, by, promise } from 'protractor';
-import { Component } from './component.po';
-import { e2e } from '../e2e';
+import { by, element, ElementFinder, promise } from 'protractor';
 
-const until = protractor.ExpectedConditions;
+import { Component } from './component.po';
 
 /**
  * Page Object for snack bar component

@@ -44,11 +44,13 @@ exports.config = {
   allScriptsTimeout: timeout,
   suites: {
     e2e: [
-      './src/test-e2e/login/*-e2e.spec.ts',
-      './src/test-e2e/endpoints/*-e2e.spec.ts',
-      './src/test-e2e/application/*-e2e.spec.ts',
-      './src/test-e2e/applications/*-e2e.spec.ts',
-      './src/test-e2e/cloud-foundry/*-e2e.spec.ts',
+      './src/test-e2e/application/**/*-e2e.spec.ts',
+      './src/test-e2e/applications/**/*-e2e.spec.ts',
+      './src/test-e2e/cloud-foundry/**/*-e2e.spec.ts',
+      './src/test-e2e/dashboard/**/*-e2e.spec.ts',
+      './src/test-e2e/endpoints/**/*-e2e.spec.ts',
+      './src/test-e2e/login/**/*-e2e.spec.ts',
+      './src/test-e2e/marketplace/**/*-e2e.spec.ts',
     ],
     check: './src/test-e2e/check/*-e2e.spec.ts',
   },

@@ -11,7 +11,6 @@ describe('Check Availability of an existing system', () => {
 
   it('Should reach log in page', () => {
     expect(loginPage.isLoginPage()).toBeTruthy();
-    expect<any>(loginPage.getTitle()).toEqual('STRATOS');
     expect(loginPage.loginButton().isPresent()).toBeTruthy();
   });
 
