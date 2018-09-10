@@ -16,10 +16,16 @@ You'll need the `uaac` CLI to configure your Client to accept the Stratos SSO Ca
 > `https://HOST.DOMAIN/pp/v1/auth/sso_login_callback`
 > where `HOST` and `DOMAIN` depend on your Stratos installation.
 
+Target your UAA
+
+```
+uaac target <UAA URL>
+```
+
 Login to your UAA with the `admin` client:
 
 ```
-uaac client token get admin -s <ADMIN_CLIENT_SECRET> 
+uaac token client get admin -s <ADMIN_CLIENT_SECRET>
 ```
 
 Next, check the configuration of your Client - for example, for the `cf` client:
@@ -28,16 +34,22 @@ Next, check the configuration of your Client - for example, for the `cf` client:
 uaac client get cf
 ```
 
-You'll get the current configuration - the property of interest is the `redirect_uri`.
+You'll get the current configuration - there are two properties of interest `redirect_uri` and `authorized_grant_types`.
 
-If not already configured, update the Client with:
+> Note: The following commands will overwrite existing values for the settings specified. To keep the existing values along with the new value include them in the new value as a comma-separated list.
+
+The `redirect_uri` value should contain the Stratos redirect URI. If not update the Client with:
 
 ```
 uaac client update cf --redirect_uri https://HOST.DOMAIN/pp/v1/auth/sso_login_callback
 ```
 
-> Note: If you already have values in the `redirect_uri`, you will need to specify these when performing the update,
-by placing them as a comma-separated list, as update will over-write the existing value.
+The `authorized_grant_types` value should contain `authorization_code`. If not update the Client with:
+
+```
+uaac client update cf --authorized_grant_types authorization_code
+```
+
 
 
 
