@@ -6,10 +6,12 @@ import { SharedModule } from '../shared/shared.module';
 import { AcmeLoginComponent } from './acme-login/acme-login.component';
 import { StratosNavExtension } from '../core/extension/extension-service';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
+import { AcmeSupportInfoComponent } from './acme-support-info/acme-support-info.component';
 
 const AcmeCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2018 ACME Corp',
   hasEula: true,
+  supportInfoComponent: AcmeSupportInfoComponent,
 };
 
 // CustomModule is bundled in to the main application bundle
@@ -33,12 +35,14 @@ const AcmeCustomizations: CustomizationsMetadata = {
   ],
   declarations: [
     AcmeLoginComponent,
-    AppTabExtensionComponent
+    AppTabExtensionComponent,
+    AcmeSupportInfoComponent
   ],
   entryComponents: [
     AcmeLoginComponent,
     // You must specify the tab as an entry component
-    AppTabExtensionComponent
+    AppTabExtensionComponent,
+    AcmeSupportInfoComponent
   ],
   providers: [
     { provide: Customizations, useValue: AcmeCustomizations }
