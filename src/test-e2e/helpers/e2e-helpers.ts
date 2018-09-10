@@ -13,7 +13,7 @@ export enum ConsoleUserType {
 
 export class E2EHelpers {
 
-  static e2eItemPrefix = 'acceptance.e2e.';
+  static e2eItemPrefix = 'e2e.';
   static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
 
   secrets = new SecretsHelpers();
@@ -40,6 +40,11 @@ export class E2EHelpers {
 
     browser.get('/').then(() => {
       browser.executeScript('window.sessionStorage.setItem("STRATOS_DISABLE_ANIMATIONS", true);');
+      // Allow GitHub API Url to be overridden
+      const gitHubUrl = this.secrets.getStratosGitHubApiUrl();
+      if (gitHubUrl) {
+        browser.executeScript('window.sessionStorage.setItem("STRATOS_GITHUB_API_URL", "' + gitHubUrl + '");');
+      }
     });
 
     if (loginUser) {

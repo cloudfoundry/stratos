@@ -8,8 +8,8 @@ export class CreateServiceInstance extends Page {
 
   stepper = new CreateServiceInstanceStepper();
 
-  constructor() {
-    super('/services/new');
-   }
+  constructor(url = '/services/new') {
+    super(url);
+  }
 
 }

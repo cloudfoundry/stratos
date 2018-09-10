@@ -9,11 +9,13 @@ const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 
-var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
-
-var reportFolderName = 'stratos-e2e-' + timestamp;
+// Test report folder name
+var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
+var reportFolderName = timestamp + '-e2e-report';
 
 const SECRETS_FILE = 'secrets.yaml';
+
+const E2E_REPORT_FOLDER = process.env['E2E_REPORT_FOLDER'] || './e2e-reports/' + reportFolderName;
 
 var fs = require('fs');
 var path = require('path');
@@ -35,8 +37,11 @@ try {
   process.exit(1);
 }
 
+// This is the maximum amount of time ALL before/after/it's must execute in
+const timeout = 40000
+
 exports.config = {
-  allScriptsTimeout: 30000,
+  allScriptsTimeout: timeout,
   specs: [
     './src/test-e2e/**/*-e2e.spec.ts',
   ],
@@ -53,7 +58,7 @@ exports.config = {
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
-    defaultTimeoutInterval: 30000,
+    defaultTimeoutInterval: timeout,
     print: function () {}
   },
   params: secrets,
@@ -63,7 +68,7 @@ exports.config = {
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
     jasmine.getEnv().addReporter(new HtmlReporter({
-      baseDirectory: './e2e-reports/' + reportFolderName,
+      baseDirectory: E2E_REPORT_FOLDER,
       takeScreenShotsOnlyForFailedSpecs: true,
       docTitle: 'E2E Test Report: ' + timestamp,
       docName: 'index.html',
