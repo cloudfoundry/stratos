@@ -16,7 +16,7 @@ describe('Login', () => {
 
   it('- should reach log in page', () => {
     expect(loginPage.isLoginPage()).toBeTruthy();
-    expect<any>(loginPage.getTitle()).toEqual('STRATOS');
+    expect<any>(loginPage.getTitle()).toEqual('');
     expect(loginPage.loginButton().isPresent()).toBeTruthy();
   });
 

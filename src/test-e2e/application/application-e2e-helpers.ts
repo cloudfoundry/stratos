@@ -1,3 +1,4 @@
+import { E2EConfigCloudFoundry } from '../e2e.types';
 import { browser, promise } from 'protractor';
 
 import { IApp, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
@@ -20,6 +21,8 @@ export class ApplicationE2eHelper {
   }
 
   static createApplicationName = (isoTime?: string): string => E2EHelpers.createCustomName(customAppLabel, isoTime).toLowerCase();
+  static createRouteName = (isoTime?: string): string =>
+    E2EHelpers.createCustomName('route-' + customAppLabel, isoTime).toLowerCase().replace(/[-:.]+/g, '')
 
   /**
    * Get default sanitized URL name for App
@@ -42,7 +45,7 @@ export class ApplicationE2eHelper {
       return appName ? this.fetchApp(cfGuid1, spaceGuid1, appName) : this.fetchAppByGuid(cfGuid1, appGuid);
     });
 
-    return appP.then(app => ({ cfGuid: this.cfHelper.cachedDefaultCfGuid, app })).catch(e => {
+    return appP.then(app => ({ cfGuid: CFHelpers.cachedDefaultCfGuid, app })).catch(e => {
       e2e.log('Failed to fetch application in default cf, org and space: ' + e);
       throw e;
     });
@@ -70,7 +73,7 @@ export class ApplicationE2eHelper {
     maxChain: number,
     abortChainFc: (val: T) => boolean,
     count = 0): promise.Promise<T> {
-    if (count > maxChain || abortChainFc(currentValue)) {
+    if (count >= maxChain || abortChainFc(currentValue)) {
       return promise.fullyResolved(currentValue);
     }
     e2e.log('Chaining requests. Count: ' + count);
@@ -92,7 +95,8 @@ export class ApplicationE2eHelper {
     needApp?: {
       appName?: string,
       appGuid?: string
-    }
+    },
+    pollForMissingRoutes = true
   ): promise.Promise<any> => {
     if (!haveApp && !needApp) {
       e2e.log(`Skipping Deleting App...`);
@@ -128,7 +132,7 @@ export class ApplicationE2eHelper {
         const routes: promise.Promise<APIResource<IRoute>[]> = this.chain<APIResource<IRoute>[]>(
           app.entity.routes,
           () => this.cfHelper.fetchAppRoutes(cfGuid, app.metadata.guid),
-          10,
+          pollForMissingRoutes ? 10 : 0,
           (res) => !!res && !!res.length
         );
 
@@ -159,12 +163,10 @@ export class ApplicationE2eHelper {
       .catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
   }
 
-  createApp(cfGuid: string, orgName: string, spaceName: string, appName: string) {
+  createApp(cfGuid: string, orgName: string, spaceName: string, appName: string, endpoint: E2EConfigCloudFoundry) {
     return browser.driver.wait(
-      this.cfHelper.addOrgIfMissing(cfGuid, orgName)
-        .then(org => {
-          return this.cfHelper.fetchSpace(cfGuid, org.metadata.guid, spaceName);
-        })
+      this.cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, endpoint, orgName)
+        .then(org => this.cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, org.entity.name, spaceName, endpoint))
         .then(space => {
           expect(space).not.toBeNull();
           return promise.all([

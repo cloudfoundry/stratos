@@ -14,12 +14,14 @@ export class EndpointsTable extends ListTableComponent {
 
   getEndpointData(row: ElementFinder) {
     // Get all of the columns
-    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then(data => {
+    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then((data: string[]) => {
       return {
         name: data[0],
         connected: data[1] === 'cloud_done',
         type: data[2],
-        url: data[3]
+        user: data[3],
+        isAdmin: data[4].indexOf('Yes') !== -1,
+        url: data[5]
       } as EndpointMetadata;
     });
   }
@@ -119,6 +121,8 @@ export interface EndpointMetadata {
   name: string;
   url: string;
   type: string;
+  user: string;
+  isAdmin: boolean;
   connected: boolean;
 }
 
