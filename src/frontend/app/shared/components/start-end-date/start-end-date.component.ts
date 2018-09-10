@@ -16,15 +16,17 @@ export class StartEndDateComponent {
   private endValue: moment.Moment;
 
   private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
-    return !oldDate || !oldDate.isSame(newDate);
+    return !oldDate || !newDate || !oldDate.isSame(newDate);
   }
 
   @Input()
   set start(start: moment.Moment) {
-    if (this.isDifferentDate(this.startValue, start)) {
-      const clone = moment(start);
-      this.startValue = clone;
-      this.startChange.emit(clone);
+    if (start && start.isValid()) {
+      if (this.isDifferentDate(this.startValue, start)) {
+        const clone = moment(start);
+        this.startValue = clone;
+        this.startChange.emit(clone);
+      }
     }
   }
 
@@ -34,10 +36,12 @@ export class StartEndDateComponent {
 
   @Input()
   set end(end: moment.Moment) {
-    if (this.isDifferentDate(this.endValue, end)) {
-      const clone = moment(end);
-      this.endValue = clone;
-      this.endChange.emit(clone);
+    if (end && end.isValid()) {
+      if (this.isDifferentDate(this.endValue, end)) {
+        const clone = moment(end);
+        this.endValue = clone;
+        this.endChange.emit(clone);
+      }
     }
   }
 

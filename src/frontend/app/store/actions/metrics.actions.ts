@@ -28,10 +28,11 @@ export class MetricQueryConfig {
       window = '',
       ...params
     } = this.params;
+    const windowString = window ? `{}[${window}]` : '';
     const paramString = Object.keys(params).reduce((accum, key) => {
       return accum + `&${key}=${params[key]}`;
     }, '');
-    return (window + paramString) || '';
+    return windowString + paramString || '';
   }
 }
 

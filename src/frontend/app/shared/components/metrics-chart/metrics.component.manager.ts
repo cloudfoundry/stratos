@@ -1,9 +1,9 @@
 import { MetricsConfig } from './metrics-chart.component';
-import { IMetrics, ChartSeries } from '../../../store/types/base-metric.types';
+import { IMetrics, ChartSeries, IMetricsData } from '../../../store/types/base-metric.types';
 import { MetricsChartHelpers } from './metrics.component.helpers';
 
 export class MetricsChartManager {
-  static mapMatrix<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
+  static mapMatrix<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
     return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),
@@ -14,7 +14,7 @@ export class MetricsChartManager {
       })
     );
   }
-  static mapVector<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
+  static mapVector<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
     return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),

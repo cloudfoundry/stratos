@@ -1,6 +1,15 @@
 <div class="metrics-chart__outer">
-  <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
-  <app-start-end-date [(start)]="start" [(end)]="end"></app-start-end-date>
+  <div class="metrics-chart__header">
+    <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
+    <mat-form-field>
+      <mat-select [(value)]="selectedTimeRange" placeholder="Time Range">
+        <mat-option *ngFor="let time of times" [value]="time">
+          {{time.label}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <app-start-end-date *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END" [(start)]="start" [(end)]="end"></app-start-end-date>
   <mat-progress-bar *ngIf="metricsMonitor.isFetchingEntity$ | async" class="metrics-chart__loading" [color]="'primary'" mode="indeterminate">
   </mat-progress-bar>
   <div class="metrics-chart" *ngIf="results$ | async as results; else other_content" [ngSwitch]="chartConfig.chartType">

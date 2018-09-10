@@ -2,7 +2,7 @@ import { SetupModule } from './../../../features/setup/setup.module';
 import { Component, OnInit, Output, OnDestroy, Input, EventEmitter } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as moment from 'moment';
-import { tap, map, filter, shareReplay } from 'rxjs/operators';
+import { tap, map, filter, shareReplay, debounceTime } from 'rxjs/operators';
 import { combineLatest, Subscription, Observable } from 'rxjs';
 
 @Component({
@@ -30,14 +30,14 @@ export class DateTimeComponent implements OnDestroy {
   }
 
   set dateTime(dateTime: moment.Moment) {
-    if (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue)) {
+    if (dateTime && dateTime.isValid() && (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue))) {
       this.dateTimeValue = dateTime;
       this.dateTimeChange.emit(this.dateTimeValue);
     }
   }
 
   private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
-    return !oldDate || !oldDate.isSame(newDate);
+    return !oldDate || !newDate || !newDate.isValid() || !oldDate.isSame(newDate);
   }
 
   private setupInputSub() {
@@ -46,6 +46,7 @@ export class DateTimeComponent implements OnDestroy {
       this.timeObservable,
       this.dateObservable
     ).pipe(
+      debounceTime(250),
       filter(([time, date]) => !!(time && date)),
       map(([time, date]: [string, moment.Moment]) => {
         const [hour, minute] = time.split(':');

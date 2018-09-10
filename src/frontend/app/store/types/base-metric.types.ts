@@ -1,3 +1,5 @@
+import { MetricQueryConfig, MetricQueryType } from "../actions/metrics.actions";
+
 export enum MetricResultTypes {
   MATRIX = 'matrix',
   VECTOR = 'vector',
@@ -9,10 +11,14 @@ export interface IMetricsResponse<T = any> {
   status: string;
   data: IMetrics<T>;
 }
-
-export interface IMetrics<T = any> {
+export interface IMetricsData<T = any> {
   resultType: string;
   result: [T];
+}
+export interface IMetrics<T = any> {
+  query: MetricQueryConfig;
+  queryType: MetricQueryType;
+  data: IMetricsData;
 }
 
 interface IVectorResult<T> {
