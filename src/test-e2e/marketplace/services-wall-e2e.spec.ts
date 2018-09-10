@@ -1,12 +1,12 @@
-import { MarketplacePage } from './marketplace.po';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { e2e } from '../e2e';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser, protractor } from 'protractor';
-import { ServicesWallPage } from './services-wall.po';
-import { ServicesHelperE2E } from './services-helper-e2e';
+
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
-import { MetaCard } from '../po/meta-card.po';
+import { ServicesHelperE2E } from './services-helper-e2e';
+import { ServicesWallPage } from './services-wall.po';
 
 describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
@@ -27,7 +27,7 @@ describe('Service Instances Wall', () => {
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
-      servicesHelperE2E.createService();
+    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
 
   });
@@ -100,7 +100,7 @@ describe('Service Instances Wall', () => {
   it('- should be able to Edit Service Instance', () => {
     servicesWallPage.serviceInstancesList.cards.getCards().then(
       cards => {
-        const metaCard = new MetaCard(cards[0]);
+        const metaCard = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
         const actionMenu = metaCard.openActionMenu();
         actionMenu.then(menu => {
           const editMenuItem = menu.getItem('Edit');
@@ -121,7 +121,7 @@ describe('Service Instances Wall', () => {
   it('- should be able to delete Service Instance', () => {
     servicesWallPage.serviceInstancesList.cards.getCards().then(
       cards => {
-        const metaCard = new MetaCard(cards[0]);
+        const metaCard = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
         const actionMenu = metaCard.openActionMenu();
         actionMenu.then(menu => {
           const deleteMenuItem = menu.getItem('Delete');

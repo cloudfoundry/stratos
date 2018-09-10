@@ -1,27 +1,21 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { Component, Input, OnInit } from '@angular/core';
+import { BehaviorSubject, of as observableOf } from 'rxjs';
 
-import { IServiceInstance, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
-import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
-import { AppState } from '../../../../../../store/app-state';
+import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-service-instance-card',
   templateUrl: './service-instance-card.component.html',
   styleUrls: ['./service-instance-card.component.scss'],
-  providers: [
-    ServicesWallService
-  ]
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> implements OnInit {
   serviceInstanceEntity: APIResource<IServiceInstance>;
