@@ -1,33 +1,27 @@
-<div class="acme-login">
-  <div class="acme-login__header">
-    <div class="acme-login__title">ACME Stratos</div>
-  </div>
-  <div class="acme-login__content">
-    <div class="acme-login__intro">
-      <h1 class="acme-login__headline">ACME Stratos</h1>
-    <div class="acme-login__box" [ngClass]="{'acme-login__busy': busy$ | async }">
-      <div class="acme-login__form-title">Sign in</div>
-      <div class="acme-login__form-outer">
+<app-intro-screen class="acme-login login__busy" [ngClass]="{'acme-login__busy': busy$ | async }">
+  <mat-card class="login__card mat-elevation-z">
+    <app-stratos-title></app-stratos-title>
+    <div class="acme-login__body">
+      <div class="acme-login__form-outer" [ngClass]="{'acme-login-sso': ssoLogin}">
         <form class="acme-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <mat-form-field>
+          <mat-form-field *ngIf="!ssoLogin">
             <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field *ngIf="!ssoLogin">
             <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
           </mat-form-field>
-          <button class="acme-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!loginForm.valid">Login</button>
+          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
         </form>
       </div>
       <div class="acme-login__loading">
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       </div>
-      <div class="acme-login__message" [ngClass]="{'acme-login__message--show': !!message, 'acme-login__message-error': this.error}">
-        {{ message }}
-      </div>
     </div>
+  </mat-card>
+  <div class="acme-login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
+      {{ message }}
   </div>
-</div>
-<div class="acme-login__footer">
+  <div class="acme-login__footer">
     <div class="acme-login__copyright">
       <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
     </div>
@@ -35,4 +29,5 @@
       <img src="/assets/custom/acme_logo.png">
     </div>
   </div>
-</div>
+</app-intro-screen>
+

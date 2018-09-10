@@ -1,130 +1,66 @@
 @import '../../../sass/custom/acme-colors';
 .acme-login {
-  align-items: center;
-  background-color: $acme-blue;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  &__header,
-  &__content,
-  &__footer {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
+  &__card.mat-card {
+    box-shadow: 0 0px 20px 9px rgba(0,0,0,.2);
+    padding: 0;
+    width: 300px;
+    mat-form-field {
+      width: 100%;
+    }
   }
-  &__header {
-    background-color: $acme-secondary;
-    color: $acme-text;
-    flex: 0 0 60px;
-    font-size: 24px;
-    font-weight: 500;
-    justify-content: center;
+  &__body {
+    padding: 24px;
+  }
+  &__submit {
     width: 100%;
   }
-  &__content {
-    align-items: flex-start;
-    color: $acme-text;
-    flex: 1;
-    margin-top: 100px;
-    overflow-y: auto;
-    width: 90%;
+  &-message {
+    font-size: 18px;
+    height: 20px;
+    padding-top: 20px;
+  }
+  &__form-outer {
+    $cubic: cubic-bezier(.215, .61, .355, 1);
+    $time: 250ms;
+    height: 180px;
+    opacity: 1;
+    transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
+    &.login-sso {
+      height: auto;
+    }
+  }
+  &__loading {
+    display: none;
+  }
+  &__busy {
+    .login__form {
+      display: none;
+    }
+    .login__form-outer {
+      height: 0;
+      opacity: 0;
+    }
+    .login__loading {
+      display: block;
+    }
   }
   &__footer {
+    align-items: center;
+    bottom: 0;
+    display: flex;
     flex: 0 0 auto;
+    flex-direction: row;
     padding: 20px 0;
-    width: 90%;
-  }
-  &__title {
+    position: absolute;
     width: 90%;
   }
   &__copyright {
-    color: $acme-text-gray;
+    color: #333;
     flex: 1;
   }
   &__logo {
     img {
       width: 79px;
     }
-  }
-  &__intro {
-    flex: 1;
-    margin-right: 24px;
-  }
-  &__box {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    justify-content: center;
-    margin-top: 24px;
-  }
-  &__form {
-    display: flex;
-    flex-direction: column;
-    .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
-      .mat-form-field-label {
-        color: $acme-text-gray;
-      }
-      .mat-form-field-underline {
-        background-color: $acme-text-gray;
-      }
-    }
-  }
-  &__submit.mat-raised-button {
-    margin-top: 24px;
-    &.mat-primary[disabled] {
-      color: $acme-button-gray;
-    }
-  }
-  &__headline {
-    color: $acme-primary;
-    font-size: 52px;
-    font-weight: 300;
-    margin: 0;
-  }
-  &__tagline {
-    color: $acme-text-gray;
-    font-size: 18px;
-    font-weight: 300;
-    line-height: 1.5;
-    margin: 24px 0;
-  }
-  &__form-outer {
-    max-width: 400px;
-    opacity: 1;
-    transition: opacity 250ms linear;
-  }
-  &__form-title {
-    color: $acme-text;
-    font-size: 30px;
-    font-weight: 300;
-    margin-bottom: 24px;
-    transition: opacity 250ms linear;
-  }
-  &__loading {
-    display: none;
-    margin-top: 24px;
-    max-width: 400px;
-    opacity: 0;
-    transition: opacity 250ms linear;
-  }
-  &__busy {
-    .acme-login__form-title {
-      opacity: .5;
-    }
-    .acme-login__form-outer {
-      opacity: .5;
-    }
-    .acme-login__loading {
-      display: block;
-      opacity: 1;
-    }
-  }
-  &__message {
-    font-size: 18px;
-    font-weight: 300;
-    height: 20px;
-    max-width: 400px;
-    padding-top: 20px;
   }
 }

@@ -13,11 +13,13 @@ $acme-side-nav-active: #003358;
 
 .stratos {
   app-page-subheader {
-  .page-subheader {
-    background-color: #fff;
-    color: #333;
+    .page-subheader {
+      background-color: #fff;
+      color: #333;
+    }
   }
-  .mat-tab-nav-bar.mat-background-primary {
+
+  .mat-tab-nav-bar.mat-primary.mat-background-primary {
     .mat-tab-links {
       background-color: #fff;
       color: #333;
@@ -56,11 +58,5 @@ $acme-side-nav-active: #003358;
   // Show the text Stratos beneath the Acme logo
   .stratos-title > .stratos-title__header {
     display: inline-block;
-  }
-
-  // Remove background image from setup screen (e.g. upgrade screen)
-  app-intro-screen > .intro {
-    background-color: $acme-blue;
-    background-image: none;
   }
 }
