@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  ApplicationEnvVarsService,
+  ApplicationEnvVarsHelper,
 } from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -27,7 +27,7 @@ describe('AppServiceBindingCardComponent', () => {
       providers: [
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
         ApplicationStateService,
         PaginationMonitorFactory,
         ConfirmationDialogService,

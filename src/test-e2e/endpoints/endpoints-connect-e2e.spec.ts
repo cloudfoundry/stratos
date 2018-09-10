@@ -27,14 +27,15 @@ describe('Endpoints', () => {
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
-        expect(endpointsPage.isActivePage()).toBeTruthy();
+        endpointsPage.waitForPage();
+        // expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
         connectDialog.snackBar.safeClose();
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
@@ -82,7 +83,7 @@ describe('Endpoints', () => {
         });
 
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown('Endpoint Action Menu');
           return menu.getItemMap().then(items => {
@@ -128,7 +129,7 @@ describe('Endpoints', () => {
         endpointsPage.navigateTo();
 
         endpointsPage.table.getRowForEndpoint(toDisconnect.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {

@@ -225,6 +225,7 @@ type PortalConfig struct {
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
+	SSOOptions                      string   `configName:"SSO_OPTIONS"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                        string   `configName:"LOG_LEVEL"`
 	CFAdminIdentifier               string

@@ -1,8 +1,8 @@
 import { browser, by, element, promise } from 'protractor';
 
-import { ListComponent } from '../../po/list.po';
-import { MetaDataItemComponent } from '../../po/meta-data-time.po';
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
+import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
 
 export class CfTopLevelPage extends CFPage {
@@ -52,7 +52,7 @@ export class CfTopLevelPage extends CFPage {
   }
 
   private waitForMetaDataItemComponent(label: string): MetaDataItemComponent {
-    const comp = new MetaDataItemComponent(element(by.css(`app-metadata-item[label="${label}"]`)));
+    const comp = MetaDataItemComponent.withLabel(element(by.css('app-cloud-foundry-summary-tab')), label);
     comp.waitUntilShown();
     return comp;
   }
@@ -70,7 +70,11 @@ export class CfTopLevelPage extends CFPage {
   }
 
   goToFirehoseTab() {
-    return this.goToTab('Firehose', 'firehose');
+    // log viewer blocks angular from settling
+    browser.waitForAngularEnabled(false);
+    return this.goToTab('Firehose', 'firehose').then(() => {
+      browser.waitForAngularEnabled(true);
+    });
   }
 
   goToFeatureFlagsTab() {
@@ -89,7 +93,7 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Security Groups', 'security-groups');
   }
 
-  private goToTab(label: string, urlSuffix: string) {
+  private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
     return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 

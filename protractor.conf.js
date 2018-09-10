@@ -9,9 +9,9 @@ const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 
-var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
-
-var reportFolderName = 'stratos-e2e-' + timestamp;
+// Test report folder name
+var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
+var reportFolderName = timestamp + '-e2e-report';
 
 const SECRETS_FILE = 'secrets.yaml';
 
@@ -37,9 +37,11 @@ try {
   process.exit(1);
 }
 
+// This is the maximum amount of time ALL before/after/it's must execute in
+const timeout = 40000;
 
 exports.config = {
-  allScriptsTimeout: 30000,
+  allScriptsTimeout: timeout,
   suites: {
     e2e: [
       './src/test-e2e/login/*-e2e.spec.ts',
@@ -63,7 +65,7 @@ exports.config = {
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
-    defaultTimeoutInterval: 30000,
+    defaultTimeoutInterval: timeout,
     print: function () {}
   },
   params: secrets,
