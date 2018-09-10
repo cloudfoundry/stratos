@@ -57,7 +57,7 @@ export function setUpTestOrgSpaceUserRoles(
       cfHelper
     }))
     .catch(e => {
-      console.log(`Failed to setup new org, space or roles: '${e}'`);
+      e2e.log(`Failed to setup new org, space or roles: '${e}'`);
       throw e;
     });
 }
