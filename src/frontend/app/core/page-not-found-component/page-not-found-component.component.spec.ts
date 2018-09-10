@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { PageNotFoundComponentComponent } from './page-not-found-component.component';
 import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
+import { MatIcon } from '@angular/material';
 
 describe('PageNotFoundComponentComponent', () => {
   let component: PageNotFoundComponentComponent;
@@ -10,11 +11,7 @@ describe('PageNotFoundComponentComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageNotFoundComponentComponent ],
-      imports: [
-        CoreModule,
-        SharedModule
-      ]
+      declarations: [ PageNotFoundComponentComponent, MatIcon ]
     })
     .compileComponents();
   }));

@@ -27,6 +27,7 @@ import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-s
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
 import { StratosActionType, StratosTabType } from '../../core/extension/extension-service';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 
 const appplicationsRoutes: Routes = [
   {
@@ -87,7 +88,7 @@ const appplicationsRoutes: Routes = [
               { path: 'github', component: GithubTabComponent },
               { path: 'metrics', component: MetricsTabComponent },
               { path: '**',
-                component: BuildTabComponent,
+                component: PageNotFoundComponentComponent,
                 canActivate: [DynamicExtenstionRoutes],
                 data: {
                   stratosRouteGroup: StratosTabType.Application
@@ -100,7 +101,7 @@ const appplicationsRoutes: Routes = [
             component: AddRouteStepperComponent,
           },
           { path: '**',
-            component: BuildTabComponent,
+            component: PageNotFoundComponentComponent,
             canActivate: [DynamicExtenstionRoutes],
             data: {
               stratosRouteGroup: StratosActionType.Application
@@ -111,7 +112,7 @@ const appplicationsRoutes: Routes = [
     ]
   },
   { path: '**',
-    component: BuildTabComponent,
+    component: PageNotFoundComponentComponent,
     canActivate: [DynamicExtenstionRoutes],
     data: {
       stratosRouteGroup: StratosActionType.Applications

@@ -55,6 +55,7 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 
 const usersRoles = [
   {
@@ -162,7 +163,7 @@ const cloudFoundry: Routes = [{
             },
             {
               path: '**',
-              component: CloudFoundrySummaryTabComponent,
+              component: PageNotFoundComponentComponent,
               canActivate: [DynamicExtenstionRoutes],
               data: {
                 stratosRouteGroup: 'cfTabs'
@@ -200,7 +201,7 @@ const cloudFoundry: Routes = [{
                 },
                 {
                   path: '**',
-                  component: CloudFoundryOrganizationSummaryComponent,
+                  component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtenstionRoutes],
                   data: {
                     stratosRouteGroup: 'cfOrgTabs'
@@ -242,7 +243,7 @@ const cloudFoundry: Routes = [{
                 },
                 {
                   path: '**',
-                  component: CloudFoundrySpaceSummaryComponent,
+                  component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtenstionRoutes],
                   data: {
                     stratosRouteGroup: 'cfSpaceTabs'

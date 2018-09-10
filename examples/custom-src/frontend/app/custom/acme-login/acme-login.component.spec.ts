@@ -15,7 +15,7 @@ describe('AcmeLoginComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SuseLoginComponent ],
+      declarations: [ AcmeLoginComponent ],
       imports: [
         CommonModule,
         CoreModule,

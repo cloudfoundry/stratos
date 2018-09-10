@@ -18,7 +18,6 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
-import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { XSRFModule } from './xsrf.module';
 import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
 import { ExtensionService, applyRoutesFromExtensions } from './core/extension/extension-service';
@@ -62,7 +61,6 @@ export class CustomRouterStateSerializer
   declarations: [
     AppComponent,
     NoEndpointsNonAdminComponent,
-    PageNotFoundComponentComponent,
   ],
   imports: [
     BrowserModule,
