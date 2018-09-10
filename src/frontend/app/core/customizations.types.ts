@@ -6,7 +6,7 @@ import { InjectionToken } from '@angular/core';
 export interface CustomizationsMetadata {
   hasEula?: boolean;
   copyright?: string;
-  supportInfoComponent?: any
+  supportInfoComponent?: any;
 }
 
 export const Customizations = new InjectionToken<CustomizationsMetadata>('Stratos customizations');

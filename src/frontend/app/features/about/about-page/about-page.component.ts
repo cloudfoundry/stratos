@@ -1,4 +1,14 @@
-import { Component, Inject, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentFactory, ComponentRef, OnDestroy } from '@angular/core';
+import {
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -17,8 +27,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   sessionData$: Observable<SessionData>;
   versionNumber$: Observable<string>;
   userIsAdmin$: Observable<boolean>;
-  
-  @ViewChild("supportInfoContainer", { read: ViewContainerRef }) supportInfoContainer;
+
+  @ViewChild('supportInfoContainer', { read: ViewContainerRef }) supportInfoContainer;
 
   componentRef: ComponentRef<any>;
 
@@ -26,7 +36,6 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private resolver: ComponentFactoryResolver,
     @Inject(Customizations) public customizations: CustomizationsMetadata) { }
-
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
       filter(auth => !!(auth && auth.sessionData)),
@@ -54,11 +63,10 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   }
 
   addSupportInfo() {
-    this.supportInfoContainer.clear(); 
+    this.supportInfoContainer.clear();
     if (this.customizations.supportInfoComponent) {
       const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.supportInfoComponent);
       this.componentRef = this.supportInfoContainer.createComponent(factory);
     }
-  }  
-
+  }
 }
