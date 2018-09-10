@@ -8,10 +8,11 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )
 
-var findAuthToken = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data
+var findAuthToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data
 									FROM tokens
 									WHERE token_type = 'uaa' AND user_guid = $1`
 
@@ -19,18 +20,26 @@ var countAuthTokens = `SELECT COUNT(*)
 										FROM tokens
 										WHERE token_type = 'uaa' AND user_guid = $1`
 
-var insertAuthToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-									VALUES ($1, $2, $3, $4, $5)`
+var insertAuthToken = `INSERT INTO tokens (token_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
+									VALUES ($1, $2, $3, $4, $5, $6)`
 
 var updateAuthToken = `UPDATE tokens
 									SET auth_token = $1, refresh_token = $2, token_expiry = $3
 									WHERE user_guid = $4 AND token_type = $5`
 
-var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid
+var getToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+									FROM tokens
+									WHERE user_guid = $1 AND token_guid = $2`
+
+var getTokenConnected = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+									FROM tokens
+									WHERE user_guid = $1 AND token_guid = $2 AND disconnected = '0'`
+
+var findCNSIToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi'`
 
-var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid
+var findCNSITokenConnected = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi' AND disconnected = '0'`
 
@@ -38,18 +47,18 @@ var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
 											WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry, disconnected,  auth_type, meta_data)
-										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+var insertCNSIToken = `INSERT INTO tokens (token_guid, cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, linked_token)
+										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 var updateCNSIToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5
-										WHERE cnsi_guid = $6 AND user_guid = $7 AND token_type = $8 AND auth_type = $9`
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5, linked_token = $6
+										WHERE cnsi_guid = $7 AND user_guid = $8 AND token_type = $9 AND auth_type = $10`
 var deleteCNSIToken = `DELETE FROM tokens
 										WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
 var deleteCNSITokens = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
-// TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
+var updateToken = `UPDATE tokens SET auth_token = $1, refresh_token = $2, token_expiry = $3 WHERE token_guid = $7 AND user_guid = $8`
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
 type PgsqlTokenRepository struct {
@@ -118,7 +127,8 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.Toke
 	case 0:
 
 		log.Debug("Performing INSERT of encrypted tokens")
-		if _, err := p.db.Exec(insertAuthToken, userGUID, "uaa", ciphertextAuthToken,
+		tokenGUID := uuid.NewV4().String()
+		if _, err := p.db.Exec(insertAuthToken, tokenGUID, userGUID, "uaa", ciphertextAuthToken,
 			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT UAA token: %v"
 			log.Debugf(msg, err)
@@ -154,6 +164,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 
 	// temp vars to retrieve db data
 	var (
+		tokenGUID              sql.NullString
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
 		tokenExpiry            sql.NullInt64
@@ -162,7 +173,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
+	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
@@ -183,6 +194,9 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 
 	// Build a new TokenRecord based on the decrypted tokens
 	tr := new(interfaces.TokenRecord)
+	if tokenGUID.Valid {
+		tr.TokenGUID = tokenGUID.String
+	}
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
 	if tokenExpiry.Valid {
@@ -192,7 +206,6 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	if metadata.Valid {
 		tr.Metadata = metadata.String
 	}
-
 	return *tr, nil
 }
 
@@ -217,13 +230,28 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return errors.New(msg)
 	}
 
+	var ciphertextAuthToken, ciphertextRefreshToken []byte
+	var err error
+
+	var linkedToken sql.NullString
+
+	// Linked token?
+	if tr.LinkedGUID == "" {
+		linkedToken = sql.NullString{}
+	} else {
+		tr.AuthToken = "LINKED TOKEN"
+		tr.RefreshToken = "LINKED TOKEN"
+		linkedToken = sql.NullString{
+			String: tr.LinkedGUID,
+			Valid:  true,
+		}
+	}
+
 	log.Debug("Encrypting Auth Token")
-	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, tr.AuthToken)
+	ciphertextAuthToken, err = crypto.EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
 	}
-
-	var ciphertextRefreshToken []byte
 	if tr.RefreshToken != "" {
 		log.Debug("Encrypting Refresh Token")
 		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
@@ -241,9 +269,9 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 	switch count {
 	case 0:
-
-		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, tr.AuthType, tr.Metadata); insertErr != nil {
+		tokenGUID := uuid.NewV4().String()
+		if _, insertErr := p.db.Exec(insertCNSIToken, tokenGUID, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
+			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, tr.AuthType, tr.Metadata, linkedToken); insertErr != nil {
 
 			msg := "Unable to INSERT CNSI token: %v"
 			log.Debugf(msg, insertErr)
@@ -256,7 +284,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 		log.Debug("Existing CNSI token found - attempting update.")
 		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry,
-			tr.Disconnected, tr.Metadata, cnsiGUID, userGUID, "cnsi", tr.AuthType)
+			tr.Disconnected, tr.Metadata, linkedToken, cnsiGUID, userGUID, "cnsi", tr.AuthType)
 		if err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
 			log.Debugf(msg, err)
@@ -308,6 +336,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	// temp vars to retrieve db data
 	var (
+		tokenGUID              sql.NullString
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
 		tokenExpiry            sql.NullInt64
@@ -315,13 +344,14 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		authType               string
 		metadata               sql.NullString
 		tokenUserGUID          sql.NullString
+		linkedTokenGUID        sql.NullString
 	)
 
 	var err error
 	if includeDisconnected {
-		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID)
+		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
 	} else {
-		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID)
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
 	}
 
 	if err != nil {
@@ -332,6 +362,26 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 			log.Errorf(msg, err)
 		}
 		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+	}
+
+	// If this token is linked - fetch that token and use it instead
+	// Currently we don't recurse - we only support one level of linked token - you can't link to another linked token
+	if linkedTokenGUID.Valid {
+		if includeDisconnected {
+			err = p.db.QueryRow(getToken, userGUID, linkedTokenGUID.String).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		} else {
+			err = p.db.QueryRow(getTokenConnected, userGUID, linkedTokenGUID.String).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		}
+
+		if err != nil {
+			msg := "Unable to Find CNSI token: %v"
+			if err == sql.ErrNoRows {
+				log.Debugf(msg, err)
+			} else {
+				log.Errorf(msg, err)
+			}
+			return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+		}
 	}
 
 	log.Debug("Decrypting Auth Token")
@@ -348,6 +398,9 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	// Build a new TokenRecord based on the decrypted tokens
 	tr := new(interfaces.TokenRecord)
+	if tokenGUID.Valid {
+		tr.TokenGUID = tokenGUID.String
+	}
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
 	if tokenExpiry.Valid {
@@ -360,6 +413,9 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	}
 	if tokenUserGUID.Valid {
 		tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
+	}
+	if linkedTokenGUID.Valid {
+		tr.LinkedGUID = linkedTokenGUID.String
 	}
 
 	return *tr, nil
@@ -404,6 +460,85 @@ func (p *PgsqlTokenRepository) DeleteCNSITokens(cnsiGUID string) error {
 		log.Debugf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
+
+	return nil
+}
+
+// UpdateTokenAuth - Update a token's auth data
+func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
+	log.Debug("UpdateTokenAuth")
+
+	if userGUID == "" {
+		msg := "Unable to save Token without a valid User GUID."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	if tr.AuthToken == "" {
+		msg := "Unable to save Token without a valid Auth Token."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	if tr.RefreshToken == "" {
+		msg := "Unable to save Token without a valid Refresh Token."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	var ciphertextAuthToken, ciphertextRefreshToken []byte
+	var err error
+
+	var tokenGUID string
+
+	// Linked token? if so, update the linked token
+	if tr.LinkedGUID == "" {
+		tokenGUID = tr.TokenGUID
+	} else {
+		tokenGUID = tr.LinkedGUID
+	}
+
+	if tr.RefreshToken == "" {
+		msg := "Unable to save Token without a valid Token GUID"
+		return errors.New(msg)
+	}
+
+	log.Infof("Updating token %s", tokenGUID)
+
+	log.Debug("Encrypting Auth Token")
+	ciphertextAuthToken, err = crypto.EncryptToken(encryptionKey, tr.AuthToken)
+	if err != nil {
+		return err
+	}
+	if tr.RefreshToken != "" {
+		log.Debug("Encrypting Refresh Token")
+		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
+		if err != nil {
+			return err
+		}
+	}
+
+	result, err := p.db.Exec(updateToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, tokenGUID, userGUID)
+	if err != nil {
+		msg := "Unable to UPDATE token: %v"
+		log.Debugf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	rowsUpdates, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("Unable to UPDATE token: could not determine number of rows that were updated")
+	}
+
+	if rowsUpdates < 1 {
+		return errors.New("Unable to UPDATE token: no rows were updated")
+	}
+
+	if rowsUpdates > 1 {
+		log.Warn("UPDATE token: More than 1 row was updated (expected only 1)")
+	}
+
+	log.Debug("Token UPDATE complete")
 
 	return nil
 }
