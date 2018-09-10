@@ -17,11 +17,19 @@
     display: flex;
     flex: 1;
     flex-direction: column;
+
+    &-label-only {
+      align-self: center;
+    }
   }
   &__label {
     flex: 1;
     opacity: .7;
     padding-bottom: 3px;
+
+    &-only {
+      padding-bottom: 0;
+    }
   }
   &__value {
     flex: 1;

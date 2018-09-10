@@ -13,16 +13,16 @@ import { AppState } from '../store/app-state';
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
 
-  @Input('appUserPermission')
+  @Input()
   public appUserPermission: CurrentUserPermissions;
 
-  @Input('appUserPermissionEndpointGuid')
+  @Input()
   public appUserPermissionEndpointGuid: string;
 
-  @Input('appUserPermissionOrganizationGuid')
+  @Input()
   private appUserPermissionOrganizationGuid: string;
 
-  @Input('appUserPermissionSpaceGuid')
+  @Input()
   private appUserPermissionSpaceGuid: string;
 
   private canSub: Subscription;

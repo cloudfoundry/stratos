@@ -30,6 +30,7 @@ run:
       patchHelmChartDev ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
 
       # Generate Helm package
+      updateHelmDependency
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/

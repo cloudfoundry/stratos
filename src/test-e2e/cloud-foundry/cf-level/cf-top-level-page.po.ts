@@ -93,7 +93,7 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Security Groups', 'security-groups');
   }
 
-  private goToTab(label: string, urlSuffix: string) {
+  private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
     return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 

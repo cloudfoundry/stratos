@@ -32,19 +32,20 @@ if [ "${RUN_TYPE}" == "quick" ]; then
   # Start a local UAA - this will take a few seconds to come up in the background
   docker run -d -p 8080:8080 splatform/stratos-uaa
 
-  # Get go 1.0 and glide
+  # Get go 1.0 and dep
   curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
   chmod +x ~/bin/gimme
   eval "$(gimme 1.9)"
-  curl https://glide.sh/get | sh
+  curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   go version
-  glide --version
+  dep version
   
   npm run build
-  npm run build-backend-dev
-  # Patch the config file so local version runs on port 443
-  pushd outputs
-  ./portal-proxy > backend.log &
+  npm run build-backend
+  # Copy travis config.properties file
+  cp deploy/ci/travis/config.properties src/jetstream/
+  pushd src/jetstream
+  ./jetstream > backend.log &
   popd
 
   E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
@@ -70,6 +71,10 @@ else
   mv /tmp/node_modules ./node_modules
 fi
 
+# Test report folder name override
+TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
+export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
+
 set +e
 echo "Running e2e tests"
 npm run ${E2E_TARGET}
@@ -87,10 +92,10 @@ if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
   popd
 fi
 
-# Output backend log if the tests failed
+# Copy the backend log to the test report folder if the tests failed
 if [ "${RUN_TYPE}" == "quick" ]; then
   if [ $RESULT -ne 0 ]; then
-    cat outputs/backend.log
+    cp src/jetstream/backend.log ${E2E_REPORT_FOLDER}/jetstream.log
   fi
 fi
 
