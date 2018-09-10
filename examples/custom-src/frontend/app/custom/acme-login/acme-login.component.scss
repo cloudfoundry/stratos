@@ -1,7 +1,7 @@
 @import '../../../sass/custom/acme-colors';
 .acme-login {
   &__card.mat-card {
-    box-shadow: 0 0px 20px 9px rgba(0,0,0,.2);
+    box-shadow: 0 0 20px 9px rgba(0, 0, 0, .2);
     padding: 0;
     width: 300px;
     mat-form-field {

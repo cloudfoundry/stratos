@@ -44,6 +44,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       map(users => !users)
     );
 
+    // Default tabs + add any tabs from extensions
     this.tabLinks = [
       { link: 'summary', label: 'Summary' },
       { link: 'organizations', label: 'Organizations' },
@@ -61,10 +62,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       { link: 'build-packs', label: 'Build Packs' },
       { link: 'stacks', label: 'Stacks' },
       { link: 'security-groups', label: 'Security Groups' }
-    ];
-
-    // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundry));
+    ].concat(getTabsFromExtensions(StratosTabType.CloudFoundry));
   }
 
   ngOnInit() {
