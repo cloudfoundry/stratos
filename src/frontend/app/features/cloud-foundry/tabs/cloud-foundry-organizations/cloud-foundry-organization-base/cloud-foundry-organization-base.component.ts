@@ -13,6 +13,7 @@ import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../
 import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { getTabsFromExtensions, StratosTabType } from '../../../../../core/extension/extension-service';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -85,6 +86,9 @@ export class CloudFoundryOrganizationBaseComponent {
       cfOrgService.cfGuid,
       cfOrgService.orgGuid,
       CurrentUserPermissionsChecker.ALL_SPACES);
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
   }
 
 }

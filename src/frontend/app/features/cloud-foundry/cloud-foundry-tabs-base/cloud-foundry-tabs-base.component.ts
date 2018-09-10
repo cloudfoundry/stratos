@@ -10,6 +10,7 @@ import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-s
 import { canUpdateOrgSpaceRoles } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { AppState } from './../../../store/app-state';
+import { StratosTabType, getTabsFromExtensions } from '../../../core/extension/extension-service';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
@@ -61,6 +62,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       { link: 'stacks', label: 'Stacks' },
       { link: 'security-groups', label: 'Security Groups' }
     ];
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundry));
   }
 
   ngOnInit() {

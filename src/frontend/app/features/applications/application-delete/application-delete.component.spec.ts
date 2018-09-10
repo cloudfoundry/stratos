@@ -17,7 +17,7 @@ describe('ApplicationDeleteComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
-        ApplicationsModule
+        ApplicationsModule,
       ],
       providers: [
         generateTestEntityServiceProvider(
