@@ -14,7 +14,7 @@ export class KubernetesPodTagsComponent<T> extends TableCellCustom<KubeAPIResour
 
   constructor() {
     super();
-   }
+  }
 
   ngOnInit() {
     const labels = this.row.metadata.labels;

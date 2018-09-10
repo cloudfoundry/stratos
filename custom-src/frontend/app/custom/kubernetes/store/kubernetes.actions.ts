@@ -1,7 +1,13 @@
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
+import {
+  entityFactory,
+  kubernetesAppsSchemaKey,
+  kubernetesNamespacesSchemaKey,
+  kubernetesNodesSchemaKey,
+  kubernetesPodsSchemaKey,
+  kubernetesServicesSchemaKey,
+} from '../../../store/helpers/entity-factory';
 import { PaginatedAction } from '../../../store/types/pagination.types';
-import { kubernetesNodesSchemaKey, entityFactory, kubernetesPodsSchemaKey } from '../../../store/helpers/entity-factory';
-import { kubernetesNamespacesSchemaKey, kubernetesAppsSchemaKey, kubernetesServicesSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 
 export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
 export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';

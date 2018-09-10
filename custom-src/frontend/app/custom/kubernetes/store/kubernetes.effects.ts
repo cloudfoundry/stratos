@@ -31,7 +31,8 @@ import {
   GetKubernetesServices,
   GET_SERVICE_INFO,
 } from './kubernetes.actions';
-import { KubernetesInfo, KubernetesPod } from './kube.types';
+import { KubernetesInfo, KubernetesPod, KubeService } from './kube.types';
+import { KubernetesService } from '../services/kubernetes.service';
 
 
 @Injectable()
@@ -95,11 +96,13 @@ export class KubernetesEffects {
               entities: { [kubernetesPodsSchemaKey]: {} },
               result: []
             } as NormalizedResponse;
-            const id = action.kubeGuid;
-            mappedData.entities[kubernetesPodsSchemaKey][id] = info[id].items;
-            mappedData.result.push(id);
-            console.log('KUBE DATA');
-            console.log(info[id].items);
+            info[action.kubeGuid].items.forEach((p: KubernetesPod) => {
+              const id = p.metadata.uid;
+              p.metadata.kubeId = action.kubeGuid;
+              mappedData.entities[kubernetesPodsSchemaKey][id] = p;
+              mappedData.result.push(id);
+
+            });
             return [
               new WrapperRequestActionSuccess(mappedData, action)
             ];
@@ -129,11 +132,11 @@ export class KubernetesEffects {
               entities: { [kubernetesServicesSchemaKey]: {} },
               result: []
             } as NormalizedResponse;
-            const id = action.kubeGuid;
-            mappedData.entities[kubernetesServicesSchemaKey][id] = info[id].items;
-            mappedData.result.push(id);
-            console.log('KUBE DATA');
-            console.log(info[id].items);
+            info[action.kubeGuid].items.forEach((p: KubeService) => {
+              const id = p.metadata.uid;
+              mappedData.entities[kubernetesServicesSchemaKey][id] = p;
+              mappedData.result.push(id);
+            });
             return [
               new WrapperRequestActionSuccess(mappedData, action)
             ];
@@ -205,11 +208,8 @@ export class KubernetesEffects {
               {
                 name: releaseName,
                 kubeId: action.kubeGuid,
-                pods: info[id].items.filter(
-                  (p: KubernetesPod) => !!p.metadata.labels &&
-                    !!p.metadata.labels['release'] &&
-                    p.metadata.labels['release'] === releaseName
-                )
+                namespace: this.getPods(info, id, releaseName)[0].metadata.namespace,
+                pods: this.getPods(info, id, releaseName)
               })
             );
 
@@ -230,4 +230,10 @@ export class KubernetesEffects {
         );
     })
   );
+
+  private getPods(info: any, id: string, releaseName: string): KubernetesPod[] {
+    return info[id].items.filter((p: KubernetesPod) => !!p.metadata.labels &&
+      !!p.metadata.labels['release'] &&
+      p.metadata.labels['release'] === releaseName);
+  }
 }

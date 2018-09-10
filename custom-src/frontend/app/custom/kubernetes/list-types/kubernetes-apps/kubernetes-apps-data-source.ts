@@ -24,19 +24,6 @@ export class KubernetesAppsDataSource extends ListDataSource<KubernetesApp, any>
       schema: entityFactory(kubernetesAppsSchemaKey),
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesAppsSchemaKey, kubeGuid.guid),
-      // transformEntity: map(variables => {
-      //   console.log('HERE');
-      //   console.log(variables);
-      //   if (!variables || variables.length === 0) {
-      //     return [];
-      //   }
-      //   const data = variables[0];
-      //   // const rows = [...Object.values(variables[0])];
-      //   // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
-      //   const rows = <KubernetesApp[]>Object.values(data);
-      //   console.log(rows);
-      //   return rows;
-      // }),
       isLocal: true,
       listConfig
     });

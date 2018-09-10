@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HelmReleaseService } from '../../../../services/helm-release.service';
 
 @Component({
   selector: 'app-helm-release-summary-card',
@@ -7,7 +8,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HelmReleaseSummaryCardComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    public helmReleaseService: HelmReleaseService
+  ) { }
 
   ngOnInit() {
   }

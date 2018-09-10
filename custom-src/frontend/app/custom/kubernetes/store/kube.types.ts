@@ -14,6 +14,38 @@ export interface KubeAPIResource {
   status: BaseStatus;
   spec: any;
 }
+export interface KubeService {
+  metadata: ServiceMetadata;
+  status: ServiceStatus;
+  spec: ServiceSpec;
+}
+
+export interface ServiceStatus {
+  loadBalancer: LoadBalancerStatus;
+}
+
+export interface LoadBalancerStatus {
+  ingress: LoadBalancerIngress[];
+}
+
+export interface LoadBalancerIngress {
+  hostname: string;
+  ip: string;
+}
+export interface ServiceSpec {
+  ports: Port[];
+  clusterIP: string;
+  type: string;
+  sessionAffinity: string;
+  sessionAffinityConfig: GenericMap;
+  selector: GenericMap;
+  externalTrafficPolicy: string;
+}
+
+export interface GenericMap {
+  [key: string]: string;
+}
+
 
 export interface KubernetesNode {
   metadata: Metadata;
@@ -26,7 +58,6 @@ export interface KubernetesApp {
   name: string;
   pods: KubernetesPod[];
 }
-
 export interface NodeStatus {
   capacity: Capacity;
   allocatable: Allocatable;
@@ -226,6 +257,19 @@ export interface Metadata {
   labels?: Labels;
   annotations?: Annotations;
   ownerReferences?: OwnerReference[];
+  kubeId?: string;
+}
+
+export interface ServiceMetadata {
+  creationTimestamp: Date;
+  labels?: Labels;
+  name: string;
+  namespace?: string;
+  resourceVersion: string;
+  selfLink: string;
+  uid: string;
+  annotations: Annotations;
+  kubeId?: string;
 }
 
 
