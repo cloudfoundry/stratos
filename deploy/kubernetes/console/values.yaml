@@ -17,6 +17,8 @@ console:
   cookieDomain:
 # externalIP: 127.0.0.1
   backendLogLevel: info
+  ssoLogin: false
+  ssoOptions:
 images:
   console: stratos-console
   proxy: stratos-jetstream
@@ -79,3 +81,5 @@ kube:
     email: default
 services:
   loadbalanced: false
+metrics:
+  enabled: false

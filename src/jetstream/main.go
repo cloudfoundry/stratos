@@ -751,7 +751,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		if err == nil {
 			routePlugin.AddAdminGroupRoutes(adminGroup)
 		}
-
 	}
 
 	adminGroup.POST("/unregister", p.unregisterCluster)
@@ -762,12 +761,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
-		e.Use(middleware.Gzip())
-		e.Static("/", staticDir)
+		e.Group("", middleware.Gzip()).Static("/", staticDir)
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
 	}
-
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)

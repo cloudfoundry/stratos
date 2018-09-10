@@ -193,13 +193,20 @@ export class CfUserService {
     }
 
     // Check space roles
-    if (this.populatedArray(user.audited_spaces) ||
-      this.populatedArray(user.managed_spaces) ||
-      this.populatedArray(user.spaces)) {
-      return true;
-    }
+    return this.hasSpaceRolesInOrg(user, orgGuid);
+  }
 
-    return false;
+  private filterByOrg(orgGuid: string, array?: Array<APIResource<ISpace>>): Array<APIResource<ISpace>> {
+    return array ? array.filter(space => space.entity.organization_guid === orgGuid) : null;
+  }
+
+  /**
+   * Helper to determine if user has space roles in an organization
+   */
+  hasSpaceRolesInOrg(user: CfUser, orgGuid: string): boolean {
+    return this.populatedArray(this.filterByOrg(orgGuid, user.audited_spaces)) ||
+      this.populatedArray(this.filterByOrg(orgGuid, user.managed_spaces)) ||
+      this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
   getUserRoleInOrg = (

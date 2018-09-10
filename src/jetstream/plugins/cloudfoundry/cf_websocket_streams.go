@@ -39,6 +39,10 @@ func (c CloudFoundrySpecification) firehose(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, firehoseStreamHandler)
 }
 
+func (c CloudFoundrySpecification) appFirehose(echoContext echo.Context) error {
+	return c.commonStreamHandler(echoContext, appFirehoseStreamHandler)
+}
+
 func (c CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context, bespokeStreamHandler func(echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
 	ac, err := c.openNoaaConsumer(echoContext)
 	if err != nil {
@@ -241,5 +245,33 @@ func firehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, cli
 	})
 
 	log.Infof("Firehose connected and streaming for CNSI: %s - subscription ID: %s", cnsiGUID, firehoseSubscriptionId)
+	return nil
+}
+
+func appFirehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
+	log.Debug("appFirehoseStreamHandler")
+
+	// Get the CNSI and app IDs from route parameters
+	cnsiGUID := echoContext.Param("cnsiGuid")
+	appGUID := echoContext.Param("appGuid")
+
+	log.Infof("Received request for log stream for App ID: %s - in CNSI: %s", appGUID, cnsiGUID)
+
+	msgChan, errorChan := ac.consumer.Stream(appGUID, ac.authToken)
+
+	// Process the app stream
+	go drainErrors(errorChan)
+	go drainFirehoseEvents(msgChan, func(msg *events.Envelope) {
+		if jsonMsg, err := json.Marshal(msg); err != nil {
+			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
+		} else {
+			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
+			if err != nil {
+				log.Errorf("Error writing data to WebSocket, %v", err)
+			}
+		}
+	})
+
+	log.Infof("Now streaming for App ID: %s - on CNSI: %s", appGUID, cnsiGUID)
 	return nil
 }
