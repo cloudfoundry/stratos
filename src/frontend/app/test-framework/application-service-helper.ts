@@ -1,11 +1,11 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ApplicationData, ApplicationService } from '../features/applications/application.service';
 import {
-  ApplicationEnvVarsService,
+  ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
@@ -50,7 +50,8 @@ export class ApplicationServiceMock {
   } as ApplicationData));
   appSummary$: Observable<EntityInfo<AppSummary>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
   appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
-  applicationStratProject$: Observable<EnvVarStratosProject> = observableOf({ deploySource: { type: '', timestamp: 0, commit: '' } });
+  applicationStratProject$: Observable<EnvVarStratosProject> =
+    observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
@@ -83,7 +84,7 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       store: Store<AppState>,
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
-      applicationEnvVarsService: ApplicationEnvVarsService,
+      applicationEnvVarsService: ApplicationEnvVarsHelper,
       paginationMonitorFactory: PaginationMonitorFactory
     ) => {
       const appService = new ApplicationService(
@@ -101,7 +102,7 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       Store,
       EntityServiceFactory,
       ApplicationStateService,
-      ApplicationEnvVarsService,
+      ApplicationEnvVarsHelper,
       PaginationMonitorFactory
     ]
   };

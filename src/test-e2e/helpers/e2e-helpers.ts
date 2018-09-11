@@ -1,9 +1,9 @@
-import { ElementArrayFinder, browser, by, element as protractorElement} from 'protractor';
+import { browser, by, element as protractorElement, ElementArrayFinder } from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
+
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
-import { e2e } from '../e2e';
 
 
 export enum ConsoleUserType {
@@ -40,6 +40,11 @@ export class E2EHelpers {
 
     browser.get('/').then(() => {
       browser.executeScript('window.sessionStorage.setItem("STRATOS_DISABLE_ANIMATIONS", true);');
+      // Allow GitHub API Url to be overridden
+      const gitHubUrl = this.secrets.getStratosGitHubApiUrl();
+      if (gitHubUrl) {
+        browser.executeScript('window.sessionStorage.setItem("STRATOS_GITHUB_API_URL", "' + gitHubUrl + '");');
+      }
     });
 
     if (loginUser) {

@@ -1,5 +1,7 @@
 import { browser, by, element, promise, protractor } from 'protractor';
 import { E2EHelpers } from '../helpers/e2e-helpers';
+import { SSOLoginPage } from './sso-login.po';
+import { ssoHelper } from '../helpers/sso-helper';
 
 const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
 const until = protractor.ExpectedConditions;
@@ -37,7 +39,16 @@ export class LoginPage {
   }
 
   login(username: string, password: string) {
-    this.navigateTo();
+    if (ssoHelper.ssoEnabled) {
+      const ssoLoginPage = new SSOLoginPage();
+      return ssoLoginPage.login(username, password);
+    } else {
+      return this.nonSSOLogin(username, password);
+    }
+  }
+
+  nonSSOLogin(username: string, password: string) {
+      this.navigateTo();
     this.enterLogin(username, password);
     this.loginButton().click();
 

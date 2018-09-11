@@ -28,6 +28,8 @@ import {
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
+  ResetSSOAuth,
+  RESET_SSO_AUTH,
 } from './../actions/auth.actions';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -84,7 +86,7 @@ export class AuthEffect {
         catchError((err, caught) => {
           let setupMode = false;
           let isUpgrading = false;
-          const isSSO = err.headers.has(SSO_HEADER);
+          const ssoOptions = err.headers.get(SSO_HEADER) as string;
           if (err.status === 503) {
             setupMode = err.headers.has(SETUP_HEADER);
             isUpgrading = err.headers.has(UPGRADE_HEADER);
@@ -92,7 +94,7 @@ export class AuthEffect {
 
           // Check for cookie domain mismatch with the requesting URL
           const isDomainMismatch = this.isDomainMismatch(err.headers);
-          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, isSSO)] : [new ResetAuth()];
+          return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
         }));
     }));
 
@@ -112,7 +114,13 @@ export class AuthEffect {
   @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT).pipe(
     switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {}).pipe(
-        mergeMap(data => [new LogoutSuccess(), new ResetAuth()]),
+        mergeMap((data: any) => {
+          if (data.isSSO) {
+            return [new LogoutSuccess(), new ResetSSOAuth()];
+          } else {
+            return [new LogoutSuccess(), new ResetAuth()];
+          }
+        }),
         catchError((err, caught) => [new LogoutFailed(err)]), );
     }));
 
@@ -121,6 +129,13 @@ export class AuthEffect {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       window.location.assign(window.location.origin);
     }));
+
+    @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.ofType<ResetSSOAuth>(RESET_SSO_AUTH).pipe(
+      tap((action) => {
+        // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
+        const returnUrl = encodeURI(window.location.origin);
+        window.open('/pp/v1/auth/sso_logout?state=' + returnUrl , '_self');
+      }));
 
   private isDomainMismatch(headers): boolean {
     if (headers.has(DOMAIN_HEADER)) {

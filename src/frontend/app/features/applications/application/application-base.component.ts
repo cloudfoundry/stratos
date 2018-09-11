@@ -8,7 +8,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
-import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 
 
@@ -18,7 +18,7 @@ export function applicationServiceFactory(
   store: Store<AppState>,
   entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
-  appEnvVarsService: ApplicationEnvVarsService,
+  appEnvVarsService: ApplicationEnvVarsHelper,
   paginationMonitorFactory: PaginationMonitorFactory
 ) {
   return new ApplicationService(
@@ -75,7 +75,7 @@ export function getGuids(type?: string) {
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [CF_GUID, APP_GUID, Store, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService, PaginationMonitorFactory]
+      deps: [CF_GUID, APP_GUID, Store, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsHelper, PaginationMonitorFactory]
     },
     {
       provide: ENTITY_SERVICE,

@@ -8,12 +8,15 @@ const {
 const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
+const globby = require('globby');
 
-var timestamp = moment().format('DD_MM_YYYY-hh.mm.ss');
-
-var reportFolderName = 'stratos-e2e-' + timestamp;
+// Test report folder name
+var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
+var reportFolderName = timestamp + '-e2e-report';
 
 const SECRETS_FILE = 'secrets.yaml';
+
+const E2E_REPORT_FOLDER = process.env['E2E_REPORT_FOLDER'] || './e2e-reports/' + reportFolderName;
 
 var fs = require('fs');
 var path = require('path');
@@ -40,12 +43,23 @@ const timeout = 40000
 
 exports.config = {
   allScriptsTimeout: timeout,
-  specs: [
-    './src/test-e2e/**/*-e2e.spec.ts',
-  ],
+  // Exclude the dashboard tests from all suites for now
   exclude: [
     './src/test-e2e/dashboard/dashboard-e2e.spec.ts',
   ],
+  // Suites - use globby to give us more control over included test specs
+  suites: {
+    e2e: globby.sync([
+      './src/test-e2e/**/*-e2e.spec.ts',
+      '!./src/test-e2e/login/*-sso-e2e.spec.ts'
+    ]),
+    sso: globby.sync([
+      './src/test-e2e/**/*-e2e.spec.ts',
+      '!./src/test-e2e/login/login-e2e.spec.ts'
+    ])
+  },
+  // Default test suite is the E2E test suite
+  suite: 'e2e',
   capabilities: {
     'browserName': 'chrome',
     chromeOptions: {
@@ -66,7 +80,7 @@ exports.config = {
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
     jasmine.getEnv().addReporter(new HtmlReporter({
-      baseDirectory: './e2e-reports/' + reportFolderName,
+      baseDirectory: E2E_REPORT_FOLDER,
       takeScreenShotsOnlyForFailedSpecs: true,
       docTitle: 'E2E Test Report: ' + timestamp,
       docName: 'index.html',
