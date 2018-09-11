@@ -65,7 +65,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       getEmptyType: () => ({
         name: '',
         system_shared_token: false,
-        metricsAvailable: false
+        metricsAvailable: false,
+        sso_allowed: false,
       }),
       paginationKey: GetAllEndpoints.storeKey,
       isLocal: true,

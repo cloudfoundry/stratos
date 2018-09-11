@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	RegisterMigration(20180813110300, "LinkedTokens", func(txn *sql.Tx, conf *goose.DBConf) error {
+	RegisterMigration(20180824092600, "LinkedTokens", func(txn *sql.Tx, conf *goose.DBConf) error {
 
 		addTokenID := "ALTER TABLE tokens ADD token_guid VARCHAR(36) DEFAULT 'default-token'"
 		_, err := txn.Exec(addTokenID)

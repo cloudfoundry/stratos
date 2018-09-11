@@ -38,6 +38,10 @@ export const DELETE_INSTANCE = '[Application Instance] Delete';
 export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
 export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 
+export const RESTAGE = '[Application] Restage';
+export const RESTAGE_SUCCESS = '[Application] Restage success';
+export const RESTAGE_FAILED = '[Application] Restage failed';
+
 const applicationEntitySchema = entityFactory(applicationSchemaKey);
 
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
@@ -192,4 +196,21 @@ export class DeleteApplicationInstance extends CFStartAction
   entityKey = appStatsSchemaKey;
   removeEntityOnDelete = true;
   options: RequestOptions;
+}
+
+export class RestageApplication extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}/restage`;
+    this.options.method = 'post';
+    this.options.headers = new Headers();
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
+  }
+  actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
+  options: RequestOptions;
+  updatingKey = 'restaging';
 }

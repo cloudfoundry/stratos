@@ -37,28 +37,30 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
+  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
 
   typeValue: any;
 
   endpointTypes = getEndpointTypes();
   urlValidation: string;
 
+  clientRedirectURI: string;
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
-    this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
-      .pipe(
-        withLatestFrom(store.select(getAPIRequestDataState)),
-        map(([pagination, entities]) => {
-          const pages = Object.values(pagination.ids);
-          const page = [].concat.apply([], pages);
-          const endpoints = page.length ? denormalize(page, [entityFactory(endpointSchemaKey)], entities) : [];
-          return {
-            names: endpoints.map(ep => ep.name),
-            urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-          };
-        })
-      );
+  this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
+    .pipe(
+      withLatestFrom(store.select(getAPIRequestDataState)),
+      map(([pagination, entities]) => {
+        const pages = Object.values(pagination.ids);
+        const page = [].concat.apply([], pages);
+        const endpoints = page.length ? denormalize(page, [entityFactory(endpointSchemaKey)], entities) : [];
+        return {
+          names: endpoints.map(ep => ep.name),
+          urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
+        };
+      })
+    );
 
     // Auto-select default endpoint type - typically this is Cloud Foundry
     const defaultType = this.endpointTypes.filter((t) => t.value === DEFAULT_ENDPOINT_TYPE);
@@ -66,6 +68,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.typeValue = defaultType[0].value;
       this.setUrlValidation(this.typeValue);
     }
+
+    // Client Redirect URI for SSO
+    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
+    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
   }
 
   onNext: StepOnNextFunction = () => {
@@ -73,7 +79,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.typeField.value,
       this.nameField.value,
       this.urlField.value,
-      !!this.skipSllField.value
+      !!this.skipSllField.value,
+      !!this.ssoAllowedField.value,
     );
 
     this.store.dispatch(action);
