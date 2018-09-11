@@ -1,20 +1,13 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ApplicationService } from '../application.service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { getPreviousRoutingState, RoutingEvent } from '../../../store/types/routing.type';
-import { first, map, filter } from 'rxjs/operators';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { APIResource } from '../../../store/types/api.types';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { combineLatest ,  Observable ,  BehaviorSubject } from 'rxjs';
-import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
-import { IApp } from '../../../core/cf-api.types';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
+import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-cli-info-application',
@@ -31,10 +24,8 @@ export class CliInfoApplicationComponent implements OnInit {
 
   public context$: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$: Observable<{ url: string, queryParams: any }>;
 
   constructor(
-    private store: Store<AppState>,
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
   ) {
@@ -43,30 +34,8 @@ export class CliInfoApplicationComponent implements OnInit {
 
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
-    const defaultBackLink = (
-      `/applications/${cfGuid}/${appGuid}`
-    );
-
-    this.setupRouteObservable(defaultBackLink);
-    // Will auto unsubscribe as we are using 'first'
-    this.route$.pipe(first()).subscribe(route => {
-      this.previousUrl = route.url;
-      this.previousQueryParams = route.queryParams;
-    });
-
     this.setupObservables(cfGuid);
     this.setupBreadcrumbs(cfGuid, appGuid);
-  }
-
-  private setupRouteObservable(defaultBackLink: string) {
-    this.route$ = this.store.select(getPreviousRoutingState).pipe(
-      map(route => {
-        return {
-          url: route && route.state ? route.state.url : defaultBackLink,
-          queryParams: route && route.state.queryParams ? route.state.queryParams : {}
-        };
-      })
-    );
   }
 
   private setupObservables(cfGuid: string) {
@@ -97,28 +66,17 @@ export class CliInfoApplicationComponent implements OnInit {
   }
 
   setupBreadcrumbs(cfGuid: string, appGuid: string) {
-    this.breadcrumbs$ = combineLatest(
-      this.route$,
-      this.context$
-    ).pipe(
-      map(([route, context]) => {
+    this.breadcrumbs$ = this.context$.pipe(
+      map((context) => {
         return [
           {
             breadcrumbs: [
               { value: 'Applications', routerLink: '/applications' },
-              { value: context.appName, routerLink: route.url }
+              { value: context.appName, routerLink: `/applications/${cfGuid}/${appGuid}` }
             ]
           }
         ];
-      }));
+      })
+    );
   }
-
-  back() {
-    this.store.dispatch(new RouterNav({
-      path: this.previousUrl,
-      query: this.previousQueryParams
-    }
-    ));
-  }
-
 }

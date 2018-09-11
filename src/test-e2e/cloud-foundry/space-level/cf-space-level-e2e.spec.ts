@@ -49,9 +49,9 @@ describe('CF - Space Level -', () => {
       cfHelper.fetchDefaultSpaceGuid(true)
         .then(spaceGuid => {
           spacePage = CfSpaceLevelPage.forEndpoint(
-            cfHelper.cachedDefaultCfGuid,
-            cfHelper.cachedDefaultOrgGuid,
-            cfHelper.cachedDefaultSpaceGuid
+            CFHelpers.cachedDefaultCfGuid,
+            CFHelpers.cachedDefaultOrgGuid,
+            CFHelpers.cachedDefaultSpaceGuid
           );
           return spacePage.navigateTo();
         })

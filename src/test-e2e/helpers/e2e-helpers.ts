@@ -1,9 +1,9 @@
-import { ElementArrayFinder, browser, by, element as protractorElement} from 'protractor';
+import { browser, by, element as protractorElement, ElementArrayFinder } from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
+
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
-import { e2e } from '../e2e';
 
 
 export enum ConsoleUserType {
@@ -21,7 +21,8 @@ export class E2EHelpers {
   constructor() { }
 
   // This makes identification of acceptance test apps easier in case they leak
-  static createCustomName = (prefix: string, isoTime?: string) => prefix + '.' + (isoTime || (new Date()).toISOString());
+  static createCustomName = (prefix: string, isoTime?: string, trim = false) =>
+    prefix + '.' + (isoTime || (new Date()).toISOString().replace(/[-:.]+/g, ''))
 
   getHost(): string {
     return browser.baseUrl;

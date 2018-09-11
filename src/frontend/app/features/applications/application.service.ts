@@ -49,7 +49,7 @@ import {
   PaginationObservables,
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
-  ApplicationEnvVarsService,
+  ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
@@ -88,7 +88,7 @@ export class ApplicationService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
-    private appEnvVarsService: ApplicationEnvVarsService,
+    private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
@@ -216,15 +216,8 @@ export class ApplicationService {
       refCount()
     );
     const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
-    this.appEnvVars = getPaginationObservables<APIResource>({
-      store: this.store,
-      action,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
-        entityFactory(appEnvVarsSchemaKey)
-      )
-    }, true);
 
+    this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
   }
 
   private constructAmalgamatedObservables() {
