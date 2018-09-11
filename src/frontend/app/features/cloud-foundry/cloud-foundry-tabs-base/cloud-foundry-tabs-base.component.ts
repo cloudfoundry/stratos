@@ -10,8 +10,13 @@ import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-s
 import { canUpdateOrgSpaceRoles } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { AppState } from './../../../store/app-state';
-import { StratosTabType, getTabsFromExtensions } from '../../../core/extension/extension-service';
-
+import {
+  StratosTabType,
+  getTabsFromExtensions,
+  StratosActionMetadata,
+  getActionsFromExtensions,
+  StratosActionType
+} from '../../../core/extension/extension-service';
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
@@ -30,6 +35,8 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   public canAddOrg$: Observable<boolean>;
   public canUpdateRoles$: Observable<boolean>;
+
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,

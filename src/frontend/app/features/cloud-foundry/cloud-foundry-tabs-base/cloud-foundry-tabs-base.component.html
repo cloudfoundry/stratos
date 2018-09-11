@@ -10,6 +10,8 @@
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli" matTooltip="CLI Info">
       <mat-icon>keyboard</mat-icon>
     </button>
+    <!-- Extension buttons -->
+    <app-extension-buttons type="CloudFoundry"></app-extension-buttons>
   </div>
 </app-page-header>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Cloud Foundry details'">

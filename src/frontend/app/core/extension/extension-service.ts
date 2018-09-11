@@ -29,9 +29,10 @@ export interface StratosTabMetadata {
 export enum StratosActionType {
   Applications = 'appsActions',
   Application = 'appActions',
-  CloudFoundry = 'cfActiosn',
+  CloudFoundry = 'cfActions',
   CloudFoundryOrg = 'cfOrgActions',
-  CloudFoundrySpace = 'cfSpaceActions'
+  CloudFoundrySpace = 'cfSpaceActions',
+  Endpoints = 'endpointsActions'
 }
 
 export interface StratosActionMetadata {
