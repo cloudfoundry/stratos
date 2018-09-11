@@ -350,7 +350,7 @@ func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (inte
 }
 
 func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {
-	log.Debug("GetCNSITokenRecord")
+	log.Debug("GetCNSITokenRecordWithDisconnected")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return interfaces.TokenRecord{}, false
@@ -378,6 +378,25 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 	}
 
 	return cnsiList, nil
+}
+
+// Uopdate the Access Token, Refresh Token and Token Expiry for a token
+func (p *portalProxy) updateTokenAuth(userGUID string, t interfaces.TokenRecord) error {
+	log.Debug("updateTokenAuth")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	err = tokenRepo.UpdateTokenAuth(userGUID, t, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		msg := "Unable to update Token: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
 }
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t interfaces.TokenRecord) error {
