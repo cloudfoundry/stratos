@@ -19,6 +19,7 @@ describe('Application View -', function () {
   const appName = ApplicationE2eHelper.createApplicationName();
   let app: APIResource<IApp>;
   let appSummary: ApplicationPageSummaryTab;
+  let defaultStack = '';
 
   function createTestAppAndNav(): promise.Promise<any> {
     return cfHelper.basicCreateApp(
@@ -46,6 +47,13 @@ describe('Application View -', function () {
 
     protractor.promise.controlFlow().execute(() => cfHelper.updateDefaultCfOrgSpace());
     protractor.promise.controlFlow().execute(() => createTestAppAndNav());
+  });
+
+  beforeAll(() => {
+    const that = this;
+    const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
+    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
+    return cfHelper.fetchDefaultStack(endpointGuid).then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
@@ -107,8 +115,8 @@ describe('Application View -', function () {
     });
 
     it('Info', () => {
-      expect(appSummary.cardInfo.memQuota.getValue()).toBe('1 GB');
-      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('1 GB');
+      expect(appSummary.cardInfo.memQuota.getValue()).toBe('23 MB');
+      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('35 MB');
       expect(appSummary.cardInfo.appState.getValue()).toBe('STOPPED');
       expect(appSummary.cardInfo.packageState.getValue()).toBe('PENDING');
       expect(appSummary.cardInfo.services.getValue()).toBe('0');
@@ -125,7 +133,7 @@ describe('Application View -', function () {
 
     it('Build Info', () => {
       expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('-');
-      expect(appSummary.cardBuildInfo.stack.getValue()).toBe('opensuse42');
+      expect(appSummary.cardBuildInfo.stack.getValue()).toBe(defaultStack);
     });
 
     it('Deployment Info', () => {
