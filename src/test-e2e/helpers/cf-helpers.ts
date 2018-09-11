@@ -128,6 +128,21 @@ export class CFHelpers {
     });
   }
 
+  // Default Stack based on the CF Vendor
+  fetchDefaultStack(endpoint: E2EConfigCloudFoundry) {
+    const reqObj = this.cfRequestHelper.newRequest();
+    const options = {
+      url: endpoint.url + '/v2/info'
+    };
+    return reqObj(options).then((response) => {
+      const json = JSON.parse(response.body);
+      const isSUSE = json.description.indexOf('SUSE') === 0;
+      return isSUSE ? 'opensuse42' : 'cflinuxfs2';
+    }).catch((e) => {
+      return 'unknown';
+    });
+  }
+
   fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results > 0) {
@@ -172,7 +187,12 @@ export class CFHelpers {
 
   // For fully fleshed our create see application-e2e-helpers
   basicCreateApp(cnsiGuid: string, spaceGuid: string, appName: string): promise.Promise<APIResource<IApp>> {
-    return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
+    return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', {
+      name: appName,
+      space_guid: spaceGuid,
+      memory: 23,
+      disk_quota: 35
+     });
   }
 
   // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)
