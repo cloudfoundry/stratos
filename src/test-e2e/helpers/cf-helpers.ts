@@ -128,6 +128,15 @@ export class CFHelpers {
     });
   }
 
+  fetchDefaultStack(cnsiGuid) {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'stacks?results-per-page=100').then(json => {
+      if (json.resources.length > 0 ) {
+        return json.resources[0].entity.name;
+      }
+      return 'could not get default stack';
+    });
+  }
+
   fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results > 0) {
@@ -172,7 +181,12 @@ export class CFHelpers {
 
   // For fully fleshed our create see application-e2e-helpers
   basicCreateApp(cnsiGuid: string, spaceGuid: string, appName: string): promise.Promise<APIResource<IApp>> {
-    return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', { name: appName, space_guid: spaceGuid });
+    return this.cfRequestHelper.sendCfPost(cnsiGuid, 'apps', {
+      name: appName,
+      space_guid: spaceGuid,
+      memory: 23,
+      disk_quota: 35
+     });
   }
 
   // For fully fleshed out delete see application-e2e-helpers (includes route and service instance deletion)

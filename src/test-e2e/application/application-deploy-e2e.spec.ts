@@ -32,8 +32,9 @@ describe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
   const testAppName = ApplicationE2eHelper.createApplicationName();
-  const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack || 'opensuse42';
+  const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack;
   let deployedCommit: promise.Promise<string>;
+  let defaultStack = '';
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -46,6 +47,13 @@ describe('Application Deploy -', function () {
       .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
     cfHelper = new CFHelpers(setup);
+  });
+
+  beforeAll(() => {
+    const that = this;
+    const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
+    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
+    return cfHelper.fetchDefaultStack(endpointGuid).then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
@@ -280,7 +288,7 @@ describe('Application Deploy -', function () {
         expect(appSummary.cardCfInfo.space.getValue()).toBe(spaceName);
 
         expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('binary_buildpack');
-        expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack);
+        expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
 
         appSummary.cardDeployInfo.waitForTitle('Deployment Info');
         expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
