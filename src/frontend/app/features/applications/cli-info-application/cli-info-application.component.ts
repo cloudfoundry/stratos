@@ -24,7 +24,6 @@ export class CliInfoApplicationComponent implements OnInit {
 
   public context$: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$: Observable<{ url: string, queryParams: any }>;
 
   constructor(
     private applicationService: ApplicationService,
@@ -67,11 +66,8 @@ export class CliInfoApplicationComponent implements OnInit {
   }
 
   setupBreadcrumbs(cfGuid: string, appGuid: string) {
-    this.breadcrumbs$ = combineLatest(
-      this.route$,
-      this.context$
-    ).pipe(
-      map(([route, context]) => {
+    this.breadcrumbs$ = this.context$.pipe(
+      map((context) => {
         return [
           {
             breadcrumbs: [
@@ -80,6 +76,7 @@ export class CliInfoApplicationComponent implements OnInit {
             ]
           }
         ];
-      }));
+      })
+    );
   }
 }
