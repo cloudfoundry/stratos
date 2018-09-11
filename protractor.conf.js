@@ -39,7 +39,8 @@ try {
 }
 
 // This is the maximum amount of time ALL before/after/it's must execute in
-const timeout = 40000
+const timeout = 40000;
+const checkSuiteGlob = './src/test-e2e/check/*-e2e.spec.ts';
 
 exports.config = {
   allScriptsTimeout: timeout,
@@ -51,20 +52,25 @@ exports.config = {
   suites: {
     e2e: globby.sync([
       './src/test-e2e/**/*-e2e.spec.ts',
-      '!./src/test-e2e/login/*-sso-e2e.spec.ts'
+      '!./src/test-e2e/login/*-sso-e2e.spec.ts',
+      '!' + checkSuiteGlob
     ]),
     sso: globby.sync([
       './src/test-e2e/**/*-e2e.spec.ts',
-      '!./src/test-e2e/login/login-e2e.spec.ts'
-    ])
+      '!./src/test-e2e/login/login-e2e.spec.ts',
+      '!' + checkSuiteGlob
+    ]),
+    check: checkSuiteGlob,
   },
   // Default test suite is the E2E test suite
   suite: 'e2e',
   capabilities: {
     'browserName': 'chrome',
     chromeOptions: {
-      args: ['--no-sandbox']
-    }
+      useAutomationExtension: false,
+      args: ['--no-sandbox', '--disable-dev-shm-usage']
+    },
+    acceptInsecureCerts: true
   },
   directConnect: true,
   framework: 'jasmine',
@@ -97,6 +103,8 @@ exports.config = {
   }
 };
 
-if (secrets.headless) {
+// Should we run e2e tests in headless Chrome?
+const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
+if (headless) {
   exports.config.capabilities.chromeOptions.args = ['--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox'];
 }

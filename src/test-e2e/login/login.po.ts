@@ -1,7 +1,9 @@
 import { browser, by, element, promise, protractor } from 'protractor';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { SSOLoginPage } from './sso-login.po';
 import { ssoHelper } from '../helpers/sso-helper';
+import { Component } from '../po/component.po';
+import { SSOLoginPage } from './sso-login.po';
 
 const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
 const until = protractor.ExpectedConditions;
@@ -48,7 +50,7 @@ export class LoginPage {
   }
 
   nonSSOLogin(username: string, password: string) {
-      this.navigateTo();
+    this.navigateTo();
     this.enterLogin(username, password);
     this.loginButton().click();
 
@@ -87,6 +89,10 @@ export class LoginPage {
 
   waitForNoEndpoints() {
     return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
+  }
+
+  waitForLoading() {
+    return Component.waitUntilNotShown(element(by.css('.login__loading')));
   }
 
 }
