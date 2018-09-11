@@ -128,12 +128,18 @@ export class CFHelpers {
     });
   }
 
-  fetchDefaultStack(cnsiGuid) {
-    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'stacks?results-per-page=100').then(json => {
-      if (json.resources.length > 0 ) {
-        return json.resources[0].entity.name;
-      }
-      return 'could not get default stack';
+  // Default Stack based on the CF Vendor
+  fetchDefaultStack(endpoint: E2EConfigCloudFoundry) {
+    const reqObj = this.cfRequestHelper.newRequest();
+    const options = {
+      url: endpoint.url + '/v2/info'
+    };
+    return reqObj(options).then((response) => {
+      const json = JSON.parse(response.body);
+      const isSUSE = json.description.indexOf('SUSE') === 0;
+      return isSUSE ? 'opensuse42' : 'cflinuxfs2';
+    }).catch((e) => {
+      return 'unknown';
     });
   }
 

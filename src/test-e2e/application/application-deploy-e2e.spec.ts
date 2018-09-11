@@ -50,10 +50,7 @@ describe('Application Deploy -', function () {
   });
 
   beforeAll(() => {
-    const that = this;
-    const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
-    return cfHelper.fetchDefaultStack(endpointGuid).then(stack => defaultStack = stack);
+    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
   });
 
   afterAll(() => {

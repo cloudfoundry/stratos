@@ -50,10 +50,7 @@ describe('Application View -', function () {
   });
 
   beforeAll(() => {
-    const that = this;
-    const endpointName = e2e.secrets.getDefaultCFEndpoint().name;
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, endpointName);
-    return cfHelper.fetchDefaultStack(endpointGuid).then(stack => defaultStack = stack);
+    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
@@ -131,7 +128,7 @@ describe('Application View -', function () {
       expect(appSummary.cardCfInfo.space.getValue()).toBe(defaultCf.testSpace);
     });
 
-    it('Build Info', () => {
+    fit('Build Info', () => {
       expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('-');
       expect(appSummary.cardBuildInfo.stack.getValue()).toBe(defaultStack);
     });
