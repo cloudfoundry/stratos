@@ -54,7 +54,7 @@ describe('Endpoints', () => {
           expect(ctrls['authtype']).toBeDefined();
           expect(ctrls['username']).toBeDefined();
           expect(ctrls['password']).toBeDefined();
-          expect(ctrls['authtype'].text).toEqual('Username and Password');
+          expect(ctrls['authtype'].value).toEqual('creds');
           expect(ctrls['username'].text).toEqual('');
           expect(ctrls['password'].text).toEqual('');
         });
