@@ -90,6 +90,14 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 
 // Login via UAA
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"SSO Login is not enabled",
+			"SSO Login is not enabled")
+		return err
+	}
+
 	state := c.QueryParam("state")
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
@@ -119,6 +127,14 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 
 // Logout of the UAA
 func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"SSO Login is not enabled",
+			"SSO Login is not enabled")
+		return err
+	}
+
 	state := c.QueryParam("state")
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
