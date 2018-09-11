@@ -67,6 +67,14 @@ export class ListTableComponent extends Component {
     });
   }
 
+  waitUntilNotBusy() {
+    return Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+    ).then(() => Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row-wrapper__blocked'))
+    ));
+  }
+
   getHighlightedRow(): promise.Promise<number> {
     return this.locator.all(by.css('.app-table__row'))
       .map((row, index) => row.getAttribute('class').then(classes => classes.indexOf('table-row-wrapper__highlighted')))

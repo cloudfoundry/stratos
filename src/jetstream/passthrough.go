@@ -234,7 +234,7 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 
 	if shouldPassthrough {
 		if len(cnsiList) > 1 {
-			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported.")
+			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported")
 			return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 	}

@@ -1,5 +1,5 @@
-import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { by, element, ElementFinder, promise } from 'protractor';
+
 import { Component } from './component.po';
 
 /**
