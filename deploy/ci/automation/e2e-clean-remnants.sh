@@ -18,6 +18,9 @@ else
   fi
 fi
 
+# Platform name (Linux, Darwin etc)
+unamestr=`uname`
+
 function clean() {
   local ITEMS=$1
   local PREFIX=$2
@@ -31,7 +34,11 @@ function clean() {
       TIMESTAMP="${BASH_REMATCH[2]}"
       NAME="${BASH_REMATCH[1]}${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
       TIMESTAMP=$(echo $TIMESTAMP | awk '{print toupper($0)}')
-      EPOCH=$(date -j -f "%Y-%M-%dT%T" $TIMESTAMP "+%s")
+      if [[ "$unamestr" == 'Darwin' ]]; then
+        EPOCH=$(date -j -f "%Y-%M-%dT%T" $TIMESTAMP "+%s")
+      else
+        EPOCH=$(date -d $TIMESTAMP "+%s")
+      fi
       DIFF=$(($NOW-$EPOCH))
       if [ $DIFF -gt 43200 ]; then
         echo "$NAME  [DELETE]"
