@@ -4,6 +4,7 @@ import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
+import { ssoHelper } from './helpers/sso-helper';
 
 
 /**
@@ -80,6 +81,12 @@ export class E2ESetup {
     // Create requests in case we need to make any API requests as admin and/or user
     this.adminReq = this.reqHelper.newRequest();
     this.userReq = this.reqHelper.newRequest();
+
+    // Get the SSO login Status if needed
+    if (!ssoHelper.ssoEnabledFetched) {
+      this.getSSOLoginStatus();
+    }
+
     // The setup sequence won't be executed until the appropriate stage in the control flow
     protractor.promise.controlFlow().execute(() => this.doSetup());
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
@@ -105,6 +112,11 @@ export class E2ESetup {
   // Ensure that an admin session is created, even if it is not needed by the setup process
   requireAdminSession() {
     this.needAdminSession = true;
+  }
+
+  private getSSOLoginStatus() {
+    return this.addSetupOp(this.resetsHelper.getSSOLoginStatus.bind(this.resetsHelper, null, ssoHelper),
+      'Check SSO Login Status');
   }
 
   /**
