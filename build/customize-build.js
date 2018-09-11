@@ -67,6 +67,7 @@
     const customBaseFolder = path.resolve(__dirname, '../custom-src/frontend');
     doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
     doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
+    doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
 
     const backendBaseFolder = path.resolve(__dirname, '../src/jetstream/plugins');
     const backendCustomBaseFolder = path.resolve(__dirname, '../custom-src/jetstream');
@@ -116,6 +117,23 @@
         fs.symlinkSync(srcFolder, destFolder);
       }
     });
+  }
+
+  // Copy the correct custom module to either import the supplied custom module or provide an empty module
+  function doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
+    const destFile = path.join(baseFolder, 'app/custom-import.module.ts');
+    const customModuleFile = path.join(baseFolder, 'app/custom/custom.module.ts');
+
+    // Delete the existing file if it exists
+    if (fs.existsSync(destFile)) {
+      fs.unlinkSync(destFile)
+    }
+
+    if (!reset) {
+      const srcFile = fs.existsSync(customModuleFile) ? 'custom-src.module.ts_' : 'custom.module.ts_';
+      fs.copySync(path.join(defaultSrcFolder, srcFile), destFile);
+    }
   }
 
   function doCustomizeBackend(reset, baseFolder, customBaseFolder) {

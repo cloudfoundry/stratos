@@ -31,6 +31,7 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
+	SSOAllowed             bool     `json:"sso_allowed"`
 }
 
 // ConnectedEndpoint

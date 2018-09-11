@@ -37,6 +37,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
+  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
 
   // Optional Client ID and Client Secret
   @ViewChild('clientIDField') clientIDField: NgModel;
@@ -48,6 +49,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   urlValidation: string;
 
   showAdvancedFields = false;
+  clientRedirectURI: string;
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
@@ -71,6 +73,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.typeValue = defaultType[0].value;
       this.setUrlValidation(this.typeValue);
     }
+
+    // Client Redirect URI for SSO
+    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
+      (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
   }
 
   onNext: StepOnNextFunction = () => {
@@ -81,6 +87,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       !!this.skipSllField.value,
       this.clientIDField.value,
       this.clientSecretField.value,
+      !!this.ssoAllowedField.value,
     );
 
     this.store.dispatch(action);

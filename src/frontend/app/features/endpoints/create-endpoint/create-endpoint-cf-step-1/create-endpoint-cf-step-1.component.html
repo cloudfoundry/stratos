@@ -19,7 +19,7 @@
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
   </mat-form-field>
   <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint</mat-checkbox>
-
+  <mat-checkbox matInput name="ssoAllowed" #ssoAllowedField="ngModel" ngModel>Allow SSO login to this endpoint</mat-checkbox>
   <div *ngIf="showAdvancedFields" class="create-endpoint__section">
     <h1 class="create-endpoint__section-title">Advanced Information (Optional)</h1>
     <mat-form-field>
@@ -30,3 +30,9 @@
     </mat-form-field>
   </div>
 </form>
+<div *ngIf="!!ssoAllowedField.value">
+  <p>
+    Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.
+  </p>
+  <pre>{{clientRedirectURI}}</pre>
+</div>
