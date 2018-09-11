@@ -1,5 +1,5 @@
 
-import { catchError, mergeMap, map, switchMap } from 'rxjs/operators';
+import { catchError, mergeMap, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -22,7 +22,7 @@ export class MetricsEffect {
   ) { }
 
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
-    switchMap(action => {
+    mergeMap(action => {
       const fullUrl = this.buildFullUrl(action);
       const apiAction = {
         guid: action.guid,

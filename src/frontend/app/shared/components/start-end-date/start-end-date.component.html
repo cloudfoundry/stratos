@@ -1,4 +1,7 @@
 <div class="start-end-date">
+  <div *ngIf="invalid">
+    Start date must be before end date.
+  </div>
   <div class="start-end-date__selector">
     <div class="start-end-date__header">Start</div>
     <app-date-time [(dateTime)]="start"></app-date-time>
