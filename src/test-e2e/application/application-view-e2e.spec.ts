@@ -128,7 +128,7 @@ describe('Application View -', function () {
       expect(appSummary.cardCfInfo.space.getValue()).toBe(defaultCf.testSpace);
     });
 
-    fit('Build Info', () => {
+    it('Build Info', () => {
       expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('-');
       expect(appSummary.cardBuildInfo.stack.getValue()).toBe(defaultStack);
     });
