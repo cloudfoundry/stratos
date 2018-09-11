@@ -1,4 +1,4 @@
-import { browser, ElementFinder, promise } from 'protractor';
+import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -7,7 +7,6 @@ import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { BrowserViewportScroller } from '@angular/common/src/viewport_scroller';
 
 describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
