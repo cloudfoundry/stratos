@@ -151,6 +151,9 @@ func main() {
 	}()
 	log.Info("Database connection pool created.")
 
+	// Wait for Database Schema to be initialized
+	datastore.WaitForMigrations(databaseConnectionPool)
+
 	// Initialize session store for Gorilla sessions
 	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
 	if err != nil {

@@ -6,8 +6,10 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
 
 	log "github.com/sirupsen/logrus"
 	// Mysql driver
@@ -144,6 +146,7 @@ func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 	return GetSQLLiteConnection()
 }
 
+// GetSQLLiteConnection returns an SQLite DB Connection
 func GetSQLLiteConnection() (*sql.DB, error) {
 
 	if !config.IsSet("SQLITE_KEEP_DB") {
@@ -257,4 +260,21 @@ func ModifySQLStatement(sql string, databaseProvider string) string {
 
 	// Default is to return the SQL provided directly
 	return sql
+}
+
+// WaitForMigrations will wait until all migrations have been applied
+func WaitForMigrations(db *sql.DB) {
+	migrations := GetOrderedMigrations()
+	targetVersion := migrations[len(migrations)-1]
+	for {
+		dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(db)
+		databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
+		if err == nil && databaseVersionRec.VersionID == targetVersion.Version {
+			log.Info("Database schema is up to date")
+			break
+		}
+
+		time.Sleep(3 * time.Second)
+		log.Info("Waiting for database schema to be initialized")
+	}
 }

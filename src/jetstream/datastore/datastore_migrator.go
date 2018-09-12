@@ -30,8 +30,8 @@ type stratosMigrationStep struct {
 
 var migrationSteps []stratosMigrationStep
 
-// getOrderedMigrations returns an order list of migrations to run
-func getOrderedMigrations() []stratosMigrationStep {
+// GetOrderedMigrations returns an order list of migrations to run
+func GetOrderedMigrations() []stratosMigrationStep {
 	sort.Slice(migrationSteps, func(i, j int) bool {
 		return migrationSteps[i].Version < migrationSteps[j].Version
 	})
@@ -51,7 +51,7 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) error {
 	log.Printf("Database provider: %s", conf.Driver.Name)
 	log.Printf("Current %d", current)
 
-	stratosMigrations := getOrderedMigrations()
+	stratosMigrations := GetOrderedMigrations()
 
 	if len(stratosMigrations) == 0 {
 		return fmt.Errorf("No Database Migrations found")
