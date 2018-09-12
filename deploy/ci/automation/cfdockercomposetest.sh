@@ -20,6 +20,9 @@ pushd deploy
 docker-compose -f docker-compose.development.yml down
 popd
 
+echo "Stopping any left-over MySQL docker container"
+docker kill $(docker ps -q --filter "ancestor=mysql:latest")
+
 echo "Listing current docker containers:"
 docker ps
 
