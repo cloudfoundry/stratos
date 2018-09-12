@@ -31,7 +31,7 @@ docker-compose -f docker-compose.development.yml up -d
 popd
 
 # Get the E2E config
-wget ${TEST_CONFIG_URL} -O secrets.yaml --no-check-certificate
+curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 echo "headless: true" >> secrets.yaml
 
 # Need node modules to run the tests

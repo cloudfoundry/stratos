@@ -52,9 +52,17 @@ if [ -n "${https_proxy:-}" -o -n "${HTTPS_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg https_proxy=${https_proxy:-${HTTPS_PROXY}}"
   RUN_ARGS="${RUN_ARGS} -e https_proxy=${https_proxy:-${HTTPS_PROXY}}"
 fi
+
+# Use correct sed command for Mac
+SED="sed -r"
+unamestr=`uname`
+if [[ "$unamestr" == 'Darwin' ]]; then
+   SED="sed -E"
+fi   
+
 # Trim leading/trailing whitespace
-BUILD_ARGS="$(echo -e "${BUILD_ARGS}" | sed -r -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
-RUN_ARGS="$(echo -e "${RUN_ARGS}" | sed -r -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
+BUILD_ARGS="$(echo -e "${BUILD_ARGS}" | $SED -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
+RUN_ARGS="$(echo -e "${RUN_ARGS}" | $SED -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
 
 if [ -n "${BUILD_ARGS}" ]; then
   echo "Web Proxy detected from environment. Running Docker with:"
