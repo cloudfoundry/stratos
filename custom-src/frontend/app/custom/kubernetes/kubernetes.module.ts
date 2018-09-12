@@ -34,7 +34,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { HelmReleaseService } from './services/helm-release.service';
-
+import { PodChartComponent } from './helm-release/metrics/pod-chart/pod-chart.component';
 @NgModule({
   imports: [
     CoreModule,
@@ -58,7 +58,8 @@ import { HelmReleaseService } from './services/helm-release.service';
     HelmReleasePodsComponent,
     HelmReleaseSummaryComponent,
     HelmReleaseServicesComponent,
-    HelmReleaseSummaryCardComponent
+    HelmReleaseSummaryCardComponent,
+    PodChartComponent
   ],
   providers: [
     KubernetesService,
@@ -69,7 +70,7 @@ import { HelmReleaseService } from './services/helm-release.service';
   entryComponents: [
     KubernetesNodeCapacityComponent,
     KubernetesPodTagsComponent,
-    AppLinkComponent
+    AppLinkComponent,
   ]
 })
 export class KubernetesModule {

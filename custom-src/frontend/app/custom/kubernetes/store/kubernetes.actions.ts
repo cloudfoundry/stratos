@@ -8,6 +8,7 @@ import {
   kubernetesServicesSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { PaginatedAction } from '../../../store/types/pagination.types';
+import { MetricsAction } from '../../../store/actions/metrics.actions';
 
 export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
 export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
@@ -99,4 +100,11 @@ export class GetKubernetesServices implements PaginatedAction {
     GET_SERVICE_INFO_FAILURE
   ];
   paginationKey: string;
+}
+
+export class FetchKubernetesMetricsAction extends MetricsAction {
+  constructor(public guid: string, public cfGuid: string, public query: string) {
+    super(guid, query);
+    this.url = `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
+  }
 }

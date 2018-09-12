@@ -1,1 +1,10 @@
+<mat-card class="metric-chart-wrapper">
+    <app-pod-chart
+      podGuid="podid"
+      [endpointGuid]="kubeEndpointService.kubeGuid"
+      title="Memory usage over the past hour"
+      yAxisLabel="Memory Usage (MB)"
+      seriesTranslation="mb"
+      [metricName]="metric">
+    </app-pod-chart>
 <app-list></app-list>

@@ -67,6 +67,7 @@ func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugi
 // AddAdminGroupRoutes adds the admin routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
+	echoContext.GET("/metrics/kubernetes/podid/:op", m.getPodMetrics)
 }
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
