@@ -15,7 +15,7 @@ export class HelmReleasePodsComponent implements OnInit {
 
   public metric: string;
   constructor(public kubeEndpointService: KubernetesEndpointService) {
-    this.metric = 'container_memory_usage_bytes{pod_name="imprecise-pig-prometheus-kube-state-metrics-8546b989c5-xptls"}[1h]';
+    this.metric = 'container_memory_usage_bytes';
    }
 
   ngOnInit() { }

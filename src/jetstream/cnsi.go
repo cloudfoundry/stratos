@@ -374,6 +374,7 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 
 	cnsiList, err := cnsiRepo.ListByUser(userGUID)
 	if err != nil {
+		log.Debugf("Error was: %+v", err)
 		return nil, err
 	}
 

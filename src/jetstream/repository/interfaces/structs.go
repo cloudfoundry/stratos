@@ -42,6 +42,7 @@ type ConnectedEndpoint struct {
 	Account                string   `json:"account"`
 	TokenExpiry            int64    `json:"token_expiry"`
 	DopplerLoggingEndpoint string   `json:"-"`
+	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
 }

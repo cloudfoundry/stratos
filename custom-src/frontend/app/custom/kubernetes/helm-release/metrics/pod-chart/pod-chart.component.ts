@@ -13,7 +13,7 @@ import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions'
 export class PodChartComponent implements OnInit {
 
   @Input()
-  private podGuid: string;
+  private podName: string;
 
   @Input()
   private endpointGuid: string;
@@ -45,15 +45,17 @@ export class PodChartComponent implements OnInit {
 
   ngOnInit() {
     this.instanceChartConfig = this.buildChartConfig();
+
+    const query = `${this.metricName}{pod_name="${this.podName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),
       metricsAction: new FetchKubernetesMetricsAction(
-        this.podGuid,
+        this.podName,
         this.endpointGuid,
-        this.metricName,
+        query,
       ),
     };
   }
