@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -89,6 +90,14 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 
 // Login via UAA
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"SSO Login is not enabled",
+			"SSO Login is not enabled")
+		return err
+	}
+
 	state := c.QueryParam("state")
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
@@ -118,6 +127,14 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 
 // Logout of the UAA
 func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"SSO Login is not enabled",
+			"SSO Login is not enabled")
+		return err
+	}
+
 	state := c.QueryParam("state")
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
@@ -457,6 +474,13 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
 			uaaToken.LinkedGUID = uaaToken.TokenGUID
 			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
+
+			// Update the endpoint to indicate that SSO Login is okay
+			repo, dbErr := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+			if dbErr == nil {
+				repo.Update(theCNSIrecord.GUID, true)
+			}
+			// Return error from the login
 			return err
 		} else {
 			return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")

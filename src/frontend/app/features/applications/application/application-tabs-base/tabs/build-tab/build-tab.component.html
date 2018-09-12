@@ -29,8 +29,8 @@
               <div class="app-metadata__two-cols">
                 <app-metadata-item icon="touch_app" label="App State">{{ appSvc.app.entity.state }}</app-metadata-item>
                 <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}</app-metadata-item>
-                <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">{{(applicationService.appSummary$| async)?.entity?.entity.services?.length || '0' }}</app-metadata-item>
-                <app-metadata-item icon="network_route" iconFont="stratos-icons" label="Routes">{{(applicationService.appSummary$| async)?.entity?.entity?.routes?.length || '0' }}</app-metadata-item>
+                <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">{{(applicationService.appSummary$ | async)?.entity?.entity.services?.length || '0' }}</app-metadata-item>
+                <app-metadata-item icon="network_route" iconFont="stratos-icons" label="Routes">{{(applicationService.appSummary$ | async)?.entity?.entity?.routes?.length || '0' }}</app-metadata-item>
               </div>
             </div>
           </mat-card-content>
@@ -51,6 +51,9 @@
               </app-metadata-item>
               <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" icon="language" label="Space">
                 <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+              </app-metadata-item>
+              <app-metadata-item icon="keyboard" label="CLI Info" class="cli-link">
+                <a [routerLink]="['/applications/' + appSvc.cf?.guid + '/' + appSvc.app?.metadata.guid + '/cli']">View</a>
               </app-metadata-item>
             </ng-container>
           </mat-card-content>
@@ -83,7 +86,7 @@
                 <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
                     <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
                     [matTooltipHideDelay]="1500">
-		    {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
+		                  {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
                 </app-metadata-item>
                 <app-metadata-item *ngSwitchCase="'github'" iconFont="stratos-icons" icon="github" label="GitHub">
