@@ -114,6 +114,13 @@ cp manifest.yml $MANIFEST
 echo "    env:" >> $MANIFEST
 echo "      SKIP_AUTO_REGISTER: true" >> $MANIFEST
 
+# SSO
+SUITE=""
+if [ "$2" == "sso" ] || [ "$3" == "sso" ] ; then
+  echo "      SSO_LOGIN: true" >> $MANIFEST
+  SUITE=" --suite=sso"
+fi  
+
 if [ -n "${DB_TYPE}" ]; then
   echo "    services:" >> $MANIFEST
   echo "    - $DB" >> $MANIFEST
@@ -153,7 +160,7 @@ mkdir -p ./e2e-reports
 export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io
+./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}
 RET=$?
 
 # Delete the app
