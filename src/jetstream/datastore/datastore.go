@@ -283,7 +283,7 @@ func WaitForMigrations(db *sql.DB) error {
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return fmt.Errorf("Timed waiting for database schema to be initialized")
+			return fmt.Errorf("Timed out waiting for database schema to be initialized")
 		}
 
 		time.Sleep(3 * time.Second)
