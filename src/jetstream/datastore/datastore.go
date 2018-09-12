@@ -276,18 +276,31 @@ func WaitForMigrations(db *sql.DB) error {
 	for {
 		dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(db)
 		databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
-		if err == nil && databaseVersionRec.VersionID == targetVersion.Version {
+		if err != nil {
+			var errorMsg = err.Error()
+			if strings.Contains(err.Error(), "no such table") {
+				errorMsg = "Waiting for versions table to be created"
+			} else if strings.Contains(err.Error(), "No database versions found") {
+				errorMsg = "Versions table is empty - waiting for migrations"
+			}
+			log.Infof("Database schema check: %s", errorMsg)
+		} else if databaseVersionRec.VersionID == targetVersion.Version {
 			log.Info("Database schema is up to date")
 			break
+		} else {
+			log.Info("Waiting for database schema to be initialized")
 		}
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
+			// If we timed out and the last request was a db error, show the error
+			if err != nil {
+				log.Error(err)
+			}
 			return fmt.Errorf("Timed out waiting for database schema to be initialized")
 		}
 
 		time.Sleep(3 * time.Second)
-		log.Info("Waiting for database schema to be initialized")
 	}
 
 	return nil
