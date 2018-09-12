@@ -12,10 +12,16 @@ source "${DIRPATH}/cfutils.sh"
 
 pwd
 
+echo "Listing current docker containers:"
+docker ps
+
 echo "Stopping previous Docker Compose (if any)"
 pushd deploy
 docker-compose -f docker-compose.development.yml down
 popd
+
+echo "Listing current docker containers:"
+docker ps
 
 set -e
 
