@@ -99,6 +99,7 @@ export interface RowState {
   blocked?: boolean;
   highlighted?: boolean;
   deleting?: boolean;
+  warning?: boolean;
   [customState: string]: any;
 }
 
