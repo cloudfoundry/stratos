@@ -16,7 +16,7 @@ done <<< "$ORGS"
 FULL_STATUS=$(cf pcfdev status)
 echo "$FULL_STATUS"
 
-STATUS=$(echo "$FULL_STATUS" | head -n 1 -)
+STATUS=$(echo "$FULL_STATUS" | head -n 1)
 if [ "$STATUS" == "Not Created" ]; then
   echo "PCF DEV not created... starting"
   cf pcfdev start -m 10240 -c 3
