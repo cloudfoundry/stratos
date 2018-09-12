@@ -28,6 +28,9 @@ const (
 	PGSQL = "pgsql"
 	// MYSQL DB Provider
 	MYSQL = "mysql"
+
+	// TimeoutBoundary is the max time in minutes to wait for the DB Schema to be initialized
+	TimeoutBoundary = 10
 )
 
 // DatabaseConfig represents the connection configuration parameters
@@ -263,9 +266,13 @@ func ModifySQLStatement(sql string, databaseProvider string) string {
 }
 
 // WaitForMigrations will wait until all migrations have been applied
-func WaitForMigrations(db *sql.DB) {
+func WaitForMigrations(db *sql.DB) error {
 	migrations := GetOrderedMigrations()
 	targetVersion := migrations[len(migrations)-1]
+
+	// Timeout after which we will give up
+	timeout := time.Now().Add(time.Minute * TimeoutBoundary)
+
 	for {
 		dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(db)
 		databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
@@ -274,7 +281,14 @@ func WaitForMigrations(db *sql.DB) {
 			break
 		}
 
+		// If our timeout boundary has been exceeded, bail out
+		if timeout.Sub(time.Now()) < 0 {
+			return fmt.Errorf("Timed waiting for database schema to be initialized")
+		}
+
 		time.Sleep(3 * time.Second)
 		log.Info("Waiting for database schema to be initialized")
 	}
+
+	return nil
 }
