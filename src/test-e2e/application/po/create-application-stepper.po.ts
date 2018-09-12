@@ -1,7 +1,8 @@
 import { promise } from 'protractor';
 
-import { StepperComponent } from '../po/stepper.po';
-import { ApplicationE2eHelper } from './application-e2e-helpers';
+import { StepperComponent } from '../../po/stepper.po';
+import { ApplicationE2eHelper } from '../application-e2e-helpers';
+
 
 export class CreateApplicationStepper extends StepperComponent {
 

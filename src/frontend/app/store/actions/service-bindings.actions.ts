@@ -1,8 +1,10 @@
-
-import { CFStartAction, ICFAction } from '../types/request.types';
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { getActions } from './action.helper';
+
 import { entityFactory, serviceBindingSchemaKey } from '../helpers/entity-factory';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
+import { CFStartAction, ICFAction } from '../types/request.types';
+import { getActions } from './action.helper';
+
 
 export const DELETE_SERVICE_BINDING_ACTION = '[ Service Instances ] Delete Service Binding';
 export const DELETE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Delete Service Binding success';
@@ -11,6 +13,7 @@ export const DELETE_SERVICE_BINDING_ACTION_FAILURE = '[ Service Instances ] Dele
 export const CREATE_SERVICE_BINDING_ACTION = '[ Service Instances ] Create Service Binding';
 export const CREATE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Create Service Binding success';
 export const CREATE_SERVICE_BINDING_ACTION_FAILURE = '[ Service Instances ] Create Service Binding failure';
+
 export class CreateServiceBinding extends CFStartAction implements ICFAction {
   constructor(
     public endpointGuid: string,
@@ -33,7 +36,8 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
     CREATE_SERVICE_BINDING_ACTION,
     CREATE_SERVICE_BINDING_ACTION_SUCCESS,
     CREATE_SERVICE_BINDING_ACTION_FAILURE
-  ];  entity = [entityFactory(serviceBindingSchemaKey)];
+  ];
+  entity = [entityFactory(serviceBindingSchemaKey)];
   entityKey = serviceBindingSchemaKey;
   options: RequestOptions;
 }
@@ -58,4 +62,22 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
   entityKey = serviceBindingSchemaKey;
   options: RequestOptions;
   removeEntityOnDelete = true;
+}
+
+export class FetchAllServiceBindings extends CFStartAction implements PaginatedAction {
+  constructor(public endpointGuid: string, public paginationKey: string, public includeRelations = [], public populateMissing = false) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = 'service_bindings';
+    this.options.method = 'get';
+  }
+  actions = getActions('Service Bindings', 'Get All');
+  entity = [entityFactory(serviceBindingSchemaKey)];
+  entityKey = serviceBindingSchemaKey;
+  options: RequestOptions;
+  initialParams: PaginationParam = {
+    'order-direction': 'asc',
+    page: 1,
+    'results-per-page': 100,
+  };
 }

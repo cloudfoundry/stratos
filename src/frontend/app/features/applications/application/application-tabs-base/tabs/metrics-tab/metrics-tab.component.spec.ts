@@ -10,7 +10,7 @@ import { generateTestApplicationServiceProvider } from '../../../../../../test-f
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { StoreModule } from '@ngrx/store';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 
 describe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;
@@ -27,7 +27,7 @@ describe('MetricsTabComponent', () => {
       ],
       providers: [
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
         generateTestEntityServiceProvider(
           appId,
           entityFactory(applicationSchemaKey),

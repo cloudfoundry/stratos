@@ -23,7 +23,7 @@ import { ApplicationData, ApplicationService } from '../../../../application.ser
 export class BuildTabComponent implements OnInit {
 
 
-  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
+  constructor(public applicationService: ApplicationService) { }
 
   cardTwoFetching$: Observable<boolean>;
 
@@ -45,11 +45,11 @@ export class BuildTabComponent implements OnInit {
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
       map(([app, space]) => {
-        if (! space.entity.allow_ssh) {
+        if (!space.entity.allow_ssh) {
           return 'Disabled by the space';
         } else {
           return app.app.entity.enable_ssh ? 'Yes' : 'No';
-       }
+        }
       })
     );
   }

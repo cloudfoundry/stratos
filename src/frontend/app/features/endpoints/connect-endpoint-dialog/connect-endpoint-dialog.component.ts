@@ -52,6 +52,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       },
       types: new Array<EndpointType>('cf', 'metrics')
     },
+    {
+      name: 'Single sign-on',
+      value: 'sso',
+      form: {},
+      types: new Array<EndpointType>('cf')
+    },
   ];
 
   private hasAttemptedConnect: boolean;
@@ -73,6 +79,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       name: string,
       guid: string,
       type: EndpointType,
+      ssoAllowed: boolean,
     }
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
@@ -81,6 +88,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         this.authTypesForEndpoint.push(authType);
       }
     });
+
+    // Remove SSO if not allowed on this endpoint
+    this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || data.ssoAllowed);
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
@@ -201,6 +211,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   submit() {
     this.hasAttemptedConnect = true;
     const { guid, authType, authValues, systemShared } = this.endpointForm.value;
+
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,

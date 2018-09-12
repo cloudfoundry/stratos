@@ -75,6 +75,8 @@ applications:
 
 When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
 
+For more information - see [Single-Sign On](../../docs/sso.md).
+
 ## Troubleshooting
 
 ### Creating logs for recent deployments

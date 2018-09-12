@@ -18,4 +18,5 @@ export interface UaaSetupData {
   uaa_endpoint: string;
   username: string;
   console_client_secret?: string;
+  use_sso: boolean;
 }

@@ -103,7 +103,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, false, cfEndpointSpec.Info)
 		if err != nil {
 			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
 			return nil
@@ -174,6 +174,9 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 
 	// Applications Log Streams
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
+
+	// Application Stream
+	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
 }
 
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
