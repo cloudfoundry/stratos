@@ -11,7 +11,7 @@ export class CfTopLevelPage extends CFPage {
     super('/cloud-foundry');
   }
 
-  static forEndpoint(guid: string, orgGuid?: string, spaceGuid?: string): CfTopLevelPage {
+  static forEndpoint(guid: string): CfTopLevelPage {
     const page = new CfTopLevelPage();
     page.navLink = '/cloud-foundry/' + guid;
     return page;
