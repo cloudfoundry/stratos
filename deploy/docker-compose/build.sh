@@ -72,10 +72,8 @@ echo
 echo "Starting build"
 
 # Copy values template
-__DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_PATH="${__DIRNAME}/../../"
+STRATOS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 source "${STRATOS_PATH}/deploy/common-build.sh"
-
 
 function buildProxy {
   echo

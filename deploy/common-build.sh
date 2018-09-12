@@ -12,7 +12,7 @@ function buildAndPublishImage {
   IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
   echo Building Docker Image for ${NAME}
 
-  pushd ${FOLDER} > /dev/null 2>&1
+  pushd "${FOLDER}" > /dev/null 2>&1
   pwd
 
   SET_TARGET=""
@@ -71,7 +71,7 @@ if [ -n "${BUILD_ARGS}" ]; then
 fi
 
 # Grab and store the git metadata so we can report in this in the UI Diagnostics
-${STRATOS_PATH}/build/store-git-metadata.sh
+"${STRATOS_PATH}/build/store-git-metadata.sh"
 
 function updateTagForRelease {
   # Reset the TAG variable for a release to be of the form:
@@ -82,7 +82,7 @@ function updateTagForRelease {
   #     <prefix> = git commit prefix - always 'g'
   #     <hash> = git commit hash for the current branch
   # Reference: See the examples section here -> https://git-scm.com/docs/git-describe
-  pushd ${STRATOS_PATH} > /dev/null 2>&1
+  pushd "${STRATOS_PATH}" > /dev/null 2>&1
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-g${GIT_HASH}"
