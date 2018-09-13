@@ -13,8 +13,6 @@ import { KubernetesService } from '../services/kubernetes.service';
     {
       provide: BaseKubeGuid,
       useFactory: (activatedRoute: ActivatedRoute) => {
-        console.log('GUID for BaseKubeGuid');
-        console.log(activatedRoute.snapshot.params.kubeId);
         return {
           guid: activatedRoute.snapshot.params.kubeId
         };

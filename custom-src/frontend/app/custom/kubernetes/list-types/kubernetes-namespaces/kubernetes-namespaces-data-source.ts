@@ -27,8 +27,6 @@ export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNam
       //   getEmptyType: () => ({ name: '', value: '', }),
       paginationKey: getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid.guid),
       transformEntity: map(variables => {
-        console.log('HERE');
-        console.log(variables);
         if (!variables || variables.length === 0) {
           return [];
         }
@@ -36,7 +34,6 @@ export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNam
         // const rows = [...Object.values(variables[0])];
         // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
         const rows = <KubernetesNamespace[]>Object.values(data);
-        console.log(rows);
         return rows;
       }),
       isLocal: true,

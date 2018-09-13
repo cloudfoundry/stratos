@@ -52,8 +52,6 @@ const endpointAuthTypes = [
 const endpointTypesMap = {};
 
 export function initEndpointTypes(epTypes: EndpointTypeExtension[]) {
-  console.log('Init endpoint types');
-
   epTypes.forEach(type => {
     endpointTypes.push({
       value: type.type,

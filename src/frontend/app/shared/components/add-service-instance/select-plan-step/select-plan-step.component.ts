@@ -126,8 +126,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),
         map(([valid, servicePlans]) =>
-          servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0]),
-        tap(p => console.log(p))
+          servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0])
       );
   }
 

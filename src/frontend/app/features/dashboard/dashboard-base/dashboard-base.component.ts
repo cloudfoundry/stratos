@@ -43,7 +43,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       ... this.defaultSideNavTabs,
       ...ext.getSideNav()
     ];
-    console.log(this.sideNavTabs);
   }
 
   private openCloseSub: Subscription;

@@ -37,7 +37,6 @@ export class HelmReleaseComponent implements OnInit {
 
   isFetching$: Observable<boolean>;
   constructor(public kubeEndpointService: KubernetesEndpointService, public helmReleaseService: HelmReleaseService) {
-    console.log(arguments);
   }
 
   ngOnInit() {

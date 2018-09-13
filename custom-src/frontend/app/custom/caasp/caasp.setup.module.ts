@@ -24,8 +24,6 @@ export class CaaspSetupModule {
 
   constructor(private ext: ExtensionManager) {
 
-    console.log('Caasp Setup Module init');
-
     // Register CaasSP extension points
 
     ext.registerRoutes(caasp);

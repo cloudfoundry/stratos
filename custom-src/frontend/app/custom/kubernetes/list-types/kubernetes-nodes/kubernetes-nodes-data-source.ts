@@ -26,8 +26,6 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode, an
       //   getEmptyType: () => ({ name: '', value: '', }),
       paginationKey: getPaginationKey(kubernetesNodesSchemaKey, kubeGuid.guid),
       transformEntity: map(variables => {
-        console.log('HERE');
-        console.log(variables);
         if (!variables || variables.length === 0) {
           return [];
         }
@@ -35,7 +33,6 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode, an
         // const rows = [...Object.values(variables[0])];
         // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
         const rows = <KubernetesNode[]>Object.values(data);
-        console.log(rows);
         return rows;
       }),
       isLocal: true,

@@ -24,8 +24,6 @@ export class KubernetesSetupModule {
 
   constructor(private ext: ExtensionManager) {
 
-    console.log('Kubernetes Module init');
-
     ext.registerRoutes(kubernetes);
 
     ext.registerSideNav({

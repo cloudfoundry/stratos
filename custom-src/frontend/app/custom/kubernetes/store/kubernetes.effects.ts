@@ -66,8 +66,6 @@ export class KubernetesEffects {
             const id = action.kubeGuid;
             mappedData.entities[kubernetesNodesSchemaKey][id] = info[id].items;
             mappedData.result.push(id);
-            console.log('KUBE DATA');
-            console.log(info[id].items);
             return [
               new WrapperRequestActionSuccess(mappedData, action)
             ];
@@ -152,7 +150,6 @@ export class KubernetesEffects {
   @Effect()
   fetchServicesInfo$ = this.actions$.ofType<GetKubernetesServices>(GET_SERVICE_INFO).pipe(
     flatMap(action => {
-      console.log('Firing off getServices Request');
       this.store.dispatch(new StartRequestAction(action));
       const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
@@ -186,7 +183,6 @@ export class KubernetesEffects {
   @Effect()
   fetchNamespaceInfo$ = this.actions$.ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO).pipe(
     flatMap(action => {
-      console.log('Firing off getPods Request');
       this.store.dispatch(new StartRequestAction(action));
       const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
@@ -204,8 +200,6 @@ export class KubernetesEffects {
             const id = action.kubeGuid;
             mappedData.entities[kubernetesNamespacesSchemaKey][id] = info[id].items;
             mappedData.result.push(id);
-            console.log('KUBE DATA');
-            console.log(info[id].items);
             return [
               new WrapperRequestActionSuccess(mappedData, action)
             ];
@@ -271,9 +265,4 @@ export class KubernetesEffects {
     })
   );
 
-  private getPods(info: any, id: string, releaseName: string): KubernetesPod[] {
-    return info[id].items.filter((p: KubernetesPod) => !!p.metadata.labels &&
-      !!p.metadata.labels['release'] &&
-      p.metadata.labels['release'] === releaseName);
-  }
 }
