@@ -13,6 +13,28 @@ done <<< "$ORGS"
 
 }
 
+# Any test run could have been aborted, leaving remnants - clean them up
+function clean_deployments {
+  echo "Stopping any MySQL Databases"
+  docker kill $(docker ps -q --filter "ancestor=mysql:latest")
+
+  echo "Stopping previous Docker Compose (if any)"
+  pushd deploy
+  docker-compose -f docker-compose.development.yml down
+  popd
+
+  echo "Stopping previous Docker All-in-one (if any)"
+  # Kill any existing docker all-in-one docker containers
+  RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")
+  if [ -n "$RUNNING" ]; then
+    docker kill $RUNNING
+  fi
+
+  # Delete existing Stratos instance if there is one
+  echo "Deleting previous Stratos app from CF (if any)"
+  cf delete -f -r console
+}
+
 FULL_STATUS=$(cf pcfdev status)
 echo "$FULL_STATUS"
 
@@ -42,3 +64,5 @@ cf apps
 
 # Clean up any old organisations
 clean_orgs
+
+clean_deployments

@@ -13,12 +13,6 @@ source "${DIRPATH}/cfutils.sh"
 pwd
 set -e
 
-# Kill any existing docker all-in-one docker containers
-RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")
-if [ -n "$RUNNING" ]; then
-  docker kill $RUNNING
-fi
-
 ./build/store-git-metadata.sh
 docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
 
