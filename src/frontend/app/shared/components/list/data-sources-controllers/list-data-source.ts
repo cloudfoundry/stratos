@@ -77,12 +77,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public getRowState: (row: T) => Observable<RowState> = null;
 
   // ------------- Private
-  private entities$: Observable<T>;
-  private paginationToStringFn: (PaginationEntityState) => string;
   private externalDestroy: () => void;
 
   protected store: Store<AppState>;
-  protected action: PaginatedAction;
+  public action: PaginatedAction;
   protected sourceScheme: schema.Entity;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
@@ -285,19 +283,27 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   }
 
-  protected setQParam(setQ: QParam, qs: QParam[]) {
+  protected setQParam(setQ: QParam, qs: QParam[]): boolean {
     const existing = qs.find((q: QParam) => q.key === setQ.key);
+    let changed = true;
     if (setQ.value && setQ.value.length) {
       if (existing) {
+        // Set existing value
+        changed = existing.value !== setQ.value;
         existing.value = setQ.value;
       } else {
+        // Add new value
         qs.push(setQ);
       }
     } else {
       if (existing) {
+        // Remove existing
         qs.splice(qs.indexOf(existing), 1);
+      } else {
+        changed = false;
       }
     }
+    return changed;
   }
 
 }

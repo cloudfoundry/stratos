@@ -1,9 +1,11 @@
+import { NgZone } from '@angular/core';
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { bufferTime, distinctUntilChanged, filter, first, map, tap } from 'rxjs/operators';
+import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
 
+import { enterZone, leaveZone } from '../../../../core/leaveEnterAngularZone';
 import { ListFilter, ListPagination, ListSort } from '../../../../store/actions/list.actions';
 import {
   AddParams,
@@ -42,7 +44,8 @@ function onPaginationEntityState(
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
     private store: Store<AppState>,
-    public dataSource: IListDataSource<T>
+    public dataSource: IListDataSource<T>,
+    private ngZone: NgZone
   ) {
 
     this.pagination$ = this.createPaginationObservable(dataSource);
@@ -55,8 +58,9 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     // filter resets other filters.
     this.multiFilterChanges$ = this.multiFilterStream.asObservable().pipe(
       filter(change => !!change),
-      bufferTime(50),
+      bufferTime(50, leaveZone(this.ngZone, asyncScheduler)),
       filter(changes => !!changes.length),
+      observeOn(enterZone(this.ngZone, asyncScheduler)),
       tap(this.handleMultiFilter),
     );
 

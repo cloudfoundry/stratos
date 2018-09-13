@@ -7,7 +7,7 @@ import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
-import { CreatePagination, SetParams } from '../../../../../store/actions/pagination.actions';
+import { CreatePagination, ResetPagination, SetParams } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -47,7 +47,6 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
-  private statsSub: Subscription;
   private subs: Subscription[];
   public action: GetAllApplications;
 
@@ -126,6 +125,10 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       return;
     }
 
+    const startingCfGuid = this.action.endpointGuid;
+    const startingOrgGuid = params.q.find((q: QParam) => q.key === 'organization_guid');
+    const startingSpaceGuid = params.q.find((q: QParam) => q.key === 'space_guid');
+
     const qChanges = changes.reduce((qs: QParam[], change) => {
       switch (change.key) {
         case 'cf':
@@ -143,9 +146,17 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       return qs;
     }, params.q || []);
 
-    params.q = qChanges;
-    this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, params, false, true));
+    const cfGuidChanged = startingCfGuid !== this.action.endpointGuid;
+    const orgOrSpaceChanged = startingOrgGuid !== params.q.find((q: QParam) => q.key === 'organization_guid') ||
+      startingSpaceGuid !== params.q.find((q: QParam) => q.key === 'space_guid');
 
+    // Changes of org or space will reset pagination and start a new request. Changes of only cf requires a punt
+    if (cfGuidChanged && !orgOrSpaceChanged) {
+      this.store.dispatch(new ResetPagination(this.entityKey, this.paginationKey));
+    } else {
+      params.q = qChanges;
+      this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, params, false, true));
+    }
   }
 
 }

@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
 
 export interface AppEvent {
   actee_name: string;
@@ -48,6 +48,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
     entities: T[],
     paginationState: PaginationEntityState
   ) => T[])[];
+  action: PaginatedAction;
   entityKey: string;
   paginationKey: string;
 

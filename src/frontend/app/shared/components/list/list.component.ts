@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   Input,
+  NgZone,
   OnDestroy,
   OnInit,
   TemplateRef,
@@ -125,7 +126,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       map(value => value as string),
       tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      }), ).subscribe();
+      })).subscribe();
   }
 
   private initialPageEvent: PageEvent;
@@ -199,7 +200,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private store: Store<AppState>,
     private cd: ChangeDetectorRef,
-    public config: ListConfig<T>
+    public config: ListConfig<T>,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit() {
@@ -278,17 +280,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       );
     }));
 
-    this.paginationController = new ListPaginationController(this.store, this.dataSource);
+    this.paginationController = new ListPaginationController(this.store, this.dataSource, this.ngZone);
     this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
-    this.maxedResults$ = observableCombineLatest(this.dataSource.pagination$, this.paginationController.filter$).pipe(
-      distinctUntilChanged(),
-      map(([pagination, filters]) => {
-        const maxResults = pagination.maxResults || 0;
-        const totalResults = this.dataSource.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
-        return !filters.string && maxResults > totalResults;
-      }),
-    );
+    this.maxedResults$ = !!this.dataSource.action.flattenPaginationMax ?
+      observableCombineLatest(this.dataSource.pagination$, this.paginationController.filter$).pipe(
+        distinctUntilChanged(),
+        map(([pagination, filters]) => {
+          const totalResults = this.dataSource.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
+          return !filters.string && this.dataSource.action.flattenPaginationMax < totalResults;
+        }),
+      ) : observableOf(false);
 
     const hasPages$ = this.dataSource.page$.pipe(
       map(pag => !!(pag && pag.length))
