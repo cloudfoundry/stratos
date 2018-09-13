@@ -6,8 +6,8 @@ import { Subscription } from 'rxjs';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
-import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
-import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
+import { ChartSeries, IMetrics, MetricResultTypes } from '../../../store/types/base-metric.types';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 

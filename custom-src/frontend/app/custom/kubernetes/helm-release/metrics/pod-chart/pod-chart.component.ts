@@ -48,7 +48,7 @@ export class PodChartComponent implements OnInit {
 
     const query = `${this.metricName}{pod_name="${this.podName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
     this.instanceMetricConfig = {
-      getSeriesName: result => `Instance ${result.metric.instance_index}`,
+      getSeriesName: result => `Container ${result.metric.container_name}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),

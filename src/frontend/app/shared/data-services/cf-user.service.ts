@@ -39,7 +39,7 @@ import {
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

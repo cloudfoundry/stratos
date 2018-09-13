@@ -3,20 +3,18 @@ import { ListConfig } from '../../../../../shared/components/list/list.component
 import { HelmReleasePodsListConfigService } from '../../../list-types/helm-release-pods/helm-release-pods-list-config.service';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 @Component({
-  selector: 'app-helm-release-pods',
-  templateUrl: './helm-release-pods.component.html',
-  styleUrls: ['./helm-release-pods.component.scss'],
+  selector: 'app-helm-release-pods-tab',
+  templateUrl: './helm-release-pods-tab.component.html',
+  styleUrls: ['./helm-release-pods-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: HelmReleasePodsListConfigService,
   }]
 })
-export class HelmReleasePodsComponent implements OnInit {
+export class HelmReleasePodsTabComponent implements OnInit {
 
-  public metric: string;
   constructor(public kubeEndpointService: KubernetesEndpointService) {
-    this.metric = 'container_memory_usage_bytes';
-   }
+  }
 
   ngOnInit() { }
 

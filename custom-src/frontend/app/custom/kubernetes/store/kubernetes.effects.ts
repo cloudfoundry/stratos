@@ -30,6 +30,8 @@ import {
   GetKubernetesApps,
   GetKubernetesServices,
   GET_SERVICE_INFO,
+  GET_KUBE_POD,
+  GetKubernetesPod,
 } from './kubernetes.actions';
 import { KubernetesInfo, KubernetesPod, KubeService } from './kube.types';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -79,9 +81,8 @@ export class KubernetesEffects {
   );
 
   @Effect()
-  fetchPodInfo$ = this.actions$.ofType<GetKubernetesPods>(GET_POD_INFO).pipe(
+  fetchPodsInfo$ = this.actions$.ofType<GetKubernetesPods>(GET_POD_INFO).pipe(
     flatMap(action => {
-      console.log('Firing off getPods Request');
       this.store.dispatch(new StartRequestAction(action));
       const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
@@ -89,6 +90,41 @@ export class KubernetesEffects {
       };
       return this.http
         .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`, requestArgs)
+        .pipe(
+          mergeMap(response => {
+            const info = response.json();
+            const mappedData = {
+              entities: { [kubernetesPodsSchemaKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            info[action.kubeGuid].items.forEach((p: KubernetesPod) => {
+              const id = p.metadata.name;
+              p.metadata.kubeId = action.kubeGuid;
+              mappedData.entities[kubernetesPodsSchemaKey][id] = p;
+              mappedData.result.push(id);
+
+            });
+            return [
+              new WrapperRequestActionSuccess(mappedData, action)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(err.message, action)
+          ])
+        );
+    })
+  );
+
+  @Effect()
+  fetchPodInfo$ = this.actions$.ofType<GetKubernetesPod>(GET_KUBE_POD).pipe(
+    flatMap(action => {
+      this.store.dispatch(new StartRequestAction(action));
+      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
+      const requestArgs = {
+        headers: headers
+      };
+      return this.http
+        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`, requestArgs)
         .pipe(
           mergeMap(response => {
             const info = response.json();

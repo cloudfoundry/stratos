@@ -57,6 +57,7 @@ export interface KubernetesApp {
   kubeId: string;
   name: string;
   pods: KubernetesPod[];
+  namespace: string;
 }
 export interface NodeStatus {
   capacity: Capacity;

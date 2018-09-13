@@ -7,7 +7,7 @@ import { ITableColumn } from '../../../../shared/components/list/list-table/tabl
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubeService } from '../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
+import { KubeService } from '../../store/kube.types';
 import { HelmReleaseServicesDataSource } from './helm-release-services-data-source';
 import { HelmReleaseService } from '../../services/helm-release.service';
 import { KubernetesPodTagsComponent } from '../kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';

@@ -12,7 +12,7 @@ import {
   SESSION_INVALID,
   SESSION_VERIFIED,
   VERIFY_SESSION,
-} from './../actions/auth.actions';
+} from '../actions/auth.actions';
 import { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {

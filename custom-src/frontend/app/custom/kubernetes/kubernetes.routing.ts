@@ -1,23 +1,37 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import {
+  HelmReleasePodsTabComponent,
+} from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
+import { HelmReleaseComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release.component';
+import { HelmReleasePodComponent } from './helm-release-pod/helm-release-pod.component';
+import {
+  HelmReleaseServicesComponent,
+} from './helm-release/helm-release-tabs-base/helm-release-services/helm-release-services.component';
+import {
+  HelmReleaseSummaryComponent,
+} from './helm-release/helm-release-tabs-base/helm-release-summary/helm-release-summary.component';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
+import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
+import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
-import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
-import { HelmReleaseComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release.component';
-import { HelmReleaseSummaryComponent } from './helm-release/helm-release-tabs-base/helm-release-summary/helm-release-summary.component';
-import { HelmReleasePodsComponent } from './helm-release/helm-release-tabs-base/helm-release-pods/helm-release-pods.component';
-import { HelmReleaseServicesComponent } from './helm-release/helm-release-tabs-base/helm-release-services/helm-release-services.component';
 
 const kubernetes: Routes = [{
   path: '',
   component: KubernetesComponent
 },
 {
-  path: ':kubeId/apps/:releaseName',
+  path: ':kubeId/apps/:releaseName/:namespaceName/pods/:podName',
+  component: HelmReleasePodComponent,
+  data: {
+    uiFullView: true
+  },
+},
+{
+  path: ':kubeId/apps/:releaseName/:namespaceName',
   // pathMatch: 'full',
   component: HelmReleaseComponent,
   data: {
@@ -35,7 +49,7 @@ const kubernetes: Routes = [{
     },
     {
       path: 'pods',
-      component: HelmReleasePodsComponent
+      component: HelmReleasePodsTabComponent
     },
     {
       path: 'services',

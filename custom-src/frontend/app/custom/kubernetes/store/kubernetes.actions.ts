@@ -9,6 +9,8 @@ import {
 } from '../../../store/helpers/entity-factory';
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
+import { Action } from '@ngrx/store';
+import { ICFAction } from '../../../store/types/request.types';
 
 export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
 export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
@@ -29,6 +31,10 @@ export const GET_KUBERNETES_APP_INFO_FAILURE = '[KUBERNETES Endpoint] Get Kubern
 export const GET_SERVICE_INFO = '[KUBERNETES Endpoint] Get Services Info';
 export const GET_SERVICE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Services Info Success';
 export const GET_SERVICE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Services Info Failure';
+
+export const GET_KUBE_POD = '[KUBERNETES Endpoint] Get K8S Pod Info';
+export const GET_KUBE_POD_SUCCESS = '[KUBERNETES Endpoint] Get K8S Pod  Success';
+export const GET_KUBE_POD_FAILURE = '[KUBERNETES Endpoint] Get K8S Pod  Failure';
 
 export class GetKubernetesNodes implements PaginatedAction {
   constructor(public kubeGuid) {
@@ -100,6 +106,18 @@ export class GetKubernetesServices implements PaginatedAction {
     GET_SERVICE_INFO_FAILURE
   ];
   paginationKey: string;
+}
+export class GetKubernetesPod implements Action {
+  constructor(public podName, public namespaceName, public kubeGuid) {
+  }
+  type = GET_KUBE_POD;
+  entityKey = kubernetesPodsSchemaKey;
+  entity = [entityFactory(kubernetesPodsSchemaKey)];
+  actions = [
+    GET_KUBE_POD,
+    GET_KUBE_POD_SUCCESS,
+    GET_KUBE_POD_FAILURE
+  ];
 }
 
 export class FetchKubernetesMetricsAction extends MetricsAction {
