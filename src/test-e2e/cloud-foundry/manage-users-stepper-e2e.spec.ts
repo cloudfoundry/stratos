@@ -179,42 +179,42 @@ describe('Manage Users Stepper', () => {
 
   function createActionTableDate(orgTarget, spaceTarget, stateIcon) {
     return [{
-      user: 'e2e',
+      user: userName,
       action: 'remove_circle\nRemove',
       role: 'Manager',
       target: orgTarget,
       'column-4': stateIcon
     },
     {
-      user: 'e2e',
+      user: userName,
       action: 'add_circle\nAdd',
       role: 'Billing Manager',
       target: orgTarget,
       'column-4': stateIcon
     },
     {
-      user: 'e2e',
+      user: userName,
       action: 'remove_circle\nRemove',
       role: 'Auditor',
       target: orgTarget,
       'column-4': stateIcon
     },
     {
-      user: 'e2e',
+      user: userName,
       action: 'remove_circle\nRemove',
       role: 'Manager',
       target: spaceTarget,
       'column-4': stateIcon
     },
     {
-      user: 'e2e',
+      user: userName,
       action: 'remove_circle\nRemove',
       role: 'Developer',
       target: spaceTarget,
       'column-4': stateIcon
     },
     {
-      user: 'e2e',
+      user: userName,
       action: 'remove_circle\nRemove',
       role: 'Auditor',
       target: spaceTarget,
