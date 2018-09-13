@@ -6,8 +6,10 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
 
 	log "github.com/sirupsen/logrus"
 	// Mysql driver
@@ -26,6 +28,9 @@ const (
 	PGSQL = "pgsql"
 	// MYSQL DB Provider
 	MYSQL = "mysql"
+
+	// TimeoutBoundary is the max time in minutes to wait for the DB Schema to be initialized
+	TimeoutBoundary = 10
 )
 
 // DatabaseConfig represents the connection configuration parameters
@@ -144,6 +149,7 @@ func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 	return GetSQLLiteConnection()
 }
 
+// GetSQLLiteConnection returns an SQLite DB Connection
 func GetSQLLiteConnection() (*sql.DB, error) {
 
 	if !config.IsSet("SQLITE_KEEP_DB") {
@@ -257,4 +263,45 @@ func ModifySQLStatement(sql string, databaseProvider string) string {
 
 	// Default is to return the SQL provided directly
 	return sql
+}
+
+// WaitForMigrations will wait until all migrations have been applied
+func WaitForMigrations(db *sql.DB) error {
+	migrations := GetOrderedMigrations()
+	targetVersion := migrations[len(migrations)-1]
+
+	// Timeout after which we will give up
+	timeout := time.Now().Add(time.Minute * TimeoutBoundary)
+
+	for {
+		dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(db)
+		databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
+		if err != nil {
+			var errorMsg = err.Error()
+			if strings.Contains(err.Error(), "no such table") {
+				errorMsg = "Waiting for versions table to be created"
+			} else if strings.Contains(err.Error(), "No database versions found") {
+				errorMsg = "Versions table is empty - waiting for migrations"
+			}
+			log.Infof("Database schema check: %s", errorMsg)
+		} else if databaseVersionRec.VersionID == targetVersion.Version {
+			log.Info("Database schema is up to date")
+			break
+		} else {
+			log.Info("Waiting for database schema to be initialized")
+		}
+
+		// If our timeout boundary has been exceeded, bail out
+		if timeout.Sub(time.Now()) < 0 {
+			// If we timed out and the last request was a db error, show the error
+			if err != nil {
+				log.Error(err)
+			}
+			return fmt.Errorf("Timed out waiting for database schema to be initialized")
+		}
+
+		time.Sleep(3 * time.Second)
+	}
+
+	return nil
 }
