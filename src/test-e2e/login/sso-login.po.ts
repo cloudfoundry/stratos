@@ -51,11 +51,10 @@ export class SSOLoginPage {
   }
 
   login(username: string, password: string) {
-
     // If this is a different user to last time, then logout first
     if (SSOLoginPage.ssoLastUsername && SSOLoginPage.ssoLastUsername !== username) {
       browser.waitForAngularEnabled(false);
-      browser.driver.get(this.getLogoutUrl());
+      this.logoutUAA();
     }
 
     browser.waitForAngularEnabled(false);
@@ -121,6 +120,12 @@ export class SSOLoginPage {
 
   waitForNoEndpoints() {
     return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
+  }
+
+  logoutUAA() {
+    if (SSOLoginPage.ssoLoginURL) {
+      return browser.driver.get(this.getLogoutUrl());
+    }
   }
 
   private getLogoutUrl(): string {
