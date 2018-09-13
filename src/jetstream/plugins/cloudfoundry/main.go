@@ -98,8 +98,6 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 	// CF auto reg cnsi entry missing, attempt to register
 	if cfCnsi.CNSIType == "" {
-		log.Infof("Auto-registering cloud foundry endpoint %s", cfAPI)
-
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
 		// Allow the auto-registration name to be configured
@@ -107,6 +105,8 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		if len(autoRegName) == 0 {
 			autoRegName = "Cloud Foundry"
 		}
+
+		log.Infof("Auto-registering cloud foundry endpoint %s as \"%s\"", cfAPI, autoRegName)
 
 		// Auto-register the Cloud Foundry
 		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, false, cfEndpointSpec.Info)
