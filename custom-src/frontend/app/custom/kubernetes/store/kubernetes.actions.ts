@@ -36,6 +36,10 @@ export const GET_KUBE_POD = '[KUBERNETES Endpoint] Get K8S Pod Info';
 export const GET_KUBE_POD_SUCCESS = '[KUBERNETES Endpoint] Get K8S Pod  Success';
 export const GET_KUBE_POD_FAILURE = '[KUBERNETES Endpoint] Get K8S Pod  Failure';
 
+export const GET_KUBE_STATEFULSETS_POD = '[KUBERNETES Endpoint] Get K8S Stateful Sets Info';
+export const GET_KUBE_STATEFULSETS_POD_SUCCESS = '[KUBERNETES Endpoint] Get Stateful Sets Success';
+export const GGET_KUBE_STATEFULSETS_POD_FAILURE = '[KUBERNETES Endpoint] Get Stateful Sets Failure';
+
 export class GetKubernetesNodes implements PaginatedAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesNodesSchemaKey, kubeGuid);
@@ -117,6 +121,18 @@ export class GetKubernetesPod implements Action {
     GET_KUBE_POD,
     GET_KUBE_POD_SUCCESS,
     GET_KUBE_POD_FAILURE
+  ];
+}
+export class GetKubernetesStatefulSets implements Action {
+  constructor(public kubeGuid) {
+  }
+  type = GET_KUBE_STATEFULSETS_POD;
+  entityKey = kubernetesPodsSchemaKey;
+  entity = [entityFactory(kubernetesPodsSchemaKey)];
+  actions = [
+    GET_KUBE_STATEFULSETS_POD,
+    GET_KUBE_STATEFULSETS_POD_SUCCESS,
+    GGET_KUBE_STATEFULSETS_POD_FAILURE
   ];
 }
 

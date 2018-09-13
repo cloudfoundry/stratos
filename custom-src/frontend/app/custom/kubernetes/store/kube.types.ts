@@ -223,6 +223,10 @@ export interface InitContainer {
   securityContext: SecurityContext;
 }
 
+export interface KubernetesConfigMap {
+  data: {};
+  metadata: ServiceMetadata;
+}
 export interface Resources {
   limits?: Limits;
   requests?: Requests;

@@ -5,9 +5,9 @@ import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import {
+  kubernetesAppsSchemaKey,
   kubernetesNamespacesSchemaKey,
   kubernetesPodsSchemaKey,
-  kubernetesAppsSchemaKey,
   kubernetesServicesSchemaKey,
 } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 import { environment } from '../../../../environments/environment';
@@ -19,22 +19,21 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../store/types/request.types';
+import { KubernetesPod, KubeService } from './kube.types';
 import {
+  GET_KUBE_POD,
   GET_KUBERNETES_APP_INFO,
   GET_NAMESPACES_INFO,
   GET_NODE_INFO,
   GET_POD_INFO,
+  GET_SERVICE_INFO,
+  GetKubernetesApps,
   GetKubernetesNamespaces,
   GetKubernetesNodes,
-  GetKubernetesPods,
-  GetKubernetesApps,
-  GetKubernetesServices,
-  GET_SERVICE_INFO,
-  GET_KUBE_POD,
   GetKubernetesPod,
+  GetKubernetesPods,
+  GetKubernetesServices,
 } from './kubernetes.actions';
-import { KubernetesInfo, KubernetesPod, KubeService } from './kube.types';
-import { KubernetesService } from '../services/kubernetes.service';
 
 
 @Injectable()
@@ -227,7 +226,7 @@ export class KubernetesEffects {
         headers: headers
       };
       return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`, requestArgs)
+        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
         .pipe(
           mergeMap(response => {
             const info = response.json();
@@ -238,14 +237,19 @@ export class KubernetesEffects {
 
             const id = action.kubeGuid;
             const releases = info[id].items
-              .filter((pod: KubernetesPod) => !!pod.metadata.labels && !!pod.metadata.labels['release'])
-              .map((pod: KubernetesPod) => pod.metadata.labels['release']);
-            const appReleases = releases.map((releaseName) => (
+              .filter((configMap) => !!configMap.metadata.labels &&
+                !!configMap.metadata.labels['NAME'] &&
+                configMap.metadata.labels['OWNER'] === 'TILLER')
+              .map((pod: KubernetesPod) => ({
+                name: pod.metadata.labels['NAME'],
+                namespace: pod.metadata.namespace
+              })
+              );
+            const appReleases = releases.map((relaseObj) => (
               {
-                name: releaseName,
+                name: relaseObj.name,
                 kubeId: action.kubeGuid,
-                namespace: this.getPods(info, id, releaseName)[0].metadata.namespace,
-                pods: this.getPods(info, id, releaseName)
+                namespace: relaseObj.namespace,
               })
             );
 
