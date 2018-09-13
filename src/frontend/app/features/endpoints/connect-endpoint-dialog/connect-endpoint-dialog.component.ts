@@ -53,7 +53,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       types: new Array<EndpointType>('cf', 'metrics')
     },
     {
-      name: 'Single sign-on',
+      name: 'Single Sign-On (SSO)',
       value: 'sso',
       form: {},
       types: new Array<EndpointType>('cf')
@@ -96,7 +96,14 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
 
     // Create the endpoint form
-    const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+
+    // Auto-select SSO if it is available
+    const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
+    if (ssoIndex >= 0 ) {
+      autoSelected = this.authTypesForEndpoint[ssoIndex];
+    }
+
     this.endpointForm = this.fb.group({
       authType: [autoSelected.value || '', Validators.required],
       authValues: this.fb.group(autoSelected.form || {}),
