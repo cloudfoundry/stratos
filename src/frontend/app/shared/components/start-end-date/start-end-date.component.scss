@@ -1,19 +1,17 @@
 .start-end-date {
-  align-items: flex-end;
+  align-items: center;
   display: flex;
   max-width: 800px;
   &__selector {
     flex: auto;
     padding: 0 5px;
   }
-  &__header {
-    font-size: 14px;
-    font-weight: bold;
-    opacity: .6;
-  }
   &__arrow {
-    // Setting padding bottom to match the input fields
-    padding: 0 20px 1.25em;
-    color: rgba(0, 0, 0, 0.54);
+    padding: 0 10px;
   }
+}
+
+.invalid-message {
+  font-size: 12px;
+  margin-top: -13px;
 }

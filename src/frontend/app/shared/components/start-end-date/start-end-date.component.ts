@@ -12,10 +12,23 @@ export class StartEndDateComponent {
   @Output()
   public startChange = new EventEmitter<moment.Moment>();
 
+  @Output()
+  public isValid = new EventEmitter<boolean>();
+
+  get valid() {
+    return this.validValue;
+  }
+
+  set valid(valid: boolean) {
+    this.validValue = valid;
+    this.isValid.emit(this.validValue);
+  }
+
+  public validValue = true;
+
   private startValue: moment.Moment;
   private endValue: moment.Moment;
 
-  public invalid = false;
 
   private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
     return !oldDate || !newDate || !oldDate.isSame(newDate);
@@ -30,10 +43,10 @@ export class StartEndDateComponent {
 
   @Input()
   set start(start: moment.Moment) {
-    this.invalid = false;
+    this.valid = true;
     if (start && start.isValid()) {
       if (!this.isStartEndValid(start, this.end)) {
-        this.invalid = true;
+        this.valid = false;
         return;
       }
       if (this.isDifferentDate(this.startValue, start)) {
@@ -50,10 +63,11 @@ export class StartEndDateComponent {
 
   @Input()
   set end(end: moment.Moment) {
-    this.invalid = false;
+    this.valid = true;
     if (end && end.isValid()) {
       if (!this.isStartEndValid(this.start, end)) {
-        this.invalid = true;
+        this.valid = false;
+        return;
       }
       if (this.isDifferentDate(this.endValue, end)) {
         const clone = moment(end);

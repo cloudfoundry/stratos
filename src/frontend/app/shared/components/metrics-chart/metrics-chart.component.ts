@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
-import { delay, map, tap, first, filter } from 'rxjs/operators';
+import { delay, map, tap, first, filter, debounceTime, takeWhile } from 'rxjs/operators';
 import { FetchApplicationMetricsAction, MetricQueryConfig, MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -53,6 +53,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
 
   private startEnd: [moment.Moment, moment.Moment] = [null, null];
 
+  private committedStartEnd: [moment.Moment, moment.Moment] = [null, null];
+
   private pollSub: Subscription;
 
   private initSub: Subscription;
@@ -68,6 +70,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   public metricsMonitor: EntityMonitor<IMetrics>;
 
   public rangeTypes = RangeType;
+
+  public dateValid = false;
 
   public times: ITimeRange[] = [
     {
@@ -92,6 +96,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   ];
 
   public selectedTimeRangeValue: ITimeRange;
+  public showOverlay = false;
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
@@ -115,8 +120,14 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
         }),
         MetricQueryType.RANGE_QUERY
       );
-      this.commit = this.getCommitFn(this.metricsConfig.metricsAction);
-      this.commit();
+
+      this.commit = () => {
+        this.committedStartEnd = [
+          this.startEnd[0],
+          this.startEnd[1]
+        ];
+        this.commitAction(this.metricsConfig.metricsAction);
+      };
     }
   }
 
@@ -125,9 +136,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   }
 
   set selectedTimeRange(timeRange: ITimeRange) {
+    this.commit = null;
     this.selectedTimeRangeValue = timeRange;
     if (this.selectedTimeRangeValue.type === RangeType.ROLLING_WINDOW) {
       this.commitWindow(this.selectedTimeRangeValue);
+    } else if (this.selectedTimeRangeValue.type === RangeType.START_END) {
+      this.showOverlay = true;
     }
   }
 
@@ -143,8 +157,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
         window: window.value
       })
     );
-    this.commit = this.getCommitFn(this.metricsConfig.metricsAction);
-    this.commit();
+    this.commitAction(this.metricsConfig.metricsAction);
   }
 
   set start(start: moment.Moment) {
@@ -193,30 +206,33 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
 
   private getInitSub(entityMonitor: EntityMonitor<IMetrics>) {
     return entityMonitor.entity$.pipe(
-      first(),
+      debounceTime(1),
       tap(metrics => {
-        if (metrics) {
-          if (metrics.queryType === MetricQueryType.RANGE_QUERY) {
-            const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
-            const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
-            const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
-            if (isDifferent) {
-              this.start = start;
-              this.end = end;
+        if (!this.selectedTimeRange) {
+          if (metrics) {
+            if (metrics.queryType === MetricQueryType.RANGE_QUERY) {
+              const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
+              const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
+              const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
+              if (isDifferent) {
+                this.start = start;
+                this.end = end;
+              }
+              this.selectedTimeRange = this.times.find(time => time.type === RangeType.START_END);
+            } else {
+              const newWindow = metrics.query.params.window ?
+                this.times.find(time => time.value === metrics.query.params.window) :
+                this.getDefaultTimeRange();
+              if (this.selectedTimeRange !== newWindow) {
+                this.selectedTimeRange = newWindow;
+              }
             }
-            this.selectedTimeRange = this.times.find(time => time.type === RangeType.START_END);
           } else {
-            const newWindow = metrics.query.params.window ?
-              this.times.find(time => time.value === metrics.query.params.window) :
-              this.getDefaultTimeRange();
-            if (this.selectedTimeRange !== newWindow) {
-              this.selectedTimeRange = newWindow;
-            }
+            this.selectedTimeRange = this.getDefaultTimeRange();
           }
-        } else {
-          this.selectedTimeRange = this.getDefaultTimeRange();
         }
-      })
+      }),
+      takeWhile(metrics => !metrics)
     ).subscribe();
   }
 
@@ -228,8 +244,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
       metricSchemaKey,
-      entityFactory(metricSchemaKey),
-      false
+      entityFactory(metricSchemaKey)
     );
 
     this.initSub = this.getInitSub(this.metricsMonitor);
@@ -252,7 +267,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     if (action.queryType === MetricQueryType.QUERY) {
       this.pollSub = this.metricsMonitor
         .poll(
-          1000,
+          10000,
           () => {
             this.store.dispatch(action);
           },
@@ -287,10 +302,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getCommitFn(action: MetricsAction) {
-    return () => {
-      this.setup(action);
-      this.store.dispatch(action);
-    };
+  private commitAction(action: MetricsAction) {
+    this.setup(action);
+    this.store.dispatch(action);
+    this.commit = null;
   }
 }

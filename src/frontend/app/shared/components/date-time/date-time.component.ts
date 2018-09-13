@@ -114,6 +114,7 @@ export class DateTimeComponent implements OnDestroy {
     );
     this.setupInputSub();
     this.setupChangeSub();
+    this.time.setValue('00:00');
   }
 
   ngOnDestroy() {

@@ -1,16 +1,14 @@
 <div class="start-end-date">
-  <div *ngIf="invalid">
-    Start date must be before end date.
-  </div>
   <div class="start-end-date__selector">
-    <div class="start-end-date__header">Start</div>
     <app-date-time [(dateTime)]="start"></app-date-time>
   </div>
   <div class="start-end-date__arrow">
-    <mat-icon>arrow_forward</mat-icon>
+    to
   </div>
   <div class="start-end-date__selector">
-    <div class="start-end-date__header">End</div>
     <app-date-time [(dateTime)]="end"></app-date-time>
   </div>
+</div>
+<div class="invalid-message" *ngIf="!valid">
+  Start date must be before end date.
 </div>

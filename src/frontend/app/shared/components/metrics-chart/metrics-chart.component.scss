@@ -20,4 +20,43 @@
     min-width: 100px;
     width: 10%;
   }
+  &__overlay {
+    background-color: rgba(0, 0, 0, .6);
+    bottom: 0;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    &-show {
+      display: block;
+    }
+    &-inner {
+      padding: 60px;
+    }
+    &-set {
+      margin-right: 10px;
+    }
+  }
+  &__selected-range {
+    align-items: center;
+    display: flex;
+  }
+  &__selected-range-dates {
+    display: flex;
+    font-size: 14px;
+    opacity: .6;
+    padding-left: 10px;
+  }
+  &__selected-range-date {
+    font-weight: bold;
+  }
+  &__selected-range-to {
+    padding: 0 10px;
+  }
+  &__selected-range-edit {
+    cursor: pointer;
+    margin-left: 10px;
+  }
 }

@@ -1,4 +1,12 @@
 <div class="metrics-chart__outer">
+  <div [ngClass]="{'metrics-chart__overlay-show': selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END && showOverlay}"
+    class="metrics-chart__overlay">
+    <div class="metrics-chart__overlay-inner">
+      <app-start-end-date (isValid)="dateValid = $event" [(start)]="start" [(end)]="end"></app-start-end-date>
+      <button mat-raised-button class="metrics-chart__overlay-set" (click)="commit(); showOverlay = false" [disabled]="!dateValid || !commit">Set</button>
+      <button mat-raised-button (click)="showOverlay = false">Cancel</button>
+    </div>
+  </div>
   <div class="metrics-chart__header">
     <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
     <mat-form-field>
@@ -8,13 +16,23 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <app-start-end-date *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END" [(start)]="start" [(end)]="end"></app-start-end-date>
+    <div class="metrics-chart__selected-range" *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END">
+      <div class="metrics-chart__selected-range-dates" *ngIf="committedStartEnd[0] && committedStartEnd[1]">
+        <div class="metrics-chart__selected-range-date">{{ committedStartEnd[0] | amDateFormat:'LL' }}</div>
+        <div class="metrics-chart__selected-range-to">to</div>
+        <div class="metrics-chart__selected-range-date"> {{ committedStartEnd[1] | amDateFormat:'LL' }}</div>
+      </div>
+      <a class="metrics-chart__selected-range-edit" (click)="showOverlay = true" *ngIf="selectedTimeRange && selectedTimeRange.type===rangeTypes.START_END && !showOverlay">Edit</a>
+    </div>
   </div>
-  <mat-progress-bar *ngIf="metricsMonitor.isFetchingEntity$ | async" class="metrics-chart__loading" [color]="'primary'" mode="indeterminate">
+  <mat-progress-bar *ngIf="metricsMonitor.isFetchingEntity$ | async " class="metrics-chart__loading " [color]="
+        'primary' " mode="indeterminate ">
   </mat-progress-bar>
-  <div class="metrics-chart" *ngIf="results$ | async as results; else other_content" [ngSwitch]="chartConfig.chartType">
-    <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="true" [yAxisLabel]="chartConfig.yAxisLabel"
-      [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="true">
+  <div class="metrics-chart " *ngIf="results$ | async as results; else other_content " [ngSwitch]="chartConfig.chartType ">
+    <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE " [animations]="false " [results]="results " [legend]="true
+        " [yAxisLabel]="chartConfig.yAxisLabel " [xAxisLabel]="chartConfig.xAxisLabel " [showXAxisLabel]="true " [showYAxisLabel]="true "
+      [xAxis]="true
+        " [yAxis]="true " [autoScale]="true ">
     </ngx-charts-line-chart>
     <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
   </div>

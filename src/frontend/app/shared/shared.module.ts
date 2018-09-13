@@ -135,6 +135,7 @@ import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
+import { MomentModule } from 'ngx-moment';
 
 @NgModule({
   imports: [
@@ -146,6 +147,7 @@ import { StartEndDateComponent } from './components/start-end-date/start-end-dat
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
