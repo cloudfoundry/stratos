@@ -6,6 +6,9 @@ const until = protractor.ExpectedConditions;
 
 export class SSOLoginPage {
 
+  static ssoLoginURL: string;
+  static ssoLastUsername: string;
+
   helpers = new E2EHelpers();
 
   navigateTo() {
@@ -48,19 +51,46 @@ export class SSOLoginPage {
   }
 
   login(username: string, password: string) {
+
+    // If this is a different user to last time, then logout first
+    if (SSOLoginPage.ssoLastUsername && SSOLoginPage.ssoLastUsername !== username) {
+      browser.waitForAngularEnabled(false);
+      browser.driver.get(this.getLogoutUrl());
+    }
+
     browser.waitForAngularEnabled(false);
     this.navigateTo();
     this.loginButton().click();
-    this.enterLogin(username, password);
-    this.submit();
 
-    browser.waitForAngularEnabled(true);
+    const that = this;
+    // We only need to login once, then we are logged in with SSO, so subsequent login
+    // do not need to enter credentials - we need to detect this!
+    browser.getTitle().then(function (title) {
+      if (title.indexOf('Stratos') === -1 ) {
+        if (!SSOLoginPage.ssoLoginURL) {
+          // SSO Login
+          browser.getCurrentUrl().then(url => {
+            SSOLoginPage.ssoLoginURL = url;
+          });
+        }
 
-    browser.wait(() => {
-      return browser.getCurrentUrl().then(function (url) {
-        return !url.endsWith('/login');
-      });
-    }, 10000, 'timed out waiting for login');
+        // Login is required
+        // Page was redirected to UAA login, so need to disable wait for Angaulr again
+        browser.waitForAngularEnabled(false);
+        that.enterLogin(username, password);
+        that.submit();
+        browser.waitForAngularEnabled(true);
+        SSOLoginPage.ssoLastUsername = username;
+
+      } else {
+        browser.waitForAngularEnabled(true);
+        browser.wait(() => {
+          return browser.getCurrentUrl().then(function (url) {
+            return !url.endsWith('/login');
+          });
+        }, 10000, 'timed out waiting for login');
+      }
+    });
 
     // Wait for the page to be ready
     return browser.getCurrentUrl().then((url: string) => {
@@ -91,6 +121,19 @@ export class SSOLoginPage {
 
   waitForNoEndpoints() {
     return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
+  }
+
+  private getLogoutUrl(): string {
+    const parts = SSOLoginPage.ssoLoginURL.split('/');
+    parts[parts.length - 1] = 'logout.do';
+    let logoutUrl = '';
+    for (let i = 0; i < parts.length; i++) {
+      if (i !== 0) {
+        logoutUrl += '/';
+      }
+      logoutUrl += parts[i];
+    }
+    return logoutUrl;
   }
 
 }
