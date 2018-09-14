@@ -107,7 +107,8 @@ if [ $RET -ne 0 ]; then
   set -e
 fi
 
-wget ${TEST_CONFIG_URL} -O secrets.yaml --no-check-certificate
+rm -f secrets.yaml
+curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 echo "headless: true" >> secrets.yaml
 
 rm -rf node_modules
