@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"code.cloudfoundry.org/cli/cf/api/applications"
@@ -29,6 +30,7 @@ import (
 	"code.cloudfoundry.org/cli/util"
 	"code.cloudfoundry.org/cli/util/randomword"
 	uuid "github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
 
 	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/flags"
@@ -59,6 +61,20 @@ type CFPushAppConfig struct {
 	DialTimeout            string
 }
 
+type CFPushAppOverrides struct {
+	Name        string `json:"name"`
+	Buildpack   string `json:"buildpack"`
+	Instances   *int   `json:"instances"`
+	DiskQuota   string `json:"diskQuota"`
+	MemQuota    string `json:"memQuota"`
+	DoNotStart  bool   `json:"doNotStart"`
+	NoRoute     bool   `json:"noRoute"`
+	RandomRoute bool   `json:"randomRoute"`
+	Host        string `json:"host"`
+	Domain      string `json:"domain"`
+	Path        string `json:"path"`
+}
+
 // ErrorType default error returned
 type ErrorType int
 
@@ -71,7 +87,7 @@ const (
 
 // CFPush Interface
 type CFPush interface {
-	Init(appDir string, manifestPath string) error
+	Init(appDir string, manifestPath string, overrides CFPushAppOverrides) error
 	Push() error
 	GetDeps() commandregistry.Dependency
 	PatchApplicationRepository(repo applications.Repository)
@@ -85,7 +101,7 @@ type PushError struct {
 }
 
 func (p *PushError) Error() string {
-	return fmt.Sprintf("Failed due to: %s", p.Err)
+	return fmt.Sprintf("Push error: %s", p.Err)
 }
 
 // Constructor returns a CFPush based on the supplied config
@@ -215,10 +231,40 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 
 }
 
-// Init initializes the push operation with the specified application directory and manifest path
-func (c *CFPushApp) Init(appDir string, manifestPath string) error {
+func appendFlag(flags []string, argName string, argValue string) []string {
+	if len(argValue) != 0 {
+		if len(argName) != 0 {
+			return append(flags, argName, argValue)
+		} else {
+			return append(flags, argValue)
+		}
+	}
+	return flags
+}
 
-	err := c.flagContext.Parse("-p", appDir, "-f", manifestPath)
+// Init initializes the push operation with the specified application directory and manifest path
+func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushAppOverrides) error {
+
+	var flags []string
+
+	flags = appendFlag(flags, "", overrides.Name)
+	flags = appendFlag(flags, "-b", overrides.Buildpack)
+	flags = appendFlag(flags, "-k", overrides.DiskQuota)
+	flags = appendFlag(flags, "-d", overrides.Domain)
+	flags = append(flags, "--no-start", strconv.FormatBool(overrides.DoNotStart))
+	flags = appendFlag(flags, "--hostname", overrides.Host)
+	flags = appendFlag(flags, "-m", overrides.MemQuota)
+	flags = append(flags, "--no-route", strconv.FormatBool(overrides.NoRoute))
+	flags = appendFlag(flags, "--route-path", overrides.Path)
+	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
+	flags = append(flags, "-p", appDir, "-f", manifestPath)
+	if overrides.Instances != nil {
+		flags = append(flags, "-i", strconv.Itoa(*overrides.Instances))
+	}
+
+	log.Debugf("Cf Push Overrides: %v", flags)
+
+	err := c.flagContext.Parse(flags...)
 	if err != nil {
 		return &PushError{Err: err, Type: GeneralFailure}
 	}

@@ -1,4 +1,7 @@
 import {
+  TableCellEndpointIsAdminComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+import {
   Component,
   ComponentFactoryResolver,
   Input,
@@ -141,7 +144,8 @@ export const listTableCells = [
   TableCellRequestMonitorIconComponent,
   TableCellSpaceNameComponent,
   TableCellAppCfOrgSpaceHeaderComponent,
-  TableCellAppCfOrgSpaceComponent
+  TableCellAppCfOrgSpaceComponent,
+  TableCellEndpointIsAdminComponent
 ];
 
 @Component({

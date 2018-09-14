@@ -1,17 +1,15 @@
-import {
-  of as observableOf,
-  combineLatest as observableCombineLatest,
-  BehaviorSubject,
-  Observable,
-  interval,
-  Subscription
-} from 'rxjs';
-
-import { startWith, catchError, filter, map, switchMap, takeWhile, tap, distinctUntilChanged, first } from 'rxjs/operators';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
+import { filter, first, map, startWith } from 'rxjs/operators';
 
 import {
   CfAppsDataSource,

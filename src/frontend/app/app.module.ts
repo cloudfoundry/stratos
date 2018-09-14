@@ -6,7 +6,7 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
-import { CustomModule } from './custom.module';
+import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
@@ -20,6 +20,7 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { XSRFModule } from './xsrf.module';
+import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
 
 
 // Create action for router navigation. See
@@ -50,6 +51,7 @@ export class CustomRouterStateSerializer
   }
 }
 
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -75,11 +77,12 @@ export class CustomRouterStateSerializer
     ServiceCatalogModule,
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
-    CustomModule,
+    CustomImportModule,
     XSRFModule,
   ],
   providers: [
     LoggedInService,
+    { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]

@@ -127,7 +127,7 @@ describe('Endpoints', () => {
                   expect(endpointConfig.typeLabel).toEqual(ep.type);
 
                   endpointsPage.table.getRowForEndpoint(ep.name).then(row => {
-                    endpointsPage.table.openActionMenu(row);
+                    endpointsPage.table.openRowActionMenuByRow(row);
                     const menu = new MenuComponent();
                     menu.waitUntilShown();
                     menu.getItemMap().then(items => {

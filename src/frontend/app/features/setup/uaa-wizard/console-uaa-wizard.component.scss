@@ -4,7 +4,7 @@
   margin: 0 100px;
   padding-top: 56px;
   &__form {
-    display: flex;
+    display: block;
     flex-direction: column;
     width: 100%;
   }
@@ -20,6 +20,14 @@
     font-size: 18px;
     font-weight: 600;
     padding-top: 36px;
+  }
+  &__sso-block {
+    margin-left: 28px;
+    margin-top: 6px;
+    code {
+      font-size: 14px;
+      padding-left: 6px;
+    }
   }
   form {
     min-width: 400px;

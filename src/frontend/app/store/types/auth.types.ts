@@ -34,7 +34,7 @@ export interface SessionData {
   valid: boolean;
   uaaError?: boolean;
   upgradeInProgress?: boolean;
-  isSSOLogin?: boolean;
+  ssoOptions?: string;
   sessionExpiresOn: number;
   domainMismatch?: boolean;
   diagnostics?: Diagnostics;

@@ -88,6 +88,7 @@ e2e-reports/
 .stratos-git-metadata.json
 src/jetstream/jetstream
 src/jetstream/console-database.db
+src/jetstream/config.properties
 
 # Customisations
 
@@ -96,7 +97,7 @@ src/frontend/sass/custom.scss
 src/frontend/assets/eula.html
 src/frontend/assets/logo.png
 src/frontend/assets/login-bg.jpg
-src/frontend/app/custom.module.ts
+src/frontend/app/custom-import.module.ts
 src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom

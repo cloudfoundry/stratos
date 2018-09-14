@@ -1,6 +1,6 @@
-import { Page } from '../po/page.po';
-import { StepperComponent } from '../po/stepper.po';
-import { TableComponent } from '../po/table.po';
+import { Page } from '../../po/page.po';
+import { StepperComponent } from '../../po/stepper.po';
+import { TableComponent } from '../../po/table.po';
 
 export class DeleteApplication extends Page {
 
