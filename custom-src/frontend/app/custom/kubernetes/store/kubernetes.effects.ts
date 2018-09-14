@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import {
@@ -21,7 +21,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../store/types/request.types';
-import { KubernetesPod, KubeService } from './kube.types';
+import { KubernetesPod, KubeService, KubernetesDeployment, KubernetesStatefuleSet, KubernetesNode } from './kube.types';
 import {
   GET_KUBE_POD,
   GET_KUBERNETES_APP_INFO,
@@ -39,8 +39,11 @@ import {
   GET_KUBE_STATEFULSETS,
   GeKubernetesDeployments,
   GET_KUBE_DEPLOYMENT,
+  KubeAction,
 } from './kubernetes.actions';
+import { KubernetesNamespace } from '../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 
+export type GetID<T> = (p: T)  => string;
 
 @Injectable()
 export class KubernetesEffects {
@@ -54,232 +57,82 @@ export class KubernetesEffects {
   @Effect()
   fetchNodeInfo$ = this.actions$.ofType<GetKubernetesNodes>(GET_NODE_INFO).pipe(
     flatMap(action => {
-
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesNodesSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            const id = action.kubeGuid;
-            mappedData.entities[kubernetesNodesSchemaKey][id] = info[id].items;
-            mappedData.result.push(id);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+      const getUid: GetID<KubernetesNode> = (p) => p.metadata.uid;
+      return this.processAction<KubernetesNode>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
+        kubernetesNodesSchemaKey,
+          getUid);
     })
   );
 
   @Effect()
   fetchPodsInfo$ = this.actions$.ofType<GetKubernetesPods>(GET_POD_INFO).pipe(
     flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesPodsSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            info[action.kubeGuid].items.forEach((p: KubernetesPod) => {
-              const id = p.metadata.name;
-              p.metadata.kubeId = action.kubeGuid;
-              mappedData.entities[kubernetesPodsSchemaKey][id] = p;
-              mappedData.result.push(id);
-
-            });
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+      const getUid: GetID<KubernetesPod> = (p) => p.metadata.uid;
+      return this.processAction<KubernetesPod>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
+        kubernetesPodsSchemaKey,
+          getUid);
     })
   );
 
   @Effect()
   fetchPodInfo$ = this.actions$.ofType<GetKubernetesPod>(GET_KUBE_POD).pipe(
     flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesPodsSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            info[action.kubeGuid].items.forEach((p: KubernetesPod) => {
-              const id = p.metadata.uid;
-              p.metadata.kubeId = action.kubeGuid;
-              mappedData.entities[kubernetesPodsSchemaKey][id] = p;
-              mappedData.result.push(id);
-
-            });
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+      const getUid: GetID<KubernetesPod> = (p) => p.metadata.uid;
+      return this.processAction<KubernetesPod>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
+        kubernetesPodsSchemaKey,
+          getUid);
     })
   );
 
   @Effect()
   fetchServicesInfo$ = this.actions$.ofType<GetKubernetesServices>(GET_SERVICE_INFO).pipe(
     flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/services`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesServicesSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            info[action.kubeGuid].items.forEach((p: KubeService) => {
-              const id = p.metadata.uid;
-              mappedData.entities[kubernetesServicesSchemaKey][id] = p;
-              mappedData.result.push(id);
-            });
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+
+      const getUid: GetID<KubeService> = (p) => p.metadata.uid;
+      return this.processAction<KubeService>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/services`,
+        kubernetesServicesSchemaKey,
+          getUid);
     })
   );
 
   @Effect()
   fetchNamespaceInfo$ = this.actions$.ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO).pipe(
     flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesNamespacesSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            const id = action.kubeGuid;
-            mappedData.entities[kubernetesNamespacesSchemaKey][id] = info[id].items;
-            mappedData.result.push(id);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+
+      const getUid: GetID<KubernetesNamespace> = (p) => p.metadata.uid;
+      return this.processAction<KubernetesNamespace>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
+        kubernetesStatefulSetsSchemaKey,
+          getUid);
     })
+
   );
 
   @Effect()
   fetchStatefulSets$ = this.actions$.ofType<GetKubernetesStatefulSets>(GET_KUBE_STATEFULSETS).pipe(
     flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesStatefulSetsSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            info[action.kubeGuid].items.forEach((p: KubeService) => {
-              const id = p.metadata.uid;
-              mappedData.entities[kubernetesStatefulSetsSchemaKey][id] = p;
-              mappedData.result.push(id);
-            });
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+
+      const getUid: GetID<KubernetesStatefuleSet> = (p) => p.metadata.uid;
+      return this.processAction<KubernetesStatefuleSet>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`,
+        kubernetesStatefulSetsSchemaKey,
+          getUid);
     })
   );
 
   @Effect()
   fetchDeployments$ = this.actions$.ofType<GeKubernetesDeployments>(GET_KUBE_DEPLOYMENT).pipe(
     flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesDeploymentsSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            info[action.kubeGuid].items.forEach((p: KubeService) => {
-              const id = p.metadata.uid;
-              mappedData.entities[kubernetesDeploymentsSchemaKey][id] = p;
-              mappedData.result.push(id);
-            });
-            return [
-              new WrapperRequestActionSuccess(mappedData, action)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
-          ])
-        );
+
+      const getUid: GetID<KubernetesDeployment> = (p) => p.metadata.uid;
+      return this.processAction<KubernetesDeployment>(action,
+         `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
+          kubernetesDeploymentsSchemaKey,
+          getUid);
     })
   );
 
@@ -337,4 +190,30 @@ export class KubernetesEffects {
     })
   );
 
+  private processAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T> ) {
+    this.store.dispatch(new StartRequestAction(action));
+    const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
+    const requestArgs = {
+      headers: headers
+    };
+    return this.http
+      .get(url, requestArgs)
+      .pipe(mergeMap(response => {
+        const info = response.json();
+        const mappedData = {
+          entities: { [schemaKey]: {} },
+          result: []
+        } as NormalizedResponse;
+        info[action.kubeGuid].items.forEach((p: T) => {
+          const id = getId(p);
+          mappedData.entities[schemaKey][id] = p;
+          mappedData.result.push(id);
+        });
+        return [
+          new WrapperRequestActionSuccess(mappedData, action)
+        ];
+      }), catchError(err => [
+        new WrapperRequestActionFailed(err.message, action)
+      ]));
+  }
 }
