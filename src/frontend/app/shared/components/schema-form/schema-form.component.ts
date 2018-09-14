@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { JsonPointer } from 'angular6-json-schema-form';
 import { Subscription } from 'rxjs';
@@ -28,21 +28,35 @@ export function isValidJsonValidator(): ValidatorFn {
   };
 }
 
+export class SchemaFormConfig {
+  schema: object;
+  initialData: object;
+}
 
 @Component({
   selector: 'app-schema-form',
   templateUrl: './schema-form.component.html',
   styleUrls: ['./schema-form.component.scss']
 })
-export class SchemaFormComponent implements OnInit, OnDestroy {
+export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
+
+  mode: 'JSON' | 'schema';
+  schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
 
   @Input()
-  set schema(schema: object) {
-    this.cleanSchema = this.filterSchema(schema);
+  set config(config: SchemaFormConfig) {
+    if (!config) {
+      return;
+    }
+    this.cleanSchema = this.filterSchema(config.schema);
+    this.mode = this.cleanSchema ? 'schema' : 'JSON';
+    if (this.mode === 'JSON') {
+      this.setJsonFormData(config.initialData);
+    } else if (this.mode === 'schema') {
+      // this.formData = config.initialData;
+      this.formInitialData = config.initialData;
+    }
   }
-
-  @Input()
-  data: object = null;
 
   @Output()
   dataChange = new EventEmitter<object>();
@@ -53,12 +67,13 @@ export class SchemaFormComponent implements OnInit, OnDestroy {
   validChange = new EventEmitter<boolean>();
 
   cleanSchema: object;
-  view = 'form';
 
+  jsonData: object;
   jsonForm: FormGroup;
   jsonChangeSub: Subscription;
 
-  formData: object = null;
+  formData: object = {};
+  formInitialData: object;
   formValidationErrors: SchemaFormValidationError[];
   formValidationErrorsStr: string;
 
@@ -66,25 +81,33 @@ export class SchemaFormComponent implements OnInit, OnDestroy {
     this.jsonForm = new FormGroup({
       json: new FormControl('', isValidJsonValidator()),
     });
+  }
+
+  ngAfterContentInit() {
     this.jsonChangeSub = this.jsonForm.controls['json'].valueChanges.subscribe(jsonStr => {
-      this.data = safeStringToObj(jsonStr);
-      this.dataChange.emit(this.data);
+      this.jsonData = safeStringToObj(jsonStr);
+      this.dataChange.emit(this.jsonData);
       this.validChange.emit(this.jsonForm.controls['json'].valid);
     });
-    if (!this.cleanSchema) {
-      this.jsonForm.controls['json'].setValue(this.data);
-    }
   }
 
   ngOnDestroy() {
     safeUnsubscribe(this.jsonChangeSub);
   }
 
-  onViewChanged() {
-    if (this.view === 'form') {
-      this.validChange.emit(!!this.data && !this.formValidationErrors.length);
+  onSchemaViewChanged() {
+    if (this.schemaView === 'schemaForm') {
+      // Copy json into form
+      this.formInitialData = this.jsonData;
     } else {
-      const jsonString = JSON.stringify(this.data);
+      // Copy form into json
+      this.setJsonFormData(this.formData);
+    }
+  }
+
+  setJsonFormData(data: object) {
+    if (this.jsonForm) {
+      const jsonString = JSON.stringify(data);
       this.jsonForm.controls['json'].setValue(jsonString);
     }
   }
@@ -100,6 +123,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy {
   }
 
   onFormChange(formData) {
+    this.formData = formData;
     this.dataChange.emit(formData);
   }
 

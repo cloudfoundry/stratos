@@ -54,6 +54,253 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+
+
+// TODO: RC remove me
+export const testSelectedServicePlan = {
+  entity: {
+    name: 'shared',
+    free: true,
+    description: 'Shared service for public-service',
+    service_guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+    extra: null,
+    unique_id: '31f1eddd-af72-44bd-98d5-7ad8915c5852-plan-shared',
+    'public': true,
+    bindable: true,
+    active: true,
+    service_url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+    service_instances_url: '/v2/service_plans/00da4974-5037-485a-96f0-cbbbf98dc8e9/service_instances',
+    guid: '00da4974-5037-485a-96f0-cbbbf98dc8e9',
+    cfGuid: '293a18c7-1504-410f-b59d-9536a5098d66',
+    schemas: {
+      service_binding: {
+        create: {
+          parameters: {
+            'type': 'object',
+            'properties': {
+              'first_name': {
+                'type': 'string'
+              },
+              'last_name': {
+                'type': 'string'
+              },
+              'address': {
+                'type': 'object',
+                'properties': {
+                  'street_1': {
+                    'type': 'string'
+                  },
+                  'street_2': {
+                    'type': 'string'
+                  },
+                  'city': {
+                    'type': 'string'
+                  },
+                  'state': {
+                    'type': 'string',
+                    'enum': [
+                      'AL',
+                      'WY'
+                    ]
+                  },
+                  'zip_code': {
+                    'type': 'string'
+                  }
+                }
+              },
+              'birthday': {
+                'type': 'string'
+              },
+              'notes': {
+                'type': 'string'
+              },
+              'phone_numbers': {
+                'type': 'array',
+                'items': {
+                  'type': 'object',
+                  'properties': {
+                    'type': {
+                      'type': 'string',
+                      'enum': [
+                        'cell',
+                        'home',
+                        'work'
+                      ]
+                    },
+                    'number': {
+                      'type': 'string'
+                    }
+                  },
+                  'required': [
+                    'type',
+                    'number'
+                  ]
+                }
+              }
+            },
+            'required': [
+              'last_name'
+            ]
+          }
+        }
+      },
+      service_instance: {
+        create: {
+          parameters: {
+            'type': 'object',
+            'properties': {
+              'first_name': {
+                'type': 'string'
+              },
+              'last_name': {
+                'type': 'string'
+              },
+              'address': {
+                'type': 'object',
+                'properties': {
+                  'street_1': {
+                    'type': 'string'
+                  },
+                  'street_2': {
+                    'type': 'string'
+                  },
+                  'city': {
+                    'type': 'string'
+                  },
+                  'state': {
+                    'type': 'string',
+                    'enum': [
+                      'AL',
+                      'AK',
+                      'WV',
+                      'WI',
+                      'WY'
+                    ]
+                  },
+                  'zip_code': {
+                    'type': 'string'
+                  }
+                }
+              },
+              'birthday': {
+                'type': 'string'
+              },
+              'notes': {
+                'type': 'string'
+              },
+              'phone_numbers': {
+                'type': 'array',
+                'items': {
+                  'type': 'object',
+                  'properties': {
+                    'type': {
+                      'type': 'string',
+                      'enum': [
+                        'cell',
+                        'home',
+                        'work'
+                      ]
+                    },
+                    'number': {
+                      'type': 'string'
+                    }
+                  },
+                  'required': [
+                    'type',
+                    'number'
+                  ]
+                }
+              }
+            },
+            'required': [
+              'last_name'
+            ]
+          }
+        },
+        update: {
+          parameters: {
+            'type': 'object',
+            'properties': {
+              'first_name': {
+                'type': 'string'
+              },
+              'last_name': {
+                'type': 'string'
+              },
+              'address': {
+                'type': 'object',
+                'properties': {
+                  'street_1': {
+                    'type': 'string'
+                  },
+                  'street_2': {
+                    'type': 'string'
+                  },
+                  'city': {
+                    'type': 'string'
+                  },
+                  'state': {
+                    'type': 'string',
+                    'enum': [
+                      'AL',
+                      'AK',
+
+                      'WI',
+                      'WY'
+                    ]
+                  },
+                  'zip_code': {
+                    'type': 'string'
+                  }
+                }
+              },
+              'birthday': {
+                'type': 'string'
+              },
+              'notes': {
+                'type': 'string'
+              },
+              'phone_numbers': {
+                'type': 'array',
+                'items': {
+                  'type': 'object',
+                  'properties': {
+                    'type': {
+                      'type': 'string',
+                      'enum': [
+                        'cell',
+                        'home',
+                        'work'
+                      ]
+                    },
+                    'number': {
+                      'type': 'string'
+                    }
+                  },
+                  'required': [
+                    'type',
+                    'number'
+                  ]
+                }
+              }
+            },
+            'required': [
+              'last_name'
+            ]
+          }
+        }
+      }
+    }
+  },
+  metadata: {
+    guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+    url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+    created_at: '2017-11-27T17:07:02Z',
+    updated_at: '2017-11-27T17:07:02Z'
+  }
+};
+
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -106,8 +353,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
   serviceParamsValid = new BehaviorSubject(false);
-  serviceSchema: object;
-  serviceParams: object;
+  serviceParams: object = null;
+  schemaFormConfig: SchemaFormConfig;
+
 
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
@@ -180,11 +428,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
 
-
-
-    this.serviceSchema = this.modeService.isEditServiceInstanceMode() ?
-      pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
-      pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas);
+    this.schemaFormConfig = {
+      schema: testSelectedServicePlan || this.modeService.isEditServiceInstanceMode() ?
+        pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
+        pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas),
+      initialData: { 'first_name': 'first_name1', 'last_name': 'last_name1' }
+    };
 
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
@@ -205,6 +454,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ).subscribe();
     }
     this.subscriptions.push(this.setupFormValidatorData());
+  }
+
+  setServiceParams(data) {
+    this.serviceParams = data;
   }
 
   resetForms = (mode: FormMode) => {
@@ -491,411 +744,4 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 }
 
 
-// TODO: RC remove me
-// selectedServicePlan = {
-//   entity: {
-//     name: 'shared',
-//     free: true,
-//     description: 'Shared service for public-service',
-//     service_guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
-//     extra: null,
-//     unique_id: '31f1eddd-af72-44bd-98d5-7ad8915c5852-plan-shared',
-//     'public': true,
-//     bindable: true,
-//     active: true,
-//     service_url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0',
-//     service_instances_url: '/v2/service_plans/00da4974-5037-485a-96f0-cbbbf98dc8e9/service_instances',
-//     guid: '00da4974-5037-485a-96f0-cbbbf98dc8e9',
-//     cfGuid: '293a18c7-1504-410f-b59d-9536a5098d66',
-//     schemas: {
-//       service_binding: {
-//         create: {
-//           parameters: {
-//             'type': 'object',
-//             'properties': {
-//               'first_name': {
-//                 'type': 'string'
-//               },
-//               'last_name': {
-//                 'type': 'string'
-//               },
-//               'address': {
-//                 'type': 'object',
-//                 'properties': {
-//                   'street_1': {
-//                     'type': 'string'
-//                   },
-//                   'street_2': {
-//                     'type': 'string'
-//                   },
-//                   'city': {
-//                     'type': 'string'
-//                   },
-//                   'state': {
-//                     'type': 'string',
-//                     'enum': [
-//                       'AL',
-//                       'AK',
-//                       'AS',
-//                       'AZ',
-//                       'AR',
-//                       'CA',
-//                       'CO',
-//                       'CT',
-//                       'DE',
-//                       'DC',
-//                       'FM',
-//                       'FL',
-//                       'GA',
-//                       'GU',
-//                       'HI',
-//                       'ID',
-//                       'IL',
-//                       'IN',
-//                       'IA',
-//                       'KS',
-//                       'KY',
-//                       'LA',
-//                       'ME',
-//                       'MH',
-//                       'MD',
-//                       'MA',
-//                       'MI',
-//                       'MN',
-//                       'MS',
-//                       'MO',
-//                       'MT',
-//                       'NE',
-//                       'NV',
-//                       'NH',
-//                       'NJ',
-//                       'NM',
-//                       'NY',
-//                       'NC',
-//                       'ND',
-//                       'MP',
-//                       'OH',
-//                       'OK',
-//                       'OR',
-//                       'PW',
-//                       'PA',
-//                       'PR',
-//                       'RI',
-//                       'SC',
-//                       'SD',
-//                       'TN',
-//                       'TX',
-//                       'UT',
-//                       'VT',
-//                       'VI',
-//                       'VA',
-//                       'WA',
-//                       'WV',
-//                       'WI',
-//                       'WY'
-//                     ]
-//                   },
-//                   'zip_code': {
-//                     'type': 'string'
-//                   }
-//                 }
-//               },
-//               'birthday': {
-//                 'type': 'string'
-//               },
-//               'notes': {
-//                 'type': 'string'
-//               },
-//               'phone_numbers': {
-//                 'type': 'array',
-//                 'items': {
-//                   'type': 'object',
-//                   'properties': {
-//                     'type': {
-//                       'type': 'string',
-//                       'enum': [
-//                         'cell',
-//                         'home',
-//                         'work'
-//                       ]
-//                     },
-//                     'number': {
-//                       'type': 'string'
-//                     }
-//                   },
-//                   'required': [
-//                     'type',
-//                     'number'
-//                   ]
-//                 }
-//               }
-//             },
-//             'required': [
-//               'last_name'
-//             ]
-//           }
-//         }
-//       },
-//       service_instance: {
-//         create: {
-//           parameters: {
-//             'type': 'object',
-//             'properties': {
-//               'first_name': {
-//                 'type': 'string'
-//               },
-//               'last_name': {
-//                 'type': 'string'
-//               },
-//               'address': {
-//                 'type': 'object',
-//                 'properties': {
-//                   'street_1': {
-//                     'type': 'string'
-//                   },
-//                   'street_2': {
-//                     'type': 'string'
-//                   },
-//                   'city': {
-//                     'type': 'string'
-//                   },
-//                   'state': {
-//                     'type': 'string',
-//                     'enum': [
-//                       'AL',
-//                       'AK',
-//                       'AS',
-//                       'AZ',
-//                       'AR',
-//                       'CA',
-//                       'CO',
-//                       'CT',
-//                       'DE',
-//                       'DC',
-//                       'FM',
-//                       'FL',
-//                       'GA',
-//                       'GU',
-//                       'HI',
-//                       'ID',
-//                       'IL',
-//                       'IN',
-//                       'IA',
-//                       'KS',
-//                       'KY',
-//                       'LA',
-//                       'ME',
-//                       'MH',
-//                       'MD',
-//                       'MA',
-//                       'MI',
-//                       'MN',
-//                       'MS',
-//                       'MO',
-//                       'MT',
-//                       'NE',
-//                       'NV',
-//                       'NH',
-//                       'NJ',
-//                       'NM',
-//                       'NY',
-//                       'NC',
-//                       'ND',
-//                       'MP',
-//                       'OH',
-//                       'OK',
-//                       'OR',
-//                       'PW',
-//                       'PA',
-//                       'PR',
-//                       'RI',
-//                       'SC',
-//                       'SD',
-//                       'TN',
-//                       'TX',
-//                       'UT',
-//                       'VT',
-//                       'VI',
-//                       'VA',
-//                       'WA',
-//                       'WV',
-//                       'WI',
-//                       'WY'
-//                     ]
-//                   },
-//                   'zip_code': {
-//                     'type': 'string'
-//                   }
-//                 }
-//               },
-//               'birthday': {
-//                 'type': 'string'
-//               },
-//               'notes': {
-//                 'type': 'string'
-//               },
-//               'phone_numbers': {
-//                 'type': 'array',
-//                 'items': {
-//                   'type': 'object',
-//                   'properties': {
-//                     'type': {
-//                       'type': 'string',
-//                       'enum': [
-//                         'cell',
-//                         'home',
-//                         'work'
-//                       ]
-//                     },
-//                     'number': {
-//                       'type': 'string'
-//                     }
-//                   },
-//                   'required': [
-//                     'type',
-//                     'number'
-//                   ]
-//                 }
-//               }
-//             },
-//             'required': [
-//               'last_name'
-//             ]
-//           }
-//         },
-//         update: {
-//           parameters: {
-//             'type': 'object',
-//             'properties': {
-//               'first_name': {
-//                 'type': 'string'
-//               },
-//               'last_name': {
-//                 'type': 'string'
-//               },
-//               'address': {
-//                 'type': 'object',
-//                 'properties': {
-//                   'street_1': {
-//                     'type': 'string'
-//                   },
-//                   'street_2': {
-//                     'type': 'string'
-//                   },
-//                   'city': {
-//                     'type': 'string'
-//                   },
-//                   'state': {
-//                     'type': 'string',
-//                     'enum': [
-//                       'AL',
-//                       'AK',
-//                       'AS',
-//                       'AZ',
-//                       'AR',
-//                       'CA',
-//                       'CO',
-//                       'CT',
-//                       'DE',
-//                       'DC',
-//                       'FM',
-//                       'FL',
-//                       'GA',
-//                       'GU',
-//                       'HI',
-//                       'ID',
-//                       'IL',
-//                       'IN',
-//                       'IA',
-//                       'KS',
-//                       'KY',
-//                       'LA',
-//                       'ME',
-//                       'MH',
-//                       'MD',
-//                       'MA',
-//                       'MI',
-//                       'MN',
-//                       'MS',
-//                       'MO',
-//                       'MT',
-//                       'NE',
-//                       'NV',
-//                       'NH',
-//                       'NJ',
-//                       'NM',
-//                       'NY',
-//                       'NC',
-//                       'ND',
-//                       'MP',
-//                       'OH',
-//                       'OK',
-//                       'OR',
-//                       'PW',
-//                       'PA',
-//                       'PR',
-//                       'RI',
-//                       'SC',
-//                       'SD',
-//                       'TN',
-//                       'TX',
-//                       'UT',
-//                       'VT',
-//                       'VI',
-//                       'VA',
-//                       'WA',
-//                       'WV',
-//                       'WI',
-//                       'WY'
-//                     ]
-//                   },
-//                   'zip_code': {
-//                     'type': 'string'
-//                   }
-//                 }
-//               },
-//               'birthday': {
-//                 'type': 'string'
-//               },
-//               'notes': {
-//                 'type': 'string'
-//               },
-//               'phone_numbers': {
-//                 'type': 'array',
-//                 'items': {
-//                   'type': 'object',
-//                   'properties': {
-//                     'type': {
-//                       'type': 'string',
-//                       'enum': [
-//                         'cell',
-//                         'home',
-//                         'work'
-//                       ]
-//                     },
-//                     'number': {
-//                       'type': 'string'
-//                     }
-//                   },
-//                   'required': [
-//                     'type',
-//                     'number'
-//                   ]
-//                 }
-//               }
-//             },
-//             'required': [
-//               'last_name'
-//             ]
-//           }
-//         }
-//       }
-//     }
-//   },
-//   metadata: {
-//     guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
-//     url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
-//     created_at: '2017-11-27T17:07:02Z',
-//     updated_at: '2017-11-27T17:07:02Z'
-//   }
-// };
+

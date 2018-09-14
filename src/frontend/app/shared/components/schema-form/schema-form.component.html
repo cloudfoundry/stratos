@@ -9,14 +9,14 @@
   </form>
 </ng-template>
 
-<div *ngIf="!!cleanSchema; else json" class="schema-form">
-  <mat-radio-group [(ngModel)]="view" (change)="onViewChanged()" class="schema-form__radios">
-    <mat-radio-button [value]="'form'" class="schema-form__radios-btn">Form</mat-radio-button>
-    <mat-radio-button [value]="'raw'" class="schema-form__radios-btn">JSON</mat-radio-button>
+<div *ngIf="mode === 'schema'; else json" class="schema-form">
+  <mat-radio-group [(ngModel)]="schemaView" (change)="onSchemaViewChanged()" class="schema-form__radios">
+    <mat-radio-button [value]="'schemaForm'" class="schema-form__radios-btn">Form</mat-radio-button>
+    <mat-radio-button [value]="'schemaJson'" class="schema-form__radios-btn">JSON</mat-radio-button>
   </mat-radio-group>
 
-  <div class="schema-form__form" *ngIf="view === 'form'; else json">
-    <json-schema-form loadExternalAssets="true" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [(data)]="data" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
+  <div class="schema-form__form" *ngIf="schemaView === 'schemaForm'; else json">
+    <json-schema-form loadExternalAssets="true" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
     </json-schema-form>
     <div *ngIf="!!formValidationErrorsStr" class="schema-form__form--data-bad" [innerHTML]="formValidationErrorsStr"></div>
   </div>
