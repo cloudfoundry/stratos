@@ -67,7 +67,12 @@ We have a channel (#stratos) on the Cloud Foundy Slack where you can ask questio
 
 You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - and then join the #stratos channel.
 
+## Acknowledgements
+
+Tested with Browserstack
+
+<a href="https://www.browserstack.com"><img width="240px" src="docs/images/Browserstack-logo.svg" alt="Browserstack"></a>
+
 ## License
 
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE).
-
