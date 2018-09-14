@@ -23,9 +23,15 @@ echo "Building images locally"
 echo "Build Finished"
 docker images
 
+# Clean the E2E reports folder
+rm -rf ./e2e-reports
+mkdir -p ./e2e-reports
+export E2E_REPORT_FOLDER=./e2e-reports
+mkdir -p "${E2E_REPORT_FOLDER}/logs"
+
 echo "Running Stratos in Docker Compose"
 pushd deploy
-docker-compose -f docker-compose.development.yml up -d
+docker-compose -f docker-compose.development.yml up -d | tee "${E2E_REPORT_FOLDER}/logs/build.log"
 popd
 
 # Get the E2E config
@@ -37,11 +43,6 @@ echo "headless: true" >> secrets.yaml
 rm -rf node_modules
 npm install
 
-# Clean the E2E reports folder
-rm -rf ./e2e-reports
-mkdir -p ./e2e-reports
-export E2E_REPORT_FOLDER=./e2e-reports
-
 # Run the E2E tests
 ./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://localhost:443
 RET=$?
@@ -49,6 +50,15 @@ RET=$?
 set +e
 
 pushd deploy
+
+# Store logs if there was a test failure
+if [ $? -ne 0 ]; then
+  docker-compose -f docker-compose.development.yml logs proxy > "${E2E_REPORT_FOLDER}/logs/jetstream.log"
+  docker-compose -f docker-compose.development.yml logs db-migrator > "${E2E_REPORT_FOLDER}/logs/db-migrator.log"
+  docker-compose -f docker-compose.development.yml logs nginx > "${E2E_REPORT_FOLDER}/logs/nginx.log"
+  docker-compose -f docker-compose.development.yml logs mariadb > "${E2E_REPORT_FOLDER}/logs/mariadb.log"
+fi
+
 docker-compose -f docker-compose.development.yml down
 popd
 
