@@ -18,7 +18,7 @@ run:
       # Create Github release
       ROOT_DIR=${PWD}
       cd ${ROOT_DIR}/stratos
-      GIT_TAG=$(cat ../image-tag/v2-alpha-tag)
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
       # Upload Helm chart to release
