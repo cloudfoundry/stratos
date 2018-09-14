@@ -9,8 +9,13 @@ $suse-dark-blue: #06253A;
 $suse-blue: #073155;
 $suse-side-nav: $suse-secondary;
 $suse-side-nav-active: #003358;
+
 .stratos img.stratos-title__logo {
   width: 160px;
+}
+
+.stratos h1.stratos-title__header {
+  display: initial;
 }
 
 .stratos .page-header .mat-toolbar.mat-primary {
@@ -23,14 +28,17 @@ $suse-side-nav-active: #003358;
     background-color: #fff;
     color: #333;
   }
+
   .mat-tab-nav-bar.mat-background-primary {
     .mat-tab-links {
       background-color: #fff;
       color: #333;
     }
+
     .mat-tab-link {
       color: #333;
     }
+
     .mat-ink-bar {
       background-color: $suse-primary-color;
     }
@@ -39,15 +47,18 @@ $suse-side-nav-active: #003358;
 
 // Use SUSE Blue Side Navigation
 .stratos {
+
   .side-nav,
   .side-nav__top,
   .side-nav__item--active:hover {
     background-color: $suse-side-nav;
   }
+
   .side-nav__item--active,
   .side-nav__item:hover {
     background-color: $suse-side-nav-active;
   }
+
   .side-nav__bottom {
     color: $suse-text-gray;
   }

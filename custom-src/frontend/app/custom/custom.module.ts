@@ -28,19 +28,19 @@ const SuseCustomizations: CustomizationsMetadata = {
     { provide: Customizations, useValue: SuseCustomizations }
   ],
 })
-export class SuseModule {
+export class CustomModule {
 
   static init = false;
 
   constructor(private router: Router) {
     // Only update the routes once
-    if (!SuseModule.init) {
+    if (!CustomModule.init) {
       // Override the component used for the login route
       const routeConfig = [...router.config];
       const loginRoute = routeConfig.find(r => r.path === 'login') || {};
       loginRoute.component = SuseLoginComponent;
       router.resetConfig(routeConfig);
-      SuseModule.init = true;
+      CustomModule.init = true;
     }
   }
 }
