@@ -31,7 +31,8 @@ mkdir -p "${E2E_REPORT_FOLDER}/logs"
 
 echo "Running Stratos in Docker Compose"
 pushd deploy
-docker-compose -f docker-compose.development.yml up -d | tee "${E2E_REPORT_FOLDER}/logs/build.log"
+#docker-compose -f docker-compose.development.yml up -d | tee "${E2E_REPORT_FOLDER}/logs/build.log"
+docker-compose -f docker-compose.development.yml up -d
 popd
 
 # Get the E2E config
