@@ -12,7 +12,7 @@ import {
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { Action } from '@ngrx/store';
-import { ICFAction } from '../../../store/types/request.types';
+import { ICFAction, IRequestAction } from '../../../store/types/request.types';
 
 export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
 export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
@@ -46,7 +46,12 @@ export const GET_KUBE_DEPLOYMENT = '[KUBERNETES Endpoint] Get K8S Deployments In
 export const GET_KUBE_DEPLOYMENT_SUCCESS = '[KUBERNETES Endpoint] Get Deployments Success';
 export const GET_KUBE_DEPLOYMENT_FAILURE = '[KUBERNETES Endpoint] Get Deployments Failure';
 
-export class GetKubernetesNodes implements PaginatedAction {
+
+export interface KubeAction extends IRequestAction {
+  kubeGuid: string;
+}
+
+export class GetKubernetesNodes implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesNodesSchemaKey, kubeGuid);
   }
@@ -61,7 +66,7 @@ export class GetKubernetesNodes implements PaginatedAction {
   paginationKey: string;
 }
 
-export class GetKubernetesPods implements PaginatedAction {
+export class GetKubernetesPods implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, kubeGuid);
   }
@@ -75,7 +80,7 @@ export class GetKubernetesPods implements PaginatedAction {
   ];
   paginationKey: string;
 }
-export class GetKubernetesNamespaces implements PaginatedAction {
+export class GetKubernetesNamespaces implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid);
   }
@@ -89,7 +94,7 @@ export class GetKubernetesNamespaces implements PaginatedAction {
   ];
   paginationKey: string;
 }
-export class GetKubernetesApps implements PaginatedAction {
+export class GetKubernetesApps implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesAppsSchemaKey, kubeGuid);
   }
@@ -103,7 +108,7 @@ export class GetKubernetesApps implements PaginatedAction {
   ];
   paginationKey: string;
 }
-export class GetKubernetesServices implements PaginatedAction {
+export class GetKubernetesServices implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesServicesSchemaKey, kubeGuid);
   }
@@ -117,7 +122,7 @@ export class GetKubernetesServices implements PaginatedAction {
   ];
   paginationKey: string;
 }
-export class GetKubernetesPod implements Action {
+export class GetKubernetesPod implements Action, KubeAction {
   constructor(public podName, public namespaceName, public kubeGuid) {
   }
   type = GET_KUBE_POD;
@@ -129,7 +134,7 @@ export class GetKubernetesPod implements Action {
     GET_KUBE_POD_FAILURE
   ];
 }
-export class GetKubernetesStatefulSets implements PaginatedAction {
+export class GetKubernetesStatefulSets implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesStatefulSetsSchemaKey, kubeGuid);
   }
@@ -144,7 +149,7 @@ export class GetKubernetesStatefulSets implements PaginatedAction {
   paginationKey: string;
 
 }
-export class GeKubernetesDeployments implements PaginatedAction {
+export class GeKubernetesDeployments implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesDeploymentsSchemaKey, kubeGuid);
   }
