@@ -1,8 +1,9 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
-import { delay, map, tap, first, filter, debounceTime, takeWhile } from 'rxjs/operators';
+import { debounceTime, map, takeWhile, tap } from 'rxjs/operators';
 import { FetchApplicationMetricsAction, MetricQueryConfig, MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -36,6 +37,7 @@ interface ITimeRange {
   label: string;
   type: RangeType;
 }
+
 @Component({
   selector: 'app-metrics-chart',
   templateUrl: './metrics-chart.component.html',
@@ -49,17 +51,20 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   @Input()
   public title: string;
 
+  @ViewChild('overlayInner')
+  overlayInner: ElementRef;
+
   public chartTypes = MetricsChartTypes;
 
   private startEnd: [moment.Moment, moment.Moment] = [null, null];
 
-  private committedStartEnd: [moment.Moment, moment.Moment] = [null, null];
+  public committedStartEnd: [moment.Moment, moment.Moment] = [null, null];
 
   private pollSub: Subscription;
 
   private initSub: Subscription;
 
-  private commit: Function = null;
+  public commit: Function = null;
 
   public results$;
 
@@ -96,7 +101,16 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   ];
 
   public selectedTimeRangeValue: ITimeRange;
-  public showOverlay = false;
+
+  set showOverlay(show: boolean) {
+    this.showOverlayValue = show;
+  }
+
+  get showOverlay() {
+    return this.showOverlayValue;
+  }
+
+  public showOverlayValue = false;
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
@@ -137,6 +151,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
 
   set selectedTimeRange(timeRange: ITimeRange) {
     this.commit = null;
+    this.committedStartEnd = [null, null];
     this.selectedTimeRangeValue = timeRange;
     if (this.selectedTimeRangeValue.type === RangeType.ROLLING_WINDOW) {
       this.commitWindow(this.selectedTimeRangeValue);

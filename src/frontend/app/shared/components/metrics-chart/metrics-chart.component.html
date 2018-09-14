@@ -1,11 +1,12 @@
 <div class="metrics-chart__outer">
   <div [ngClass]="{'metrics-chart__overlay-show': selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END && showOverlay}"
     class="metrics-chart__overlay">
-    <div class="metrics-chart__overlay-inner">
+    <div #overlayInner class="metrics-chart__overlay-inner">
       <app-start-end-date (isValid)="dateValid = $event" [(start)]="start" [(end)]="end"></app-start-end-date>
-      <button mat-raised-button class="metrics-chart__overlay-set" (click)="commit(); showOverlay = false" [disabled]="!dateValid || !commit">Set</button>
+      <button mat-raised-button color="primary" class="metrics-chart__overlay-set" (click)="commit(); showOverlay = false" [disabled]="!dateValid || !commit">Set</button>
       <button mat-raised-button (click)="showOverlay = false">Cancel</button>
     </div>
+    <div class="metrics-chart__overlay-click" (click)="showOverlay = false"></div>
   </div>
   <div class="metrics-chart__header">
     <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
