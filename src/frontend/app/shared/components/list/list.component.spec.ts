@@ -1,4 +1,4 @@
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
@@ -19,6 +19,11 @@ import { CfEndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-c
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+
+class MockedNgZone {
+  run = fn => fn();
+  runOutsideAngular = fn => fn();
+}
 
 describe('ListComponent', () => {
 
@@ -50,11 +55,13 @@ describe('ListComponent', () => {
           createBasicStoreModule(store),
         ],
         providers: [
-          { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } }
+          { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
+          // Fun fact, NgZone will execute something on import which causes an undefined error
+          { provide: MockedNgZone, useValue: new MockedNgZone },
         ]
       });
-      inject([Store, ChangeDetectorRef], (iStore: Store<AppState>, cd: ChangeDetectorRef) => {
-        const component = new ListComponent<APIResource>(iStore, cd, config);
+      inject([Store, ChangeDetectorRef, NgZone], (iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone) => {
+        const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);
       })();
     }
