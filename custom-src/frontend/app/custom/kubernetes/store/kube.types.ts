@@ -32,6 +32,7 @@ export interface DeploymentSpec {
   strategy?: any;
   revisionHistoryLimit: number;
   progressDeadlineSeconds: number;
+  type?: string;
 }
 
 export interface KubernetesDeployment {

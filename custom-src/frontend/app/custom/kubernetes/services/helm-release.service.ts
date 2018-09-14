@@ -14,9 +14,10 @@ import {
   kubernetesStatefulSetsSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { KubernetesApp, KubernetesDeployment, KubernetesStatefuleSet, KubernetesPod } from '../store/kube.types';
-import { GeKubernetesDeployments, GetKubernetesApps, GetKubernetesStatefulSets } from '../store/kubernetes.actions';
+import { KubernetesApp, KubernetesDeployment, KubernetesStatefuleSet, KubernetesPod, KubeService } from '../store/kube.types';
+import { GeKubernetesDeployments, GetKubernetesApps, GetKubernetesStatefulSets, GetKubernetesServices } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
+import { kubernetesServicesSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 
 @Injectable()
 export class HelmReleaseService {
@@ -25,6 +26,7 @@ export class HelmReleaseService {
   helmRelease$: Observable<KubernetesApp>;
   deployments$: Observable<KubernetesDeployment[]>;
   statefulSets$: Observable<KubernetesStatefuleSet[]>;
+  services$:  Observable<KubeService[]>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -85,18 +87,35 @@ export class HelmReleaseService {
       }),
       first()
     );
+
+    const servicesAction = new GetKubernetesServices(this.kubeGuid);
+
+    this.services$ = getPaginationObservables<KubeService>({
+      store: this.store,
+      action: servicesAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        servicesAction.paginationKey,
+        entityFactory(kubernetesServicesSchemaKey)
+      )
+    }, true).entities$.pipe(
+      filter(p => !!p),
+      map(p => {
+        return p.filter(r => {
+          return r.metadata.labels['release'] === this.helmReleaseName;
+        });
+
+      }),
+      first()
+    );
   }
 
   public getReleasePods(pods: Observable<KubernetesPod[]>): Observable<KubernetesPod[]> {
     return combineLatest(this.deployments$, this.statefulSets$, pods).pipe(
-      tap(o => console.log('In Combine!')),
       map(([deployments, statefulSets, allPods]) => {
-        console.log(allPods);
         return allPods.filter(p => {
           const podName = p.metadata.name;
           const filteredDeployments = deployments.filter(d => podName.startsWith(d.metadata.name));
           const filteredStatefulSets = statefulSets.filter(d => podName.startsWith(d.metadata.name));
-          console.log('Filtering pod: ' + podName);
           return filteredDeployments.length !== 0 || filteredStatefulSets.length !== 0;
         });
       })
