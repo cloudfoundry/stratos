@@ -1,31 +1,3 @@
-@import '../../../../../sass/mixins';
 :host {
   flex: 1;
 }
-
-@mixin json-schema-component() {
-  .data-bad { background-color: #fcc; }
-  .display-json {
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-  .json-schema {
-    display: flex;
-    flex-direction: column;
-    @include breakpoint(laptop) {
-      flex-direction: row;
-    }
-  }
-  .json-schema-data,
-  .json-schema-form {
-    width: 100%;
-    @include breakpoint(laptop) {
-      width: 50%;
-    }
-  }
-}
-
-@include json-schema-component();

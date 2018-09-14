@@ -1,4 +1,3 @@
-@import '../bind-apps-step/bind-apps-step.component';
 :host {
   flex: 1;
 }
@@ -7,6 +6,7 @@
   &__tags {
     &__chip-list {
       mat-chip {
+
         &.stepper-form__tags__chip-list__chip,
         &.stepper-form__tags__chip-list__chip + &.stepper-form__tags__chip-list__chip {
           $chip-padding: 5px;
@@ -14,6 +14,10 @@
         }
       }
     }
+  }
+
+  &__params {
+    padding-top: 20px;
   }
 }
 
@@ -24,5 +28,3 @@
     }
   }
 }
-
-@include json-schema-component();

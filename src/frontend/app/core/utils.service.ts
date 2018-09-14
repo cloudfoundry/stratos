@@ -244,3 +244,19 @@ export function parseHttpPipeError(res): {} {
   }
   return {};
 }
+
+export function safeStringToObj(value: string): object {
+  try {
+    if (value) {
+      const jsonObj = JSON.parse(value);
+      // Check if jsonObj is actually an obj
+      if (jsonObj.constructor !== {}.constructor) {
+        throw new Error('not an object');
+      }
+      return jsonObj;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}

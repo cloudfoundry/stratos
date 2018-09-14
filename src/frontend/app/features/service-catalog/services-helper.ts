@@ -44,17 +44,6 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
 
 export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };
 
-export const getServiceJsonParams = (params: any): {} => {
-  let prms = params;
-  try {
-    prms = JSON.parse(params) || null;
-  } catch (e) {
-    prms = null;
-  }
-  return prms;
-};
-
-
 export const isMarketplaceMode = (activatedRoute: ActivatedRoute) => {
   const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
   const cfId = getIdFromRoute(activatedRoute, 'cfId');
@@ -112,13 +101,4 @@ export const getServicePlans = (
     }));
 };
 
-export const prettyValidationErrors = (formValidationErrors: any[]): string => {
-  if (!formValidationErrors) { return null; }
-  return formValidationErrors.reduce((a, c) => {
-      const arrMessage = JsonPointer.parse(c.dataPath).reduce((aa, cc) => {
-          const dd = /^\d+$/.test(cc) ? `[${cc}]` : `.${cc}`;
-          return aa + dd;
-      }, '');
-      return `${a} ${arrMessage} ${c.message} <br>`;
-  }, '');
-};
+

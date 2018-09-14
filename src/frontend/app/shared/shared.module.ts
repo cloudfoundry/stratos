@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
 import {
@@ -54,6 +55,7 @@ import {
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
@@ -102,7 +104,9 @@ import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.compon
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
+import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { SchemaFormComponent } from './components/schema-form/schema-form.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
@@ -124,16 +128,14 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
-import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
-import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -237,6 +239,7 @@ import { MaterialDesignFrameworkModule } from 'angular6-json-schema-form';
     CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
+    SchemaFormComponent,
   ],
   exports: [
     FormsModule,

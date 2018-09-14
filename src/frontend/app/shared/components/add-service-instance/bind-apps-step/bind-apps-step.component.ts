@@ -2,10 +2,10 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 
+import { IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IApp } from '../../../../core/cf-api.types';
-import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
@@ -13,12 +13,9 @@ import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../..
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { CsiGuidsService } from '../csi-guids.service';
-import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
-import { safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -36,21 +33,15 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   stepperForm: FormGroup;
   apps$: Observable<APIResource<IApp>[]>;
   guideText = 'Specify the application to bind (Optional)';
+  selectedServicePlan: APIResource<IServicePlan>;
+  bindingParams: object;
 
-  selectedFramework = 'material-design';
-  schema: any;
-  showJsonSchema: boolean;
-  jsonFormOptions: any = { addSubmit: false };
-  selectedServiceSubscription: Subscription;
-  formValidationErrors: any;
-  selectedService$: any;
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.stepperForm = new FormGroup({
       apps: new FormControl(''),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
   }
 
@@ -62,32 +53,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     }
   }
 
-  onFormChange(jsonData) {
-    if (!!jsonData) {
-      try {
-        const stringData = JSON.stringify(jsonData);
-        this.stepperForm.get('params').setValue(stringData);
-      } catch { }
-    }
-  }
-
-  validationErrors(data: any): void {
-    this.formValidationErrors = data;
-  }
-
-  get prettyValidationErrors() {
-    return prettyValidationErrors(this.formValidationErrors);
-  }
-
   ngAfterContentInit() {
-    this.validateSubscription = this.stepperForm.statusChanges.pipe(
-      map(() => {
-        if (this.stepperForm.pristine) {
-          setTimeout(() => this.validate.next(true));
-        }
-        setTimeout(() => this.validate.next(this.stepperForm.valid));
-      })
-    ).subscribe();
+    this.validateSubscription = this.stepperForm.controls['apps'].valueChanges.subscribe(app => {
+      if (!app) {
+        this.validate.next(true);
+      }
+    });
 
 
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -106,36 +77,184 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.setBoundApp();
   }
 
-  onEnter = (selectedService$?) => {
-    this.selectedService$ = selectedService$;
-    if (selectedService$ instanceof Observable) {
-      this.selectedServiceSubscription = selectedService$.pipe(
-        first()
-      ).subscribe(selectedService => {
-        this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_binding.create.parameters);
-      });
-    }
-  }
+  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+    this.selectedServicePlan = selectedServicePlan;
+    // TODO: RC Remove
+    this.selectedServicePlan = {
+      entity: {
+        name: 'shared',
+        free: true,
+        description: 'Shared service for public-service',
+        service_guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+        extra: null,
+        unique_id: '31f1eddd-af72-44bd-98d5-7ad8915c5852-plan-shared',
+        'public': true,
+        bindable: true,
+        active: true,
+        service_url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+        service_instances_url: '/v2/service_plans/00da4974-5037-485a-96f0-cbbbf98dc8e9/service_instances',
+        guid: '00da4974-5037-485a-96f0-cbbbf98dc8e9',
+        cfGuid: '293a18c7-1504-410f-b59d-9536a5098d66',
+        schemas: {
+          service_binding: {
+            create: {
+              parameters: {
+                'type': 'object',
+                'properties': {
+                  'first_name': {
+                    'type': 'string'
+                  },
+                  'last_name': {
+                    'type': 'string'
+                  },
+                  'address': {
+                    'type': 'object',
+                    'properties': {
+                      'street_1': {
+                        'type': 'string'
+                      },
+                      'street_2': {
+                        'type': 'string'
+                      },
+                      'city': {
+                        'type': 'string'
+                      },
+                      'state': {
+                        'type': 'string',
+                        'enum': [
+                          'AL',
+                          'AK',
+                          'AS',
+                          'AZ',
+                          'AR',
+                          'CA',
+                          'CO',
+                          'CT',
+                          'DE',
+                          'DC',
+                          'FM',
+                          'FL',
+                          'GA',
+                          'GU',
+                          'HI',
+                          'ID',
+                          'IL',
+                          'IN',
+                          'IA',
+                          'KS',
+                          'KY',
+                          'LA',
+                          'ME',
+                          'MH',
+                          'MD',
+                          'MA',
+                          'MI',
+                          'MN',
+                          'MS',
+                          'MO',
+                          'MT',
+                          'NE',
+                          'NV',
+                          'NH',
+                          'NJ',
+                          'NM',
+                          'NY',
+                          'NC',
+                          'ND',
+                          'MP',
+                          'OH',
+                          'OK',
+                          'OR',
+                          'PW',
+                          'PA',
+                          'PR',
+                          'RI',
+                          'SC',
+                          'SD',
+                          'TN',
+                          'TX',
+                          'UT',
+                          'VT',
+                          'VI',
+                          'VA',
+                          'WA',
+                          'WV',
+                          'WI',
+                          'WY'
+                        ]
+                      },
+                      'zip_code': {
+                        'type': 'string'
+                      }
+                    }
+                  },
+                  'birthday': {
+                    'type': 'string'
+                  },
+                  'notes': {
+                    'type': 'string'
+                  },
+                  'phone_numbers': {
+                    'type': 'array',
+                    'items': {
+                      'type': 'object',
+                      'properties': {
+                        'type': {
+                          'type': 'string',
+                          'enum': [
+                            'cell',
+                            'home',
+                            'work'
+                          ]
+                        },
+                        'number': {
+                          'type': 'string'
+                        }
+                      },
+                      'required': [
+                        'type',
+                        'number'
+                      ]
+                    }
+                  }
+                },
+                'required': [
+                  'last_name'
+                ]
+              }
+            }
+          },
+          service_instance: {
 
-  private filterSchema = (schema: any): any => {
-    return Object.keys(schema).reduce((obj, key) => {
-      if (key !== '$schema') { obj[key] = schema[key]; }
-      return obj;
-    }, {});
+          }
+        }
+      },
+      metadata: {
+        guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+        url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+        created_at: '2017-11-27T17:07:02Z',
+        updated_at: '2017-11-27T17:07:02Z'
+      }
+    };
   }
 
   submit = (): Observable<StepOnNextResult> => {
     this.setApp();
-    return observableOf({ success: true, data: this.selectedService$ });
+    return observableOf({
+      success: true,
+      data: this.selectedServicePlan
+    });
   }
 
   setApp = () => this.store.dispatch(
-    new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.stepperForm.controls.params.value)
+    new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams)
   )
 
   ngOnDestroy(): void {
     this.validateSubscription.unsubscribe();
-    safeUnsubscribe(this.selectedServiceSubscription);
   }
 
 }
+
+
+

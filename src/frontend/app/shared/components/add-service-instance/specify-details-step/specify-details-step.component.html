@@ -21,15 +21,13 @@
           {{tag.label}}
           <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
         </mat-chip>
-        <input placeholder="Tags"  name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
+        <input placeholder="Tags" name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
       </mat-chip-list>
     </mat-form-field>
-    <mat-form-field>
-      <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
-      <mat-error *ngIf="createNewInstanceForm.controls.params?.hasError('notValidJson')">
-        Not valid JSON. Please specify a valid JSON Object
-      </mat-error>
-    </mat-form-field>
+    <div class="stepper-form__params">
+      <div>Service Parameters</div>
+      <app-schema-form [schema]="serviceSchema" [(data)]="serviceParams" (validChange)="serviceParamsValid.next($event)"></app-schema-form>
+    </div>
   </form>
   <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'" [formGroup]="selectExistingInstanceForm">
     <mat-form-field>
@@ -38,25 +36,5 @@
       </mat-select>
     </mat-form-field>
   </form>
-  <div *ngIf="!!schema" class="json-schema">
-    <mat-card class="json-schema-form">
-      <mat-card-header>
-        <mat-card-title><b>Generated Form</b><button mat-button color="accent" (click)="showJsonSchema=!showJsonSchema">Json schema</button>
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <json-schema-form loadExternalAssets="true" [options]="jsonFormOptions" [schema]="schema" [framework]="selectedFramework" (validationErrors)="validationErrors($event)" (onChanges)="onFormChange($event)">
-        </json-schema-form>
-        <div *ngIf="!!prettyValidationErrors" class="data-bad" [innerHTML]="prettyValidationErrors"></div>
-      </mat-card-content>
-    </mat-card>
-    <mat-card *ngIf="showJsonSchema" class="json-schema-data">
-      <mat-card-header>
-        <mat-card-title><b>Json schema</b></mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <pre class="display-json">{{schema | json}} </pre>
-      </mat-card-content>
-    </mat-card>
-  </div>
+
 </div>

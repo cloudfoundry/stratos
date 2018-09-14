@@ -3,7 +3,13 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -16,22 +22,30 @@ import {
   startWith,
   switchMap,
   take,
-  tap
+  tap,
 } from 'rxjs/operators';
-import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { getServiceJsonParams, safeUnsubscribe, prettyValidationErrors } from '../../../../features/service-catalog/services-helper';
+
+import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
+import { pathGet, safeStringToObj } from '../../../../core/utils.service';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
-import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
+import {
+  SetCreateServiceInstanceOrg,
+  SetServiceInstanceGuid,
+} from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
-import { CreateServiceInstance, GetServiceInstance, UpdateServiceInstance } from '../../../../store/actions/service-instances.actions';
+import {
+  CreateServiceInstance,
+  GetServiceInstance,
+  UpdateServiceInstance,
+} from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
-  selectCreateServiceInstanceSpaceGuid
+  selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource, NormalizedResponse } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
@@ -89,32 +103,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
   spaceScopeSub: Subscription;
-  selectedServiceSubscription: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
-  selectedFramework = 'material-design';
-  schema: any;
-  showJsonSchema: boolean;
-  jsonFormOptions: any = { addSubmit: false };
-  formValidationErrors: any;
+  serviceParamsValid = new BehaviorSubject(false);
+  serviceSchema: object;
+  serviceParams: object;
 
-  static isValidJsonValidatorFn = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
-
-      try {
-        if (formField.value) {
-          const jsonObj = JSON.parse(formField.value);
-          // Check if jsonObj is actually an obj
-          if (jsonObj.constructor !== {}.constructor) {
-            throw new Error('not an object');
-          }
-        }
-      } catch (e) {
-        return { 'notValidJson': { value: formField.value } };
-      }
-      return null;
-    };
-  }
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
       !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
@@ -184,15 +178,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  onEnter = (selectedService$?) => {
-    if (selectedService$ instanceof Observable) {
-      this.selectedServiceSubscription = selectedService$
-        .subscribe(selectedService => {
-          if (!!this.modeService.isEditServiceInstanceMode()) {
-            this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_instance.create.parameters);
-          } else { this.schema = this.filterSchema(selectedService.entity.entity.schemas.service_instance.update.parameters); }
-        });
-    }
+  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+
+
+
+    this.serviceSchema = this.modeService.isEditServiceInstanceMode() ?
+      pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
+      pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas);
+
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
@@ -200,7 +193,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         take(1),
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
-          this.createNewInstanceForm.controls.params.setValue(state.parameters);
+
+          this.serviceParams = safeStringToObj(state.parameters);
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
@@ -211,13 +205,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ).subscribe();
     }
     this.subscriptions.push(this.setupFormValidatorData());
-  }
-
-  private filterSchema = (schema: any): any => {
-    return Object.keys(schema).reduce((obj, key) => {
-      if (key !== '$schema') { obj[key] = schema[key]; }
-      return obj;
-    }, {});
   }
 
   resetForms = (mode: FormMode) => {
@@ -255,7 +242,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private setupForms() {
     this.createNewInstanceForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
     this.selectExistingInstanceForm = new FormGroup({
@@ -267,28 +253,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
-    safeUnsubscribe(this.selectedServiceSubscription);
   }
 
   ngAfterContentInit() {
     this.setupValidate();
-  }
-
-  onFormChange(jsonData) {
-    if (!!jsonData) {
-      try {
-        const stringData = JSON.stringify(jsonData);
-        this.createNewInstanceForm.get('params').setValue(stringData);
-      } catch { }
-    }
-  }
-
-  validationErrors(data: any): void {
-    this.formValidationErrors = data;
-  }
-
-  get prettyValidationErrors() {
-    return prettyValidationErrors(this.formValidationErrors);
   }
 
   onNext = (): Observable<StepOnNextResult> => {
@@ -368,10 +336,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
 
   private setupValidate() {
-    this.subscriptions.push(this.createNewInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.createNewInstanceForm.valid))).subscribe());
+    this.subscriptions.push(
+      observableCombineLatest([
+        this.serviceParamsValid.asObservable(),
+        this.createNewInstanceForm.statusChanges
+      ]).pipe(
+        map(([serviceParamsValid, b]) => this.validate.next(serviceParamsValid && this.createNewInstanceForm.valid))
+      ).subscribe()
+    );
     this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.selectExistingInstanceForm.valid))).subscribe());
+      map(() => this.validate.next(this.selectExistingInstanceForm.valid))
+    ).subscribe());
   }
 
   private getNewServiceGuid(name: string, spaceGuid: string, servicePlanGuid: string) {
@@ -429,7 +404,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
+    const params = this.serviceParams;
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
@@ -470,7 +445,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    params = getServiceJsonParams(params);
 
     this.store.dispatch(new CreateServiceBinding(
       cfGuid,
@@ -515,3 +489,413 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
 }
+
+
+// TODO: RC remove me
+// selectedServicePlan = {
+//   entity: {
+//     name: 'shared',
+//     free: true,
+//     description: 'Shared service for public-service',
+//     service_guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+//     extra: null,
+//     unique_id: '31f1eddd-af72-44bd-98d5-7ad8915c5852-plan-shared',
+//     'public': true,
+//     bindable: true,
+//     active: true,
+//     service_url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+//     service_instances_url: '/v2/service_plans/00da4974-5037-485a-96f0-cbbbf98dc8e9/service_instances',
+//     guid: '00da4974-5037-485a-96f0-cbbbf98dc8e9',
+//     cfGuid: '293a18c7-1504-410f-b59d-9536a5098d66',
+//     schemas: {
+//       service_binding: {
+//         create: {
+//           parameters: {
+//             'type': 'object',
+//             'properties': {
+//               'first_name': {
+//                 'type': 'string'
+//               },
+//               'last_name': {
+//                 'type': 'string'
+//               },
+//               'address': {
+//                 'type': 'object',
+//                 'properties': {
+//                   'street_1': {
+//                     'type': 'string'
+//                   },
+//                   'street_2': {
+//                     'type': 'string'
+//                   },
+//                   'city': {
+//                     'type': 'string'
+//                   },
+//                   'state': {
+//                     'type': 'string',
+//                     'enum': [
+//                       'AL',
+//                       'AK',
+//                       'AS',
+//                       'AZ',
+//                       'AR',
+//                       'CA',
+//                       'CO',
+//                       'CT',
+//                       'DE',
+//                       'DC',
+//                       'FM',
+//                       'FL',
+//                       'GA',
+//                       'GU',
+//                       'HI',
+//                       'ID',
+//                       'IL',
+//                       'IN',
+//                       'IA',
+//                       'KS',
+//                       'KY',
+//                       'LA',
+//                       'ME',
+//                       'MH',
+//                       'MD',
+//                       'MA',
+//                       'MI',
+//                       'MN',
+//                       'MS',
+//                       'MO',
+//                       'MT',
+//                       'NE',
+//                       'NV',
+//                       'NH',
+//                       'NJ',
+//                       'NM',
+//                       'NY',
+//                       'NC',
+//                       'ND',
+//                       'MP',
+//                       'OH',
+//                       'OK',
+//                       'OR',
+//                       'PW',
+//                       'PA',
+//                       'PR',
+//                       'RI',
+//                       'SC',
+//                       'SD',
+//                       'TN',
+//                       'TX',
+//                       'UT',
+//                       'VT',
+//                       'VI',
+//                       'VA',
+//                       'WA',
+//                       'WV',
+//                       'WI',
+//                       'WY'
+//                     ]
+//                   },
+//                   'zip_code': {
+//                     'type': 'string'
+//                   }
+//                 }
+//               },
+//               'birthday': {
+//                 'type': 'string'
+//               },
+//               'notes': {
+//                 'type': 'string'
+//               },
+//               'phone_numbers': {
+//                 'type': 'array',
+//                 'items': {
+//                   'type': 'object',
+//                   'properties': {
+//                     'type': {
+//                       'type': 'string',
+//                       'enum': [
+//                         'cell',
+//                         'home',
+//                         'work'
+//                       ]
+//                     },
+//                     'number': {
+//                       'type': 'string'
+//                     }
+//                   },
+//                   'required': [
+//                     'type',
+//                     'number'
+//                   ]
+//                 }
+//               }
+//             },
+//             'required': [
+//               'last_name'
+//             ]
+//           }
+//         }
+//       },
+//       service_instance: {
+//         create: {
+//           parameters: {
+//             'type': 'object',
+//             'properties': {
+//               'first_name': {
+//                 'type': 'string'
+//               },
+//               'last_name': {
+//                 'type': 'string'
+//               },
+//               'address': {
+//                 'type': 'object',
+//                 'properties': {
+//                   'street_1': {
+//                     'type': 'string'
+//                   },
+//                   'street_2': {
+//                     'type': 'string'
+//                   },
+//                   'city': {
+//                     'type': 'string'
+//                   },
+//                   'state': {
+//                     'type': 'string',
+//                     'enum': [
+//                       'AL',
+//                       'AK',
+//                       'AS',
+//                       'AZ',
+//                       'AR',
+//                       'CA',
+//                       'CO',
+//                       'CT',
+//                       'DE',
+//                       'DC',
+//                       'FM',
+//                       'FL',
+//                       'GA',
+//                       'GU',
+//                       'HI',
+//                       'ID',
+//                       'IL',
+//                       'IN',
+//                       'IA',
+//                       'KS',
+//                       'KY',
+//                       'LA',
+//                       'ME',
+//                       'MH',
+//                       'MD',
+//                       'MA',
+//                       'MI',
+//                       'MN',
+//                       'MS',
+//                       'MO',
+//                       'MT',
+//                       'NE',
+//                       'NV',
+//                       'NH',
+//                       'NJ',
+//                       'NM',
+//                       'NY',
+//                       'NC',
+//                       'ND',
+//                       'MP',
+//                       'OH',
+//                       'OK',
+//                       'OR',
+//                       'PW',
+//                       'PA',
+//                       'PR',
+//                       'RI',
+//                       'SC',
+//                       'SD',
+//                       'TN',
+//                       'TX',
+//                       'UT',
+//                       'VT',
+//                       'VI',
+//                       'VA',
+//                       'WA',
+//                       'WV',
+//                       'WI',
+//                       'WY'
+//                     ]
+//                   },
+//                   'zip_code': {
+//                     'type': 'string'
+//                   }
+//                 }
+//               },
+//               'birthday': {
+//                 'type': 'string'
+//               },
+//               'notes': {
+//                 'type': 'string'
+//               },
+//               'phone_numbers': {
+//                 'type': 'array',
+//                 'items': {
+//                   'type': 'object',
+//                   'properties': {
+//                     'type': {
+//                       'type': 'string',
+//                       'enum': [
+//                         'cell',
+//                         'home',
+//                         'work'
+//                       ]
+//                     },
+//                     'number': {
+//                       'type': 'string'
+//                     }
+//                   },
+//                   'required': [
+//                     'type',
+//                     'number'
+//                   ]
+//                 }
+//               }
+//             },
+//             'required': [
+//               'last_name'
+//             ]
+//           }
+//         },
+//         update: {
+//           parameters: {
+//             'type': 'object',
+//             'properties': {
+//               'first_name': {
+//                 'type': 'string'
+//               },
+//               'last_name': {
+//                 'type': 'string'
+//               },
+//               'address': {
+//                 'type': 'object',
+//                 'properties': {
+//                   'street_1': {
+//                     'type': 'string'
+//                   },
+//                   'street_2': {
+//                     'type': 'string'
+//                   },
+//                   'city': {
+//                     'type': 'string'
+//                   },
+//                   'state': {
+//                     'type': 'string',
+//                     'enum': [
+//                       'AL',
+//                       'AK',
+//                       'AS',
+//                       'AZ',
+//                       'AR',
+//                       'CA',
+//                       'CO',
+//                       'CT',
+//                       'DE',
+//                       'DC',
+//                       'FM',
+//                       'FL',
+//                       'GA',
+//                       'GU',
+//                       'HI',
+//                       'ID',
+//                       'IL',
+//                       'IN',
+//                       'IA',
+//                       'KS',
+//                       'KY',
+//                       'LA',
+//                       'ME',
+//                       'MH',
+//                       'MD',
+//                       'MA',
+//                       'MI',
+//                       'MN',
+//                       'MS',
+//                       'MO',
+//                       'MT',
+//                       'NE',
+//                       'NV',
+//                       'NH',
+//                       'NJ',
+//                       'NM',
+//                       'NY',
+//                       'NC',
+//                       'ND',
+//                       'MP',
+//                       'OH',
+//                       'OK',
+//                       'OR',
+//                       'PW',
+//                       'PA',
+//                       'PR',
+//                       'RI',
+//                       'SC',
+//                       'SD',
+//                       'TN',
+//                       'TX',
+//                       'UT',
+//                       'VT',
+//                       'VI',
+//                       'VA',
+//                       'WA',
+//                       'WV',
+//                       'WI',
+//                       'WY'
+//                     ]
+//                   },
+//                   'zip_code': {
+//                     'type': 'string'
+//                   }
+//                 }
+//               },
+//               'birthday': {
+//                 'type': 'string'
+//               },
+//               'notes': {
+//                 'type': 'string'
+//               },
+//               'phone_numbers': {
+//                 'type': 'array',
+//                 'items': {
+//                   'type': 'object',
+//                   'properties': {
+//                     'type': {
+//                       'type': 'string',
+//                       'enum': [
+//                         'cell',
+//                         'home',
+//                         'work'
+//                       ]
+//                     },
+//                     'number': {
+//                       'type': 'string'
+//                     }
+//                   },
+//                   'required': [
+//                     'type',
+//                     'number'
+//                   ]
+//                 }
+//               }
+//             },
+//             'required': [
+//               'last_name'
+//             ]
+//           }
+//         }
+//       }
+//     }
+//   },
+//   metadata: {
+//     guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+//     url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+//     created_at: '2017-11-27T17:07:02Z',
+//     updated_at: '2017-11-27T17:07:02Z'
+//   }
+// };

@@ -67,17 +67,21 @@ export interface IServicePlan {
   service?: APIResource<IService>;
   guid?: string;
   cfGuid?: string;
-  schemas?: any;
+  schemas?: ServicePlanSchemas;
 }
 
 export interface ServicePlanSchemas {
-   service_instance: ServicePlanSchema;
-   service_binding: ServicePlanSchema;
+  service_instance: ServicePlanSchema;
+  service_binding: ServicePlanSchema;
 }
 
 export interface ServicePlanSchema {
-  create?: object;
-  update?: object;
+  create?: {
+    parameters: object
+  };
+  update?: {
+    parameters: object
+  };
 }
 
 export interface IServicePlanExtra {
