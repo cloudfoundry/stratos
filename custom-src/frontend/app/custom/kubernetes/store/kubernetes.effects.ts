@@ -162,7 +162,6 @@ export class KubernetesEffects {
             } as NormalizedResponse;
 
             const id = action.kubeGuid;
-            console.log(info[id].items);
             const releases = info[id].items
               .filter((configMap) => !!configMap.metadata.labels &&
                 !!configMap.metadata.labels['NAME'] &&
