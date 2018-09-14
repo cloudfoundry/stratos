@@ -23,20 +23,8 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode, an
       action: new GetKubernetesNodes(kubeGuid.guid),
       schema: entityFactory(kubernetesNodesSchemaKey),
       getRowUniqueId: object => object.name,
-      //   getEmptyType: () => ({ name: '', value: '', }),
       paginationKey: getPaginationKey(kubernetesNodesSchemaKey, kubeGuid.guid),
-      transformEntity: map(variables => {
-        if (!variables || variables.length === 0) {
-          return [];
-        }
-        const data = variables[0];
-        // const rows = [...Object.values(variables[0])];
-        // const rows = Object.keys(data).map(name => ({ name, value: data[name] }));
-        const rows = <KubernetesNode[]>Object.values(data);
-        return rows;
-      }),
       isLocal: true,
-      // transformEntities: [{ type: 'filter', field: 'name' }],
       listConfig
     });
   }

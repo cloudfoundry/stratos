@@ -23,8 +23,8 @@ export class HelmReleaseService {
   kubeGuid: string;
   helmReleaseName: string;
   helmRelease$: Observable<KubernetesApp>;
-  deployments: KubernetesDeployment[];
-  statefulSets: KubernetesStatefuleSet[];
+  deployments$: Observable<KubernetesDeployment[]>;
+  statefulSets$: Observable<KubernetesStatefuleSet[]>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -51,77 +51,56 @@ export class HelmReleaseService {
       share()
     );
 
-
-    console.log('Executing contructor!!!!!');
     const statefulSetsAction = new GetKubernetesStatefulSets(this.kubeGuid);
 
-    const statefulSets$ = getPaginationObservables<KubernetesStatefuleSet>({
+    this.statefulSets$ = getPaginationObservables<KubernetesStatefuleSet>({
       store: this.store,
       action: statefulSetsAction,
       paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
+        statefulSetsAction.paginationKey,
         entityFactory(kubernetesStatefulSetsSchemaKey)
       )
     }, true).entities$.pipe(
       filter(p => !!p),
-      tap(statefuleSets => {
-        console.log(statefuleSets);
-      }),
       map(p => p.filter(r => r.metadata.labels['release'] === this.helmReleaseName)),
-      tap(statefuleSets => this.statefulSets = statefuleSets),
       first(),
     );
 
-    statefulSets$.subscribe();
-
     const deploymentsAction = new GeKubernetesDeployments(this.kubeGuid);
 
-    const deployments$ = getPaginationObservables<KubernetesDeployment>({
+    this.deployments$ = getPaginationObservables<KubernetesDeployment>({
       store: this.store,
       action: deploymentsAction,
       paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
+        deploymentsAction.paginationKey,
         entityFactory(kubernetesDeploymentsSchemaKey)
       )
     }, true).entities$.pipe(
-      tap(deployments => {
-        console.log(deployments);
-
-      }),
       filter(p => !!p),
-      tap(deployments => {
-        console.log(deployments);
-
-      }),
       map(p => {
-        console.log(p);
         return p.filter(r => {
           return r.metadata.labels['release'] === this.helmReleaseName;
         });
 
       }),
-      tap(deployments => {
-        this.deployments = deployments;
-        console.log(deployments);
-
-      }),
       first()
     );
+  }
 
-    deployments$.subscribe(() => {
-      console.log('Subscribed!');
-    }
+  public getReleasePods(pods: Observable<KubernetesPod[]>): Observable<KubernetesPod[]> {
+    return combineLatest(this.deployments$, this.statefulSets$, pods).pipe(
+      tap(o => console.log('In Combine!')),
+      map(([deployments, statefulSets, allPods]) => {
+        console.log(allPods);
+        return allPods.filter(p => {
+          const podName = p.metadata.name;
+          const filteredDeployments = deployments.filter(d => podName.startsWith(d.metadata.name));
+          const filteredStatefulSets = statefulSets.filter(d => podName.startsWith(d.metadata.name));
+          console.log('Filtering pod: ' + podName);
+          return filteredDeployments.length !== 0 || filteredStatefulSets.length !== 0;
+        });
+      })
     );
   }
-
-  public isReleasePod(pod: KubernetesPod): boolean {
-
-    // console.log(this.statefulSets);
-    // console.log(this.deployments);
-    return true;
-
-
-  }
-
 
 }

@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store, Action } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import {
   kubernetesAppsSchemaKey,
+  kubernetesDeploymentsSchemaKey,
   kubernetesNamespacesSchemaKey,
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
 } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
@@ -21,9 +21,20 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../store/types/request.types';
-import { KubernetesPod, KubeService, KubernetesDeployment, KubernetesStatefuleSet, KubernetesNode } from './kube.types';
 import {
+  KubernetesConfigMap,
+  KubernetesDeployment,
+  KubernetesNamespace,
+  KubernetesNode,
+  KubernetesPod,
+  KubernetesStatefuleSet,
+  KubeService,
+} from './kube.types';
+import {
+  GeKubernetesDeployments,
+  GET_KUBE_DEPLOYMENT,
   GET_KUBE_POD,
+  GET_KUBE_STATEFULSETS,
   GET_KUBERNETES_APP_INFO,
   GET_NAMESPACES_INFO,
   GET_NODE_INFO,
@@ -36,12 +47,8 @@ import {
   GetKubernetesPods,
   GetKubernetesServices,
   GetKubernetesStatefulSets,
-  GET_KUBE_STATEFULSETS,
-  GeKubernetesDeployments,
-  GET_KUBE_DEPLOYMENT,
   KubeAction,
 } from './kubernetes.actions';
-import { KubernetesNamespace } from '../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 
 export type GetID<T> = (p: T)  => string;
 
@@ -106,7 +113,7 @@ export class KubernetesEffects {
       const getUid: GetID<KubernetesNamespace> = (p) => p.metadata.uid;
       return this.processAction<KubernetesNamespace>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
-        kubernetesStatefulSetsSchemaKey,
+        kubernetesNamespacesSchemaKey,
           getUid);
     })
 
@@ -159,20 +166,23 @@ export class KubernetesEffects {
               .filter((configMap) => !!configMap.metadata.labels &&
                 !!configMap.metadata.labels['NAME'] &&
                 configMap.metadata.labels['OWNER'] === 'TILLER')
-              .map((pod: KubernetesPod) => ({
-                name: pod.metadata.labels['NAME'],
-                namespace: pod.metadata.namespace
+              .map((configMap: KubernetesConfigMap) => ({
+                name: configMap.metadata.labels['NAME'],
+                kubeId: action.kubeGuid,
+                createdAt: configMap.metadata.creationTimestamp,
+                status:  configMap.metadata.labels['STATUS'],
+                version:  configMap.metadata.labels['VERSION']
               })
               );
-            const appReleases = releases.map((relaseObj) => (
-              {
-                name: relaseObj.name,
-                kubeId: action.kubeGuid,
-                namespace: relaseObj.namespace,
-              })
-            );
+            // const appReleases = releases.map((relaseObj) => (
+            //   {
+            //     name: relaseObj.name,
+            //     kubeId: action.kubeGuid,
+            //     namespace: relaseObj.namespace,
+            //   })
+            // );
 
-            appReleases.forEach(r => {
+            releases.forEach(r => {
               const _id = `${r.kubeId}-${r.name}`;
               mappedData.entities[kubernetesAppsSchemaKey][_id] = r;
               if (mappedData.result.indexOf(_id) === -1) {

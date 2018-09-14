@@ -7,10 +7,11 @@ import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { GetKubernetesPods } from '../../store/kubernetes.actions';
 
-import { map } from 'rxjs/operators';
+import { map, switchMap, flatMap } from 'rxjs/operators';
 import { entityFactory, kubernetesPodsSchemaKey } from '../../../../store/helpers/entity-factory';
 import { KubernetesPod } from '../../store/kube.types';
 import { HelmReleaseService } from '../../services/helm-release.service';
+import { Observable } from 'rxjs';
 
 export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod, any> {
 
@@ -26,7 +27,7 @@ export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod, any
       schema: entityFactory(kubernetesPodsSchemaKey),
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesPodsSchemaKey, kubeGuid.guid),
-      transformEntity: map((pods: KubernetesPod[]) => pods.filter(p => helmReleaseService.isReleasePod(p))),
+      transformEntity: (pods: Observable<KubernetesPod[]>) => helmReleaseService.getReleasePods(pods),
       isLocal: true,
       listConfig
     });

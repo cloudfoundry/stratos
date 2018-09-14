@@ -34,6 +34,12 @@ export class HelmReleaseServicesListConfig implements IListConfig<KubeService> {
       cellComponent: KubernetesPodTagsComponent,
       cellFlex: '5',
     },
+    {
+      columnId: 'portType', headerCell: () => 'Port Type',
+      cellDefinition: {
+        getValue: (row) => `${row.spec.type}`
+      },      cellFlex: '5'
+    },
   ];
 
   pageSizeOptions = [9, 45, 90];
