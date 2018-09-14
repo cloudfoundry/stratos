@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-/* tslint:disable:max-line-length */
-import { CfSpaceAppsListConfigService } from '../../../../../../../shared/components/list/list-types/cf-space-apps/cf-space-apps-list-config.service';
-/* tslint:enable:max-line-length */
+import { Component } from '@angular/core';
 
+import {
+  CfSpaceAppsListConfigService,
+} from '../../../../../../../shared/components/list/list-types/cf-space-apps/cf-space-apps-list-config.service';
 import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
+
 @Component({
   selector: 'app-cloud-foundry-space-apps',
   templateUrl: './cloud-foundry-space-apps.component.html',
@@ -15,11 +16,4 @@ import { ListConfig } from '../../../../../../../shared/components/list/list.com
     }
   ]
 })
-export class CloudFoundrySpaceAppsComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class CloudFoundrySpaceAppsComponent { }
