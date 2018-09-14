@@ -1,4 +1,4 @@
-import { browser, by, element, promise } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
 import { ListComponent } from '../../po/list.po';
@@ -6,6 +6,8 @@ import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
 
 export class CfTopLevelPage extends CFPage {
+
+  private readonly until = protractor.ExpectedConditions;
 
   constructor() {
     super('/cloud-foundry');
@@ -94,6 +96,9 @@ export class CfTopLevelPage extends CFPage {
   }
 
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
+    // Some tabs don't appear in the page had fully loaded - so wait until the tab is present
+    const tabElement = this.subHeader.getItem(label);
+    browser.wait(this.until.presenceOf(tabElement), 10000);
     return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
