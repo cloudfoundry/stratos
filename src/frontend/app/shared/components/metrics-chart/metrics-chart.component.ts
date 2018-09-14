@@ -51,8 +51,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   @Input()
   public title: string;
 
-  @ViewChild('overlayInner')
-  overlayInner: ElementRef;
+  @ViewChild('noDatesSelected')
+  public noDatesSelected: ElementRef;
 
   public chartTypes = MetricsChartTypes;
 
@@ -124,7 +124,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
       const startUnix = start.unix();
       const endUnix = end.unix();
       const oldAction = this.metricsConfig.metricsAction;
-      this.metricsConfig.metricsAction = new FetchApplicationMetricsAction(
+      const action = new FetchApplicationMetricsAction(
         oldAction.guid,
         oldAction.cfGuid,
         new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
@@ -140,7 +140,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
           this.startEnd[0],
           this.startEnd[1]
         ];
-        this.commitAction(this.metricsConfig.metricsAction);
+        this.commitAction(action);
       };
     }
   }
@@ -151,7 +151,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
 
   set selectedTimeRange(timeRange: ITimeRange) {
     this.commit = null;
-    this.committedStartEnd = [null, null];
     this.selectedTimeRangeValue = timeRange;
     if (this.selectedTimeRangeValue.type === RangeType.ROLLING_WINDOW) {
       this.commitWindow(this.selectedTimeRangeValue);

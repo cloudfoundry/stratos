@@ -25,7 +25,7 @@ export class MetricsEffect {
     mergeMap(action => {
       const fullUrl = this.buildFullUrl(action);
       const apiAction = {
-        guid: action.guid,
+        guid: action.metricId,
         entityKey: metricSchemaKey
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
@@ -46,7 +46,7 @@ export class MetricsEffect {
               entities: {
                 [metricSchemaKey]: metricObject
               },
-              result: [action.guid]
+              result: [action.metricId]
             },
             apiAction
           );

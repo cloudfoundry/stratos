@@ -33,7 +33,9 @@
     transition: visibility 0s linear $animation-time, background-color $animation-time $animation-function;
     visibility: hidden;
     z-index: 1;
-
+    &-buttons {
+      margin-top: 10px;
+    }
     &-click {
       bottom: 0;
       left: 0;
