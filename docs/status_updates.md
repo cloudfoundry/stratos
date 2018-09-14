@@ -4,7 +4,7 @@ Weekly status updates are published here.
 
 ## 12th September 2018
 
-We've been preparing a 2.1.0 release this week that we will publish next week. Going forward we will be aiming to publish a new release every month. The releaase notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md#210).
+We've been preparing the 2.1.0 release this week. This will be published next week. Going forward we will be publishing a new release every month. The release notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md#210).
 
 Highlioghts for this week:
 
