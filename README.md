@@ -71,9 +71,7 @@ You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - a
 
 Tested with Browserstack
 
-<a href="https://www.browserstack.com">
-<img width="240px" src="docs/images/Browserstack-logo.svg" srcset="docs/images/Browserstack-logo.svg 1x, docs/images/Browserstack-logo@2x.png 2x" alt="Browserstack">
-</a>
+<a href="https://www.browserstack.com"><img width="240px" src="docs/images/Browserstack-logo.svg" alt="Browserstack"></a>
 
 ## License
 
