@@ -14,3 +14,9 @@ applications:
 # Turn on backend debugging
 #       LOG_LEVEL: debug
 
+# User provided services can also be used to set environment properties:
+#   env:
+#     CF_UPS_NAME: stratos-properties
+#   services:
+#   - stratos-properties
+# cf create-user-provided-service stratos-properties -p '{"CF_CLIENT":"stratos","CF_CLIENT_SECRET":"xxxx"}'

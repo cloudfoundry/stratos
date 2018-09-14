@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,13 +27,13 @@ type VCAPService struct {
 }
 
 // Discover cf db services via their 'uri' env var and apply settings to the DatabaseConfig objects
-func ParseCFEnvs(db *DatabaseConfig) (bool, error) {
-	if config.IsSet(SERVICES_ENV) == false {
+func ParseCFEnvs(db *DatabaseConfig, env *env.VarSet) (bool, error) {
+	if !env.IsSet(SERVICES_ENV) {
 		return false, nil
 	}
 
 	// Extract struts from VCAP_SERVICES env
-	vcapServicesStr := config.GetString(SERVICES_ENV)
+	vcapServicesStr := env.MustString(SERVICES_ENV)
 	var vcapServices map[string][]VCAPService
 	err := json.Unmarshal([]byte(vcapServicesStr), &vcapServices)
 	if err != nil {

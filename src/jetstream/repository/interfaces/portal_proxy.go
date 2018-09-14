@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 )
 
@@ -41,6 +42,7 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
+	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 
 	// UAA Token

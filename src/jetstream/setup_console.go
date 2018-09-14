@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -14,7 +13,6 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -152,42 +150,15 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	log.Debug("initialiseConsoleConfig")
 
 	consoleConfig := new(interfaces.ConsoleConfig)
-	uaaEndpoint, err := config.GetValue("UAA_ENDPOINT")
-	if err != nil {
-		return consoleConfig, errors.New("UAA_Endpoint not found")
-	}
 
-	consoleClient, err := config.GetValue("CONSOLE_CLIENT")
-	if err != nil {
-		return consoleConfig, errors.New("CONSOLE_CLIENT not found")
-	}
+	consoleConfig.ConsoleClient = p.Env().MustString("CONSOLE_CLIENT")
+	consoleConfig.ConsoleClientSecret = p.Env().String("CONSOLE_CLIENT_SECRET", "") // Special case, mostly this is blank, so assume its blank (TODO - stop this incorrect assumption)
+	consoleConfig.ConsoleAdminScope = p.Env().MustString("CONSOLE_ADMIN_SCOPE")
+	consoleConfig.SkipSSLValidation = p.Env().MustBool("SKIP_SSL_VALIDATION")
 
-	consoleClientSecret, err := config.GetValue("CONSOLE_CLIENT_SECRET")
-	if err != nil {
-		// Special case, mostly this is blank, so assume its blank
-		consoleClientSecret = ""
-	}
-
-	consoleAdminScope, err := config.GetValue("CONSOLE_ADMIN_SCOPE")
-	if err != nil {
-		return consoleConfig, errors.New("CONSOLE_ADMIN_SCOPE not found")
-	}
-
-	skipSslValidation, err := config.GetValue("SKIP_SSL_VALIDATION")
-	if err != nil {
-		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
-	}
-
-	if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
+	var err error
+	if consoleConfig.UAAEndpoint, err = url.Parse(p.Env().MustString("UAA_ENDPOINT")); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
-	}
-
-	consoleConfig.ConsoleAdminScope = consoleAdminScope
-	consoleConfig.ConsoleClient = consoleClient
-	consoleConfig.ConsoleClientSecret = consoleClientSecret
-	consoleConfig.SkipSSLValidation, err = strconv.ParseBool(skipSslValidation)
-	if err != nil {
-		return consoleConfig, fmt.Errorf("Invalid value for Skip SSL Validation property %v", err)
 	}
 
 	err = p.SaveConsoleConfig(consoleConfig, consoleRepo)
