@@ -124,6 +124,11 @@ export E2E_REPORT_FOLDER=./e2e-reports
 ./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}
 RET=$?
 
+# If we had test failures then copy console log to reports folder
+if [ $RET -ne 0 ]; then
+  cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
+fi 
+
 # Delete the app
 cf delete -f -r console
 
