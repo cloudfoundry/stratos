@@ -2,6 +2,28 @@
 
 Weekly status updates are published here.
 
+## 12th September 2018
+
+We've been preparing a 2.1.0 release this week that we will publish next week. Going forward we will be aiming to publish a new release every month. The releaase notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md#210).
+
+Highlioghts for this week:
+
+- Extensions - Work continues on adding extension points in the UI. We have PRs up to support adding new side-nav items, tabs and actions. This already goes beyond what could be done in V1 of Stratos. The extension mechanism is also much cleaner due to the use of decorators. Extensions is targeted for 2.2.0 in October.
+
+- E2E Tests and Automation - Continuing to build out the E2E test suite and automate the deploy and test of Stratos in different environments (pushed to Cloud Foundry, pushed to Cloud Foundry with MySQL and Postgres, pushed to Cloud Foundry with SSO, Docker compose, Docker All-in-One)
+
+- Metrics - Work is almost complete on improving the metrics integration and presentation in the UI. Rather than display a timeline under each graph, we are switching to a control to allow you to choose the time period.
+
+Other updates:
+
+- Allow auto-registration name to be configured [#2986](https://github.com/cloudfoundry-incubator/stratos/pull/2986)
+- SSO: Refinements [#2982](https://github.com/cloudfoundry-incubator/stratos/pull/2982)
+  - Fix consistency of SSO casing and hyphenation => 'Single Sign-On'
+  - Make SSO default when connecting if enabled for the endpoint
+  - Move the SSO Allowed checkbox to the bottom in 'Advanced Options', so that the form does not move when the checkbox is checked and the advisory text appears
+- Add check to make sure DB Schema migrations have completed (fixes an issue with diagnostics and a possible race-condition when deployed via Helm or Docker Compose) [#2977](https://github.com/cloudfoundry-incubator/stratos/pull/2977)
+
+
 ## 7th September 2018
 
 Update for this week:
