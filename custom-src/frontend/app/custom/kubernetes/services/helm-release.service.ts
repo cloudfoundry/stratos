@@ -1,24 +1,30 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KubernetesEndpointService } from './kubernetes-endpoint.service';
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { KubernetesApp, KubeService } from '../store/kube.types';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
+import { filter, map, share, tap, first } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+
+import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { entityFactory, kubernetesAppsSchemaKey, kubernetesServicesSchemaKey } from '../../../store/helpers/entity-factory';
-import { filter, map, share, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { KubernetesService } from './kubernetes.service';
+import { AppState } from '../../../store/app-state';
+import {
+  entityFactory,
+  kubernetesAppsSchemaKey,
+  kubernetesDeploymentsSchemaKey,
+  kubernetesStatefulSetsSchemaKey,
+} from '../../../store/helpers/entity-factory';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { KubernetesApp, KubernetesDeployment, KubernetesStatefuleSet, KubernetesPod } from '../store/kube.types';
+import { GeKubernetesDeployments, GetKubernetesApps, GetKubernetesStatefulSets } from '../store/kubernetes.actions';
+import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
 @Injectable()
 export class HelmReleaseService {
   kubeGuid: string;
   helmReleaseName: string;
   helmRelease$: Observable<KubernetesApp>;
-  // helmReleaseServices$: Observable<KubeService[]>;
+  deployments: KubernetesDeployment[];
+  statefulSets: KubernetesStatefuleSet[];
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -44,23 +50,78 @@ export class HelmReleaseService {
       map(p => p.filter(r => r.name === this.helmReleaseName)[0]),
       share()
     );
-    // const servicesAction = new GetKubernetesServices(this.kubeGuid);
 
-    // this.helmReleaseServices$ = getPaginationObservables<KubeService>({
-    //   store: this.store,
-    //   action: servicesAction,
-    //   paginationMonitor: this.paginationMonitorFactory.create(
-    //     servicesAction.paginationKey,
-    //     entityFactory(kubernetesServicesSchemaKey)
-    //   )
-    // }, true).entities$.pipe(
-    //   filter(p => !!p),
-    //   map(svcs => {
-    //     svcs.filter(s => s.metadata.labels &&
-    //       s.metadata.labels['release'] &&
-    //       s.metadata.labels['release'] === this.helmReleaseName);
-    //   })
 
-    // )
+    console.log('Executing contructor!!!!!');
+    const statefulSetsAction = new GetKubernetesStatefulSets(this.kubeGuid);
+
+    const statefulSets$ = getPaginationObservables<KubernetesStatefuleSet>({
+      store: this.store,
+      action: statefulSetsAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        entityFactory(kubernetesStatefulSetsSchemaKey)
+      )
+    }, true).entities$.pipe(
+      filter(p => !!p),
+      tap(statefuleSets => {
+        console.log(statefuleSets);
+      }),
+      map(p => p.filter(r => r.metadata.labels['release'] === this.helmReleaseName)),
+      tap(statefuleSets => this.statefulSets = statefuleSets),
+      first(),
+    );
+
+    statefulSets$.subscribe();
+
+    const deploymentsAction = new GeKubernetesDeployments(this.kubeGuid);
+
+    const deployments$ = getPaginationObservables<KubernetesDeployment>({
+      store: this.store,
+      action: deploymentsAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        entityFactory(kubernetesDeploymentsSchemaKey)
+      )
+    }, true).entities$.pipe(
+      tap(deployments => {
+        console.log(deployments);
+
+      }),
+      filter(p => !!p),
+      tap(deployments => {
+        console.log(deployments);
+
+      }),
+      map(p => {
+        console.log(p);
+        return p.filter(r => {
+          return r.metadata.labels['release'] === this.helmReleaseName;
+        });
+
+      }),
+      tap(deployments => {
+        this.deployments = deployments;
+        console.log(deployments);
+
+      }),
+      first()
+    );
+
+    deployments$.subscribe(() => {
+      console.log('Subscribed!');
+    }
+    );
   }
+
+  public isReleasePod(pod: KubernetesPod): boolean {
+
+    // console.log(this.statefulSets);
+    // console.log(this.deployments);
+    return true;
+
+
+  }
+
+
 }

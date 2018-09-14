@@ -6,6 +6,8 @@ import {
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
+  kubernetesStatefulSetsSchemaKey,
+  kubernetesDeploymentsSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
@@ -36,9 +38,13 @@ export const GET_KUBE_POD = '[KUBERNETES Endpoint] Get K8S Pod Info';
 export const GET_KUBE_POD_SUCCESS = '[KUBERNETES Endpoint] Get K8S Pod  Success';
 export const GET_KUBE_POD_FAILURE = '[KUBERNETES Endpoint] Get K8S Pod  Failure';
 
-export const GET_KUBE_STATEFULSETS_POD = '[KUBERNETES Endpoint] Get K8S Stateful Sets Info';
-export const GET_KUBE_STATEFULSETS_POD_SUCCESS = '[KUBERNETES Endpoint] Get Stateful Sets Success';
-export const GGET_KUBE_STATEFULSETS_POD_FAILURE = '[KUBERNETES Endpoint] Get Stateful Sets Failure';
+export const GET_KUBE_STATEFULSETS = '[KUBERNETES Endpoint] Get K8S Stateful Sets Info';
+export const GET_KUBE_STATEFULSETS_SUCCESS = '[KUBERNETES Endpoint] Get Stateful Sets Success';
+export const GET_KUBE_STATEFULSETS_FAILURE = '[KUBERNETES Endpoint] Get Stateful Sets Failure';
+
+export const GET_KUBE_DEPLOYMENT = '[KUBERNETES Endpoint] Get K8S Deployments Info';
+export const GET_KUBE_DEPLOYMENT_SUCCESS = '[KUBERNETES Endpoint] Get Deployments Success';
+export const GET_KUBE_DEPLOYMENT_FAILURE = '[KUBERNETES Endpoint] Get Deployments Failure';
 
 export class GetKubernetesNodes implements PaginatedAction {
   constructor(public kubeGuid) {
@@ -123,17 +129,35 @@ export class GetKubernetesPod implements Action {
     GET_KUBE_POD_FAILURE
   ];
 }
-export class GetKubernetesStatefulSets implements Action {
+export class GetKubernetesStatefulSets implements PaginatedAction {
   constructor(public kubeGuid) {
+    this.paginationKey = getPaginationKey(kubernetesStatefulSetsSchemaKey, kubeGuid);
   }
-  type = GET_KUBE_STATEFULSETS_POD;
-  entityKey = kubernetesPodsSchemaKey;
-  entity = [entityFactory(kubernetesPodsSchemaKey)];
+  type = GET_KUBE_STATEFULSETS;
+  entityKey = kubernetesStatefulSetsSchemaKey;
+  entity = [entityFactory(kubernetesStatefulSetsSchemaKey)];
   actions = [
-    GET_KUBE_STATEFULSETS_POD,
-    GET_KUBE_STATEFULSETS_POD_SUCCESS,
-    GGET_KUBE_STATEFULSETS_POD_FAILURE
+    GET_KUBE_STATEFULSETS,
+    GET_KUBE_STATEFULSETS_SUCCESS,
+    GET_KUBE_STATEFULSETS_FAILURE
   ];
+  paginationKey: string;
+
+}
+export class GeKubernetesDeployments implements PaginatedAction {
+  constructor(public kubeGuid) {
+    this.paginationKey = getPaginationKey(kubernetesDeploymentsSchemaKey, kubeGuid);
+  }
+  type = GET_KUBE_DEPLOYMENT;
+  entityKey = kubernetesDeploymentsSchemaKey;
+  entity = [entityFactory(kubernetesDeploymentsSchemaKey)];
+  actions = [
+    GET_KUBE_DEPLOYMENT,
+    GET_KUBE_DEPLOYMENT_SUCCESS,
+    GET_KUBE_DEPLOYMENT_FAILURE
+  ];
+  paginationKey: string;
+
 }
 
 export class FetchKubernetesMetricsAction extends MetricsAction {

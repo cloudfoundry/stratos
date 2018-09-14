@@ -26,8 +26,7 @@ export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod, any
       schema: entityFactory(kubernetesPodsSchemaKey),
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesPodsSchemaKey, kubeGuid.guid),
-      transformEntity: map((pods: KubernetesPod[]) =>
-        pods.filter(p => p.metadata.labels['release'] === helmReleaseService.helmReleaseName)),
+      transformEntity: map((pods: KubernetesPod[]) => pods.filter(p => helmReleaseService.isReleasePod(p))),
       isLocal: true,
       listConfig
     });

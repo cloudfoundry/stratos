@@ -17,6 +17,26 @@ export interface KubeAPIResource {
 export interface KubeService {
   metadata: ServiceMetadata;
   status: ServiceStatus;
+  spec: DeploymentSpec;
+}
+export interface KubernetesStatefuleSet {
+  metadata: ServiceMetadata;
+  status: ServiceStatus;
+  spec: ServiceSpec;
+}
+
+export interface DeploymentSpec {
+  replicas: number;
+  selector?: any;
+  template?: any;
+  strategy?: any;
+  revisionHistoryLimit: number;
+  progressDeadlineSeconds: number;
+}
+
+export interface KubernetesDeployment {
+  metadata: ServiceMetadata;
+  status: ServiceStatus;
   spec: ServiceSpec;
 }
 
