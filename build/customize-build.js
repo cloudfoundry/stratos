@@ -200,9 +200,9 @@
 
     // Read in the stored Git metadata if it is there, default to empty metadata
     var gitMetadata = {
-      project: process.env.STRATOS_GIT_PROJECT || '',
-      branch: process.env.STRATOS_GIT_BRANCH ||'',
-      commit: process.env.STRATOS_GIT_COMMIT ||''
+      project: process.env.project || '',
+      branch: process.env.branch || '',
+      commit: process.env.commit || ''
     };
 
     if (fs.existsSync(GIT_METADATA)) {
