@@ -48,7 +48,6 @@
     cb();
   });
 
-
   function doCustomize(forceDefaults, reset) {
     var msg = !forceDefaults ? 'Checking for and applying customizations' : 'Removing customizations and applying defaults';
     var msg = !reset ? msg : 'Removing all customizations';
@@ -201,9 +200,9 @@
 
     // Read in the stored Git metadata if it is there, default to empty metadata
     var gitMetadata = {
-      project: '',
-      branch: '',
-      commit: ''
+      project: process.env.project || '',
+      branch: process.env.branch || '',
+      commit: process.env.commit || ''
     };
 
     if (fs.existsSync(GIT_METADATA)) {

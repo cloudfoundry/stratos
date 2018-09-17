@@ -7,7 +7,6 @@
 DEV=${STRATOS_BACKEND_DEV:-false}
 ACTION=${1:-build}
 NO_DEP=${STRATOS_USE_VENDOR_AS_IS:-false}
-VERSION=${stratos_version:-dev}
 
 set -euo pipefail
 
@@ -60,22 +59,16 @@ else
   echo "Using vendor folder as is"
 fi
 
-# Determine the build version from the package file if not already set
-if [ "${VERSION}" == "dev" ]; then
-  PACKAGE_VERSION=$(cat package.json | grep "version")
-  REGEX="\"version\": \"([0-9\.]*)\""
-  if [[ $PACKAGE_VERSION =~ $REGEX ]]; then
-    VERSION=${BASH_REMATCH[1]}
-  fi
-fi
-
 # Build backend or run tests
 pushd ${STRATOS_GOBASE}/src/jetstream > /dev/null
 
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
-  echo "Building version: ${VERSION}"
-  go build -ldflags -X=main.appVersion=${VERSION}
+  go build
+  # Legacy - we will remove the need for this shortly
+  # if [ "$DEV" == "true" ]; then
+  #  echo "Copying files to simplify running backend in dev ..."
+  # fi
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
