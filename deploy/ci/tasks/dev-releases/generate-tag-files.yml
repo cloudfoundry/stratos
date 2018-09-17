@@ -28,7 +28,7 @@ run:
       fi
 
       ./build/store-git-metadata.sh
-      cp .stratos-git-metadata.json ../image-tag/ui-build-args
+      cat .stratos-git-metadata.json | tr -d '\n' > ../image-tag/ui-build-args
 
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
