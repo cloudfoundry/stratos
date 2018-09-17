@@ -155,7 +155,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     if (this.selectedTimeRangeValue.type === RangeType.ROLLING_WINDOW) {
       this.commitWindow(this.selectedTimeRangeValue);
     } else if (this.selectedTimeRangeValue.type === RangeType.START_END) {
-      this.showOverlay = true;
+      if (!this.startEnd[0] || !this.startEnd[1]) {
+        this.showOverlay = true;
+      }
     }
   }
 
@@ -233,6 +235,10 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
               if (isDifferent) {
                 this.start = start;
                 this.end = end;
+                this.committedStartEnd = [
+                  start,
+                  end
+                ];
               }
               this.selectedTimeRange = this.times.find(time => time.type === RangeType.START_END);
             } else {
@@ -257,6 +263,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
       metricSchemaKey,
