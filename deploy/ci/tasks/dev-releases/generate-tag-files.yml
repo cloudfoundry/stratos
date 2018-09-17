@@ -18,7 +18,8 @@ run:
     - |
       cd stratos
 
-      LATEST_TAG=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")-$(git log -1 --format="%h")
+      VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
+      LATEST_TAG=$VERSION-$(git log -1 --format="%h")
 
       if [ ! -z ${TAG_SUFFIX} ]; then
         if [ "${TAG_SUFFIX}" != "null" ]; then
@@ -27,15 +28,14 @@ run:
       fi
 
       ./build/store-git-metadata.sh
+      cp .stratos-git-metadata.json ../image-tag/ui-build-args
 
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
+      echo "$VERSION" > v2-version
       FILENAME="release-${LATEST_TAG}"
       cat > build-args << EOF
       { "stratos_version": "${LATEST_TAG}" }
       EOF
 
-      cp stratos/.stratos-git-metadata.json ./ui-build-args
-
-      
-      tar -cf ${FILENAME}.tar v2-alpha-tag build-args ui-build-args
+      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args
