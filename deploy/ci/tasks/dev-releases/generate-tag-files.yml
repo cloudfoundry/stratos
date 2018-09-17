@@ -28,7 +28,7 @@ run:
       fi
 
       ./build/store-git-metadata.sh
-      cp .stratos-git-metadata.json ../image-tag/ui-build-args
+      cat .stratos-git-metadata.json | tr -d '\n' > ../image-tag/ui-build-args
 
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
@@ -37,5 +37,8 @@ run:
       cat > build-args << EOF
       { "stratos_version": "${LATEST_TAG}" }
       EOF
+
+      cat build-args
+      cat ui-build-args
 
       tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args
