@@ -458,11 +458,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         })
       ).subscribe();
     } else {
-      this.schemaFormConfig = {
-        schema,
-        // TODO: RC Remove
-        initialData: testServiceBindingData
-      };
+      if (!this.schemaFormConfig) {
+        this.schemaFormConfig = {
+          schema,
+          // TODO: RC Remove
+          initialData: testServiceBindingData
+        };
+      }
     }
     this.subscriptions.push(this.setupFormValidatorData());
   }

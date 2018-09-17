@@ -52,6 +52,9 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     this.mode = this.cleanSchema ? 'schema' : 'JSON';
     if (this.mode === 'JSON') {
       this.setJsonFormData(config.initialData);
+      if (!config.initialData) {
+        this._validChange.next(true);
+      }
     } else if (this.mode === 'schema') {
       // this.formData = config.initialData;
       this.formInitialData = config.initialData;
@@ -91,7 +94,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     this.subs.push(this.jsonForm.controls['json'].valueChanges.subscribe(jsonStr => {
       this.jsonData = safeStringToObj(jsonStr);
       this._dataChange.next(this.jsonData);
-      this._validChange.next(this.jsonForm.controls['json'].valid);
+      this._validChange.next(!this.jsonForm.controls['json'].value || this.jsonForm.controls['json'].valid);
     }));
 
     this.subs.push(this._dataChange.asObservable().pipe(delay(0)).subscribe(data => this.dataChange.emit(data)));

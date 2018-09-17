@@ -32,7 +32,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   boundAppId: string;
 
   validateSubscription: Subscription;
-  validate = new BehaviorSubject<boolean>(false);
+  validate = new BehaviorSubject<boolean>(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
   apps$: Observable<APIResource<IApp>[]>;
@@ -79,6 +79,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     // TODO: RC Remove
     selectedServicePlan = testSelectedServicePlan;
 
+    if (selectedServicePlan) {
+      // Don't overwrite if it's null (we've returned to this step from the next)
+      this.selectedServicePlan = selectedServicePlan;
+    }
+
+    // Start
     this.validateSubscription = this.stepperForm.controls['apps'].valueChanges.subscribe(app => {
       if (!app) {
         // If there's no app selected the step will always be valid
@@ -86,12 +92,14 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       }
     });
 
-    this.selectedServicePlan = selectedServicePlan;
-    this.schemaFormConfig = {
-      schema: pathGet('entity.schemas.service_binding.create.parameters', selectedServicePlan),
-      // TODO: RC Remove
-      initialData: testServiceBindingData
-    };
+    if (!this.schemaFormConfig) {
+      this.schemaFormConfig = {
+        schema: pathGet('entity.schemas.service_binding.create.parameters', selectedServicePlan),
+        // TODO: RC Remove
+        initialData: testServiceBindingData
+      };
+    }
+
   }
 
   setBindingParams(data) {
