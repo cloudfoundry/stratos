@@ -300,6 +300,7 @@ export const testSelectedServicePlan = {
     updated_at: '2017-11-27T17:07:02Z'
   }
 };
+export const testServiceBindingData = { 'first_name': 'first_name1', 'last_name': 'last_name1' };
 
 
 const enum FormMode {
@@ -427,13 +428,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+    // TODO: RC Remove
+    selectedServicePlan = testSelectedServicePlan;
 
-    this.schemaFormConfig = {
-      schema: testSelectedServicePlan || this.modeService.isEditServiceInstanceMode() ?
-        pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
-        pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas),
-      initialData: { 'first_name': 'first_name1', 'last_name': 'last_name1' }
-    };
+    const schema = this.modeService.isEditServiceInstanceMode() ?
+      pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
+      pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas);
 
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
@@ -443,7 +443,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.serviceParams = safeStringToObj(state.parameters);
+          this.schemaFormConfig = {
+            schema,
+            initialData: safeStringToObj(state.parameters)
+          };
+
+          this.serviceParams = testServiceBindingData;
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
@@ -452,6 +457,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           }
         })
       ).subscribe();
+    } else {
+      this.schemaFormConfig = {
+        schema,
+        // TODO: RC Remove
+        initialData: testServiceBindingData
+      };
     }
     this.subscriptions.push(this.setupFormValidatorData());
   }

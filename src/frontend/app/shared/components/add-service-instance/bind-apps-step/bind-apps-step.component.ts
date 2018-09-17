@@ -19,7 +19,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { testSelectedServicePlan } from '../specify-details-step/specify-details-step.component';
+import { testSelectedServicePlan, testServiceBindingData } from '../specify-details-step/specify-details-step.component';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -90,12 +90,16 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.schemaFormConfig = {
       schema: pathGet('entity.schemas.service_binding.create.parameters', selectedServicePlan),
       // TODO: RC Remove
-      initialData: { 'first_name': 'first_name1', 'last_name': 'last_name1' }
+      initialData: testServiceBindingData
     };
   }
 
   setBindingParams(data) {
     this.bindingParams = data;
+  }
+
+  setParamValid(valid: boolean) {
+    this.validate.next(valid);
   }
 
   submit = (): Observable<StepOnNextResult> => {
@@ -109,12 +113,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   setApp = () => this.store.dispatch(
     new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams)
   )
-
-  setParamValid(valid: boolean) {
-    console.log('setParamValid ', valid);
-    // TODO: RC
-    this.validate.next(valid);
-  }
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.validateSubscription);
