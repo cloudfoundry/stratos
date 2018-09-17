@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
@@ -44,6 +43,7 @@ interface ITimeRange {
   styleUrls: ['./metrics-chart.component.scss']
 })
 export class MetricsChartComponent implements OnInit, OnDestroy {
+  private committedAction: MetricsAction;
   @Input()
   public metricsConfig: MetricsConfig;
   @Input()
@@ -130,7 +130,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
         new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
           start: startUnix,
           end: endUnix,
-          step: Math.max((endUnix - startUnix) / 300, 0)
+          step: Math.max((endUnix - startUnix) / 200, 0)
         }),
         MetricQueryType.RANGE_QUERY
       );
@@ -163,15 +163,17 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     if (!window) {
       return;
     }
+    this.committedStartEnd = [null, null];
+    this.startEnd = [null, null];
     const oldAction = this.metricsConfig.metricsAction;
-    this.metricsConfig.metricsAction = new FetchApplicationMetricsAction(
+    const action = new FetchApplicationMetricsAction(
       oldAction.guid,
       oldAction.cfGuid,
       new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
         window: window.value
       })
     );
-    this.commitAction(this.metricsConfig.metricsAction);
+    this.commitAction(action);
   }
 
   set start(start: moment.Moment) {
@@ -202,15 +204,15 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
       ];
       newMetricsArray.sort(this.metricsConfig.sort);
       if (
-        this.metricsConfig.metricsAction.query.params &&
-        this.metricsConfig.metricsAction.query.params.start &&
-        this.metricsConfig.metricsAction.query.params.end
+        this.committedAction.query.params &&
+        this.committedAction.query.params.start &&
+        this.committedAction.query.params.end
       ) {
         return MetricsChartManager.fillOutTimeOrderedChartSeries(
           newMetricsArray,
-          this.metricsConfig.metricsAction.query.params.start as number,
-          this.metricsConfig.metricsAction.query.params.end as number,
-          this.metricsConfig.metricsAction.query.params.step as number,
+          this.committedAction.query.params.start as number,
+          this.committedAction.query.params.end as number,
+          this.committedAction.query.params.step as number,
           this.metricsConfig,
         );
       }
@@ -317,6 +319,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   }
 
   private commitAction(action: MetricsAction) {
+    this.committedAction = action;
     this.setup(action);
     this.store.dispatch(action);
     this.commit = null;

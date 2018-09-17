@@ -1,7 +1,10 @@
+import { ChartSeries, IMetricsData } from '../../../store/types/base-metric.types';
 import { MetricsConfig } from './metrics-chart.component';
-import { IMetrics, ChartSeries, IMetricsData } from '../../../store/types/base-metric.types';
-import { MetricsChartHelpers } from './metrics.component.helpers';
 
+function dateLessThanUnix(date: Date, unix: number) {
+  const unixDate = date.getTime() / 1000;
+  return unixDate < unix;
+}
 export class MetricsChartManager {
   static mapMatrix<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
     return metrics.result.map<ChartSeries<T>>(
@@ -25,37 +28,38 @@ export class MetricsChartManager {
       })
     );
   }
-  static fillOutTimeOrderedChartSeries(timeOrdered: ChartSeries[], start: number, end: number, step: number, metricConfig: MetricsConfig) {
+  static fillOutTimeOrderedChartSeries(
+    timeOrdered: ChartSeries[],
+    start: number,
+    end: number,
+    step: number,
+    metricConfig: MetricsConfig
+  ): ChartSeries[] {
     if (!timeOrdered || !timeOrdered.length) {
       return timeOrdered;
     }
     return timeOrdered.reduce((allSeries, series) => {
       let pos = 0;
-      const data = series.series;
+      const newSeries = [];
       for (let t = start; t <= end; t += step) {
-        const current = data[pos];
-        const name = metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '';
-        if (!current) {
-          data.push({
+        const current = series.series[pos];
+        if (series.series.length > pos && dateLessThanUnix(series.series[pos].name as Date, t + step)) {
+          newSeries.push({
+            name: current.name,
+            value: current.value
+          });
+          pos++;
+        } else {
+          newSeries.push({
             name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
             value: 0
           });
-        } else {
-          if (current.name < name) {
-            data.splice(pos, 0, {
-              name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
-              value: 0
-            });
-          } else {
-            data.splice(pos + 1, 0, {
-              name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
-              value: 0
-            });
-            pos += 2;
-          }
         }
       }
-      allSeries.push(series);
+      allSeries.push({
+        name: series.name,
+        series: newSeries
+      });
       return allSeries;
     }, []);
   }
