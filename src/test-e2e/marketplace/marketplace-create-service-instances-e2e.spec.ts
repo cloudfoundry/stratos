@@ -44,8 +44,6 @@ describe('Marketplace', () => {
       createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
     });
     afterAll((done) => {
-      // Sleeping because the service instance may not be listed in the `get services` request
-      browser.sleep(1000);
       servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
     });
   });
@@ -75,8 +73,6 @@ describe('Marketplace', () => {
       createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
     });
     afterAll((done) => {
-      // Sleeping because the service instance may not be listed in the `get services` request
-      browser.sleep(1000);
       servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
     });
   });
@@ -106,8 +102,6 @@ describe('Marketplace', () => {
       createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
     });
     afterAll((done) => {
-      // Sleeping because the service instance may not be listed in the `get services` request
-      browser.sleep(1000);
       servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
     });
   });

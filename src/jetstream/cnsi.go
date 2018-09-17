@@ -48,6 +48,12 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
+	ssoAllowed, err := strconv.ParseBool(c.FormValue("sso_allowed"))
+	if err != nil {
+		// default to false
+		ssoAllowed = false
+	}
+
 	cnsiClientId := c.FormValue("cnsi_client_id")
 	cnsiClientSecret := c.FormValue("cnsi_client_secret")
 
@@ -56,7 +62,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -65,7 +71,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -121,6 +127,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.SkipSSLValidation = skipSSLValidation
 	newCNSI.ClientId = clientId
 	newCNSI.ClientSecret = clientSecret
+	newCNSI.SSOAllowed = ssoAllowed
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
@@ -350,7 +357,7 @@ func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (inte
 }
 
 func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {
-	log.Debug("GetCNSITokenRecord")
+	log.Debug("GetCNSITokenRecordWithDisconnected")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return interfaces.TokenRecord{}, false
@@ -378,6 +385,25 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 	}
 
 	return cnsiList, nil
+}
+
+// Uopdate the Access Token, Refresh Token and Token Expiry for a token
+func (p *portalProxy) updateTokenAuth(userGUID string, t interfaces.TokenRecord) error {
+	log.Debug("updateTokenAuth")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	err = tokenRepo.UpdateTokenAuth(userGUID, t, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		msg := "Unable to update Token: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
 }
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t interfaces.TokenRecord) error {

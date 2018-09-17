@@ -60,11 +60,19 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number): promise.Promise<any> {
+  selectRow(index: number, radioButton = true): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
-      return rows[index].element(by.css('.mat-radio-button')).click();
+      return rows[index].element(by.css(radioButton ? '.mat-radio-button' : '.mat-checkbox')).click();
     });
+  }
+
+  waitUntilNotBusy() {
+    return Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+    ).then(() => Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row-wrapper__blocked'))
+    ));
   }
 
   getHighlightedRow(): promise.Promise<number> {
@@ -218,6 +226,10 @@ export class ListHeaderComponent extends Component {
 
   getAdd(): ElementFinder {
     return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
+  }
+
+  getIconButton(iconText: string): ElementFinder {
+    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
 }
