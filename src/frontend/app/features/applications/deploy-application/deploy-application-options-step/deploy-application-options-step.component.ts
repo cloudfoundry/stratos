@@ -12,7 +12,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { SaveAppOverrides } from '../../../../store/actions/deploy-applications.actions';
 import { FetchAllDomains } from '../../../../store/actions/domains.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory } from '../../../../store/helpers/entity-factory';
+import { entityFactory, stackSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCfDetails } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource } from '../../../../store/types/api.types';
@@ -20,6 +20,7 @@ import { OverrideAppDetails } from '../../../../store/types/deploy-application.t
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { GetAllStacks } from '../../../../store/actions/stack.action';
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -33,6 +34,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
   valid$: Observable<boolean>;
   domains$: Observable<APIResource<IDomain>[]>;
+  stacks$: Observable<APIResource<IDomain>[]>;
   deployOptionsForm: FormGroup;
   subs: Subscription[] = [];
   appGuid: string;
@@ -61,7 +63,13 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       buildpack: null,
       no_route: false,
       random_route: false,
-      no_start: false
+      no_start: false,
+      startCmd: null,
+      healthCheckType: null,
+      stack: null,
+      time: [null, [
+        Validators.min(0)
+      ]],
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -97,6 +105,29 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       map(domains => domains.filter(domain => domain.entity.router_group_type !== 'tcp')),
       share()
     );
+
+    this.stacks$ = cfDetails$.pipe(
+      switchMap(cfDetails => {
+        const action = new GetAllStacks(cfDetails.cloudFoundry);
+        return getPaginationObservables<APIResource<IDomain>>(
+          {
+            store: this.store,
+            action,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              action.paginationKey,
+              entityFactory(action.entityKey)
+            )
+          },
+          true
+        ).entities$;
+      }),
+      share()
+    );
+    this.subs.push(this.stacks$.pipe(first()).subscribe(stacks => {
+      if (stacks && stacks.length > 0) {
+        this.deployOptionsForm.controls.stack.setValue(stacks[0].entity.name);
+      }
+    }));
 
     // Ensure that when the no route + random route options are checked the host, domain and path fields are enabled/disabled
     this.subs.push(noRouteChanged$.subscribe(value => {
@@ -162,7 +193,11 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       randomRoute: controls.random_route.value,
       host: controls.host.value,
       domain: controls.domain.value,
-      path: controls.path.value
+      path: controls.path.value,
+      startCmd: controls.startCmd.value,
+      healthCheckType: controls.healthCheckType.value,
+      stack: controls.stack.value,
+      time: controls.time.value
     };
   }
 
@@ -181,6 +216,10 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.random_route.disable();
     // Don't repopulate route fields with previous route setting. Editing might suggest existing route is changed instead of new route
     // created
+    controls.startCmd.setValue(overrides.startCmd);
+    controls.healthCheckType.setValue(overrides.healthCheckType);
+    controls.stack.setValue(overrides.stack);
+    controls.time.setValue(overrides.time);
   }
 
   onNext: StepOnNextFunction = () => {

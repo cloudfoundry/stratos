@@ -11,14 +11,13 @@ import { IListConfig } from '../../list.component.types';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationKey(endpointSchemaKey, cfGuid);
-    const action = new GetAllStacks(cfGuid, paginationKey);
+    const action = new GetAllStacks(cfGuid);
     super({
       store,
       action,
       schema: entityFactory(stackSchemaKey),
       getRowUniqueId: getRowMetadata,
-      paginationKey,
+      paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [{ type: 'filter', field: 'entity.name' }],
       listConfig

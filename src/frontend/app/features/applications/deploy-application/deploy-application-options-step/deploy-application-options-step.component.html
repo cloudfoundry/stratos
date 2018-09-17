@@ -8,16 +8,38 @@
         <input matInput placeholder="Application Name" formControlName="name">
       </mat-form-field>
       <mat-form-field>
+        <mat-select placeholder="Stack" formControlName="stack">
+          <mat-option *ngFor="let stack of stacks$ | async" [value]="stack.entity.name">
+            {{ stack.entity.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
         <input matInput placeholder="Custom buildpack" formControlName="buildpack">
+        <mat-hint>Custom buildpack by name or Git URL</mat-hint>
       </mat-form-field>
       <mat-form-field>
         <input matInput placeholder="Number of Instances" formControlName="instances" type="number">
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number">
+        <input matInput placeholder="Disk Quota" formControlName="disk_quota" type="number">
+        <span matSuffix>(MBs)</span>
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number">
+        <input matInput placeholder="Memory Quota" formControlName="memory" type="number">
+        <span matSuffix>(MBs)</span>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Start Command" formControlName="startCmd">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Health Check Type" formControlName="healthCheckType">
+        <mat-hint>Default: 'port', 'none' accepted for 'process', 'http' implies endpoint '/'</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Time" formControlName="time" type="number">
+        <mat-hint>Seconds between application start and first healthy response</mat-hint>
+        <span matSuffix>(Seconds)</span>
       </mat-form-field>
     </div>
     <div class="deploy-options__form-sections__form-section">
