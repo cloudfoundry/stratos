@@ -38,4 +38,7 @@ run:
       { "stratos_version": "${LATEST_TAG}" }
       EOF
 
+      cat build-args
+      cat ui-build-args
+
       tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args
