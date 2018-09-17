@@ -89,11 +89,16 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*interfaces.CNSIR
 			return nil, fmt.Errorf("Unable to parse API Endpoint: %v", err)
 		}
 
-		plaintextClientSecret, err := crypto.DecryptToken(encryptionKey, cipherTextClientSecret)
-		if err != nil {
-			return nil, err
+		if len(cipherTextClientSecret) > 0 {
+			plaintextClientSecret, err := crypto.DecryptToken(encryptionKey, cipherTextClientSecret)
+			if err != nil {
+				return nil, err
+			}
+			cnsi.ClientSecret = plaintextClientSecret
+		} else {
+			// Empty secret means there was none, so set the plain text to an empty string
+			cnsi.ClientSecret = ""
 		}
-		cnsi.ClientSecret = plaintextClientSecret
 
 		cnsiList = append(cnsiList, cnsi)
 	}
@@ -184,19 +189,22 @@ func (p *PostgresCNSIRepository) findBy(query, match string, encryptionKey []byt
 		// do nothing
 	}
 
-	// TODO(wchrisjohnson): discover a way to do this automagically
-	// These two fields need to be converted manually
 	cnsi.CNSIType = pCNSIType
 
 	if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
 		return interfaces.CNSIRecord{}, fmt.Errorf("Unable to parse API Endpoint: %v", err)
 	}
 
-	plaintextClientSecret, err := crypto.DecryptToken(encryptionKey, cipherTextClientSecret)
-	if err != nil {
-		return interfaces.CNSIRecord{}, err
+	if len(cipherTextClientSecret) > 0 {
+		plaintextClientSecret, err := crypto.DecryptToken(encryptionKey, cipherTextClientSecret)
+		if err != nil {
+			return interfaces.CNSIRecord{}, err
+		}
+		cnsi.ClientSecret = plaintextClientSecret
+	} else {
+		// Empty secret means there was none, so set the plain text to an empty string
+		cnsi.ClientSecret = ""
 	}
-	cnsi.ClientSecret = plaintextClientSecret
 
 	return *cnsi, nil
 }
