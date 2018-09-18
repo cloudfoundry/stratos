@@ -1,4 +1,4 @@
-import { MetricQueryConfig, MetricQueryType } from "../actions/metrics.actions";
+import { MetricQueryConfig, MetricQueryType } from '../actions/metrics.actions';
 
 export enum MetricResultTypes {
   MATRIX = 'matrix',
