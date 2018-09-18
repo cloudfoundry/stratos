@@ -330,7 +330,9 @@ import { MomentModule } from 'ngx-moment';
     BindAppsStepComponent,
     CapitalizeFirstPipe,
     CfEndpointsMissingComponent,
-    RoutingIndicatorComponent
+    RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

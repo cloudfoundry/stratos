@@ -1,6 +1,8 @@
+import { SharedModule } from './../../shared.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { StartEndDateComponent } from './start-end-date.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('StartEndDateComponent', () => {
   let component: StartEndDateComponent;
@@ -8,9 +10,12 @@ describe('StartEndDateComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ StartEndDateComponent ]
+      imports: [
+        SharedModule,
+        NoopAnimationsModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
