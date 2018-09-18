@@ -9,7 +9,7 @@ Release highlights:
 - Stratos frontend can be pre-built before pushing to Cloud Foundry to enable AOT and reduce push time
 - SSO support refinements with the ability to now connect a Cloud Foundry endpoint using SSO in addition to SSO login to Straos itself
 - Ability to specify manifest overrides when deploying an application
-- Ability to optionally specify Client ID anc Client Secret when registering an endpoint
+- Ability to optionally specify Client ID and Client Secret when registering an endpoint
 - Add ability to restage an application
 - Endpoints list now shows logged in user's username and whether they're an admin
 - Switched to new Stratos logo for login and about pages
