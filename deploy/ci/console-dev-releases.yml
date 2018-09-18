@@ -14,7 +14,7 @@ resources:
     uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
-    tag_filter: "2*"
+    tag_filter: "2*-*"
 - name: helm-repo
   type: git
   source:
@@ -121,6 +121,7 @@ jobs:
           build: stratos/
           target_name: prod-build
           tag: image-tag/v2-alpha-tag
+          build_args_file: image-tag/ui-build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
 - name: create-chart

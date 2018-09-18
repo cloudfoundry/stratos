@@ -29,6 +29,7 @@ Release highlights:
 - Upgrade angular to 6.1.1 to fix security vulnerability [\#2850](https://github.com/cloudfoundry-incubator/stratos/pull/2850)
 - Fixes and improvement for the diagnostics page [\#2860](https://github.com/cloudfoundry-incubator/stratos/pull/2860)
 - Fix several manage user role bugs [\#2826](https://github.com/cloudfoundry-incubator/stratos/pull/2826)
+- Diagnostics does not show GitHub details when cloned via HTTPS [\#3007](https://github.com/cloudfoundry-incubator/stratos/pull/3007)
 
 **Improvements:**
 
