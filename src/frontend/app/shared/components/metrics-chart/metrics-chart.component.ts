@@ -129,7 +129,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
         oldAction.cfGuid,
         new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
           start: startUnix,
-          end: endUnix,
+          end: end.unix(),
           step: Math.max((endUnix - startUnix) / 200, 0)
         }),
         MetricQueryType.RANGE_QUERY
