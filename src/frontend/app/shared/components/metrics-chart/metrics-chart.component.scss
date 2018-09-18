@@ -6,7 +6,7 @@
   width: 100%;
   &__header {
     align-items: center;
-    display: flex;    
+    display: flex;
   }
   &__outer {
     display: flex;
@@ -43,10 +43,10 @@
       position: absolute;
       right: 0;
       top: 0;
-    }    
+    }
     &-show {
       background-color: rgba(0, 0, 0, .6);
-      transition-delay:0s;
+      transition-delay: 0s;
       visibility: visible;
       .metrics-chart__overlay-inner {
         transform: translateY(0);
@@ -58,7 +58,7 @@
       padding: 50px;
       position: relative;
       transform: translateY(-100%);
-      transition:  transform $animation-time $animation-function;
+      transition: transform $animation-time $animation-function;
       z-index: 2;
     }
 
@@ -75,13 +75,13 @@
     display: flex;
   }
   &__selected-range-dates {
-    @include breakpoint(tablet) {
-      display: flex;
-    }
     display: none;
     font-size: 14px;
     opacity: .6;
     padding-left: 10px;
+    @include breakpoint(tablet) {
+      display: flex;
+    }
   }
   &__selected-range-date {
     font-weight: bold;

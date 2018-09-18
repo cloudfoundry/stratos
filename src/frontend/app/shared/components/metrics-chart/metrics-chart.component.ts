@@ -235,10 +235,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
               if (isDifferent) {
                 this.start = start;
                 this.end = end;
-                this.committedStartEnd = [
-                  start,
-                  end
-                ];
+                this.committedStartEnd = [start, end];
               }
               this.selectedTimeRange = this.times.find(time => time.type === RangeType.START_END);
             } else {
