@@ -1,9 +1,10 @@
 .start-end-date {
   align-items: center;
   display: flex;
-  max-width: 800px;
+  flex-wrap: wrap;
+  width: 100%;
   &__selector {
-    flex: auto;
+    flex: none;
     padding: 0 5px;
   }
   &__arrow {

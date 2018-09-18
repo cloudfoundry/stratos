@@ -1,3 +1,4 @@
+@import '../../../../sass/mixins';
 .metrics-chart {
   $animation-function: cubic-bezier(0, 0, .2, 1);
   $animation-time: 250ms;
@@ -74,7 +75,10 @@
     display: flex;
   }
   &__selected-range-dates {
-    display: flex;
+    @include breakpoint(tablet) {
+      display: flex;
+    }
+    display: none;
     font-size: 14px;
     opacity: .6;
     padding-left: 10px;

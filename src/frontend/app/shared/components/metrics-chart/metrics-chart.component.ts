@@ -95,7 +95,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
       type: RangeType.ROLLING_WINDOW
     },
     {
-      label: 'Over a specific period',
+      label: 'Set time window',
       type: RangeType.START_END
     }
   ];
