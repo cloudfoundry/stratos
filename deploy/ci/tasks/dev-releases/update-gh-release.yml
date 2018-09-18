@@ -18,19 +18,13 @@ run:
       # Create Github release
       ROOT_DIR=${PWD}
       VERSION=$(cat image-tag/v2-version)
+      FULL_VERSION=$(cat image-tag/v2-alpha-tag)
       cd ${ROOT_DIR}/stratos
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
+
       # Upload Helm chart to release
-
-      # Check that the release exists - if it does, don't create a new one
-      set +e
-      github-release info -t ${VERSION}
-      RETVAL=$?
-      set -e
-
-      if [ $RETVAL -ne 0 ]; then
-        github-release release -t ${VERSION} --name "Stratos ${VERSION} Preview release" --pre-release
-      fi
-      github-release upload -t ${VERSION} --file ${CHART_PACKAGE} --name "console-helm-chart-${GIT_TAG}.tgz"
+      github-release release -t ${FULL_VERSION} --name "Stratos ${VERSION} Preview release" --pre-release
+      github-release upload -t ${FULL_VERSION} --file ${CHART_PACKAGE} --name "${CHART_PACKAGE}"
+      
