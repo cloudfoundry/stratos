@@ -180,7 +180,7 @@ function getObservables<T = any>(
         (!isLocal && shouldFetchNonLocalList(pagination))
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        previousPaginationParams = spreadPaginationParams(pagination.params);
+        previousPaginationParams = pagination ? spreadPaginationParams(pagination.params) : null;
         populatePaginationFromParent(store, action).pipe(
           first(),
           tap(newAction => {

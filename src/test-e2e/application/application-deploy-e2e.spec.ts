@@ -17,8 +17,6 @@ import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
 
-const until = protractor.ExpectedConditions;
-
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
 let applicationE2eHelper: ApplicationE2eHelper;

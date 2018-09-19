@@ -27,7 +27,7 @@ describe('Service Instances Wall', () => {
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
 
   });
