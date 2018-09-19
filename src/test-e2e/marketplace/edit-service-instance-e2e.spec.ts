@@ -1,4 +1,4 @@
-import { browser } from 'protractor';
+import { browser, element, by } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -7,6 +7,7 @@ import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
+import { Component } from '../po/component.po';
 
 describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
@@ -59,6 +60,9 @@ describe('Edit Service Instance', () => {
   it('- should have edited service instance', () => {
     servicesWall.waitForPage();
     const editedServiceName = servicesHelperE2E.serviceInstanceName;
+    // Wait for card
+    const siCard =  new Component(element(by.css('mat-card')));
+    siCard.waitUntilShown('Service Instance Card');
     return getCardWithTitle(servicesWall, editedServiceName).then((card: MetaCard) => {
       expect(card).toBeDefined();
     }).catch(e => fail(e));
