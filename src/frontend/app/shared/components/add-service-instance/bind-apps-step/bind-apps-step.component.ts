@@ -76,9 +76,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
-    // TODO: RC Remove
-    selectedServicePlan = testSelectedServicePlan;
-
     if (selectedServicePlan) {
       // Don't overwrite if it's null (we've returned to this step from the next)
       this.selectedServicePlan = selectedServicePlan;

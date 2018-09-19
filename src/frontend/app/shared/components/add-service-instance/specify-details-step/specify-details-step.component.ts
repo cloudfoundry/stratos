@@ -79,6 +79,9 @@ export const testSelectedServicePlan = {
           parameters: {
             'type': 'object',
             'properties': {
+              'service_binding_create_schema': {
+                'type': 'string'
+              },
               'first_name': {
                 'type': 'string'
               },
@@ -150,6 +153,9 @@ export const testSelectedServicePlan = {
           parameters: {
             'type': 'object',
             'properties': {
+              'service_instance_create_schema': {
+                'type': 'string'
+              },
               'first_name': {
                 'type': 'string'
               },
@@ -222,6 +228,9 @@ export const testSelectedServicePlan = {
           parameters: {
             'type': 'object',
             'properties': {
+              'service_instance_update_schema': {
+                'type': 'string'
+              },
               'first_name': {
                 'type': 'string'
               },
@@ -300,7 +309,8 @@ export const testSelectedServicePlan = {
     updated_at: '2017-11-27T17:07:02Z'
   }
 };
-export const testServiceBindingData = { 'first_name': 'first_name1', 'last_name': 'last_name1' };
+// TODO: RC remove me
+export const testServiceBindingData = { 'first_name': 'initial', 'last_name': 'data' };
 
 
 const enum FormMode {
@@ -428,9 +438,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
-    // TODO: RC Remove
-    selectedServicePlan = testSelectedServicePlan;
-
     const schema = this.modeService.isEditServiceInstanceMode() ?
       pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
       pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas);
@@ -445,7 +452,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
           this.schemaFormConfig = {
             schema,
-            initialData: safeStringToObj(state.parameters)
+            // TODO: RC add
+            // initialData: safeStringToObj(state.parameters)
+            // TODO: RC Remove
+            initialData: testServiceBindingData
           };
 
           this.serviceParams = testServiceBindingData;
@@ -461,8 +471,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       if (!this.schemaFormConfig) {
         this.schemaFormConfig = {
           schema,
-          // TODO: RC Remove
-          initialData: testServiceBindingData
         };
       }
     }
@@ -471,6 +479,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   setServiceParams(data) {
     this.serviceParams = data;
+  }
+
+  setParamsValid(valid: boolean) {
+    this.serviceParamsValid.next(valid);
   }
 
   resetForms = (mode: FormMode) => {

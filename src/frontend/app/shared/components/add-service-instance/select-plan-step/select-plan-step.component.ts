@@ -10,13 +10,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import {
-  BehaviorSubject,
-  combineLatest as observableCombineLatest,
-  Observable,
-  of as observableOf,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -48,6 +42,7 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
+import { testSelectedServicePlan } from '../specify-details-step/specify-details-step.component';
 
 
 interface ServicePlan {
@@ -172,7 +167,8 @@ export class SelectPlanStepComponent implements OnDestroy {
     return this.selectedService$.pipe(
       map(selectedServicePlan => ({
         success: true,
-        data: selectedServicePlan.entity
+        // TODO: RC remove/tweak
+        data: testSelectedServicePlan || selectedServicePlan.entity
       }))
     );
   }

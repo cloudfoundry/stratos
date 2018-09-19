@@ -1,8 +1,9 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
-import { JsonPointer } from 'stratos-angular6-json-schema-form';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import { JsonPointer } from 'stratos-angular6-json-schema-form';
 
 import { safeStringToObj } from '../../../core/utils.service';
 
@@ -36,7 +37,10 @@ export class SchemaFormConfig {
 @Component({
   selector: 'app-schema-form',
   templateUrl: './schema-form.component.html',
-  styleUrls: ['./schema-form.component.scss']
+  styleUrls: ['./schema-form.component.scss'],
+  providers: [
+    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+  ]
 })
 export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
 
@@ -117,7 +121,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   setJsonFormData(data: object) {
     if (this.jsonForm) {
-      const jsonString = JSON.stringify(data);
+      const jsonString = data ? JSON.stringify(data) : '';
       this.jsonForm.controls['json'].setValue(jsonString);
     }
   }
