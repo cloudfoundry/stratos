@@ -2,7 +2,7 @@ import { browser, promise } from 'protractor';
 
 import { IOrganization } from '../../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../../frontend/app/store/types/api.types';
-import { e2e, E2ESetup, E2E } from '../../e2e';
+import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
