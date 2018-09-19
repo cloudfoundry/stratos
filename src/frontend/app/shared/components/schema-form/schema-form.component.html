@@ -16,7 +16,7 @@
   </mat-radio-group>
 
   <div class="schema-form__form" *ngIf="schemaView === 'schemaForm'; else json">
-    <json-schema-form loadExternalAssets="true" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
+    <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
     </json-schema-form>
     <div *ngIf="!!formValidationErrorsStr" class="schema-form__form--data-bad" [innerHTML]="formValidationErrorsStr"></div>
   </div>

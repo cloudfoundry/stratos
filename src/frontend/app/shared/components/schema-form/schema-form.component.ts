@@ -1,6 +1,6 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
-import { JsonPointer } from 'angular6-json-schema-form';
+import { JsonPointer } from 'stratos-angular6-json-schema-form';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
