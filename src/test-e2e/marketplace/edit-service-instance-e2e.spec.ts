@@ -8,6 +8,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 import { Component } from '../po/component.po';
+import { SideNavMenuItem } from '../po/side-nav.po';
 
 describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
@@ -26,12 +27,12 @@ describe('Edit Service Instance', () => {
   });
 
   beforeEach(() => {
-    servicesWall.navigateTo();
+    servicesWall.sideNav.goto(SideNavMenuItem.Services);
     servicesWall.waitForPage();
   });
 
-  it('- should be able edit a service instance', () => {
-    createServiceInstance.navigateTo();
+  fit('- should be able edit a service instance', () => {
+    servicesWall.clickCreateServiceInstance();
     createServiceInstance.waitForPage();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
 
@@ -44,6 +45,8 @@ describe('Edit Service Instance', () => {
       .then((card: MetaCard) => card.openActionMenu())
       .then(menu => {
         menu.clickItem('Edit');
+        menu.waitUntilNotShown();
+
         return browser.getCurrentUrl().then(url => {
           expect(url.endsWith('edit')).toBeTruthy();
           servicesHelperE2E.setServicePlan(true);
@@ -52,7 +55,8 @@ describe('Edit Service Instance', () => {
           servicesHelperE2E.addPrefixToServiceName(serviceNamePrefix);
           serviceNamesToDelete.push(servicesHelperE2E.serviceInstanceName);
           servicesHelperE2E.setServiceInstanceDetail(true);
-          return servicesHelperE2E.createServiceInstance.stepper.next();
+          servicesHelperE2E.createServiceInstance.stepper.next();
+          servicesHelperE2E.createServiceInstance.stepper.waitUntilNotShown();
         });
       }).catch(e => fail(e));
   });
@@ -61,7 +65,7 @@ describe('Edit Service Instance', () => {
     servicesWall.waitForPage();
     const editedServiceName = servicesHelperE2E.serviceInstanceName;
     // Wait for card
-    const siCard =  new Component(element(by.css('mat-card')));
+    const siCard =  new Component(element(by.css('.list-component__body mat-card')));
     siCard.waitUntilShown('Service Instance Card');
     return getCardWithTitle(servicesWall, editedServiceName).then((card: MetaCard) => {
       expect(card).toBeDefined();
@@ -78,7 +82,8 @@ describe('Edit Service Instance', () => {
         const deleteDialog = new ConfirmDialogComponent();
         expect(deleteDialog.isDisplayed()).toBeTruthy();
         expect(deleteDialog.getTitle()).toEqual('Delete Service Instance');
-        return deleteDialog.confirm();
+        deleteDialog.confirm();
+        deleteDialog.waitUntilNotShown();
       }).catch(e => fail(e));
   });
 
