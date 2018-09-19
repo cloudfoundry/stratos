@@ -13,12 +13,6 @@ source "${DIRPATH}/cfutils.sh"
 pwd
 set -e
 
-# Kill any existing docker all-in-one docker containers
-RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")
-if [ -n "$RUNNING" ]; then
-  docker kill $RUNNING
-fi
-
 ./build/store-git-metadata.sh
 docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
 
@@ -31,11 +25,12 @@ CONTAINER_ID=$(docker run \
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
 -e UAA_ENDPOINT='https://login.local.pcfdev.io' \
+-e SKIP_SSL_VALIDATION='true' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
 stratos-aio)
 
 # Get the E2E config
-wget ${TEST_CONFIG_URL} -O secrets.yaml --no-check-certificate
+curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 echo "headless: true" >> secrets.yaml
 
 # Need node modules to run the tests
