@@ -19,7 +19,6 @@ import { APIResource } from '../../../../store/types/api.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { testSelectedServicePlan, testServiceBindingData } from '../specify-details-step/specify-details-step.component';
 
 @Component({
   selector: 'app-bind-apps-step',

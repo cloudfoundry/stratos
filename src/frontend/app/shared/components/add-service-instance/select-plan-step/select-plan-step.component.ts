@@ -42,7 +42,6 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
-import { testSelectedServicePlan } from '../specify-details-step/specify-details-step.component';
 
 
 interface ServicePlan {
