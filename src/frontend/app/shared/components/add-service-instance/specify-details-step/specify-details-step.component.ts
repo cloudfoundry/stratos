@@ -767,6 +767,3 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
 }
-
-
-
