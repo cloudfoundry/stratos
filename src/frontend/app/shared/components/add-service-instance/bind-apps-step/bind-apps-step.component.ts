@@ -92,8 +92,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     if (!this.schemaFormConfig) {
       this.schemaFormConfig = {
         schema: pathGet('entity.schemas.service_binding.create.parameters', selectedServicePlan),
-        // TODO: RC Remove
-        initialData: testServiceBindingData
       };
     }
 

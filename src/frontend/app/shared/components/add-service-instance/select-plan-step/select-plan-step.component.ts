@@ -167,8 +167,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     return this.selectedService$.pipe(
       map(selectedServicePlan => ({
         success: true,
-        // TODO: RC remove/tweak
-        data: testSelectedServicePlan || selectedServicePlan.entity
+        data: selectedServicePlan.entity
       }))
     );
   }
