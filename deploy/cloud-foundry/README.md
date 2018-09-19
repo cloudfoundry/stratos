@@ -7,6 +7,8 @@ The quickest way to install Stratos is to deploy it as a Cloud Foundry applicati
 ```
 git clone https://github.com/cloudfoundry-incubator/stratos
 cd stratos
+git checkout tags/stable -b stable
+./build/store-git-metadata.sh
 cf push
 ```
 

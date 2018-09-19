@@ -188,7 +188,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canSubmit$ = observableCombineLatest(
       this.connecting$.pipe(startWith(false)),
       this.fetchingInfo$.pipe(startWith(false)),
-      this.valid$.pipe(startWith(false))
+      this.valid$.pipe(startWith(this.endpointForm.valid))
     ).pipe(
       map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid));
   }
