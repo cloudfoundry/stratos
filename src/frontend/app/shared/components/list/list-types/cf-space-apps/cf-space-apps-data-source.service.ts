@@ -13,15 +13,15 @@ import { IListConfig } from '../../list.component.types';
 
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, cfSpaceService.spaceGuid);
-    const action = new GetAllAppsInSpace(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey);
+    const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, cfSpaceService.spaceGuid) + '-tab';
+    const action = new GetAllAppsInSpace(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey, [], false, false);
     super({
       store,
       action,
       schema: entityFactory(applicationSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey,
-      isLocal: true,
+      isLocal: false,
       transformEntities: [],
       listConfig
     });

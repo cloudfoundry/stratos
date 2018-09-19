@@ -11,6 +11,7 @@ describe('SSO Login', () => {
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
       .doNotLogin();
+    loginPage.logoutUAA();
   });
 
   beforeEach(() => {
