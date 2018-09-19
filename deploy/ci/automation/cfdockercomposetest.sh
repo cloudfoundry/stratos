@@ -53,7 +53,7 @@ set +e
 pushd deploy
 
 # Store logs if there was a test failure
-if [ $? -ne 0 ]; then
+if [ $RET -ne 0 ]; then
   docker-compose -f docker-compose.development.yml logs proxy > "${E2E_REPORT_FOLDER}/logs/jetstream.log"
   docker-compose -f docker-compose.development.yml logs db-migrator > "${E2E_REPORT_FOLDER}/logs/db-migrator.log"
   docker-compose -f docker-compose.development.yml logs nginx > "${E2E_REPORT_FOLDER}/logs/nginx.log"
