@@ -31,7 +31,7 @@ describe('Edit Service Instance', () => {
     servicesWall.waitForPage();
   });
 
-  fit('- should be able edit a service instance', () => {
+  it('- should be able edit a service instance', () => {
     servicesWall.clickCreateServiceInstance();
     createServiceInstance.waitForPage();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
