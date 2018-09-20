@@ -7,8 +7,8 @@ import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationSummary } from './application-summary.po';
-import { CreateApplicationStepper } from './create-application-stepper.po';
+import { ApplicationBasePage } from './po/application-page.po';
+import { CreateApplicationStepper } from './po/create-application-stepper.po';
 
 describe('Application Create', function () {
 
@@ -80,7 +80,7 @@ describe('Application Create', function () {
       expect(res.app).not.toBe(null);
       app = res.app;
       cfGuid = res.cfGuid;
-      const appSummaryPage = new ApplicationSummary(res.cfGuid, app.metadata.guid, app.entity.name);
+      const appSummaryPage = new ApplicationBasePage(res.cfGuid, app.metadata.guid);
       appSummaryPage.waitForPage();
     }));
 

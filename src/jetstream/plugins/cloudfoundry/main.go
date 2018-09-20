@@ -98,12 +98,18 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 	// CF auto reg cnsi entry missing, attempt to register
 	if cfCnsi.CNSIType == "" {
-		log.Infof("Auto-registering cloud foundry endpoint %s", cfAPI)
-
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
+		// Allow the auto-registration name to be configured
+		autoRegName := c.portalProxy.GetConfig().AutoRegisterCFName
+		if len(autoRegName) == 0 {
+			autoRegName = "Cloud Foundry"
+		}
+
+		log.Infof("Auto-registering cloud foundry endpoint %s as \"%s\"", cfAPI, autoRegName)
+
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, false, cfEndpointSpec.Info)
 		if err != nil {
 			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
 			return nil
@@ -174,6 +180,9 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 
 	// Applications Log Streams
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
+
+	// Application Stream
+	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
 }
 
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

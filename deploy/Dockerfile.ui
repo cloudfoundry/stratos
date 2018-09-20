@@ -1,4 +1,8 @@
 FROM splatform/stratos-ui-build-base:opensuse as base-build
+ARG project
+ARG branch
+ARG commit
+
 COPY --chown=stratos:users . /usr/src/app
 WORKDIR /usr/src/app
 RUN bash deploy/provision.sh -u

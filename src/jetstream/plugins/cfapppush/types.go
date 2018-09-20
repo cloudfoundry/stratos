@@ -28,7 +28,8 @@ var upgrader = websocket.Upgrader{
 }
 
 type StratosProject struct {
-	DeploySource interface{} `json:"deploySource"`
+	DeploySource    interface{} `json:"deploySource"`
+	DeployOverrides interface{} `json:"deployOverrides"`
 }
 
 type DeploySource struct {

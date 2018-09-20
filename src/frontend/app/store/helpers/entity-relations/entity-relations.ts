@@ -130,15 +130,15 @@ function createEntityWatcher(store, paramAction, guid: string): Observable<Valid
  * @returns {ValidateEntityResult[]}
  */
 function createActionsForExistingEntities(config: HandleRelationsConfig): Action {
-  const { store, allEntities, newEntities, childEntities, childRelation } = config;
+  const { store, allEntities, newEntities, childEntities, childRelation, action } = config;
   const childEntitiesAsArray = childEntities as Array<any>;
 
-  const paramAction = createAction(config);
+  const paramAction = action || createAction(config);
   // We've got the value already, ensure we create a pagination section for them
   let response: NormalizedResponse;
   const guids = childEntitiesAsGuids(childEntitiesAsArray);
-  const safeEewEntities = newEntities || {};
-  const entities = pick(safeEewEntities[childRelation.entityKey], guids as [string]) ||
+  const safeEntities = newEntities || {};
+  const entities = pick(safeEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
   response = {
     entities: {
@@ -511,10 +511,10 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
           // Yes? Let's create the action that will populate the pagination section with the value
           const config: HandleRelationsConfig = {
             store,
-            action: null,
+            action,
             allEntities,
             allPagination: {},
-            newEntities: {},
+            newEntities: entity.entity[paramName],
             apiResponse: null,
             parentEntities: null,
             entities: entity.entity[paramName],
