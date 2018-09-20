@@ -207,8 +207,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
           this.schemaFormConfig.initialData = safeStringToObj(state.parameters);
-          // TODO: RC Remove
-          // this.schemaFormConfig.initialData = testServiceBindingData;
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
