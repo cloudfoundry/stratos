@@ -4,6 +4,7 @@ import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { MetaCard } from '../po/meta-card.po';
+import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -25,12 +26,12 @@ describe('Edit Service Instance', () => {
   });
 
   beforeEach(() => {
-    servicesWall.navigateTo();
+    servicesWall.sideNav.goto(SideNavMenuItem.Services);
     servicesWall.waitForPage();
   });
 
   it('- should be able edit a service instance', () => {
-    createServiceInstance.navigateTo();
+    servicesWall.clickCreateServiceInstance();
     createServiceInstance.waitForPage();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
 
@@ -43,6 +44,8 @@ describe('Edit Service Instance', () => {
       .then((card: MetaCard) => card.openActionMenu())
       .then(menu => {
         menu.clickItem('Edit');
+        menu.waitUntilNotShown();
+
         return browser.getCurrentUrl().then(url => {
           expect(url.endsWith('edit')).toBeTruthy();
           servicesHelperE2E.setServicePlan(true);
@@ -51,7 +54,8 @@ describe('Edit Service Instance', () => {
           servicesHelperE2E.addPrefixToServiceName(serviceNamePrefix);
           serviceNamesToDelete.push(servicesHelperE2E.serviceInstanceName);
           servicesHelperE2E.setServiceInstanceDetail(true);
-          return servicesHelperE2E.createServiceInstance.stepper.next();
+          servicesHelperE2E.createServiceInstance.stepper.next();
+          servicesHelperE2E.createServiceInstance.stepper.waitUntilNotShown();
         });
       }).catch(e => fail(e));
   });
@@ -74,7 +78,8 @@ describe('Edit Service Instance', () => {
         const deleteDialog = new ConfirmDialogComponent();
         expect(deleteDialog.isDisplayed()).toBeTruthy();
         expect(deleteDialog.getTitle()).toEqual('Delete Service Instance');
-        return deleteDialog.confirm();
+        deleteDialog.confirm();
+        deleteDialog.waitUntilNotShown();
       }).catch(e => fail(e));
   });
 
