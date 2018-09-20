@@ -17,6 +17,7 @@ import {
   spaceSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
+import { spreadPaginationParams } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState, PaginationParam, QParam } from '../../../../../store/types/pagination.types';
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -144,11 +145,11 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           break;
       }
       return qs;
-    }, params.q || []);
+    }, spreadPaginationParams(params).q || []);
 
     const cfGuidChanged = startingCfGuid !== this.action.endpointGuid;
-    const orgOrSpaceChanged = startingOrgGuid !== params.q.find((q: QParam) => q.key === 'organization_guid') ||
-      startingSpaceGuid !== params.q.find((q: QParam) => q.key === 'space_guid');
+    const orgOrSpaceChanged = startingOrgGuid !== qChanges.find((q: QParam) => q.key === 'organization_guid') ||
+      startingSpaceGuid !== qChanges.find((q: QParam) => q.key === 'space_guid');
 
     // Changes of org or space will reset pagination and start a new request. Changes of only cf requires a punt
     if (cfGuidChanged && !orgOrSpaceChanged) {

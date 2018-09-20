@@ -158,10 +158,10 @@ export class RemoveParams implements PaginationAction {
   type = REMOVE_PARAMS;
 }
 
-export class PaginationMaxResults implements Action {
+export class PaginationMaxedResults implements Action {
   type = SET_PAGINATION_MAX_REACHED;
   constructor(
-    public maxReached: number,
+    public maxReached: boolean,
     public entityKey: string,
     public paginationKey: string
   ) { }

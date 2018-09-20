@@ -117,41 +117,19 @@ export const getPaginationObservables = <T = any>(
   return obs;
 };
 
-function hasPaginationParamsChanged(o: PaginationParam, n: PaginationParam): boolean {
-  try {
-    return JSON.stringify(o) !== JSON.stringify(n);
-  } catch { }
-  return false;
+function shouldFetchLocalOrNonLocalList(isLocal: boolean, hasDispatchedOnce: boolean, pagination: PaginationEntityState) {
+  // The following could be written more succinctly, but kept verbose for clarity
+  return isLocal ? shouldFetchLocalList(hasDispatchedOnce, pagination) : shouldFetchNonLocalList(pagination);
 }
 
-function shouldFetchMaxedList(pagination: PaginationEntityState, previousPaginationParams: PaginationParam): boolean {
-  // No maxResults? ignore
-  if (pagination.maxResults === null || pagination.maxResults === undefined) {
-    return;
-  }
-  const maxedResults = pagination.maxResults || 0;
-  const totalResults = pagination.totalResults || 0;
-  return maxedResults !== totalResults &&
-    !isFetchingPage(pagination) &&
-    hasPaginationParamsChanged(previousPaginationParams, pagination.params);
-}
-
-function shouldFetchLocalList(hasDispatchedOnce, pagination: PaginationEntityState, previousPaginationParams: PaginationParam): boolean {
-  // This could be written more succinctly, however clearer in this more verbose form
+function shouldFetchLocalList(hasDispatchedOnce: boolean, pagination: PaginationEntityState): boolean {
   if (hasError(pagination)) {
     return false;
   }
-
-  const shouldFetchLocal = !hasDispatchedOnce && !hasValidOrGettingPage(pagination);
-  if (shouldFetchLocal) {
-    return true;
-  }
-
-  const shouldReFetchMaxed = shouldFetchMaxedList(pagination, previousPaginationParams);
-  return shouldReFetchMaxed;
+  return !hasDispatchedOnce || !hasValidOrGettingPage(pagination);
 }
 
-function shouldFetchNonLocalList(pagination): boolean {
+function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
@@ -165,7 +143,6 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
-  let previousPaginationParams: PaginationParam;
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
@@ -174,13 +151,8 @@ function getObservables<T = any>(
   const fetchPagination$ = paginationSelect$.pipe(
     tap(pagination => {
       // This could be written more succinctly, however clearer in this more verbose form
-      if (
-        (!pagination && !hasDispatchedOnce) ||
-        (isLocal && shouldFetchLocalList(hasDispatchedOnce, pagination, previousPaginationParams)) ||
-        (!isLocal && shouldFetchNonLocalList(pagination))
-      ) {
+      if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, pagination)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        previousPaginationParams = pagination ? spreadPaginationParams(pagination.params) : null;
         populatePaginationFromParent(store, action).pipe(
           first(),
           tap(newAction => {
@@ -288,6 +260,9 @@ export function spreadClientPagination(pag: PaginationClientPagination): Paginat
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
     ...params,
-    q: [...params.q]
+    q: params.q ? params.q.reduce((newQ, qP) => {
+      newQ.push({ ...qP });
+      return newQ;
+    }, []) : null
   };
 }

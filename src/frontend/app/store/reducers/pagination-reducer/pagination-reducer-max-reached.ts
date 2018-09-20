@@ -1,14 +1,15 @@
-import { PaginationMaxResults } from '../../actions/pagination.actions';
+import { PaginationMaxedResults } from '../../actions/pagination.actions';
 import { PaginationState } from '../../types/pagination.types';
 
 export function paginationMaxReached(state: PaginationState, action): PaginationState {
-  const maxAction: PaginationMaxResults = action as PaginationMaxResults;
+  const maxAction: PaginationMaxedResults = action as PaginationMaxedResults;
 
   if (!state[maxAction.entityKey] || !state[maxAction.entityKey][maxAction.paginationKey]) {
     return state;
   }
 
-  if (state[maxAction.entityKey][maxAction.paginationKey].maxResults === maxAction.maxReached) {
+  if (state[maxAction.entityKey][maxAction.paginationKey].maxedResults) {
+    // Once a list is maxed it can never go back
     return state;
   }
 
@@ -17,7 +18,7 @@ export function paginationMaxReached(state: PaginationState, action): Pagination
     ...newState[action.entityKey],
     [action.paginationKey]: {
       ...newState[action.entityKey][action.paginationKey],
-      maxResults: maxAction.maxReached
+      maxedResults: true
     }
   };
   return {
