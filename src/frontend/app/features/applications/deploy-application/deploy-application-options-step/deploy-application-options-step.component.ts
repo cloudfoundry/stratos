@@ -38,6 +38,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   deployOptionsForm: FormGroup;
   subs: Subscription[] = [];
   appGuid: string;
+  public healthCheckTypes = ['http', 'port', 'process'];
 
   constructor(
     private fb: FormBuilder,
@@ -75,6 +76,18 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       map(() => this.deployOptionsForm.valid),
       startWith(this.deployOptionsForm.valid)
     );
+  }
+
+  private disableAddressFields() {
+    this.deployOptionsForm.controls.host.disable();
+    this.deployOptionsForm.controls.domain.disable();
+    this.deployOptionsForm.controls.path.disable();
+  }
+
+  private enableAddressFields() {
+    this.deployOptionsForm.controls.host.enable();
+    this.deployOptionsForm.controls.domain.enable();
+    this.deployOptionsForm.controls.path.enable();
   }
 
   ngOnInit() {
@@ -123,23 +136,14 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       }),
       share()
     );
-    this.subs.push(this.stacks$.pipe(first()).subscribe(stacks => {
-      if (stacks && stacks.length > 0) {
-        this.deployOptionsForm.controls.stack.setValue(stacks[0].entity.name);
-      }
-    }));
 
     // Ensure that when the no route + random route options are checked the host, domain and path fields are enabled/disabled
     this.subs.push(noRouteChanged$.subscribe(value => {
       if (value) {
-        this.deployOptionsForm.controls.host.disable();
-        this.deployOptionsForm.controls.domain.disable();
-        this.deployOptionsForm.controls.path.disable();
+        this.disableAddressFields();
         this.deployOptionsForm.controls.random_route.disable();
       } else {
-        this.deployOptionsForm.controls.host.enable();
-        this.deployOptionsForm.controls.domain.enable();
-        this.deployOptionsForm.controls.path.enable();
+        this.enableAddressFields();
         if (!this.appGuid) {
           // This can only be enabled if this is not a redeploy
           this.deployOptionsForm.controls.random_route.enable();
@@ -153,13 +157,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       // control.valueChanges fires whenever the value ... or enabled/disabled state changes. This means whenever noRouteChanged$ changes
       // randomRoute this also fires ... which undos the host+domain state
       if (noRoute || randomRoute) {
-        this.deployOptionsForm.controls.host.disable();
-        this.deployOptionsForm.controls.domain.disable();
-        this.deployOptionsForm.controls.path.disable();
+        this.disableAddressFields();
       } else {
-        this.deployOptionsForm.controls.host.enable();
-        this.deployOptionsForm.controls.domain.enable();
-        this.deployOptionsForm.controls.path.enable();
+        this.enableAddressFields();
       }
     }));
 
