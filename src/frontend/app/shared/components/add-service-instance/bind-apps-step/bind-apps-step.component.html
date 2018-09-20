@@ -7,7 +7,7 @@
         <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <div *ngIf="stepperForm.controls.apps.value">
+    <div *ngIf="stepperForm.controls.apps.value" class="stepper-form__params">
       <div>Binding Parameters</div>
       <app-schema-form [config]="schemaFormConfig" (dataChange)="setBindingParams($event)" (validChange)="setParamValid($event)"></app-schema-form>
     </div>

@@ -89,8 +89,15 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     });
 
     if (!this.schemaFormConfig) {
+      // Create new config
       this.schemaFormConfig = {
-        schema: pathGet('entity.schemas.service_binding.create.parameters', selectedServicePlan),
+        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan),
+      };
+    } else {
+      // Update existing config (retaining any existing config)
+      this.schemaFormConfig = {
+        ...this.schemaFormConfig,
+        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
       };
     }
 
@@ -105,22 +112,15 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   submit = (): Observable<StepOnNextResult> => {
-    this.setApp();
+    this.store.dispatch(new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams));
     return observableOf({
       success: true,
       data: this.selectedServicePlan
     });
   }
 
-  setApp = () => this.store.dispatch(
-    new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams)
-  )
-
   ngOnDestroy(): void {
     safeUnsubscribe(this.validateSubscription);
   }
 
 }
-
-
-

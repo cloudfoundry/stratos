@@ -182,8 +182,21 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
     const schema = this.modeService.isEditServiceInstanceMode() ?
-      pathGet('service_instance.update.parameters', selectedServicePlan.entity.schemas) :
-      pathGet('service_instance.create.parameters', selectedServicePlan.entity.schemas);
+      pathGet('entity.schemas.service_instance.update.parameters', selectedServicePlan) :
+      pathGet('entity.schemas.service_instance.create.parameters', selectedServicePlan);
+
+    if (!this.schemaFormConfig) {
+      // Create new config
+      this.schemaFormConfig = {
+        schema
+      };
+    } else {
+      // Update existing config (retaining any existing config)
+      this.schemaFormConfig = {
+        ...this.schemaFormConfig,
+        schema
+      };
+    }
 
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
@@ -193,10 +206,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.schemaFormConfig = {
-            schema,
-            initialData: safeStringToObj(state.parameters)
-          };
+          this.schemaFormConfig.initialData = safeStringToObj(state.parameters);
+          // TODO: RC Remove
+          // this.schemaFormConfig.initialData = testServiceBindingData;
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
@@ -206,12 +218,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           }
         })
       ).subscribe();
-    } else {
-      if (!this.schemaFormConfig) {
-        this.schemaFormConfig = {
-          schema,
-        };
-      }
     }
     this.subscriptions.push(this.setupFormValidatorData());
   }
@@ -268,7 +274,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
@@ -353,6 +359,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
 
   private setupValidate() {
+    // For a new service instance the step is valid if the form and service params are both valid
     this.subscriptions.push(
       observableCombineLatest([
         this.serviceParamsValid.asObservable(),
@@ -361,6 +368,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         map(([serviceParamsValid, b]) => this.validate.next(serviceParamsValid && this.createNewInstanceForm.valid))
       ).subscribe()
     );
+    // For existing service instance the step is valid if the form is (there's no service params)
     this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
       map(() => this.validate.next(this.selectExistingInstanceForm.valid))
     ).subscribe());

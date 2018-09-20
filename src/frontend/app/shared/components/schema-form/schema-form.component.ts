@@ -46,12 +46,15 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   mode: 'JSON' | 'schema';
   schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
+  private schema;
 
   @Input()
   set config(config: SchemaFormConfig) {
-    if (!config) {
+    // Skip if no config... or schema is the same (avoids losing existing data in form)
+    if (!config || config.schema === this.schema) {
       return;
     }
+    this.schema = config.schema;
     this.cleanSchema = this.filterSchema(config.schema);
     this.mode = this.cleanSchema ? 'schema' : 'JSON';
     if (this.mode === 'JSON') {
@@ -60,7 +63,6 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
         this._validChange.next(true);
       }
     } else if (this.mode === 'schema') {
-      // this.formData = config.initialData;
       this.formInitialData = config.initialData;
     }
   }
