@@ -75,6 +75,13 @@ fi
 TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
 export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
 
+# Capture video if configured
+if [ "$2" == "video" ]; then
+  echo "Starting video capture"
+  ffmpeg -video_size 1280x768 -framerate 25 -f x11grab -i :0.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 &
+  FFMPEG=$!
+fi
+
 set +e
 echo "Running e2e tests"
 npm run ${E2E_TARGET}
@@ -97,6 +104,11 @@ if [ "${RUN_TYPE}" == "quick" ]; then
   if [ $RESULT -ne 0 ]; then
     cp src/jetstream/backend.log ${E2E_REPORT_FOLDER}/jetstream.log
   fi
+fi
+
+if [ "$2" == "video" ]; then
+  echo "Stopping video capture"
+  kill -INT $FFMPEG
 fi
 
 # Check environment variable that will ignore E2E failures
