@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
@@ -26,6 +27,7 @@ import { MetaCardValueComponent } from '../../list/list-cards/meta-card/meta-car
 import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { PageHeaderModule } from '../../page-header/page-header.module';
+import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 import { SteppersModule } from '../../stepper/steppers.module';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
@@ -60,11 +62,13 @@ describe('AddServiceInstanceComponent', () => {
         BooleanIndicatorComponent,
         AppChipsComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        SchemaFormComponent
       ],
       imports: [
         PageHeaderModule,
         SteppersModule,
+        MaterialDesignFrameworkModule,
         // CoreModule,
         BaseTestModulesNoShared
       ],

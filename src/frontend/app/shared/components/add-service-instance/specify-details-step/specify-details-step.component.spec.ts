@@ -1,12 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
-import { BaseTestModules, BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { SpecifyDetailsStepComponent } from './specify-details-step.component';
-import { CsiGuidsService } from '../csi-guids.service';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { SchemaFormComponent } from '../../schema-form/schema-form.component';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
+import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -14,8 +16,14 @@ describe('SpecifyDetailsStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [SpecifyDetailsStepComponent],
-      imports: [BaseTestModulesNoShared],
+      declarations: [
+        SpecifyDetailsStepComponent,
+        SchemaFormComponent
+      ],
+      imports: [
+        BaseTestModulesNoShared,
+        MaterialDesignFrameworkModule
+      ],
       providers: [
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,

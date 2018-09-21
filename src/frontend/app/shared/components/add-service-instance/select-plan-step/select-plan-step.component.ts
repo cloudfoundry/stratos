@@ -10,13 +10,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import {
-  BehaviorSubject,
-  combineLatest as observableCombineLatest,
-  Observable,
-  of as observableOf,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -169,7 +163,12 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   onNext = (): Observable<StepOnNextResult> => {
     this.store.dispatch(new SetCreateServiceInstanceServicePlan(this.stepperForm.controls.servicePlans.value));
-    return observableOf({ success: true });
+    return this.selectedService$.pipe(
+      map(selectedServicePlan => ({
+        success: true,
+        data: selectedServicePlan.entity
+      }))
+    );
   }
 
   ngOnDestroy(): void {
