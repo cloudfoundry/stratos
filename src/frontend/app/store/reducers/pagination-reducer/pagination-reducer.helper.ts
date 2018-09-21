@@ -117,16 +117,30 @@ export const getPaginationObservables = <T = any>(
   return obs;
 };
 
-function shouldFetchLocalOrNonLocalList(isLocal: boolean, hasDispatchedOnce: boolean, pagination: PaginationEntityState) {
+function shouldFetchLocalOrNonLocalList(
+  isLocal: boolean,
+  hasDispatchedOnce: boolean,
+  pagination: PaginationEntityState,
+) {
   // The following could be written more succinctly, but kept verbose for clarity
   return isLocal ? shouldFetchLocalList(hasDispatchedOnce, pagination) : shouldFetchNonLocalList(pagination);
 }
 
-function shouldFetchLocalList(hasDispatchedOnce: boolean, pagination: PaginationEntityState): boolean {
+function shouldFetchLocalList(
+  hasDispatchedOnce: boolean,
+  pagination: PaginationEntityState,
+): boolean {
   if (hasError(pagination)) {
     return false;
   }
-  return !hasDispatchedOnce || !hasValidOrGettingPage(pagination);
+
+  // Should a standard, non-maxed local list be refetched?
+  if (!hasDispatchedOnce && !hasValidOrGettingPage(pagination)) {
+    return true;
+  }
+
+  // Should a maxed local list be refetched?
+  return pagination.maxedResults && !hasValidOrGettingPage(pagination);
 }
 
 function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {

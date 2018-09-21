@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
@@ -18,10 +18,12 @@ import {
 } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { spreadPaginationParams } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState, PaginationParam, QParam } from '../../../../../store/types/pagination.types';
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/list-data-source-types';
+import { valueOrCommonFalsy } from '../../data-sources-controllers/list-pagination-controller';
 import { IListConfig } from '../../list.component.types';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
@@ -50,6 +52,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
   public static paginationKey = 'applicationWall';
   private subs: Subscription[];
   public action: GetAllApplications;
+  public initialised$: Observable<boolean>;
+
 
   constructor(
     store: Store<AppState>,
@@ -60,6 +64,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
     const action = createGetAllAppAction(paginationKey);
+
     const dispatchSequencer = new DispatchSequencer(store);
 
     if (syncNeeded) {
@@ -87,6 +92,17 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       destroy: () => this.subs.forEach(sub => sub.unsubscribe())
     });
 
+    // Reapply the cf guid to the action. Normally this is done via reapplying the selection to the filter... however this is too slow
+    // for maxedResult world
+    this.initialised$ = store.select(selectPaginationState(action.entityKey, action.paginationKey)).pipe(
+      map(pagination => {
+        if (pagination && pagination.clientPagination) {
+          action.endpointGuid = pagination.clientPagination.filter.items.cf;
+        }
+        return true;
+      })
+    );
+
     this.action = action;
 
     const statsSub = this.page$.pipe(
@@ -104,7 +120,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           const appState = app.entity.state;
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
-          const dispatching = false;
           if (appState === 'STARTED') {
             actions.push({
               id: appGuid,
@@ -126,9 +141,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       return;
     }
 
-    const startingCfGuid = this.action.endpointGuid;
-    const startingOrgGuid = params.q.find((q: QParam) => q.key === 'organization_guid');
-    const startingSpaceGuid = params.q.find((q: QParam) => q.key === 'space_guid');
+    const startingCfGuid = valueOrCommonFalsy(this.action.endpointGuid);
+    const startingOrgGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const startingSpaceGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'space_guid'), {}).value;
 
     const qChanges = changes.reduce((qs: QParam[], change) => {
       switch (change.key) {
@@ -147,14 +162,14 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       return qs;
     }, spreadPaginationParams(params).q || []);
 
-    const cfGuidChanged = startingCfGuid !== this.action.endpointGuid;
-    const orgOrSpaceChanged = startingOrgGuid !== qChanges.find((q: QParam) => q.key === 'organization_guid') ||
-      startingSpaceGuid !== qChanges.find((q: QParam) => q.key === 'space_guid');
+    const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(this.action.endpointGuid);
+    const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
 
     // Changes of org or space will reset pagination and start a new request. Changes of only cf requires a punt
-    if (cfGuidChanged && !orgOrSpaceChanged) {
+    if (cfGuidChanged && !orgChanged && !spaceChanged) {
       this.store.dispatch(new ResetPagination(this.entityKey, this.paginationKey));
-    } else {
+    } else if (orgChanged || spaceChanged) {
       params.q = qChanges;
       this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, params, false, true));
     }

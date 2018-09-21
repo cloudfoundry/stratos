@@ -142,8 +142,8 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
       // chained actions from firing.
       const cleanChanges = changes.reduce((newCleanChanges, change) => {
-        const storeFilterParamValue = this.cleanFilterParam(paginationEntityState.clientPagination.filter.items[change.key]);
-        const newFilterParamValue = this.cleanFilterParam(change.value);
+        const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
+        const newFilterParamValue = valueOrCommonFalsy(change.value);
         if (storeFilterParamValue !== newFilterParamValue) {
           newCleanChanges[change.key] = change.value;
         }
@@ -230,12 +230,12 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       tag('list-filter')
     );
   }
+}
 
-  private cleanFilterParam(filterVal) {
-    // Flatten some specific falsies into the same value.
-    if (filterVal === null || filterVal === undefined || filterVal === '') {
-      return undefined;
-    }
-    return filterVal;
+export function valueOrCommonFalsy(value, commonFalsy?) {
+  // Flatten some specific falsies into the same common value
+  if (value === null || value === undefined || value === '') {
+    return commonFalsy;
   }
+  return value;
 }
