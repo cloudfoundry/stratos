@@ -137,7 +137,8 @@
     }
     return result;
   }
-
+  
+  // Processor for Spec Reporter to add times to the test output
   let startTime;
   function TimeProcessor(configuration) {
     startTime =  Date.now();
@@ -179,39 +180,5 @@
   };
 
   module.exports.reporterPlugIn = TimeProcessor;
-
-
-  // Custom reporter to show times for test failures
-  module.exports.reporter = function () {
-    let startTime;
-
-    const ansi = {
-      green: '\x1B[32m',
-      red: '\x1B[31m',
-      yellow: '\x1B[33m',
-      none: '\x1B[0m'
-    };
-
-    function colorize(color, str) {
-      return ansi[color] + str + ansi.none;
-    }
-
-    return {
-      jasmineStarted: function () {
-        startTime =  Date.now();
-      },
-      suiteStarted: function () {},
-      specStarted: function () {},
-      specDone: function (result) {
-        if (result.status === 'disabled') {
-          skipped++;
-        }
-        total++;
-      },
-      suiteDone: function () {},
-      jasmineDone: function () {
-      }
-    };  
-  };
 
 })();
