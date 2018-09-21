@@ -1,14 +1,15 @@
 import { browser, promise } from 'protractor';
-import { CFHelpers } from '../helpers/cf-helpers';
-import { E2EConfigCloudFoundry } from '../e2e.types';
-import { ApplicationsPage } from './applications.po';
-import { ListComponent } from '../po/list.po';
+
+import { IOrganization, ISpace } from '../../frontend/app/core/cf-api.types';
+import { APIResource } from '../../frontend/app/store/types/api.types';
 import { ApplicationE2eHelper } from '../application/application-e2e-helpers';
 import { e2e } from '../e2e';
-import { IOrganization } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { E2EConfigCloudFoundry } from '../e2e.types';
+import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
+import { ListComponent } from '../po/list.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
+import { ApplicationsPage } from './applications.po';
 
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-app-wall-tests';
@@ -20,6 +21,10 @@ fdescribe('Application Wall Tests -', () => {
   const appsPage = new ApplicationsPage();
   const appList = new ListComponent();
   let endpointGuid: string;
+  let space1: APIResource<ISpace>;
+  let space2: APIResource<ISpace>;
+  let space1Apps: string[];
+  let space2Apps: string[];
 
   const timeAllowed = 60000;
 
@@ -60,7 +65,10 @@ fdescribe('Application Wall Tests -', () => {
             cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, org.entity.name, spaceName2, defaultCf, true),
           ]);
         })
-        .then(([space1, space2]) => {
+        .then(([s1, s2]) => {
+          space1 = s1;
+          space2 = s2;
+
           if (!appNames || !appNames.length) {
             return promise.fullyResolved(null);
           }
@@ -70,11 +78,8 @@ fdescribe('Application Wall Tests -', () => {
           }
 
           const splitIndex = Math.round(appNames.length / 2) - 1;
-          const space1Apps = appNames.slice(0, splitIndex);
-          // console.log(appNames, splitIndex);
-          // console.log(space1Apps);
-          const space2Apps = appNames.slice(splitIndex, appNames.length);
-          // console.log(space2Apps);
+          space1Apps = appNames.slice(0, splitIndex);
+          space2Apps = appNames.slice(splitIndex, appNames.length);
 
           // Chain the creation of the spaces to ensure there's a nice sequential 'created_at' value to be used for sort tests
           const promises = orderImportant ?
@@ -241,63 +246,121 @@ fdescribe('Application Wall Tests -', () => {
 
     afterAll(() => tearDown(orgName), timeAllowed);
 
-    function testStartingPosition() {
-      // General expects for all tests in this section
-      expect(appList.getTotalResults()).toBeLessThan(80);
-      expect(appList.pagination.isPresent()).toBeTruthy();
+    describe('Pagination - ', () => {
+      function testStartingPosition() {
+        // General expects for all tests in this section
+        expect(appList.getTotalResults()).toBeLessThan(80);
+        expect(appList.pagination.isPresent()).toBeTruthy();
 
-      expect(appList.cards.getCardCount()).toBe(9);
-      expect(appList.pagination.getPageSize('mat-select-4')).toEqual('9');
-      expect(appList.pagination.getTotalResults()).toBeGreaterThan(9);
+        expect(appList.cards.getCardCount()).toBe(9);
+        expect(appList.pagination.getPageSize('mat-select-4')).toEqual('9');
+        expect(appList.pagination.getTotalResults()).toBeGreaterThan(9);
 
-      expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeTruthy();
-      expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeTruthy();
+      }
+
+      beforeEach(testStartingPosition, timeAllowed);
+
+      afterEach(testStartingPosition, timeAllowed);
+
+      it('Initial Pagination Values', () => { });
+
+      it('Next and Previous Page', () => {
+        appList.pagination.getNavNextPage().getComponent().click();
+
+        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+
+        appList.pagination.getNavPreviousPage().getComponent().click();
+      });
+
+      it('Last and First Page', () => {
+        appList.pagination.getNavLastPage().getComponent().click();
+
+        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+
+        appList.pagination.getNavFirstPage().getComponent().click();
+      });
+
+      it('Change Page Size', () => {
+
+        appList.pagination.setPageSize('80', 'mat-select-4');
+        expect(appList.cards.getCardCount()).toBeGreaterThan(9);
+
+        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
+        expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+
+        appList.pagination.setPageSize('9', 'mat-select-4');
+        expect(appList.cards.getCardCount()).toBe(9);
+
+      });
+    });
+
+    function checkApp(appName, shouldFind = true) {
+      appList.header.setSearchText(appName);
+      expect(appList.getTotalResults()).toBe(shouldFind ? 1 : 0);
+      appList.header.clearSearchText();
     }
 
-    beforeEach(testStartingPosition, timeAllowed);
+    it('CF/Org/Space Filters', () => {
+      const filters = appList.header.getMultiFilterForm();
+      expect(filters.getText('cf')).toBe(defaultCf.name);
+      expect(filters.getText('org')).toBe(orgName);
+      expect(space1).toBeTruthy();
+      expect(space2).toBeTruthy();
+      expect(space1Apps).toBeTruthy();
+      expect(space2Apps).toBeTruthy();
 
-    afterEach(testStartingPosition, timeAllowed);
+      // Check initial state
+      checkApp(space1Apps[0]);
+      checkApp(space2Apps[0]);
 
-    it('Initial Pagination Values', () => { });
+      // Org --> Space 1
+      filters.fill({ space: space1.entity.name });
+      checkApp(space1Apps[0]);
+      checkApp(space2Apps[0], false);
 
-    it('Next and Previous Page', () => {
-      appList.pagination.getNavNextPage().getComponent().click();
+      // Space 1 --> Space 2
+      filters.fill({ space: space2.entity.name });
+      checkApp(space1Apps[0], false);
+      checkApp(space2Apps[0]);
 
-      expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
-      expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
-      expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+      // Space 2 --> All Spaces
+      filters.fill({ space: 'All' }, true);
+      expect(filters.getText('space')).toBe(' ');
+      checkApp(space1Apps[0]);
+      checkApp(space2Apps[0]);
 
-      appList.pagination.getNavPreviousPage().getComponent().click();
-    });
+      // Org --> default org
+      filters.fill({ org: defaultCf.testOrg });
+      checkApp(space1Apps[0], false);
+      checkApp(space2Apps[0], false);
 
-    it('Last and First Page', () => {
-      appList.pagination.getNavLastPage().getComponent().click();
+      // Default org --> all
+      filters.fill({ org: 'All' }, true);
+      expect(filters.getText('org')).toBe(' ');
+      checkApp(space1Apps[0]);
+      checkApp(space2Apps[0]);
 
-      expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
-      expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
-      expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
+      // Default cf --> all
+      filters.fill({ cf: 'All' }, true);
+      expect(filters.getText('cf')).toBe(' ');
+      checkApp(space1Apps[0]);
+      checkApp(space2Apps[0]);
 
-      appList.pagination.getNavFirstPage().getComponent().click();
-    });
+      appList.header.clearSearchText();
 
-    it('Change Page Size', () => {
-
-      appList.pagination.setPageSize('80', 'mat-select-4');
-      expect(appList.cards.getCardCount()).toBeGreaterThan(9);
-
-      expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
-      expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
-
-      appList.pagination.setPageSize('9', 'mat-select-4');
-      expect(appList.cards.getCardCount()).toBe(9);
-
-    });
+    }, timeAllowed);
 
   });
 
