@@ -164,12 +164,11 @@ export class FormComponent extends Component {
 
   // Fill the form fields in the specified object
   fill(fields: { [fieldKey: string]: string | boolean }, expectFailure = false): promise.Promise<void> {
-
     return this.getControlsMap().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value = fields[field];
-        expect(ctrl).toBeDefined();
+        expect(ctrl).toBeDefined(`Could not find form control with id '${field}'. Found ctrls with ids '${Object.keys(ctrls)}'`);
         if (!ctrl) {
           return;
         }

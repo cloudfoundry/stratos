@@ -6,15 +6,16 @@ import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationPageEventsTab } from './application-page-events.po';
-import { ApplicationPageGithubTab } from './application-page-github.po';
-import { ApplicationPageInstancesTab } from './application-page-instances.po';
-import { ApplicationPageRoutesTab } from './application-page-routes.po';
-import { ApplicationPageSummaryTab } from './application-page-summary.po';
-import { ApplicationPageVariablesTab } from './application-page-variables.po';
-import { ApplicationBasePage } from './application-page.po';
+import { ApplicationPageEventsTab } from './po/application-page-events.po';
+import { ApplicationPageGithubTab } from './po/application-page-github.po';
+import { ApplicationPageInstancesTab } from './po/application-page-instances.po';
+import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
+import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
+import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
+import { ApplicationBasePage } from './po/application-page.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -31,8 +32,9 @@ describe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
   const testAppName = ApplicationE2eHelper.createApplicationName();
-  const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack || 'opensuse42';
+  const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack;
   let deployedCommit: promise.Promise<string>;
+  let defaultStack = '';
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -45,6 +47,10 @@ describe('Application Deploy -', function () {
       .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
     cfHelper = new CFHelpers(setup);
+  });
+
+  beforeAll(() => {
+    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
@@ -176,7 +182,10 @@ describe('Application Deploy -', function () {
 
     beforeAll(() => {
       browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName)
-        .then(res => { appDetails = res; })
+        .then(res => {
+          expect(res).toBeTruthy('Failed to fetch app, is it deployed in the default space?');
+          appDetails = res;
+        })
         .then(() => {
           appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.app.metadata.guid);
           return appBasePage.navigateTo();
@@ -276,7 +285,7 @@ describe('Application Deploy -', function () {
         expect(appSummary.cardCfInfo.space.getValue()).toBe(spaceName);
 
         expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('binary_buildpack');
-        expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack);
+        expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
 
         appSummary.cardDeployInfo.waitForTitle('Deployment Info');
         expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
@@ -350,6 +359,73 @@ describe('Application Deploy -', function () {
     });
 
 
+
+    it('Instance scaling', () => {
+      const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appInstances.goToInstancesTab();
+
+      // Initial state
+      appInstances.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+      expect(appInstances.cardInstances.editCountButton().isDisplayed()).toBeTruthy();
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      expect(appInstances.cardInstances.increaseCountButton().isDisplayed()).toBeTruthy();
+
+      // Scale using edit count form
+      appInstances.cardInstances.editInstanceCount(2);
+      appInstances.cardInstances.waitForRunningInstancesText('2 / 2');
+      expect(appInstances.list.getTotalResults()).toBe(2);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+      expect(appInstances.list.table.getCell(1, 1).getText()).toBe('RUNNING');
+
+      appInstances.cardInstances.editInstanceCount(1);
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(1);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+
+      // Scale using +/- buttons
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      appInstances.cardInstances.decreaseCountButton().click();
+      const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
+      expect(confirm.getMessage()).toBe('Are you sure you want to set the instance count to 0?');
+      confirm.confirm();
+      appInstances.cardInstances.waitForRunningInstancesText('0 / 0');
+      // Content of empty instance table is tested elsewhere
+      expect(appInstances.list.getTotalResults()).toBe(0);
+
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      appInstances.cardInstances.increaseCountButton().click();
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(1);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+    });
+
+    it('Instance termination', () => {
+      const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.app.metadata.guid);
+      appInstances.goToInstancesTab();
+
+      // Initial state
+      appInstances.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+
+      // Terminate an instance
+      appInstances.list.table.openRowActionMenuByIndex(0).clickItem('Terminate');
+      const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
+      expect(confirm.getMessage()).toBe('Are you sure you want to terminate instance 0?');
+      confirm.confirm();
+      appInstances.cardInstances.waitForRunningInstancesText('0 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(0);
+    });
 
   });
 

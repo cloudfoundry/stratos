@@ -7,11 +7,11 @@ import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationPageEventsTab } from './application-page-events.po';
-import { ApplicationPageInstancesTab } from './application-page-instances.po';
-import { ApplicationPageRoutesTab } from './application-page-routes.po';
-import { ApplicationPageSummaryTab } from './application-page-summary.po';
-import { ApplicationPageVariablesTab } from './application-page-variables.po';
+import { ApplicationPageEventsTab } from './po/application-page-events.po';
+import { ApplicationPageInstancesTab } from './po/application-page-instances.po';
+import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
+import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
+import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 
 describe('Application View -', function () {
   let cfHelper: CFHelpers;
@@ -19,6 +19,7 @@ describe('Application View -', function () {
   const appName = ApplicationE2eHelper.createApplicationName();
   let app: APIResource<IApp>;
   let appSummary: ApplicationPageSummaryTab;
+  let defaultStack = '';
 
   function createTestAppAndNav(): promise.Promise<any> {
     return cfHelper.basicCreateApp(
@@ -46,6 +47,10 @@ describe('Application View -', function () {
 
     protractor.promise.controlFlow().execute(() => cfHelper.updateDefaultCfOrgSpace());
     protractor.promise.controlFlow().execute(() => createTestAppAndNav());
+  });
+
+  beforeAll(() => {
+    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
@@ -107,8 +112,8 @@ describe('Application View -', function () {
     });
 
     it('Info', () => {
-      expect(appSummary.cardInfo.memQuota.getValue()).toBe('1 GB');
-      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('1 GB');
+      expect(appSummary.cardInfo.memQuota.getValue()).toBe('23 MB');
+      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('35 MB');
       expect(appSummary.cardInfo.appState.getValue()).toBe('STOPPED');
       expect(appSummary.cardInfo.packageState.getValue()).toBe('PENDING');
       expect(appSummary.cardInfo.services.getValue()).toBe('0');
@@ -125,7 +130,7 @@ describe('Application View -', function () {
 
     it('Build Info', () => {
       expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('-');
-      expect(appSummary.cardBuildInfo.stack.getValue()).toBe('opensuse42');
+      expect(appSummary.cardBuildInfo.stack.getValue()).toBe(defaultStack);
     });
 
     it('Deployment Info', () => {

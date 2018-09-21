@@ -37,6 +37,7 @@ export class UAASetupEffect {
       params.set('password', setupData.password);
       params.set('skip_ssl_validation', setupData.skip_ssl_validation.toString() || 'false');
       params.set('uaa_endpoint', setupData.uaa_endpoint);
+      params.set('use_sso', setupData.use_sso.toString() || 'false');
 
       if (setupData.console_client_secret) {
         params.set('console_client_secret', setupData.console_client_secret);

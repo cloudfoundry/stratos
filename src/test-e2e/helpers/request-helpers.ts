@@ -61,6 +61,7 @@ export class RequestHelpers {
   sendRequest(req, options, body?, formData?): promise.Promise<any> {
 
     const p = promise.defer<any>();
+    const reqObj = req || this.newRequest();
 
     options.url = this.getHost() + '/' + options.url;
     if (body) {
@@ -69,20 +70,20 @@ export class RequestHelpers {
       options.formData = formData;
     }
 
-    if (req._xsrfToken) {
+    if (reqObj._xsrfToken) {
       options.headers = options.headers || {};
-      options.headers['x-xsrf-token'] = req._xsrfToken;
+      options.headers['x-xsrf-token'] = reqObj._xsrfToken;
     }
 
     E2E.debugLog('REQ: ' + options.method + ' ' + options.url);
     E2E.debugLog('   > ' + JSON.stringify(options));
 
-    req(options).then((response) => {
+    reqObj(options).then((response) => {
       E2E.debugLog('OK');
 
       // Get XSRF Token
       if (response.headers['x-xsrf-token'] ) {
-        req._xsrfToken = response.headers['x-xsrf-token'];
+        reqObj._xsrfToken = response.headers['x-xsrf-token'];
       }
       p.fulfill(response.body);
     }).catch((e) => {

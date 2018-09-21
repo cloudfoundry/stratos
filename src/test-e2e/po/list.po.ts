@@ -3,6 +3,7 @@ import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
+import { MenuComponent } from './menu.po';
 import { MetaCard, MetaCardTitleType } from './meta-card.po';
 
 const until = protractor.ExpectedConditions;
@@ -44,7 +45,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData(): promise.Promise<any> {
+  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -59,11 +60,19 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number): promise.Promise<any> {
+  selectRow(index: number, radioButton = true): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
-      return rows[index].element(by.css('.mat-radio-button')).click();
+      return rows[index].element(by.css(radioButton ? '.mat-radio-button' : '.mat-checkbox')).click();
     });
+  }
+
+  waitUntilNotBusy() {
+    return Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+    ).then(() => Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row-wrapper__blocked'))
+    ));
   }
 
   getHighlightedRow(): promise.Promise<number> {
@@ -80,6 +89,15 @@ export class ListTableComponent extends Component {
         }
         return -1;
       });
+  }
+
+  openRowActionMenuByIndex(index: number): MenuComponent {
+    return this.openRowActionMenuByRow(this.getRows().get(index));
+  }
+
+  openRowActionMenuByRow(row: ElementFinder): MenuComponent {
+    row.element(by.css('app-table-cell-actions button')).click();
+    return new MenuComponent();
   }
 
   toggleSort(headerTitle: string): promise.Promise<any> {
@@ -204,6 +222,14 @@ export class ListHeaderComponent extends Component {
 
   toggleSortOrder() {
     this.findSortSection().element(by.css('button')).click();
+  }
+
+  getAdd(): ElementFinder {
+    return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
+  }
+
+  getIconButton(iconText: string): ElementFinder {
+    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
 }

@@ -17,7 +17,7 @@ const tableColumnSelect = {
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
   class: 'table-column-select',
-  cellFlex: '0 0 75px'
+  cellFlex: '0 0 60px'
 };
 
 const tableColumnAction = {

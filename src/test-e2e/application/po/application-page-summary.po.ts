@@ -1,11 +1,11 @@
 import { ApplicationBasePage } from './application-page.po';
-import { CardAppBuildInfo } from './po/card-app-build-info.po';
-import { CardAppCfInfo } from './po/card-app-cf-info.po';
-import { CardAppDeployInfo } from './po/card-app-deploy-info.po';
-import { CardAppInfo } from './po/card-app-info.po';
-import { CardAppInstances } from './po/card-app-instances.po';
-import { CardAppStatus } from './po/card-app-status.po';
-import { CardAppUptime } from './po/card-app-uptime.po';
+import { CardAppBuildInfo } from './card-app-build-info.po';
+import { CardAppCfInfo } from './card-app-cf-info.po';
+import { CardAppDeployInfo } from './card-app-deploy-info.po';
+import { CardAppInfo } from './card-app-info.po';
+import { CardAppInstances } from './card-app-instances.po';
+import { CardAppStatus } from './card-app-status.po';
+import { CardAppUptime } from './card-app-uptime.po';
 
 export class ApplicationPageSummaryTab extends ApplicationBasePage {
 
