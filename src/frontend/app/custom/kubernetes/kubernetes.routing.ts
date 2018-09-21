@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import {
   HelmReleasePodsTabComponent,
-} from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
+} from './helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
 import { HelmReleaseComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release.component';
 import { HelmReleasePodComponent } from './helm-release-pod/helm-release-pod.component';
 import {

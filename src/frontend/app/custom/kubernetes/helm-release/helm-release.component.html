@@ -1,5 +1,5 @@
-<app-page-header [tabs]="tabLinks">
-  <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}/{{ helmReleaseService.helmReleaseName }}</h1>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]=" tabLinks">
+  <h1>{{ helmReleaseService.helmReleaseName }}</h1>
   <div class="page-header-right">
   </div>
 </app-page-header>
