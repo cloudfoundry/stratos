@@ -2,7 +2,7 @@
 
 Weekly status updates are published here.
 
-## 20th September 2018
+## 21st September 2018
 
 This week saw the release of 2.1.0 - the highlights are:
 
@@ -37,7 +37,7 @@ Fixes/Misc:
 - Fix for NULL Client Secret bug [#3015](https://github.com/cloudfoundry-incubator/stratos/pull/3015)
 - Fix bug where token IDs are not set properly when upgrading from a previous version [#3017](https://github.com/cloudfoundry-incubator/stratos/pull/3017)
 
-## 12th September 2018
+## 14th September 2018
 
 We've been preparing the 2.1.0 release this week. This will be published next week. Going forward we will be publishing a new release every month. The release notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md#210).
 
