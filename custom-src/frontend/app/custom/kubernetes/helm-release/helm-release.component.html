@@ -1,10 +1,8 @@
-<app-page-header>
+<app-page-header [tabs]="tabLinks">
   <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}/{{ helmReleaseService.helmReleaseName }}</h1>
   <div class="page-header-right">
   </div>
 </app-page-header>
-<app-page-subheader [tabs]="tabLinks">
-</app-page-subheader>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Release details'">
   <router-outlet></router-outlet>
 </app-loading-page>
