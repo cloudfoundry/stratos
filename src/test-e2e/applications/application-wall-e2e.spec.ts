@@ -14,7 +14,7 @@ import { ApplicationsPage } from './applications.po';
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-app-wall-tests';
 
-fdescribe('Application Wall Tests -', () => {
+describe('Application Wall Tests -', () => {
 
   let cfHelper: CFHelpers;
   let defaultCf: E2EConfigCloudFoundry;
