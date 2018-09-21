@@ -12,7 +12,10 @@ export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 /* tslint:disable */
 export function getInitialTestStoreState(): AppState {
   return {
-    kubernetesInfo: {},
+    kubernetesInfo: {
+      nodes: {},
+      pods: {}
+    },
     auth: {
       loggedIn: true,
       loggingIn: false,
@@ -3893,7 +3896,6 @@ export function getInitialTestStoreState(): AppState {
       kubernetesService: {},
       kubernetesStatefulSet: {},
       kubernetesDeployment: {},
-      servicePlanVisibility: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
           entity: {
