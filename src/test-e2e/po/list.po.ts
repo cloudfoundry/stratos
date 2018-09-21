@@ -200,8 +200,13 @@ export class ListHeaderComponent extends Component {
   getFilterText(index = 0): promise.Promise<string> {
     return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
   }
-  selectFilterOption(index: number): promise.Promise<any> {
-    return this.getFilterOptions().then(options => options[index].click());
+
+  selectFilterOption(index: number, valueIndex): promise.Promise<any> {
+    return this.getFilterOptions(index).then(options => options[valueIndex].click());
+  }
+
+  getMultiFilterForm(): FormComponent {
+    return new FormComponent(this.locator.element(by.className('list-component__header__left--multi-filters')));
   }
 
   getRefreshListButton(): ElementFinder {
@@ -254,12 +259,13 @@ export class ListPaginationComponent extends Component {
     return this.locator.element(by.css('.mat-paginator-page-size'));
   }
 
-  getPageSize(): promise.Promise<string> {
-    return this.getPageSizeForm().getText('mat-select-1');
+  getPageSize(customCtrlName?: string): promise.Promise<string> {
+    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-1');
   }
 
-  setPageSize(pageSize): promise.Promise<void> {
-    return this.getPageSizeForm().fill({ 'mat-select-1': pageSize });
+  setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
+    const name = customCtrlName || 'mat-select-1';
+    return this.getPageSizeForm().fill({ [name]: pageSize });
   }
 
   getPageSizeForm(): FormComponent {

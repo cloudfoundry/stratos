@@ -27,7 +27,7 @@ describe('Service Instances Wall', () => {
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
 
   });
@@ -63,7 +63,7 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should change filter text when an option is selected', () => {
-    servicesWallPage.serviceInstancesList.header.selectFilterOption(1);
+    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 1);
     servicesWallPage.serviceInstancesList.header.getFilterText().then(text => {
       expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });
