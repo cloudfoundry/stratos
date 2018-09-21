@@ -13,7 +13,7 @@ import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
-import { getCanShareTokenForEndpointType } from '../endpoint-helpers';
+import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
 
 import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -42,24 +42,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private bodyContent = '';
 
-  private authTypes = [
-    {
-      name: 'Username and Password',
-      value: 'creds',
-      form: {
-        username: ['', Validators.required],
-        password: ['', Validators.required],
-      },
-      types: new Array<EndpointType>('cf', 'metrics')
-    },
-    {
-      name: 'Single Sign-On (SSO)',
-      value: 'sso',
-      form: {},
-      types: new Array<EndpointType>('cf')
-    },
-  ];
-
   private hasAttemptedConnect: boolean;
   public authTypesForEndpoint = [];
 
@@ -69,6 +51,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   // If we don't do this and if we're quick enough, we can navigate to the application page
   // and end up with an empty list where we should have results.
   public connectDelay = 1000;
+
+  authTypesMap = {};
+
+  public formType = '';
+
+  public authTypeData: any;
 
   constructor(
     public store: Store<AppState>,
@@ -82,8 +70,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       ssoAllowed: boolean,
     }
   ) {
+    const authTypes = getEndpointAuthTypes();
+
     // Populate the valid auth types for the endpoint that we want to connect to
-    this.authTypes.forEach(authType => {
+    authTypes.forEach(authType => {
+      this.authTypesMap[authType.value] = authType;
       if (authType.types.find(t => t === this.data.type)) {
         this.authTypesForEndpoint.push(authType);
       }
@@ -96,19 +87,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
 
     // Create the endpoint form
-    let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
-
-    // Auto-select SSO if it is available
-    const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
-    if (ssoIndex >= 0 ) {
-      autoSelected = this.authTypesForEndpoint[ssoIndex];
-    }
-
+    const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
     this.endpointForm = this.fb.group({
       authType: [autoSelected.value || '', Validators.required],
       authValues: this.fb.group(autoSelected.form || {}),
       systemShared: false
     });
+    this.formType = autoSelected.formType;
 
     this.setupObservables();
     this.setupSubscriptions();
@@ -116,9 +101,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   authChanged(e) {
     const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
+    this.formType = authType.formType;
     this.endpointForm.removeControl('authValues');
-    this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    const form = this.authTypesMap[authType.formType].form;
+    this.endpointForm.addControl('authValues', this.fb.group(form));
     this.bodyContent = '';
+    this.authTypeData = authType.data || {};
   }
 
   setupSubscriptions() {
@@ -188,7 +176,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canSubmit$ = observableCombineLatest(
       this.connecting$.pipe(startWith(false)),
       this.fetchingInfo$.pipe(startWith(false)),
-      this.valid$.pipe(startWith(this.endpointForm.valid))
+      this.valid$.pipe(startWith( this.endpointForm.valid))
     ).pipe(
       map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid));
   }
@@ -217,8 +205,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   submit() {
     this.hasAttemptedConnect = true;
-    const { guid, authType, authValues, systemShared } = this.endpointForm.value;
-
+    const { authType, authValues, systemShared } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,
@@ -227,6 +214,20 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       systemShared,
       this.bodyContent,
     ));
+  }
+
+  handleConfigFile($event) {
+    const file = $event;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.bodyContent = reader.result.toString();
+      this.endpointForm.controls.authValues.patchValue({config: file.name});
+    };
+    reader.onerror = () => {
+      this.endpointForm.patchValue({config: null});
+      this.bodyContent = '';
+    };
+    reader.readAsText(file);
   }
 
   ngOnDestroy() {

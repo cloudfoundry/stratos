@@ -60,7 +60,6 @@ export class CustomRouterStateSerializer
   declarations: [
     AppComponent,
     NoEndpointsNonAdminComponent,
-    PageNotFoundComponentComponent,
   ],
   imports: [
     BrowserModule,
@@ -82,9 +81,15 @@ export class CustomRouterStateSerializer
   ],
   providers: [
     LoggedInService,
+    ExtensionService,
+    DynamicExtenstionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private router: Router, private ext: ExtensionService) {
+    ext.init();
+  }
+}

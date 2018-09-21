@@ -1,3 +1,17 @@
 <app-page-header>
   <h1>Dashboard</h1>
 </app-page-header>
+
+<app-file-input placeholder="config" (onFileSelect)="handleConfigFile($event)" [accept]="true">
+</app-file-input>
+
+
+
+<form class="connection-dialog__form" (ngSubmit)="submit()">
+  <div>
+    <span>Specify `config` file:</span>
+    <mat-form-field [hidden]=true style="display: none">
+      <input matInput hidden=true>
+    </mat-form-field>
+  </div>      
+</form>
