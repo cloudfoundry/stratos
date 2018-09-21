@@ -11,6 +11,10 @@ Stratos provides a mechanism for customization - the following customizations ar
 
 In order to customize Stratos, you will need to fork the Stratos GitHub repository and apply customizations in your fork. Our aim is to minimize any merge conflicts that might occur when re-basing your fork with the upstream Stratos repository.
 
+We define several custom folders where you can place your customizations - we guarentee not to use these folders in the upstream Stratos GitHub repository, thus merge conflicts for these folders will be avoided.
+
+> Note: The information below is in the process of being updated - front-end customizations should now be directly placed in the folder `src/frontend/app/custom`.
+
 All customizations are placed within a top-level folder named `custom-src`. This folder should only exist in forks and will not exist in the main Stratos repository, so any changes made within this folder should be free from merge conflicts.
 
 The Stratos approach to customization uses symbolic links. We maintain a default set of resources in the folder `src/misc/custom`. When you run `npm install` or when you explicitly run `npm run customize`, a gulp task (in the file `build/fe-build.js`) runs and creates symbolic links, linking the required files to their expected locations withing the `src` folder.
