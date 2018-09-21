@@ -21,6 +21,7 @@ const E2E_REPORT_FOLDER = process.env['E2E_REPORT_FOLDER'] || './e2e-reports/' +
 var fs = require('fs');
 var path = require('path');
 var yaml = require('js-yaml');
+var browserstackHelper = require('./src/test-e2e/browserstack-helper.js');
 
 const secretsPath = path.join(__dirname, SECRETS_FILE)
 if (!fs.existsSync(secretsPath)) {
@@ -41,6 +42,11 @@ try {
 // This is the maximum amount of time ALL before/after/it's must execute in
 const timeout = 40000;
 const checkSuiteGlob = './src/test-e2e/check/*-e2e.spec.ts';
+
+const specReporterCustomProcessors = [];
+if (browserstackHelper.isConfigured()) {
+  specReporterCustomProcessors.push(browserstackHelper.reporterPlugIn);
+}
 
 exports.config = {
   allScriptsTimeout: timeout,
@@ -96,8 +102,9 @@ exports.config = {
     }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
-        displayStacktrace: true
-      }
+        displayStacktrace: true,
+      },
+      customProcessors: specReporterCustomProcessors
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
   }
@@ -107,4 +114,9 @@ exports.config = {
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
 if (headless) {
   exports.config.capabilities.chromeOptions.args = ['--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox'];
+}
+
+// Browserstack support
+if (browserstackHelper.isConfigured()) {
+  exports.config = browserstackHelper.configure(exports.config);
 }
