@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	RegisterMigration(20180813110300, "SSOSetupFlag", func(txn *sql.Tx, conf *goose.DBConf) error {
+	RegisterMigration(20180907123000, "SSOSetupFlag", func(txn *sql.Tx, conf *goose.DBConf) error {
 
 		addTokenID := "ALTER TABLE console_config ADD use_sso BOOLEAN NOT NULL DEFAULT FALSE"
 		_, err := txn.Exec(addTokenID)

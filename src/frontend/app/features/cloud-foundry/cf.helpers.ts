@@ -246,3 +246,7 @@ export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolea
     map(connectedCfs => connectedCfs.length > 1)
   );
 }
+
+export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
+  return array ? array.filter(entity => entity.metadata.guid === guid) : null;
+}

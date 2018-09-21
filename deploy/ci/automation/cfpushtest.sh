@@ -1,52 +1,11 @@
 #!/bin/bash
 
-function clean_orgs {
-
-ORGS=$(cf orgs | tail -n +3)
-echo "Cleaning up orgs"
-
-while read -r ORG; do
- if [[ $ORG == acceptance.e2e.* ]]; then
-   echo "Deleting org: $ORG"
-   cf delete-org $ORG -f
- fi
-done <<< "$ORGS"
-
-}
-
 echo "===================="
 echo "Stratos CF Push Test"
 echo "===================="
 
-FULL_STATUS=$(cf pcfdev status)
-echo "$FULL_STATUS"
-
-STATUS=$(echo "$FULL_STATUS" | head -n 1 -)
-if [ "$STATUS" == "Not Created" ]; then
-  echo "PCF DEV not created... starting"
-  cf pcfdev start -m 10240 -c 3
-else if [ "$STATUS" == "Running" ]; then
-  echo "PCF DEV is already running"
-  else if [ "$STATUS" == "Stopped" ]; then
-    echo "PCF DEV stopped... starting"
-    cf pcfdev start
-    else if [ "$STATUS" == "Suspended" ]; then
-      echo "Resuming PCF DEV"
-      cf pcfdev resume
-      else
-        echo "Stopping and starting PCF DEV"
-        cf pcfdev stop
-        cf pcfdev start
-      fi
-    fi
-  fi
-fi
-
-cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o e2e -s e2e
-cf apps
-
-# Clean up any old organisations
-clean_orgs
+DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${DIRPATH}/cfutils.sh"
 
 # We should be running in the Stratos GitHub folder
 
@@ -114,6 +73,13 @@ cp manifest.yml $MANIFEST
 echo "    env:" >> $MANIFEST
 echo "      SKIP_AUTO_REGISTER: true" >> $MANIFEST
 
+# SSO
+SUITE=""
+if [ "$2" == "sso" ] || [ "$3" == "sso" ] ; then
+  echo "      SSO_LOGIN: true" >> $MANIFEST
+  SUITE=" --suite=sso"
+fi  
+
 if [ -n "${DB_TYPE}" ]; then
   echo "    services:" >> $MANIFEST
   echo "    - $DB" >> $MANIFEST
@@ -141,7 +107,9 @@ if [ $RET -ne 0 ]; then
   set -e
 fi
 
-wget ${TEST_CONFIG_URL} -O secrets.yaml --no-check-certificate
+# Get the E2E config
+rm -f secrets.yaml
+curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 echo "headless: true" >> secrets.yaml
 
 rm -rf node_modules
@@ -153,8 +121,13 @@ mkdir -p ./e2e-reports
 export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io
+./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}
 RET=$?
+
+# If we had test failures then copy console log to reports folder
+if [ $RET -ne 0 ]; then
+  cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
+fi 
 
 # Delete the app
 cf delete -f -r console
