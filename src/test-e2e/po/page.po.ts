@@ -36,7 +36,7 @@ export abstract class Page {
   constructor(public navLink?: string) { }
 
   navigateTo(): promise.Promise<any> {
-    //return browser.setLocation(this.navLink);
+    // was: return browser.setLocation(this.navLink);
     return browser.executeScript(pUrl => window.location.href = pUrl, this.navLink);
   }
 
