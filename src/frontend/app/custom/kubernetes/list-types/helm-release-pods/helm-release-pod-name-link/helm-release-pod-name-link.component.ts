@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { HelmReleaseService } from '../../../services/helm-release.service';
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
-import { KubernetesPod } from '../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
+import { HelmReleaseService } from '../../../services/helm-release.service';
+import { KubernetesPod } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-helm-release-pod-name-link',
