@@ -49,7 +49,8 @@ jobs:
     - sudo apt-get -qq update
     - sudo apt-get install -y ffmpeg
     script:
-    - xvfb-run --server-args="-screen 0 1280x1024x24" "./deploy/ci/travis/run-e2e-tests.sh video"
+    - export DIR=$(pwd)
+    - xvfb-run --server-args="-screen 0 1280x1024x24" "$DIR/deploy/ci/travis/run-e2e-tests.sh video"
     - "./deploy/ci/travis/upload-e2e-test-report.sh"
   - name: Frontend Unit Tests
     env:
