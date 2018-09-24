@@ -84,7 +84,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public paginationKey: string;
   private transformEntity: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
-  public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[];
+  public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[] = [];
 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
@@ -131,11 +131,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).subscribe();
 
     const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
-      const validPagesCountChange = this.transformEntity;
       if (
         paginationEntity.totalResults !== entities.length ||
         paginationEntity.clientPagination.totalResults !== entities.length
       ) {
+        console.log('setting results count')
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
       }
     };
