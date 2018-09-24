@@ -97,7 +97,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     },
     {
       columnId: 'mappedapps',
-      headerCell: () => 'Application Attached',
+      headerCell: () => 'Attached Applications',
       cellComponent: TableCellRouteAppsAttachedComponent,
       cellFlex: '4',
       cellConfig: {

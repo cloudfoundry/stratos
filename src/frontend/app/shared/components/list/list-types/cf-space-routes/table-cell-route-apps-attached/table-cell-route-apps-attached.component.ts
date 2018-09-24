@@ -1,17 +1,17 @@
-import { Component, Input } from '@angular/core';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { Component, Input, OnInit } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfRoute } from '../../../../../../store/types/route.types';
 import { AppChip } from '../../../../chips/chips.component';
-import { first, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-table-cell-route-apps-attached',
   templateUrl: './table-cell-route-apps-attached.component.html',
   styleUrls: ['./table-cell-route-apps-attached.component.scss']
 })
-export class TableCellRouteAppsAttachedComponent {
+export class TableCellRouteAppsAttachedComponent implements OnInit {
   boundApps$: Observable<AppChip[]>;
   config$ = new BehaviorSubject(null);
   row$ = new BehaviorSubject(null);
