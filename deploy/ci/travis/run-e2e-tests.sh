@@ -55,7 +55,7 @@ mkdir -p "${E2E_REPORT_FOLDER}"
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
   echo "Starting video capture"
-  ffmpeg -video_size 1024x768 -framerate 25 -f x11grab -i :99.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 &
+  ffmpeg -video_size 1280x1024 -framerate 25 -f x11grab -i :0.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 > /dev/null &
   FFMPEG=$!
 fi
 
