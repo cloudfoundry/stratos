@@ -4,6 +4,7 @@ import { Component } from './component.po';
 
 export enum SideNavMenuItem {
   Applications = 'Applications',
+  Marketplace = 'Marketplace',
   Services = 'Services',
   CloudFoundry = 'Cloud Foundry',
   Endpoints = 'Endpoints',

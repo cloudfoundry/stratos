@@ -193,6 +193,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     if (filterVal === null || filterVal === undefined || filterVal === '') {
       return undefined;
     }
-    return filter;
+    return filterVal;
   }
 }
