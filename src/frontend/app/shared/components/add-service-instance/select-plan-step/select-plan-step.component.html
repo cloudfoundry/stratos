@@ -18,7 +18,7 @@
     <app-metadata-item label="Free"> {{ isFree(selPlan) | titlecase}} </app-metadata-item>
     <ng-container *ngIf="!selPlan.entity.entity.free">
       <div *ngFor="let cost of selPlan.extra.costs">
-        <app-metadata-item label="Cost per {{ cost.unit | titlecase }} In {{ getCostCurrency(cost, false) }}"> {{ getCostValue(cost) }} </app-metadata-item>
+        <app-metadata-item label="Cost per {{ cost.unit | titlecase }}"> {{ getCostValue(cost) | currency:getCostCurrency(cost, false):'symbol-narrow':'1.2-2':getCurrencyLocale(cost, false) }} </app-metadata-item>
       </div>
     </ng-container>
     <app-metadata-item label="Additional Information" *ngIf="hasAdditionalInfo(selPlan)">

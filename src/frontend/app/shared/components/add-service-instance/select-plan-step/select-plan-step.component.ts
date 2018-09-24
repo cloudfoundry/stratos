@@ -1,4 +1,4 @@
-import { TitleCasePipe, getCurrencySymbol } from '@angular/common';
+import { TitleCasePipe, getCurrencySymbol, registerLocaleData } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,6 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import localeFr from '@angular/common/locales/fr';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -88,6 +89,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     private modeService: CsiModeService
 
   ) {
+    registerLocaleData(localeFr);
 
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
@@ -211,7 +213,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   getCost = (cost: IServicePlanCost, symbol: boolean) => {
     if (!cost.amount) { return '-'; }
     return `${this.getCostCurrency(cost, symbol)}${this.getCostValue(cost)}`;
- }
+  }
   getCostCurrency = (cost: IServicePlanCost, symbol: boolean) => {
     const currency = Object.keys(cost.amount)[0];
     if (!symbol) {
@@ -220,6 +222,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     return getCurrencySymbol(currency.toUpperCase(), 'wide');
   }
   getCostValue = (cost: IServicePlanCost) => cost.amount[this.getCostCurrency(cost, false)];
+  getCurrencyLocale = (cost: IServicePlanCost) => this.getCostCurrency(cost, false) === 'EUR' ? 'fr' : 'en-US';
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(
