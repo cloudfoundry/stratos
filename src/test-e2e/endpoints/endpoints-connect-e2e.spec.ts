@@ -11,7 +11,7 @@ import { SnackBarComponent } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
-describe('Endpoints', () => {
+fdescribe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
 
   describe('Connect/Disconnect endpoints -', () => {
