@@ -54,7 +54,7 @@ export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUM
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
   echo "Starting video capture"
-  ffmpeg -video_size 1280x768 -framerate 25 -f x11grab -i ${DISPLAY} ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 &
+  ffmpeg -video_size 1024x768 -framerate 25 -f x11grab -i :99.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 &
   FFMPEG=$!
 fi
 
