@@ -45,13 +45,13 @@ jobs:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
-  - name: E2E Tests
+    name: E2E Tests
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     # Install ffmpeg so we can capture a video of the display as the tests run
-    - add-apt-repository -y ppa:mc3man/trusty-media
-    - apt-get -qq update
-    - apt-get install -y ffmpeg
+    - sudo add-apt-repository -y ppa:mc3man/trusty-media
+    - sudo apt-get -qq update
+    - sudo apt-get install -y ffmpeg
     script:
     - "./deploy/ci/travis/run-e2e-tests.sh quick video"
     - "./deploy/ci/travis/upload-e2e-test-report.sh"
