@@ -36,7 +36,7 @@ export abstract class Page {
   constructor(public navLink?: string) { }
 
   navigateTo(): promise.Promise<any> {
-    return browser.setLocation(this.navLink);
+    return browser.get(this.navLink);
   }
 
   isActivePage(): promise.Promise<boolean> {
