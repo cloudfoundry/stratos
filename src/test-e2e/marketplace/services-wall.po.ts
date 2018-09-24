@@ -1,4 +1,4 @@
-import { ElementArrayFinder, ElementFinder, promise } from 'protractor';
+import { ElementArrayFinder, ElementFinder, promise, element, by } from 'protractor';
 
 import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
@@ -19,6 +19,10 @@ export class ServicesWallPage extends Page {
   serviceInstancesList = new ListComponent();
   constructor() {
     super('/services');
+  }
+
+  clickCreateServiceInstance(): any {
+    return this.helpers.waitForElementAndClick(element(by.buttonText('add')));
   }
 
   getServiceInstances = (): ElementArrayFinder => {
