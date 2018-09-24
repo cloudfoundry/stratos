@@ -10,6 +10,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
 import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
 import { KubernetesNode } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
+import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
 
 @Injectable()
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
@@ -18,9 +19,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   columns: Array<ITableColumn<KubernetesNode>> = [
     {
       columnId: 'name', headerCell: () => 'ID',
-      cellDefinition: {
-        getValue: (row) => `${row.metadata.name}`
-      },
+      cellComponent: KubernetesNodeLinkComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',

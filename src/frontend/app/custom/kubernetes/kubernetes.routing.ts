@@ -18,6 +18,7 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
+import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -29,6 +30,32 @@ const kubernetes: Routes = [{
   data: {
     uiFullView: true
   },
+},
+{
+  path: ':kubeId/nodes/:nodeUid',
+  component: KubernetesNodeComponent,
+  data: {
+    uiFullView: true
+  },
+  children: [
+    {
+      path: '',
+      redirectTo: 'summary',
+      pathMatch: 'full'
+    },
+    {
+      path: 'summary',
+      component: HelmReleaseSummaryComponent
+    },
+    {
+      path: 'pods',
+      component: HelmReleasePodsTabComponent
+    },
+    {
+      path: 'services',
+      component: HelmReleaseServicesComponent
+    }
+  ]
 },
 {
   path: ':kubeId/apps/:releaseName/:namespaceName',

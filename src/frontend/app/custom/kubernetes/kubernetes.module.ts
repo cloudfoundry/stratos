@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import {
+  PodUsageComponent,
+} from '../../../../../src/frontend/app/custom/kubernetes/helm-release-pod/pod-usage/pod-usage.component';
+import {
   HelmReleasePodsTabComponent,
 } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
 import {
@@ -31,6 +34,9 @@ import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link
 import {
   KubernetesNodeCapacityComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
+import {
+  KubernetesNodeLinkComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { HelmReleaseService } from './services/helm-release.service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
@@ -39,7 +45,11 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { PodUsageComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release-pod/pod-usage/pod-usage.component';
+import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
+import { KubernetesNodeService } from './services/kubernetes-node.service';
+import { KubernetesNodeMetricsComponent } from './list-types/kubernetes-nodes/kubernetes-node-metrics/kubernetes-node-metrics.component';
+import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
+import { KubernetesNodePodsComponent } from './list-types/kubernetes-nodes/kubernetes-node-pods/kubernetes-node-pods.component';
 
 @NgModule({
   imports: [
@@ -68,20 +78,27 @@ import { PodUsageComponent } from '../../../../../src/frontend/app/custom/kubern
     HelmReleasePodComponent,
     PodChartComponent,
     HelmReleasePodNameLinkComponent,
-    PodUsageComponent
+    PodUsageComponent,
+    KubernetesNodeLinkComponent,
+    KubernetesNodeComponent,
+    KubernetesNodeMetricsComponent,
+    KubernetesNodeSummaryComponent,
+    KubernetesNodePodsComponent
   ],
   providers: [
     KubernetesService,
     BaseKubeGuid,
     KubernetesEndpointService,
-    HelmReleaseService
+    HelmReleaseService,
+    KubernetesNodeService
   ],
   entryComponents: [
     KubernetesNodeCapacityComponent,
     KubernetesPodTagsComponent,
     AppLinkComponent,
     HelmReleasePodNameLinkComponent,
-    PodUsageComponent
+    PodUsageComponent,
+    KubernetesNodeLinkComponent
   ]
 })
 export class KubernetesModule {
