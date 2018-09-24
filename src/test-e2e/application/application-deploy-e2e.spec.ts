@@ -1,4 +1,4 @@
-import { browser, promise, protractor } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import { IApp } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
@@ -16,8 +16,6 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
-
-const until = protractor.ExpectedConditions;
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -424,6 +422,7 @@ describe('Application Deploy -', function () {
       expect(confirm.getMessage()).toBe('Are you sure you want to terminate instance 0?');
       confirm.confirm();
       appInstances.cardInstances.waitForRunningInstancesText('0 / 1');
+      appInstances.list.empty.getDefault().waitUntilShown();
       expect(appInstances.list.getTotalResults()).toBe(0);
     });
 
