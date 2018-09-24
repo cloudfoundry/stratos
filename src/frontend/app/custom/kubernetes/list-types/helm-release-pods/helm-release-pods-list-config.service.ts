@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
 import { Store } from '@ngrx/store';
-
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
-import { HelmReleasePodsDataSource } from './helm-release-pods-data-source';
 import { HelmReleaseService } from '../../services/helm-release.service';
+import { KubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
 import { HelmReleasePodNameLinkComponent } from './helm-release-pod-name-link/helm-release-pod-name-link.component';
+import { HelmReleasePodsDataSource } from './helm-release-pods-data-source';
+
+
 @Injectable()
 export class HelmReleasePodsListConfigService extends KubernetesPodsListConfigService {
   constructor(
