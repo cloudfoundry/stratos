@@ -76,7 +76,7 @@ export class ApplicationE2eHelper {
     if (count >= maxChain || abortChainFc(currentValue)) {
       return promise.fullyResolved(currentValue);
     }
-    e2e.log('Chaining requests. Count: ' + count);
+    e2e.debugLog('Chaining requests. Count: ' + count);
 
     return nextChainFc().then(res => {
       if (abortChainFc(res)) {
@@ -99,7 +99,7 @@ export class ApplicationE2eHelper {
     pollForMissingRoutes = true
   ): promise.Promise<any> => {
     if (!haveApp && !needApp) {
-      e2e.log(`Skipping Deleting App...`);
+      e2e.debugLog(`Skipping Deleting App...`);
       return;
     }
 
@@ -112,11 +112,11 @@ export class ApplicationE2eHelper {
         return res.app;
       });
 
-    e2e.log(`Deleting App...`);
+    e2e.debugLog(`Deleting App...`);
 
     return appP
       .then(app => {
-        e2e.log(`'${app.entity.name}': Found app to delete`);
+        e2e.debugLog(`'${app.entity.name}': Found app to delete`);
 
         const promises = [];
 
@@ -138,10 +138,10 @@ export class ApplicationE2eHelper {
 
         promises.push(routes.then(appRoutes => {
           if (!appRoutes || !appRoutes.length) {
-            e2e.log(`'${app.entity.name}': Deleting App Routes... None found'. `);
+            e2e.debugLog(`'${app.entity.name}': Deleting App Routes... None found'. `);
             return promise.fullyResolved({});
           }
-          e2e.log(`'${app.entity.name}': Deleting App Routes... '${appRoutes.map(route => route.entity.host).join(',')}'. `);
+          e2e.debugLog(`'${app.entity.name}': Deleting App Routes... '${appRoutes.map(route => route.entity.host).join(',')}'. `);
           return promise.all(appRoutes.map(route =>
             this.cfRequestHelper.sendCfDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false')
           ));
@@ -157,7 +157,7 @@ export class ApplicationE2eHelper {
 
         // Delete app
         return deps.then(() => this.cfHelper.basicDeleteApp(cfGuid, app.metadata.guid)).then(() => {
-          e2e.log(`'${app.entity.name}': Successfully deleted.`);
+          e2e.debugLog(`'${app.entity.name}': Successfully deleted.`);
         });
       })
       .catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));

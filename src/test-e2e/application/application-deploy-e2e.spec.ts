@@ -69,7 +69,7 @@ describe('Application Deploy -', function () {
       expect(deployApp.header.getTitleText()).toBe('Deploy');
 
       // Check the steps
-      e2e.log(`${loggingPrefix} Checking Steps`);
+      e2e.debugLog(`${loggingPrefix} Checking Steps`);
       deployApp.stepper.getStepNames().then(steps => {
         expect(steps.length).toBe(5);
         expect(steps[0]).toBe('Cloud Foundry');
@@ -78,7 +78,7 @@ describe('Application Deploy -', function () {
         expect(steps[3]).toBe('Overrides (Optional)');
         expect(steps[4]).toBe('Deploy');
       });
-      e2e.log(`${loggingPrefix} Cf/Org/Space Step`);
+      e2e.debugLog(`${loggingPrefix} Cf/Org/Space Step`);
       expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
       promise.all([
         deployApp.stepper.getStepperForm().getText('cf'),
@@ -101,7 +101,7 @@ describe('Application Deploy -', function () {
       // Press next to get to source step
       deployApp.stepper.next();
 
-      e2e.log(`${loggingPrefix} Source Step`);
+      e2e.debugLog(`${loggingPrefix} Source Step`);
       expect(deployApp.stepper.getActiveStepName()).toBe('Source');
       expect(deployApp.stepper.canNext()).toBeFalsy();
       deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
@@ -110,7 +110,7 @@ describe('Application Deploy -', function () {
       deployApp.stepper.waitUntilCanNext('Next');
       deployApp.stepper.next();
 
-      e2e.log(`${loggingPrefix} Source Config Step`);
+      e2e.debugLog(`${loggingPrefix} Source Config Step`);
       expect(deployApp.stepper.getActiveStepName()).toBe('Source Config');
 
       const commits = deployApp.getCommitList();
@@ -123,7 +123,7 @@ describe('Application Deploy -', function () {
       });
 
       commits.selectRow(0);
-      e2e.log(`${loggingPrefix} Select a commit (selected)`);
+      e2e.debugLog(`${loggingPrefix} Select a commit (selected)`);
 
       deployedCommit = commits.getCell(0, 2).getText();
       expect(deployApp.stepper.canNext()).toBeTruthy();
@@ -131,14 +131,14 @@ describe('Application Deploy -', function () {
       // Press next to get to overrides step
       deployApp.stepper.next();
 
-      e2e.log(`${loggingPrefix} Overrides Step`);
+      e2e.debugLog(`${loggingPrefix} Overrides Step`);
       expect(deployApp.stepper.canNext()).toBeTruthy();
 
       const overrides = deployApp.getOverridesForm();
       overrides.waitUntilShown();
       overrides.fill({ name: testAppName, random_route: true });
 
-      e2e.log(`${loggingPrefix} Overrides Step - overrides set`);
+      e2e.debugLog(`${loggingPrefix} Overrides Step - overrides set`);
 
       // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
       // waiting for angular if we don't turn off.
@@ -147,15 +147,15 @@ describe('Application Deploy -', function () {
       // Press next to deploy the app
       deployApp.stepper.next();
 
-      e2e.log(`${loggingPrefix} Deploying Step (wait)`);
+      e2e.debugLog(`${loggingPrefix} Deploying Step (wait)`);
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
-      e2e.log(`${loggingPrefix} Deploying Step (after wait)`);
+      e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
       // Click next
       deployApp.stepper.next();
 
-      e2e.log(`${loggingPrefix} Waiting For Application Summary Page`);
+      e2e.debugLog(`${loggingPrefix} Waiting For Application Summary Page`);
       // Should be app summary
       browser.wait(ApplicationBasePage.detect()
         .then(appSummary => {
@@ -252,7 +252,7 @@ describe('Application Deploy -', function () {
       beforeAll(() => {
         const appSummary = new ApplicationPageSummaryTab(appDetails.cfGuid, appDetails.app.metadata.guid);
         appSummary.goToSummaryTab();
-        e2e.log('Waiting for app status to be `Deployed - Online`');
+        e2e.debugLog('Waiting for app status to be `Deployed - Online`');
         appSummary.cardStatus.waitForStatus('Deployed');
         appSummary.cardStatus.waitForSubStatus('Online');
       });
