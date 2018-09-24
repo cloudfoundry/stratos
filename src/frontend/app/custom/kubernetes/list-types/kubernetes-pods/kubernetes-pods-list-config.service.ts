@@ -98,9 +98,6 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Pods'
-  };
   enableTextFilter = false;
 
   getGlobalActions = () => null;
@@ -112,8 +109,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
 
   constructor(
     private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
-    private kubeId: BaseKubeGuid,
+    kubeId: BaseKubeGuid,
   ) {
     this.podsDataSource = new KubernetesPodsDataSource(this.store, kubeId, this);
   }

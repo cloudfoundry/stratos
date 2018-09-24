@@ -1,3 +1,4 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -29,6 +30,7 @@ import {
   KubernetesPod,
   KubernetesStatefuleSet,
   KubeService,
+  ConfigMap,
 } from './kube.types';
 import {
   GeKubernetesDeployments,
@@ -50,13 +52,13 @@ import {
   KubeAction,
 } from './kubernetes.actions';
 
-export type GetID<T> = (p: T)  => string;
+export type GetID<T> = (p: T) => string;
 
 @Injectable()
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>
   ) { }
@@ -68,7 +70,7 @@ export class KubernetesEffects {
       return this.processAction<KubernetesNode>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
         kubernetesNodesSchemaKey,
-          getUid);
+        getUid);
     })
   );
 
@@ -79,7 +81,7 @@ export class KubernetesEffects {
       return this.processAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
         kubernetesPodsSchemaKey,
-          getUid);
+        getUid);
     })
   );
 
@@ -90,7 +92,7 @@ export class KubernetesEffects {
       return this.processAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
         kubernetesPodsSchemaKey,
-          getUid);
+        getUid);
     })
   );
 
@@ -102,7 +104,7 @@ export class KubernetesEffects {
       return this.processAction<KubeService>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/services`,
         kubernetesServicesSchemaKey,
-          getUid);
+        getUid);
     })
   );
 
@@ -114,7 +116,7 @@ export class KubernetesEffects {
       return this.processAction<KubernetesNamespace>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
         kubernetesNamespacesSchemaKey,
-          getUid);
+        getUid);
     })
 
   );
@@ -127,7 +129,7 @@ export class KubernetesEffects {
       return this.processAction<KubernetesStatefuleSet>(action,
         `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`,
         kubernetesStatefulSetsSchemaKey,
-          getUid);
+        getUid);
     })
   );
 
@@ -137,9 +139,9 @@ export class KubernetesEffects {
 
       const getUid: GetID<KubernetesDeployment> = (p) => p.metadata.uid;
       return this.processAction<KubernetesDeployment>(action,
-         `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
-          kubernetesDeploymentsSchemaKey,
-          getUid);
+        `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
+        kubernetesDeploymentsSchemaKey,
+        getUid);
     })
   );
 
@@ -147,50 +149,42 @@ export class KubernetesEffects {
   fetchKubernetesAppsInfo$ = this.actions$.ofType<GetKubernetesApps>(GET_KUBERNETES_APP_INFO).pipe(
     flatMap(action => {
       this.store.dispatch(new StartRequestAction(action));
-      const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
+      const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
         headers: headers
       };
       return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
+        .get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
         .pipe(
           mergeMap(response => {
-            const info = response.json();
-            const mappedData = {
-              entities: { [kubernetesAppsSchemaKey]: {} },
-              result: []
-            } as NormalizedResponse;
-
             const id = action.kubeGuid;
-            const releases = info[id].items
+            const items = response[id].items as Array<any>;
+            const releases = items
               .filter((configMap) => !!configMap.metadata.labels &&
-                !!configMap.metadata.labels['NAME'] &&
-                configMap.metadata.labels['OWNER'] === 'TILLER')
+                !!configMap.metadata.labels.NAME &&
+                configMap.metadata.labels.OWNER === 'TILLER'
+              )
               .map((configMap: KubernetesConfigMap) => ({
-                name: configMap.metadata.labels['NAME'],
+                name: configMap.metadata.labels.NAME,
                 kubeId: action.kubeGuid,
                 createdAt: configMap.metadata.creationTimestamp,
-                status:  configMap.metadata.labels['STATUS'],
-                version:  configMap.metadata.labels['VERSION']
+                status: configMap.metadata.labels.STATUS,
+                version: configMap.metadata.labels.VERSION
               })
-              );
-            // const appReleases = releases.map((relaseObj) => (
-            //   {
-            //     name: relaseObj.name,
-            //     kubeId: action.kubeGuid,
-            //     namespace: relaseObj.namespace,
-            //   })
-            // );
+              ).reduce((res, app) => {
+                const _id = `${app.kubeId}-${app.name}`;
+                res.entities[kubernetesAppsSchemaKey][_id] = app;
+                if (res.result.indexOf(_id) === -1) {
+                  res.result.push(_id);
+                }
+                return res;
+              }, {
+                entities: { [kubernetesAppsSchemaKey]: {} },
+                result: []
+              } as NormalizedResponse);
 
-            releases.forEach(r => {
-              const _id = `${r.kubeId}-${r.name}`;
-              mappedData.entities[kubernetesAppsSchemaKey][_id] = r;
-              if (mappedData.result.indexOf(_id) === -1) {
-                mappedData.result.push(_id);
-              }
-            });
             return [
-              new WrapperRequestActionSuccess(mappedData, action)
+              new WrapperRequestActionSuccess(releases, action)
             ];
           }),
           catchError(err => [
@@ -200,27 +194,28 @@ export class KubernetesEffects {
     })
   );
 
-  private processAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T> ) {
+  private processAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>) {
     this.store.dispatch(new StartRequestAction(action));
-    const headers = new Headers({ 'x-cap-cnsi-list': action.kubeGuid });
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
     const requestArgs = {
       headers: headers
     };
     return this.http
       .get(url, requestArgs)
       .pipe(mergeMap(response => {
-        const info = response.json();
-        const mappedData = {
+        const base = {
           entities: { [schemaKey]: {} },
           result: []
         } as NormalizedResponse;
-        info[action.kubeGuid].items.forEach((p: T) => {
-          const id = getId(p);
-          mappedData.entities[schemaKey][id] = p;
-          mappedData.result.push(id);
-        });
+        const items = response[action.kubeGuid].items as Array<any>;
+        const processesData = items.reduce((res, data) => {
+          const id = getId(data);
+          res.entities[schemaKey][id] = data;
+          res.result.push(id);
+          return res;
+        }, base);
         return [
-          new WrapperRequestActionSuccess(mappedData, action)
+          new WrapperRequestActionSuccess(processesData, action)
         ];
       }), catchError(err => [
         new WrapperRequestActionFailed(err.message, action)

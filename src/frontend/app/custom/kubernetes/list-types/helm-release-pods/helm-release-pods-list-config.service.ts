@@ -13,11 +13,10 @@ import { HelmReleasePodNameLinkComponent } from './helm-release-pod-name-link/he
 export class HelmReleasePodsListConfigService extends KubernetesPodsListConfigService {
   constructor(
     store: Store<AppState>,
-    activatedRoute: ActivatedRoute,
     kubeId: BaseKubeGuid,
     public helmReleaseService: HelmReleaseService,
   ) {
-    super(store, activatedRoute, kubeId);
+    super(store, kubeId);
     this.podsDataSource = new HelmReleasePodsDataSource(store, kubeId, this, helmReleaseService);
     this.columns[0] = {
       columnId: 'name', headerCell: () => 'Pod Name',

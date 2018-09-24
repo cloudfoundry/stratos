@@ -192,8 +192,6 @@ export interface PodStatus {
   qosClass?: string;
   initContainerStatuses?: ContainerStatus[];
 }
-
-
 export interface Condition {
   type: string;
   status: string;
@@ -248,7 +246,16 @@ export interface InitContainer {
 }
 
 export interface KubernetesConfigMap {
-  data: {};
+  data: {
+    apiVersion: string,
+    binaryData: {
+      [key: string]: any,
+    },
+    data: {
+      [key: string]: any,
+    },
+    kind: string
+  };
   metadata: ServiceMetadata;
 }
 export interface Resources {
@@ -272,35 +279,25 @@ export interface VolumeMount {
   readOnly?: boolean;
 }
 
-
-export interface Metadata {
+export interface BaseMetadata {
+  namespace: string;
   name: string;
-  generateName?: string;
-  namespace?: string;
-  selfLink: string;
   uid: string;
-  resourceVersion: string;
-  creationTimestamp: Date;
+}
+
+export interface Metadata extends BaseMetadata {
+  resourceVersion?: string;
+  creationTimestamp?: Date;
   deletionTimestamp?: Date;
-  deletionGracePeriodSeconds?: number;
   labels?: Labels;
   annotations?: Annotations;
-  ownerReferences?: OwnerReference[];
   kubeId?: string;
+  generation?: number;
 }
 
-export interface ServiceMetadata {
-  creationTimestamp: Date;
-  labels?: Labels;
-  name: string;
-  namespace?: string;
-  resourceVersion: string;
+export interface ServiceMetadata extends Metadata {
   selfLink: string;
-  uid: string;
-  annotations: Annotations;
-  kubeId?: string;
 }
-
 
 export interface Container {
   name: string;
@@ -413,7 +410,7 @@ export interface Volume {
 
 export interface ConfigMap {
   name: string;
-  items: Item2[];
+  items: Item[];
   defaultMode: number;
 }
 
@@ -426,6 +423,6 @@ export interface HostPath {
   path: string;
   type: string;
 }
-export interface Item2 {
+export interface Item {
   key: string;
 }
