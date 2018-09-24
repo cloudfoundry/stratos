@@ -50,6 +50,7 @@ E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
 # Test report folder name override
 TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
 export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
+mkdir -p "${E2E_REPORT_FOLDER}"
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
