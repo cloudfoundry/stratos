@@ -27,7 +27,7 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-#- Lint
+- Lint
 - Test
 jobs:
   include:
