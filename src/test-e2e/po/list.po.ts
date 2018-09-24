@@ -108,6 +108,8 @@ export class ListTableComponent extends Component {
 // Page Object for the List Card View
 export class ListCardComponent extends Component {
 
+  static cardsCss = 'app-card:not(.row-filler)';
+
   constructor(locator: ElementFinder) {
     super(locator);
   }
@@ -120,16 +122,23 @@ export class ListCardComponent extends Component {
   }
 
   getCards(): ElementArrayFinder {
-    return this.locator.all(by.css('app-card:not(.row-filler)'));
+    return this.locator.all(by.css(ListCardComponent.cardsCss));
   }
 
   getCard(index: number, metaType = MetaCardTitleType.CUSTOM): MetaCard {
     return new MetaCard(this.getCards().get(index), metaType);
   }
 
+  waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
+    const cardTitle = this.locator.element(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title));
+    return browser.wait(until.visibilityOf(cardTitle), 10000).then(() => {
+      return this.findCardByTitle(title, metaType);
+    });
+  }
+
   findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    return this.getCards().filter((elem) => {
-      return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
+    return this.getCards().filter(elem => {
+      return elem.element(by.cssContainingText(metaType, title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
       return new MetaCard(e[0], metaType);
