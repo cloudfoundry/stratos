@@ -51,7 +51,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   @Input()
   set config(config: SchemaFormConfig) {
     // Skip if no config... or schema is the same (avoids losing existing data in form)
-    if (!config || config.schema === this.schema) {
+    if (!config || (config.schema && config.schema === this.schema)) {
       return;
     }
     this.schema = config.schema;
@@ -100,7 +100,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     this.subs.push(this.jsonForm.controls['json'].valueChanges.subscribe(jsonStr => {
       this.jsonData = safeStringToObj(jsonStr);
       this._dataChange.next(this.jsonData);
-      this._validChange.next(!this.jsonForm.controls['json'].value || this.jsonForm.controls['json'].valid);
+      this._validChange.next(this.isJsonFormValid());
     }));
 
     this.subs.push(this._dataChange.asObservable().pipe(delay(0)).subscribe(data => this.dataChange.emit(data)));
@@ -126,6 +126,10 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
       const jsonString = data ? JSON.stringify(data) : '';
       this.jsonForm.controls['json'].setValue(jsonString);
     }
+  }
+
+  private isJsonFormValid(): boolean {
+    return !this.jsonForm.controls['json'].value || this.jsonForm.controls['json'].valid;
   }
 
   private filterSchema = (schema?: object): any => {
