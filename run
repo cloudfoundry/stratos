@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+./build/store-git-metadata.sh
+
+cf push
