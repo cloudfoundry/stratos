@@ -21,7 +21,7 @@ export CERTS_PATH=./dev-certs
 # There are two ways of running - building and deploying a full docker-compose deployment
 # or doing a local build and running that with sqlite
 
-# Single arg to script can change whether we do a quick of full deploy
+# Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1
 
 echo "Using local deployment for e2e tests"
