@@ -10,7 +10,7 @@ echo $SUITE
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo $DIRPATH
 
-cd $DIRPATH/../../..
+cd "$DIRPATH/../../.."
 
 export E2E_REPORT_FOLDER=./e2e-reports
 
