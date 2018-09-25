@@ -686,18 +686,30 @@ users/f2d71b96-4268-4a29-b8a1-88c856ee7f75/spaces?results-per-page=100&page=1
 
 ### Current v2 Issues
 
-- Most list fetch all entities up front to provide a reasonable level of sorting and filtering
+- Most lists fetch all entities up front to provide a reasonable level of sorting and filtering
   - API provides limited sorting and filtering capabilities
   - Sorting is mostly just on `creation_date`
   - Filtering sometimes contains org, space and name, but not all
+  > Desired - Lists of entities can be sorted or filtered on any top level property
 - Calculated numerical summary stats (number of applications in an organisation, cumulative total of memory from running apps in an
   organisation, number of users etc) requires fetching all entities of a certain type. This can be quite a costly set of requests.
+  > Desired - `counts` API which, given a filter, could sum up a selection of numerical properties of collection of entities. Some of this
+    may already be possible by making individual requests with `results-per-page=1` & `total_results` and `q` filters, however a neat way to
+    combine these into a single request would be awesome
 - Determining an informative application state requires an additional request to the `application/<guid>/stats` endpoint.
-- Fetching a list of users for non-admins can be expensive if there are many organizations. In an ideal world non-admins would be able to
-  hit `/users` and get the same response as hitting all if their visible `organization/guid/users` endpoints.
-- The user entities that are turned by the `/users` request contain a lot of duplicated organisation and space entities.
-- The url provided to fetch a user entity's missing role properties only succeeds for administrator or if the user entity is the same as the connected user
+  > Desired - It would massively improve Stratos performance if the APIs to list applications and retrieve a specific application could
+    return the app stats for the application(s). If this is not possibly, an app stats call that can return stats for all running
+    applications would help.
+- Fetching a list of users for non-admins can be expensive if there are many organizations.
+  > Desired - In an ideal world non-admins would be able to hit `/users` and get the same response as hitting all if their visible
+    `organization/guid/users` endpoints.
+- The user entities that are returned by the `/users` request contain a lot of duplicated organisation and space entities.
+  > Desired - Entities are listed in a common bucket and referenced by guid inline. Think this might be how v3 works
+- The `<role>_url` in a user entity can only be called by an administrator or by the same user
+  > Desired - URL behaves as per the `/users` suggestion above the response contains the organisaitons that are visible to the user that
+    calls the url
 - `include-relations` works by specifying the name of the child property. If the inline-depth is greater than one this can lead relations being fetched that might not actually be required
+  > Desired - Minor nice to have. Be able to specify relations like `include-relations=application-route,route-domain`
 
 ### Critical v2 Features
 
@@ -705,5 +717,3 @@ users/f2d71b96-4268-4a29-b8a1-88c856ee7f75/spaces?results-per-page=100&page=1
 - Arbitrary entity relations can be fetched or not fetched. The way we store and retrieve entity/s would break down without this generic process
 - The API provides a url (`<property name>_url`) to fetch missing entity relations. As per relations, without this we'd need a process to
   generically make up the url for any given relationships
-
-
