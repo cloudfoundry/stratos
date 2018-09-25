@@ -17,7 +17,7 @@ done <<< "$ORGS"
 function clean_deployments {
   echo "Stopping any MySQL Database"
   MYSQL_DOCKER=$(docker ps -q --filter "ancestor=mysql:latest")
-  if [ -n "$RUNNING" ]; then
+  if [ -n "$MYSQL_DOCKER" ]; then
     docker kill $MYSQL_DOCKER
   fi
 
