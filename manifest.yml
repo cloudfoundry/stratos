@@ -6,3 +6,7 @@ applications:
   timeout: 180
   buildpack: https://github.com/SUSE/stratos-buildpack
   health-check-type: port
+  env:
+    SSO_LOGIN: true
+  routes: 
+  - route: stratos.public.springernature.app
