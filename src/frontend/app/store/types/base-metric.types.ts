@@ -18,7 +18,7 @@ export interface IMetricsData<T = any> {
 export interface IMetrics<T = any> {
   query: MetricQueryConfig;
   queryType: MetricQueryType;
-  data: IMetricsData;
+  data: IMetricsData<T>;
 }
 
 interface IVectorResult<T> {

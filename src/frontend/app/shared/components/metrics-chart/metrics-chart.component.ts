@@ -3,7 +3,13 @@ import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { debounceTime, map, takeWhile, tap } from 'rxjs/operators';
-import { FetchApplicationMetricsAction, MetricQueryConfig, MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
+
+import {
+  FetchApplicationMetricsAction,
+  MetricQueryConfig,
+  MetricQueryType,
+  MetricsAction,
+} from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';

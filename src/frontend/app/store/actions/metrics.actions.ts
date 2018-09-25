@@ -1,4 +1,5 @@
-import { Action } from '@ngrx/store';
+import { metricSchemaKey } from '../helpers/entity-factory';
+import { IRequestAction } from '../types/request.types';
 import { environment } from './../../../environments/environment.prod';
 
 export const METRICS_START = '[Metrics] Fetch Start';
@@ -27,7 +28,7 @@ export class MetricQueryConfig {
     const {
       window = '',
       ...params
-    } = this.params;
+    } = this.params || {};
     const windowString = window ? `{}[${window}]` : '';
     const paramString = Object.keys(params).reduce((accum, key) => {
       return accum + `&${key}=${params[key]}`;
@@ -36,10 +37,11 @@ export class MetricQueryConfig {
   }
 }
 
-export abstract class MetricsAction implements Action {
+export abstract class MetricsAction implements IRequestAction {
   constructor(public guid: string, public query: MetricQueryConfig, public queryType: MetricQueryType = MetricQueryType.QUERY) {
     this.metricId = MetricsAction.buildMetricKey(guid, query);
   }
+  entityKey = metricSchemaKey;
   type = METRICS_START;
   url: string;
   cfGuid: string;

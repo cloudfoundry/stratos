@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { MetricsService, MetricsEndpointProvider } from '../services/metrics-service';
-
-import { getNameForEndpointType } from '../../endpoints/endpoint-helpers';
-import { Observable } from 'rxjs';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
-import { map, first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
+
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
+import { getNameForEndpointType } from '../../endpoints/endpoint-helpers';
+import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
+
 @Component({
   selector: 'app-metrics',
   templateUrl: './metrics.component.html',
@@ -19,7 +20,7 @@ export class MetricsComponent {
   public metricsEndpoint$: Observable<MetricsEndpointProvider>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  constructor(private activatedRoute: ActivatedRoute, private metricsService: MetricsService) {
+  constructor(activatedRoute: ActivatedRoute, metricsService: MetricsService) {
 
     const metricsGuid = getIdFromRoute(activatedRoute, 'metricsId');
 
@@ -28,7 +29,7 @@ export class MetricsComponent {
     );
 
     this.breadcrumbs$ = this.metricsEndpoint$.pipe(
-      map(endpoint => ([
+      map(() => ([
         {
           breadcrumbs: [
             {
