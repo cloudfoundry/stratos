@@ -110,7 +110,7 @@ fi
 # Get the E2E config
 rm -f secrets.yaml
 curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-echo "headless: true" >> secrets.yaml
+#echo "headless: true" >> secrets.yaml
 
 rm -rf node_modules
 npm install
@@ -121,7 +121,9 @@ mkdir -p ./e2e-reports
 export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}
+export DISPLAY=:99.0
+xvfb-run --server-args="-screen 0 1280x1024x24" $DIRPATH/runandrecord.sh ${SUITE}
+#"./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}"
 RET=$?
 
 # If we had test failures then copy console log to reports folder
