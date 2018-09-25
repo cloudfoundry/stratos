@@ -58,9 +58,9 @@ export abstract class MetricsAction implements IRequestAction {
 
 export class FetchCFMetricsAction extends MetricsAction {
   public cfGuid: string;
-  constructor(public guid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
-    super(guid, query, queryType);
-    this.cfGuid = guid;
+  constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(cfGuid, query, queryType);
+    this.cfGuid = cfGuid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
   }
 }

@@ -10,6 +10,7 @@ import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-s
 import { canUpdateOrgSpaceRoles } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { AppState } from './../../../store/app-state';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
@@ -19,6 +20,7 @@ import { AppState } from './../../../store/app-state';
 export class CloudFoundryTabsBaseComponent implements OnInit {
   static firehose = 'firehose';
   static users = 'users';
+  static cells = 'cells';
 
   public tabLinks: ISubHeaderTabs[];
 
@@ -32,7 +34,8 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    endpointsService: EndpointsService
   ) {
     const firehoseHidden$ = this.currentUserPermissionsService
       .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
@@ -41,6 +44,10 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     const usersHidden$ = cfEndpointService.users$.pipe(
       startWith(null),
       map(users => !users)
+    );
+
+    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+      map(hasMetrics => !hasMetrics)
     );
 
     this.tabLinks = [
@@ -55,6 +62,11 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
         hidden: firehoseHidden$
+      },
+      {
+        link: CloudFoundryTabsBaseComponent.cells,
+        label: 'Cells',
+        hidden: cellsHidden$
       },
       { link: 'feature-flags', label: 'Feature Flags' },
       { link: 'build-packs', label: 'Build Packs' },

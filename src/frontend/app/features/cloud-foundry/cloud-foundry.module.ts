@@ -77,6 +77,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
 import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-feature-cells/cloud-foundry-cells.component';
 
 
 @NgModule({
@@ -90,6 +91,7 @@ import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-co
     CloudFoundryUsersComponent,
     CloudFoundryFirehoseComponent,
     CloudFoundryFeatureFlagsComponent,
+    CloudFoundryCellsComponent,
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,
