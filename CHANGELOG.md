@@ -9,7 +9,7 @@ Release highlights:
 - Stratos frontend can be pre-built before pushing to Cloud Foundry to enable AOT and reduce push time
 - SSO support refinements with the ability to now connect a Cloud Foundry endpoint using SSO in addition to SSO login to Straos itself
 - Ability to specify manifest overrides when deploying an application
-- Ability to optionally specify Client ID anc Client Secret when registering an endpoint
+- Ability to optionally specify Client ID and Client Secret when registering an endpoint
 - Add ability to restage an application
 - Endpoints list now shows logged in user's username and whether they're an admin
 - Switched to new Stratos logo for login and about pages
@@ -29,6 +29,7 @@ Release highlights:
 - Upgrade angular to 6.1.1 to fix security vulnerability [\#2850](https://github.com/cloudfoundry-incubator/stratos/pull/2850)
 - Fixes and improvement for the diagnostics page [\#2860](https://github.com/cloudfoundry-incubator/stratos/pull/2860)
 - Fix several manage user role bugs [\#2826](https://github.com/cloudfoundry-incubator/stratos/pull/2826)
+- Diagnostics does not show GitHub details when cloned via HTTPS [\#3007](https://github.com/cloudfoundry-incubator/stratos/pull/3007)
 
 **Improvements:**
 
