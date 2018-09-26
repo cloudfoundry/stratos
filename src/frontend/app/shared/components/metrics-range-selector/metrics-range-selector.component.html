@@ -1,0 +1,33 @@
+<div>
+  <div [ngClass]="{'metrics-chart__overlay-show': selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END && showOverlay}"
+    class="metrics-chart__overlay">
+    <div class="metrics-chart__overlay-inner">
+      <h3>Choose time window</h3>
+      <app-start-end-date (isValid)="dateValid = $event" [(start)]="start" [(end)]="end"></app-start-end-date>
+      <div class="metrics-chart__overlay-buttons">
+        <button mat-raised-button color="primary" class="metrics-chart__overlay-set" (click)="commit(); showOverlay = false"
+          [disabled]="!dateValid || !commit">Set</button>
+        <button mat-raised-button (click)="showOverlay = false">Cancel</button>
+      </div>
+    </div>
+    <div class="metrics-chart__overlay-click" (click)="showOverlay = false"></div>
+  </div>
+  <mat-form-field>
+    <mat-select [(value)]="selectedTimeRange">
+      <mat-option *ngFor="let time of times" [value]="time">
+        {{time.label}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div class="metrics-chart__selected-range" *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END">
+    <div class="metrics-chart__selected-range-dates" *ngIf="committedStartEnd[0] && committedStartEnd[1] ; else noDatesSelected">
+      <div class="metrics-chart__selected-range-date">{{ committedStartEnd[0] | amDateFormat:'Do MMM YYYY, HH:mm' }}
+      </div>
+      <div class="metrics-chart__selected-range-to">to</div>
+      <div class="metrics-chart__selected-range-date"> {{ committedStartEnd[1] | amDateFormat:'Do MMM YYYY, HH:mm' }}
+      </div>
+    </div>
+    <ng-template #noDatesSelected class="metrics-chart__selected-range-date">No dates selected</ng-template>
+    <a class="metrics-chart__selected-range-edit" (click)="showOverlay = true" *ngIf="selectedTimeRange && selectedTimeRange.type===rangeTypes.START_END && !showOverlay">Edit</a>
+  </div>
+</div>
