@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, OnDestroy, Input, ViewChild, TemplateRef } from '@angular/core';
 import * as moment from 'moment';
 import { FetchApplicationMetricsAction, MetricQueryConfig, MetricsAction, MetricQueryType } from '../../../store/actions/metrics.actions';
 import { EntityMonitor } from '../../monitors/entity-monitor';
@@ -41,8 +41,23 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
   @Output()
   public metricsAction = new EventEmitter<FetchApplicationMetricsAction>();
 
+  private baseActionValue: MetricsAction;
+
   @Input()
-  public baseAction: MetricsAction;
+  set baseAction(action: MetricsAction) {
+    this.baseActionValue = action;
+    this.committedAction = action;
+    this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
+      action.metricId,
+      metricSchemaKey,
+      entityFactory(metricSchemaKey)
+    );
+    this.initSub = this.getInitSub(this.metricsMonitor);
+  }
+
+  get baseAction() {
+    return this.baseActionValue;
+  }
 
   public commit: Function = null;
 
@@ -110,12 +125,11 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
       );
 
       this.commit = () => {
-        console.log('commiting');
         this.committedStartEnd = [
           this.startEnd[0],
           this.startEnd[1]
         ];
-        this.metricsAction.emit(action);
+        this.commitAction(action);
       };
     }
   }
@@ -207,6 +221,7 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
   }
 
   private commitAction(action: MetricsAction) {
+    this.metricsAction.emit(action);
     this.committedAction = action;
     this.commit = null;
   }
@@ -215,14 +230,7 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.committedAction = this.baseAction;
-    this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      this.baseAction.metricId,
-      metricSchemaKey,
-      entityFactory(metricSchemaKey)
-    );
 
-    this.initSub = this.getInitSub(this.metricsMonitor);
   }
 
   ngOnDestroy() {

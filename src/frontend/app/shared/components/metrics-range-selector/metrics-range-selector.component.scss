@@ -1,7 +1,8 @@
 @import '../../../../sass/mixins';
-.metrics-chart {
+.metrics-range-selector {
   $animation-function: cubic-bezier(0, 0, .2, 1);
   $animation-time: 250ms;
+  position: relative;
   &__overlay {
     background-color: rgba(0, 0, 0, 0);
     bottom: 0;
@@ -27,7 +28,7 @@
       background-color: rgba(0, 0, 0, .6);
       transition-delay: 0s;
       visibility: visible;
-      .metrics-chart__overlay-inner {
+      .metrics-range-selector__overlay-inner {
         transform: translateY(0);
       }
     }

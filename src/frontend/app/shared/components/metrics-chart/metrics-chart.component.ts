@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ContentChild, AfterContentInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
@@ -11,6 +11,7 @@ import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
+import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -26,24 +27,12 @@ export interface MetricsChartConfig {
   yAxisLabel?: string;
 }
 
-enum RangeType {
-  ROLLING_WINDOW = 'ROLLING_WINDOW',
-  START_END = 'START_END'
-}
-
-interface ITimeRange {
-  value?: string;
-  label: string;
-  type: RangeType;
-}
-
 @Component({
   selector: 'app-metrics-chart',
   templateUrl: './metrics-chart.component.html',
   styleUrls: ['./metrics-chart.component.scss']
 })
-export class MetricsChartComponent implements OnInit, OnDestroy {
-  private committedAction: MetricsAction;
+export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input()
   public metricsConfig: MetricsConfig;
   @Input()
@@ -51,148 +40,23 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   @Input()
   public title: string;
 
-  @ViewChild('noDatesSelected')
-  public noDatesSelected: ElementRef;
+  @ContentChild(MetricsRangeSelectorComponent)
+  public timeRangeSelector: MetricsRangeSelectorComponent;
 
-  public chartTypes = MetricsChartTypes;
-
-  private startEnd: [moment.Moment, moment.Moment] = [null, null];
-
-  public committedStartEnd: [moment.Moment, moment.Moment] = [null, null];
-
-  private pollSub: Subscription;
-
-  private initSub: Subscription;
-
-  public commit: Function = null;
-
-  public results$;
-
-  private readonly startIndex = 0;
-
-  private readonly endIndex = 1;
-
-  public metricsMonitor: EntityMonitor<IMetrics>;
-
-  public rangeTypes = RangeType;
-
-  public dateValid = false;
-
-  public times: ITimeRange[] = [
-    {
-      value: '5m',
-      label: 'The past 5 minutes',
-      type: RangeType.ROLLING_WINDOW
-    },
-    {
-      value: '1h',
-      label: 'The past hour',
-      type: RangeType.ROLLING_WINDOW
-    },
-    {
-      value: '1w',
-      label: 'The past week',
-      type: RangeType.ROLLING_WINDOW
-    },
-    {
-      label: 'Set time window',
-      type: RangeType.START_END
-    }
-  ];
-
-  public selectedTimeRangeValue: ITimeRange;
-
-  set showOverlay(show: boolean) {
-    this.showOverlayValue = show;
-  }
-
-  get showOverlay() {
-    return this.showOverlayValue;
-  }
-
-  public showOverlayValue = false;
-
-  private commitDate(date: moment.Moment, type: 'start' | 'end') {
-    const index = type === 'start' ? this.startIndex : this.endIndex;
-    const oldDate = this.startEnd[index];
-    if (!date.isValid() || date.isSame(oldDate)) {
-      return;
-    }
-    this.startEnd[index] = date;
-    const [start, end] = this.startEnd;
-    if (start && end) {
-      const startUnix = start.unix();
-      const endUnix = end.unix();
-      const oldAction = this.metricsConfig.metricsAction;
-      const action = new FetchApplicationMetricsAction(
-        oldAction.guid,
-        oldAction.cfGuid,
-        new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
-          start: startUnix,
-          end: end.unix(),
-          step: Math.max((endUnix - startUnix) / 200, 0)
-        }),
-        MetricQueryType.RANGE_QUERY
-      );
-
-      this.commit = () => {
-        this.committedStartEnd = [
-          this.startEnd[0],
-          this.startEnd[1]
-        ];
-        this.commitAction(action);
-      };
-    }
-  }
-
-  get selectedTimeRange() {
-    return this.selectedTimeRangeValue;
-  }
-
-  set selectedTimeRange(timeRange: ITimeRange) {
-    this.commit = null;
-    this.selectedTimeRangeValue = timeRange;
-    if (this.selectedTimeRangeValue.type === RangeType.ROLLING_WINDOW) {
-      this.commitWindow(this.selectedTimeRangeValue);
-    } else if (this.selectedTimeRangeValue.type === RangeType.START_END) {
-      if (!this.startEnd[0] || !this.startEnd[1]) {
-        this.showOverlay = true;
-      }
-    }
-  }
-
-  private commitWindow(window: ITimeRange) {
-    if (!window) {
-      return;
-    }
-    this.committedStartEnd = [null, null];
-    this.startEnd = [null, null];
-    const oldAction = this.metricsConfig.metricsAction;
-    const action = new FetchApplicationMetricsAction(
-      oldAction.guid,
-      oldAction.cfGuid,
-      new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
-        window: window.value
-      })
-    );
+  @Input()
+  set metricsAction(action: MetricsAction) {
     this.commitAction(action);
   }
 
-  set start(start: moment.Moment) {
-    this.commitDate(start, 'start');
-  }
+  public chartTypes = MetricsChartTypes;
 
-  get start() {
-    return this.startEnd[this.startIndex];
-  }
+  private pollSub: Subscription;
 
-  set end(end: moment.Moment) {
-    this.commitDate(end, 'end');
-  }
+  public results$;
 
-  get end() {
-    return this.startEnd[this.endIndex];
-  }
+  public metricsMonitor: EntityMonitor<IMetrics>;
+
+  private committedAction: MetricsAction;
 
   constructor(
     private store: Store<AppState>,
@@ -222,52 +86,14 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     return metricsArray;
   }
 
-  private getInitSub(entityMonitor: EntityMonitor<IMetrics>) {
-    return entityMonitor.entity$.pipe(
-      debounceTime(1),
-      tap(metrics => {
-        if (!this.selectedTimeRange) {
-          if (metrics) {
-            if (metrics.queryType === MetricQueryType.RANGE_QUERY) {
-              const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
-              const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
-              const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
-              if (isDifferent) {
-                this.start = start;
-                this.end = end;
-                this.committedStartEnd = [start, end];
-              }
-              this.selectedTimeRange = this.times.find(time => time.type === RangeType.START_END);
-            } else {
-              const newWindow = metrics.query.params.window ?
-                this.times.find(time => time.value === metrics.query.params.window) :
-                this.getDefaultTimeRange();
-              if (this.selectedTimeRange !== newWindow) {
-                this.selectedTimeRange = newWindow;
-              }
-            }
-          } else {
-            this.selectedTimeRange = this.getDefaultTimeRange();
-          }
-        }
-      }),
-      takeWhile(metrics => !metrics)
-    ).subscribe();
-  }
-
-  private getDefaultTimeRange() {
-    return this.times.find(time => time.value === '1h') || this.times[0];
-  }
-
   ngOnInit() {
+
     this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
-
-    this.initSub = this.getInitSub(this.metricsMonitor);
 
     this.results$ = this.metricsMonitor.entity$.pipe(
       map(metrics => {
@@ -278,6 +104,15 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
         return this.postFetchMiddleware(metricsArray);
       })
     );
+  }
+
+  ngAfterContentInit() {
+    if (this.timeRangeSelector) {
+      this.timeRangeSelector.baseAction = this.metricsConfig.metricsAction;
+      const listener = this.timeRangeSelector.metricsAction.subscribe((action) => {
+        this.commitAction(action);
+      });
+    }
   }
 
   private setup(action: MetricsAction) {
@@ -299,9 +134,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.pollSub) {
       this.pollSub.unsubscribe();
-    }
-    if (this.initSub) {
-      this.initSub.unsubscribe();
     }
   }
 
@@ -326,6 +158,5 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     this.committedAction = action;
     this.setup(action);
     this.store.dispatch(action);
-    this.commit = null;
   }
 }
