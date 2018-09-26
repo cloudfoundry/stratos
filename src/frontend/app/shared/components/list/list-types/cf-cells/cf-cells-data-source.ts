@@ -1,7 +1,11 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { FetchCFMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
+import {
+  FetchCFMetricsPaginatedAction,
+  MetricQueryConfig,
+  MetricQueryType,
+} from '../../../../../store/actions/metrics.actions';
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
@@ -17,7 +21,7 @@ export class CfCellsDataSource
   static cellHealthyPath = 'value.1';
 
   constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricApplication>>) {
-    const action = new FetchCFMetricsAction(
+    const action = new FetchCFMetricsPaginatedAction(
       cfGuid,
       new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
       MetricQueryType.QUERY

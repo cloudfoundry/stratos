@@ -57,16 +57,23 @@ export abstract class MetricsAction implements IRequestAction {
   }
 }
 
-export class FetchCFMetricsAction extends MetricsAction implements PaginatedAction {
+export class FetchCFMetricsAction extends MetricsAction {
   public cfGuid: string;
   constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(cfGuid, query, queryType);
     this.cfGuid = cfGuid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
+  }
+}
+
+export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implements PaginatedAction {
+  constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(cfGuid, query, queryType);
     this.paginationKey = this.metricId;
   }
   actions = [];
   paginationKey: string;
+  // TODO: RC Move this to DataSource
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': 'id',

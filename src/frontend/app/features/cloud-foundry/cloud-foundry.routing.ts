@@ -3,12 +3,17 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
+import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
+import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
-import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
+import {
+  CloudFoundryCellSummaryComponent,
+} from './tabs/cloud-foundry-feature-cells/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-feature-cells/cloud-foundry-cells.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
@@ -20,7 +25,6 @@ import {
 import {
   CloudFoundrySpaceBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component';
-/* tslint:disable:max-line-length */
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
@@ -48,14 +52,13 @@ import {
 import {
   CloudFoundrySecurityGroupsComponent,
 } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
-/* tslint:enable:max-line-length */
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
-import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
-import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
-import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-feature-cells/cloud-foundry-cells.component';
+import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 
+/* tslint:disable:max-line-length */
+/* tslint:enable:max-line-length */
 const usersRoles = [
   {
     path: 'users/manage',
@@ -170,6 +173,23 @@ const cloudFoundry: Routes = [{
           path: '',
           // Root for Tabs
           children: [
+            {
+              path: 'cells/:cellId',
+              data: {
+                uiFullView: true
+              },
+              children: [
+                {
+                  path: '',
+                  redirectTo: 'summary',
+                  pathMatch: 'full'
+                },
+                {
+                  path: 'summary',
+                  component: CloudFoundryCellSummaryComponent
+                },
+              ]
+            },
             {
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,

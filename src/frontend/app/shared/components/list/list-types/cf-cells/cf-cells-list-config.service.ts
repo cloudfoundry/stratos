@@ -13,7 +13,7 @@ import {
   TableCellBooleanIndicatorComponentConfig,
 } from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../list-table/table.types';
-import { ListViewTypes } from '../../list.component.types';
+import { IListAction, ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
 
@@ -37,6 +37,14 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     type: 'enabled-disabled',
     subtle: false,
     showText: false
+  };
+
+  private summaryAction: IListAction<IMetricVectorResult<IMetricApplication>> = {
+    action: (cell) => {
+      this.router.navigate([`cloud-foundry/${this.activeRouteCfOrgSpace.cfGuid}/cells/${cell.metric.bosh_job_id}`]);
+    },
+    label: 'Summary',
+    description: ``
   };
 
   columns: Array<ITableColumn<IMetricVectorResult<IMetricApplication>>> = [
@@ -82,6 +90,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     this.dataSource = new CfCellsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }
 
+  getSingleActions = () => [this.summaryAction];
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }

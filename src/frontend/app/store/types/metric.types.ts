@@ -10,3 +10,4 @@ export interface IMetricApplication {
   job: string;
   origin: string;
 }
+// TODO: RC create IMetricCell

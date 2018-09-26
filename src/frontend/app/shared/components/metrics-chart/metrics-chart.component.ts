@@ -4,12 +4,7 @@ import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { debounceTime, map, takeWhile, tap } from 'rxjs/operators';
 
-import {
-  FetchApplicationMetricsAction,
-  MetricQueryConfig,
-  MetricQueryType,
-  MetricsAction,
-} from '../../../store/actions/metrics.actions';
+import { MetricQueryConfig, MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
@@ -118,6 +113,13 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
 
   public showOverlayValue = false;
 
+  private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig): MetricsAction {
+    return {
+      ...action,
+      query: newQuery,
+    };
+  }
+
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
     const oldDate = this.startEnd[index];
@@ -130,16 +132,21 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
       const startUnix = start.unix();
       const endUnix = end.unix();
       const oldAction = this.metricsConfig.metricsAction;
-      const action = new FetchApplicationMetricsAction(
-        oldAction.guid,
-        oldAction.cfGuid,
-        new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
-          start: startUnix,
-          end: end.unix(),
-          step: Math.max((endUnix - startUnix) / 200, 0)
-        }),
-        MetricQueryType.RANGE_QUERY
-      );
+      const action = this.newMetricsAction(oldAction, new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
+        start: startUnix,
+        end: end.unix(),
+        step: Math.max((endUnix - startUnix) / 200, 0)
+      }));
+      // const action = new FetchApplicationMetricsAction(
+      //   oldAction.guid,
+      //   oldAction.cfGuid,
+      //   new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
+      //     start: startUnix,
+      //     end: end.unix(),
+      //     step: Math.max((endUnix - startUnix) / 200, 0)
+      //   }),
+      //   MetricQueryType.RANGE_QUERY
+      // );
 
       this.commit = () => {
         this.committedStartEnd = [
@@ -174,13 +181,16 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
     const oldAction = this.metricsConfig.metricsAction;
-    const action = new FetchApplicationMetricsAction(
-      oldAction.guid,
-      oldAction.cfGuid,
-      new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
-        window: window.value
-      })
-    );
+    const action = this.newMetricsAction(oldAction, new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
+      window: window.value
+    }));
+    // const action = new FetchApplicationMetricsAction(
+    //   oldAction.guid,
+    //   oldAction.cfGuid,
+    //   new MetricQueryConfig(this.metricsConfig.metricsAction.query.metric, {
+    //     window: window.value
+    //   })
+    // );
     this.commitAction(action);
   }
 
