@@ -20,7 +20,7 @@ export class KubernetesNodeLinkComponent<T> extends TableCellCustom<KubernetesNo
 
   ngOnInit() {
 
-    this.nodeLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/nodes/${this.row.metadata.uid}`;
+    this.nodeLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/nodes/${this.row.metadata.name}`;
 
   }
 

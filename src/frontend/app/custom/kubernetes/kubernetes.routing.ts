@@ -19,6 +19,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
+import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -32,7 +33,7 @@ const kubernetes: Routes = [{
   },
 },
 {
-  path: ':kubeId/nodes/:nodeUid',
+  path: ':kubeId/nodes/:nodeName',
   component: KubernetesNodeComponent,
   data: {
     uiFullView: true
@@ -45,7 +46,7 @@ const kubernetes: Routes = [{
     },
     {
       path: 'summary',
-      component: HelmReleaseSummaryComponent
+      component: KubernetesNodeSummaryComponent
     },
     {
       path: 'pods',

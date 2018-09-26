@@ -14,9 +14,13 @@ import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { Action } from '@ngrx/store';
 import { ICFAction, IRequestAction } from '../../../store/types/request.types';
 
-export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
-export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
-export const GET_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Nodes Info Failure';
+export const GET_NODES_INFO = '[KUBERNETES Endpoint] Get Nodes Info';
+export const GET_NODES_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Nodes Info Success';
+export const GET_NODES_INFO_FAILURE = '[KUBERNETES Endpoint] Get Nodes Info Failure';
+
+export const GET_NODE_INFO = '[KUBERNETES Endpoint] Get Node Info';
+export const GET_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Node Info Success';
+export const GET_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Node Info Failure';
 
 export const GET_POD_INFO = '[KUBERNETES Endpoint] Get Pod Info';
 export const GET_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pod Info Success';
@@ -55,6 +59,19 @@ export class GetKubernetesNodes implements PaginatedAction, KubeAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesNodesSchemaKey, kubeGuid);
   }
+  type = GET_NODES_INFO;
+  entityKey = kubernetesNodesSchemaKey;
+  entity = [entityFactory(kubernetesNodesSchemaKey)];
+  actions = [
+    GET_NODES_INFO,
+    GET_NODES_INFO_SUCCESS,
+    GET_NODES_INFO_FAILURE
+  ];
+  paginationKey: string;
+}
+export class GetKubernetesNode implements KubeAction {
+  constructor(public nodeName: string, public kubeGuid: string) {
+  }
   type = GET_NODE_INFO;
   entityKey = kubernetesNodesSchemaKey;
   entity = [entityFactory(kubernetesNodesSchemaKey)];
@@ -63,7 +80,6 @@ export class GetKubernetesNodes implements PaginatedAction, KubeAction {
     GET_NODE_INFO_SUCCESS,
     GET_NODE_INFO_FAILURE
   ];
-  paginationKey: string;
 }
 
 export class GetKubernetesPods implements PaginatedAction, KubeAction {

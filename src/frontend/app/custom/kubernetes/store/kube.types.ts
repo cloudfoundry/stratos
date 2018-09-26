@@ -117,9 +117,21 @@ export interface Allocatable {
   pods: string;
 }
 
+export enum ConditionType {
+  OutOfDisk = 'OutOfDisk',
+  MemoryPressure = 'MemoryPressure',
+  DiskPressure = 'DiskPressure',
+  Ready = 'Ready'
+}
+
+export enum ConditionStatus {
+  False = 'False',
+  True = 'True'
+}
+
 export interface Condition {
-  type: string;
-  status: string;
+  type: ConditionType;
+  status: ConditionStatus;
   lastHeartbeatTime: Date;
   lastTransitionTime: Date;
   reason: string;
