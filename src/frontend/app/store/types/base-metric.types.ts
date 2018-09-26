@@ -11,6 +11,7 @@ export interface IMetricsResponse<T = any> {
   status: string;
   data: IMetrics<T>;
 }
+
 export interface IMetricsData<T = any> {
   resultType: string;
   result: [T];

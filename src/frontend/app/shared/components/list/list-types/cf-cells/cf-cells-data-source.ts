@@ -1,26 +1,43 @@
-// import { Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
 
-// import { IFeatureFlag } from '../../../../../core/cf-api.types';
-// import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-// import { AppState } from '../../../../../store/app-state';
-// import { entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
-// import { APIResource } from '../../../../../store/types/api.types';
-// import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-// import { IListConfig } from '../../list.component.types';
-// import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
+import { FetchCFMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
+import { AppState } from '../../../../../store/app-state';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
+import { IMetricApplication } from '../../../../../store/types/metric.types';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
-// export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
-//   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
-//     const action = createCfFeatureFlagFetchAction(cfGuid);
-//     super({
-//       store,
-//       action,
-//       schema: entityFactory(featureFlagSchemaKey),
-//       getRowUniqueId: getRowMetadata,
-//       paginationKey: action.paginationKey,
-//       isLocal: true,
-//       transformEntities: [{ type: 'filter', field: 'entity.name' }],
-//       listConfig
-//     });
-//   }
-// }
+export class CfCellsDataSource
+  extends ListDataSource<IMetricVectorResult<IMetricApplication>, IMetrics<IMetricVectorResult<IMetricApplication>>> {
+
+  static cellIdPath = 'metric.bosh_job_id';
+  static cellNamePath = 'metric.bosh_job_name';
+  static cellHealthyPath = 'value.1';
+
+  constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricApplication>>) {
+    const action = new FetchCFMetricsAction(
+      cfGuid,
+      new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
+      MetricQueryType.QUERY
+    );
+
+    super({
+      store,
+      action,
+      schema: entityFactory(action.entityKey),
+      getRowUniqueId: (row) => row.metric.bosh_job_id,
+      paginationKey: action.paginationKey,
+      isLocal: true,
+      transformEntities: [{ type: 'filter', field: CfCellsDataSource.cellNamePath }],
+      transformEntity: map((response) => {
+        if (!response || response.length === 0) {
+          return [];
+        }
+        return response[0].data.result;
+      }),
+      listConfig
+    });
+  }
+}

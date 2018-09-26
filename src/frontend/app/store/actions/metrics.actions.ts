@@ -1,6 +1,7 @@
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IRequestAction } from '../types/request.types';
 import { environment } from './../../../environments/environment.prod';
+import { PaginatedAction } from '../types/pagination.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
@@ -56,13 +57,20 @@ export abstract class MetricsAction implements IRequestAction {
   }
 }
 
-export class FetchCFMetricsAction extends MetricsAction {
+export class FetchCFMetricsAction extends MetricsAction implements PaginatedAction {
   public cfGuid: string;
   constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(cfGuid, query, queryType);
     this.cfGuid = cfGuid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
+    this.paginationKey = this.metricId;
   }
+  actions = [];
+  paginationKey: string;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'id',
+  };
 }
 
 export class FetchApplicationMetricsAction extends MetricsAction {
@@ -70,4 +78,5 @@ export class FetchApplicationMetricsAction extends MetricsAction {
     super(guid, query, queryType);
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`;
   }
+
 }

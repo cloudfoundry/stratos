@@ -141,12 +141,12 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryUsersComponent
             },
             {
-              path: 'firehose',
-              component: CloudFoundryFirehoseComponent
-            },
-            {
               path: 'cells',
               component: CloudFoundryCellsComponent
+            },
+            {
+              path: 'firehose',
+              component: CloudFoundryFirehoseComponent
             },
             {
               path: 'feature-flags',
