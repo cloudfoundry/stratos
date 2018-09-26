@@ -1,5 +1,5 @@
 
-import {catchError, mergeMap,  map } from 'rxjs/operators';
+import { catchError, mergeMap, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -9,7 +9,7 @@ import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, StartRequestAction } from './../types/request.types';
 
 
 @Injectable()
@@ -25,24 +25,27 @@ export class MetricsEffect {
     mergeMap(action => {
       const fullUrl = this.buildFullUrl(action);
       const apiAction = {
-        guid: action.guid,
-        entityKey: metricSchemaKey
+        ...action,
       } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.cfGuid }
       }).pipe(
         map(metrics => {
           const metric = metrics[action.cfGuid];
-          const metricKey = MetricsAction.buildMetricKey(action.guid, action.query);
           const metricObject = metric ? {
-            [metricKey]: metric.data
+            [action.metricId]: {
+              query: action.query,
+              queryType: action.queryType,
+              data: metric.data
+            }
           } : {};
           return new WrapperRequestActionSuccess(
             {
               entities: {
                 [metricSchemaKey]: metricObject
               },
-              result: [action.guid]
+              result: [action.metricId]
             },
             apiAction
           );
@@ -59,7 +62,7 @@ export class MetricsEffect {
     }));
 
   private buildFullUrl(action: MetricsAction) {
-    return `${action.url}/query?query=${action.query}`;
+    return `${action.url}/${action.queryType}?query=${action.query.getFullQuery()}`;
   }
 }
 

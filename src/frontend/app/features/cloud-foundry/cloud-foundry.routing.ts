@@ -54,6 +54,7 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-ta
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-feature-cells/cloud-foundry-cells.component';
 
 const usersRoles = [
   {
@@ -138,6 +139,10 @@ const cloudFoundry: Routes = [{
             {
               path: 'users',
               component: CloudFoundryUsersComponent
+            },
+            {
+              path: 'cells',
+              component: CloudFoundryCellsComponent
             },
             {
               path: 'firehose',

@@ -28,8 +28,8 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 	}
 
 	// For an application, we only support the query operation
-	if prometheusOp != "query" {
-		return errors.New("Only 'query' is supported for a Cloud Foundry application")
+	if prometheusOp != "query" && prometheusOp != "query_range" {
+		return errors.New("Only 'query' or 'query_range' is supported for a Cloud Foundry application")
 	}
 
 	// Now make the metrics requests to the appropriate metrics endpoint
@@ -78,7 +78,6 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		req.URI = makePrometheusRequestURI(c, prometheusOp, addQueries)
 		requests = append(requests, req)
 	}
-
 	return requests
 }
 

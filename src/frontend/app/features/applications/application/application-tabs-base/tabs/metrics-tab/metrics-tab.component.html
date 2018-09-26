@@ -1,29 +1,15 @@
 <mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart
-    [appGuid]="applicationService.appGuid"
-    [endpointGuid]="applicationService.cfGuid"
-    title="CPU usage over the past hour"
-    yAxisLabel="CPU Usage (%)"
-    metricName="firehose_container_metric_cpu_percentage{}[1h]">
+  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid" title="CPU usage"
+    yAxisLabel="CPU Usage (%)" queryRange="true" queryString="firehose_container_metric_cpu_percentage">
   </app-application-instance-chart>
 </mat-card>
 <mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart
-    [appGuid]="applicationService.appGuid"
-    [endpointGuid]="applicationService.cfGuid"
-    title="Memory usage over the past hour"
-    yAxisLabel="Memory Usage (MB)"
-    seriesTranslation="mb"
-    metricName="firehose_container_metric_memory_bytes{}[1h]">
+  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid" title="Memory usage"
+    yAxisLabel="Memory Usage (MB)" seriesTranslation="mb" default queryString="firehose_container_metric_memory_bytes">
   </app-application-instance-chart>
 </mat-card>
 <mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart
-    [appGuid]="applicationService.appGuid"
-    [endpointGuid]="applicationService.cfGuid"
-    title="Disk usage over the past hour"
-    yAxisLabel="Disk Usage (MB)"
-    seriesTranslation="mb"
-    metricName="firehose_container_metric_disk_bytes{}[1h]">
+  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid" title="Disk usage"
+    yAxisLabel="Disk Usage (MB)" seriesTranslation="mb" queryString="firehose_container_metric_disk_bytes">
   </app-application-instance-chart>
 </mat-card>
