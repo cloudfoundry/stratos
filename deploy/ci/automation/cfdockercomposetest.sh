@@ -38,7 +38,6 @@ popd
 # Get the E2E config
 rm -f secrets.yaml
 curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-echo "headless: true" >> secrets.yaml
 
 # Need node modules to run the tests
 rm -rf node_modules

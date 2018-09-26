@@ -13,8 +13,19 @@ source "${DIRPATH}/cfutils.sh"
 pwd
 set -e
 
-./build/store-git-metadata.sh
-docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
+IMAGE="stratos-aio"
+
+# Build AIO image unless asked to use nightly image
+if [ "$1" -ne "prebuilt" ]; then
+  echo "Building AIO image locally"
+  ./build/store-git-metadata.sh
+  docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
+else
+  echo "Using Nightly published AIO image"
+  IMAGE="splatform/stratos"
+  # Ensure we pull the latest image
+  docker pull $IMAGE
+fi
 
 echo "Running Stratos All-in-one"
 
@@ -27,11 +38,10 @@ CONTAINER_ID=$(docker run \
 -e UAA_ENDPOINT='https://login.local.pcfdev.io' \
 -e SKIP_SSL_VALIDATION='true' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
-stratos-aio)
+$IMAGE)
 
 # Get the E2E config
 curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-echo "headless: true" >> secrets.yaml
 
 # Need node modules to run the tests
 rm -rf node_modules
