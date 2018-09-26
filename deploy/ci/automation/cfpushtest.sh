@@ -122,7 +122,7 @@ export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
 export DISPLAY=:99.0
-xvfb-run --server-args="-screen 0 1366x768x24" "bash -c \"$DIRPATH/runandrecord.sh\" ${SUITE}"
+"$DIRPATH/runandrecord.sh" ${SUITE}
 #"./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}"
 RET=$?
 
