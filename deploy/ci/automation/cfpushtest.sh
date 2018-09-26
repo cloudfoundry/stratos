@@ -121,9 +121,7 @@ mkdir -p ./e2e-reports
 export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
-export DISPLAY=:99.0
-"$DIRPATH/runandrecord.sh" ${SUITE}
-#"./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://console.local.pcfdev.io ${SUITE}"
+"$DIRPATH/runandrecord.sh" https://console.local.pcfdev.io ${SUITE}
 RET=$?
 
 # If we had test failures then copy console log to reports folder

@@ -43,7 +43,7 @@ mkdir -p ./e2e-reports
 export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://localhost:5443
+"$DIRPATH/runandrecord.sh" https://localhost:5443
 RET=$?
 
 set +e

@@ -45,7 +45,7 @@ rm -rf node_modules
 npm install
 
 # Run the E2E tests
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://localhost:443
+"$DIRPATH/runandrecord.sh" https://localhost:443
 RET=$?
 
 set +e
