@@ -1,0 +1,11 @@
+<form class="date-time-form">
+  <mat-form-field class="form-field" floatLabel="never">
+    <input matInput name="date" [formControl]="date" [matDatepicker]="picker" placeholder="Choose a date">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field class="form-field" floatLabel="never">
+    <mat-icon matSuffix>access_time</mat-icon>
+    <input matInput name="time" [formControl]="time" placeholder="Choose time" type="time">
+  </mat-form-field>
+</form>

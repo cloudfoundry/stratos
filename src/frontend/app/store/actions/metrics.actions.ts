@@ -1,20 +1,49 @@
+import { metricSchemaKey } from '../helpers/entity-factory';
+import { IRequestAction } from '../types/request.types';
 import { environment } from './../../../environments/environment.prod';
-import { schema } from 'normalizr';
-import { Action } from '@ngrx/store';
 
-export const METRICS_START = '[Metrics] Start';
-export const METRICS_START_SUCCESS = '[Metrics] Start succeeded';
-export const METRICS_START_FAILED = '[Metrics] Start failed';
+export const METRICS_START = '[Metrics] Fetch Start';
+export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
+export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
 const { proxyAPIVersion } = environment;
 
-export abstract class MetricsAction implements Action {
-  constructor(guid: string, query: string) {
+export enum MetricQueryType {
+  QUERY = 'query',
+  RANGE_QUERY = 'query_range'
+}
+export interface IMetricQueryConfigParams {
+  window?: string;
+  [key: string]: string | number;
+}
+export class MetricQueryConfig {
+  constructor(
+    public metric: string,
+    public params?: IMetricQueryConfigParams
+  ) { }
+  public getFullQuery() {
+    return this.metric + this.joinParams();
+  }
+
+  public joinParams() {
+    const {
+      window = '',
+      ...params
+    } = this.params || {};
+    const windowString = window ? `{}[${window}]` : '';
+    const paramString = Object.keys(params).reduce((accum, key) => {
+      return accum + `&${key}=${params[key]}`;
+    }, '');
+    return windowString + paramString || '';
+  }
+}
+
+export abstract class MetricsAction implements IRequestAction {
+  constructor(public guid: string, public query: MetricQueryConfig, public queryType: MetricQueryType = MetricQueryType.QUERY) {
     this.metricId = MetricsAction.buildMetricKey(guid, query);
   }
+  entityKey = metricSchemaKey;
   type = METRICS_START;
   url: string;
-  query: string;
-  guid: string;
   cfGuid: string;
   metricId: string;
   static getBaseMetricsURL() {
@@ -22,23 +51,23 @@ export abstract class MetricsAction implements Action {
   }
 
   // Builds the key that is used to store the metric in the app state.
-  static buildMetricKey(guid: string, query: string) {
-    return `${guid}:${query}`;
+  static buildMetricKey(guid: string, query: MetricQueryConfig) {
+    return `${guid}:${query.metric}`;
   }
 }
 
 export class FetchCFMetricsAction extends MetricsAction {
   public cfGuid: string;
-  constructor(public guid: string, public query: string) {
-    super(guid, query);
+  constructor(public guid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(guid, query, queryType);
     this.cfGuid = guid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
   }
 }
 
 export class FetchApplicationMetricsAction extends MetricsAction {
-  constructor(public guid: string, public cfGuid: string, public query: string) {
-    super(guid, query);
+  constructor(guid: string, public cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(guid, query, queryType);
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`;
   }
 }
