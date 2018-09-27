@@ -12,7 +12,9 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./kubernetes-node-summary.component.scss']
 })
 export class KubernetesNodeSummaryComponent implements OnInit {
-  constructor() { }
+  constructor(
+    public kubeNodeService: KubernetesNodeService
+  ) { }
 
   ngOnInit() {
   }

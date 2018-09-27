@@ -205,8 +205,8 @@ export interface PodStatus {
   initContainerStatuses?: ContainerStatus[];
 }
 export interface Condition {
-  type: string;
-  status: string;
+  type: ConditionType;
+  status: ConditionStatus;
   lastProbeTime?: any;
   lastTransitionTime: Date;
 }

@@ -52,6 +52,7 @@ import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/ku
 import { KubernetesNodePodsComponent } from './list-types/kubernetes-nodes/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodeSummaryCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary-card/kubernetes-node-summary-card.component';
 import { KubernetesNodeConditionCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
+import { KubernetesNodeTagsCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-tags-card/kubernetes-node-tags-card.component';
 
 @NgModule({
   imports: [
@@ -87,7 +88,8 @@ import { KubernetesNodeConditionCardComponent } from './list-types/kubernetes-no
     KubernetesNodeSummaryComponent,
     KubernetesNodePodsComponent,
     KubernetesNodeSummaryCardComponent,
-    KubernetesNodeConditionCardComponent
+    KubernetesNodeConditionCardComponent,
+    KubernetesNodeTagsCardComponent
   ],
   providers: [
     KubernetesService,

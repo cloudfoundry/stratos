@@ -22,28 +22,7 @@ export class KubernetesNodeSummaryCardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-
-    this.node$ = this.kubeNodeService.node$.pipe(
-      map(p => p.entity)
-    );
-    this.labels$ = this.node$.pipe(
-      map(node => {
-        return this.getTags(node.metadata.labels);
-      })
-    );
-    this.annotations$ = this.node$.pipe(
-      map(node => {
-        return this.getTags(node.metadata.annotations);
-      })
-    );
-
   }
 
 
-  private getTags(tags: {}) {
-    const labelEntries = Object.entries(tags);
-    return labelEntries.map(t => ({
-      value: `${t[0]}:${t[1]}`
-    }));
-  }
 }

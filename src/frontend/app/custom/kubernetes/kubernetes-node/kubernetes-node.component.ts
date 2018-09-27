@@ -36,8 +36,8 @@ export class KubernetesNodeComponent implements OnInit {
 
 
   constructor(
-    private kubeEndpointService: KubernetesEndpointService,
-    private kubeNodeService: KubernetesNodeService
+    public kubeEndpointService: KubernetesEndpointService,
+    public kubeNodeService: KubernetesNodeService
   ) { }
 
   ngOnInit() {

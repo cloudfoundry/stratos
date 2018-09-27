@@ -5,10 +5,18 @@
     </mat-card-header>
     <mat-card-content>
       <div class="kubernetes-node-summary-card__content">
-        <app-metadata-item icon="title" label="Ready">{{ (ready$ | async)?.status }}</app-metadata-item>
-        <app-metadata-item icon="title" label="diskPressure">{{ (diskPressure$ | async)?.status }}</app-metadata-item>
-        <app-metadata-item icon="title" label="memoryPressure">{{ (memoryPressure$ | async)?.status }}</app-metadata-item>
-        <app-metadata-item icon="title" label="outOfDisk">{{ (outOfDisk$ | async)?.status }}</app-metadata-item>
+        <app-metadata-item icon="title" label="Ready">
+          <app-boolean-indicator [isTrue]="(ready$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
+        </app-metadata-item>
+        <app-metadata-item icon="title" label="Disk Pressure">
+            <app-boolean-indicator [isTrue]="(diskPressure$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
+        </app-metadata-item>
+        <app-metadata-item icon="title" label="Memory Pressure">
+            <app-boolean-indicator [isTrue]="(memoryPressure$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
+         </app-metadata-item>
+        <app-metadata-item icon="title" label="Out of Disk">
+            <app-boolean-indicator [isTrue]="(outOfDisk$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
+          </app-metadata-item>
       </div>
     </mat-card-content>
   </mat-card>

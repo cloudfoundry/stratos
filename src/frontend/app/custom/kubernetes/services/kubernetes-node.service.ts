@@ -9,7 +9,7 @@ import { KubernetesNode } from '../store/kube.types';
 import { kubernetesNodesSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { GetKubernetesNode } from '../store/kubernetes.actions';
-import { first, shareReplay, filter } from 'rxjs/operators';
+import { first, shareReplay, filter, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { EntityInfo } from '../../../store/types/api.types';
 
@@ -18,6 +18,7 @@ export class KubernetesNodeService {
   public nodeName: string;
   public kubeGuid: string;
   public node$: Observable<EntityInfo<KubernetesNode>>;
+  nodeEntity$: Observable<KubernetesNode>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -43,6 +44,11 @@ export class KubernetesNodeService {
       filter(p => !!p && !!p.entity),
       first(),
       shareReplay(1),
+    );
+
+
+    this.nodeEntity$ = this.node$.pipe(
+      map(p => p.entity)
     );
   }
 }
