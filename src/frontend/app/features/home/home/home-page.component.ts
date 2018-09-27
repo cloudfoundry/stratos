@@ -1,6 +1,7 @@
-import { AppState } from '../../../store/app-state';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Component, OnInit, AfterContentInit } from '@angular/core';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
+import { AppState } from '../../../store/app-state';
 
 @Component({
   selector: 'app-home-page',
@@ -10,6 +11,10 @@ import { Component, OnInit, AfterContentInit } from '@angular/core';
 export class HomePageComponent implements OnInit {
 
   constructor(private store: Store<AppState>) { }
-
+  public metricsAction = new FetchApplicationMetricsAction(
+    'fbb2e26f-491f-468c-8d5b-ed02028f7106',
+    'rqljU7j5TF-v8_nyozXsd6kDUeU',
+    new MetricQueryConfig('firehose_container_metric_cpu_percentage')
+  );
   ngOnInit() { }
 }

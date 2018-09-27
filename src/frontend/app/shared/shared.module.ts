@@ -136,6 +136,7 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { MomentModule } from 'ngx-moment';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 
 @NgModule({
   imports: [
@@ -242,6 +243,7 @@ import { MomentModule } from 'ngx-moment';
     RoutingIndicatorComponent,
     DateTimeComponent,
     StartEndDateComponent,
+    MetricsRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -333,6 +335,7 @@ import { MomentModule } from 'ngx-moment';
     RoutingIndicatorComponent,
     DateTimeComponent,
     StartEndDateComponent,
+    MetricsRangeSelectorComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

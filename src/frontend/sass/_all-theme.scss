@@ -35,6 +35,7 @@
 @import '../app/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
 @import '../app/shared/components/start-end-date/start-end-date.component.theme';
 @import '../app/shared/components/metrics-chart/metrics-chart.component.theme';
+@import '../app/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -109,6 +110,7 @@ $side-nav-light-active: #484848;
   @include meta-card-component($theme, $app-theme);
   @include start-end-theme($theme, $app-theme);
   @include metrics-chart-theme($theme, $app-theme);
+  @include metrics-range-selector-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
