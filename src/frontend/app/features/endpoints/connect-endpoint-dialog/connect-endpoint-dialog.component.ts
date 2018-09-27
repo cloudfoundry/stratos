@@ -64,6 +64,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       name: string,
       guid: string,
       type: EndpointType,
+      ssoAllowed: boolean,
     }
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
@@ -73,11 +74,21 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       }
     });
 
+    // Remove SSO if not allowed on this endpoint
+    this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || data.ssoAllowed);
+
     // Not all endpoint types might allow token sharing - typically types like metrics do
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
 
     // Create the endpoint form
-    const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+
+    // Auto-select SSO if it is available
+    const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
+    if (ssoIndex >= 0 ) {
+      autoSelected = this.authTypesForEndpoint[ssoIndex];
+    }
+
     this.endpointForm = this.fb.group({
       authType: [autoSelected.value || '', Validators.required],
       authValues: this.fb.group(autoSelected.form || {}),
@@ -171,7 +182,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canSubmit$ = observableCombineLatest(
       this.connecting$.pipe(startWith(false)),
       this.fetchingInfo$.pipe(startWith(false)),
-      this.valid$.pipe(startWith(false))
+      this.valid$.pipe(startWith(this.endpointForm.valid))
     ).pipe(
       map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid));
   }
@@ -209,6 +220,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     if (this.endpointForm.value.authType === 'kubeconfig') {
       this.bodyContent = this.kubeconfig;
     }
+
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,

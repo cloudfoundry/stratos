@@ -1,9 +1,9 @@
 
-import { of as observableOf, Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router, Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
@@ -39,10 +39,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
     }
-    this.sideNavTabs = [
-      ... this.defaultSideNavTabs,
-      ...ext.getSideNav()
-    ];
   }
 
   private openCloseSub: Subscription;
@@ -56,44 +52,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
-  sideNavTabs: SideNavItem[];
-
-  defaultSideNavTabs: SideNavItem[] = [
-    {
-      text: 'Dashboard',
-      matIcon: 'assessment',
-      link: '/dashboard',
-      // Experimental - only show in development
-      hidden: observableOf(environment.production),
-    },
-    {
-      text: 'Applications',
-      matIcon: 'apps',
-      link: '/applications'
-    },
-    {
-      text: 'Marketplace',
-      matIcon: 'store',
-      link: '/marketplace'
-    },
-    {
-      text: 'Services',
-      matIcon: 'service',
-      matIconFont: 'stratos-icons',
-      link: '/services'
-    },
-    {
-      text: 'Cloud Foundry',
-      matIcon: 'cloud_foundry',
-      matIconFont: 'stratos-icons',
-      link: '/cloud-foundry'
-    },
-    {
-      text: 'Endpoints',
-      matIcon: 'settings_ethernet',
-      link: '/endpoints'
-    },
-  ];
+  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
   sideNaveMode = 'side';
   dispatchRelations() {
@@ -163,5 +122,39 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private disableMobileNav() {
     this.store.dispatch(new OpenSideNav());
     this.store.dispatch(new ChangeSideNavMode('side'));
+  }
+
+  private getNavigationRoutes(): SideNavItem[] {
+    let navItems = this.collectNavigationRoutes('', this.router.config);
+
+    // Sort by name
+    navItems = navItems.sort((a: any, b: any) => a.text.localeCompare(b.text));
+
+    // Sort by position
+    navItems = navItems.sort((a: any, b: any) => {
+      const posA = a.position ? a.position : 99;
+      const posB = b.position ? b.position : 99;
+      return posA - posB;
+    });
+
+    return navItems;
+  }
+
+  private collectNavigationRoutes(path: string, routes: Route[]): SideNavItem[] {
+    let nav: SideNavItem[] = [];
+    if (!routes) {
+      return nav;
+    }
+    routes.forEach(route => {
+      if (route.data && route.data.stratosNavigation) {
+        nav.push({
+          ...route.data.stratosNavigation,
+          link: path + '/' + route.path
+        });
+      }
+      const navs = this.collectNavigationRoutes(route.path, route.children);
+      nav = nav.concat(navs);
+    });
+    return nav;
   }
 }

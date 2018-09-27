@@ -8,6 +8,7 @@ import { DeployApplicationStep2Component } from './deploy-application-step2/depl
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { DeployApplicationComponent } from './deploy-application.component';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
+import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step/deploy-application-options-step.component';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
 import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component';
 import { DeployApplicationFsComponent } from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
@@ -27,6 +28,7 @@ import {
     DeployApplicationStep2Component,
     GithubProjectExistsDirective,
     DeployApplicationStep3Component,
+    DeployApplicationOptionsStepComponent,
     DeployApplicationStep21Component,
     CommitListWrapperComponent,
     DeployApplicationFsComponent,

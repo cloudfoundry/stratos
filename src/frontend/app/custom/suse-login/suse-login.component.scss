@@ -130,8 +130,22 @@
   }
 }
 
+// If SSO Login, move the form underneath the intro
+.suse-login-sso {
+  &.suse-login__content {
+    flex-direction: column;
+    .suse-login__intro {
+      flex: 0;
+    }
+    .suse-login__box {
+      justify-content: flex-start;
+      margin-left: 0;
+    }
+  }
+}
+
 @media(max-width: 768px) {
-  .suse-login {
+  .suse-login:not(.suse-login-sso) {
     &__intro {
       display: none;
     }

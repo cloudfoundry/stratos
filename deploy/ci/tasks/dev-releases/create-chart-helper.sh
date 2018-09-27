@@ -40,6 +40,19 @@ setupAndPushChange() {
 
 }
 
+updateHelmDependency() {
+  local START_CWD=$(pwd)
+  cd ${STRATOS}/deploy/kubernetes/console
+  # Only do this if there is a requirements.yaml file
+  if [ -f "./requirements.yaml" ]; then
+    # Extract helm repo
+    local HELM_REPO=$(cat requirements.yaml | grep repo | sed -e 's/.*repository:\s\(.*\)/\1/p' | head -1)
+    helm repo add repo ${HELM_REPO}
+    helm dependency update
+  fi
+  cd ${START_CWD}
+}
+
 fetchImageTag() {
   echo "$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)-$(git rev-parse HEAD | head -c 8)"
 }

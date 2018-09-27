@@ -72,10 +72,8 @@ echo
 echo "Starting build"
 
 # Copy values template
-__DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_PATH=${__DIRNAME}/../../
-source ${STRATOS_PATH}/deploy/common-build.sh
-
+STRATOS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+source "${STRATOS_PATH}/deploy/common-build.sh"
 
 function buildProxy {
   echo
@@ -83,21 +81,21 @@ function buildProxy {
 
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage stratos-dc-jetstream deploy/Dockerfile.bk ${STRATOS_PATH} dev-build
+  buildAndPublishImage stratos-dc-jetstream deploy/Dockerfile.bk "${STRATOS_PATH}" dev-build
 }
 
 function buildDbMigratorJob {
   # Build the db-migrator container
   echo
   echo "-- Build & publish the runtime container image for the db-migrator job"
-  buildAndPublishImage stratos-dc-db-migrator deploy/Dockerfile.bk ${STRATOS_PATH}  postflight-job
+  buildAndPublishImage stratos-dc-db-migrator deploy/Dockerfile.bk "${STRATOS_PATH}"  postflight-job
 }
 
 function buildMariaDb {
   echo
   echo "-- Building/publishing MariaDB"
   # Download and retag image to save bandwidth
-  buildAndPublishImage stratos-dc-mariadb Dockerfile.mariadb ${STRATOS_PATH}/deploy/db
+  buildAndPublishImage stratos-dc-mariadb Dockerfile.mariadb "${STRATOS_PATH}/deploy/db"
 }
 
 function buildUI {
@@ -105,14 +103,14 @@ function buildUI {
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
   # Download and retag image to save bandwidth
-  buildAndPublishImage stratos-dc-console deploy/Dockerfile.ui ${STRATOS_PATH} prod-build
+  buildAndPublishImage stratos-dc-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
 }
 
 # MAIN ------------------------------------------------------
 #
 
 # Set the path to the portal proxy
-STRATOS_PATH=${STRATOS_PATH}
+STRATOS_PATH="${STRATOS_PATH}"
 
 # cleanup output, intermediate artifacts
 cleanup

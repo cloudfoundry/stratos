@@ -11,6 +11,7 @@ import { ApplicationService } from '../../../../application.service';
 import { GithubTabComponent } from './github-tab.component';
 import { DatePipe } from '@angular/common';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../../core/github.helpers';
 
 describe('GithubTabComponent', () => {
   let component: GithubTabComponent;
@@ -34,6 +35,7 @@ describe('GithubTabComponent', () => {
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         DatePipe
       ]
     })

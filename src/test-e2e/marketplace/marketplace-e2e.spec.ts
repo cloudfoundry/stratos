@@ -48,7 +48,7 @@ describe('Marketplace', () => {
   });
 
   it('- should change filter text when an option is selected', () => {
-    marketplacePage.servicesList.header.selectFilterOption(1);
+    marketplacePage.servicesList.header.selectFilterOption(0, 1);
     marketplacePage.servicesList.header.getFilterText().then(text => {
       expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });

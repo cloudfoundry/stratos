@@ -7,16 +7,10 @@ services:
 - docker
 addons:
   chrome: stable
-  artifacts:
-    paths:
-    - ./e2e-reports
-    target_paths:
-    - e2e
-    debug: true
 before_install:
 - export DISPLAY=:99.0
-- sh -e /etc/init.d/xvfb start
-- sleep 3 # give xvfb some time to start  
+- "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1366x768x24"
+- sleep 3
 install:
 - npm install npm@5.6.0 -g
 - npm install
@@ -33,26 +27,15 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-- Frontend Lint
-- Frontend Unit Tests
-- Backend Lint
-- Backend Unit Tests
-- name: E2E tests
-  if: type != pull_request OR commit_message =~ /\[e2e\-full\]/
-- name: E2E tests quick
-  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$ OR commit_message =~ /\[e2e\]/
+- Lint
+- Test
 jobs:
   include:
-  - stage: Frontend Lint
+  - stage: Lint
+    name: Frontend Lint
     script:
     - npm run lint
-  - stage: Frontend Unit Tests
-    env:
-    - CI_ENV=true
-    script:
-    - npm test
-    - npm run codecov
-  - stage: Backend Lint
+  - name: Backend Lint
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
@@ -61,7 +44,14 @@ jobs:
     script:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
-  - stage: Backend Unit Tests
+  - stage: Test
+    name: Frontend Unit Tests
+    env:
+    - CI_ENV=true
+    script:
+    - npm test
+    - npm run codecov
+  - name: Backend Unit Tests
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
@@ -69,16 +59,16 @@ jobs:
     - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - npm run test-backend
-  - stage: E2E tests
+  - name: E2E Tests
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
+    # Install ffmpeg so we can capture a video of the display as the tests run
+    - sudo add-apt-repository -y ppa:mc3man/trusty-media
+    - sudo apt-get -qq update
+    - sudo apt-get install -y ffmpeg
     script:
-    - "./deploy/ci/travis/run-e2e-tests.sh"
-  - stage: E2E tests quick
-    before_script:
-    - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
-    script:
-    - "./deploy/ci/travis/run-e2e-tests.sh quick"
+    - "./deploy/ci/travis/run-e2e-tests.sh video"
+    - "./deploy/ci/travis/upload-e2e-test-report.sh"
 notifications:
   slack:
     secure: s5SFnFKwzfxLrjGR5lJ2AJG1FSWCKtHdQi8K2Kmx5ZhrYL/7P+KLc/ks18WnzCPoy705LbHCBSULcnWbLjqCpnkKxNjsFAyFl2nZZPxBjl2/mHpulbr3gmultDOrMDbmYL4oWPKBlxKResElz9nQwknlLWZ/L94AIx8zuMfRIWdEt1bJBDAQts4fx2D4cIEx0yZUq7JGAKjSiXKR9eDyMWFb+SWw6mvr5WtFM8uq35rPvRVEfm56LIgSuMUpVeYtnYiY2JP7W8iKX0gD+54wAiSXRZiQVCLJq606/TlJo7j8Na9Dn1Q5XDkX3b3XzcgmEZThoO1GFtv3yNYOVxv+50p2tSnc8CT0VEVOYOGJuz17AESZAYK+AyjEmeZmDiroj1czmIq8/ZYKbmvDYSZgGuDcSkQurX/6BPac6ra69WmSQmwv0tS3A/IzDw7X+CuC+3QubQ7GfaiVe25PUU+tRSEDM4PMUJY8QRF5Q+oeN5NjjWmJBqf/ic2TO2xTU1j+qysdqK34qIV1qyVcPMUIiYW+5ltH71qiy05TSvvfGS+oatRBMzINRl3zl2gOV1CKNU801XehRKCx9XDCw5NL1HSx5HD5psOyBRpAMYYBOqa+rv9VAza9MsfpslCoibg5rdrq4rZqqUgRhayNp/LKzlhe/g62+qbGNT+iFuHtB+Y=

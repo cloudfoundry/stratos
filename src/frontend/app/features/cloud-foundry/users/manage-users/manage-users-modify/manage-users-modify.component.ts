@@ -169,6 +169,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
 
     const users$: Observable<CfUserWithWarning[]> = this.store.select(selectUsersRolesPicked).pipe(
+      filter(users => !!users),
       distinctUntilChanged(),
       map(users => users.map(this.mapUser.bind(this)))
     );
@@ -190,9 +191,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private mapUser(user: CfUser): CfUserWithWarning {
     // If we're at the org level or lower we guarantee org roles. If we're at the space we guarantee space roles.
-    const showWarning = user.missingRoles &&
-      (user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
-      (user.missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid);
+
+    const showWarning = !!user.missingRoles &&
+      ((user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
+        (user.missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid));
     // Ensure we're in an object where the username is always populated (in some cases it's missing)
     const newUser = {
       ...user,

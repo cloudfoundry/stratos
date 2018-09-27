@@ -200,6 +200,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
+				endpoint.Metadata["metrics_job"] = provider.Job
 			}
 			// For K8S
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
@@ -253,10 +254,12 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	for _, metricProviderInfo := range metricsProviders {
 		for guid, info := range endpointsMap {
 			// Depends on the type
-			if info.DopplerLoggingEndpoint == metricProviderInfo.URL {
+			if info.CNSIType == metricProviderInfo.Type && info.DopplerLoggingEndpoint == metricProviderInfo.URL {
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info
-				relate.metrics = &metricProviderInfo
+				// Make a copy
+				relate.metrics = &MetricsMetadata{}
+				*relate.metrics = metricProviderInfo
 				results[guid] = relate
 				delete(endpointsMap, guid)
 				break
@@ -275,7 +278,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 		}
 	}
 
-	// If there are still items in the endpoints map, then we did not find all metric providers
+	// Did we find a metric provider for each endpoint?
 	if len(endpointsMap) != 0 {
 		return nil, errors.New("Can not find a metric provider for all of the specified endpoints")
 	}
