@@ -26,6 +26,10 @@ export const GET_POD_INFO = '[KUBERNETES Endpoint] Get Pod Info';
 export const GET_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pod Info Success';
 export const GET_POD_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pod Info Failure';
 
+export const GET_PODS_ON_NODE_INFO = '[KUBERNETES Endpoint] Get Pods on Node Info';
+export const GET_PODS_ON_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pods on Node Success';
+export const GET_PODS_ON_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods on Node Failure';
+
 export const GET_NAMESPACES_INFO = '[KUBERNETES Endpoint] Get Namespaces Info';
 export const GET_NAMESPACES_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Namespaces Info Success';
 export const GET_NAMESPACES_INFO_FAILURE = '[KUBERNETES Endpoint] Get Namespaces Info Failure';
@@ -93,6 +97,21 @@ export class GetKubernetesPods implements PaginatedAction, KubeAction {
     GET_POD_INFO,
     GET_POD_INFO_SUCCESS,
     GET_POD_INFO_FAILURE
+  ];
+  paginationKey: string;
+}
+
+export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
+  constructor(public kubeGuid: string, public nodeName: string) {
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, nodeName, kubeGuid);
+  }
+  type = GET_PODS_ON_NODE_INFO;
+  entityKey = kubernetesPodsSchemaKey;
+  entity = [entityFactory(kubernetesPodsSchemaKey)];
+  actions = [
+    GET_PODS_ON_NODE_INFO,
+    GET_PODS_ON_NODE_INFO_SUCCESS,
+    GET_PODS_ON_NODE_INFO_FAILURE
   ];
   paginationKey: string;
 }

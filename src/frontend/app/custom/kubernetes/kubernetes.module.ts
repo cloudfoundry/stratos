@@ -26,6 +26,7 @@ import {
 import { HelmReleaseTabsBaseComponent } from './helm-release/helm-release-tabs-base/helm-release-tabs-base.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { PodChartComponent } from './helm-release/metrics/pod-chart/pod-chart.component';
+import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
@@ -37,22 +38,32 @@ import {
 import {
   KubernetesNodeLinkComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component';
+import {
+  KubernetesNodeMetricsComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-metrics/kubernetes-node-metrics.component';
+import {
+  KubernetesNodeConditionCardComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
+import {
+  KubernetesNodeSummaryCardComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary-card/kubernetes-node-summary-card.component';
+import {
+  KubernetesNodeSummaryComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
+import {
+  KubernetesNodeTagsCardComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-tags-card/kubernetes-node-tags-card.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { HelmReleaseService } from './services/helm-release.service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
+import { KubernetesNodeService } from './services/kubernetes-node.service';
 import { KubernetesService } from './services/kubernetes.service';
 import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
-import { KubernetesNodeService } from './services/kubernetes-node.service';
-import { KubernetesNodeMetricsComponent } from './list-types/kubernetes-nodes/kubernetes-node-metrics/kubernetes-node-metrics.component';
-import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
-import { KubernetesNodePodsComponent } from './list-types/kubernetes-nodes/kubernetes-node-pods/kubernetes-node-pods.component';
-import { KubernetesNodeSummaryCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary-card/kubernetes-node-summary-card.component';
-import { KubernetesNodeConditionCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
-import { KubernetesNodeTagsCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-tags-card/kubernetes-node-tags-card.component';
+import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
+import { KubernetesNodePodsLinkComponent } from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
 
 @NgModule({
   imports: [
@@ -89,7 +100,9 @@ import { KubernetesNodeTagsCardComponent } from './list-types/kubernetes-nodes/k
     KubernetesNodePodsComponent,
     KubernetesNodeSummaryCardComponent,
     KubernetesNodeConditionCardComponent,
-    KubernetesNodeTagsCardComponent
+    KubernetesNodeTagsCardComponent,
+    KubernetesNodePodsComponent,
+    KubernetesNodePodsLinkComponent
   ],
   providers: [
     KubernetesService,
@@ -104,7 +117,8 @@ import { KubernetesNodeTagsCardComponent } from './list-types/kubernetes-nodes/k
     AppLinkComponent,
     HelmReleasePodNameLinkComponent,
     PodUsageComponent,
-    KubernetesNodeLinkComponent
+    KubernetesNodeLinkComponent,
+    KubernetesNodePodsLinkComponent
   ]
 })
 export class KubernetesModule {

@@ -52,9 +52,12 @@ import {
   KubeAction,
   GET_NODES_INFO,
   GetKubernetesNode,
+  GetKubernetesPodsOnNode,
+  GET_PODS_ON_NODE_INFO,
 } from './kubernetes.actions';
 
 export type GetID<T> = (p: T) => string;
+export type Filter<T> = (p: T) => boolean;
 
 @Injectable()
 export class KubernetesEffects {
@@ -94,6 +97,22 @@ export class KubernetesEffects {
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
         kubernetesPodsSchemaKey,
         getUid);
+    })
+  );
+
+  @Effect()
+  fetchPodsOnNodeInfo$ = this.actions$.ofType<GetKubernetesPodsOnNode>(GET_PODS_ON_NODE_INFO).pipe(
+    flatMap(action => {
+      const getUid: GetID<KubernetesPod> = (p) => p.metadata.uid;
+      return this.processListAction<KubernetesPod>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
+        kubernetesPodsSchemaKey,
+        getUid,
+        (p: KubernetesPod) => {
+          console.log(p)
+         return p.spec.nodeName === action.nodeName;
+        }
+      );
     })
   );
 
@@ -206,7 +225,7 @@ export class KubernetesEffects {
     })
   );
 
-  private processListAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>) {
+  private processListAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>, filterResults?: Filter<T> ) {
     this.store.dispatch(new StartRequestAction(action));
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
     const requestArgs = {
@@ -220,7 +239,8 @@ export class KubernetesEffects {
           result: []
         } as NormalizedResponse;
         const items = response[action.kubeGuid].items as Array<any>;
-        const processesData = items.reduce((res, data) => {
+        const processesData = items.filter((res) => !!filterResults ? filterResults(res) : true)
+          .reduce((res, data) => {
           const id = getId(data);
           res.entities[schemaKey][id] = data;
           res.result.push(id);

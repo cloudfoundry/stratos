@@ -20,6 +20,8 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
+import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
+import { KubernetesNodePodsLinkComponent } from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -27,6 +29,13 @@ const kubernetes: Routes = [{
 },
 {
   path: ':kubeId/apps/:releaseName/:namespaceName/pods/:podName',
+  component: HelmReleasePodComponent,
+  data: {
+    uiFullView: true
+  },
+},
+{
+  path: ':kubeId/nodes/:nodeName/pods/:podName',
   component: HelmReleasePodComponent,
   data: {
     uiFullView: true
@@ -50,7 +59,7 @@ const kubernetes: Routes = [{
     },
     {
       path: 'pods',
-      component: HelmReleasePodsTabComponent
+      component: KubernetesNodePodsComponent
     },
     {
       path: 'services',
