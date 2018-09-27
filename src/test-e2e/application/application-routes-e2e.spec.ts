@@ -13,6 +13,10 @@ describe('Application Routes -', () => {
 
   let applicationE2eHelper: ApplicationE2eHelper;
   let cfGuid, app: APIResource<IApp>;
+  let appRoutes;
+  let routeHostName, routePath;
+
+  const EC = protractor.ExpectedConditions;
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
@@ -36,13 +40,39 @@ describe('Application Routes -', () => {
     });
   });
 
-
   function spaceContainsRoute(spaceGuid: string, host: string, path: string): promise.Promise<boolean> {
     return applicationE2eHelper.cfHelper.fetchRoutesInSpace(cfGuid, spaceGuid)
-      .then(routes => !!routes.filter(route => route.entity.host === host && route.entity.path === '/' + path).length);
+      .then(routes => !!routes.find(route => route.entity.host === host && route.entity.path === '/' + path));
   }
 
-  function testCreateNewRoute(appRoutes: ApplicationPageRoutesTab): { newRouteHostName: string, newRoutePath: string } {
+  function waitForRouteToBeDeleted(spaceGuid: string, host: string, path: string, count = 0): promise.Promise<boolean> {
+    return spaceContainsRoute(app.entity.space_guid, routeHostName, routePath).then(exists => {
+      if (!exists) {
+        return true;
+      }
+      count++;
+      if (count === 10) {
+        return false;
+      }
+      e2e.sleep(1000);
+      return waitForRouteToBeDeleted(spaceGuid, host, path, count);
+    });
+  }
+
+  // All of these tests assume that they run after each other
+
+  it('Go to Application Routes Tab', () => {
+    appRoutes = new ApplicationPageRoutesTab(cfGuid, app.metadata.guid);
+    appRoutes.navigateTo();
+
+    // Check empty initial state
+    expect(appRoutes.list.empty.getDefault().isPresent()).toBeFalsy();
+    expect(appRoutes.list.empty.getDefault().getComponent().isPresent()).toBeFalsy();
+    expect(appRoutes.list.empty.getCustom().getComponent().isDisplayed()).toBeTruthy();
+    expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
+  });
+
+  it('Add a new route', () => {
     expect(appRoutes.list.header.getAdd().isDisplayed()).toBeTruthy();
     appRoutes.list.header.getAdd().click();
 
@@ -60,11 +90,11 @@ describe('Application Routes -', () => {
     httpRouteForm.clearField('host');
     expect(addRoutePage.stepper.canNext()).toBeFalsy();
 
-    const newRouteHostName = '0-' + ApplicationE2eHelper.createRouteName();
-    const newRoutePath = 'thisIsAPath';
+    routeHostName = '0-' + ApplicationE2eHelper.createRouteName();
+    routePath = 'thisIsAPath';
     httpRouteForm.fill({
-      host: newRouteHostName,
-      path: newRoutePath
+      host: routeHostName,
+      path: routePath
     });
     expect(addRoutePage.stepper.canNext()).toBeTruthy();
     addRoutePage.stepper.next();
@@ -78,26 +108,22 @@ describe('Application Routes -', () => {
     expect(appRoutes.list.table.getRows().count()).toBe(1);
     appRoutes.list.table.getCell(0, 1).getText().then(route => {
       expect(route).toBeTruthy();
-      expect(route.startsWith(newRouteHostName)).toBeTruthy();
-      expect(route.endsWith('/' + newRoutePath)).toBeTruthy();
-      expect(spaceContainsRoute(app.entity.space_guid, newRouteHostName, newRoutePath)).toBeTruthy();
+      expect(route.startsWith(routeHostName)).toBeTruthy();
+      expect(route.endsWith('/' + routePath)).toBeTruthy();
+      expect(spaceContainsRoute(app.entity.space_guid, routeHostName, routePath)).toBeTruthy();
     });
     expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('No');
-    return {
-      newRouteHostName,
-      newRoutePath
-    };
-  }
+  });
 
-  function testUnmapOfNewRoute(appRoutes: ApplicationPageRoutesTab, newRouteHostName: string, newRoutePath: string) {
+  it('Unmap existing route', () => {
     const unmapActionMenu = appRoutes.list.table.openRowActionMenuByIndex(0);
     unmapActionMenu.waitUntilShown();
     unmapActionMenu.clickItem('Unmap');
     const confirm = new ConfirmDialogComponent();
     confirm.getMessage().then(message => {
       expect(message).toBeTruthy();
-      expect(message.indexOf(newRouteHostName)).toBeGreaterThanOrEqual(0);
-      expect(message.indexOf('/' + newRoutePath)).toBeGreaterThanOrEqual(0);
+      expect(message.indexOf(routeHostName)).toBeGreaterThanOrEqual(0);
+      expect(message.indexOf('/' + routePath)).toBeGreaterThanOrEqual(0);
     });
     confirm.confirm();
     confirm.waitUntilNotShown();
@@ -106,11 +132,11 @@ describe('Application Routes -', () => {
       expect(appRoutes.list.empty.getCustom().isDisplayed()).toBeTruthy();
       expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
 
-      expect(spaceContainsRoute(app.entity.space_guid, newRouteHostName, newRoutePath)).toBeTruthy();
+      expect(spaceContainsRoute(app.entity.space_guid, routeHostName, routePath)).toBeTruthy();
     });
-  }
+  });
 
-  function testMapExistingRoute(appRoutes: ApplicationPageRoutesTab, routeHostName: string, routePath: string) {
+  it('Map existing route', () => {
     const addRoutePage = new CreateRoutesPage(cfGuid, app.metadata.guid, app.entity.space_guid);
 
     // Bind the just unbound route back to app
@@ -151,10 +177,9 @@ describe('Application Routes -', () => {
       });
       expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('No');
     });
+  });
 
-  }
-
-  function testDeleteOfRoute(appRoutes: ApplicationPageRoutesTab, routeHostName: string, routePath: string) {
+  it('Delete route', () => {
     expect(appRoutes.isActivePage()).toBeTruthy();
 
     const deleteActionMenu = appRoutes.list.table.openRowActionMenuByIndex(0);
@@ -166,35 +191,17 @@ describe('Application Routes -', () => {
       expect(message.indexOf(routeHostName)).toBeGreaterThanOrEqual(0);
       expect(message.indexOf('/' + routePath)).toBeGreaterThanOrEqual(0);
     });
+
+    e2e.sleep(5000);
     confirm.confirm();
     confirm.waitUntilNotShown();
 
     appRoutes.list.header.getRefreshListButton().click();
-
     expect(appRoutes.list.empty.getCustom().isDisplayed()).toBeTruthy();
     expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
 
-    expect(spaceContainsRoute(app.entity.space_guid, routeHostName, routePath)).toBeFalsy();
-  }
-
-
-  it('Add a new route', () => {
-
-    const appRoutes = new ApplicationPageRoutesTab(cfGuid, app.metadata.guid);
-    appRoutes.navigateTo();
-
-    // Check empty initial state
-    expect(appRoutes.list.empty.getDefault().isPresent()).toBeFalsy();
-    expect(appRoutes.list.empty.getDefault().getComponent().isPresent()).toBeFalsy();
-    expect(appRoutes.list.empty.getCustom().getComponent().isDisplayed()).toBeTruthy();
-    expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
-
-    // All these tests are designed to lead on from each other.
-    const { newRouteHostName, newRoutePath } = testCreateNewRoute(appRoutes);
-    testUnmapOfNewRoute(appRoutes, newRouteHostName, newRoutePath);
-    testMapExistingRoute(appRoutes, newRouteHostName, newRoutePath);
-    testDeleteOfRoute(appRoutes, newRouteHostName, newRoutePath);
-
+    browser.wait(waitForRouteToBeDeleted(app.entity.space_guid, routeHostName, routePath),
+    10000, 'Route should have been deleted from the space');
   });
 
   afterAll(() => {

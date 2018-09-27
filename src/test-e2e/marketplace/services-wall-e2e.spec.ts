@@ -3,7 +3,6 @@ import { browser, protractor } from 'protractor';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
-import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -27,7 +26,7 @@ describe('Service Instances Wall', () => {
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
 
   });
@@ -63,7 +62,7 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should change filter text when an option is selected', () => {
-    servicesWallPage.serviceInstancesList.header.selectFilterOption(1);
+    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 1);
     servicesWallPage.serviceInstancesList.header.getFilterText().then(text => {
       expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });
@@ -98,38 +97,30 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to Edit Service Instance', () => {
-    servicesWallPage.serviceInstancesList.cards.getCards().then(
-      cards => {
-        const metaCard = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
-        const actionMenu = metaCard.openActionMenu();
-        actionMenu.then(menu => {
-          const editMenuItem = menu.getItem('Edit');
-          expect(editMenuItem.getText()).toEqual('Edit');
-          expect(editMenuItem.isEnabled()).toBeTruthy();
-          editMenuItem.click();
-          browser.getCurrentUrl().then(url => {
-            expect(url.endsWith('edit')).toBeTruthy();
-          });
-          const createServiceInstance = new CreateServiceInstance();
-          createServiceInstance.stepper.cancel();
-          servicesWallPage.isActivePage();
+    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, servicesHelperE2E.serviceInstanceName, false)
+      .then(metaCard => metaCard.openActionMenu())
+      .then(menu => {
+        const editMenuItem = menu.getItem('Edit');
+        expect(editMenuItem.getText()).toEqual('Edit');
+        expect(editMenuItem.isEnabled()).toBeTruthy();
+        editMenuItem.click();
+        browser.getCurrentUrl().then(url => {
+          expect(url.endsWith('edit')).toBeTruthy();
         });
-      }
-    );
+        const createServiceInstance = new CreateServiceInstance();
+        createServiceInstance.stepper.cancel();
+        servicesWallPage.isActivePage();
+      });
   });
 
   it('- should be able to delete Service Instance', () => {
-    servicesWallPage.serviceInstancesList.cards.getCards().then(
-      cards => {
-        const metaCard = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
-        const actionMenu = metaCard.openActionMenu();
-        actionMenu.then(menu => {
-          const deleteMenuItem = menu.getItem('Delete');
-          expect(deleteMenuItem.getText()).toEqual('Delete');
-          expect(deleteMenuItem.isEnabled()).toBeTruthy();
-        });
-      }
-    );
+    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, servicesHelperE2E.serviceInstanceName, false)
+      .then(metaCard => metaCard.openActionMenu())
+      .then(menu => {
+        const deleteMenuItem = menu.getItem('Delete');
+        expect(deleteMenuItem.getText()).toEqual('Delete');
+        expect(deleteMenuItem.isEnabled()).toBeTruthy();
+      });
   });
 
   afterAll((done) => {
