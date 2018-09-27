@@ -16,6 +16,7 @@ export interface IMetricCell {
   bosh_deployment: string;
   bosh_job_id: string;
   bosh_job_name: string;
+  environment: string;
   instance: string;
   job: string;
   origin: string;

@@ -1,4 +1,20 @@
 .metric-chart-wrapper {
   height: 500px;
+}
+
+mat-card {
   margin-bottom: 20px;
+}
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+
+  &__two-cols {
+    flex: 1;
+
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
 }

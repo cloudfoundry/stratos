@@ -53,6 +53,7 @@ export abstract class MetricsAction implements IRequestAction {
 
   // Builds the key that is used to store the metric in the app state.
   static buildMetricKey(guid: string, query: MetricQueryConfig) {
+    // TODO: RC add params
     return `${guid}:${query.metric}`;
   }
 }
@@ -61,6 +62,15 @@ export class FetchCFMetricsAction extends MetricsAction {
   public cfGuid: string;
   constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(cfGuid, query, queryType);
+    this.cfGuid = cfGuid;
+    this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
+  }
+}
+
+export class FetchCFCellMetricsAction extends MetricsAction {
+  public cfGuid: string;
+  constructor(cfGuid: string, cellId: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(cfGuid + '-' + cellId, query, queryType);
     this.cfGuid = cfGuid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
   }

@@ -19,25 +19,12 @@ export class CloudFoundryCellSummaryComponent {
   ) {
 
     this.status$ = cfCellService.healthy$.pipe(
-      map(entity => {
-        if (!entity.data || !entity.data.result) {
+      map(health => {
+        if (health === undefined) {
           return CardStatus.NONE;
         }
-        // TODO: RC
-        const health = entity.data.result[0];
-        return health.value[1] === '0' ? CardStatus.OK : CardStatus.ERROR;
+        return health === '0' ? CardStatus.OK : CardStatus.ERROR;
       })
-      // map(entityInfo => entityInfo.entity),
-      // filter(metrics => !!metrics && !!metrics.data && !!metrics.data.result),
-      // map(metrics => metrics.data.result)
     );
-    // this.status$.subscribe(status => console.log(status));
-
-    // this.status$ = cellHealth$.pipe(
-    //   startWith(CardStatus.NONE)
-    // );
-
-
-
   }
 }

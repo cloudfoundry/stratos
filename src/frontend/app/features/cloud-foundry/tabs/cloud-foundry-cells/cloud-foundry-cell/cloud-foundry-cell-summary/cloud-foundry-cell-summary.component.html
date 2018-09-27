@@ -1,16 +1,35 @@
 <mat-card>
   <app-card-status [status$]="status$"></app-card-status>
-  <mat-card-header>
-    <div>Summary</div>
-  </mat-card-header>
   <mat-card-content>
-    <app-metadata-item label="Healthy">
-      <!-- //TODO: RC test -->
-      <app-boolean-indicator [isTrue]="(status$ | async) === 'ok'" type="enabled-disabled" subtle="false" showText="false"></app-boolean-indicator>
-    </app-metadata-item>
+    <div class="app-metadata">
+      <div class="app-metadata__two-cols">
+        <app-metadata-item icon="local_hospital" label="Healthy" matTooltip="Has the cell passed the garden backend health check?">
+          <app-boolean-indicator [isTrue]="(status$ | async) === 'ok'" type="yes-no" [subtle]="false" [showText]="true"></app-boolean-indicator>
+        </app-metadata-item>
+      </div>
+      <div class="app-metadata__two-cols">
+        <app-metadata-item icon="developer_board" label="Number of CPUs">{{ cfCellService.cpus$ | async}}</app-metadata-item>
+      </div>
+    </div>
   </mat-card-content>
 </mat-card>
-<!-- <mat-card class="metric-chart-wrapper">
-  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Containers" yAxisLabel="Available" queryRange="false" queryString="firehose_value_metric_rep_capacity_remaining_containers">
+
+<app-tile-grid [fit]="false">
+  <app-tile-group>
+    <app-tile>
+      <app-card-number-metric icon="memory" label="Memory" units="mb" value="{{ cfCellService.usageMemory$ | async}} " limit="{{ cfCellService.totalMemory$ | async}}"></app-card-number-metric>
+    </app-tile>
+    <app-tile>
+      <app-card-number-metric icon="storage" label="Disk" units="mb" value="{{ cfCellService.usageDisk$ | async}} " limit="{{ cfCellService.totalDisk$ | async}}"></app-card-number-metric>
+    </app-tile>
+    <app-tile>
+      <!-- //TODO: RC icon -->
+      <app-card-number-metric icon="hdr_off" label="Containers" value="{{ cfCellService.usageContainers$ | async}} " limit="{{ cfCellService.totalContainers$ | async}}"></app-card-number-metric>
+    </app-tile>
+  </app-tile-group>
+</app-tile-grid>
+
+<mat-card class="metric-chart-wrapper">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Health" yAxisLabel="0 = Healthy, 1 = Unhealthy" queryRange="false" queryString="firehose_value_metric_rep_unhealthy_cell">
   </app-cf-cell-summary-chart>
-</mat-card> -->
+</mat-card>

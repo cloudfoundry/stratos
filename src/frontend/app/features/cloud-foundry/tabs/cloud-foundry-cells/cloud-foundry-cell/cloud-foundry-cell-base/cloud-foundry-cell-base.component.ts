@@ -43,11 +43,11 @@ export class CloudFoundryCellBaseComponent {
     cfCellService: CloudFoundryCellService
   ) {
 
-    this.waitForEntityId = cfCellService.healthyAction.metricId;
-    this.name$ = cfCellService.healthy$.pipe(
-      map(entity => {
-        console.log(entity);
-        return entity.data.result[0].metric.bosh_job_name;
+    this.waitForEntityId = cfCellService.healthyMetricId;
+    this.name$ = cfCellService.cellMetric$.pipe(
+      map(metric => {
+        console.log(metric);
+        return metric.bosh_job_name;
       })
     );
 
