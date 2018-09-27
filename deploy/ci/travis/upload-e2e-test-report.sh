@@ -4,8 +4,8 @@ echo "Stratos e2e test report upload"
 echo "=============================="
 
 if [ -z "${AWS_ENDPOINT}" ]; then
-  echo "Need S3 endpoint URL"
-  exit 1
+  echo "S3 endpoint URL needed to upload reports"
+  exit 0
 fi
 
 wget https://dl.minio.io/client/mc/release/linux-amd64/mc

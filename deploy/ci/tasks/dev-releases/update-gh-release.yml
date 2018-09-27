@@ -17,10 +17,34 @@ run:
     - |
       # Create Github release
       ROOT_DIR=${PWD}
+      VERSION=$(cat image-tag/v2-version)
+      FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
+
+      # Check tagged release version is consistent with package.json version
+      TAG_RELEASE_VERSION=$(echo ${FULL_VERSION} | cut -d"-" -f1)
+      if [ "${TAG_RELEASE_VERSION}" != "${VERSION}" ]; then
+        echo "Package.json version is not consistent with tag release version! ${TAG_RELEASE_VERSION} != ${VERSION}"
+        exit 1
+      fi
       cd ${ROOT_DIR}/stratos
-      GIT_TAG=$(cat ../image-tag/v2-alpha-tag)
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
+
+      # Check that the release exists
+      set +e
+      github-release info -t ${VERSION}
+      RETVAL=$?
+      set -e
+
+      # Delete the release if it already exists
+      if [ $RETVAL -eq 0 ]; then
+        github-release delete -t ${VERSION}
+      fi
+
+      # Create new release
+      github-release release -t ${VERSION} --name "Stratos ${VERSION} Preview release" --pre-release
+
       # Upload Helm chart to release
-      github-release release -t ${GIT_TAG} --name "Stratos ${GIT_TAG} Preview release" --pre-release
-      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "console-helm-chart-${GIT_TAG}.tgz"
+      github-release upload -t ${VERSION} --file ${CHART_PACKAGE} --name "${CHART_PACKAGE}"
+      

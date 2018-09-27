@@ -1,5 +1,108 @@
 # Change Log
 
+## 2.1.2
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.1...2.1.2)
+
+This release fixes an issue with a broken backend dependency, where the pinned version that was being used is no longer available.
+
+- Fix go-flags dependency pinned version broken [\#3071](https://github.com/cloudfoundry-incubator/stratos/pull/3071)
+
+## 2.1.1
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.0...2.1.1)
+
+This is a bug fix release that addresses the following issues:
+
+**Fixes:**
+
+- App wall filtering can stop working  with some filter combinations [\#3043](https://github.com/cloudfoundry-incubator/stratos/pull/3043)
+
+- Can not connect a metrics endpoint [\#3035](https://github.com/cloudfoundry-incubator/stratos/issues/3035)
+
+- Backend build issue due to the pinned commit for a dependency being removed [\#3060](https://github.com/cloudfoundry-incubator/stratos/pull/3060)
+
+
+- Metrics: Wrong job can be matched up when there are multiple jobs [\#3057](https://github.com/cloudfoundry-incubator/stratos/pull/3057)
+
+## 2.1.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.1...2.1.0)
+
+Release highlights:
+
+- Stratos frontend can be pre-built before pushing to Cloud Foundry to enable AOT and reduce push time
+- SSO support refinements with the ability to now connect a Cloud Foundry endpoint using SSO in addition to SSO login to Straos itself
+- Ability to specify manifest overrides when deploying an application
+- Ability to optionally specify Client ID and Client Secret when registering an endpoint
+- Add ability to restage an application
+- Endpoints list now shows logged in user's username and whether they're an admin
+- Switched to new Stratos logo for login and about pages
+- Backend improvements to make it easier for developers to develop with
+- Security fixes
+
+**Fixes:**
+
+- Diagnostics can report incorrect migrations [\#2965](https://github.com/cloudfoundry-incubator/stratos/issues/2965)
+- Backend should only gzip static responses [\#2925](https://github.com/cloudfoundry-incubator/stratos/issues/2925)
+- Incorrect deployment type when deployed as a CF App [\#2858](https://github.com/cloudfoundry-incubator/stratos/issues/2858)
+- Space Scoped Services are absent in the `Select Service` when the correct space/org is selected [\#2829](https://github.com/cloudfoundry-incubator/stratos/issues/2829)
+- I can not get service information [\#2814](https://github.com/cloudfoundry-incubator/stratos/issues/2814)
+- Fix security vulnerability CVE-2018-3774 introduced by nested dependency [\#2851](https://github.com/cloudfoundry-incubator/stratos/issues/2851)
+- Fix issues with cookie not being marked as secure or http only with sqlite session store [\#2911](https://github.com/cloudfoundry-incubator/stratos/pull/2911)
+- Update cache-control header [\#2910](https://github.com/cloudfoundry-incubator/stratos/pull/2910)
+- Upgrade angular to 6.1.1 to fix security vulnerability [\#2850](https://github.com/cloudfoundry-incubator/stratos/pull/2850)
+- Fixes and improvement for the diagnostics page [\#2860](https://github.com/cloudfoundry-incubator/stratos/pull/2860)
+- Fix several manage user role bugs [\#2826](https://github.com/cloudfoundry-incubator/stratos/pull/2826)
+- Diagnostics does not show GitHub details when cloned via HTTPS [\#3007](https://github.com/cloudfoundry-incubator/stratos/pull/3007)
+
+**Improvements:**
+
+- Endpoint list: Show logged in user's username and whether they're an admin or not. [\#2827](https://github.com/cloudfoundry-incubator/stratos/pull/2827)
+- Allow front-end to be pre-built [\#2838](https://github.com/cloudfoundry-incubator/stratos/pull/2838)
+- Deploy App Manifest overrides [\#2924](https://github.com/cloudfoundry-incubator/stratos/pull/2924)
+- Add restage to application page. [\#2828](https://github.com/cloudfoundry-incubator/stratos/pull/2828)
+- Extend endpoint registration UI to support Client ID and Client Secret [\#2920](https://github.com/cloudfoundry-incubator/stratos/pull/2920)
+- Use new Stratos logo on splash/login and about page [\#2919](https://github.com/cloudfoundry-incubator/stratos/pull/2919)
+- Scalability: Change application list in service instance table row from vertical to chip list [\#2896](https://github.com/cloudfoundry-incubator/stratos/issues/2896)
+- Scalability: Convert space apps list from local to remote [\#2893](https://github.com/cloudfoundry-incubator/stratos/issues/2893)
+- Use official CF Stratos logo [\#2892](https://github.com/cloudfoundry-incubator/stratos/issues/2892)
+- SSO - Enable SSO for all deployment mechanisms [\#2873](https://github.com/cloudfoundry-incubator/stratos/issues/2873)
+- SSO: Add an option to the setup screen to enable SSO [\#2963](https://github.com/cloudfoundry-incubator/stratos/pull/2963)
+- SSO: Add initial SSO doc [\#2945](https://github.com/cloudfoundry-incubator/stratos/pull/2945)
+- SSO: Add flag to indicate if an endpoint has been configured for SSO [\#2939](https://github.com/cloudfoundry-incubator/stratos/pull/2939)
+- SSO: Add SSO Config options to Helm chart [\#2934](https://github.com/cloudfoundry-incubator/stratos/pull/2934)
+- SSO: Allow a Cloud Foundry endpoint to be connected with SSO login [\#2928](https://github.com/cloudfoundry-incubator/stratos/pull/2928)
+- SSO: Link tokens rather than copying them [\#2916](https://github.com/cloudfoundry-incubator/stratos/pull/2916)
+- Add check to make sure DB Schema migrations have completed [\#2977](https://github.com/cloudfoundry-incubator/stratos/pull/2977)
+- Extensions: Allow new side nav items to be added [\#2950](https://github.com/cloudfoundry-incubator/stratos/pull/2950)
+- Extensions: Tidy up customizations and fix logo customization [\#2948](https://github.com/cloudfoundry-incubator/stratos/pull/2948)
+- Improve GitHub error handling [\#2946](https://github.com/cloudfoundry-incubator/stratos/pull/2946)
+- Harden app delete e2e test to reduce chance of concurrency failures [\#2942](https://github.com/cloudfoundry-incubator/stratos/pull/2942)
+- Show 'other apps bound to service instance' warning on delete app service instance step [\#2918](https://github.com/cloudfoundry-incubator/stratos/pull/2918)
+- Harden the service wall instance card [\#2908](https://github.com/cloudfoundry-incubator/stratos/pull/2908)
+- Restructure go backend \(with source moves\) [\#2854](https://github.com/cloudfoundry-incubator/stratos/pull/2854)
+- Improvements to simplify dev experience with go backend [\#2861](https://github.com/cloudfoundry-incubator/stratos/pull/2861)
+- Added word break to the log viewer [\#2823](https://github.com/cloudfoundry-incubator/stratos/pull/2823)
+- Remove all tokens associated with a cnsi on unregister, also fix e2e [\#2821](https://github.com/cloudfoundry-incubator/stratos/pull/2821)
+
+## [2.0.1](https://github.com/cloudfoundry-incubator/stratos/tree/2.0.1) (2018-08-16)
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0...2.0.1)
+
+**Fixed bugs:**
+
+- Unable to edit user provided service instances [\#2839](https://github.com/cloudfoundry-incubator/stratos/issues/2839)
+
+**Merged pull requests:**
+
+- use cnsi client in deploy.go [\#2843](https://github.com/cloudfoundry-incubator/stratos/pull/2843)
+- Improve performance [\#2842](https://github.com/cloudfoundry-incubator/stratos/pull/2842)
+- Pass helm repo branch as an env var to create-chart task [\#2820](https://github.com/cloudfoundry-incubator/stratos/pull/2820)
+- Update nigthly release pipeline to allow helm repo configuration [\#2819](https://github.com/cloudfoundry-incubator/stratos/pull/2819)
+- Update index.yaml in gh-pages [\#2818](https://github.com/cloudfoundry-incubator/stratos/pull/2818)
+- Update README travis badge link to avoid `current` tab confusion [\#2817](https://github.com/cloudfoundry-incubator/stratos/pull/2817)
+
+
 ## 2.0.1
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.0...2.0.1)
 

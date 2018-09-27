@@ -58,7 +58,9 @@ var deleteCNSIToken = `DELETE FROM tokens
 var deleteCNSITokens = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
-var updateToken = `UPDATE tokens SET auth_token = $1, refresh_token = $2, token_expiry = $3 WHERE token_guid = $7 AND user_guid = $8`
+var updateToken = `UPDATE tokens
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3
+										WHERE token_guid = $4 AND user_guid = $5`
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
 type PgsqlTokenRepository struct {
@@ -85,6 +87,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)
 	deleteCNSIToken = datastore.ModifySQLStatement(deleteCNSIToken, databaseProvider)
 	deleteCNSITokens = datastore.ModifySQLStatement(deleteCNSITokens, databaseProvider)
+	updateToken = datastore.ModifySQLStatement(updateToken, databaseProvider)
 }
 
 // saveAuthToken - Save the Auth token to the datastore

@@ -2,6 +2,63 @@
 
 Weekly status updates are published here.
 
+## 21st September 2018
+
+This week saw the release of 2.1.0 - the highlights are:
+
+- Stratos frontend can be pre-built before pushing to Cloud Foundry to enable AOT and reduce push time
+- SSO support refinements with the ability to now connect a Cloud Foundry endpoint using SSO in addition to SSO login to Straos itself
+- Ability to specify manifest overrides when deploying an application
+- Ability to optionally specify Client ID anc Client Secret when registering an endpoint
+- Add ability to restage an application
+- Endpoints list now shows logged in user's username and whether they're an admin
+- Switched to new Stratos logo for login and about pages
+- Backend improvements to make it easier for developers to develop with
+- Security fixes
+
+Full release information is available [here](https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.1.0).
+
+Highlights for this week (continuing from last week):
+
+- Extensions - Work continues on adding extension points in the UI. Extensions is targeted for 2.2.0 in October.
+
+- E2E Tests and Automation - Focusing on making the E2E tests more resilient to timing issues. We have also spent time getting the E2E tests to run against BrowserStack to allow us to automate testing of Stratos across multiple browser types/platforms.
+
+- Metrics - Work to tidy up the existing Cloud Foundry Application metrics is complete.
+
+- JSON Schema support for Service Instance binding - We have been working to update PR [#2997](https://github.com/cloudfoundry-incubator/stratos/pull/2997) to get this feature into Stratos.
+
+Fixes/Misc:
+
+- Fix app wall filtering issue [#3043](https://github.com/cloudfoundry-incubator/stratos/pull/3043)
+- Fix for Connect button not being enabled when SSO is the default [#3004](https://github.com/cloudfoundry-incubator/stratos/pull/3004)
+- Version number always reports 'dev' [#3001](https://github.com/cloudfoundry-incubator/stratos/pull/3001)
+- Diagnostics does not show GitHub details when cloned via HTTPS [#3007](https://github.com/cloudfoundry-incubator/stratos/pull/3007)
+- Fix for NULL Client Secret bug [#3015](https://github.com/cloudfoundry-incubator/stratos/pull/3015)
+- Fix bug where token IDs are not set properly when upgrading from a previous version [#3017](https://github.com/cloudfoundry-incubator/stratos/pull/3017)
+
+## 14th September 2018
+
+We've been preparing the 2.1.0 release this week. This will be published next week. Going forward we will be publishing a new release every month. The release notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md#210).
+
+Highlights for this week:
+
+- Extensions - Work continues on adding extension points in the UI. We have PRs up to support adding new side-nav items, tabs and actions. This already goes beyond what could be done in V1 of Stratos. The extension mechanism is also much cleaner due to the use of decorators. Extensions is targeted for 2.2.0 in October.
+
+- E2E Tests and Automation - Continuing to build out the E2E test suite and automate the deploy and test of Stratos in different environments (pushed to Cloud Foundry, pushed to Cloud Foundry with MySQL and Postgres, pushed to Cloud Foundry with SSO, Docker compose, Docker All-in-One)
+
+- Metrics - Work is almost complete on improving the metrics integration and presentation in the UI. Rather than display a timeline under each graph, we are switching to a control to allow you to choose the time period.
+
+Other updates:
+
+- Allow auto-registration name to be configured [#2986](https://github.com/cloudfoundry-incubator/stratos/pull/2986)
+- SSO: Refinements [#2982](https://github.com/cloudfoundry-incubator/stratos/pull/2982)
+  - Fix consistency of SSO casing and hyphenation => 'Single Sign-On'
+  - Make SSO default when connecting if enabled for the endpoint
+  - Move the SSO Allowed checkbox to the bottom in 'Advanced Options', so that the form does not move when the checkbox is checked and the advisory text appears
+- Add check to make sure DB Schema migrations have completed (fixes an issue with diagnostics and a possible race-condition when deployed via Helm or Docker Compose) [#2977](https://github.com/cloudfoundry-incubator/stratos/pull/2977)
+
+
 ## 7th September 2018
 
 Update for this week:

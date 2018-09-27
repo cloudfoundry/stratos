@@ -31,6 +31,7 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
+	SSOAllowed             bool     `json:"sso_allowed"`
 }
 
 // ConnectedEndpoint
@@ -189,6 +190,7 @@ type ConsoleConfig struct {
 	ConsoleClientSecret string   `json:"console_client_secret"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
+	UseSSO              bool     `json:"use_sso"`
 }
 
 // CNSIRequest
@@ -226,6 +228,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
 	SSOOptions                      string   `configName:"SSO_OPTIONS"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`

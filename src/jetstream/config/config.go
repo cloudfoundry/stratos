@@ -226,3 +226,8 @@ func LoadConfigFile(path string) error {
 
 	return nil
 }
+
+// SetConfigValue will update/set a value in the loaded configuration
+func SetConfigValue(name, value string) {
+	loadedConfig[name] = value
+}

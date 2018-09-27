@@ -40,6 +40,7 @@ describe('EndpointCardComponent', () => {
       },
       metricsAvailable: false,
       system_shared_token: false,
+      sso_allowed: false,
     };
     fixture.detectChanges();
   });
