@@ -172,7 +172,7 @@
   revision = "7dc373669fa10ddf827c37c595dee30a2f001be9"
 
 [[projects]]
-  digest = "1:bbb950f3ec3179e246d4825963951937feb34f059d757a8b5b48889bd3d0b70d"
+  digest = "1:ce6d7efd1b0df664411b6ffbe83fca8d14b20d3cb82e222a8be1b7c4d93b38e0"
   name = "github.com/cloudfoundry-incubator/stratos"
   packages = [
     "src/jetstream/config",
@@ -192,8 +192,8 @@
     "src/jetstream/repository/tokens",
   ]
   pruneopts = "UT"
-  revision = "a82510df5f0e7827eca10dc015738c29a56ce36d"
-  version = "2.1.0"
+  revision = "74090ba09e68dcd9caae73436fe17d11cbb90f2a"
+  version = "2.1.1"
 
 [[projects]]
   digest = "1:24fc51072bca32204c162b79ede835505b3c5c5cce4e2e0cd6184ff2376486c9"
@@ -221,7 +221,7 @@
   name = "github.com/cloudfoundry/cli-plugin-repo"
   packages = ["web"]
   pruneopts = "UT"
-  revision = "d386b12f5a8d9a89df9434a5fbd3720480c5d2f1"
+  revision = "5740b9c86f3bd1c08d32902af5881f451819bc40"
 
 [[projects]]
   branch = "master"
@@ -274,7 +274,7 @@
   name = "github.com/docker/docker"
   packages = ["pkg/term/windows"]
   pruneopts = "UT"
-  revision = "a9c061deec0f8d452e4feb7258046d5e32a1143b"
+  revision = "87e7930892e5d0b3b5d3c17ad1fad793ed6e1c0e"
 
 [[projects]]
   branch = "master"
@@ -385,11 +385,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f02725ce387d00c747f67ad1024e1a034b530e106b810aef81e0b3cd80930917"
+  digest = "1:6aef7435133a86356083388b3b64cffdfb5e6ba940515da60cfadd2ebc4c05de"
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2a52a758370dbcc53ac24326c683cf39a43f2fa4"
+  revision = "c34bc0d561b850901c8b0a3be8ef3d69b666fd6b"
   source = "github.com/XenoPhex/go-flags"
 
 [[projects]]
@@ -406,6 +406,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f44d34fda864bed6d6c71514cd40b2ee097e6e67f745d5d014113e1faa5af8b7"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
 
 [[projects]]
   branch = "master"
@@ -566,12 +574,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
+  digest = "1:dc2d85c13ac22c22a1f3170a41a8e1b897fa05134aaf533f16df44f66a25b4a1"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
@@ -675,18 +683,18 @@
     "websocket",
   ]
   pruneopts = "UT"
-  revision = "f04abc6bdfa7a0171a8a0c9fd2ada9391044d056"
+  revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
 
 [[projects]]
   branch = "master"
-  digest = "1:75cb7164c3c9e028922e69b10842159549ab96ffc4800ea189c4a6865dc3bc08"
+  digest = "1:6fb1dd382722f93fcf7c52ff631f7b899d8c5d54314d88d42dd1f4e5ac404a30"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "90868a75fefd03942536221d7c0e2f84ec62a668"
+  revision = "c2ed4eda69e7f62900806e4cd6e45f0429f859fa"
 
 [[projects]]
   branch = "master"
