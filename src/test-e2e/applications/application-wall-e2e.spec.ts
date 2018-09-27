@@ -25,13 +25,16 @@ describe('Application Wall Tests -', () => {
   let space2: APIResource<ISpace>;
   let space1Apps: string[];
   let space2Apps: string[];
+  let baseAppName: string;
 
   const timeAllowed = 60000;
 
   function createAppNames(count: number): string[] {
     const appNames = [];
+    // Ensure the app names all have the same prefix
+    baseAppName = ApplicationE2eHelper.createApplicationName(null, '-wallTest');
     for (let i = 0; i < count; i++) {
-      appNames.push(ApplicationE2eHelper.createApplicationName(null, `-wallTest-${i}`));
+      appNames.push(`${baseAppName}-${i}`);
     }
     return appNames;
   }
@@ -93,7 +96,7 @@ describe('Application Wall Tests -', () => {
   }
 
   function navAppWall() {
-    // Note - always nave to page... this will pick up all the new org
+    // Note - always nav to page... this will pick up all the new org
     appsPage.navigateTo();
     appsPage.isActivePage().then(active => {
       if (!active) {
@@ -169,22 +172,33 @@ describe('Application Wall Tests -', () => {
     beforeAll(() => {
       appNames = createAppNames(3);
       setup(orgName, appNames, true);
-      expect(appList.getTotalResults()).toBeLessThanOrEqual(9);
       expect(appList.pagination.isDisplayed()).toBeFalsy();
     }, timeAllowed);
 
     beforeAll(() => {
       appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      browser.wait(() => {
+        return appList.getTotalResults().then(results => results === 3);
+      });
     });
 
     afterAll(() => tearDown(orgName), timeAllowed);
 
-    it('sort by name', () => {
-      testSortBy('Application Name');
-    });
+    describe('Sorting', () => {
 
-    it('sort by creation', () => {
-      testSortBy('Creation Date');
+      beforeAll(() => {
+        // appList.header.setSearchText(baseAppName);
+        expect(appList.getTotalResults()).toBeLessThanOrEqual(9);
+        expect(appList.pagination.isDisplayed()).toBeFalsy();
+      });
+
+      it('sort by name', () => {
+        testSortBy('Application Name');
+      });
+
+      it('sort by creation', () => {
+        testSortBy('Creation Date');
+      });
     });
 
     it('text filter by existing', () => {
