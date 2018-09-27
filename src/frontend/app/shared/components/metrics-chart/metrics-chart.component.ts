@@ -1,17 +1,16 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ContentChild, AfterContentInit } from '@angular/core';
+import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
 import { Subscription } from 'rxjs';
-import { debounceTime, map, takeWhile, tap } from 'rxjs/operators';
-import { FetchApplicationMetricsAction, MetricQueryConfig, MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
+import { map } from 'rxjs/operators';
+import { MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
+import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
-import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;

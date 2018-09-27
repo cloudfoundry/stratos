@@ -2,7 +2,7 @@
 .metrics-range-selector {
   $animation-function: cubic-bezier(0, 0, .2, 1);
   $animation-time: 250ms;
-  position: relative;
+  display: flex;
   &__overlay {
     background-color: rgba(0, 0, 0, 0);
     bottom: 0;
@@ -53,6 +53,7 @@
   &__selected-range {
     align-items: center;
     display: flex;
+    margin-left: 10px;
   }
   &__selected-range-dates {
     display: none;
