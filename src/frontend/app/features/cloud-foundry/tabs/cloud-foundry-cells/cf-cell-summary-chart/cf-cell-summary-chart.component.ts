@@ -4,7 +4,7 @@ import { MetricsConfig } from '../../../../../shared/components/metrics-chart/me
 import { IMetricMatrixResult } from '../../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/types/metric.types';
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
-import { FetchCFMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
+import { FetchCFMetricsAction, MetricQueryConfig, MetricQueryType, FetchCFCellMetricsAction } from '../../../../../store/actions/metrics.actions';
 
 
 @Component({
@@ -56,8 +56,9 @@ export class CfCellSummaryChartComponent implements OnInit {
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       // mapSeriesItemValue: this.mapSeriesItemValue(),
-      metricsAction: new FetchCFMetricsAction(
+      metricsAction: new FetchCFCellMetricsAction(
         this.endpointGuid,
+        this.cellId,
         new MetricQueryConfig(this.queryString),
         // TODO: RC MetricQueryType.RANGE_QUERY causes failure
         // this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY

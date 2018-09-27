@@ -10,7 +10,9 @@ const { proxyAPIVersion } = environment;
 
 export enum MetricQueryType {
   QUERY = 'query',
-  RANGE_QUERY = 'query_range'
+  RANGE_QUERY = 'query_range',
+  // Response contains a single value instead of a series of values
+  VALUE = 'value'
 }
 export interface IMetricQueryConfigParams {
   window?: string;
@@ -40,7 +42,7 @@ export class MetricQueryConfig {
 
 export abstract class MetricsAction implements IRequestAction {
   constructor(public guid: string, public query: MetricQueryConfig, public queryType: MetricQueryType = MetricQueryType.QUERY) {
-    this.metricId = MetricsAction.buildMetricKey(guid, query);
+    this.metricId = MetricsAction.buildMetricKey(guid, query, queryType);
   }
   entityKey = metricSchemaKey;
   type = METRICS_START;
@@ -52,9 +54,10 @@ export abstract class MetricsAction implements IRequestAction {
   }
 
   // Builds the key that is used to store the metric in the app state.
-  static buildMetricKey(guid: string, query: MetricQueryConfig) {
-    // TODO: RC add params
-    return `${guid}:${query.metric}`;
+  static buildMetricKey(guid: string, query: MetricQueryConfig, queryType: MetricQueryType) {
+    // TODO: RC add params?
+    const valueOrSeries = queryType === MetricQueryType.VALUE ? 'value' : 'series';
+    return `${guid}:${query.metric}:${valueOrSeries}`;
   }
 }
 
@@ -67,9 +70,20 @@ export class FetchCFMetricsAction extends MetricsAction {
   }
 }
 
+export class FetchCFCellMetricAction extends MetricsAction {
+  public cfGuid: string;
+  constructor(cfGuid: string, cellId: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    // TODO: RC metric id needs to be unique per cell... and if it's a series or single value
+    super(cfGuid + '-' + cellId + '-value', query, queryType);
+    this.cfGuid = cfGuid;
+    this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
+  }
+}
+
 export class FetchCFCellMetricsAction extends MetricsAction {
   public cfGuid: string;
   constructor(cfGuid: string, cellId: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    // TODO: RC metric id needs to be unique per cell... and if it's a series or single value
     super(cfGuid + '-' + cellId, query, queryType);
     this.cfGuid = cfGuid;
     this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;

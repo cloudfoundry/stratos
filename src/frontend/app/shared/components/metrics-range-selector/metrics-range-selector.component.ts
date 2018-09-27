@@ -1,12 +1,13 @@
-import { Component, OnInit, Output, EventEmitter, OnDestroy, Input, ViewChild, TemplateRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
-import { FetchApplicationMetricsAction, MetricQueryConfig, MetricsAction, MetricQueryType } from '../../../store/actions/metrics.actions';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { IMetrics } from '../../../store/types/base-metric.types';
-import { debounceTime, tap, takeWhile } from 'rxjs/operators';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { metricSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { Subscription } from 'rxjs';
+import { debounceTime, takeWhile, tap } from 'rxjs/operators';
+
+import { MetricQueryConfig, MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
+import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { IMetrics } from '../../../store/types/base-metric.types';
+import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 
 enum RangeType {
   ROLLING_WINDOW = 'ROLLING_WINDOW',
@@ -39,7 +40,7 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
   private initSub: Subscription;
 
   @Output()
-  public metricsAction = new EventEmitter<FetchApplicationMetricsAction>();
+  public metricsAction = new EventEmitter<MetricsAction>();
 
   private baseActionValue: MetricsAction;
 
@@ -101,6 +102,14 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
 
   public showOverlayValue = false;
 
+  private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig, queryType: MetricQueryType): MetricsAction {
+    return {
+      ...action,
+      query: newQuery,
+      queryType
+    };
+  }
+
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
     const oldDate = this.startEnd[index];
@@ -113,16 +122,11 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
       const startUnix = start.unix();
       const endUnix = end.unix();
       const oldAction = this.baseAction;
-      const action = new FetchApplicationMetricsAction(
-        oldAction.guid,
-        oldAction.cfGuid,
-        new MetricQueryConfig(this.baseAction.query.metric, {
-          start: startUnix,
-          end: end.unix(),
-          step: Math.max((endUnix - startUnix) / 200, 0)
-        }),
-        MetricQueryType.RANGE_QUERY
-      );
+      const action = this.newMetricsAction(oldAction, new MetricQueryConfig(this.baseAction.query.metric, {
+        start: startUnix,
+        end: end.unix(),
+        step: Math.max((endUnix - startUnix) / 200, 0)
+      }), MetricQueryType.RANGE_QUERY);
 
       this.commit = () => {
         this.committedStartEnd = [
@@ -190,13 +194,9 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
     const oldAction = this.baseAction;
-    const action = new FetchApplicationMetricsAction(
-      oldAction.guid,
-      oldAction.cfGuid,
-      new MetricQueryConfig(this.baseAction.query.metric, {
-        window: window.value
-      })
-    );
+    const action = this.newMetricsAction(oldAction, new MetricQueryConfig(this.baseAction.query.metric, {
+      window: window.value
+    }), MetricQueryType.QUERY);
     this.commitAction(action);
   }
 
