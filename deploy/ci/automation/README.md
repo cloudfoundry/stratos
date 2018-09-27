@@ -15,3 +15,7 @@ The Stratos team uses these scripts with a Jenkins instance to monitor systems a
 - check-docker-images.sh - Checks that the Stratos nightly docker images have been updated. We use this to ensure the nightly jobs are operational.
 
 - check-stratos.sh - Checks a deployed Stratos system is up and can be logged into.
+
+- runandrecord,sh - Helper script to run E2E tests and record vide
+
+- cfutils.sh - Helper script providing common functions
