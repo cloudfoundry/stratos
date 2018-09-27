@@ -1,6 +1,5 @@
-import { Injectable, Component, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
-import { AppModule } from '../../app.module';
 
 export interface EndpointTypeExtension {
   type: string;
@@ -8,11 +7,11 @@ export interface EndpointTypeExtension {
   authTypes: string[];
 }
 
-export interface RouteInfo {
-  target: any;
-  name: string;
+export interface StratosExtensionConfig {
+  routes?: Route[];
 }
 
+// The different types of Tab
 export enum StratosTabType {
   Application = 'appTabs',
   CloudFoundry = 'cfTabs',
@@ -26,12 +25,14 @@ export interface StratosTabMetadata {
   link: string;
 }
 
+// The different types of Action
 export enum StratosActionType {
   Applications = 'appsActions',
   Application = 'appActions',
-  CloudFoundry = 'cfActiosn',
+  CloudFoundry = 'cfActions',
   CloudFoundryOrg = 'cfOrgActions',
-  CloudFoundrySpace = 'cfSpaceActions'
+  CloudFoundrySpace = 'cfSpaceActions',
+  Endpoints = 'endpointsActions'
 }
 
 export interface StratosActionMetadata {
@@ -44,6 +45,7 @@ export interface StratosActionMetadata {
 
 export type StratosRouteType = StratosTabType | StratosActionType;
 
+// Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
   routes: [],
   loginComponent: null,
@@ -51,6 +53,42 @@ const extensionMetadata = {
   tabs: {},
   actions: {},
 };
+
+/**
+ * Decortator for a Tab extension
+ */
+export function StratosTab(props: StratosTabMetadata) {
+  return function(target) {
+    addExtensionTab(props.type, target, props);
+  };
+}
+
+/**
+ * Decortator for an Action extension
+ */
+export function StratosAction(props: StratosActionMetadata) {
+  return function(target) {
+    addExtensionAction(props.type, target, props);
+  };
+}
+
+/**
+ * Decorator for an Extension module providing routes etc.
+ */
+
+export function StratosExtension(config: StratosExtensionConfig) {
+  return (_target) => {
+    if (config.routes) {
+      extensionMetadata.routes.push(config.routes);
+    }
+  };
+}
+
+export function StratosLoginComponent() {
+  return (target) => {
+    extensionMetadata.loginComponent = target;
+  };
+}
 
 function addExtensionTab(tab: StratosTabType, target: any, props: any) {
   if (!extensionMetadata.tabs[tab]) {
@@ -79,103 +117,25 @@ function addExtensionAction(action: StratosActionType, target: any, props: any) 
   extensionMetadata.actions[action].push(props);
 }
 
-export function StratosTab(props: StratosTabMetadata) {
-  return function(target) {
-    addExtensionTab(props.type, target, props);
-  };
-}
-
-export function StratosAction(props: StratosActionMetadata) {
-  return function(target) {
-    addExtensionAction(props.type, target, props);
-  };
-}
-
-
-export interface StratosNavExtensionConfig {
-  routes: Route[];
-}
-
-export function StratosNavExtension(config: StratosNavExtensionConfig) {
-  return (target) => {
-    extensionMetadata.routes.push(config.routes);
-  };
-}
-
-export function StratosLoginComponent() {
-  return (target) => {
-    extensionMetadata.loginComponent = target;
-  };
-}
-
-
+// Injectable Extension Service
 @Injectable()
 export class ExtensionService {
 
-  private routes: Route[] = [];
-
-  private endointTypes: EndpointTypeExtension[] = [];
-
-  private loginComponent: any;
-
   public metadata = extensionMetadata;
 
-  constructor(private router: Router, private injector: Injector) {}
+  constructor(private router: Router) {}
 
   /**
-   * Regiser new top-level routes
+   * Initialize the extensions - to be invoked in the AppModule
    */
-  public registerRoutes(r: Route[]): ExtensionService {
-    this.routes = this.routes.concat(r);
-    return this;
-  }
-
-  /**
-   * Register a component to use for the Login page
-   */
-  public registerLoginComponent(component: any): ExtensionService {
-    this.loginComponent = component;
-    return this;
-  }
-
-  public registerEndpointType(epType: EndpointTypeExtension): ExtensionService {
-    this.endointTypes.push(epType);
-    return this;
-  }
-
-  public getEndpointTypes(): EndpointTypeExtension[] {
-    return this.endointTypes;
+  public init() {
+    this.applyRoutesFromExtensions(this.router);
   }
 
   /**
    * Apply route configuration
    */
-  public applyRouteConfig() {
-    const routeConfig = [...this.router.config];
-    const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
-    let needsReset = false;
-    if (dashboardRoute) {
-      dashboardRoute.children = [
-        ...dashboardRoute.children,
-        ...this.routes
-      ];
-      needsReset = true;
-    }
-
-    if (this.loginComponent) {
-      // Override the component used for the login route
-      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
-      loginRoute.component = this.loginComponent;
-      needsReset = true;
-    }
-
-    if (needsReset) {
-      this.router.resetConfig(routeConfig);
-    }
-  }
-}
-
-export function applyRoutesFromExtensions(router: Router) {
+  private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
     const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
     let needsReset = false;
@@ -194,7 +154,10 @@ export function applyRoutesFromExtensions(router: Router) {
     if (needsReset) {
       router.resetConfig(routeConfig);
     }
+  }
 }
+
+// Helpers to access Extension metadata (without using the injectable Extension Service)
 
 export function getRoutesFromExtensions(routeType: StratosRouteType) {
   return extensionMetadata.extensionRoutes[routeType] || [];

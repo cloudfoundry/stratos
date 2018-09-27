@@ -56,6 +56,7 @@ import { EditOrganizationComponent } from './edit-organization/edit-organization
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
 import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
+import { StratosActionType } from '../../core/extension/extension-service';
 
 const usersRoles = [
   {
@@ -254,7 +255,15 @@ const cloudFoundry: Routes = [{
           ]
         }]
     },
-    ...usersRoles
+    ...usersRoles,
+    {
+      path: '**',
+      component: PageNotFoundComponentComponent,
+      canActivate: [DynamicExtenstionRoutes],
+      data: {
+        stratosRouteGroup: StratosActionType.CloudFoundry
+      }
+    }
   ]
 }];
 

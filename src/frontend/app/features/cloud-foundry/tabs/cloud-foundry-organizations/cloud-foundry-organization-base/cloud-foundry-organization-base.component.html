@@ -14,6 +14,8 @@
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli" matTooltip="CLI Info">
       <mat-icon>keyboard</mat-icon>
     </button>
+    <!-- Extension buttons -->
+    <app-extension-buttons type="CloudFoundryOrg"></app-extension-buttons>
   </div>
 </app-page-header>
 <app-loading-page [entityId]="cfOrgService.orgGuid" [entitySchema]="schema" deleteText="Deleting organization" [text]="'Retrieving organization'">
