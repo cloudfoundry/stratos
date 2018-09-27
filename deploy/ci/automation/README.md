@@ -16,6 +16,6 @@ The Stratos team uses these scripts with a Jenkins instance to monitor systems a
 
 - check-stratos.sh - Checks a deployed Stratos system is up and can be logged into.
 
-- runandrecord,sh - Helper script to run E2E tests and record vide
+- runandrecord,sh - Helper script to run E2E tests and record video
 
 - cfutils.sh - Helper script providing common functions
