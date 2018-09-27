@@ -21,4 +21,7 @@ type Repository interface {
 	DeleteCNSIToken(cnsiGUID string, userGUID string) error
 	DeleteCNSITokens(cnsiGUID string) error
 	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error
+
+	// Update a token's auth data
+	UpdateTokenAuth(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error
 }

@@ -41,12 +41,15 @@ setupAndPushChange() {
 }
 
 updateHelmDependency() {
-  START_CWD=$(pwd)
+  local START_CWD=$(pwd)
   cd ${STRATOS}/deploy/kubernetes/console
-  # Extract helm repo
-  HELM_REPO=$(cat requirements.yaml | grep repo | sed -e 's/.*repository:\s\(.*\)/\1/p' | head -1)
-  helm repo add repo ${HELM_REPO}
-  helm dependency update
+  # Only do this if there is a requirements.yaml file
+  if [ -f "./requirements.yaml" ]; then
+    # Extract helm repo
+    local HELM_REPO=$(cat requirements.yaml | grep repo | sed -e 's/.*repository:\s\(.*\)/\1/p' | head -1)
+    helm repo add repo ${HELM_REPO}
+    helm dependency update
+  fi
   cd ${START_CWD}
 }
 

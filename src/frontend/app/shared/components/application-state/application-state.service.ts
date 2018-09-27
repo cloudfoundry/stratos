@@ -40,7 +40,7 @@ export class ApplicationStateService {
       FAILED: {
         label: 'Staging Failed',
         indicator: CardStatus.ERROR,
-        actions: 'delete'
+        actions: 'delete,restage'
       }
     },
     PENDING: {
@@ -65,12 +65,12 @@ export class ApplicationStateService {
       STAGED: {
         label: 'Offline',
         indicator: CardStatus.WARNING,
-        actions: 'start,delete,cli'
+        actions: 'start,delete,cli,restage'
       },
       '*NONE*': {
         label: 'Incomplete',
         indicator: CardStatus.INCOMPLETE,
-        actions: 'delete,cli'
+        actions: 'delete,cli,restage'
       }
     },
     STARTED: {
@@ -78,7 +78,7 @@ export class ApplicationStateService {
         label: 'Deployed',
         subLabel: 'No Instances',
         indicator: CardStatus.OK,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       PENDING: {
         label: 'Staging App',
@@ -88,7 +88,7 @@ export class ApplicationStateService {
       'STAGED(?,?,?)': {
         label: 'Deployed',
         indicator: CardStatus.TENTATIVE,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(0,0,0)': {
         label: 'Deployed',
@@ -112,13 +112,13 @@ export class ApplicationStateService {
         label: 'Deployed',
         subLabel: 'Online',
         indicator: CardStatus.OK,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
       },
       'STAGED(0,N,0)': {
         label: 'Deployed',
         subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(0,0,N)': {
         label: 'Deployed',
@@ -130,37 +130,37 @@ export class ApplicationStateService {
         label: 'Deployed',
         subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(0,N,N,N)': {
         label: 'Deployed',
         subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'CRASHING': {
         label: 'Deployed',
         subLabel: 'Crashing',
         indicator: CardStatus.WARNING,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(N,N,0)': {
         label: 'Deployed',
         subLabel: 'Crashing',
         indicator: CardStatus.WARNING,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
       },
       'STAGED(N,N,N)': {
         label: 'Deployed',
         subLabel: 'Crashing',
         indicator: CardStatus.WARNING,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
       },
       'STAGED(N,0,N)': {
         label: 'Deployed',
         subLabel: 'Partially Online',
         indicator: CardStatus.WARNING,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
       }
     }
   };

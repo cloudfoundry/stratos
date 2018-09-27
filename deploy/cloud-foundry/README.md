@@ -7,6 +7,8 @@ The quickest way to install Stratos is to deploy it as a Cloud Foundry applicati
 ```
 git clone https://github.com/cloudfoundry-incubator/stratos
 cd stratos
+git checkout tags/stable -b stable
+./build/store-git-metadata.sh
 cf push
 ```
 
@@ -74,6 +76,8 @@ applications:
 ```
 
 When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
+
+For more information - see [Single-Sign On](../../docs/sso.md).
 
 ## Troubleshooting
 

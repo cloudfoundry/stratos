@@ -32,6 +32,7 @@ describe('Endpoints', () => {
 
         // Close the snack bar telling us that there are no connected endpoints
         connectDialog.snackBar.safeClose();
+        connectDialog.snackBar.waitUntilShown('No connected endpoints snackbar');
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
@@ -75,16 +76,16 @@ describe('Endpoints', () => {
       it('should update service instance data on register', () => {
         connectDialog.connect();
         // Wait for snackbar
-        connectDialog.snackBar.waitUntilShown();
+        connectDialog.snackBar.waitForMessage('Connected ' + toConnect.name);
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
-
+        connectDialog.waitUntilNotShown();
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
           endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
-          menu.waitUntilShown();
+          menu.waitUntilShown('Endpoint Action Menu');
           return menu.getItemMap().then(items => {
             expect(items['connect']).not.toBeDefined();
             expect(items['disconnect']).toBeDefined();
@@ -102,6 +103,7 @@ describe('Endpoints', () => {
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(e2e.secrets.getConsoleAdminUsername(), e2e.secrets.getConsoleAdminPassword());
+        loginPage.waitForLoading();
         loginPage.waitForApplicationPage();
         expect(endpointsPage.isActivePage()).toBeTruthy();
       });
@@ -111,7 +113,7 @@ describe('Endpoints', () => {
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(e2e.secrets.getConsoleNonAdminUsername(), e2e.secrets.getConsoleNonAdminPassword());
-        // loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+        loginPage.waitForLoading();
         loginPage.waitForApplicationPage();
         const appPage = new ApplicationsPage();
         expect(appPage.isActivePage()).toBeTruthy();

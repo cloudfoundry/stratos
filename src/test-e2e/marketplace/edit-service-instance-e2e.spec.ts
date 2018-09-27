@@ -1,9 +1,10 @@
-import { browser, ElementFinder, promise } from 'protractor';
+import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
-import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
+import { MetaCard } from '../po/meta-card.po';
+import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -12,7 +13,8 @@ describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
-  const serviceNamePrefix = 'edited';
+  const serviceNamePrefix = 'e';
+  const serviceNamesToDelete = [];
   beforeAll(() => {
     const e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -24,76 +26,69 @@ describe('Edit Service Instance', () => {
   });
 
   beforeEach(() => {
-    servicesWall.navigateTo();
+    servicesWall.sideNav.goto(SideNavMenuItem.Services);
     servicesWall.waitForPage();
   });
 
   it('- should be able edit a service instance', () => {
-    createServiceInstance.navigateTo();
+    servicesWall.clickCreateServiceInstance();
     createServiceInstance.waitForPage();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
 
     servicesWall.waitForPage();
 
     const serviceName = servicesHelperE2E.serviceInstanceName;
+    serviceNamesToDelete.push(serviceName);
 
-    getCardWithTitle(servicesWall, serviceName).then((card: MetaCard) => {
-      card.openActionMenu().then(menu => {
+    return getCardWithTitle(serviceName)
+      .then((card: MetaCard) => card.openActionMenu())
+      .then(menu => {
         menu.clickItem('Edit');
-        browser.getCurrentUrl().then(url => {
+        menu.waitUntilNotShown();
+
+        return browser.getCurrentUrl().then(url => {
           expect(url.endsWith('edit')).toBeTruthy();
           servicesHelperE2E.setServicePlan(true);
           servicesHelperE2E.createServiceInstance.stepper.next();
 
           servicesHelperE2E.addPrefixToServiceName(serviceNamePrefix);
+          serviceNamesToDelete.push(servicesHelperE2E.serviceInstanceName);
           servicesHelperE2E.setServiceInstanceDetail(true);
           servicesHelperE2E.createServiceInstance.stepper.next();
-
+          servicesHelperE2E.createServiceInstance.stepper.waitUntilNotShown();
         });
-      });
-    }).catch(e => fail(e));
+      }).catch(e => fail(e));
   });
 
   it('- should have edited service instance', () => {
-
     servicesWall.waitForPage();
     const editedServiceName = servicesHelperE2E.serviceInstanceName;
-    getCardWithTitle(servicesWall, editedServiceName).then((card: MetaCard) => {
+    return getCardWithTitle(editedServiceName).then((card: MetaCard) => {
       expect(card).toBeDefined();
     }).catch(e => fail(e));
   });
 
   it('- should be able to delete service instance', () => {
-
     servicesWall.waitForPage();
     const editedServiceName = servicesHelperE2E.serviceInstanceName;
-    getCardWithTitle(servicesWall, editedServiceName).then((card: MetaCard) => {
-      card.openActionMenu().then(menu => {
+    return getCardWithTitle(editedServiceName)
+      .then((card: MetaCard) => card.openActionMenu())
+      .then(menu => {
         menu.clickItem('Delete');
         const deleteDialog = new ConfirmDialogComponent();
-
         expect(deleteDialog.isDisplayed()).toBeTruthy();
         expect(deleteDialog.getTitle()).toEqual('Delete Service Instance');
         deleteDialog.confirm();
-      });
-    }).catch(e => fail(e));
+        deleteDialog.waitUntilNotShown();
+      }).catch(e => fail(e));
   });
+
+  afterAll(() => {
+    return servicesHelperE2E.cleanUpServiceInstances(serviceNamesToDelete);
+  });
+
+  function getCardWithTitle(serviceName: string) {
+    return servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, serviceName);
+  }
 
 });
-
-function getCardWithTitle(servicesWall: ServicesWallPage, serviceName: string) {
-  return servicesWall.serviceInstancesList.cards.getCards().then((cards: ElementFinder[]) => {
-    return cards.map(card => {
-      const metaCard = new MetaCard(card, MetaCardTitleType.CUSTOM);
-      return metaCard.getTitle();
-    });
-  }).then(cardTitles => {
-    return promise.all(cardTitles).then(titles => {
-      for (let i = 0; i < titles.length; i++) {
-        if (titles[i] === serviceName) {
-          return servicesWall.serviceInstancesList.cards.getCard(i);
-        }
-      }
-    });
-  });
-}

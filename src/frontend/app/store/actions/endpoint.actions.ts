@@ -123,6 +123,9 @@ export class RegisterEndpoint extends EndpointAction {
     public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,
+    public clientID = '',
+    public clientSecret = '',
+    public ssoAllowed: boolean,
   ) {
     super();
   }

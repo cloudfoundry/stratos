@@ -16,6 +16,7 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions,
+  filterEntitiesByGuid,
 } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllOrgUsers } from '../../store/actions/organization.actions';
 import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
@@ -185,10 +186,10 @@ export class CfUserService {
   hasRolesInOrg(user: CfUser, orgGuid: string, excludeOrgUser = true): boolean {
 
     // Check org roles
-    if (this.populatedArray(user.audited_organizations) ||
-      this.populatedArray(user.billing_managed_organizations) ||
-      this.populatedArray(user.managed_organizations) ||
-      (!excludeOrgUser && this.populatedArray(user.organizations))) {
+    if (this.populatedArray(filterEntitiesByGuid(orgGuid, user.audited_organizations)) ||
+      this.populatedArray(filterEntitiesByGuid(orgGuid, user.billing_managed_organizations)) ||
+      this.populatedArray(filterEntitiesByGuid(orgGuid, user.managed_organizations)) ||
+      (!excludeOrgUser && this.populatedArray(filterEntitiesByGuid(orgGuid, user.organizations)))) {
       return true;
     }
 
