@@ -9,7 +9,7 @@ import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { CreateRoutesPage } from './po/routes-create-page.po';
 
-fdescribe('Application Routes -', () => {
+describe('Application Routes -', () => {
 
   let applicationE2eHelper: ApplicationE2eHelper;
   let cfGuid, app: APIResource<IApp>;
