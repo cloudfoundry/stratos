@@ -20,7 +20,7 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
 import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
-import { ExtensionService, applyRoutesFromExtensions } from './core/extension/extension-service';
+import { ExtensionService } from './core/extension/extension-service';
 import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
 
 // Create action for router navigation. See
