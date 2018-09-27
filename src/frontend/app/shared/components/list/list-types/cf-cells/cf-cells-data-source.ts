@@ -19,6 +19,7 @@ export class CfCellsDataSource
   static cellIdPath = 'metric.bosh_job_id';
   static cellNamePath = 'metric.bosh_job_name';
   static cellHealthyPath = 'value.1';
+  static cellDeploymentPath = 'metric.bosh_deployment';
 
   constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricApplication>>) {
     const action = new FetchCFMetricsPaginatedAction(

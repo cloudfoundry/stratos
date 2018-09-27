@@ -1,0 +1,16 @@
+<mat-card>
+  <app-card-status [status$]="status$"></app-card-status>
+  <mat-card-header>
+    <div>Summary</div>
+  </mat-card-header>
+  <mat-card-content>
+    <app-metadata-item label="Healthy">
+      <!-- //TODO: RC test -->
+      <app-boolean-indicator [isTrue]="(status$ | async) === 'ok'" type="enabled-disabled" subtle="false" showText="false"></app-boolean-indicator>
+    </app-metadata-item>
+  </mat-card-content>
+</mat-card>
+<!-- <mat-card class="metric-chart-wrapper">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Containers" yAxisLabel="Available" queryRange="false" queryString="firehose_value_metric_rep_capacity_remaining_containers">
+  </app-cf-cell-summary-chart>
+</mat-card> -->

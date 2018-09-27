@@ -59,14 +59,14 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         hidden: usersHidden$
       },
       {
-        link: CloudFoundryTabsBaseComponent.firehose,
-        label: 'Firehose',
-        hidden: firehoseHidden$
-      },
-      {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
         hidden: cellsHidden$
+      },
+      {
+        link: CloudFoundryTabsBaseComponent.firehose,
+        label: 'Firehose',
+        hidden: firehoseHidden$
       },
       { link: 'feature-flags', label: 'Feature Flags' },
       { link: 'build-packs', label: 'Build Packs' },

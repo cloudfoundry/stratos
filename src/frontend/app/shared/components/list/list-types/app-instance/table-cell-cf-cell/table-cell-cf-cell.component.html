@@ -1,1 +1,5 @@
-{{ cell$ | async }}
+<a [routerLink]="[cellLink]" matTooltip="Cell Summary" *ngIf="(cellMetric$ | async) as cellMetric">
+  Deployment: {{cellMetric.bosh_deployment}}<br>
+  Name: {{cellMetric.bosh_job_name}}<br>
+  Id: {{cellMetric.bosh_job_id}}
+</a>

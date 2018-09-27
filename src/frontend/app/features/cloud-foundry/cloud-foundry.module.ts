@@ -15,7 +15,7 @@ import {
 } from './add-organization/create-organization-step/create-organization-step.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
@@ -30,11 +30,18 @@ import { CloudFoundryOrganizationService } from './services/cloud-foundry-organi
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
   CfCellSummaryChartComponent,
-} from './tabs/cloud-foundry-feature-cells/cf-cell-summary-chart/cf-cell-summary-chart.component';
+} from './tabs/cloud-foundry-cells/cf-cell-summary-chart/cf-cell-summary-chart.component';
+import {
+  CloudFoundryCellBaseComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-base/cloud-foundry-cell-base.component';
+import {
+  CloudFoundryCellChartsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-charts/cloud-foundry-cell-charts.component';
 import {
   CloudFoundryCellSummaryComponent,
-} from './tabs/cloud-foundry-feature-cells/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
-import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-feature-cells/cloud-foundry-cells.component';
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
+import { CloudFoundryCellService } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
@@ -98,7 +105,9 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryFirehoseComponent,
     CloudFoundryFeatureFlagsComponent,
     CloudFoundryCellsComponent,
+    CloudFoundryCellBaseComponent,
     CloudFoundryCellSummaryComponent,
+    CloudFoundryCellChartsComponent,
     CfCellSummaryChartComponent,
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
@@ -135,9 +144,14 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
       provide: ActiveRouteCfOrgSpace,
       useValue: {}
     },
+    {
+      provide: ActiveRouteCfCell,
+      useValue: {}
+    },
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
-    CfRolesService
+    CfRolesService,
+    CloudFoundryCellService
   ],
 })
 export class CloudFoundryModule { }

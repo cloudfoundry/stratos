@@ -1,19 +1,15 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { ITableColumn } from '../../list-table/table.types';
-import { ISpace } from '../../../../../core/cf-api.types';
+import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { DetachAppsDataSource } from './detach-apps-data-source';
-import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
-import { ActivatedRoute } from '@angular/router';
-import { DatePipe } from '@angular/common';
 
 @Injectable()
 export class DetachAppsListConfigService implements IListConfig<APIResource> {

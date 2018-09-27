@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -11,9 +12,15 @@ import { EditOrganizationComponent } from './edit-organization/edit-organization
 import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
+  CloudFoundryCellBaseComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-base/cloud-foundry-cell-base.component';
+import {
+  CloudFoundryCellChartsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-charts/cloud-foundry-cell-charts.component';
+import {
   CloudFoundryCellSummaryComponent,
-} from './tabs/cloud-foundry-feature-cells/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
-import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-feature-cells/cloud-foundry-cells.component';
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
@@ -57,7 +64,6 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-ta
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 
-/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 const usersRoles = [
   {
@@ -175,6 +181,7 @@ const cloudFoundry: Routes = [{
           children: [
             {
               path: 'cells/:cellId',
+              component: CloudFoundryCellBaseComponent,
               data: {
                 uiFullView: true
               },
@@ -188,6 +195,10 @@ const cloudFoundry: Routes = [{
                   path: 'summary',
                   component: CloudFoundryCellSummaryComponent
                 },
+                {
+                  path: 'charts',
+                  component: CloudFoundryCellChartsComponent
+                }
               ]
             },
             {

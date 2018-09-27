@@ -70,7 +70,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         type: 'sort',
         orderKey: 'memory',
         field: 'usage.mem'
-      }, cellFlex: '3'
+      }, cellFlex: '2'
     },
     {
       columnId: 'disk', headerCell: () => 'Disk',
@@ -85,7 +85,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         type: 'sort',
         orderKey: 'disk',
         field: 'usage.disk'
-      }, cellFlex: '3'
+      }, cellFlex: '2'
     },
     {
       columnId: 'cpu', headerCell: () => 'CPU',
@@ -109,7 +109,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         type: 'sort',
         orderKey: 'uptime',
         field: 'value.stats.uptime'
-      }, cellFlex: '5'
+      }, cellFlex: '3'
     }
   ];
   cfCellColumn: ITableColumn<ListAppInstance> = {
@@ -119,7 +119,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       metricResults$: null
     },
     cellComponent: TableCellCfCellComponent,
-    cellFlex: '1'
+    cellFlex: '3'
   };
 
   viewType = ListViewTypes.TABLE_ONLY;
@@ -193,7 +193,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
           this.cfCellColumn.cellConfig = {
-            metricResults$: this.createMetricsResults(entityServiceFactory)
+            metricResults$: this.createMetricsResults(entityServiceFactory),
+            cfGuid: this.appService.cfGuid
           };
         }
         return true;

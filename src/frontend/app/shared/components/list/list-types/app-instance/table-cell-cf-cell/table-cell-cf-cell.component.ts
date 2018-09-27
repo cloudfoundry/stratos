@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 
 import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../store/types/metric.types';
@@ -14,17 +14,25 @@ import { ListAppInstance } from '../app-instance-types';
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> {
 
-  cell$: Observable<string>;
+  cellMetric$: Observable<IMetricApplication>;
+  cellLink: string;
 
   @Input('config')
-  set config(config: { metricResults$: Observable<IMetricMatrixResult<IMetricApplication>[]> }) {
+  set config(config: {
+    metricResults$: Observable<IMetricMatrixResult<IMetricApplication>[]>
+    cfGuid: string
+  }) {
     if (!config) {
       return;
     }
-    this.cell$ = config.metricResults$.pipe(
+    const { metricResults$, cfGuid } = config;
+
+    this.cellMetric$ = metricResults$.pipe(
       filter(metricResults => !!metricResults[this.row.index]),
-      map(metricResults => metricResults[this.row.index].metric.bosh_job_id)
+      map(metricResults => metricResults[this.row.index].metric),
+      tap(metric => this.cellLink = `/cloud-foundry/${cfGuid}/cells/${metric.bosh_job_id}/summary`)
     );
+
   }
 
 }

@@ -20,7 +20,6 @@ import { CfCellsDataSource } from './cf-cells-data-source';
 @Injectable()
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricApplication>> {
 
-
   dataSource: CfCellsDataSource;
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
@@ -39,14 +38,6 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     showText: false
   };
 
-  private summaryAction: IListAction<IMetricVectorResult<IMetricApplication>> = {
-    action: (cell) => {
-      this.router.navigate([`cloud-foundry/${this.activeRouteCfOrgSpace.cfGuid}/cells/${cell.metric.bosh_job_id}`]);
-    },
-    label: 'Summary',
-    description: ``
-  };
-
   columns: Array<ITableColumn<IMetricVectorResult<IMetricApplication>>> = [
     {
       columnId: 'id',
@@ -62,13 +53,28 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        valuePath: CfCellsDataSource.cellNamePath
+        valuePath: CfCellsDataSource.cellNamePath,
+        getLink: (row: IMetricVectorResult<IMetricApplication>) =>
+          `/cloud-foundry/${this.activeRouteCfOrgSpace.cfGuid}/cells/${row.metric.bosh_job_id}/summary`
       },
       cellFlex: '1',
       sort: {
         type: 'sort',
         orderKey: 'name',
         field: CfCellsDataSource.cellNamePath
+      }
+    },
+    {
+      columnId: 'deployment',
+      headerCell: () => 'Deployment',
+      cellDefinition: {
+        valuePath: CfCellsDataSource.cellDeploymentPath
+      },
+      cellFlex: '1',
+      sort: {
+        type: 'sort',
+        orderKey: 'deployment',
+        field: CfCellsDataSource.cellDeploymentPath
       }
     },
     {
@@ -85,12 +91,11 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     },
   ];
 
-  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace, private router: Router) {
+  constructor(store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
-    this.dataSource = new CfCellsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfCellsDataSource(store, activeRouteCfOrgSpace.cfGuid, this);
   }
 
-  getSingleActions = () => [this.summaryAction];
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }

@@ -1,0 +1,12 @@
+<mat-card class="metric-chart-wrapper">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Containers" yAxisLabel="Available" queryRange="false" queryString="firehose_value_metric_rep_capacity_remaining_containers">
+  </app-cf-cell-summary-chart>
+</mat-card>
+<mat-card class="metric-chart-wrapper">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Memory" yAxisLabel="Memory Available (MB)" seriesTranslation="mb" queryRange="false" queryString="firehose_value_metric_rep_capacity_total_disk">
+  </app-cf-cell-summary-chart>
+</mat-card>
+<mat-card class="metric-chart-wrapper">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Disk" yAxisLabel="Disk Available (MB)" seriesTranslation="mb" queryRange="false" queryString="firehose_value_metric_rep_capacity_total_memory">
+  </app-cf-cell-summary-chart>
+</mat-card>
