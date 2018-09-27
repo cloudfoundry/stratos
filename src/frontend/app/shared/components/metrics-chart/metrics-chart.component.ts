@@ -2,7 +2,7 @@ import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } f
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MetricQueryType, MetricsAction } from '../../../store/actions/metrics.actions';
+import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
@@ -11,6 +11,7 @@ import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
+import { MetricQueryType } from '../../services/metrics-range-selector.types';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -51,6 +52,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   private pollSub: Subscription;
 
+  private timeSelectorSub: Subscription;
+
   public results$;
 
   public metricsMonitor: EntityMonitor<IMetrics>;
@@ -86,7 +89,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   ngOnInit() {
-
     this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
@@ -108,7 +110,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   ngAfterContentInit() {
     if (this.timeRangeSelector) {
       this.timeRangeSelector.baseAction = this.metricsConfig.metricsAction;
-      const listener = this.timeRangeSelector.metricsAction.subscribe((action) => {
+      this.timeSelectorSub = this.timeRangeSelector.metricsAction.subscribe((action) => {
         this.commitAction(action);
       });
     }
@@ -133,6 +135,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   ngOnDestroy() {
     if (this.pollSub) {
       this.pollSub.unsubscribe();
+    }
+    if (this.timeSelectorSub) {
+      this.timeSelectorSub.unsubscribe();
     }
   }
 

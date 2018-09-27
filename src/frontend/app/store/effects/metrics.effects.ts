@@ -30,10 +30,10 @@ export class MetricsEffect {
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
-        headers: { 'x-cap-cnsi-list': action.cfGuid }
+        headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
-          const metric = metrics[action.cfGuid];
+          const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
             [action.metricId]: {
               query: action.query,

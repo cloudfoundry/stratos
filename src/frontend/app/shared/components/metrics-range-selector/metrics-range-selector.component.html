@@ -1,5 +1,5 @@
 <div *ngIf="baseAction" class="metrics-range-selector">
-  <div [ngClass]="{'metrics-range-selector__overlay-show': selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END && showOverlay}"
+  <div [ngClass]="{'metrics-range-selector__overlay-show': selectedTimeRange && selectedTimeRange.type === rangeTypes.RANGE_QUERY && showOverlay}"
     class="metrics-range-selector__overlay">
     <div class="metrics-range-selector__overlay-inner">
       <h3>Choose time window</h3>
@@ -19,7 +19,7 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <div class="metrics-range-selector__selected-range" *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.START_END">
+  <div class="metrics-range-selector__selected-range" *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.RANGE_QUERY">
     <div class="metrics-range-selector__selected-range-dates" *ngIf="committedStartEnd[0] && committedStartEnd[1] ; else noDatesSelected">
       <div class="metrics-range-selector__selected-range-date">{{ committedStartEnd[0] | amDateFormat:'Do MMM YYYY,
         HH:mm' }}
@@ -30,6 +30,6 @@
       </div>
     </div>
     <ng-template #noDatesSelected class="metrics-range-selector__selected-range-date">No dates selected</ng-template>
-    <a class="metrics-range-selector__selected-range-edit" (click)="showOverlay = true" *ngIf="selectedTimeRange && selectedTimeRange.type===rangeTypes.START_END && !showOverlay">Edit</a>
+    <a class="metrics-range-selector__selected-range-edit" (click)="showOverlay = true" *ngIf="selectedTimeRange && selectedTimeRange.type === rangeTypes.RANGE_QUERY && !showOverlay">Edit</a>
   </div>
 </div>

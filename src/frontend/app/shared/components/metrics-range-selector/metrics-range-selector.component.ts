@@ -1,32 +1,31 @@
-import { Component, OnInit, Output, EventEmitter, OnDestroy, Input, ViewChild, TemplateRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import * as moment from 'moment';
-import { FetchApplicationMetricsAction, MetricQueryConfig, MetricsAction, MetricQueryType } from '../../../store/actions/metrics.actions';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { IMetrics } from '../../../store/types/base-metric.types';
-import { debounceTime, tap, takeWhile } from 'rxjs/operators';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { metricSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { Subscription } from 'rxjs';
-
-enum RangeType {
-  ROLLING_WINDOW = 'ROLLING_WINDOW',
-  START_END = 'START_END'
-}
-
-interface ITimeRange {
-  value?: string;
-  label: string;
-  type: RangeType;
-}
+import { debounceTime, takeWhile, tap } from 'rxjs/operators';
+import { FetchApplicationMetricsAction, MetricsAction } from '../../../store/actions/metrics.actions';
+import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { IMetrics } from '../../../store/types/base-metric.types';
+import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { MetricsRangeSelectorService } from '../../services/metrics-range-selector.service';
+import { ITimeRange, MetricQueryType } from '../../services/metrics-range-selector.types';
+import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 
 @Component({
   selector: 'app-metrics-range-selector',
   templateUrl: './metrics-range-selector.component.html',
-  styleUrls: ['./metrics-range-selector.component.scss']
+  styleUrls: ['./metrics-range-selector.component.scss'],
+  providers: [
+    MetricsRangeSelectorManagerService
+  ]
 })
-export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
+export class MetricsRangeSelectorComponent implements OnDestroy {
 
-  private committedAction: MetricsAction;
+  constructor(
+    private entityMonitorFactory: EntityMonitorFactory,
+    private metricRangeService: MetricsRangeSelectorService,
+    public rangeSelectorManager: MetricsRangeSelectorManagerService
+  ) { }
 
   public metricsMonitor: EntityMonitor<IMetrics>;
 
@@ -46,12 +45,12 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
   @Input()
   set baseAction(action: MetricsAction) {
     this.baseActionValue = action;
-    this.committedAction = action;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.metricId,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
+    // this.rangeSelectorManager.init(this.metricsMonitor);
     this.initSub = this.getInitSub(this.metricsMonitor);
   }
 
@@ -65,29 +64,9 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
 
   public committedStartEnd: [moment.Moment, moment.Moment] = [null, null];
 
-  public rangeTypes = RangeType;
+  public rangeTypes = MetricQueryType;
 
-  public times: ITimeRange[] = [
-    {
-      value: '5m',
-      label: 'The past 5 minutes',
-      type: RangeType.ROLLING_WINDOW
-    },
-    {
-      value: '1h',
-      label: 'The past hour',
-      type: RangeType.ROLLING_WINDOW
-    },
-    {
-      value: '1w',
-      label: 'The past week',
-      type: RangeType.ROLLING_WINDOW
-    },
-    {
-      label: 'Set time window',
-      type: RangeType.START_END
-    }
-  ];
+  public times = this.metricRangeService.times;
 
   public selectedTimeRangeValue: ITimeRange;
 
@@ -110,20 +89,7 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
     this.startEnd[index] = date;
     const [start, end] = this.startEnd;
     if (start && end) {
-      const startUnix = start.unix();
-      const endUnix = end.unix();
-      const oldAction = this.baseAction;
-      const action = new FetchApplicationMetricsAction(
-        oldAction.guid,
-        oldAction.cfGuid,
-        new MetricQueryConfig(this.baseAction.query.metric, {
-          start: startUnix,
-          end: end.unix(),
-          step: Math.max((endUnix - startUnix) / 200, 0)
-        }),
-        MetricQueryType.RANGE_QUERY
-      );
-
+      const action = this.metricRangeService.getNewDateRangeAction(this.baseAction, start, end);
       this.commit = () => {
         this.committedStartEnd = [
           this.startEnd[0],
@@ -141,9 +107,9 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
   set selectedTimeRange(timeRange: ITimeRange) {
     this.commit = null;
     this.selectedTimeRangeValue = timeRange;
-    if (this.selectedTimeRangeValue.type === RangeType.ROLLING_WINDOW) {
+    if (this.selectedTimeRangeValue.queryType === MetricQueryType.QUERY) {
       this.commitWindow(this.selectedTimeRangeValue);
-    } else if (this.selectedTimeRangeValue.type === RangeType.START_END) {
+    } else if (this.selectedTimeRangeValue.queryType === MetricQueryType.RANGE_QUERY) {
       if (!this.startEnd[0] || !this.startEnd[1]) {
         this.showOverlay = true;
       }
@@ -155,28 +121,17 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
       debounceTime(1),
       tap(metrics => {
         if (!this.selectedTimeRange) {
-          if (metrics) {
-            if (metrics.queryType === MetricQueryType.RANGE_QUERY) {
-              const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
-              const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
-              const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
-              if (isDifferent) {
-                this.start = start;
-                this.end = end;
-                this.committedStartEnd = [start, end];
-              }
-              this.selectedTimeRange = this.times.find(time => time.type === RangeType.START_END);
-            } else {
-              const newWindow = metrics.query.params.window ?
-                this.times.find(time => time.value === metrics.query.params.window) :
-                this.getDefaultTimeRange();
-              if (this.selectedTimeRange !== newWindow) {
-                this.selectedTimeRange = newWindow;
-              }
+          const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
+
+          if (timeRange.queryType === MetricQueryType.RANGE_QUERY) {
+            const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
+            if (isDifferent) {
+              this.start = start;
+              this.end = end;
+              this.committedStartEnd = [start, end];
             }
-          } else {
-            this.selectedTimeRange = this.getDefaultTimeRange();
           }
+          this.selectedTimeRange = timeRange;
         }
       }),
       takeWhile(metrics => !metrics)
@@ -189,15 +144,7 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    const oldAction = this.baseAction;
-    const action = new FetchApplicationMetricsAction(
-      oldAction.guid,
-      oldAction.cfGuid,
-      new MetricQueryConfig(this.baseAction.query.metric, {
-        window: window.value
-      })
-    );
-    this.commitAction(action);
+    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, window));
   }
 
   set start(start: moment.Moment) {
@@ -216,27 +163,13 @@ export class MetricsRangeSelectorComponent implements OnInit, OnDestroy {
     return this.startEnd[this.endIndex];
   }
 
-  private getDefaultTimeRange() {
-    return this.times.find(time => time.value === '1h') || this.times[0];
-  }
-
   private commitAction(action: MetricsAction) {
     this.metricsAction.emit(action);
-    this.committedAction = action;
     this.commit = null;
   }
 
-  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
-
-  ngOnInit() {
-
-
-  }
-
   ngOnDestroy() {
-    if (this.initSub) {
-      this.initSub.unsubscribe();
-    }
+    this.rangeSelectorManager.destroy();
   }
 
 }

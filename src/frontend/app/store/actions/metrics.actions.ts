@@ -1,15 +1,13 @@
 import { Action } from '@ngrx/store';
 import { environment } from './../../../environments/environment.prod';
+import { MetricQueryType } from '../../shared/services/metrics-range-selector.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
 const { proxyAPIVersion } = environment;
 
-export enum MetricQueryType {
-  QUERY = 'query',
-  RANGE_QUERY = 'query_range'
-}
+
 export interface IMetricQueryConfigParams {
   window?: string;
   [key: string]: string | number;
@@ -36,13 +34,16 @@ export class MetricQueryConfig {
   }
 }
 
-export abstract class MetricsAction implements Action {
-  constructor(public guid: string, public query: MetricQueryConfig, public queryType: MetricQueryType = MetricQueryType.QUERY) {
+export class MetricsAction implements Action {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public query: MetricQueryConfig,
+    public url: string,
+    public queryType: MetricQueryType = MetricQueryType.QUERY) {
     this.metricId = MetricsAction.buildMetricKey(guid, query);
   }
   type = METRICS_START;
-  url: string;
-  cfGuid: string;
   metricId: string;
   static getBaseMetricsURL() {
     return `/pp/${proxyAPIVersion}/metrics`;
@@ -55,17 +56,14 @@ export abstract class MetricsAction implements Action {
 }
 
 export class FetchCFMetricsAction extends MetricsAction {
-  public cfGuid: string;
+  public endpointGuid: string;
   constructor(public guid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
-    super(guid, query, queryType);
-    this.cfGuid = guid;
-    this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
+    super(guid, guid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, queryType);
   }
 }
 
 export class FetchApplicationMetricsAction extends MetricsAction {
-  constructor(guid: string, public cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
-    super(guid, query, queryType);
-    this.url = `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`;
+  constructor(guid: string, cfGuid: string, query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, queryType);
   }
 }

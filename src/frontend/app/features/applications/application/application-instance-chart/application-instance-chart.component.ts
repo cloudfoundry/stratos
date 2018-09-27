@@ -2,9 +2,10 @@ import { Component, OnInit, Input } from '@angular/core';
 import { MetricsLineChartConfig } from '../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsConfig } from '../../../../shared/components/metrics-chart/metrics-chart.component';
 import { IMetricMatrixResult } from '../../../../store/types/base-metric.types';
-import { FetchApplicationMetricsAction, MetricQueryType, MetricQueryConfig } from '../../../../store/actions/metrics.actions';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../store/actions/metrics.actions';
 import { MetricsChartHelpers } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IMetricApplication } from '../../../../store/types/metric.types';
+import { MetricQueryType } from '../../../../shared/services/metrics-range-selector.types';
 
 @Component({
   selector: 'app-application-instance-chart',
