@@ -32,9 +32,9 @@ describe('Application Wall Tests -', () => {
   function createAppNames(count: number): string[] {
     const appNames = [];
     // Ensure the app names all have the same prefix
-    baseAppName = ApplicationE2eHelper.createApplicationName(null, '-wallTest-');
+    baseAppName = ApplicationE2eHelper.createApplicationName(null, '-wallTest');
     for (let i = 0; i < count; i++) {
-      appNames.push(`${baseAppName}${i}`);
+      appNames.push(`${baseAppName}-${i}`);
     }
     return appNames;
   }
@@ -96,7 +96,7 @@ describe('Application Wall Tests -', () => {
   }
 
   function navAppWall() {
-    // Note - always nave to page... this will pick up all the new org
+    // Note - always nav to page... this will pick up all the new org
     appsPage.navigateTo();
     appsPage.isActivePage().then(active => {
       if (!active) {
@@ -172,12 +172,14 @@ describe('Application Wall Tests -', () => {
     beforeAll(() => {
       appNames = createAppNames(3);
       setup(orgName, appNames, true);
-      expect(appList.getTotalResults()).toBeLessThanOrEqual(9);
       expect(appList.pagination.isDisplayed()).toBeFalsy();
     }, timeAllowed);
 
     beforeAll(() => {
       appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      browser.wait(() => {
+        return appList.getTotalResults().then(results => results === 3);
+      });
     });
 
     afterAll(() => tearDown(orgName), timeAllowed);
@@ -185,7 +187,7 @@ describe('Application Wall Tests -', () => {
     describe('Sorting', () => {
 
       beforeAll(() => {
-        appList.header.setSearchText(baseAppName);
+        // appList.header.setSearchText(baseAppName);
         expect(appList.getTotalResults()).toBeLessThanOrEqual(9);
         expect(appList.pagination.isDisplayed()).toBeFalsy();
       });

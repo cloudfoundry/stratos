@@ -16,6 +16,8 @@ describe('Application Routes -', () => {
   let appRoutes;
   let routeHostName, routePath;
 
+  const EC = protractor.ExpectedConditions;
+
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -40,13 +42,27 @@ describe('Application Routes -', () => {
 
   function spaceContainsRoute(spaceGuid: string, host: string, path: string): promise.Promise<boolean> {
     return applicationE2eHelper.cfHelper.fetchRoutesInSpace(cfGuid, spaceGuid)
-      .then(routes => !!routes.filter(route => route.entity.host === host && route.entity.path === '/' + path).length);
+      .then(routes => !!routes.find(route => route.entity.host === host && route.entity.path === '/' + path));
+  }
+
+  function waitForRouteToBeDeleted(spaceGuid: string, host: string, path: string, count = 0): promise.Promise<boolean> {
+    return spaceContainsRoute(app.entity.space_guid, routeHostName, routePath).then(exists => {
+      if (!exists) {
+        return true;
+      }
+      count++;
+      if (count === 10) {
+        return false;
+      }
+      e2e.sleep(1000);
+      return waitForRouteToBeDeleted(spaceGuid, host, path, count);
+    });
   }
 
   // All of these tests assume that they run after each other
 
   it('Go to Application Routes Tab', () => {
-    const appRoutes = new ApplicationPageRoutesTab(cfGuid, app.metadata.guid);
+    appRoutes = new ApplicationPageRoutesTab(cfGuid, app.metadata.guid);
     appRoutes.navigateTo();
 
     // Check empty initial state
@@ -162,7 +178,7 @@ describe('Application Routes -', () => {
       expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('No');
     });
   });
-  
+
   it('Delete route', () => {
     expect(appRoutes.isActivePage()).toBeTruthy();
 
@@ -175,16 +191,17 @@ describe('Application Routes -', () => {
       expect(message.indexOf(routeHostName)).toBeGreaterThanOrEqual(0);
       expect(message.indexOf('/' + routePath)).toBeGreaterThanOrEqual(0);
     });
+
+    e2e.sleep(5000);
     confirm.confirm();
     confirm.waitUntilNotShown();
 
     appRoutes.list.header.getRefreshListButton().click();
-
     expect(appRoutes.list.empty.getCustom().isDisplayed()).toBeTruthy();
     expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
 
-    expect(spaceContainsRoute(app.entity.space_guid, routeHostName, routePath)).toBeFalsy();
-
+    browser.wait(waitForRouteToBeDeleted(app.entity.space_guid, routeHostName, routePath),
+    10000, 'Route should have been deleted from the space');
   });
 
   afterAll(() => {
