@@ -16,7 +16,7 @@ set -e
 IMAGE="stratos-aio"
 
 # Build AIO image unless asked to use nightly image
-if [ "$1" -ne "prebuilt" ]; then
+if [ "$1" != "prebuilt" ]; then
   echo "Building AIO image locally"
   ./build/store-git-metadata.sh
   docker build --pull	-f deploy/Dockerfile.all-in-one . -t stratos-aio
