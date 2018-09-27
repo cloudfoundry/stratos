@@ -6,11 +6,13 @@ import * as moment from 'moment';
 import { MetricQueryType, ITimeRange } from './metrics-range-selector.types';
 import { EntityMonitor } from '../monitors/entity-monitor';
 import { IMetrics } from '../../store/types/base-metric.types';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { debounceTime, tap, takeWhile } from 'rxjs/operators';
 
 @Injectable()
 export class MetricsRangeSelectorManagerService {
+
+  public timeWindow$ = new Subject<ITimeRange>();
 
   public commit: Function = null;
 
@@ -28,13 +30,15 @@ export class MetricsRangeSelectorManagerService {
 
   private readonly endIndex = 1;
 
-  private startEnd: [moment.Moment, moment.Moment] = [null, null];
+  public startEnd: [moment.Moment, moment.Moment] = [null, null];
 
   private initSub: Subscription;
 
   public selectedTimeRangeValue: ITimeRange;
 
-  public metricsActionEmitter = new EventEmitter<MetricsAction>();
+  public metricsAction$ = new Subject<MetricsAction>();
+
+  private baseAction: MetricsAction;
 
   constructor(public metricRangeService: MetricsRangeSelectorService) { }
 
@@ -58,7 +62,8 @@ export class MetricsRangeSelectorManagerService {
     }
   }
 
-  public init(entityMonitor: EntityMonitor<IMetrics>) {
+  public init(entityMonitor: EntityMonitor<IMetrics>, baseAction: MetricsAction) {
+    this.baseAction = baseAction;
     this.initSub = entityMonitor.entity$.pipe(
       debounceTime(1),
       tap(metrics => {
@@ -92,18 +97,19 @@ export class MetricsRangeSelectorManagerService {
 
   set selectedTimeRange(timeRange: ITimeRange) {
     this.commit = null;
+    this.start = null;
+    this.end = null;
     this.selectedTimeRangeValue = timeRange;
+    this.timeWindow$.next(this.selectedTimeRangeValue);
     if (this.selectedTimeRangeValue.queryType === MetricQueryType.QUERY) {
       this.commitWindow(this.selectedTimeRangeValue);
-    } else if (this.selectedTimeRangeValue.queryType === MetricQueryType.RANGE_QUERY) {
-      if (!this.startEnd[0] || !this.startEnd[1]) {
-        this.showOverlay = true;
-      }
     }
   }
 
   set start(start: moment.Moment) {
-    this.commitDate(start, 'start');
+    if (start) {
+      this.commitDate(start, 'start');
+    }
   }
 
   get start() {
@@ -111,7 +117,9 @@ export class MetricsRangeSelectorManagerService {
   }
 
   set end(end: moment.Moment) {
-    this.commitDate(end, 'end');
+    if (end) {
+      this.commitDate(end, 'end');
+    }
   }
 
   get end() {
@@ -128,7 +136,7 @@ export class MetricsRangeSelectorManagerService {
   }
 
   private commitAction(action: MetricsAction) {
-    this.metricsActionEmitter.emit(action);
+    this.metricsAction$.next(action);
     this.commit = null;
   }
 
