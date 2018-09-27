@@ -192,7 +192,6 @@ describe('Application Routes -', () => {
       expect(message.indexOf('/' + routePath)).toBeGreaterThanOrEqual(0);
     });
 
-    e2e.sleep(5000);
     confirm.confirm();
     confirm.waitUntilNotShown();
 
