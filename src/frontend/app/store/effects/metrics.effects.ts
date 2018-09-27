@@ -1,3 +1,4 @@
+import { query } from '@angular/animations';
 
 import { catchError, mergeMap, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
@@ -5,7 +6,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
-import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
+import { METRICS_START, MetricsAction, getFullMetricQueryQuery } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
@@ -63,7 +64,7 @@ export class MetricsEffect {
     }));
 
   private buildFullUrl(action: MetricsAction) {
-    return `${action.url}/${action.queryType}?query=${action.query.getFullQuery()}`;
+    return `${action.url}/${action.queryType}?query=${getFullMetricQueryQuery(action.query)}`;
   }
 }
 

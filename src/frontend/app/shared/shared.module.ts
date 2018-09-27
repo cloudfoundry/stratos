@@ -339,6 +339,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

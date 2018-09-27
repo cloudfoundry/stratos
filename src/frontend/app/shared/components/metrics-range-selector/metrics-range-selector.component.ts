@@ -25,9 +25,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     public rangeSelectorManager: MetricsRangeSelectorManagerService
   ) {
     this.rangeSelectorSub = this.rangeSelectorManager.timeWindow$.subscribe(selectedTimeRangeValue => {
-
       if (selectedTimeRangeValue.queryType === MetricQueryType.RANGE_QUERY) {
-        console.log(selectedTimeRangeValue)
         if (!this.rangeSelectorManager.startEnd[0] || !this.rangeSelectorManager.startEnd[1]) {
           this.showOverlay = true;
         }

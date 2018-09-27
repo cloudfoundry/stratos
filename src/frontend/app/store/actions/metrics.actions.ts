@@ -12,26 +12,28 @@ export interface IMetricQueryConfigParams {
   window?: string;
   [key: string]: string | number;
 }
+
+function joinParams(queryConfig: MetricQueryConfig) {
+  const {
+    window = '',
+    ...params
+  } = queryConfig.params;
+  const windowString = window ? `{}[${window}]` : '';
+  const paramString = Object.keys(params).reduce((accum, key) => {
+    return accum + `&${key}=${params[key]}`;
+  }, '');
+  return windowString + paramString || '';
+}
+
+export function getFullMetricQueryQuery(queryConfig: MetricQueryConfig) {
+  return queryConfig.metric + joinParams(queryConfig);
+}
+
 export class MetricQueryConfig {
   constructor(
     public metric: string,
     public params?: IMetricQueryConfigParams
   ) { }
-  public getFullQuery() {
-    return this.metric + this.joinParams();
-  }
-
-  public joinParams() {
-    const {
-      window = '',
-      ...params
-    } = this.params;
-    const windowString = window ? `{}[${window}]` : '';
-    const paramString = Object.keys(params).reduce((accum, key) => {
-      return accum + `&${key}=${params[key]}`;
-    }, '');
-    return windowString + paramString || '';
-  }
 }
 
 export class MetricsAction implements Action {
