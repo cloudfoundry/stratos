@@ -23,6 +23,7 @@ export interface MetricsChartConfig {
   chartType: MetricsChartTypes;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  showLegend?: boolean;
 }
 
 @Component({
@@ -76,6 +77,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.pollSub.unsubscribe();
   }
+
+  showLegend = () => !!this.chartConfig.showLegend ? this.chartConfig.showLegend : true;
 
   private mapMetricsToChartData(metrics: IMetrics, metricsConfig: MetricsConfig) {
     switch (metrics.resultType) {

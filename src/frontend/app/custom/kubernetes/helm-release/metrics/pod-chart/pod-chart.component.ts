@@ -52,6 +52,7 @@ export class PodChartComponent implements OnInit {
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),
+      showLegend: false,
       metricsAction: new FetchKubernetesMetricsAction(
         this.podName,
         this.endpointGuid,

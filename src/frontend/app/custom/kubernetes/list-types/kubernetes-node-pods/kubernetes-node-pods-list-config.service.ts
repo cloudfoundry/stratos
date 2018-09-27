@@ -8,7 +8,6 @@ import { KubernetesNodePodsDataSource } from './kubernetes-node-pods-data-source
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { KubernetesNodePodsLinkComponent } from './kubernetes-node-pods-link/kubernetes-node-pods-link.component';
 
-
 @Injectable()
 export class KubernetesNodePodsListConfigService extends KubernetesPodsListConfigService {
   constructor(

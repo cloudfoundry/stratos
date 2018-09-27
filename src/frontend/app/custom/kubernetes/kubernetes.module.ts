@@ -39,9 +39,6 @@ import {
   KubernetesNodeLinkComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component';
 import {
-  KubernetesNodeMetricsComponent,
-} from './list-types/kubernetes-nodes/kubernetes-node-metrics/kubernetes-node-metrics.component';
-import {
   KubernetesNodeConditionCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
 import {
@@ -64,6 +61,8 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodePodsLinkComponent } from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
+import { KubernetesNodeInfoCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-info-card/kubernetes-node-info-card.component';
+import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
 
 @NgModule({
   imports: [
@@ -95,14 +94,15 @@ import { KubernetesNodePodsLinkComponent } from './list-types/kubernetes-node-po
     PodUsageComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodeComponent,
-    KubernetesNodeMetricsComponent,
     KubernetesNodeSummaryComponent,
     KubernetesNodePodsComponent,
     KubernetesNodeSummaryCardComponent,
     KubernetesNodeConditionCardComponent,
     KubernetesNodeTagsCardComponent,
     KubernetesNodePodsComponent,
-    KubernetesNodePodsLinkComponent
+    KubernetesNodePodsLinkComponent,
+    KubernetesNodeInfoCardComponent,
+    KubernetesNodeMetricsComponent
   ],
   providers: [
     KubernetesService,
