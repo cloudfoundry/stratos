@@ -104,3 +104,4 @@ src/frontend/index.html
 # Prebuild package
 
 stratos-frontend-prebuild.zip
+src/jetstream/config.properties
