@@ -2,6 +2,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellBaseComponent } from './cloud-foundry-cell-base.component';
 
 
@@ -13,7 +15,11 @@ describe('CloudFoundryCellBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryCellBaseComponent],
       imports: [...BaseTestModules],
-      providers: [ActiveRouteCfOrgSpace]
+      providers: [
+        CloudFoundryEndpointService,
+        CloudFoundryCellService,
+        ActiveRouteCfOrgSpace
+      ]
     })
       .compileComponents();
   }));

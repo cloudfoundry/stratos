@@ -13,12 +13,18 @@ describe('CfCellSummaryChartComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        CfCellSummaryChartComponent
+      ],
       imports: [
         createBasicStoreModule(),
         RouterTestingModule,
         CoreModule,
         SharedModule,
         NoopAnimationsModule
+      ],
+      providers: [
+
       ]
     })
       .compileComponents();

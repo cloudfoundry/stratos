@@ -1,7 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
+import { ActiveRouteCfCell } from '../../../../cf-page.types';
+import { CfCellSummaryChartComponent } from '../../cf-cell-summary-chart/cf-cell-summary-chart.component';
+import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellChartsComponent } from './cloud-foundry-cell-charts.component';
 
 describe('CloudFoundryCellChartsComponent', () => {
@@ -10,9 +12,15 @@ describe('CloudFoundryCellChartsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryCellChartsComponent],
+      declarations: [
+        CloudFoundryCellChartsComponent,
+        CfCellSummaryChartComponent
+      ],
       imports: [...BaseTestModules],
-      providers: [ActiveRouteCfOrgSpace]
+      providers: [
+        CloudFoundryCellService,
+        ActiveRouteCfCell
+      ]
     })
       .compileComponents();
   }));
