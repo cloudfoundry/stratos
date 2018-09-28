@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
+
 import { MetricsConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.component';
+import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
+import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
+import { FetchCFCellMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/types/metric.types';
-import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
-import { FetchCFMetricsAction, MetricQueryConfig, MetricQueryType, FetchCFCellMetricsAction } from '../../../../../store/actions/metrics.actions';
 
 
 @Component({
@@ -22,6 +23,9 @@ export class CfCellSummaryChartComponent implements OnInit {
 
   @Input()
   private yAxisLabel: string;
+
+  @Input()
+  private showLegend = true;
 
   // Prometheus query string
   @Input()
@@ -46,6 +50,7 @@ export class CfCellSummaryChartComponent implements OnInit {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = this.yAxisLabel;
+    lineChartConfig.showLegend = this.showLegend;
     return lineChartConfig;
   }
 

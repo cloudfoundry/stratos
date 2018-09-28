@@ -7,7 +7,7 @@
     mode="indeterminate">
   </mat-progress-bar>
   <div class="metrics-chart" *ngIf="results$ | async as results; else other_content" [ngSwitch]="chartConfig.chartType">
-    <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="true"
+    <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="chartConfig.showLegend"
       [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true"
       [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="true">
     </ngx-charts-line-chart>

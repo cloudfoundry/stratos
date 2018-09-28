@@ -10,7 +10,7 @@ import { EntityMonitor } from '../../monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
-import { MetricsChartTypes } from './metrics-chart.types';
+import { MetricsChartTypes, IMetricsChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
 export interface MetricsConfig<T = any> {
@@ -19,12 +19,6 @@ export interface MetricsConfig<T = any> {
   mapSeriesItemName?: (value) => string | Date;
   mapSeriesItemValue?: (value) => any;
   sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
-}
-export interface MetricsChartConfig {
-  // Make an enum for this.
-  chartType: MetricsChartTypes;
-  xAxisLabel?: string;
-  yAxisLabel?: string;
 }
 
 @Component({
@@ -36,7 +30,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @Input()
   public metricsConfig: MetricsConfig;
   @Input()
-  public chartConfig: MetricsChartConfig;
+  public chartConfig: IMetricsChartConfig;
   @Input()
   public title: string;
 

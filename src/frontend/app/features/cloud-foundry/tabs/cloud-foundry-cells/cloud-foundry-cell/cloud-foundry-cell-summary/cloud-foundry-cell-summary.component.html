@@ -3,11 +3,14 @@
   <mat-card-content>
     <div class="app-metadata">
       <div class="app-metadata__two-cols">
+        <app-metadata-item icon="table_chart" label="Deployment">{{ (cfCellService.cellMetric$ | async).bosh_deployment}}</app-metadata-item>
+        <app-metadata-item icon="perm_identity" label="ID">{{ (cfCellService.cellMetric$ | async).bosh_job_id}}</app-metadata-item>
+        <app-metadata-item icon="wallpaper" label="Environment">{{ (cfCellService.cellMetric$ | async).environment}}</app-metadata-item>
+      </div>
+      <div class="app-metadata__two-cols">
         <app-metadata-item icon="local_hospital" label="Healthy" matTooltip="Has the cell passed the garden backend health check?">
           <app-boolean-indicator [isTrue]="(status$ | async) === 'ok'" type="yes-no" [subtle]="false" [showText]="true"></app-boolean-indicator>
         </app-metadata-item>
-      </div>
-      <div class="app-metadata__two-cols">
         <app-metadata-item icon="developer_board" label="Number of CPUs">{{ cfCellService.cpus$ | async}}</app-metadata-item>
       </div>
     </div>
@@ -23,13 +26,13 @@
       <app-card-number-metric icon="storage" label="Disk" units="mb" value="{{ cfCellService.usageDisk$ | async}} " limit="{{ cfCellService.totalDisk$ | async}}"></app-card-number-metric>
     </app-tile>
     <app-tile>
-      <!-- //TODO: RC icon -->
-      <app-card-number-metric icon="hdr_off" label="Containers" value="{{ cfCellService.usageContainers$ | async}} " limit="{{ cfCellService.totalContainers$ | async}}"></app-card-number-metric>
+      <app-card-number-metric icon="settings_system_daydream" label="Containers" value="{{ cfCellService.usageContainers$ | async}} " limit="{{ cfCellService.totalContainers$ | async}}"></app-card-number-metric>
     </app-tile>
   </app-tile-group>
 </app-tile-grid>
 
 <mat-card class="metric-chart-wrapper">
-  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Health" yAxisLabel="0 = Healthy, 1 = Unhealthy" queryRange="false" queryString="firehose_value_metric_rep_unhealthy_cell">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Health" yAxisLabel="0 = Healthy, 1 = Unhealthy"
+    queryRange="false" queryString="firehose_value_metric_rep_unhealthy_cell" [showLegend]="false">
   </app-cf-cell-summary-chart>
 </mat-card>
