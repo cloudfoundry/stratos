@@ -32,20 +32,5 @@ export class KubernetesNodeConditionCardComponent implements OnInit {
       map(node => node.status.conditions)
     );
 
-    this.outOfDisk$ = this.filterByType(ConditionType.OutOfDisk);
-    this.diskPressure$ = this.filterByType(ConditionType.DiskPressure);
-    this.memoryPressure$ = this.filterByType(ConditionType.MemoryPressure);
-    this.ready$ = this.filterByType(ConditionType.Ready);
-
-  }
-
-
-  filterByType = (type: ConditionType) => this.condition$.pipe(map(p => p.filter(o => o.type === type)[0]));
-
-  private getTags(tags: {}) {
-    const labelEntries = Object.entries(tags);
-    return labelEntries.map(t => ({
-      value: `${t[0]}:${t[1]}`
-    }));
   }
 }

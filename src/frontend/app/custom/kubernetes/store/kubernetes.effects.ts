@@ -109,7 +109,6 @@ export class KubernetesEffects {
         kubernetesPodsSchemaKey,
         getUid,
         (p: KubernetesPod) => {
-          console.log(p)
          return p.spec.nodeName === action.nodeName;
         }
       );

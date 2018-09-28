@@ -26,12 +26,17 @@ import {
 import { HelmReleaseTabsBaseComponent } from './helm-release/helm-release-tabs-base/helm-release-tabs-base.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { PodChartComponent } from './helm-release/metrics/pod-chart/pod-chart.component';
+import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
+import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link.component';
+import {
+  KubernetesNodePodsLinkComponent,
+} from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
 import {
   KubernetesNodeCapacityComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
@@ -41,6 +46,12 @@ import {
 import {
   KubernetesNodeConditionCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
+import {
+  KubernetesNodeConditionComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition/kubernetes-node-condition.component';
+import {
+  KubernetesNodeInfoCardComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-info-card/kubernetes-node-info-card.component';
 import {
   KubernetesNodeSummaryCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary-card/kubernetes-node-summary-card.component';
@@ -59,10 +70,6 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
-import { KubernetesNodePodsLinkComponent } from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
-import { KubernetesNodeInfoCardComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-info-card/kubernetes-node-info-card.component';
-import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
 
 @NgModule({
   imports: [
@@ -102,7 +109,8 @@ import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-nod
     KubernetesNodePodsComponent,
     KubernetesNodePodsLinkComponent,
     KubernetesNodeInfoCardComponent,
-    KubernetesNodeMetricsComponent
+    KubernetesNodeMetricsComponent,
+    KubernetesNodeConditionComponent
   ],
   providers: [
     KubernetesService,

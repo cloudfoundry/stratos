@@ -21,6 +21,7 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
+import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
 const kubernetes: Routes = [{
   path: '',
   component: KubernetesComponent
@@ -61,7 +62,7 @@ const kubernetes: Routes = [{
     },
     {
       path: 'metrics',
-      component: HelmReleaseServicesComponent
+      component: KubernetesNodeMetricsComponent
     }
   ]
 },

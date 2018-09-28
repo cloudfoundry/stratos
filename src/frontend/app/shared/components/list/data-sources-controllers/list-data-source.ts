@@ -135,7 +135,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         paginationEntity.totalResults !== entities.length ||
         paginationEntity.clientPagination.totalResults !== entities.length
       ) {
-        console.log('setting results count')
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
       }
     };

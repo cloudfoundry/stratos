@@ -5,18 +5,10 @@
     </mat-card-header>
     <mat-card-content>
       <div class="kubernetes-node-summary-card__content">
-        <app-metadata-item icon="title" label="Ready">
-          <app-boolean-indicator [isTrue]="(ready$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
-        </app-metadata-item>
-        <app-metadata-item icon="title" label="Disk Pressure">
-            <app-boolean-indicator [isTrue]="(diskPressure$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
-        </app-metadata-item>
-        <app-metadata-item icon="title" label="Memory Pressure">
-            <app-boolean-indicator [isTrue]="(memoryPressure$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
-         </app-metadata-item>
-        <app-metadata-item icon="title" label="Out of Disk">
-            <app-boolean-indicator [isTrue]="(outOfDisk$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
-          </app-metadata-item>
+        <app-kubernetes-node-condition condition="Ready"></app-kubernetes-node-condition>
+        <app-kubernetes-node-condition condition="DiskPressure"></app-kubernetes-node-condition>
+        <app-kubernetes-node-condition condition="MemoryPressure"></app-kubernetes-node-condition>
+        <app-kubernetes-node-condition condition="OutOfDisk"></app-kubernetes-node-condition>
       </div>
     </mat-card-content>
   </mat-card>

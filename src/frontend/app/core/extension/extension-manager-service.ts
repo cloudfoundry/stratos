@@ -19,7 +19,6 @@ export class ExtensionManager {
   public endointTypes: EndpointTypeExtension[] = [];
 
   constructor(private router: Router) {
-    console.log('Extension Manager');
   }
 
   public registerRoutes(r: Route[]): ExtensionManager {
