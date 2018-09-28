@@ -251,11 +251,14 @@ describe('Application Wall Tests -', () => {
     beforeAll(() => {
       appNames = createAppNames(11);
       setup(orgName, appNames, false);
-      expect(appList.getTotalResults()).toBeGreaterThanOrEqual(appNames.length);
     }, timeAllowed);
 
     beforeAll(() => {
+      appList.header.clearSearchText();
       appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      browser.wait(() => {
+        return appList.getTotalResults().then(results => results >= appNames.length);
+      });
     });
 
     afterAll(() => tearDown(orgName), timeAllowed);
@@ -305,7 +308,6 @@ describe('Application Wall Tests -', () => {
       });
 
       it('Change Page Size', () => {
-
         appList.pagination.setPageSize('80', 'mat-select-4');
         expect(appList.cards.getCardCount()).toBeGreaterThan(9);
 
@@ -321,6 +323,7 @@ describe('Application Wall Tests -', () => {
     });
 
     function checkApp(appName, shouldFind = true) {
+      appList.header.clearSearchText();
       appList.header.setSearchText(appName);
       expect(appList.getTotalResults()).toBe(shouldFind ? 1 : 0);
       appList.header.clearSearchText();
