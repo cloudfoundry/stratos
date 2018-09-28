@@ -9,19 +9,19 @@ import {
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
-import { IMetricApplication } from '../../../../../store/types/metric.types';
+import { IMetricCell } from '../../../../../store/types/metric.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
 export class CfCellsDataSource
-  extends ListDataSource<IMetricVectorResult<IMetricApplication>, IMetrics<IMetricVectorResult<IMetricApplication>>> {
+  extends ListDataSource<IMetricVectorResult<IMetricCell>, IMetrics<IMetricVectorResult<IMetricCell>>> {
 
   static cellIdPath = 'metric.bosh_job_id';
   static cellNamePath = 'metric.bosh_job_name';
   static cellHealthyPath = 'value.1';
   static cellDeploymentPath = 'metric.bosh_deployment';
 
-  constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricApplication>>) {
+  constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
     const action = new FetchCFMetricsPaginatedAction(
       cfGuid,
       new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),

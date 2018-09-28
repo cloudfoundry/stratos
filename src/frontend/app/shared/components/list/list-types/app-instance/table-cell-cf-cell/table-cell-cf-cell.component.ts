@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../store/types/metric.types';
+import { IMetricCell } from '../../../../../../store/types/metric.types';
 import { TableCellCustom } from '../../../list.types';
 import { ListAppInstance } from '../app-instance-types';
 
@@ -14,12 +14,12 @@ import { ListAppInstance } from '../app-instance-types';
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> {
 
-  cellMetric$: Observable<IMetricApplication>;
+  cellMetric$: Observable<IMetricCell>;
   cellLink: string;
 
   @Input('config')
   set config(config: {
-    metricResults$: Observable<IMetricMatrixResult<IMetricApplication>[]>
+    metricResults$: Observable<IMetricMatrixResult<IMetricCell>[]>
     cfGuid: string
   }) {
     if (!config) {

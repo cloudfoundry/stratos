@@ -5,7 +5,7 @@ import { MetricsLineChartConfig } from '../../../../../shared/components/metrics
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { FetchCFCellMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../../store/types/base-metric.types';
-import { IMetricApplication } from '../../../../../store/types/metric.types';
+import { IMetricCell } from '../../../../../store/types/metric.types';
 
 
 @Component({
@@ -40,9 +40,9 @@ export class CfCellSummaryChartComponent implements OnInit {
   @Input()
   public title: string;
 
-  public instanceChartConfig: MetricsLineChartConfig;
+  public chartConfig: MetricsLineChartConfig;
 
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+  public metricConfig: MetricsConfig<IMetricMatrixResult<IMetricCell>>;
 
   constructor() { }
 
@@ -55,8 +55,8 @@ export class CfCellSummaryChartComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.instanceChartConfig = this.buildChartConfig();
-    this.instanceMetricConfig = {
+    this.chartConfig = this.buildChartConfig();
+    this.metricConfig = {
       getSeriesName: result => `Cell ${result.metric.bosh_job_id}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
@@ -70,15 +70,6 @@ export class CfCellSummaryChartComponent implements OnInit {
         MetricQueryType.QUERY
       ),
     };
-  }
-
-  private mapSeriesItemValue() {
-    switch (this.seriesTranslation) {
-      case 'mb':
-        return (bytes) => (bytes / 1000000).toFixed(2);
-      default:
-        return undefined;
-    }
   }
 
 }

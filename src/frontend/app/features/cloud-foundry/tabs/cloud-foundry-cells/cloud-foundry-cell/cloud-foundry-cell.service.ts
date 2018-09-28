@@ -90,11 +90,7 @@ export class CloudFoundryCellService {
         if (!entity.data || !entity.data.result) {
           return undefined;
         }
-        if (isMetric) {
-          return entity.data.result[0].metric;
-        }
-        console.log(metric, entity.data.result[0]);
-        return entity.data.result[0].value[1];
+        return isMetric ? entity.data.result[0].metric : entity.data.result[0].value[1];
       })
     );
   }

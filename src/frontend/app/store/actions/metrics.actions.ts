@@ -97,7 +97,6 @@ export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implemen
   }
   actions = [];
   paginationKey: string;
-  // TODO: RC Move this to DataSource
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': 'id',
