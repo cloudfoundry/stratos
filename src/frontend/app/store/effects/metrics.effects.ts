@@ -23,7 +23,7 @@ export class MetricsEffect {
 
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
     mergeMap(action => {
-      const fullUrl = this.buildFullUrl(action);
+      const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
       const apiAction = {
         guid: action.guid,
         entityKey: metricSchemaKey

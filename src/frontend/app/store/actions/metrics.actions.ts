@@ -17,6 +17,7 @@ export abstract class MetricsAction implements Action {
   guid: string;
   cfGuid: string;
   metricId: string;
+  directApi = false;
   static getBaseMetricsURL() {
     return `/pp/${proxyAPIVersion}/metrics`;
   }
@@ -27,6 +28,14 @@ export abstract class MetricsAction implements Action {
   }
 }
 
+export class FetchMetricsAction extends MetricsAction {
+  constructor(public guid: string, public query: string) {
+    super(guid, query);
+    this.url = `/pp/${proxyAPIVersion}/proxy/api/v1/` + query;
+    this.directApi = true;
+    this.cfGuid = guid;
+  }
+}
 export class FetchCFMetricsAction extends MetricsAction {
   public cfGuid: string;
   constructor(public guid: string, public query: string) {

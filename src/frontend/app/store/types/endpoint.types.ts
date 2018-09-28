@@ -41,7 +41,8 @@ export interface EndpointModel {
   token_endpoint?: string;
   user?: EndpointUser;
   metadata?: {
-    metrics: string
+    metrics?: string;
+    metrics_job?: string;
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
