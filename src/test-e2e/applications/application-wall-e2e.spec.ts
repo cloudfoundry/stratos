@@ -172,7 +172,6 @@ describe('Application Wall Tests -', () => {
     beforeAll(() => {
       appNames = createAppNames(3);
       setup(orgName, appNames, true);
-      expect(appList.pagination.isDisplayed()).toBeFalsy();
     }, timeAllowed);
 
     beforeAll(() => {
@@ -180,6 +179,7 @@ describe('Application Wall Tests -', () => {
       browser.wait(() => {
         return appList.getTotalResults().then(results => results === 3);
       });
+      expect(appList.pagination.isDisplayed()).toBeFalsy();
     });
 
     afterAll(() => tearDown(orgName), timeAllowed);

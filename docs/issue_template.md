@@ -1,5 +1,5 @@
 <!--- For bugs and general issues -->
-### Frontent Deployment type
+### Frontend Deployment type
 <!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
 <!--- Put an 'x' in one or more boxes below.  -->

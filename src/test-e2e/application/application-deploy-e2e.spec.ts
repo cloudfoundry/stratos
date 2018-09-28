@@ -149,6 +149,9 @@ describe('Application Deploy -', function () {
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
+      // Add small delay before we press the button
+      e2e.sleep(1500);
+
       e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
       // Click next
       deployApp.stepper.next();
