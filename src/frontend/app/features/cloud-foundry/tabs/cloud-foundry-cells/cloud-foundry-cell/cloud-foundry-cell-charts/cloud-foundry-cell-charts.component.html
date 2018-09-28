@@ -1,18 +1,16 @@
 <mat-card class="metric-chart-wrapper">
-  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Containers"
-    yAxisLabel="Available" queryRange="false" queryString="firehose_value_metric_rep_capacity_remaining_containers"
-    [showLegend]="false">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Containers" yAxisLabel="Available"
+    queryRange="false" queryString="firehose_value_metric_rep_capacity_remaining_containers" [showLegend]="false">
+  </app-cf-cell-summary-chart>
+  <!-- (((firehose_value_metric_rep_capacity_total_containers-firehose_value_metric_rep_capacity_remaining_containers)/firehose_value_metric_rep_capacity_total_containers)*100) -->
+</mat-card>
+<mat-card class="metric-chart-wrapper">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Memory" yAxisLabel="Memory Available (MB)"
+    seriesTranslation="mb" queryRange="false" queryString="firehose_value_metric_rep_capacity_total_disk" [showLegend]="false">
   </app-cf-cell-summary-chart>
 </mat-card>
 <mat-card class="metric-chart-wrapper">
-  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Memory"
-    yAxisLabel="Memory Available (MB)" seriesTranslation="mb" queryRange="false" queryString="firehose_value_metric_rep_capacity_total_disk"
-    [showLegend]="false">
-  </app-cf-cell-summary-chart>
-</mat-card>
-<mat-card class="metric-chart-wrapper">
-  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Disk"
-    yAxisLabel="Disk Available (MB)" seriesTranslation="mb" queryRange="false" queryString="firehose_value_metric_rep_capacity_total_memory"
-    [showLegend]="false">
+  <app-cf-cell-summary-chart [cellId]="cfCellService.cellId" [endpointGuid]="cfCellService.cfGuid" title="Disk" yAxisLabel="Disk Available (MB)"
+    seriesTranslation="mb" queryRange="false" queryString="firehose_value_metric_rep_capacity_total_memory" [showLegend]="false">
   </app-cf-cell-summary-chart>
 </mat-card>

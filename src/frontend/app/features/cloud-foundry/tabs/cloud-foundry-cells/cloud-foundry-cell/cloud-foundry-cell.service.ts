@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { FetchCFCellMetricAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
+import { FetchCFCellMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
 import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
@@ -69,11 +69,11 @@ export class CloudFoundryCellService {
 
 
   private generate(metric: CellMetrics, isMetric = false): Observable<any> {
-    const action = new FetchCFCellMetricAction(
+    const action = new FetchCFCellMetricsAction(
       this.cfGuid,
       this.cellId,
       new MetricQueryConfig(metric, { bosh_job_id: this.cellId }),
-      MetricQueryType.QUERY
+      MetricQueryType.VALUE
     );
     if (metric === CellMetrics.HEALTHY) {
       this.healthyMetricId = action.metricId;
@@ -88,7 +88,7 @@ export class CloudFoundryCellService {
       map(entityInfo => entityInfo.entity),
       map(entity => {
         if (!entity.data || !entity.data.result) {
-          return undefined;
+          return null;
         }
         return isMetric ? entity.data.result[0].metric : entity.data.result[0].value[1];
       })

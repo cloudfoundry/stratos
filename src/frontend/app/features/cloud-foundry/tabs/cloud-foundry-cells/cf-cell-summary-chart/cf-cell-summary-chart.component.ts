@@ -57,7 +57,7 @@ export class CfCellSummaryChartComponent implements OnInit {
   ngOnInit() {
     this.chartConfig = this.buildChartConfig();
     this.metricConfig = {
-      getSeriesName: result => `Cell ${result.metric.bosh_job_id}`,
+      getSeriesName: result => `Cell ${result.metric.bosh_job_name} (${result.metric.bosh_job_id})`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       // mapSeriesItemValue: this.mapSeriesItemValue(),
