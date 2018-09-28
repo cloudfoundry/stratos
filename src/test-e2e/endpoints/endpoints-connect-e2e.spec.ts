@@ -32,6 +32,7 @@ describe('Endpoints', () => {
 
         // Close the snack bar telling us that there are no connected endpoints
         connectDialog.snackBar.safeClose();
+        connectDialog.snackBar.waitUntilShown('No connected endpoints snackbar');
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
@@ -74,14 +75,13 @@ describe('Endpoints', () => {
 
       it('should update service instance data on register', () => {
         connectDialog.connect();
-        connectDialog.waitUntilNotShown();
         // Wait for snackbar
-        connectDialog.snackBar.waitUntilShown('Connect success snackbar');
+        connectDialog.snackBar.waitForMessage('Connected ' + toConnect.name);
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
-
+        connectDialog.waitUntilNotShown();
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
           endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();

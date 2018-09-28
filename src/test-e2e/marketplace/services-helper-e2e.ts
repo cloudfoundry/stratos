@@ -5,6 +5,8 @@ import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
+import { ListComponent } from '../po/list.po';
+import { MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
@@ -181,6 +183,14 @@ export class ServicesHelperE2E {
         promise.all(serviceInstances.map(serviceInstance => this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid))) :
         promise.fullyResolved(createEmptyCfResponse());
     });
+  }
+
+  getServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true) {
+    if (filter) {
+      list.header.waitUntilShown();
+      list.header.setSearchText(serviceName);
+    }
+    return list.cards.waitForCardByTitle(serviceName);
   }
 
 }
