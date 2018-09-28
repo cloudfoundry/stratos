@@ -45,7 +45,11 @@ export class MetricsRangeSelectorManagerService {
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
     const oldDate = this.startEnd[index];
-    if (!date.isValid() || date.isSame(oldDate)) {
+    if (oldDate && !date) {
+      this.startEnd[index] = date;
+      return;
+    }
+    if (!date || !date.isValid() || date.isSame(oldDate)) {
       return;
     }
     this.startEnd[index] = date;
@@ -57,6 +61,8 @@ export class MetricsRangeSelectorManagerService {
           this.startEnd[0],
           this.startEnd[1]
         ];
+        this.start = null;
+        this.end = null;
         this.commitAction(action);
       };
     }
@@ -73,8 +79,6 @@ export class MetricsRangeSelectorManagerService {
           if (timeRange.queryType === MetricQueryType.RANGE_QUERY) {
             const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
             if (isDifferent) {
-              this.start = start;
-              this.end = end;
               this.committedStartEnd = [start, end];
             }
           }
@@ -107,9 +111,7 @@ export class MetricsRangeSelectorManagerService {
   }
 
   set start(start: moment.Moment) {
-    if (start) {
-      this.commitDate(start, 'start');
-    }
+    this.commitDate(start, 'start');
   }
 
   get start() {
@@ -117,9 +119,7 @@ export class MetricsRangeSelectorManagerService {
   }
 
   set end(end: moment.Moment) {
-    if (end) {
-      this.commitDate(end, 'end');
-    }
+    this.commitDate(end, 'end');
   }
 
   get end() {

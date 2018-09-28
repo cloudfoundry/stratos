@@ -26,9 +26,7 @@ export class MetricsParentRangeSelectorComponent implements OnInit, AfterContent
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
     public rangeSelectorManager: MetricsRangeSelectorManagerService
-  ) {
-
-  }
+  ) { }
 
   ngAfterContentInit() {
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
