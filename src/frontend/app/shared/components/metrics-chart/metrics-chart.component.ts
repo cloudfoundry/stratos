@@ -1,7 +1,7 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -97,6 +97,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     );
 
     this.results$ = this.metricsMonitor.entity$.pipe(
+      distinctUntilChanged((oldMetrics, newMetrics) => {
+        return oldMetrics && oldMetrics.data === newMetrics.data;
+      }),
       map(metrics => {
         const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
         if (!metricsArray.length) {
@@ -143,6 +146,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   private mapMetricsToChartData(metrics: IMetrics, metricsConfig: MetricsConfig) {
     if (metrics && metrics.data) {
+      console.log(metrics.data);
       switch (metrics.data.resultType) {
         case MetricResultTypes.MATRIX:
           return MetricsChartManager.mapMatrix(metrics.data, metricsConfig);

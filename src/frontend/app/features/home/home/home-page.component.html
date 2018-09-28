@@ -2,8 +2,6 @@
   <h1>Dashboard</h1>
 </app-page-header>
 <app-metrics-parent-range-selector>
-  <app-metrics-chart [metricsConfig]="instanceMetricConfig" [chartConfig]="instanceChartConfig">
-  </app-metrics-chart>
-  <app-metrics-chart [metricsConfig]="instanceMetricConfig" [chartConfig]="instanceChartConfig">
+  <app-metrics-chart *ngFor="let config of instanceMetricConfig" [metricsConfig]="config" [chartConfig]="instanceChartConfig">
   </app-metrics-chart>
 </app-metrics-parent-range-selector>

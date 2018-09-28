@@ -1,16 +1,13 @@
 <div>
   <div class="metrics-range-selector">
-    <div [ngClass]="{'metrics-range-selector__overlay-show': rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY && showOverlay}"
+    <div *ngIf="rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY"
       class="metrics-range-selector__overlay">
-      <div class="metrics-range-selector__overlay-inner">
-        <h3>Choose time window</h3>
-        <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start"
-          [(end)]="rangeSelectorManager.end"></app-start-end-date>
-        <div class="metrics-range-selector__overlay-buttons">
-          <button mat-raised-button color="primary" class="metrics-range-selector__overlay-set" (click)="rangeSelectorManager.commit(); showOverlay = false"
-            [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
-          <button mat-raised-button (click)="showOverlay = false">Cancel</button>
-        </div>
+      <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start"
+        [(end)]="rangeSelectorManager.end"></app-start-end-date>
+      <div class="metrics-range-selector__overlay-buttons">
+        <button mat-raised-button color="primary" class="metrics-range-selector__overlay-set" (click)="rangeSelectorManager.commit(); showOverlay = false"
+          [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
+        <button mat-raised-button (click)="showOverlay = false">Cancel</button>
       </div>
       <div class="metrics-range-selector__overlay-click" (click)="showOverlay = false"></div>
     </div>
