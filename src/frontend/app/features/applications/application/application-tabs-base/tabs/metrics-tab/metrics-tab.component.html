@@ -1,15 +1,4 @@
-<mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"
-    title="CPU usage" yAxisLabel="CPU Usage (%)" queryRange="true" queryString="firehose_container_metric_cpu_percentage">
-  </app-application-instance-chart>
-</mat-card>
-<mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"
-    title="Memory usage" yAxisLabel="Memory Usage (MB)" seriesTranslation="mb" default queryString="firehose_container_metric_memory_bytes">
-  </app-application-instance-chart>
-</mat-card>
-<mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"
-    title="Disk usage" yAxisLabel="Disk Usage (MB)" seriesTranslation="mb" queryString="firehose_container_metric_disk_bytes">
-  </app-application-instance-chart>
-</mat-card>
+<app-metrics-parent-range-selector>
+  <app-metrics-chart *ngFor="let config of instanceMetricConfigs" [metricsConfig]="config[0]" [chartConfig]="config[1]">
+  </app-metrics-chart>
+</app-metrics-parent-range-selector>

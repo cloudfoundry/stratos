@@ -27,6 +27,9 @@
     min-width: 100px;
     width: 10%;
   }
+  &__refreshing {
+    position: absolute;
+  }
   &__overlay {
     background-color: rgba(0, 0, 0, 0);
     bottom: 0;

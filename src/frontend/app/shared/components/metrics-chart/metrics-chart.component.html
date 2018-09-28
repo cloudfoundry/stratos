@@ -4,16 +4,20 @@
       <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
-    <mat-progress-bar *ngIf="metricsMonitor.isFetchingEntity$ | async" class="metrics-chart__loading" color="primary"
-      mode="indeterminate">
+    <mat-spinner *ngIf="isRefreshing$ | async" diameter="20" class="metrics-chart__refreshing"></mat-spinner>
+    <mat-progress-bar *ngIf="isFetching$ | async" class="metrics-chart__loading" color="primary" mode="indeterminate">
     </mat-progress-bar>
-    <div class="metrics-chart" *ngIf="results$ | async as results; else other_content" [ngSwitch]="chartConfig.chartType">
-      <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="hasMultipleInstances"
-        [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true"
-        [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="true">
-      </ngx-charts-line-chart>
-      <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
+    <div class="metrics-chart" *ngIf="results$ | async as results; else other_content">
+      <div class="metrics-chart" *ngIf="results.length; else other_content" [ngSwitch]="chartConfig.chartType">
+        <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="hasMultipleInstances"
+          [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true"
+          [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="true">
+        </ngx-charts-line-chart>
+        <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
+      </div>
+      <ng-template #other_content>
+        <div class="no-content">No results found</div>
+      </ng-template>
     </div>
-    <ng-template #other_content>No results found</ng-template>
   </div>
 </mat-card>

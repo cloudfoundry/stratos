@@ -1,16 +1,15 @@
-import { query } from '@angular/animations';
-
-import { catchError, mergeMap, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-
-import { METRICS_START, MetricsAction, getFullMetricQueryQuery } from '../actions/metrics.actions';
+import { catchError, map, mergeMap } from 'rxjs/operators';
+import { getFullMetricQueryQuery, MetricsAction, METRICS_START } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, StartRequestAction } from './../types/request.types';
+import { IRequestAction, StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+
+
 
 
 @Injectable()
