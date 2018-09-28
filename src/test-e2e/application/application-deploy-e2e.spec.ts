@@ -146,11 +146,12 @@ describe('Application Deploy -', function () {
       deployApp.stepper.next();
 
       e2e.debugLog(`${loggingPrefix} Deploying Step (wait)`);
+
+      // Wait for the application to be fully deployed - so we see any errors that occur
+      deployApp.waitUntilDeployed();
+
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
-
-      // Add small delay before we press the button
-      e2e.sleep(1500);
 
       e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
       // Click next
@@ -192,6 +193,7 @@ describe('Application Deploy -', function () {
           return appBasePage.navigateTo();
         })
       );
+
     });
 
     // Two sets of tests, those that require app to be started and those that don't. The app can take a while to start so run those
