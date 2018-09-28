@@ -48,6 +48,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.commitAction(action);
   }
 
+  public hasMultipleInstances = false;
+
   public chartTypes = MetricsChartTypes;
 
   private pollSub: Subscription;
@@ -105,6 +107,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         if (!metricsArray.length) {
           return null;
         }
+        this.hasMultipleInstances = metricsArray.length > 1;
         return this.postFetchMiddleware(metricsArray);
       })
     );

@@ -8,6 +8,10 @@
     align-items: center;
     display: flex;
   }
+  &__card {
+    height: 300px;
+    margin-bottom: 15px;
+  }
   &__outer {
     display: flex;
     flex-direction: column;
