@@ -283,7 +283,11 @@ export interface Requests {
   memory: string;
   cpu: string;
 }
-
+export enum MetricStatistic {
+  AVERAGE = 'avg',
+  MAXIMUM = 'max',
+  MINOMUM = 'min'
+}
 
 export interface VolumeMount {
   name: string;

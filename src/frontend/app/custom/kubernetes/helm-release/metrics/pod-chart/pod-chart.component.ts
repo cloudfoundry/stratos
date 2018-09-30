@@ -5,6 +5,7 @@ import { IMetricMatrixResult } from '../../../../../store/types/base-metric.type
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IMetricApplication } from '../../../../../store/types/metric.types';
 import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
+
 @Component({
   selector: 'app-pod-chart',
   templateUrl: './pod-chart.component.html',
@@ -14,6 +15,9 @@ export class PodChartComponent implements OnInit {
 
   @Input()
   private podName: string;
+
+  @Input()
+  private aggregate: string;
 
   @Input()
   private endpointGuid: string;

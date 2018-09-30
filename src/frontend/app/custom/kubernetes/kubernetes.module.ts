@@ -70,6 +70,9 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
+import { KubernetesNodeMetricsChartComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics-chart/kubernetes-node-metrics-chart.component';
+import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
+import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
 
 @NgModule({
   imports: [
@@ -110,7 +113,10 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
     KubernetesNodePodsLinkComponent,
     KubernetesNodeInfoCardComponent,
     KubernetesNodeMetricsComponent,
-    KubernetesNodeConditionComponent
+    KubernetesNodeConditionComponent,
+    KubernetesNodeMetricsChartComponent,
+    KubernetesNodeMetricStatsCardComponent,
+    KubernetesNodeSimpleMetricComponent
   ],
   providers: [
     KubernetesService,
