@@ -1,0 +1,13 @@
+<div class="kubernetes-node-metric-stats-card">
+    <mat-card>
+        <mat-card-header>
+          <mat-card-title>Summary of {{title}} Usage for Last {{period}} in {{unit}}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="app-metadata">
+            <app-kubernetes-node-simple-metric key="Mean" value="{{ mean$ | async }}"></app-kubernetes-node-simple-metric>
+            <app-kubernetes-node-simple-metric key="Maximum" value="{{ max$ | async }}"></app-kubernetes-node-simple-metric>
+          </div>
+        </mat-card-content>
+      </mat-card>
+</div>

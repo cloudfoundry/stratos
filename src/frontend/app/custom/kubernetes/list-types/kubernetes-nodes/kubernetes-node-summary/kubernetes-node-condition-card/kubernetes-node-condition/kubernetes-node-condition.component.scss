@@ -1,0 +1,14 @@
+.kube-node-condition {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-right: 20px;
+    padding-top: 20px;
+    &__title{
+        display: flex;
+        justify-content: center;
+        &__span{
+            margin-left: 10px;
+        }
+    }
+}
