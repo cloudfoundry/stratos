@@ -137,6 +137,8 @@ import { DateTimeComponent } from './components/date-time/date-time.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { MomentModule } from 'ngx-moment';
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 
 @NgModule({
   imports: [
@@ -244,6 +246,7 @@ import { MetricsRangeSelectorComponent } from './components/metrics-range-select
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -336,6 +339,7 @@ import { MetricsRangeSelectorComponent } from './components/metrics-range-select
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -353,7 +357,8 @@ import { MetricsRangeSelectorComponent } from './components/metrics-range-select
     PaginationMonitorFactory,
     CloudFoundryService,
     InternalEventMonitorFactory,
-    ServiceActionHelperService
+    ServiceActionHelperService,
+    MetricsRangeSelectorService
   ]
 })
 export class SharedModule { }

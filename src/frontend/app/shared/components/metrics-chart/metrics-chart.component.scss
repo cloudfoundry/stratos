@@ -8,6 +8,10 @@
     align-items: center;
     display: flex;
   }
+  &__card {
+    height: 300px;
+    margin-bottom: 15px;
+  }
   &__outer {
     display: flex;
     flex-direction: column;
@@ -22,6 +26,9 @@
     margin: auto;
     min-width: 100px;
     width: 10%;
+  }
+  &__refreshing {
+    position: absolute;
   }
   &__overlay {
     background-color: rgba(0, 0, 0, 0);

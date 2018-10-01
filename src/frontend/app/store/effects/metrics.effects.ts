@@ -1,16 +1,20 @@
-
-import { catchError, mergeMap, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 
-import { METRICS_START, MetricsAction, MetricQueryType } from '../actions/metrics.actions';
+import { MetricQueryType } from '../../shared/services/metrics-range-selector.types';
+import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, StartRequestAction } from './../types/request.types';
-
+import {
+  IRequestAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from './../types/request.types';
 
 @Injectable()
 export class MetricsEffect {
@@ -29,10 +33,10 @@ export class MetricsEffect {
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
-        headers: { 'x-cap-cnsi-list': action.cfGuid }
+        headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
-          const metric = metrics[action.cfGuid];
+          const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
             [action.metricId]: {
               query: action.query,
@@ -62,8 +66,8 @@ export class MetricsEffect {
     }));
 
   private buildFullUrl(action: MetricsAction) {
-
-    return `${action.url}/${this.queryType(action.queryType)}?query=${action.query.getFullQuery()}`;
+    return `${action.url}/${this.queryType(action.queryType)}?query=${getFullMetricQueryQuery(action.query)}`;
+    // return `${action.url}/${action.queryType}?query=${getFullMetricQueryQuery(action.query)}`;
   }
 
   private queryType(type: MetricQueryType): string {

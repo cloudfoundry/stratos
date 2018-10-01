@@ -44,7 +44,11 @@ export class StartEndDateComponent {
   @Input()
   set start(start: moment.Moment) {
     this.valid = true;
-    if (start && start.isValid()) {
+    if (!start) {
+      this.startValue = start;
+      return;
+    }
+    if (start.isValid()) {
       if (!this.isStartEndValid(start, this.end)) {
         this.valid = false;
         return;
@@ -64,6 +68,10 @@ export class StartEndDateComponent {
   @Input()
   set end(end: moment.Moment) {
     this.valid = true;
+    if (!end) {
+      this.endValue = end;
+      return;
+    }
     if (end && end.isValid()) {
       if (!this.isStartEndValid(this.start, end)) {
         this.valid = false;

@@ -1,4 +1,7 @@
 <app-page-header>
   <h1>Dashboard</h1>
 </app-page-header>
-<app-metrics-range-selector [baseAction]="metricsAction"></app-metrics-range-selector>
+<app-metrics-parent-range-selector>
+  <app-metrics-chart *ngFor="let config of instanceMetricConfig" [metricsConfig]="config" [chartConfig]="instanceChartConfig">
+  </app-metrics-chart>
+</app-metrics-parent-range-selector>

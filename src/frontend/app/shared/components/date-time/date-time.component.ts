@@ -30,7 +30,9 @@ export class DateTimeComponent implements OnDestroy {
   }
 
   set dateTime(dateTime: moment.Moment) {
-    if (dateTime && dateTime.isValid() && (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue))) {
+    const empty = !dateTime && this.dateTimeValue !== dateTime;
+    const validDate = dateTime && dateTime.isValid() && (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue))
+    if (empty || validDate) {
       this.dateTimeValue = dateTime;
       this.dateTimeChange.emit(this.dateTimeValue);
     }
@@ -89,12 +91,15 @@ export class DateTimeComponent implements OnDestroy {
   private setupChangeSub() {
     this.stopChangeSub();
     this.changeSub = this.dateTimeChange.pipe(
-      filter(dateTime => !!dateTime),
       tap(dateTime => {
-        this.stopInputSub();
-        this.date.setValue(dateTime);
-        this.time.setValue(dateTime.format('HH:mm'));
-        this.setupInputSub();
+        if (!dateTime) {
+          this.emptyDateTime();
+        } else {
+          this.stopInputSub();
+          this.date.setValue(dateTime);
+          this.time.setValue(dateTime.format('HH:mm'));
+          this.setupInputSub();
+        }
       })
     ).subscribe();
   }
@@ -114,6 +119,11 @@ export class DateTimeComponent implements OnDestroy {
     );
     this.setupInputSub();
     this.setupChangeSub();
+    this.emptyDateTime();
+  }
+
+  private emptyDateTime() {
+    this.date.setValue(null);
     this.time.setValue('00:00');
   }
 
