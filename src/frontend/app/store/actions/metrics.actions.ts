@@ -64,11 +64,9 @@ export class MetricsAction implements IRequestAction {
 }
 
 export class FetchMetricsAction extends MetricsAction {
-  constructor(public guid: string, public query: string) {
-    super(guid, query);
-    this.url = `/pp/${proxyAPIVersion}/proxy/api/v1/` + query;
+  constructor(guid: string, query: string) {
+    super(guid, guid, new MetricQueryConfig(query), `/pp/${proxyAPIVersion}/proxy/api/v1/` + query);
     this.directApi = true;
-    this.cfGuid = guid;
   }
 }
 export class FetchCFMetricsAction extends MetricsAction {

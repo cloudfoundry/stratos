@@ -101,8 +101,8 @@ export class MetricsComponent {
       filter(a => !!a),
       map((targetsData: any) => {
         const mapped = {};
-        if (targetsData.activeTargets) {
-          targetsData.activeTargets.forEach(t => {
+        if (targetsData.data.activeTargets) {
+          targetsData.data.activeTargets.forEach(t => {
             if (t.labels && t.labels.job) {
               mapped[t.labels.job] = t;
             }
