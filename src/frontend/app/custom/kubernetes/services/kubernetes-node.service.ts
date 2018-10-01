@@ -67,15 +67,19 @@ export class KubernetesNodeService {
 
     const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"}[1h]))`;
     const metricsAction = new FetchKubernetesMetricsAction(this.nodeName, this.kubeGuid, query);
-    const metricsId =  MetricsAction.buildMetricKey(this.nodeName, query);
+    const metricsId = MetricsAction.buildMetricKey(this.nodeName, query);
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(metricsId, metricSchemaKey, entityFactory(metricSchemaKey));
     this.store.dispatch(metricsAction);
     const pollSub = metricsMonitor.poll(30000, () => this.store.dispatch(metricsAction),
-    request => ({ busy: request.fetching, error: request.error, message: request.message }))
-    .subscribe();
+      request => ({ busy: request.fetching, error: request.error, message: request.message }))
+      .subscribe();
     return {
       entity$: metricsMonitor.entity$.pipe(filter(metrics => !!metrics), map(metrics => {
-        return metrics.result[0].value[1];
+        if (metrics.result.length === 1) {
+          return metrics.result[0].value[1];
+        } else {
+          return 0;
+        }
       })),
       pollerSub: pollSub
     };

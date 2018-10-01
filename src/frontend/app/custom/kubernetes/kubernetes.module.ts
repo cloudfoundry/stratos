@@ -73,6 +73,7 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
 import { KubernetesNodeMetricsChartComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics-chart/kubernetes-node-metrics-chart.component';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
 import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
+import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 
 @NgModule({
   imports: [
@@ -116,7 +117,8 @@ import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node/kubernete
     KubernetesNodeConditionComponent,
     KubernetesNodeMetricsChartComponent,
     KubernetesNodeMetricStatsCardComponent,
-    KubernetesNodeSimpleMetricComponent
+    KubernetesNodeSimpleMetricComponent,
+    ConditionCellComponent
   ],
   providers: [
     KubernetesService,
@@ -132,7 +134,8 @@ import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node/kubernete
     HelmReleasePodNameLinkComponent,
     PodUsageComponent,
     KubernetesNodeLinkComponent,
-    KubernetesNodePodsLinkComponent
+    KubernetesNodePodsLinkComponent,
+    ConditionCellComponent
   ]
 })
 export class KubernetesModule {
