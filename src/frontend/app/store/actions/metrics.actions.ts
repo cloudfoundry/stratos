@@ -50,6 +50,7 @@ export class MetricsAction implements IRequestAction {
   entityKey = metricSchemaKey;
   type = METRICS_START;
   metricId: string;
+  directApi = false;
   static getBaseMetricsURL() {
     return `/pp/${proxyAPIVersion}/metrics`;
   }
@@ -62,6 +63,14 @@ export class MetricsAction implements IRequestAction {
   }
 }
 
+export class FetchMetricsAction extends MetricsAction {
+  constructor(public guid: string, public query: string) {
+    super(guid, query);
+    this.url = `/pp/${proxyAPIVersion}/proxy/api/v1/` + query;
+    this.directApi = true;
+    this.cfGuid = guid;
+  }
+}
 export class FetchCFMetricsAction extends MetricsAction {
   constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(cfGuid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, queryType);

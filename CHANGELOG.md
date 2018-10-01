@@ -1,5 +1,22 @@
 # Change Log
 
+## 2.1.1
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.0...2.1.1)
+
+This is a bug fix release that addresses the following issues:
+
+**Fixes:**
+
+- App wall filtering can stop working  with some filter combinations [\#3043](https://github.com/cloudfoundry-incubator/stratos/pull/3043)
+
+- Can not connect a metrics endpoint [\#3035](https://github.com/cloudfoundry-incubator/stratos/issues/3035)
+
+- Backend build issue due to the pinned commit for a dependency being removed [\#3060](https://github.com/cloudfoundry-incubator/stratos/pull/3060)
+
+
+- Metrics: Wrong job can be matched up when there are multiple jobs [\#3057](https://github.com/cloudfoundry-incubator/stratos/pull/3057)
+
 ## 2.1.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.1...2.1.0)

@@ -68,7 +68,7 @@ exports.config = {
     'browserName': 'chrome',
     chromeOptions: {
       useAutomationExtension: false,
-      args: ['--no-sandbox', '--disable-dev-shm-usage']
+      args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-infobars']
     },
     acceptInsecureCerts: true
   },

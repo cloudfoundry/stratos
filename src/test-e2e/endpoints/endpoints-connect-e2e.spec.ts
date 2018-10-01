@@ -76,12 +76,11 @@ describe('Endpoints', () => {
       it('should update service instance data on register', () => {
         connectDialog.connect();
         // Wait for snackbar
-        connectDialog.snackBar.waitUntilShown('Connect success snackbar');
+        connectDialog.snackBar.waitForMessage('Connected ' + toConnect.name);
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
-
         connectDialog.waitUntilNotShown();
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
           endpointsPage.table.openRowActionMenuByRow(row);
