@@ -102,7 +102,7 @@ export class CloudFoundryCellService {
     const action = new FetchCFCellMetricsAction(
       this.cfGuid,
       this.cellId,
-      new MetricQueryConfig(metric, {}),
+      new MetricQueryConfig(metric + `{bosh_job_id="${this.cellId}"}`, {}),
       // new MetricQueryConfig(metric, { bosh_job_id: this.cellId }),
       MetricQueryType.VALUE
     );
@@ -121,7 +121,11 @@ export class CloudFoundryCellService {
         if (!entity.data || !entity.data.result) {
           return null;
         }
-        return isMetric ? entity.data.result[0].metric : entity.data.result[0].value[1];
+        if (isMetric) {
+          return entity.data.result[0].metric;
+        }
+        const res = entity.data.result;
+        return res && res.length ? entity.data.result[0].value[1] : null;
       })
     );
   }

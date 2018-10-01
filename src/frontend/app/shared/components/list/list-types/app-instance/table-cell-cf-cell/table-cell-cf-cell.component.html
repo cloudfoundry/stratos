@@ -1,3 +1,3 @@
-<a [routerLink]="[cellLink]" matTooltip="Cell Summary" *ngIf="(cellMetric$ | async) as cellMetric">
+<a [routerLink]="[cellLink]" *ngIf="(cellMetric$ | async) as cellMetric">
   {{cellMetric.bosh_job_id}} ({{cellMetric.bosh_deployment}})
 </a>

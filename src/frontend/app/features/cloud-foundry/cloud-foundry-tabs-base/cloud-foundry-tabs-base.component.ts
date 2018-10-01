@@ -54,14 +54,14 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       { link: 'summary', label: 'Summary' },
       { link: 'organizations', label: 'Organizations' },
       {
-        link: CloudFoundryTabsBaseComponent.users,
-        label: 'Users',
-        hidden: usersHidden$
-      },
-      {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
         hidden: cellsHidden$
+      },
+      {
+        link: CloudFoundryTabsBaseComponent.users,
+        label: 'Users',
+        hidden: usersHidden$
       },
       {
         link: CloudFoundryTabsBaseComponent.firehose,
