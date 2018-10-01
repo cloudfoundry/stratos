@@ -288,7 +288,7 @@ describe('Application Wall Tests -', () => {
       it('Next and Previous Page', () => {
         appList.pagination.getNavNextPage().getComponent().click();
 
-        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getnavFirstPage().getComponent().isEnabled()).toBeTruthy();
         expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
         expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
         expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
@@ -329,56 +329,69 @@ describe('Application Wall Tests -', () => {
       appList.header.clearSearchText();
     }
 
-    it('CF/Org/Space Filters', () => {
-      const filters = appList.header.getMultiFilterForm();
-      expect(filters.getText('cf')).toBe(defaultCf.name);
-      expect(filters.getText('org')).toBe(orgName);
-      expect(space1).toBeTruthy();
-      expect(space2).toBeTruthy();
-      expect(space1Apps).toBeTruthy();
-      expect(space2Apps).toBeTruthy();
+    describe('CF/Org/Space Filters', () => {
+      let originalTimeout = 40000;
 
-      // Check initial state
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      beforeEach(function() {
+        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+      });
 
-      // Org --> Space 1
-      filters.fill({ space: space1.entity.name });
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0], false);
+      afterEach(function() {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+      });
 
-      // Space 1 --> Space 2
-      filters.fill({ space: space2.entity.name });
-      checkApp(space1Apps[0], false);
-      checkApp(space2Apps[0]);
+      it('Check filters', () => {
+        const filters = appList.header.getMultiFilterForm();
+        expect(filters.getText('cf')).toBe(defaultCf.name);
+        expect(filters.getText('org')).toBe(orgName);
+        expect(space1).toBeTruthy();
+        expect(space2).toBeTruthy();
+        expect(space1Apps).toBeTruthy();
+        expect(space2Apps).toBeTruthy();
 
-      // Space 2 --> All Spaces
-      filters.fill({ space: 'All' }, true);
-      expect(filters.getText('space')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+        // Check initial state
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
 
-      // Org --> default org
-      filters.fill({ org: defaultCf.testOrg });
-      checkApp(space1Apps[0], false);
-      checkApp(space2Apps[0], false);
+        // Org --> Space 1
+        filters.fill({ space: space1.entity.name });
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0], false);
 
-      // Default org --> all
-      filters.fill({ org: 'All' }, true);
-      expect(filters.getText('org')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+        // Space 1 --> Space 2
+        filters.fill({ space: space2.entity.name });
+        checkApp(space1Apps[0], false);
+        checkApp(space2Apps[0]);
 
-      // Default cf --> all
-      filters.fill({ cf: 'All' }, true);
-      expect(filters.getText('cf')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+        // Space 2 --> All Spaces
+        filters.fill({ space: 'All' }, true);
+        expect(filters.getText('space')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
 
-      appList.header.clearSearchText();
+        // Org --> default org
+        filters.fill({ org: defaultCf.testOrg });
+        checkApp(space1Apps[0], false);
+        checkApp(space2Apps[0], false);
 
-    }, timeAllowed);
+        // Default org --> all
+        filters.fill({ org: 'All' }, true);
+        expect(filters.getText('org')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
 
+        // Default cf --> all
+        filters.fill({ cf: 'All' }, true);
+        expect(filters.getText('cf')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+
+        appList.header.clearSearchText();
+
+      }, timeAllowed);
+
+    });
   });
 
 });
