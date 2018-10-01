@@ -32,7 +32,7 @@ export class CfCellsDataSource
       getRowUniqueId: (row) => row.metric.bosh_job_id,
       paginationKey: action.paginationKey,
       isLocal: true,
-      transformEntities: [{ type: 'filter', field: CfCellsDataSource.cellNamePath }],
+      transformEntities: [{ type: 'filter', field: CfCellsDataSource.cellIdPath }],
       transformEntity: map((response) => {
         if (!response || response.length === 0) {
           return [];

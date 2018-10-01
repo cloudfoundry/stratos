@@ -25,7 +25,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   enableTextFilter = true;
   text = {
     title: null,
-    filter: 'Search by name',
+    filter: 'Search by id',
     noEntries: 'There are no cells'
   };
 
@@ -48,7 +48,11 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
       },
       class: 'table-column-select',
       cellFlex: '1',
-      sort: getIntegerFieldSortFunction(CfCellsDataSource.cellIdPath)
+      sort: {
+        type: 'sort',
+        orderKey: 'id',
+        field: CfCellsDataSource.cellIdPath
+      }
     },
     {
       columnId: 'name',
