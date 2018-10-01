@@ -34,17 +34,4 @@ export class KubernetesNodeConditionCardComponent implements OnInit {
 
   }
 
-  shouldBeGreen(condition: Condition) {
-    if (condition.status === 'True') {
-      if (condition.type === ConditionType.Ready) {
-        return true;
-      }
-      return false;
-    } else if (condition.status === 'False') {
-      if (condition.type === ConditionType.Ready) {
-        return false;
-      }
-      return true;
-    }
-  }
 }
