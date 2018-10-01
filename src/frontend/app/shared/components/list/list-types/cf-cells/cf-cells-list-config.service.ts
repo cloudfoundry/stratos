@@ -42,19 +42,19 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
       columnId: 'id',
       headerCell: () => 'ID',
       cellDefinition: {
-        valuePath: CfCellsDataSource.cellIdPath
+        valuePath: CfCellsDataSource.cellIdPath,
+        getLink: (row: IMetricVectorResult<IMetricCell>) =>
+          `/cloud-foundry/${this.activeRouteCfCell.cfGuid}/cells/${row.metric.bosh_job_id}/summary`
       },
       class: 'table-column-select',
-      cellFlex: '0 0 100px',
+      cellFlex: '1',
       sort: getIntegerFieldSortFunction(CfCellsDataSource.cellIdPath)
     },
     {
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        valuePath: CfCellsDataSource.cellNamePath,
-        getLink: (row: IMetricVectorResult<IMetricCell>) =>
-          `/cloud-foundry/${this.activeRouteCfCell.cfGuid}/cells/${row.metric.bosh_job_id}/summary`
+        valuePath: CfCellsDataSource.cellNamePath
       },
       cellFlex: '1',
       sort: {

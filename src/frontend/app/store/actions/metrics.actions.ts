@@ -18,8 +18,9 @@ function joinParams(queryConfig: MetricQueryConfig) {
   const {
     window = '',
     ...params
-  } = queryConfig.params;
-  const windowString = window ? `{}[${window}]` : '';
+  } = queryConfig.params || {};
+  const hasSquiggly = queryConfig.metric.endsWith('}');
+  const windowString = window ? `${(hasSquiggly ? '' : '{}')}[${window}]` : '';
   const paramString = Object.keys(params).reduce((accum, key) => {
     return accum + `&${key}=${params[key]}`;
   }, '');

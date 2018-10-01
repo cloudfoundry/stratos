@@ -73,14 +73,15 @@ export class CloudFoundryCellService {
 
   public buildMetricConfig(queryString: string, queryRange: MetricQueryType): MetricsConfig<IMetricMatrixResult<IMetricCell>> {
     return {
-      getSeriesName: result => `Cell ${result.metric.bosh_job_name} (${result.metric.bosh_job_id})`,
+      getSeriesName: (result: IMetricMatrixResult<IMetricCell>) => `Cell ${result.metric.bosh_job_id} (${result.metric.bosh_deployment})`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       // mapSeriesItemValue: this.mapSeriesItemValue(),
       metricsAction: new FetchCFCellMetricsAction(
         this.cfGuid,
         this.cellId,
-        new MetricQueryConfig(queryString),
+        new MetricQueryConfig(queryString + `{bosh_job_id="${this.cellId}"}`, {}),
+        // new MetricQueryConfig(queryString, { bosh_job_id: this.cellId }), // TODO: RC Fix - this does not work
         // TODO: RC MetricQueryType.RANGE_QUERY causes failure
         queryRange
         // MetricQueryType.QUERY
@@ -101,7 +102,8 @@ export class CloudFoundryCellService {
     const action = new FetchCFCellMetricsAction(
       this.cfGuid,
       this.cellId,
-      new MetricQueryConfig(metric, { bosh_job_id: this.cellId }),
+      new MetricQueryConfig(metric, {}),
+      // new MetricQueryConfig(metric, { bosh_job_id: this.cellId }),
       MetricQueryType.VALUE
     );
     if (metric === CellMetrics.HEALTHY) {

@@ -42,7 +42,13 @@ export class MetricsRangeSelectorService {
   public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
     const startUnix = start.unix();
     const endUnix = end.unix();
+    const {
+      window,
+      ...params
+    } = action.query.params || { window: undefined };
+
     return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
+      ...params,
       start: startUnix,
       end: end.unix(),
       step: Math.max((endUnix - startUnix) / 200, 0)
@@ -50,7 +56,15 @@ export class MetricsRangeSelectorService {
   }
 
   public getNewTimeWindowAction(action: MetricsAction, window: ITimeRange) {
+    const {
+      start,
+      end,
+      step,
+      ...params
+    } = action.query.params || { start: undefined, end: undefined, step: undefined };
+
     return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
+      ...params,
       window: window.value
     }), MetricQueryType.QUERY);
   }

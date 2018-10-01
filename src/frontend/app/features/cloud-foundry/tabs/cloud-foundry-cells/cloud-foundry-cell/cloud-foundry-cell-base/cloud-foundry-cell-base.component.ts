@@ -45,7 +45,7 @@ export class CloudFoundryCellBaseComponent {
 
     this.waitForEntityId = cfCellService.healthyMetricId;
     this.name$ = cfCellService.cellMetric$.pipe(
-      map(metric => metric.bosh_job_name)
+      map(metric => `${metric.bosh_job_id} (${metric.bosh_deployment})`)
     );
 
     this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
