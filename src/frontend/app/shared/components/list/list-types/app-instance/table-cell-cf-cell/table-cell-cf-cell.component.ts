@@ -1,8 +1,9 @@
-import { Component, Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, Input, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
+import { EntityService } from '../../../../../../core/entity-service';
+import { IMetricMatrixResult, IMetrics } from '../../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../../store/types/metric.types';
 import { TableCellCustom } from '../../../list.types';
 import { ListAppInstance } from '../app-instance-types';
@@ -12,27 +13,50 @@ import { ListAppInstance } from '../app-instance-types';
   templateUrl: './table-cell-cf-cell.component.html',
   styleUrls: ['./table-cell-cf-cell.component.scss']
 })
-export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> {
+export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {
 
   cellMetric$: Observable<IMetricCell>;
   cellLink: string;
+  fetchMetricsSub: Subscription;
 
   @Input('config')
   set config(config: {
-    metricResults$: Observable<IMetricMatrixResult<IMetricCell>[]>
+    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>
     cfGuid: string
   }) {
     if (!config) {
       return;
     }
-    const { metricResults$, cfGuid } = config;
+    const { metricEntityService, cfGuid } = config;
 
-    this.cellMetric$ = metricResults$.pipe(
-      filter(metricResults => !!metricResults[this.row.index]),
-      map(metricResults => metricResults[this.row.index].metric),
-      tap(metric => this.cellLink = `/cloud-foundry/${cfGuid}/cells/${metric.bosh_job_id}/summary`)
+    this.cellMetric$ = metricEntityService.waitForEntity$.pipe(
+      filter(entityInfo => !!entityInfo.entity.data && !!entityInfo.entity.data.result),
+      map((entityInfo) => {
+        const metricResult = entityInfo.entity.data.result.find(res => res.metric.instance_index === this.row.index.toString());
+        return metricResult ? metricResult.metric : null;
+      }),
+      tap(metric => {
+        // No metric? It should exists so start polling to ensure we fetch it. It could be missing if the instance was just created
+        // and cf hasn't yet emitted metrics for it
+        if (!metric && !this.fetchMetricsSub) {
+          this.fetchMetricsSub = metricEntityService.poll(5000).subscribe();
+        }
+      }),
+      filter(metric => !!metric),
+      tap(metric => {
+        this.cellLink = `/cloud-foundry/${cfGuid}/cells/${metric.bosh_job_id}/summary`;
+        // If we're polled to get metric then make sure to unsub
+        if (this.fetchMetricsSub) {
+          this.fetchMetricsSub.unsubscribe();
+        }
+      })
     );
+  }
 
+  ngOnDestroy() {
+    if (this.fetchMetricsSub) {
+      this.fetchMetricsSub.unsubscribe();
+    }
   }
 
 }

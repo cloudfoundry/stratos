@@ -190,7 +190,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
           this.cfCellColumn.cellConfig = {
-            metricResults$: this.createMetricsResults(entityServiceFactory),
+            metricEntityService: this.createMetricsResults(entityServiceFactory),
             cfGuid: this.appService.cfGuid
           };
         }
@@ -218,9 +218,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     const metricsAction = new FetchApplicationMetricsAction(
       this.appService.appGuid,
       this.appService.cfGuid,
-      new MetricQueryConfig('firehose_container_metric_cpu_percentage', {
-        window: '5m'
-      }),
+      new MetricQueryConfig('firehose_container_metric_cpu_percentage'),
       MetricQueryType.QUERY
     );
     return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
@@ -229,10 +227,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       metricsAction.metricId,
       metricsAction,
       false
-    ).entityObs$.pipe(
-      map(entityInfo => entityInfo.entity),
-      filter(metrics => !!metrics && !!metrics.data && !!metrics.data.result),
-      map(metrics => metrics.data.result)
     );
   }
 
