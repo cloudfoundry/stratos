@@ -156,9 +156,6 @@ describe('Application Deploy -', function () {
       // Wait for the application to be fully deployed - so we see any errors that occur
       deployApp.waitUntilDeployed();
 
-      // Should be deployed, no web-socket open, so we can wait for angular agiain
-      browser.waitForAngularEnabled(true);
-
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
@@ -185,6 +182,9 @@ describe('Application Deploy -', function () {
   describe('Tab Tests -', () => {
 
     beforeAll(() => {
+      // Should be deployed, no web-socket open, so we can wait for angular agiain
+      browser.waitForAngularEnabled(true);
+
       expect(appDetails.cfGuid).toBeDefined();
       expect(appDetails.appGuid).toBeDefined();
       // Fresh reload so that we know the app status is correct
