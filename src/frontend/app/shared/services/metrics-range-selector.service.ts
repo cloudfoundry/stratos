@@ -26,7 +26,7 @@ export class MetricsRangeSelectorService {
       queryType: MetricQueryType.QUERY
     },
     {
-      label: 'Set time window',
+      label: 'Custom time window',
       queryType: MetricQueryType.RANGE_QUERY
     }
   ];

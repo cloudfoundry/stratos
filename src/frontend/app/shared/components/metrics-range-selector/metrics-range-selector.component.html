@@ -3,8 +3,7 @@
     class="metrics-range-selector__overlay">
     <div class="metrics-range-selector__overlay-inner">
       <h3>Choose time window</h3>
-      <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start"
-        [(end)]="rangeSelectorManager.end"></app-start-end-date>
+      <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start" [(end)]="rangeSelectorManager.end"></app-start-end-date>
       <div class="metrics-range-selector__overlay-buttons">
         <button mat-raised-button color="primary" class="metrics-range-selector__overlay-set" (click)="rangeSelectorManager.commit(); showOverlay = false"
           [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
