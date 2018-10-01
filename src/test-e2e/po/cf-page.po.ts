@@ -5,7 +5,7 @@ import { Page } from './page.po';
 /**
  * Base CF Page Object can be inherited by appropriate pages
  */
-export abstract class CFPage extends Page {
+export class CFPage extends Page {
 
   noContent = new NoContentComponent();
 
