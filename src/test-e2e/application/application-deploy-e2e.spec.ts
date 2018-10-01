@@ -353,49 +353,64 @@ describe('Application Deploy -', function () {
     expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
   });
 
-  it('Instance scaling', () => {
-    const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.appGuid);
-    appInstances.goToInstancesTab();
+  describe('Instance scaling', () => {
+    let appInstances;
 
-    // Initial state
-    appInstances.cardStatus.getStatus().then(res => {
-      expect(res.status).toBe('Deployed');
-      expect(res.subStatus).toBe('Online');
+    beforeAll(() => {
+      appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.appGuid);
+      appInstances.goToInstancesTab();
     });
-    appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
-    expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
-    expect(appInstances.cardInstances.editCountButton().isDisplayed()).toBeTruthy();
-    expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
-    expect(appInstances.cardInstances.increaseCountButton().isDisplayed()).toBeTruthy();
 
-    // Scale using edit count form
-    appInstances.cardInstances.editInstanceCount(2);
-    appInstances.cardInstances.waitForRunningInstancesText('2 / 2');
-    expect(appInstances.list.getTotalResults()).toBe(2);
-    expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
-    expect(appInstances.list.table.getCell(1, 1).getText()).toBe('RUNNING');
+    it('Should show correct initial state', () => {
+      // Initial state
+      appInstances.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+      expect(appInstances.cardInstances.editCountButton().isDisplayed()).toBeTruthy();
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      expect(appInstances.cardInstances.increaseCountButton().isDisplayed()).toBeTruthy();
+    });
 
-    appInstances.cardInstances.editInstanceCount(1);
-    appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
-    expect(appInstances.list.getTotalResults()).toBe(1);
-    expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+    it('Should scale up using edit form', () => {
+      // Scale using edit count form
+      appInstances.cardInstances.editInstanceCount(2);
+      appInstances.cardInstances.waitForRunningInstancesText('2 / 2');
+      expect(appInstances.list.getTotalResults()).toBe(2);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+      expect(appInstances.list.table.getCell(1, 1).getText()).toBe('RUNNING');
+    });
 
-    // Scale using +/- buttons
-    expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
-    appInstances.cardInstances.decreaseCountButton().click();
-    const confirm = new ConfirmDialogComponent();
-    confirm.waitUntilShown();
-    expect(confirm.getMessage()).toBe('Are you sure you want to set the instance count to 0?');
-    confirm.confirm();
-    appInstances.cardInstances.waitForRunningInstancesText('0 / 0');
-    // Content of empty instance table is tested elsewhere
-    expect(appInstances.list.getTotalResults()).toBe(0);
+    it('Should scale down using edit form', () => {
+      // Scale using edit count form
+      appInstances.cardInstances.editInstanceCount(1);
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(1);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+    });
 
-    expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
-    appInstances.cardInstances.increaseCountButton().click();
-    appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
-    expect(appInstances.list.getTotalResults()).toBe(1);
-    expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+    it('Should scale to zero using - button', () => {
+      // Scale using +/- buttons
+      expect(appInstances.cardInstances.decreaseCountButton().isDisplayed()).toBeTruthy();
+      appInstances.cardInstances.decreaseCountButton().click();
+      const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
+      expect(confirm.getMessage()).toBe('Are you sure you want to set the instance count to 0?');
+      confirm.confirm();
+      appInstances.cardInstances.waitForRunningInstancesText('0 / 0');
+      // Content of empty instance table is tested elsewhere
+      expect(appInstances.list.getTotalResults()).toBe(0);
+    });
+
+    it('Should scale to 1 using + button', () => {
+      expect(appInstances.cardInstances.increaseCountButton().isDisplayed()).toBeTruthy();
+      appInstances.cardInstances.increaseCountButton().click();
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+      expect(appInstances.list.getTotalResults()).toBe(1);
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
+    });
   });
 
   it('Instance termination', () => {
