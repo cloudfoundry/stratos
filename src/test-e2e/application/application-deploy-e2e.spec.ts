@@ -141,6 +141,10 @@ describe('Application Deploy -', function () {
       overrides.fill({ name: testAppName, random_route: true });
 
       e2e.debugLog(`${loggingPrefix} Overrides Step - overrides set`);
+      
+      // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
+      // waiting for angular if we don't turn off.
+      browser.waitForAngularEnabled(false);
 
       // Press next to deploy the app
       deployApp.stepper.next();
@@ -161,6 +165,7 @@ describe('Application Deploy -', function () {
       // Should be app summary
       browser.wait(ApplicationBasePage.detect()
         .then(appSummary => {
+          browser.waitForAngularEnabled(true);        
           appSummary.waitForPage();
           appDetails.cfGuid = appSummary.cfGuid;
           appDetails.appGuid = appSummary.appGuid;
