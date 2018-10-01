@@ -61,7 +61,19 @@ describe('Application Deploy -', function () {
   });
 
   describe('Deploy process - ', () => {
+
+    let originalTimeout = 40000;
     beforeEach(() => nav.goto(SideNavMenuItem.Applications));
+
+    // Might take a bit longer to deploy the app than the global default timeout allows
+    beforeEach(function() {
+      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+    });
+
+    afterEach(function() {
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    });
 
     // Allow up to 2 minutes for the application to be deployed
     it('Should deploy app from GitHub', () => {
