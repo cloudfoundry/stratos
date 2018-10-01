@@ -16,6 +16,7 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
+import { CFPage } from '../po/cf-page.po';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -158,20 +159,22 @@ describe('Application Deploy -', function () {
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
-      browser.waitForAngularEnabled(true);
-
       e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
       // Click next
       deployApp.stepper.next();
 
+      e2e.sleep(1000);
+
       e2e.debugLog(`${loggingPrefix} Waiting For Application Summary Page`);
       // Should be app summary
+      browser.waitForAngularEnabled(true);
+      const appSummaryPage = new CFPage('/applications/');
+      appSummaryPage.waitForPageOrChildPage();
+      appSummaryPage.header.waitForTitleText(testAppName);
       browser.wait(ApplicationBasePage.detect()
         .then(appSummary => {
-          appSummary.waitForPage();
           appDetails.cfGuid = appSummary.cfGuid;
           appDetails.appGuid = appSummary.appGuid;
-          return appSummary.header.waitForTitleText(testAppName);
         }), 10000, 'Failed to wait for Application Summary page after deploying application'
       );
     }, 120000);
@@ -180,6 +183,8 @@ describe('Application Deploy -', function () {
   describe('Tab Tests -', () => {
 
     beforeAll(() => {
+      expect(appDetails.cfGuid).toBeDefined();
+      expect(appDetails.appGuid).toBeDefined();
       // Fresh reload so that we know the app status is correct
       const appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.appGuid);
       return appBasePage.navigateTo();
