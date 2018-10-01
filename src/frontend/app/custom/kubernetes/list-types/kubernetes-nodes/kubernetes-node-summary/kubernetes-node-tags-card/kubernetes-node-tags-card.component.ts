@@ -27,8 +27,7 @@ export class KubernetesNodeTagsCardComponent implements OnInit {
 
   ngOnInit() {
     this.chipTags$ = this.kubeNodeService.nodeEntity$.pipe(
-    map(node => this.getTags(node.metadata[this.mode])),
-    tap(o =>  console.log(o))
+      map(node => this.getTags(node.metadata[this.mode])),
     );
   }
 

@@ -17,7 +17,6 @@ export class ConditionCellComponent extends TableCellCustom<KubernetesNode> impl
 
   ngOnInit() {
     this.condition = this.row.status.conditions.filter(c => c.type === this.config.conditionType)[0].status;
-    console.log(this.condition);
   }
 
 }

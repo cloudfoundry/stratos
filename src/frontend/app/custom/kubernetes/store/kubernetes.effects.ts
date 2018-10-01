@@ -229,7 +229,6 @@ export class KubernetesEffects {
           mergeMap(response => {
             const id = action.kubeGuid;
             const items = response[id].items as Array<any>;
-            console.log(items);
             const releases = items
               .filter((configMap) => !!configMap.metadata.labels &&
                 !!configMap.metadata.labels.NAME &&

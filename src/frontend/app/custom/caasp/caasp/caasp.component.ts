@@ -37,7 +37,6 @@ export class CaaspComponent {
             path: ['caasp', connectedEndpoints[0].guid]
           }));
         }
-        console.log(caaspEndpoints);
         return connectedEndpoints.length === 1;
       }),
       filter(hasOne => !hasOne),

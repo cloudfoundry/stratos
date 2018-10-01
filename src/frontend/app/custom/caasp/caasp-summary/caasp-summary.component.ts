@@ -27,32 +27,32 @@ export class CaaspSummaryComponent implements OnInit {
   // };
   stats: any;
 
-  constructor(private http: Http, private store: Store<AppState>, private activatedRoute: ActivatedRoute) {}
+  constructor(private http: Http, private store: Store<AppState>, private activatedRoute: ActivatedRoute) { }
 
   colorScheme: any;
   chartData: any;
 
   ngOnInit() {
-    //this.fetch();
+    // this.fetch();
 
     const { caaspId } = this.activatedRoute.snapshot.params;
-    //this.store.dispatch(new GetCaaspInfo(caaspId));
+    // this.store.dispatch(new GetCaaspInfo(caaspId));
 
-    //this.store.dispatch(new LoggerDebugAction(message));
+    // this.store.dispatch(new LoggerDebugAction(message));
     this.colorScheme = {
       domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
     };
 
     this.chartData = [
       {
-        "name": "Master",
-        "value": 1
+        'name': 'Master',
+        'value': 1
       },
       {
-        "name": "Worker",
-        "value": 2
+        'name': 'Worker',
+        'value': 2
       }
-    ]
+    ];
 
   }
 
@@ -68,7 +68,6 @@ export class CaaspSummaryComponent implements OnInit {
   //       } else {
   //         this.metadata = {};
   //       }
-  //       console.log(this.metadata);
 
   //       const nodes = this.metadata.assigned_minions ? this.metadata.assigned_minions : [];
   //       this.stats = {};
@@ -81,7 +80,7 @@ export class CaaspSummaryComponent implements OnInit {
 
   downloadKubeConfig() {
     const { caaspId } = this.activatedRoute.snapshot.params;
-    const url = "/pp/v1/caasp/" + caaspId + "/kubeConfig?kubeconfig.yaml";
-    window.open(url, "_download");
+    const url = '/pp/v1/caasp/' + caaspId + '/kubeConfig?kubeconfig.yaml';
+    window.open(url, '_download');
   }
 }
