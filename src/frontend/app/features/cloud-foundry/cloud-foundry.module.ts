@@ -28,9 +28,9 @@ import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
-import {
-  CfCellSummaryChartComponent,
-} from './tabs/cloud-foundry-cells/cf-cell-summary-chart/cf-cell-summary-chart.component';
+// import {
+//   CfCellSummaryChartComponent,
+// } from './tabs/cloud-foundry-cells/cf-cell-summary-chart/cf-cell-summary-chart.component';
 import {
   CloudFoundryCellBaseComponent,
 } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-base/cloud-foundry-cell-base.component';
@@ -108,7 +108,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryCellBaseComponent,
     CloudFoundryCellSummaryComponent,
     CloudFoundryCellChartsComponent,
-    CfCellSummaryChartComponent,
+    // CfCellSummaryChartComponent,
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,

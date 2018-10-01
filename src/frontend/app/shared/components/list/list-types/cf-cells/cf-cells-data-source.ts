@@ -1,15 +1,12 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import {
-  FetchCFMetricsPaginatedAction,
-  MetricQueryConfig,
-  MetricQueryType,
-} from '../../../../../store/actions/metrics.actions';
+import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
+import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 

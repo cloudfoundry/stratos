@@ -3,9 +3,13 @@ import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { FetchCFCellMetricsAction, MetricQueryConfig, MetricQueryType } from '../../../../../store/actions/metrics.actions';
+import { MetricsConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.component';
+import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
+import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
+import { MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
+import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
+import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
 
@@ -65,6 +69,31 @@ export class CloudFoundryCellService {
 
     this.cellMetric$ = this.generate(CellMetrics.HEALTHY, true);
 
+  }
+
+  public buildMetricConfig(queryString: string, queryRange: MetricQueryType): MetricsConfig<IMetricMatrixResult<IMetricCell>> {
+    return {
+      getSeriesName: result => `Cell ${result.metric.bosh_job_name} (${result.metric.bosh_job_id})`,
+      mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
+      sort: MetricsChartHelpers.sortBySeriesName,
+      // mapSeriesItemValue: this.mapSeriesItemValue(),
+      metricsAction: new FetchCFCellMetricsAction(
+        this.cfGuid,
+        this.cellId,
+        new MetricQueryConfig(queryString),
+        // TODO: RC MetricQueryType.RANGE_QUERY causes failure
+        queryRange
+        // MetricQueryType.QUERY
+      ),
+    };
+  }
+
+  public buildChartConfig(yAxisLabel: string): MetricsLineChartConfig {
+    const lineChartConfig = new MetricsLineChartConfig();
+    lineChartConfig.xAxisLabel = 'Time';
+    lineChartConfig.yAxisLabel = yAxisLabel;
+    lineChartConfig.showLegend = false;
+    return lineChartConfig;
   }
 
 

@@ -31,32 +31,28 @@ export class MetricsRangeSelectorService {
     }
   ];
 
+  private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig, queryType: MetricQueryType): MetricsAction {
+    return {
+      ...action,
+      query: newQuery,
+      queryType
+    };
+  }
+
   public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
     const startUnix = start.unix();
     const endUnix = end.unix();
-    return new MetricsAction(
-      action.guid,
-      action.endpointGuid,
-      new MetricQueryConfig(action.query.metric, {
-        start: startUnix,
-        end: end.unix(),
-        step: Math.max((endUnix - startUnix) / 200, 0)
-      }),
-      action.url,
-      MetricQueryType.RANGE_QUERY
-    );
+    return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
+      start: startUnix,
+      end: end.unix(),
+      step: Math.max((endUnix - startUnix) / 200, 0)
+    }), MetricQueryType.RANGE_QUERY);
   }
 
   public getNewTimeWindowAction(action: MetricsAction, window: ITimeRange) {
-    return new MetricsAction(
-      action.guid,
-      action.endpointGuid,
-      new MetricQueryConfig(action.query.metric, {
-        window: window.value
-      }),
-      action.url,
-      MetricQueryType.QUERY
-    );
+    return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
+      window: window.value
+    }), MetricQueryType.QUERY);
   }
 
   public getDateFromStoreMetric(metrics: IMetrics, times = this.times): StoreMetricTimeRange {

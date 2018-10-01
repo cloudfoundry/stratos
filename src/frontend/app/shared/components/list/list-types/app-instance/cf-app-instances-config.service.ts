@@ -9,15 +9,12 @@ import { EntityServiceFactory } from '../../../../../core/entity-service-factory
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
-import {
-  FetchApplicationMetricsAction,
-  MetricQueryConfig,
-  MetricQueryType,
-} from '../../../../../store/actions/metrics.actions';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/types/metric.types';
+import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { getIntegerFieldSortFunction } from '../../data-sources-controllers/local-filtering-sorting';
