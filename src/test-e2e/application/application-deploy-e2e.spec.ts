@@ -177,6 +177,12 @@ describe('Application Deploy -', function () {
 
     describe('Tab Tests -', () => {
 
+      beforeAll(() => {
+        // Fresh reload so that we know the app status is correct
+        const appBasePage = new ApplicationBasePage(appDetails.cfGuid, appDetails.appGuid);
+        return appBasePage.navigateTo();
+      });
+
       it('Variables Tab', () => {
         const appVariables = new ApplicationPageVariablesTab(appDetails.cfGuid, appDetails.appGuid);
         appVariables.goToVariablesTab();
