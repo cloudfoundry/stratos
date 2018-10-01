@@ -330,19 +330,10 @@ describe('Application Wall Tests -', () => {
     }
 
     describe('CF/Org/Space Filters', () => {
-      let originalTimeout = 40000;
+      let filters;
 
-      beforeEach(function() {
-        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-      });
-
-      afterEach(function() {
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-      });
-
-      it('Check filters', () => {
-        const filters = appList.header.getMultiFilterForm();
+      beforeAll(() => {
+        filters = appList.header.getMultiFilterForm();
         expect(filters.getText('cf')).toBe(defaultCf.name);
         expect(filters.getText('org')).toBe(orgName);
         expect(space1).toBeTruthy();
@@ -353,45 +344,56 @@ describe('Application Wall Tests -', () => {
         // Check initial state
         checkApp(space1Apps[0]);
         checkApp(space2Apps[0]);
+      });
 
+      afterAll(() => {
+        appList.header.clearSearchText();
+      });
+
+      it('Can change filter from Org to Space 1', () => {
         // Org --> Space 1
         filters.fill({ space: space1.entity.name });
         checkApp(space1Apps[0]);
         checkApp(space2Apps[0], false);
+      });
 
+      it('Can change filter from Space 1 to Space 2', () => {
         // Space 1 --> Space 2
         filters.fill({ space: space2.entity.name });
         checkApp(space1Apps[0], false);
         checkApp(space2Apps[0]);
+      });
 
+      it('Can change filter from Space 2 to All Spaces', () => {
         // Space 2 --> All Spaces
         filters.fill({ space: 'All' }, true);
         expect(filters.getText('space')).toBe(' ');
         checkApp(space1Apps[0]);
         checkApp(space2Apps[0]);
+      });
 
+      it('Can change filter from Org to Default Org', () => {
         // Org --> default org
         filters.fill({ org: defaultCf.testOrg });
         checkApp(space1Apps[0], false);
         checkApp(space2Apps[0], false);
+      });
 
+      it('Can change filter from Default Org to All Orgs', () => {
         // Default org --> all
         filters.fill({ org: 'All' }, true);
         expect(filters.getText('org')).toBe(' ');
         checkApp(space1Apps[0]);
         checkApp(space2Apps[0]);
+      });
 
+      it('Can change filter from CF to All CFs', () => {
         // Default cf --> all
         filters.fill({ cf: 'All' }, true);
         expect(filters.getText('cf')).toBe(' ');
         checkApp(space1Apps[0]);
         checkApp(space2Apps[0]);
-
-        appList.header.clearSearchText();
-
-      }, timeAllowed);
-
+      });
     });
   });
-
 });
