@@ -1,6 +1,5 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
@@ -54,6 +53,9 @@ import {
   GetKubernetesNode,
   GetKubernetesPodsOnNode,
   GET_PODS_ON_NODE_INFO,
+  KubePaginationAction,
+  GetKubernetesReleasePods,
+  GET_RELEASE_POD_INFO,
 } from './kubernetes.actions';
 
 export type GetID<T> = (p: T) => string;
@@ -69,13 +71,22 @@ export class KubernetesEffects {
   ) { }
 
   @Effect()
+  fetchReleasePodsInfo$ = this.actions$.ofType<GetKubernetesReleasePods>(GET_RELEASE_POD_INFO).pipe(
+    flatMap(action => {
+      const getUid: GetID<KubernetesPod> = (p) => p.metadata.uid;
+      return this.processListAction<KubernetesPod>(
+        action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
+        kubernetesNodesSchemaKey,
+        getUid
+      );
+    })
+  );
+
+  @Effect()
   fetchNodesInfo$ = this.actions$.ofType<GetKubernetesNodes>(GET_NODES_INFO).pipe(
     flatMap(action => {
-      const getUid: GetID<KubernetesNode> = (p) => p.metadata.name;
-      return this.processListAction<KubernetesNode>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
-        kubernetesNodesSchemaKey,
-        getUid);
+      return this.processNodeAction(action);
     })
   );
   @Effect()
@@ -109,7 +120,7 @@ export class KubernetesEffects {
         kubernetesPodsSchemaKey,
         getUid,
         (p: KubernetesPod) => {
-         return p.spec.nodeName === action.nodeName;
+          return p.spec.nodeName === action.nodeName;
         }
       );
     })
@@ -189,6 +200,7 @@ export class KubernetesEffects {
           mergeMap(response => {
             const id = action.kubeGuid;
             const items = response[id].items as Array<any>;
+            console.log(items);
             const releases = items
               .filter((configMap) => !!configMap.metadata.labels &&
                 !!configMap.metadata.labels.NAME &&
@@ -224,12 +236,29 @@ export class KubernetesEffects {
     })
   );
 
-  private processListAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>, filterResults?: Filter<T> ) {
+
+  private processNodeAction(action: GetKubernetesReleasePods | GetKubernetesNodes) {
+    const getUid: GetID<KubernetesNode> = (p) => p.metadata.uid;
+    return this.processListAction<KubernetesNode>(action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
+      kubernetesNodesSchemaKey,
+      getUid);
+  }
+
+
+  private processListAction<T>(action: KubePaginationAction | KubeAction, url: string, schemaKey: string, getId: GetID<T>, filterResults?: Filter<T>) {
     this.store.dispatch(new StartRequestAction(action));
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
     const requestArgs = {
-      headers: headers
+      headers: headers,
+      params: null
     };
+    const paginationAction = action as KubePaginationAction;
+    if (paginationAction.initialParams) {
+      requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
+        return httpParams.set(initialKey, paginationAction.initialParams[initialKey]);
+      }, new HttpParams());
+    }
     return this.http
       .get(url, requestArgs)
       .pipe(mergeMap(response => {
@@ -240,11 +269,11 @@ export class KubernetesEffects {
         const items = response[action.kubeGuid].items as Array<any>;
         const processesData = items.filter((res) => !!filterResults ? filterResults(res) : true)
           .reduce((res, data) => {
-          const id = getId(data);
-          res.entities[schemaKey][id] = data;
-          res.result.push(id);
-          return res;
-        }, base);
+            const id = getId(data);
+            res.entities[schemaKey][id] = data;
+            res.result.push(id);
+            return res;
+          }, base);
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];

@@ -53,9 +53,6 @@ export class CaaspNodesListConfigService implements IListConfig<CaaspNodeInfo> {
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Nodes'
-  };
   enableTextFilter = false;
 
   getGlobalActions = () => null;

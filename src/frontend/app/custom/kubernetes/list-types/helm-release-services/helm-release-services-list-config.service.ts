@@ -38,15 +38,12 @@ export class HelmReleaseServicesListConfig implements IListConfig<KubeService> {
       columnId: 'portType', headerCell: () => 'Port Type',
       cellDefinition: {
         getValue: (row) => `${row.spec.type}`
-      },      cellFlex: '5'
+      }, cellFlex: '5'
     },
   ];
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Services'
-  };
   enableTextFilter = false;
 
   getGlobalActions = () => null;

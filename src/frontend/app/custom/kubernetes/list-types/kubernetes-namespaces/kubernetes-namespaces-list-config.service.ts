@@ -43,9 +43,6 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Namespaces'
-  };
   enableTextFilter = false;
 
   getGlobalActions = () => null;

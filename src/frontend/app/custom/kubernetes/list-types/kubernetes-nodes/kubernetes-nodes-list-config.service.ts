@@ -77,9 +77,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Nodes'
-  };
+
   enableTextFilter = false;
 
   getGlobalActions = () => null;
@@ -97,4 +95,4 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     this.nodesDataSource = new KubernetesNodesDataSource(this.store, kubeId, this);
   }
 
-
+}

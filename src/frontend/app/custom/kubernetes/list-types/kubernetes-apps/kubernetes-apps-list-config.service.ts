@@ -30,9 +30,7 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Apps'
-  };
+
   enableTextFilter = false;
 
   getGlobalActions = () => null;

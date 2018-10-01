@@ -22,7 +22,7 @@ const SuseCustomizations: CustomizationsMetadata = {
     KubernetesSetupModule
   ],
   declarations: [
-    SuseLoginComponent,    
+    SuseLoginComponent
   ],
   entryComponents: [
     SuseLoginComponent,
