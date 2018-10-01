@@ -13,6 +13,9 @@ export class KubernetesNodeSimpleMetricComponent implements OnInit {
   @Input()
   value: number;
 
+  @Input()
+  unit: string;
+
   constructor() { }
 
   ngOnInit() {

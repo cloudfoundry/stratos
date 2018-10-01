@@ -42,4 +42,22 @@ export class KubernetesNodeConditionComponent implements OnInit {
       map(conditions => conditions.filter(o => o.type === this.condition)[0])
     );
   }
+
+  shouldBeGreen(condition: Condition) {
+    console.log('CAlled!');
+    if (!condition) {
+      return false;
+    }
+    if (condition.status === 'True') {
+      if (condition.type === ConditionType.Ready) {
+        return true;
+      }
+      return false;
+    } else if (condition.status === 'False') {
+      if (condition.type === ConditionType.Ready) {
+        return false;
+      }
+      return true;
+    }
+  }
 }

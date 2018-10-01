@@ -3,5 +3,5 @@
     <mat-icon [fontSet]="icons[condition][1]">{{ icons[condition][0] }}</mat-icon>
     <span class="kube-node-condition__title__span">{{ titles[condition] }}</span>
   </div>
-    <app-boolean-indicator [isTrue]="(condition$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
+  <app-boolean-indicator [isTrue]="(condition$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
 </div>

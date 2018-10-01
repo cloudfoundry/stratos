@@ -108,3 +108,4 @@ src/frontend/index.html
 
 stratos-frontend-prebuild.zip
 src/jetstream/config.properties
+e2e-reports/
