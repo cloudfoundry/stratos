@@ -288,7 +288,7 @@ describe('Application Wall Tests -', () => {
       it('Next and Previous Page', () => {
         appList.pagination.getNavNextPage().getComponent().click();
 
-        expect(appList.pagination.getnavFirstPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
         expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
         expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
         expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
