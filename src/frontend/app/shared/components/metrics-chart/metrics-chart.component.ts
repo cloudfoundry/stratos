@@ -1,7 +1,7 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription, Observable, combineLatest, timer } from 'rxjs';
-import { map, distinctUntilChanged, startWith, debounce } from 'rxjs/operators';
+import { map, distinctUntilChanged, startWith, debounce, tap } from 'rxjs/operators';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -101,12 +101,13 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       entityFactory(metricSchemaKey)
     );
 
-
-
-    this.results$ = this.metricsMonitor.entity$.pipe(
+    const baseResults$ = this.metricsMonitor.entity$.pipe(
       distinctUntilChanged((oldMetrics, newMetrics) => {
         return oldMetrics && oldMetrics.data === newMetrics.data;
-      }),
+      })
+    );
+
+    this.results$ = baseResults$.pipe(
       map(metrics => {
         const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
         if (!metricsArray.length) {
@@ -116,18 +117,20 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         return this.postFetchMiddleware(metricsArray);
       })
     );
+
     this.isRefreshing$ = combineLatest(
-      this.results$,
+      baseResults$,
       this.metricsMonitor.isFetchingEntity$
     ).pipe(
       debounce(([results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
       }),
+      tap(console.log),
       map(([results, fetching]) => results && fetching)
     );
 
     this.isFetching$ = combineLatest(
-      this.results$.pipe(startWith(null)),
+      baseResults$.pipe(startWith(null)),
       this.metricsMonitor.isFetchingEntity$
     ).pipe(
       map(([results, fetching]) => !results && fetching)
