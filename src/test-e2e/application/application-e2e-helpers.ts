@@ -20,7 +20,8 @@ export class ApplicationE2eHelper {
     this.cfHelper = new CFHelpers(e2eSetup);
   }
 
-  static createApplicationName = (isoTime?: string): string => E2EHelpers.createCustomName(customAppLabel, isoTime).toLowerCase();
+  static createApplicationName = (isoTime?: string, postFix?: string): string =>
+    E2EHelpers.createCustomName(customAppLabel + (postFix || ''), isoTime).toLowerCase()
   static createRouteName = (isoTime?: string): string =>
     E2EHelpers.createCustomName('route-' + customAppLabel, isoTime).toLowerCase().replace(/[-:.]+/g, '')
 

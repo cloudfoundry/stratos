@@ -9,5 +9,5 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 STRATOS="`cd "${DIR}/..";pwd`"
 
 echo "Fetching backend dependencies"
-export DEPPROJECTROOT=${STRATOS}
+export DEPPROJECTROOT="${STRATOS}"
 dep ensure -vendor-only -v

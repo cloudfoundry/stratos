@@ -15,8 +15,11 @@ done <<< "$ORGS"
 
 # Any test run could have been aborted, leaving remnants - clean them up
 function clean_deployments {
-  echo "Stopping any MySQL Databases"
-  docker kill $(docker ps -q --filter "ancestor=mysql:latest")
+  echo "Stopping any MySQL Database"
+  MYSQL_DOCKER=$(docker ps -q --filter "ancestor=mysql:latest")
+  if [ -n "$MYSQL_DOCKER" ]; then
+    docker kill $MYSQL_DOCKER
+  fi
 
   echo "Stopping previous Docker Compose (if any)"
   pushd deploy
@@ -30,18 +33,25 @@ function clean_deployments {
     docker kill $RUNNING
   fi
 
+  echo "Stopping previous Docker All-in-one Nightly (if any)"
+  # Kill any existing docker all-in-one nightly docker containers
+  RUNNING=$(docker ps -q --filter "ancestor=splatform/stratos")
+  if [ -n "$RUNNING" ]; then
+    docker kill $RUNNING
+  fi
+
   # Delete existing Stratos instance if there is one
   echo "Deleting previous Stratos app from CF (if any)"
-  cf delete -f -r console
+  cf delete -f -r console > /dev/null 2>&1
 
-  # Remove old images
-  docker rmi stratos-dc-console:latest -f
-  docker rmi stratos-dc-jetstream:latest -f
-  docker rmi stratos-dc-db-migrator:latest -f
-  docker rmi stratos-dc-mariadb:latest -f
-  docker rmi stratos-dc-console:latest -f
+  # Kill all containers
+  echo "Killing all Docker containers"
+  docker kill $(docker ps -q) > /dev/null 2>&1
+  docker rm $(docker ps -a -q) > /dev/null 2>&1
 
-  docker rmi stratos-aio:latest -f
+  # Remove all images
+  echo "Removing docker images"
+  docker rmi $(docker images -q) -f > /dev/null 2>&1
 }
 
 # Need TEST_CONFIG_URL to be set

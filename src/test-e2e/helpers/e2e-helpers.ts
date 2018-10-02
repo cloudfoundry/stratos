@@ -21,7 +21,7 @@ export class E2EHelpers {
   constructor() { }
 
   // This makes identification of acceptance test apps easier in case they leak
-  static createCustomName = (prefix: string, isoTime?: string, trim = false) =>
+  static createCustomName = (prefix: string, isoTime?: string) =>
     prefix + '.' + (isoTime || (new Date()).toISOString().replace(/[-:.]+/g, ''))
 
   getHost(): string {

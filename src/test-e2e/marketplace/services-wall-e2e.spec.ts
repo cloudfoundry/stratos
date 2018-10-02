@@ -62,7 +62,7 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should change filter text when an option is selected', () => {
-    servicesWallPage.serviceInstancesList.header.selectFilterOption(1);
+    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 1);
     servicesWallPage.serviceInstancesList.header.getFilterText().then(text => {
       expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });
