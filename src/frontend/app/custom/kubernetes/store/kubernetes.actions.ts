@@ -33,9 +33,17 @@ export const GET_PODS_ON_NODE_INFO = '[KUBERNETES Endpoint] Get Pods on Node Inf
 export const GET_PODS_ON_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pods on Node Success';
 export const GET_PODS_ON_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods on Node Failure';
 
+export const GET_PODS_IN_NAMEPSACE_INFO = '[KUBERNETES Endpoint] Get Pods in Namespace Info';
+export const GET_PODS_IN_NAMEPSACE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pods in Namespace Success';
+export const GET_PODS_IN_NAMEPSACE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods in Namespace Failure';
+
 export const GET_NAMESPACES_INFO = '[KUBERNETES Endpoint] Get Namespaces Info';
 export const GET_NAMESPACES_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Namespaces Info Success';
 export const GET_NAMESPACES_INFO_FAILURE = '[KUBERNETES Endpoint] Get Namespaces Info Failure';
+
+export const GET_NAMESPACE_INFO = '[KUBERNETES Endpoint] Get Namespace Info';
+export const GET_NAMESPACE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Namespace Info Success';
+export const GET_NAMESPACE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Namespace Info Failure';
 
 export const GET_KUBERNETES_APP_INFO = '[KUBERNETES Endpoint] Get Kubernetes App Info';
 export const GET_KUBERNETES_APP_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Kubernetes App Info Success';
@@ -111,6 +119,19 @@ export class GetKubernetesNode implements KubeAction {
     GET_NODE_INFO_FAILURE
   ];
 }
+export class GetKubernetesNamespace implements KubeAction {
+  constructor(public namespaceName: string, public kubeGuid: string) {
+  }
+  type = GET_NAMESPACE_INFO;
+  entityKey = kubernetesNamespacesSchemaKey;
+  entity = [entityFactory(kubernetesNamespacesSchemaKey)];
+
+  actions = [
+    GET_NAMESPACE_INFO,
+    GET_NAMESPACE_INFO_SUCCESS,
+    GET_NAMESPACE_INFO_FAILURE
+  ];
+}
 
 export class GetKubernetesPods implements KubePaginationAction {
   constructor(public kubeGuid) {
@@ -138,6 +159,21 @@ export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
     GET_PODS_ON_NODE_INFO,
     GET_PODS_ON_NODE_INFO_SUCCESS,
     GET_PODS_ON_NODE_INFO_FAILURE
+  ];
+  paginationKey: string;
+}
+
+export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction {
+  constructor(public kubeGuid: string, public namespaceName: string) {
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, namespaceName, kubeGuid);
+  }
+  type = GET_PODS_IN_NAMEPSACE_INFO;
+  entityKey = kubernetesPodsSchemaKey;
+  entity = [entityFactory(kubernetesPodsSchemaKey)];
+  actions = [
+    GET_PODS_IN_NAMEPSACE_INFO,
+    GET_PODS_IN_NAMEPSACE_INFO_SUCCESS,
+    GET_PODS_IN_NAMEPSACE_INFO_FAILURE
   ];
   paginationKey: string;
 }

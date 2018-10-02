@@ -26,7 +26,20 @@ import {
 import { HelmReleaseTabsBaseComponent } from './helm-release/helm-release-tabs-base/helm-release-tabs-base.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { PodChartComponent } from './helm-release/metrics/pod-chart/pod-chart.component';
+import {
+  KubernetesNamespacePodsComponent,
+} from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
+import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
+import {
+  KubernetesNodeMetricStatsCardComponent,
+} from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
+import {
+  KubernetesNodeMetricsChartComponent,
+} from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics-chart/kubernetes-node-metrics-chart.component';
 import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
+import {
+  KubernetesNodeSimpleMetricComponent,
+} from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 import { BaseKubeGuid } from './kubernetes-page.types';
@@ -35,8 +48,12 @@ import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link.component';
 import {
+  KubernetesNamespaceLinkComponent,
+} from './list-types/kubernetes-namespaces/kubernetes-namespace-link/kubernetes-namespace-link.component';
+import {
   KubernetesNodePodsLinkComponent,
 } from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
+import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 import {
   KubernetesNodeCapacityComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
@@ -70,10 +87,6 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { KubernetesNodeMetricsChartComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics-chart/kubernetes-node-metrics-chart.component';
-import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
-import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
-import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 
 @NgModule({
   imports: [
@@ -118,7 +131,10 @@ import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-
     KubernetesNodeMetricsChartComponent,
     KubernetesNodeMetricStatsCardComponent,
     KubernetesNodeSimpleMetricComponent,
-    ConditionCellComponent
+    ConditionCellComponent,
+    KubernetesNamespaceLinkComponent,
+    KubernetesNamespaceComponent,
+    KubernetesNamespacePodsComponent
   ],
   providers: [
     KubernetesService,
@@ -135,7 +151,8 @@ import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-
     PodUsageComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodePodsLinkComponent,
-    ConditionCellComponent
+    ConditionCellComponent,
+    KubernetesNamespaceLinkComponent
   ]
 })
 export class KubernetesModule {

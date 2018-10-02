@@ -56,6 +56,10 @@ import {
   KubePaginationAction,
   GetKubernetesReleasePods,
   GET_RELEASE_POD_INFO,
+  GetKubernetesNamespace,
+  GET_NAMESPACE_INFO,
+  GetKubernetesPodsInNamespace,
+  GET_PODS_IN_NAMEPSACE_INFO,
 } from './kubernetes.actions';
 
 export type GetID<T> = (p: T) => string;
@@ -99,6 +103,16 @@ export class KubernetesEffects {
         getUid);
     })
   );
+  @Effect()
+  fetchNamespaceInfo$ = this.actions$.ofType<GetKubernetesNamespace>(GET_NAMESPACE_INFO).pipe(
+    flatMap(action => {
+      const getUid: GetID<KubernetesNamespace> = (p) => p.metadata.name;
+      return this.processSingleItemAction<KubernetesNamespace>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}`,
+        kubernetesNamespacesSchemaKey,
+        getUid);
+    })
+  );
 
   @Effect()
   fetchPodsInfo$ = this.actions$.ofType<GetKubernetesPods>(GET_POD_INFO).pipe(
@@ -121,6 +135,21 @@ export class KubernetesEffects {
         getUid,
         (p: KubernetesPod) => {
           return p.spec.nodeName === action.nodeName;
+        }
+      );
+    })
+  );
+
+  @Effect()
+  fetchPodsInNamespaceInfo$ = this.actions$.ofType<GetKubernetesPodsInNamespace>(GET_PODS_IN_NAMEPSACE_INFO).pipe(
+    flatMap(action => {
+      const getUid: GetID<KubernetesPod> = (p) => p.metadata.uid;
+      return this.processListAction<KubernetesPod>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
+        kubernetesPodsSchemaKey,
+        getUid,
+        (p: KubernetesPod) => {
+          return p.metadata.namespace === action.namespaceName;
         }
       );
     })
@@ -150,7 +179,7 @@ export class KubernetesEffects {
   );
 
   @Effect()
-  fetchNamespaceInfo$ = this.actions$.ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO).pipe(
+  fetchNamespacesInfo$ = this.actions$.ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO).pipe(
     flatMap(action => {
 
       const getUid: GetID<KubernetesNamespace> = (p) => p.metadata.uid;

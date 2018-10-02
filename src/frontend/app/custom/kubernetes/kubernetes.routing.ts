@@ -22,6 +22,8 @@ import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.compo
 import { KubernetesNodeSummaryComponent } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
+import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
+import { KubernetesNamespacePodsComponent } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
 const kubernetes: Routes = [{
   path: '',
   component: KubernetesComponent
@@ -35,6 +37,13 @@ const kubernetes: Routes = [{
 },
 {
   path: ':kubeId/nodes/:nodeName/pods/:podName',
+  component: HelmReleasePodComponent,
+  data: {
+    uiFullView: true
+  },
+},
+{
+  path: ':kubeId/namespaces/:namespaceName/pods/:podName',
   component: HelmReleasePodComponent,
   data: {
     uiFullView: true
@@ -64,6 +73,24 @@ const kubernetes: Routes = [{
       path: 'metrics',
       component: KubernetesNodeMetricsComponent
     }
+  ]
+},
+{
+  path: ':kubeId/namespaces/:namespaceName',
+  component: KubernetesNamespaceComponent,
+  data: {
+    uiFullView: true
+  },
+  children: [
+    {
+      path: '',
+      redirectTo: 'pods',
+      pathMatch: 'full'
+    },
+    {
+      path: 'pods',
+      component: KubernetesNamespacePodsComponent
+    },
   ]
 },
 {

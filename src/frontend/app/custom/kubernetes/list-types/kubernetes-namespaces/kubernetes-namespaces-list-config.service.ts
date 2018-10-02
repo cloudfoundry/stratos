@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
 import { Store } from '@ngrx/store';
 
+import {
+  KubernetesNamespacesDataSource,
+} from '../../../../../../../src/frontend/app/custom/kubernetes/list-types/kubernetes-namespaces/kubernetes-namespaces-data-source';
+import { KubernetesNamespace } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesNamespace } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
-import { KubernetesNamespacesDataSource } from '../../../../../../../src/frontend/app/custom/kubernetes/list-types/kubernetes-namespaces/kubernetes-namespaces-data-source';
+import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
 
 @Injectable()
 export class KubernetesNamespacesListConfigService implements IListConfig<KubernetesNamespace> {
@@ -17,9 +19,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   columns: Array<ITableColumn<KubernetesNamespace>> = [
     {
       columnId: 'name', headerCell: () => 'ID',
-      cellDefinition: {
-        getValue: (row) => `${row.metadata.name}`
-      },
+      cellComponent: KubernetesNamespaceLinkComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',
