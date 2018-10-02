@@ -23,7 +23,7 @@ if [ "${GODEPCACHEURL}" != "false" ]; then
   curl -L -s -f "${GODEPCACHEURL}/${DEPFILE}" -o depcache.tgz
   if [ $? -eq 0 ]; then
     echo "Unpacking depcache"
-    tar -xvf depcache.tgz -C "${DIRPATH}"
+    tar -xvf depcache.tgz -C "${DIRPATH}" > /dev/null
   else
     echo "Could not find vendor cache to download"
   fi
