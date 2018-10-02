@@ -10,6 +10,7 @@ import {
 import { IRequestEntityTypeState } from '../app-state';
 import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
+import { MetricsAPIActionSuccess, MetricAPIQueryTypes, METRIC_API_SUCCESS } from '../actions/metrics-api.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
   switch (action.type) {
@@ -28,6 +29,8 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case CONNECT_ENDPOINTS:
     case DISCONNECT_ENDPOINTS:
       return changeEndpointConnectionStatus(state, action, 'checking');
+    case METRIC_API_SUCCESS:
+      return updateMetricsInfo(state, action);
     default:
       return state;
   }
@@ -89,4 +92,22 @@ function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointM
 
 function getAllEnpointIds(endpoints = {}, payloadEndpoints = {}) {
   return new Set(Object.keys(endpoints).concat(Object.keys(payloadEndpoints)));
+}
+
+function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action: MetricsAPIActionSuccess) {
+  if (action.queryType === MetricAPIQueryTypes.TARGETS) {
+    const existingEndpoint = state[action.endpointGuid];
+    return {
+      ...state,
+      [action.endpointGuid]: {
+        ...existingEndpoint,
+        metadata: {
+          ...existingEndpoint.metadata,
+          metrics_targets: action.data.data
+        }
+      },
+    };
+  }
+  return state;
+
 }
