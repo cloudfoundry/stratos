@@ -118,7 +118,9 @@ export function getIconForEndpoint(type: string): EndpointIcon {
     icon.font = ep.iconFont;
   }
   return icon;
+}
 
 export function getEndpointAuthTypes() {
   return endpointAuthTypes;
 }
+
