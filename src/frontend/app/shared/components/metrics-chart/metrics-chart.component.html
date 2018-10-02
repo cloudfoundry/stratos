@@ -16,7 +16,11 @@
         <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
       </div>
       <ng-template #other_content>
-        <div class="no-content">No results found</div>
+        <div class="no-content">No results found
+          <div class="no-content__name" *ngIf="!title">
+            {{ chartConfig.yAxisLabel }}
+          </div>
+        </div>
       </ng-template>
     </div>
   </div>

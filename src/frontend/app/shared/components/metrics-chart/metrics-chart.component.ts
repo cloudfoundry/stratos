@@ -1,17 +1,17 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subscription, Observable, combineLatest, timer } from 'rxjs';
-import { map, distinctUntilChanged, startWith, debounce, tap } from 'rxjs/operators';
+import { combineLatest, Observable, Subscription, timer } from 'rxjs';
+import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
+import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
-import { MetricQueryType } from '../../services/metrics-range-selector.types';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -21,7 +21,6 @@ export interface MetricsConfig<T = any> {
   sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
 }
 export interface MetricsChartConfig {
-  // Make an enum for this.
   chartType: MetricsChartTypes;
   xAxisLabel?: string;
   yAxisLabel?: string;
@@ -125,7 +124,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       debounce(([results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
       }),
-      tap(console.log),
       map(([results, fetching]) => results && fetching)
     );
 
