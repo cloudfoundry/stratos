@@ -23,16 +23,16 @@ export class CardAppUsageComponent implements OnInit {
 
   ngOnInit() {
     this.appData$ = observableCombineLatest(
-      this.appMonitor.appMonitor$.pipe(startWith()),
-        this.appService.applicationRunning$,
-      ).pipe(
-        map(([monitor, isRunning]) => ({
-          monitor: monitor,
-          isRunning: isRunning,
-          status: !isRunning ? 'tentative' : pathGet('status.usage', monitor)
-        })),
-        share()
-      );
+      this.appMonitor.appMonitor$.pipe(startWith(null)),
+      this.appService.applicationRunning$,
+    ).pipe(
+      map(([monitor, isRunning]) => ({
+        monitor: monitor,
+        isRunning: isRunning,
+        status: !isRunning ? 'tentative' : pathGet('status.usage', monitor)
+      })),
+      share()
+    );
     this.status$ = this.appData$.pipe(
       map(data => data.status)
     );

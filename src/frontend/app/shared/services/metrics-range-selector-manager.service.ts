@@ -74,7 +74,7 @@ export class MetricsRangeSelectorManagerService {
       debounceTime(1),
       tap(metrics => {
         if (!this.selectedTimeRange) {
-          const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics, baseAction);
+          const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
 
           if (timeRange.queryType === MetricQueryType.RANGE_QUERY) {
 

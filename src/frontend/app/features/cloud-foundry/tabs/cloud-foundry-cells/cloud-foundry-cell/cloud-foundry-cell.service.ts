@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import * as moment from 'moment';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -8,11 +7,7 @@ import { MetricsConfig } from '../../../../../shared/components/metrics-chart/me
 import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
-import {
-  FetchCFCellMetricsAction,
-  IMetricQueryConfigParams,
-  MetricQueryConfig,
-} from '../../../../../store/actions/metrics.actions';
+import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
@@ -85,25 +80,10 @@ export class CloudFoundryCellService {
       metricsAction: new FetchCFCellMetricsAction(
         this.cfGuid,
         this.cellId,
-        new MetricQueryConfig(queryString, this.createMetricQueryConfig(queryRange)),
+        new MetricQueryConfig(queryString + `{bosh_job_id="${this.cellId}"}`, {}),
         queryRange
       ),
     };
-  }
-
-  private createMetricQueryConfig(queryRange: MetricQueryType): IMetricQueryConfigParams {
-    if (queryRange === MetricQueryType.RANGE_QUERY) {
-      const end = moment();
-      const start = moment().subtract(1, 'day');
-      const startUnix = start.unix() * 1000;
-      const endUnix = end.unix() * 1000;
-      return {
-        start: startUnix,
-        end: endUnix,
-        step: Math.max((endUnix - startUnix) / 200, 0)
-      };
-    }
-    return {};
   }
 
   public buildChartConfig(yAxisLabel: string): MetricsLineChartConfig {
@@ -113,7 +93,6 @@ export class CloudFoundryCellService {
     lineChartConfig.showLegend = false;
     return lineChartConfig;
   }
-
 
   private generate(metric: CellMetrics, isMetric = false): Observable<any> {
     const action = new FetchCFCellMetricsAction(
@@ -151,10 +130,4 @@ export class CloudFoundryCellService {
       map(([remaining, total]) => Number(total) - Number(remaining))
     );
   }
-
-  public createPercentageMetric(total: string, remaining: string) {
-    // Calc % remaining then flip. Yes the math look super wrong but check out the results
-    return `((${remaining}{bosh_job_id="${this.cellId}"}/${total}{bosh_job_id="${this.cellId}"})-1)*100`;
-  }
-
 }

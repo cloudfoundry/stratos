@@ -16,46 +16,28 @@ import { MetricsRangeSelectorService } from '../../../../../../shared/services/m
   templateUrl: './cloud-foundry-cell-charts.component.html',
   styleUrls: ['./cloud-foundry-cell-charts.component.scss'],
 })
-export class CloudFoundryCellChartsComponent implements OnInit {
+export class CloudFoundryCellChartsComponent {
 
   public metricConfigs: [
     MetricsConfig<IMetricMatrixResult<IMetricCell>>,
     MetricsLineChartConfig
   ][];
 
-  constructor(
-    public cfCellService: CloudFoundryCellService,
-  ) {
-    // private rangeSelectorManager: MetricsRangeSelectorManagerService,
-    // private rangeSelectorService: MetricsRangeSelectorService
-
+  constructor(public cfCellService: CloudFoundryCellService) {
     this.metricConfigs = [
       [
-        this.cfCellService.buildMetricConfig(cfCellService.createPercentageMetric(
-          'firehose_value_metric_rep_capacity_remaining_containers',
-          'firehose_value_metric_rep_capacity_total_containers'),
-          MetricQueryType.RANGE_QUERY),
+        this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_containers', MetricQueryType.RANGE_QUERY),
         this.cfCellService.buildChartConfig('Containers Used (%)')
       ],
       [
-        this.cfCellService.buildMetricConfig(cfCellService.createPercentageMetric(
-          'firehose_value_metric_rep_capacity_remaining_memory',
-          'firehose_value_metric_rep_capacity_total_memory'),
-          MetricQueryType.RANGE_QUERY),
+        this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_memory', MetricQueryType.QUERY),
         this.cfCellService.buildChartConfig('Memory Used (%)')
       ],
       [
-        this.cfCellService.buildMetricConfig(cfCellService.createPercentageMetric(
-          'firehose_value_metric_rep_capacity_remaining_disk',
-          'firehose_value_metric_rep_capacity_total_disk'),
-          MetricQueryType.RANGE_QUERY),
+        this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_disk', MetricQueryType.QUERY),
         this.cfCellService.buildChartConfig('Disk Used (%)')
       ],
     ];
 
-  }
-
-  ngOnInit() {
-    // this.rangeSelectorManager.selectedTimeRange(this.rangeSelectorService[3]);
   }
 }

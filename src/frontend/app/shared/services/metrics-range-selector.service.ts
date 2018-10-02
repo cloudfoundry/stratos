@@ -10,21 +10,21 @@ export class MetricsRangeSelectorService {
   constructor() { }
 
   public times: ITimeRange[] = [
-    // {
-    //   value: '5m',
-    //   label: 'The past 5 minutes',
-    //   queryType: MetricQueryType.QUERY
-    // },
-    // {
-    //   value: '1h',
-    //   label: 'The past hour',
-    //   queryType: MetricQueryType.QUERY
-    // },
-    // {
-    //   value: '1w',
-    //   label: 'The past week',
-    //   queryType: MetricQueryType.QUERY
-    // },
+    {
+      value: '5m',
+      label: 'The past 5 minutes',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '1h',
+      label: 'The past hour',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '1w',
+      label: 'The past week',
+      queryType: MetricQueryType.QUERY
+    },
     {
       label: 'Custom time window',
       queryType: MetricQueryType.RANGE_QUERY
@@ -69,7 +69,7 @@ export class MetricsRangeSelectorService {
     }), MetricQueryType.QUERY);
   }
 
-  public getDateFromStoreMetric(metrics: IMetrics, baseAction: MetricsAction, times = this.times): StoreMetricTimeRange {
+  public getDateFromStoreMetric(metrics: IMetrics, times = this.times): StoreMetricTimeRange {
     if (metrics) {
       if (metrics.queryType === MetricQueryType.RANGE_QUERY) {
         const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
@@ -87,13 +87,9 @@ export class MetricsRangeSelectorService {
         };
       }
     } else {
-      const params = baseAction ? baseAction.query.params || {} : {};
       const timeRange = this.getDefaultTimeRange(times);
-      // , baseAction.queryType === MetricQueryType.RANGE_QUERY && params.start
       return {
-        timeRange,
-        start: null, // params.start ? moment(params.start) : null,
-        end: null, // params.end ? moment(params.end) : null
+        timeRange
       };
     }
   }
