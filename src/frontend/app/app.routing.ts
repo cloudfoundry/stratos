@@ -2,6 +2,7 @@ import { of as observableOf } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
@@ -93,6 +94,16 @@ const appRoutes: Routes = [
           }
         },
       },
+      {path: 'kubernetes', loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule',
+      data: {
+          stratosNavigation: {
+            text: 'Kubernetes',
+            matIcon: 'kubernetes',
+            matIconFont: 'stratos-icons',
+            position: 60
+          }
+        },
+      },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
     ]
@@ -113,7 +124,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
   ]
 })
 export class RouteModule { }

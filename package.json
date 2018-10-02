@@ -4,6 +4,8 @@
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
+    "cf-get-backend-deps": "gulp cf-get-backend-deps",
+    "cf-build-backend": "gulp cf-build-backend",
     "build-backend": "./build/bk-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
@@ -77,7 +79,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.7.4",
-    "@angular/cli": "^6.1.1",
+    "@angular/cli": "^6.1.5",
     "@angular/compiler-cli": "^6.1.1",
     "@angular/language-service": "^6.1.1",
     "@types/jasmine": "^2.8.7",

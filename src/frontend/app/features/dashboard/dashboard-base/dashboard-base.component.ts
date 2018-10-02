@@ -7,6 +7,9 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router, Route } 
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
+import { environment } from '../../../../environments/environment';
+import { ExtensionManager } from '../../../core/extension/extension-manager-service';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 import { AppState } from '../../../store/app-state';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
@@ -14,7 +17,6 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -32,6 +34,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
+    private ext: ExtensionManager,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();

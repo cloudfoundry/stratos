@@ -20,7 +20,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
-
+import { kubernetesReducer } from '../custom/kubernetes/store/kube.reducer';
 
 export function logger(reducer) {
   // default, no options
@@ -43,7 +43,8 @@ export const appReducers = {
   routing: routingReducer,
   manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
-  currentUserRoles: currentUserRolesReducer
+  currentUserRoles: currentUserRolesReducer,
+  kubernetesInfo: kubernetesReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];
