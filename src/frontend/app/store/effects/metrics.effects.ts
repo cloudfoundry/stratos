@@ -1,12 +1,15 @@
-
-import {catchError, mergeMap,  map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 
+import {
+  METRIC_API_FAILED,
+  METRIC_API_START,
+  MetricsAPIAction,
+  MetricsAPIActionSuccess,
+} from '../actions/metrics-api.actions';
 import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
-import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
 import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
@@ -17,13 +20,12 @@ export class MetricsEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
     private httpClient: HttpClient,
   ) { }
 
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
     mergeMap(action => {
-      const fullUrl = this.buildFullUrl(action);
+      const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
       const apiAction = {
         guid: action.guid,
         entityKey: metricSchemaKey
@@ -54,6 +56,25 @@ export class MetricsEffect {
             apiAction,
             'fetch'
           )
+        ];
+      }));
+    }));
+
+  @Effect() metricsAPI$ = this.actions$.ofType<MetricsAPIAction>(METRIC_API_START).pipe(
+    mergeMap(action => {
+      return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(action.url, {
+        headers: { 'x-cap-cnsi-list': action.endpointGuid }
+      }).pipe(
+        map(metrics => {
+          const metric = metrics[action.endpointGuid];
+          return new MetricsAPIActionSuccess(action.endpointGuid, metric);
+        })
+      ).pipe(catchError(errObservable => {
+        return [
+          {
+            type: METRIC_API_FAILED,
+            error: errObservable.message
+          }
         ];
       }));
     }));

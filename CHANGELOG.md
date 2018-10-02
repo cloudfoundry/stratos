@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.1.2
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.1...2.1.2)
+
+This release fixes an issue with a broken backend dependency, where the pinned version that was being used is no longer available.
+
+- Fix go-flags dependency pinned version broken [\#3071](https://github.com/cloudfoundry-incubator/stratos/pull/3071)
+
 ## 2.1.1
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.0...2.1.1)

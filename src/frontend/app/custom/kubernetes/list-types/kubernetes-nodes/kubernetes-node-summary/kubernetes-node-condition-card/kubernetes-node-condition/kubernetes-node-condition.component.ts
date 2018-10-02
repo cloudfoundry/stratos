@@ -25,9 +25,9 @@ export class KubernetesNodeConditionComponent implements OnInit {
 
   public icons = {
     'Ready': ['done_outline', 'material-icons'],
-    'OutOfDisk': ['storage', 'stratos-icons'],
+    'OutOfDisk': ['storage', 'material-icons'],
     'MemoryPressure': ['memory', 'material-icons'],
-    'DiskPressure': ['storage', 'stratos-icons'],
+    'DiskPressure': ['storage', 'material-icons'],
   };
 
   constructor(
@@ -44,7 +44,6 @@ export class KubernetesNodeConditionComponent implements OnInit {
   }
 
   shouldBeGreen(condition: Condition) {
-    console.log('CAlled!');
     if (!condition) {
       return false;
     }

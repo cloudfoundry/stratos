@@ -38,14 +38,13 @@ popd
 # Get the E2E config
 rm -f secrets.yaml
 curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-echo "headless: true" >> secrets.yaml
 
 # Need node modules to run the tests
 rm -rf node_modules
 npm install
 
 # Run the E2E tests
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=https://localhost:443
+"$DIRPATH/runandrecord.sh" https://localhost:443
 RET=$?
 
 set +e
@@ -53,7 +52,7 @@ set +e
 pushd deploy
 
 # Store logs if there was a test failure
-if [ $? -ne 0 ]; then
+if [ $RET -ne 0 ]; then
   docker-compose -f docker-compose.development.yml logs proxy > "${E2E_REPORT_FOLDER}/logs/jetstream.log"
   docker-compose -f docker-compose.development.yml logs db-migrator > "${E2E_REPORT_FOLDER}/logs/db-migrator.log"
   docker-compose -f docker-compose.development.yml logs nginx > "${E2E_REPORT_FOLDER}/logs/nginx.log"

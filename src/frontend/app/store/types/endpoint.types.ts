@@ -1,6 +1,7 @@
+import { ScopeStrings } from '../../core/current-user-permissions.config';
+import { MetricsAPITargets } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
-import { ScopeStrings } from '../../core/current-user-permissions.config';
 
 export interface INewlyConnectedEndpointInfo {
   account: string;
@@ -14,9 +15,9 @@ export const endpointStoreNames: {
   section: TRequestTypeKeys,
   type: string
 } = {
-    section: RequestSectionKeys.Other,
-    type: endpointSchemaKey
-  };
+  section: RequestSectionKeys.Other,
+  type: endpointSchemaKey
+};
 
 export interface IApiEndpointInfo {
   ForceQuery: boolean;
@@ -41,7 +42,9 @@ export interface EndpointModel {
   token_endpoint?: string;
   user?: EndpointUser;
   metadata?: {
-    metrics: string
+    metrics?: string;
+    metrics_job?: string;
+    metrics_targets?: MetricsAPITargets;
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
