@@ -18,13 +18,22 @@ export interface EndpointTypeHelper {
   label: string;
   urlValidation?: string;
   allowTokenSharing?: boolean;
+  icon?: string;
+  iconFont?: string;
+}
+
+export interface EndpointIcon {
+  name: string;
+  font: string;
 }
 
 const endpointTypes: EndpointTypeHelper[] = [
   {
     value: 'cf',
     label: 'Cloud Foundry',
-    urlValidation: urlValidationExpression
+    urlValidation: urlValidationExpression,
+    icon: 'cloud_foundry',
+    iconFont: 'stratos-icons'
   },
   {
     value: 'metrics',
@@ -96,6 +105,19 @@ export function getCanShareTokenForEndpointType(type: string): boolean {
 export function getEndpointTypes() {
   return endpointTypes;
 }
+
+export function getIconForEndpoint(type: string): EndpointIcon {
+  const icon = {
+    name: 'endpoint',
+    font: ''
+  };
+
+  const ep = endpointTypesMap[type];
+  if (ep && ep.icon) {
+    icon.name = ep.icon;
+    icon.font = ep.iconFont;
+  }
+  return icon;
 
 export function getEndpointAuthTypes() {
   return endpointAuthTypes;

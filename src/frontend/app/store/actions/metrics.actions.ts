@@ -2,9 +2,12 @@ import { environment } from '../../../environments/environment.prod';
 import { schema } from 'normalizr';
 import { Action } from '@ngrx/store';
 
+import { environment } from './../../../environments/environment.prod';
+
 export const METRICS_START = '[Metrics] Start';
 export const METRICS_START_SUCCESS = '[Metrics] Start succeeded';
 export const METRICS_START_FAILED = '[Metrics] Start failed';
+
 const { proxyAPIVersion } = environment;
 
 export abstract class MetricsAction implements Action {
@@ -17,6 +20,7 @@ export abstract class MetricsAction implements Action {
   guid: string;
   cfGuid: string;
   metricId: string;
+  directApi = false;
   static getBaseMetricsURL() {
     return `/pp/${proxyAPIVersion}/metrics`;
   }
