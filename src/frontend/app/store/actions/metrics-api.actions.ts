@@ -17,12 +17,16 @@ export interface MetricAPIResponse {
 }
 
 export interface MetricsAPITargets {
-  activeTargets: [{
+  activeTargets: {
     labels: {
       job: string
     }
-  }];
-  droppedTargets: [];
+  }[];
+  droppedTargets: {
+    discoveredLabels: {
+      job: string
+    }
+  }[];
 }
 
 export class MetricsAPIAction implements Action {
