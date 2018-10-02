@@ -77,10 +77,7 @@ describe('CF - Manage Organizations and Spaces', () => {
   });
 
   it('Create and delete an organization', () => {
-    // Count the number of organizations
-    let orgCount = 0;
     const cardView = cloudFoundry.goToOrgView();
-    listComponent.getTotalResults().then(total => orgCount = total);
 
     // Click the add button to add an organization
     cloudFoundry.header.clickIconButton('add');
@@ -92,10 +89,9 @@ describe('CF - Manage Organizations and Spaces', () => {
     modal.next();
 
     cardView.cards.waitUntilShown();
-    listComponent.getTotalResults().then(newOrgCount => expect(newOrgCount).toEqual(orgCount + 1));
 
     // Delete the org
-    cardView.cards.findCardByTitle(testOrgName).then(card => {
+    cardView.cards.waitForCardByTitle(testOrgName).then(card => {
       card.openActionMenu().then(menu => {
         menu.clickItem('Delete');
         ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization');

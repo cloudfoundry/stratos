@@ -2,6 +2,31 @@
 
 Weekly status updates are published here.
 
+## 28th September 2018
+
+This week saw the release of 2.1.1 and an update 2.1.2. It was necessary to tag a 2.1.2 release to resolve a broken backend dependency that would affect users deploying via 'cf push'. You should use 2.1.2 and not 2.1.1. 
+
+*2.1.2 Highlights*
+
+- Fix go-flags dependency pinned version broken [\#3071](https://github.com/cloudfoundry-incubator/stratos/pull/3071)
+
+- App wall filtering can stop working  with some filter combinations [\#3043](https://github.com/cloudfoundry-incubator/stratos/pull/3043)
+
+- Can not connect a metrics endpoint [\#3035](https://github.com/cloudfoundry-incubator/stratos/issues/3035)
+
+- Backend build issue due to the pinned commit for a dependency being removed [\#3060](https://github.com/cloudfoundry-incubator/stratos/pull/3060)
+
+- Metrics: Wrong job can be matched up when there are multiple jobs [\#3057](https://github.com/cloudfoundry-incubator/stratos/pull/3057)
+
+
+Highlights for this week (continuing from last week):
+
+- Extensions - Work continues on adding extension points in the UI. Extensions is targeted for 2.2.0 in October.
+
+- E2E Tests and Automation - Focusing on making the E2E tests more resilient to timing issues. 
+
+- Metrics - Work to tidy up the existing Cloud Foundry Application metrics is complete.
+
 ## 21st September 2018
 
 This week saw the release of 2.1.0 - the highlights are:

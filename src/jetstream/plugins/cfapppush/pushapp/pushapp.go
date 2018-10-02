@@ -62,17 +62,21 @@ type CFPushAppConfig struct {
 }
 
 type CFPushAppOverrides struct {
-	Name        string `json:"name"`
-	Buildpack   string `json:"buildpack"`
-	Instances   *int   `json:"instances"`
-	DiskQuota   string `json:"diskQuota"`
-	MemQuota    string `json:"memQuota"`
-	DoNotStart  bool   `json:"doNotStart"`
-	NoRoute     bool   `json:"noRoute"`
-	RandomRoute bool   `json:"randomRoute"`
-	Host        string `json:"host"`
-	Domain      string `json:"domain"`
-	Path        string `json:"path"`
+	Name            string `json:"name"`
+	Buildpack       string `json:"buildpack"`
+	StartCmd        string `json:"startCmd"`
+	HealthCheckType string `json:"healthCheckType"`
+	Stack           string `json:"stack"`
+	Time            *int   `json:"time"`
+	Instances       *int   `json:"instances"`
+	DiskQuota       string `json:"diskQuota"`
+	MemQuota        string `json:"memQuota"`
+	DoNotStart      bool   `json:"doNotStart"`
+	NoRoute         bool   `json:"noRoute"`
+	RandomRoute     bool   `json:"randomRoute"`
+	Host            string `json:"host"`
+	Domain          string `json:"domain"`
+	Path            string `json:"path"`
 }
 
 // ErrorType default error returned
@@ -249,17 +253,23 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 
 	flags = appendFlag(flags, "", overrides.Name)
 	flags = appendFlag(flags, "-b", overrides.Buildpack)
-	flags = appendFlag(flags, "-k", overrides.DiskQuota)
+	flags = appendFlag(flags, "-c", overrides.StartCmd)
 	flags = appendFlag(flags, "-d", overrides.Domain)
-	flags = append(flags, "--no-start", strconv.FormatBool(overrides.DoNotStart))
+	flags = appendFlag(flags, "--health-check-type", overrides.HealthCheckType)
 	flags = appendFlag(flags, "--hostname", overrides.Host)
-	flags = appendFlag(flags, "-m", overrides.MemQuota)
-	flags = append(flags, "--no-route", strconv.FormatBool(overrides.NoRoute))
-	flags = appendFlag(flags, "--route-path", overrides.Path)
-	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
-	flags = append(flags, "-p", appDir, "-f", manifestPath)
 	if overrides.Instances != nil {
 		flags = append(flags, "-i", strconv.Itoa(*overrides.Instances))
+	}
+	flags = appendFlag(flags, "-k", overrides.DiskQuota)
+	flags = appendFlag(flags, "-m", overrides.MemQuota)
+	flags = append(flags, "--no-route", strconv.FormatBool(overrides.NoRoute))
+	flags = append(flags, "--no-start", strconv.FormatBool(overrides.DoNotStart))
+	flags = append(flags, "-p", appDir, "-f", manifestPath)
+	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
+	flags = appendFlag(flags, "--route-path", overrides.Path)
+	flags = appendFlag(flags, "-s", overrides.Stack)
+	if overrides.Instances != nil {
+		flags = append(flags, "-t", strconv.Itoa(*overrides.Time))
 	}
 
 	log.Debugf("Cf Push Overrides: %v", flags)
