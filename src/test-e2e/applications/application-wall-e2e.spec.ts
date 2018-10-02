@@ -25,13 +25,16 @@ describe('Application Wall Tests -', () => {
   let space2: APIResource<ISpace>;
   let space1Apps: string[];
   let space2Apps: string[];
+  let baseAppName: string;
 
   const timeAllowed = 60000;
 
   function createAppNames(count: number): string[] {
     const appNames = [];
+    // Ensure the app names all have the same prefix
+    baseAppName = ApplicationE2eHelper.createApplicationName(null, '-wallTest');
     for (let i = 0; i < count; i++) {
-      appNames.push(ApplicationE2eHelper.createApplicationName(null, `-wallTest-${i}`));
+      appNames.push(`${baseAppName}-${i}`);
     }
     return appNames;
   }
@@ -93,7 +96,7 @@ describe('Application Wall Tests -', () => {
   }
 
   function navAppWall() {
-    // Note - always nave to page... this will pick up all the new org
+    // Note - always nav to page... this will pick up all the new org
     appsPage.navigateTo();
     appsPage.isActivePage().then(active => {
       if (!active) {
@@ -169,22 +172,33 @@ describe('Application Wall Tests -', () => {
     beforeAll(() => {
       appNames = createAppNames(3);
       setup(orgName, appNames, true);
-      expect(appList.getTotalResults()).toBeLessThanOrEqual(9);
-      expect(appList.pagination.isDisplayed()).toBeFalsy();
     }, timeAllowed);
 
     beforeAll(() => {
       appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      browser.wait(() => {
+        return appList.getTotalResults().then(results => results === 3);
+      });
+      expect(appList.pagination.isDisplayed()).toBeFalsy();
     });
 
     afterAll(() => tearDown(orgName), timeAllowed);
 
-    it('sort by name', () => {
-      testSortBy('Application Name');
-    });
+    describe('Sorting', () => {
 
-    it('sort by creation', () => {
-      testSortBy('Creation Date');
+      beforeAll(() => {
+        // appList.header.setSearchText(baseAppName);
+        expect(appList.getTotalResults()).toBeLessThanOrEqual(9);
+        expect(appList.pagination.isDisplayed()).toBeFalsy();
+      });
+
+      it('sort by name', () => {
+        testSortBy('Application Name');
+      });
+
+      it('sort by creation', () => {
+        testSortBy('Creation Date');
+      });
     });
 
     it('text filter by existing', () => {
@@ -237,11 +251,14 @@ describe('Application Wall Tests -', () => {
     beforeAll(() => {
       appNames = createAppNames(11);
       setup(orgName, appNames, false);
-      expect(appList.getTotalResults()).toBeGreaterThanOrEqual(appNames.length);
     }, timeAllowed);
 
     beforeAll(() => {
+      appList.header.clearSearchText();
       appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      browser.wait(() => {
+        return appList.getTotalResults().then(results => results >= appNames.length);
+      });
     });
 
     afterAll(() => tearDown(orgName), timeAllowed);
@@ -291,7 +308,6 @@ describe('Application Wall Tests -', () => {
       });
 
       it('Change Page Size', () => {
-
         appList.pagination.setPageSize('80', 'mat-select-4');
         expect(appList.cards.getCardCount()).toBeGreaterThan(9);
 
@@ -307,61 +323,77 @@ describe('Application Wall Tests -', () => {
     });
 
     function checkApp(appName, shouldFind = true) {
+      appList.header.clearSearchText();
       appList.header.setSearchText(appName);
       expect(appList.getTotalResults()).toBe(shouldFind ? 1 : 0);
       appList.header.clearSearchText();
     }
 
-    it('CF/Org/Space Filters', () => {
-      const filters = appList.header.getMultiFilterForm();
-      expect(filters.getText('cf')).toBe(defaultCf.name);
-      expect(filters.getText('org')).toBe(orgName);
-      expect(space1).toBeTruthy();
-      expect(space2).toBeTruthy();
-      expect(space1Apps).toBeTruthy();
-      expect(space2Apps).toBeTruthy();
+    describe('CF/Org/Space Filters', () => {
+      let filters;
 
-      // Check initial state
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      beforeAll(() => {
+        filters = appList.header.getMultiFilterForm();
+        expect(filters.getText('cf')).toBe(defaultCf.name);
+        expect(filters.getText('org')).toBe(orgName);
+        expect(space1).toBeTruthy();
+        expect(space2).toBeTruthy();
+        expect(space1Apps).toBeTruthy();
+        expect(space2Apps).toBeTruthy();
 
-      // Org --> Space 1
-      filters.fill({ space: space1.entity.name });
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0], false);
+        // Check initial state
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
 
-      // Space 1 --> Space 2
-      filters.fill({ space: space2.entity.name });
-      checkApp(space1Apps[0], false);
-      checkApp(space2Apps[0]);
+      afterAll(() => {
+        appList.header.clearSearchText();
+      });
 
-      // Space 2 --> All Spaces
-      filters.fill({ space: 'All' }, true);
-      expect(filters.getText('space')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      it('Can change filter from Org to Space 1', () => {
+        // Org --> Space 1
+        filters.fill({ space: space1.entity.name });
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0], false);
+      });
 
-      // Org --> default org
-      filters.fill({ org: defaultCf.testOrg });
-      checkApp(space1Apps[0], false);
-      checkApp(space2Apps[0], false);
+      it('Can change filter from Space 1 to Space 2', () => {
+        // Space 1 --> Space 2
+        filters.fill({ space: space2.entity.name });
+        checkApp(space1Apps[0], false);
+        checkApp(space2Apps[0]);
+      });
 
-      // Default org --> all
-      filters.fill({ org: 'All' }, true);
-      expect(filters.getText('org')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      it('Can change filter from Space 2 to All Spaces', () => {
+        // Space 2 --> All Spaces
+        filters.fill({ space: 'All' }, true);
+        expect(filters.getText('space')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
 
-      // Default cf --> all
-      filters.fill({ cf: 'All' }, true);
-      expect(filters.getText('cf')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      it('Can change filter from Org to Default Org', () => {
+        // Org --> default org
+        filters.fill({ org: defaultCf.testOrg });
+        checkApp(space1Apps[0], false);
+        checkApp(space2Apps[0], false);
+      });
 
-      appList.header.clearSearchText();
+      it('Can change filter from Default Org to All Orgs', () => {
+        // Default org --> all
+        filters.fill({ org: 'All' }, true);
+        expect(filters.getText('org')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
 
-    }, timeAllowed);
-
+      it('Can change filter from CF to All CFs', () => {
+        // Default cf --> all
+        filters.fill({ cf: 'All' }, true);
+        expect(filters.getText('cf')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
+    });
   });
-
 });

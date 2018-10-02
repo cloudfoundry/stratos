@@ -100,4 +100,11 @@
     cursor: pointer;
     margin-left: 10px;
   }
+  .no-content {
+    padding: 20px 15px;
+    &__name {
+      font-size: 12px;
+      padding-top: 5px;
+    }
+  }
 }
