@@ -288,7 +288,7 @@ describe('Application Wall Tests -', () => {
       it('Next and Previous Page', () => {
         appList.pagination.getNavNextPage().getComponent().click();
 
-        expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeTruthy();
+        expect(appList.pagination.getnavFirstPage().getComponent().isEnabled()).toBeTruthy();
         expect(appList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeTruthy();
         expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
         expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
@@ -329,56 +329,71 @@ describe('Application Wall Tests -', () => {
       appList.header.clearSearchText();
     }
 
-    it('CF/Org/Space Filters', () => {
-      const filters = appList.header.getMultiFilterForm();
-      expect(filters.getText('cf')).toBe(defaultCf.name);
-      expect(filters.getText('org')).toBe(orgName);
-      expect(space1).toBeTruthy();
-      expect(space2).toBeTruthy();
-      expect(space1Apps).toBeTruthy();
-      expect(space2Apps).toBeTruthy();
+    describe('CF/Org/Space Filters', () => {
+      let filters;
 
-      // Check initial state
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      beforeAll(() => {
+        filters = appList.header.getMultiFilterForm();
+        expect(filters.getText('cf')).toBe(defaultCf.name);
+        expect(filters.getText('org')).toBe(orgName);
+        expect(space1).toBeTruthy();
+        expect(space2).toBeTruthy();
+        expect(space1Apps).toBeTruthy();
+        expect(space2Apps).toBeTruthy();
 
-      // Org --> Space 1
-      filters.fill({ space: space1.entity.name });
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0], false);
+        // Check initial state
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
 
-      // Space 1 --> Space 2
-      filters.fill({ space: space2.entity.name });
-      checkApp(space1Apps[0], false);
-      checkApp(space2Apps[0]);
+      afterAll(() => {
+        appList.header.clearSearchText();
+      });
 
-      // Space 2 --> All Spaces
-      filters.fill({ space: 'All' }, true);
-      expect(filters.getText('space')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      it('Can change filter from Org to Space 1', () => {
+        // Org --> Space 1
+        filters.fill({ space: space1.entity.name });
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0], false);
+      });
 
-      // Org --> default org
-      filters.fill({ org: defaultCf.testOrg });
-      checkApp(space1Apps[0], false);
-      checkApp(space2Apps[0], false);
+      it('Can change filter from Space 1 to Space 2', () => {
+        // Space 1 --> Space 2
+        filters.fill({ space: space2.entity.name });
+        checkApp(space1Apps[0], false);
+        checkApp(space2Apps[0]);
+      });
 
-      // Default org --> all
-      filters.fill({ org: 'All' }, true);
-      expect(filters.getText('org')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      it('Can change filter from Space 2 to All Spaces', () => {
+        // Space 2 --> All Spaces
+        filters.fill({ space: 'All' }, true);
+        expect(filters.getText('space')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
 
-      // Default cf --> all
-      filters.fill({ cf: 'All' }, true);
-      expect(filters.getText('cf')).toBe(' ');
-      checkApp(space1Apps[0]);
-      checkApp(space2Apps[0]);
+      it('Can change filter from Org to Default Org', () => {
+        // Org --> default org
+        filters.fill({ org: defaultCf.testOrg });
+        checkApp(space1Apps[0], false);
+        checkApp(space2Apps[0], false);
+      });
 
-      appList.header.clearSearchText();
+      it('Can change filter from Default Org to All Orgs', () => {
+        // Default org --> all
+        filters.fill({ org: 'All' }, true);
+        expect(filters.getText('org')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
 
-    }, timeAllowed);
-
+      it('Can change filter from CF to All CFs', () => {
+        // Default cf --> all
+        filters.fill({ cf: 'All' }, true);
+        expect(filters.getText('cf')).toBe(' ');
+        checkApp(space1Apps[0]);
+        checkApp(space2Apps[0]);
+      });
+    });
   });
-
 });
