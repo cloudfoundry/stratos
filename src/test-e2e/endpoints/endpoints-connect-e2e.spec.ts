@@ -31,8 +31,8 @@ describe('Endpoints', () => {
         // expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
+        connectDialog.snackBar.waitForMessage('There are no connected endpoints, connect with your personal credentials to get started.');
         connectDialog.snackBar.safeClose();
-        connectDialog.snackBar.waitUntilShown('No connected endpoints snackbar');
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
