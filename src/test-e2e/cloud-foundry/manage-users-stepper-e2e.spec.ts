@@ -19,6 +19,17 @@ describe('Manage Users Stepper', () => {
 
   let manageUsersPage: ManagerUsersPage, cfHelper: CFHelpers, cfGuid, userGuid;
 
+  let originalTimeout = 40000;
+
+  beforeEach(function() {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000;
+  });
+
+  afterEach(function() {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  });
+
   beforeAll(() => {
     setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true).then(res => {
       cfHelper = res.cfHelper;
