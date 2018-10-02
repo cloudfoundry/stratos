@@ -12,7 +12,7 @@ describe('CF - Top Level - ', () => {
   let defaultCf: E2EConfigCloudFoundry;
 
   function navToCfPage() {
-    // // There is only one CF endpoint registered (since that is what we setup)
+    // There is only one CF endpoint registered (since that is what we setup)
     const page = new CFPage();
     page.sideNav.goto(SideNavMenuItem.CloudFoundry);
     CfTopLevelPage.detect().then(p => {
