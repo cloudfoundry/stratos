@@ -32,7 +32,7 @@
     </app-tile>
   </app-tile-group>
 </app-tile-grid>
-<app-metrics-parent-range-selector class="metric-chart-wrapper">
-  <app-metrics-chart [metricsConfig]="metricsConfig" [chartConfig]="chartConfig">
-  </app-metrics-chart>
-</app-metrics-parent-range-selector>
+
+<app-metrics-chart [metricsConfig]="metricsConfig" [chartConfig]="chartConfig">
+  <app-metrics-range-selector></app-metrics-range-selector>
+</app-metrics-chart>

@@ -7,7 +7,6 @@ import { MetricsChartHelpers } from '../../../../shared/components/metrics-chart
 import { IMetricApplication } from '../../../../store/types/metric.types';
 import { MetricQueryType } from '../../../../shared/services/metrics-range-selector.types';
 
-// TODO: RC Remove in upstream PR
 @Component({
   selector: 'app-application-instance-chart',
   templateUrl: './application-instance-chart.component.html',

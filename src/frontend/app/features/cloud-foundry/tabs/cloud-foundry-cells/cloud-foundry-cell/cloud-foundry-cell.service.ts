@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import * as moment from 'moment';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -7,11 +8,16 @@ import { MetricsConfig } from '../../../../../shared/components/metrics-chart/me
 import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
+import {
+  FetchCFCellMetricsAction,
+  IMetricQueryConfigParams,
+  MetricQueryConfig,
+} from '../../../../../store/actions/metrics.actions';
 import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
+
 
 export const enum CellMetrics {
   HEALTHY = 'firehose_value_metric_rep_unhealthy_cell',
@@ -76,17 +82,28 @@ export class CloudFoundryCellService {
       getSeriesName: (result: IMetricMatrixResult<IMetricCell>) => `Cell ${result.metric.bosh_job_id} (${result.metric.bosh_deployment})`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
-      // mapSeriesItemValue: this.mapSeriesItemValue(),
       metricsAction: new FetchCFCellMetricsAction(
         this.cfGuid,
         this.cellId,
-        new MetricQueryConfig(queryString + `{bosh_job_id="${this.cellId}"}`, {}),
-        // new MetricQueryConfig(queryString, { bosh_job_id: this.cellId }), // TODO: RC Fix - this does not work
-        // TODO: RC MetricQueryType.RANGE_QUERY causes failure
+        new MetricQueryConfig(queryString, this.createMetricQueryConfig(queryRange)),
         queryRange
-        // MetricQueryType.QUERY
       ),
     };
+  }
+
+  private createMetricQueryConfig(queryRange: MetricQueryType): IMetricQueryConfigParams {
+    if (queryRange === MetricQueryType.RANGE_QUERY) {
+      const end = moment();
+      const start = moment().subtract(1, 'day');
+      const startUnix = start.unix() * 1000;
+      const endUnix = end.unix() * 1000;
+      return {
+        start: startUnix,
+        end: endUnix,
+        step: Math.max((endUnix - startUnix) / 200, 0)
+      };
+    }
+    return {};
   }
 
   public buildChartConfig(yAxisLabel: string): MetricsLineChartConfig {
@@ -103,7 +120,6 @@ export class CloudFoundryCellService {
       this.cfGuid,
       this.cellId,
       new MetricQueryConfig(metric + `{bosh_job_id="${this.cellId}"}`, {}),
-      // new MetricQueryConfig(metric, { bosh_job_id: this.cellId }),
       MetricQueryType.VALUE
     );
     if (metric === CellMetrics.HEALTHY) {
@@ -134,6 +150,11 @@ export class CloudFoundryCellService {
     return combineLatest([remaining$, total$]).pipe(
       map(([remaining, total]) => Number(total) - Number(remaining))
     );
+  }
+
+  public createPercentageMetric(total: string, remaining: string) {
+    // Calc % remaining then flip. Yes the math look super wrong but check out the results
+    return `((${remaining}{bosh_job_id="${this.cellId}"}/${total}{bosh_job_id="${this.cellId}"})-1)*100`;
   }
 
 }
