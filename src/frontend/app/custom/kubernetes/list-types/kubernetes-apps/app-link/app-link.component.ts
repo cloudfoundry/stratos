@@ -15,7 +15,7 @@ export class AppLinkComponent<T> extends TableCellCustom<KubernetesApp> implemen
   }
 
   ngOnInit(): void {
-    this.routerLink = `${this.row.name}/${this.row.namespace}`;
+    this.routerLink = `${this.row.name}`;
   }
 
 }

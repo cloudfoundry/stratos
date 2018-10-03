@@ -23,7 +23,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'metadata.name'
       },
       cellFlex: '5',
     },
@@ -35,7 +35,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       sort: {
         type: 'sort',
         orderKey: 'status',
-        field: 'status'
+        field: 'status.phase'
       },
       cellFlex: '5',
     },

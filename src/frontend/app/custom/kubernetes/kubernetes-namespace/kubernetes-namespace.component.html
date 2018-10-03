@@ -1,9 +1,6 @@
-<app-page-header [tabs]="tabLinks">
-    <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}/ {{ kubeNamespaceService.namespaceName }}</h1>
-    <div class="page-header-right">
-    </div>
-  </app-page-header>
-  <!-- <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving node details'"> -->
-    <router-outlet></router-outlet>
-  <!-- </app-loading-page> -->
-  
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+  <h1>{{ kubeNamespaceService.namespaceName }}</h1>
+  <div class="page-header-right">
+  </div>
+</app-page-header>
+<router-outlet></router-outlet>

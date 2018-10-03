@@ -23,7 +23,7 @@ export class KubernetesNamespacePodsListConfigService extends KubernetesPodsList
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'metadata.name'
       },
       cellFlex: '5',
     };
