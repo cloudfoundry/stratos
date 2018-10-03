@@ -8,7 +8,8 @@ import { IListConfig, ListViewTypes } from '../../../../shared/components/list/l
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespace } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
-import { KubernetesNamespacesDataSource } from '../../../../../../../src/frontend/app/custom/kubernetes/list-types/kubernetes-namespaces/kubernetes-namespaces-data-source';
+import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-source';
+
 
 @Injectable()
 export class KubernetesNamespacesListConfigService implements IListConfig<KubernetesNamespace> {
