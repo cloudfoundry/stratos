@@ -5,8 +5,8 @@ import { MetricQueryType } from '../../shared/services/metrics-range-selector.ty
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
-const { proxyAPIVersion } = environment;
 
+const { proxyAPIVersion } = environment;
 
 export interface IMetricQueryConfigParams {
   window?: string;
@@ -48,6 +48,7 @@ export class MetricsAction implements Action {
   }
   type = METRICS_START;
   metricId: string;
+  directApi = false;
   static getBaseMetricsURL() {
     return `/pp/${proxyAPIVersion}/metrics`;
   }
