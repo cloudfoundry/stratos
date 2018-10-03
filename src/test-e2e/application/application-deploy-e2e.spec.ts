@@ -450,8 +450,10 @@ describe('Application Deploy -', function () {
     confirm.waitUntilShown();
     expect(confirm.getMessage()).toBe('Are you sure you want to terminate instance 0?');
     confirm.confirm();
-    appInstances.cardInstances.waitForRunningInstancesText('0 / 1');
-    // The instance can come back very quickly, so we can't check for 0 rows
+
+    browser.wait(() => {
+      return appInstances.list.table.getTableDataRaw().then(table => table.rows.length === 0);
+    });
   });
 
   afterAll(() => applicationE2eHelper.deleteApplication(null, { appName: testAppName }));
