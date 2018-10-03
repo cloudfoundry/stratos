@@ -1,3 +1,4 @@
+import { AppState } from './../app-state';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -7,6 +8,7 @@ import { getFullMetricQueryQuery, MetricsAction, METRICS_START } from '../action
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
 import { IRequestAction, StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class MetricsEffect {
@@ -14,6 +16,7 @@ export class MetricsEffect {
   constructor(
     private actions$: Actions,
     private httpClient: HttpClient,
+    private store: Store<AppState>
   ) { }
 
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
