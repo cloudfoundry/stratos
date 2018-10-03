@@ -40,7 +40,7 @@ try {
 }
 
 // This is the maximum amount of time ALL before/after/it's must execute in
-const timeout = 40000;
+let timeout = 40000;
 const checkSuiteGlob = './src/test-e2e/check/*-e2e.spec.ts';
 
 if (process.env.STRATOS_SCRIPTS_TIMEOUT) {
