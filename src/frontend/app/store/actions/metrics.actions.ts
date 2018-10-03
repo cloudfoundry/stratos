@@ -7,6 +7,7 @@ import { environment } from './../../../environments/environment.prod';
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
+
 const { proxyAPIVersion } = environment;
 
 export interface IMetricQueryConfigParams {
@@ -62,12 +63,6 @@ export class MetricsAction implements IRequestAction {
   }
 }
 
-export class FetchMetricsAction extends MetricsAction {
-  constructor(guid: string, query: string) {
-    super(guid, guid, new MetricQueryConfig(query), `/pp/${proxyAPIVersion}/proxy/api/v1/` + query);
-    this.directApi = true;
-  }
-}
 export class FetchCFMetricsAction extends MetricsAction {
   constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(cfGuid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, queryType);

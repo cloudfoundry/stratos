@@ -5,11 +5,8 @@ import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { FetchMetricsAction } from '../../../store/actions/metrics.actions';
+import { MetricsAPIAction, MetricsAPITargets } from '../../../store/actions/metrics-api.actions';
 import { AppState } from '../../../store/app-state';
-import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
-import { IMetrics } from '../../../store/types/base-metric.types';
 import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
 import { EndpointIcon, getIconForEndpoint, getNameForEndpointType } from '../../endpoints/endpoint-helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
@@ -53,11 +50,10 @@ export class MetricsComponent {
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
     private store: Store<AppState>,
-    private entityMonitorFactory: EntityMonitorFactory
   ) {
 
     const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
-    const metricsAction = new FetchMetricsAction(metricsGuid, 'targets');
+    const metricsAction = new MetricsAPIAction(metricsGuid, 'targets');
     this.store.dispatch(metricsAction);
 
     this.metricsEndpoint$ = this.metricsService.metricsEndpoints$.pipe(
@@ -91,25 +87,15 @@ export class MetricsComponent {
       first()
     );
 
-    const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      metricsAction.metricId,
-      metricSchemaKey,
-      entityFactory(metricSchemaKey)
-    );
-
-    this.jobDetails$ = metricsMonitor.entity$.pipe(
-      filter(a => !!a),
-      map((targetsData: any) => {
-        const mapped = {};
-        if (targetsData.data.activeTargets) {
-          targetsData.data.activeTargets.forEach(t => {
-            if (t.labels && t.labels.job) {
-              mapped[t.labels.job] = t;
-            }
-          });
+    this.jobDetails$ = this.metricsEndpoint$.pipe(
+      filter(mi => !!mi && !!mi.entity.provider && !!mi.entity.provider.metadata && !!mi.entity.provider.metadata.metrics_targets),
+      map(mi => mi.entity.provider.metadata.metrics_targets),
+      map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped, t) => {
+        if (t.labels && t.labels.job) {
+          mapped[t.labels.job] = t;
         }
         return mapped;
-      })
+      }, {}))
     );
   }
 }
