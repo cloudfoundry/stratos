@@ -12,6 +12,7 @@ import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
 
+
 @Injectable()
 export class KubernetesNamespacesListConfigService implements IListConfig<KubernetesNamespace> {
   podsDataSource: KubernetesNamespacesDataSource;
