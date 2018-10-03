@@ -15,7 +15,7 @@ import { IMetrics } from '../../../store/types/base-metric.types';
     MetricsRangeSelectorManagerService
   ]
 })
-export class MetricsParentRangeSelectorComponent implements OnInit, AfterContentInit {
+export class MetricsParentRangeSelectorComponent implements AfterContentInit {
   private actionSub: Subscription;
 
   @ContentChildren(MetricsChartComponent)
@@ -51,10 +51,6 @@ export class MetricsParentRangeSelectorComponent implements OnInit, AfterContent
         });
       }
     });
-  }
-
-
-  ngOnInit() {
   }
 
 }
