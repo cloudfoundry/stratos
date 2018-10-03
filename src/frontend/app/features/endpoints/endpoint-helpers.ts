@@ -74,7 +74,9 @@ export function initEndpointTypes(epTypes: EndpointTypeExtension[]) {
   epTypes.forEach(type => {
     endpointTypes.push({
       value: type.type,
-      label: type.label
+      label: type.label,
+      icon: type.icon,
+      iconFont: type.iconFont
     });
 
     // Map in the authentication providers
@@ -108,7 +110,7 @@ export function getEndpointTypes() {
 
 export function getIconForEndpoint(type: string): EndpointIcon {
   const icon = {
-    name: 'endpoint',
+    name: 'settings_ethernet',
     font: ''
   };
 
@@ -123,4 +125,3 @@ export function getIconForEndpoint(type: string): EndpointIcon {
 export function getEndpointAuthTypes() {
   return endpointAuthTypes;
 }
-
