@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 
 	log "github.com/sirupsen/logrus"
 
@@ -1074,6 +1075,18 @@ func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *inter
 	}
 
 	return cnsiUser, true
+}
+
+type AuthHandlerFunc func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error)
+
+func (p *portalProxy) doAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error) {
+
+	// get a cnsi token record and a cnsi record
+	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve Endpoint records: %v", err)
+	}
+	return authHandler(tokenRec, cnsi)
 }
 
 // Refresh the UAA Token for the user
