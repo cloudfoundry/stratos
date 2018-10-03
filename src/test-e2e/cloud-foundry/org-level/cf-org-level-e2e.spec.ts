@@ -5,25 +5,15 @@ import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
-
+import { CFPage } from '../../po/cf-page.po';
+import { SideNavMenuItem } from '../../po/side-nav.po';
+import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
+import { ListComponent } from '../../po/list.po';
 
 describe('CF - Org Level - ', () => {
 
   let orgPage: CfOrgLevelPage;
-  let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
-  let cfHelper: CFHelpers;
-
-  function setup(user: ConsoleUserType) {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.admin)
-      .connectAllEndpoints(ConsoleUserType.user)
-      .loginAs(user)
-      .getInfo();
-    cfHelper = new CFHelpers(e2eSetup);
-  }
 
   function testBreadcrumb() {
     orgPage.breadcrumbs.waitUntilShown();
@@ -41,19 +31,41 @@ describe('CF - Org Level - ', () => {
   }
 
   function navToPage() {
-    defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    browser.wait(cfHelper.fetchOrg(endpointGuid, defaultCf.testOrg).then((org => {
-      orgPage = CfOrgLevelPage.forEndpoint(endpointGuid, org.metadata.guid);
-      orgPage.navigateTo();
-      orgPage.waitForPageOrChildPage();
-      orgPage.loadingIndicator.waitUntilNotShown();
-    })));
+    const page = new CFPage();
+    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+    CfTopLevelPage.detect().then(cfPage => {
+      cfPage.waitForPageOrChildPage();
+      cfPage.loadingIndicator.waitUntilNotShown();
+      cfPage.goToOrgTab();
+
+      // Find the Org and click on it
+      const list = new ListComponent();
+      list.cards.getCardsMetadata().then(cards => {
+        const card = cards.find(c => c.title === defaultCf.testOrg);
+        expect(card).toBeDefined();
+        card.click();
+      });
+      CfOrgLevelPage.detect().then(o => {
+        orgPage = o;
+        orgPage.waitForPageOrChildPage();
+        orgPage.loadingIndicator.waitUntilNotShown();
+      });
+    });
   }
 
+  beforeAll(() => {
+    defaultCf = e2e.secrets.getDefaultCFEndpoint();
+    e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .connectAllEndpoints(ConsoleUserType.user);
+  });
+
   describe('As Admin', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.admin);
+    beforeAll(() => {
+      e2e.setup(ConsoleUserType.admin)
+      .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests - ', () => {
@@ -68,8 +80,9 @@ describe('CF - Org Level - ', () => {
   });
 
   describe('As User', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.user);
+    beforeAll(() => {
+      e2e.setup(ConsoleUserType.user)
+      .loginAs(ConsoleUserType.user);
     });
 
     describe('Basic Tests - ', () => {
