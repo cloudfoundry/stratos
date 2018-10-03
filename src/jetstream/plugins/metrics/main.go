@@ -205,6 +205,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 			// For K8S
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
+				endpoint.Metadata["metrics_job"] = provider.Job
 			}
 		}
 	}

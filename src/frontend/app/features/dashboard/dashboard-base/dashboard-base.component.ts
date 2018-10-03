@@ -17,6 +17,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -35,6 +36,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
     private ext: ExtensionManager,
+    private endpointsService: EndpointsService,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
@@ -147,11 +149,16 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     }
     routes.forEach(route => {
       if (route.data && route.data.stratosNavigation) {
-        nav.push({
+        const item = {
           ...route.data.stratosNavigation,
           link: path + '/' + route.path
-        });
+        };
+        if (item.requiresEndpointType) {
+          item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+        }
+        nav.push(item);
       }
+
       const navs = this.collectNavigationRoutes(route.path, route.children);
       nav = nav.concat(navs);
     });

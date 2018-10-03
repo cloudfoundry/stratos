@@ -100,7 +100,8 @@ const appRoutes: Routes = [
             text: 'Kubernetes',
             matIcon: 'kubernetes',
             matIconFont: 'stratos-icons',
-            position: 60
+            position: 60,
+            requiresEndpointType: 'k8s'
           }
         },
       },

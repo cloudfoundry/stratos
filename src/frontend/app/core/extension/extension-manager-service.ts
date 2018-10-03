@@ -7,6 +7,8 @@ export interface EndpointTypeExtension {
   type: string;
   label: string;
   authTypes: string[];
+  icon?: string;
+  iconFont?: string;
 }
 
 @Injectable()

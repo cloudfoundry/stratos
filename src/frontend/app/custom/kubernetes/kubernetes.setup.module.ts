@@ -33,7 +33,9 @@ export class KubernetesSetupModule {
     }).registerEndpointType({
       type: 'k8s',
       label: 'Kubernetes',
-      authTypes: ['kubeconfig']
+      authTypes: ['kubeconfig'],
+      icon: 'kubernetes',
+      iconFont: 'stratos-icons'
     });
 
   }
