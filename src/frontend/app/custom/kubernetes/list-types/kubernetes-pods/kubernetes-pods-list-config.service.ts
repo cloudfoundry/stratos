@@ -10,6 +10,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { KubernetesPod } from '../../store/kube.types';
 import { KubernetesPodTagsComponent } from './kubernetes-pod-tags/kubernetes-pod-tags.component';
+import { getContainerLengthSort } from '../kube-sort.helper';
 
 @Injectable()
 export class KubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
@@ -17,14 +18,14 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
 
   columns: Array<ITableColumn<KubernetesPod>> = [
     {
-      columnId: 'name', headerCell: () => 'ID',
+      columnId: 'name', headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row) => `${row.metadata.name}`
       },
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'metadata.name'
       },
       cellFlex: '5',
     },
@@ -38,23 +39,14 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       cellDefinition: {
         getValue: (row) => `${row.spec.containers.length}`
       },
-      sort: {
-        type: 'sort',
-        orderKey: 'containers',
-        field: 'containers'
-      },
-      cellFlex: '1',
+      sort: getContainerLengthSort,
+      cellFlex: '2',
     },
     {
       columnId: 'image', headerCell: () => 'Image',
       cellDefinition: {
         // Assuming 1 pod = 1 container
-        getValue: (row) => `${row.spec.containers.map(c => c.image)}`
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'image',
-        field: 'image'
+        getValue: (row) => `${row.spec.containers.map(c => c.image)} `
       },
       cellFlex: '5',
     },
@@ -66,7 +58,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       sort: {
         type: 'sort',
         orderKey: 'namespace',
-        field: 'namespace'
+        field: 'metadata.namespace'
       },
       cellFlex: '5',
     },
@@ -78,7 +70,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       sort: {
         type: 'sort',
         orderKey: 'node',
-        field: 'node'
+        field: 'spec.nodeName'
       },
       cellFlex: '5',
     },
@@ -90,7 +82,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       sort: {
         type: 'sort',
         orderKey: 'status',
-        field: 'status'
+        field: 'status.phase'
       },
       cellFlex: '5',
     },

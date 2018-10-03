@@ -12,6 +12,7 @@ import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
 import { KubernetesNode, ConditionType } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
 import { ConditionCellComponent } from './condition-cell/condition-cell.component';
+import { getConditionSort } from '../kube-sort.helper';
 
 @Injectable()
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
@@ -24,7 +25,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'metadata.name'
       },
       cellFlex: '5',
     },
@@ -35,11 +36,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       },
       cellComponent: ConditionCellComponent,
 
-      sort: {
-        type: 'sort',
-        orderKey: 'ready',
-        field: 'ready'
-      },
+      sort: getConditionSort(ConditionType.Ready),
       cellFlex: '2',
     },
     {
@@ -48,11 +45,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellConfig: {
         conditionType: ConditionType.DiskPressure
       },
-      sort: {
-        type: 'sort',
-        orderKey: 'diskPressure',
-        field: 'diskPressure'
-      },
+      sort: getConditionSort(ConditionType.DiskPressure),
       cellFlex: '2',
     },
     {
@@ -61,11 +54,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellConfig: {
         conditionType: ConditionType.MemoryPressure
       },
-      sort: {
-        type: 'sort',
-        orderKey: 'memPressure',
-        field: 'memPressure'
-      },
+      sort: getConditionSort(ConditionType.MemoryPressure),
       cellFlex: '2',
     },
     {
