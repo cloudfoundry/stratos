@@ -13,7 +13,6 @@ import { ListComponent } from '../../po/list.po';
 describe('CF - Org Level - ', () => {
 
   let orgPage: CfOrgLevelPage;
-  let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
 
   function testBreadcrumb() {
@@ -56,7 +55,7 @@ describe('CF - Org Level - ', () => {
 
   beforeAll(() => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)

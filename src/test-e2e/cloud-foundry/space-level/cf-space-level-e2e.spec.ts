@@ -1,30 +1,18 @@
-import { browser } from 'protractor';
-
-import { e2e, E2ESetup } from '../../e2e';
+import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
+import { CFPage } from '../../po/cf-page.po';
+import { SideNavMenuItem } from '../../po/side-nav.po';
+import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
+import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
+import { ListComponent } from '../../po/list.po';
 
 
 describe('CF - Space Level -', () => {
 
   let spacePage: CfSpaceLevelPage;
-  let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
-  let cfHelper: CFHelpers;
-
-  function setup(user: ConsoleUserType) {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.admin)
-      .connectAllEndpoints(ConsoleUserType.user)
-      .loginAs(user)
-      .getInfo();
-    cfHelper = new CFHelpers(e2eSetup);
-  }
-
   function testBreadcrumb() {
     spacePage.breadcrumbs.waitUntilShown();
     spacePage.breadcrumbs.getBreadcrumbs().then(breadcrumbs => {
@@ -44,25 +32,56 @@ describe('CF - Space Level -', () => {
   }
 
   function navToPage() {
-    defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    browser.wait(
-      cfHelper.fetchDefaultSpaceGuid(true)
-        .then(spaceGuid => {
-          spacePage = CfSpaceLevelPage.forEndpoint(
-            CFHelpers.cachedDefaultCfGuid,
-            CFHelpers.cachedDefaultOrgGuid,
-            CFHelpers.cachedDefaultSpaceGuid
-          );
-          return spacePage.navigateTo();
-        })
-        .then(() => spacePage.waitForPageOrChildPage())
-        .then(() => spacePage.loadingIndicator.waitUntilNotShown())
-    );
+    const page = new CFPage();
+    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+    CfTopLevelPage.detect().then(cfPage => {
+      cfPage.waitForPageOrChildPage();
+      cfPage.loadingIndicator.waitUntilNotShown();
+      cfPage.goToOrgTab();
+
+      // Find the Org and click on it
+      const list = new ListComponent();
+      list.cards.getCardsMetadata().then(cards => {
+        const card = cards.find(c => c.title === defaultCf.testOrg);
+        expect(card).toBeDefined();
+        card.click();
+      });
+      CfOrgLevelPage.detect().then(orgPage => {
+        orgPage.waitForPageOrChildPage();
+        orgPage.loadingIndicator.waitUntilNotShown();
+        orgPage.goToSpacesTab();
+
+        // Find the Space and click on it
+        const spaceList = new ListComponent();
+        spaceList.cards.getCardsMetadata().then(cards => {
+          const card = cards.find(c => c.title === defaultCf.testSpace);
+          expect(card).toBeDefined();
+          card.click();
+        });
+        CfSpaceLevelPage.detect().then(s => {
+          spacePage = s;
+          spacePage.waitForPageOrChildPage();
+          spacePage.loadingIndicator.waitUntilNotShown();
+        });
+
+      });
+    });
   }
 
+
+  beforeAll(() => {
+    defaultCf = e2e.secrets.getDefaultCFEndpoint();
+    e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .connectAllEndpoints(ConsoleUserType.user);
+  });
+
   describe('As Admin -', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.admin);
+    beforeAll(() => {
+      e2e.setup(ConsoleUserType.admin)
+      .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests -', () => {
@@ -76,8 +95,9 @@ describe('CF - Space Level -', () => {
   });
 
   describe('As User -', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.user);
+    beforeAll(() => {
+      e2e.setup(ConsoleUserType.admin)
+      .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests -', () => {

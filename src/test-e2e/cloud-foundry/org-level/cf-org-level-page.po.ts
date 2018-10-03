@@ -10,7 +10,7 @@ export class CfOrgLevelPage extends CFPage {
     return page;
   }
 
-  // Detect cfGuid from the URL
+  // Detect from the URL
   public static detect(): promise.Promise<CfOrgLevelPage> {
     return browser.getCurrentUrl().then(url => {
       if (url.indexOf(browser.baseUrl) === 0) {
