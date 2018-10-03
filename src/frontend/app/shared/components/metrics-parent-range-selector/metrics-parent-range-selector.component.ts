@@ -1,4 +1,4 @@
-import { Component, OnInit, QueryList, ViewChildren, AfterViewInit, AfterContentInit, ContentChildren } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren, AfterViewInit, AfterContentInit, ContentChildren, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
@@ -15,7 +15,7 @@ import { IMetrics } from '../../../store/types/base-metric.types';
     MetricsRangeSelectorManagerService
   ]
 })
-export class MetricsParentRangeSelectorComponent implements AfterContentInit {
+export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
   private actionSub: Subscription;
 
   @ContentChildren(MetricsChartComponent)
@@ -29,6 +29,9 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit {
   ) { }
 
   ngAfterContentInit() {
+    if (!this.metricsCharts || !this.metricsCharts.first) {
+      return;
+    }
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.metricId,
@@ -51,6 +54,12 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit {
         });
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.actionSub) {
+      this.actionSub.unsubscribe();
+    }
   }
 
 }

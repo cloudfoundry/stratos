@@ -1,13 +1,13 @@
-import { MetricsRangeSelectorService } from './metrics-range-selector.service';
-import { MetricsAction } from './../../store/actions/metrics.actions';
-import { Injectable, EventEmitter } from '@angular/core';
-
+import { Injectable } from '@angular/core';
 import * as moment from 'moment';
-import { MetricQueryType, ITimeRange } from './metrics-range-selector.types';
-import { EntityMonitor } from '../monitors/entity-monitor';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, takeWhile, tap } from 'rxjs/operators';
+
 import { IMetrics } from '../../store/types/base-metric.types';
-import { Subscription, Subject } from 'rxjs';
-import { debounceTime, tap, takeWhile } from 'rxjs/operators';
+import { EntityMonitor } from '../monitors/entity-monitor';
+import { MetricsAction } from './../../store/actions/metrics.actions';
+import { MetricsRangeSelectorService } from './metrics-range-selector.service';
+import { ITimeRange, MetricQueryType } from './metrics-range-selector.types';
 
 @Injectable()
 export class MetricsRangeSelectorManagerService {
