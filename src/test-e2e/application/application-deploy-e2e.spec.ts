@@ -451,8 +451,7 @@ describe('Application Deploy -', function () {
     expect(confirm.getMessage()).toBe('Are you sure you want to terminate instance 0?');
     confirm.confirm();
     appInstances.cardInstances.waitForRunningInstancesText('0 / 1');
-    appInstances.list.empty.getDefault().waitUntilShown();
-    expect(appInstances.list.getTotalResults()).toBe(0);
+    // The instance can come back very quickly, so we can't check for 0 rows
   });
 
   afterAll(() => applicationE2eHelper.deleteApplication(null, { appName: testAppName }));
