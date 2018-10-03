@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, ContentChildren, OnInit, QueryList } from '@angular/core';
+import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -16,7 +16,7 @@ import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component'
     MetricsRangeSelectorManagerService
   ]
 })
-export class MetricsParentRangeSelectorComponent implements AfterContentInit {
+export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
   private actionSub: Subscription;
 
   @ContentChildren(MetricsChartComponent)
@@ -30,6 +30,9 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit {
   ) { }
 
   ngAfterContentInit() {
+    if (!this.metricsCharts || !this.metricsCharts.first) {
+      return;
+    }
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.metricId,
@@ -52,6 +55,12 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit {
         });
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.actionSub) {
+      this.actionSub.unsubscribe();
+    }
   }
 
 }

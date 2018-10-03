@@ -1,11 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { MetricsRangeSelectorManagerService } from './metrics-range-selector-manager.service';
+import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 
 describe('MetricsRangeSelectorManagerService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MetricsRangeSelectorManagerService]
+      providers: [
+        MetricsRangeSelectorManagerService,
+        MetricsRangeSelectorService
+      ],
     });
   });
 
