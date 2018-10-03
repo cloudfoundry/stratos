@@ -63,7 +63,7 @@ describe('Application Deploy -', function () {
   describe('Deploy process - ', () => {
 
     let originalTimeout = 40000;
-    beforeEach(() => nav.goto(SideNavMenuItem.Applications));
+    beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
     beforeEach(function() {
@@ -83,12 +83,13 @@ describe('Application Deploy -', function () {
 
       beforeAll(() => {
         // Should be on deploy app modal
+        appWall.waitForPage();
+        expect(appWall.isActivePage()).toBeTruthy();
         deployApp = appWall.clickDeployApp();
-        expect(deployApp.header.getTitleText()).toBe('Deploy');
       });
 
       it('Check deploy steps', () => {
-        expect(appWall.isActivePage()).toBeTruthy();
+        expect(deployApp.header.getTitleText()).toBe('Deploy');
         // Check the steps
         e2e.debugLog(`${loggingPrefix} Checking Steps`);
         deployApp.stepper.getStepNames().then(steps => {
