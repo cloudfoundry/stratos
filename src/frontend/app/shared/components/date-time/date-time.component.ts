@@ -31,7 +31,7 @@ export class DateTimeComponent implements OnDestroy {
 
   set dateTime(dateTime: moment.Moment) {
     const empty = !dateTime && this.dateTimeValue !== dateTime;
-    const validDate = dateTime && dateTime.isValid() && (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue))
+    const validDate = dateTime && dateTime.isValid() && (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue));
     if (empty || validDate) {
       this.dateTimeValue = dateTime;
       this.dateTimeChange.emit(this.dateTimeValue);
