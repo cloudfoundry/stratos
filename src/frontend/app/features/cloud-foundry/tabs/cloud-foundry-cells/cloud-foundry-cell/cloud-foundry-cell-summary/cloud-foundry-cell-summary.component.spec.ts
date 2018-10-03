@@ -1,11 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { of as observableOf } from 'rxjs';
 
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
-import { CfCellSummaryChartComponent } from '../../cf-cell-summary-chart/cf-cell-summary-chart.component';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellSummaryComponent } from './cloud-foundry-cell-summary.component';
-import { of as observableOf } from 'rxjs';
 
 class MockCloudFoundryCellService {
   cfGuid = 'cfGuid';
@@ -37,7 +36,6 @@ describe('CloudFoundryCellSummaryComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryCellSummaryComponent,
-        CfCellSummaryChartComponent
       ],
       imports: [...BaseTestModules],
       providers: [
