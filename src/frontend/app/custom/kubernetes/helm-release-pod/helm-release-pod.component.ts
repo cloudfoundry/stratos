@@ -13,6 +13,8 @@ import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesService } from '../services/kubernetes.service';
+import { map } from 'rxjs/operators';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 
 @Component({
   selector: 'app-helm-release-pod',
@@ -39,6 +41,7 @@ export class HelmReleasePodComponent implements OnInit {
   podName: string;
   podEntity$: Observable<EntityInfo<KubernetesPod>>;
   namespaceName: any;
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   constructor(
     public helmReleaseService: HelmReleaseService,
@@ -50,6 +53,41 @@ export class HelmReleasePodComponent implements OnInit {
     this.podName = activatedRoute.snapshot.params['podName'];
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
 
+
+    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+      map(endpoint => {
+
+        // check if this is being invoked from the node path
+        const nodeName = getIdFromRoute(activatedRoute, 'nodeName');
+        if (!!nodeName) {
+          return [{
+            breadcrumbs: [
+              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+              { value: nodeName, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes/${nodeName}` },
+            ]
+          }];
+        }
+        // check if this is being invoked from the namespace path
+        if (!!this.namespaceName) {
+          return [{
+            breadcrumbs: [
+              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+              { value: this.namespaceName, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces/${this.namespaceName}` },
+            ]
+          }];
+        }
+        // Finally, check if this is being invoked from the helm-release path
+        const releaseName = getIdFromRoute(activatedRoute, 'releaseName');
+        if (!!releaseName) {
+          return [{
+            breadcrumbs: [
+              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+              { value: releaseName, routerLink: `/kubernetes/${endpoint.entity.guid}/apps/${releaseName}` },
+            ]
+          }];
+        }
+      })
+    );
     this.podEntity$ = this.entityServiceFactory.create<KubernetesPod>(
       kubernetesPodsSchemaKey,
       entityFactory(kubernetesPodsSchemaKey),

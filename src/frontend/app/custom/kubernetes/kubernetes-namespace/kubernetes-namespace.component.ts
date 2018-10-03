@@ -4,6 +4,9 @@ import { ActivatedRoute } from '@angular/router';
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
+import { Observable } from 'rxjs';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-kubernetes-namespace',
@@ -32,11 +35,21 @@ export class KubernetesNamespaceComponent implements OnInit {
     { link: 'pods', label: 'Pods' },
   ];
 
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public kubeNamespaceService: KubernetesNamespaceService
-  ) { }
+  ) {
+    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+      map(endpoint => ([{
+        breadcrumbs: [
+          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+        ]
+      }])
+      )
+    );
+  }
 
   ngOnInit() {
   }
