@@ -72,11 +72,14 @@ export class CloudFoundryCellService {
 
   }
 
-  public buildMetricConfig(queryString: string, queryRange: MetricQueryType): MetricsConfig<IMetricMatrixResult<IMetricCell>> {
+  public buildMetricConfig(
+    queryString: string,
+    queryRange: MetricQueryType,
+    mapSeriesItemValue?: (value) => any): MetricsConfig<IMetricMatrixResult<IMetricCell>> {
     return {
       getSeriesName: (result: IMetricMatrixResult<IMetricCell>) => `Cell ${result.metric.bosh_job_id} (${result.metric.bosh_deployment})`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-      sort: MetricsChartHelpers.sortBySeriesName,
+      mapSeriesItemValue,
       metricsAction: new FetchCFCellMetricsAction(
         this.cfGuid,
         this.cellId,
