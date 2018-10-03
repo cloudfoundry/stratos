@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
+import { IFeatureFlag } from '../../../../core/cf-api.types';
+import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
   CfFeatureFlagsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-list-config.service';
@@ -16,4 +18,13 @@ import { ListConfig } from '../../../../shared/components/list/list.component.ty
     }
   ]
 })
-export class CloudFoundryFeatureFlagsComponent { }
+export class CloudFoundryFeatureFlagsComponent implements OnInit {
+
+  constructor(private listConfig: ListConfig<IFeatureFlag>) {
+    const dataSource: ListDataSource<IFeatureFlag> = listConfig.getDataSource();
+  }
+
+  ngOnInit() {
+  }
+
+}

@@ -4,6 +4,7 @@ import {
   CfCellsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { ActiveRouteCfCell } from '../../cf-page.types';
 import { CloudFoundryCellsComponent } from './cloud-foundry-cells.component';
 
@@ -14,11 +15,20 @@ describe('CloudFoundryCellsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryCellsComponent],
-      imports: [...BaseTestModules],
+      imports: [
+        ...BaseTestModules,
+        createBasicStoreModule()
+      ],
       providers: [
         CfCellsListConfigService,
-        ActiveRouteCfCell
-      ]
+        {
+          provide: ActiveRouteCfCell,
+          useFactory: () => ({
+            cfGuid: 'cfGuid',
+            cellId: 'cellId'
+          }),
+        }
+      ],
     })
       .compileComponents();
   }));
