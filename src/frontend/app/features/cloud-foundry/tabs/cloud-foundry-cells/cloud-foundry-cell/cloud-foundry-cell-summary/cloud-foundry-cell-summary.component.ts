@@ -26,8 +26,7 @@ export class CloudFoundryCellSummaryComponent {
     public cfCellService: CloudFoundryCellService
   ) {
 
-    this.metricsConfig = this.cfCellService.buildMetricConfig(
-      `firehose_value_metric_rep_unhealthy_cell${cfCellService.cellId}`, MetricQueryType.QUERY);
+    this.metricsConfig = this.cfCellService.buildMetricConfig(`firehose_value_metric_rep_unhealthy_cell`, MetricQueryType.QUERY);
     this.chartConfig = this.cfCellService.buildChartConfig('0 = Healthy, 1 = Unhealthy');
 
     this.status$ = cfCellService.healthy$.pipe(

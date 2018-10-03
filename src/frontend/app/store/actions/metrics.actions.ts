@@ -20,11 +20,9 @@ function joinParams(queryConfig: MetricQueryConfig) {
     ...params
   } = queryConfig.params || {};
   // If the query contains it's own curly brackets don't add a new set
-  const hasSquiggly = queryConfig.metric.indexOf('}');
+  const hasSquiggly = queryConfig.metric.indexOf('}') >= 0;
   const windowString = window ? `${(hasSquiggly ? '' : '{}')}[${window}]` : '';
-  const paramString = Object.keys(params).reduce((accum, key) => {
-    return accum + `&${key}=${params[key]}`;
-  }, '');
+  const paramString = Object.keys(params).reduce((accum, key) => accum + `&${key}=${params[key]}`, '');
   return windowString + paramString || '';
 }
 

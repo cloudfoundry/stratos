@@ -27,15 +27,15 @@ export class CloudFoundryCellChartsComponent {
     this.metricConfigs = [
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_containers', MetricQueryType.RANGE_QUERY),
-        this.cfCellService.buildChartConfig('Containers Used (%)')
+        this.cfCellService.buildChartConfig('Containers Remaining')
       ],
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_memory', MetricQueryType.QUERY),
-        this.cfCellService.buildChartConfig('Memory Used (%)')
+        this.cfCellService.buildChartConfig('Memory Remaining (MB)')
       ],
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_disk', MetricQueryType.QUERY),
-        this.cfCellService.buildChartConfig('Disk Used (%)')
+        this.cfCellService.buildChartConfig('Disk Remaining (MB)')
       ],
     ];
 
