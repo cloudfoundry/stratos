@@ -88,6 +88,19 @@ export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implemen
   };
 }
 
+export class FetchCFCellMetricsPaginatedAction extends FetchCFCellMetricsAction implements PaginatedAction {
+  constructor(cfGuid: string, cellId: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(cfGuid, cellId, query, queryType);
+    this.paginationKey = this.metricId;
+  }
+  actions = [];
+  paginationKey: string;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'id',
+  };
+}
+
 export class FetchApplicationMetricsAction extends MetricsAction {
   constructor(guid: string, cfGuid: string, query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
     super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, queryType);

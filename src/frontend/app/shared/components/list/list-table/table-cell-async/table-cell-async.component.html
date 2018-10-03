@@ -1,0 +1,5 @@
+<ng-container *ngIf="config">
+  <ng-container *ngIf="row[config.pathToObs] | async as value">
+    {{ pathGet(config.pathToValue, value)}}
+  </ng-container>
+</ng-container>
