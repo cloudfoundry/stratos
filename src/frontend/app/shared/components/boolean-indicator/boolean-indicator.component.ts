@@ -19,7 +19,7 @@ export class BooleanIndicatorComponent implements OnInit {
 
   @Input() isTrue: boolean;
   @Input() type: BooleanIndicatorType;
-  @Input() showText: boolean;
+  @Input() showText = true;
 
   // Should we use a subtle display - this won't show the No option as danger (typically red)
   @Input() subtle = true;
