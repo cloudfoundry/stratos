@@ -95,6 +95,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
+import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
 
 @NgModule({
   imports: [
@@ -146,7 +147,8 @@ import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link
     KubeAppcreatedDateComponent,
     KubeAppChartNameComponent,
     KubeNamespacePodCountComponent,
-    PodNameLinkComponent
+    PodNameLinkComponent,
+    NodePodCountComponent
   ],
   providers: [
     KubernetesService,
@@ -168,7 +170,8 @@ import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link
     KubeAppcreatedDateComponent,
     KubeAppChartNameComponent,
     KubeNamespacePodCountComponent,
-    PodNameLinkComponent
+    PodNameLinkComponent,
+    NodePodCountComponent
   ]
 })
 export class KubernetesModule {
