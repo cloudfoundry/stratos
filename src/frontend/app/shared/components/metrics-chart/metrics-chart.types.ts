@@ -20,7 +20,6 @@ export interface IMetricsChartConfig {
 
 export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
-  showLegend = true;
   xAxisLabel?: string;
   yAxisLabel?: string;
   showLegend?: boolean;
