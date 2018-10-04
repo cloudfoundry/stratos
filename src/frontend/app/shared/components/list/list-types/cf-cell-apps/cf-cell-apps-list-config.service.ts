@@ -5,10 +5,12 @@ import { EntityServiceFactory } from '../../../../../core/entity-service-factory
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
-import { TableCellAsyncComponent, TableCellAsyncConfig } from '../../list-table/table-cell-async/table-cell-async.component';
+import { ITableColumn } from '../../list-table/table.types';
 import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
+import { APIResource } from '../../../../../store/types/api.types';
+import { IApp, ISpace } from '../../../../../core/cf-api.types';
 
 @Injectable()
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
@@ -27,33 +29,50 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
     this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this, entityServiceFactory);
   }
 
-  getColumns = () => [
+  getColumns = (): ITableColumn<CfCellApp>[] => [
     {
-      columnId: 'app', headerCell: () => 'Application',
-      cellComponent: TableCellAsyncComponent,
+      columnId: 'app',
+      headerCell: () => 'Application',
       cellFlex: '1',
-      cellConfig: {
-        pathToObs: 'appEntityService',
-        pathToValue: 'entity.name'
-      } as TableCellAsyncConfig,
+      cellDefinition: {
+        getAsyncLink: (value: APIResource<IApp>) => `/applications/${value.entity.cfGuid}/${value.metadata.guid}/summary`,
+        asyncValue: {
+          pathToObs: 'appEntityService',
+          pathToValue: 'entity.name'
+        }
+      },
     },
     {
-      columnId: 'space', headerCell: () => 'Space',
-      cellComponent: TableCellAsyncComponent,
+      columnId: 'space',
+      headerCell: () => 'Space',
       cellFlex: '1',
-      cellConfig: {
-        pathToObs: 'appEntityService',
-        pathToValue: 'entity.space.entity.name'
-      } as TableCellAsyncConfig,
+      cellDefinition: {
+        getAsyncLink: (value: APIResource<IApp>) => {
+          const spaceEntity = value.entity.space as APIResource<ISpace>;
+          const cf = `/cloud-foundry/${value.entity.cfGuid}/`;
+          const org = `organizations/${spaceEntity.entity.organization.metadata.guid}`;
+          const space = `/spaces/${spaceEntity.metadata.guid}/summary`;
+          return cf + org + space;
+        },
+        asyncValue: {
+          pathToObs: 'appEntityService',
+          pathToValue: 'entity.space.entity.name'
+        }
+      },
     },
     {
       columnId: 'org', headerCell: () => 'Organization',
-      cellComponent: TableCellAsyncComponent,
       cellFlex: '1',
-      cellConfig: {
-        pathToObs: 'appEntityService',
-        pathToValue: 'entity.space.entity.organization.entity.name'
-      } as TableCellAsyncConfig,
+      cellDefinition: {
+        getAsyncLink: (value: APIResource<IApp>) => {
+          const space = value.entity.space as APIResource<ISpace>;
+          return `/cloud-foundry/${value.entity.cfGuid}/organizations/${space.entity.organization.metadata.guid}/summary`;
+        },
+        asyncValue: {
+          pathToObs: 'appEntityService',
+          pathToValue: 'entity.space.entity.organization.entity.name'
+        }
+      },
     },
   ]
   getDataSource = () => this.dataSource;
