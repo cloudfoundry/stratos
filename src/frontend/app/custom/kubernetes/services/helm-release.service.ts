@@ -54,12 +54,12 @@ export class HelmReleaseService {
     );
 
     this.statefulSets$ = kubeEndpointService.statefulSets$.pipe(
-      map(p => p.filter(r => r.metadata.labels['app.kubernetes.io/name'] === this.helmReleaseName)),
+      map(p => p.filter(r => r.metadata.labels['app.kubernetes.io/instance'] === this.helmReleaseName)),
       first(),
     );
 
     this.deployments$ = kubeEndpointService.deployments$.pipe(
-      map(p => p.filter(r => r.metadata.labels['app.kubernetes.io/name'] === this.helmReleaseName)),
+      map(p => p.filter(r => r.metadata.labels['app.kubernetes.io/instance'] === this.helmReleaseName)),
       first()
     );
 

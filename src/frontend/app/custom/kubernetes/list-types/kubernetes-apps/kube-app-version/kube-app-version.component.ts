@@ -24,8 +24,8 @@ export class KubeAppVersionComponent extends TableCellCustom<KubernetesApp> impl
     this.chartVersion$ = combineLatest(this.kubeServiceEndpoint.deployments$, this.kubeServiceEndpoint.statefulSets$).pipe(
       map(([deployments, statefulsets]) => {
 
-        const releaseDeployment = deployments.filter(d => d.metadata.labels['app.kubernetes.io/name'] === this.row.name);
-        const releaseStatefulSets = statefulsets.filter(d => d.metadata.labels['app.kubernetes.io/name'] === this.row.name);
+        const releaseDeployment = deployments.filter(d => d.metadata.labels['app.kubernetes.io/instance'] === this.row.name);
+        const releaseStatefulSets = statefulsets.filter(d => d.metadata.labels['app.kubernetes.io/instance'] === this.row.name);
 
         if (releaseDeployment.length !== 0) {
           return releaseDeployment[0].metadata.labels['app.kubernetes.io/version'];
