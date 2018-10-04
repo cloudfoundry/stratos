@@ -24,6 +24,9 @@ export CERTS_PATH=./dev-certs
 # Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1
 
+# Test report folder name override
+TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
+
 export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
 mkdir -p "${E2E_REPORT_FOLDER}"
 
@@ -55,9 +58,6 @@ pushd src/jetstream
 popd
 
 E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
-
-# Test report folder name override
-TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
