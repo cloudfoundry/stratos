@@ -63,7 +63,7 @@ export class HelmReleasePodComponent implements OnInit {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes` },
-              { value: nodeName, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes/${nodeName}` },
+              { value: nodeName, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes/${nodeName}/pods` },
             ]
           }];
         }
@@ -72,7 +72,7 @@ export class HelmReleasePodComponent implements OnInit {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces` },
-              { value: this.namespaceName, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces/${this.namespaceName}` },
+              { value: this.namespaceName, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces/${this.namespaceName}/pods` },
             ]
           }];
         }
@@ -82,7 +82,7 @@ export class HelmReleasePodComponent implements OnInit {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/apps` },
-              { value: releaseName, routerLink: `/kubernetes/${endpoint.entity.guid}/apps/${releaseName}` },
+              { value: releaseName, routerLink: `/kubernetes/${endpoint.entity.guid}/apps/${releaseName}/pods` },
             ]
           }];
         }

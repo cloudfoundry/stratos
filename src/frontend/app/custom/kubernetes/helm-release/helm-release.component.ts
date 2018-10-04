@@ -43,7 +43,7 @@ export class HelmReleaseComponent implements OnInit {
     this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [
-          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/apps` },
         ]
       }])
       )
