@@ -11,7 +11,7 @@ import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kube
 import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
 import { KubernetesNode, ConditionType } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
-import { ConditionCellComponent } from './condition-cell/condition-cell.component';
+import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';
 import { getConditionSort } from '../kube-sort.helper';
 
 @Injectable()
@@ -41,7 +41,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     },
     {
       columnId: 'diskPressure', headerCell: () => 'Disk Pressure',
-      cellComponent: ConditionCellComponent,
+      cellComponent: InverseConditionCellComponent,
       cellConfig: {
         conditionType: ConditionType.DiskPressure
       },
@@ -50,7 +50,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     },
     {
       columnId: 'memPressure', headerCell: () => 'Memory Pressure',
-      cellComponent: ConditionCellComponent,
+      cellComponent: InverseConditionCellComponent,
       cellConfig: {
         conditionType: ConditionType.MemoryPressure
       },

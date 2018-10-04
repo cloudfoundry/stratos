@@ -53,7 +53,10 @@ import {
 import {
   KubernetesNodePodsLinkComponent,
 } from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
-import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
+import {
+  ConditionCellComponent,
+  InverseConditionCellComponent
+} from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 import {
   KubernetesNodeCapacityComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
@@ -132,6 +135,7 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
     KubernetesNodeMetricStatsCardComponent,
     KubernetesNodeSimpleMetricComponent,
     ConditionCellComponent,
+    InverseConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent
@@ -152,6 +156,7 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
     KubernetesNodeLinkComponent,
     KubernetesNodePodsLinkComponent,
     ConditionCellComponent,
+    InverseConditionCellComponent,
     KubernetesNamespaceLinkComponent
   ]
 })
