@@ -102,7 +102,8 @@ export class CloudFoundryCellService {
       this.cfGuid,
       this.cellId,
       new MetricQueryConfig(metric + `{bosh_job_id="${this.cellId}"}`, {}),
-      MetricQueryType.VALUE
+      MetricQueryType.QUERY,
+      false
     );
     if (metric === CellMetrics.HEALTHY) {
       this.healthyMetricId = action.metricId;
