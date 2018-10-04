@@ -94,6 +94,7 @@ export class CloudFoundryCellService {
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yAxisLabel;
     lineChartConfig.showLegend = false;
+    lineChartConfig.autoScale = false;
     return lineChartConfig;
   }
 

@@ -23,7 +23,10 @@ export class CloudFoundryCellChartsComponent {
     this.metricConfigs = [
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_containers', MetricQueryType.RANGE_QUERY),
-        this.cfCellService.buildChartConfig('Containers Remaining')
+        {
+          ...this.cfCellService.buildChartConfig('Containers Remaining'),
+          yAxisTickFormatting: (label: string) => Math.round(Number(label)).toString()
+        }
       ],
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_memory', MetricQueryType.QUERY),
