@@ -162,7 +162,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     });
   });
 
-  it('Should create an org and a space', () => {
+  xit('Should create an org and a space', () => {
     const cardView = cloudFoundry.goToOrgView();
 
     // Click the add button to add an organization
