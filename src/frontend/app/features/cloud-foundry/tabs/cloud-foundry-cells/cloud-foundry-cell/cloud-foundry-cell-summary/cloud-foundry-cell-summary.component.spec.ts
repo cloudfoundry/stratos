@@ -46,7 +46,8 @@ class MockCloudFoundryCellService {
     chartType: MetricsChartTypes.LINE,
     xAxisLabel: 'Time',
     yAxisLabel: yAxisLabel,
-    showLegend: false
+    showLegend: false,
+    autoScale: true
   })
 
 }
