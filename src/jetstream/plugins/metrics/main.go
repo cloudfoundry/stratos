@@ -159,8 +159,16 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 		return newCNSI, nil, err
 	}
 
-	// No info endpoint that we can fetch to check if the Endpoint is a metrics endpoint
-	// We'll discover that when we try and connect
+	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation)
+	resp, err := httpClient.Get(apiEndpoint)
+	if err != nil {
+		return newCNSI, nil, err
+	}
+
+	// Any error code >= 400 that is not 401 means something wrong
+	if resp.StatusCode >= 400 && resp.StatusCode != 401 {
+		return newCNSI, nil, err
+	}
 
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
