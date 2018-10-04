@@ -1,0 +1,3 @@
+<a [routerLink]="[cellLink]" *ngIf="(cellMetric$ | async) as cellMetric">
+  {{cellMetric.bosh_job_id}} ({{cellMetric.bosh_deployment}})
+</a>

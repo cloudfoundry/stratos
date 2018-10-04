@@ -172,30 +172,6 @@
   revision = "7dc373669fa10ddf827c37c595dee30a2f001be9"
 
 [[projects]]
-  digest = "1:ce6d7efd1b0df664411b6ffbe83fca8d14b20d3cb82e222a8be1b7c4d93b38e0"
-  name = "github.com/cloudfoundry-incubator/stratos"
-  packages = [
-    "src/jetstream/config",
-    "src/jetstream/datastore",
-    "src/jetstream/plugins/cfapppush",
-    "src/jetstream/plugins/cfapppush/pushapp",
-    "src/jetstream/plugins/cfappssh",
-    "src/jetstream/plugins/cloudfoundry",
-    "src/jetstream/plugins/cloudfoundryhosting",
-    "src/jetstream/plugins/metrics",
-    "src/jetstream/plugins/userinfo",
-    "src/jetstream/repository/cnsis",
-    "src/jetstream/repository/console_config",
-    "src/jetstream/repository/crypto",
-    "src/jetstream/repository/goose-db-version",
-    "src/jetstream/repository/interfaces",
-    "src/jetstream/repository/tokens",
-  ]
-  pruneopts = "UT"
-  revision = "74090ba09e68dcd9caae73436fe17d11cbb90f2a"
-  version = "2.1.1"
-
-[[projects]]
   digest = "1:24fc51072bca32204c162b79ede835505b3c5c5cce4e2e0cd6184ff2376486c9"
   name = "github.com/cloudfoundry/bosh-cli"
   packages = ["director/template"]

@@ -1,29 +1,4 @@
-<mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart
-    [appGuid]="applicationService.appGuid"
-    [endpointGuid]="applicationService.cfGuid"
-    title="CPU usage over the past hour"
-    yAxisLabel="CPU Usage (%)"
-    metricName="firehose_container_metric_cpu_percentage{}[1h]">
-  </app-application-instance-chart>
-</mat-card>
-<mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart
-    [appGuid]="applicationService.appGuid"
-    [endpointGuid]="applicationService.cfGuid"
-    title="Memory usage over the past hour"
-    yAxisLabel="Memory Usage (MB)"
-    seriesTranslation="mb"
-    metricName="firehose_container_metric_memory_bytes{}[1h]">
-  </app-application-instance-chart>
-</mat-card>
-<mat-card class="metric-chart-wrapper">
-  <app-application-instance-chart
-    [appGuid]="applicationService.appGuid"
-    [endpointGuid]="applicationService.cfGuid"
-    title="Disk usage over the past hour"
-    yAxisLabel="Disk Usage (MB)"
-    seriesTranslation="mb"
-    metricName="firehose_container_metric_disk_bytes{}[1h]">
-  </app-application-instance-chart>
-</mat-card>
+<app-metrics-parent-range-selector>
+  <app-metrics-chart *ngFor="let config of instanceMetricConfigs" [metricsConfig]="config[0]" [chartConfig]="config[1]">
+  </app-metrics-chart>
+</app-metrics-parent-range-selector>

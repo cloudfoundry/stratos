@@ -31,9 +31,12 @@
               <app-metadata-item icon="link" label="Address">{{ svc.url }}</app-metadata-item>
               <app-metadata-item icon="history" label="Promethues Job">{{ svc.metadata ? svc.metadata.metrics_job : 'N/A' }}</app-metadata-item>
               <div class="metrics-extra" *ngIf="svc.metadata && svc.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
-                <app-metadata-item icon="help_outline" label="Exporter Health">{{ jobDetails[svc.metadata.metrics_job].health | uppercase }}</app-metadata-item>
-                <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{ jobDetails[svc.metadata.metrics_job].lastScrape | date:'medium' }}</app-metadata-item>
-                <app-metadata-item icon="error_outline" label="Exporter Last Error">{{ jobDetails[svc.metadata.metrics_job].lastError || 'None' }}</app-metadata-item>
+                <app-metadata-item icon="help_outline" label="Exporter Health">{{ jobDetails[svc.metadata.metrics_job]?.health | uppercase
+                  }}</app-metadata-item>
+                <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{ jobDetails[svc.metadata.metrics_job]?.lastScrape |
+                  date:'medium' }}</app-metadata-item>
+                <app-metadata-item icon="error_outline" label="Exporter Last Error">{{ jobDetails[svc.metadata.metrics_job]?.lastError ||
+                  'None' }}</app-metadata-item>
               </div>
             </div>
           </div>

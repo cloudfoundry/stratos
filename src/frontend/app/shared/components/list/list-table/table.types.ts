@@ -12,7 +12,7 @@ export interface ICellDefinition<T> {
   getValue?: (row: T) => string;
   // Should the value of getLink be used in a href or routerLink
   externalLink?: boolean;
-  // Automatically turns the row into a link
+  // Automatically turns the cell into a link
   getLink?: (row: T) => string;
   newTab?: boolean;
 }
