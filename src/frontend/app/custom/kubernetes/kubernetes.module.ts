@@ -87,6 +87,8 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
+import { KubeAppcreatedDateComponent } from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
+import { KubeAppChartNameComponent } from './list-types/kubernetes-apps/kube-app-chart-name/kube-app-chart-name.component';
 
 @NgModule({
   imports: [
@@ -134,7 +136,9 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
     ConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubernetesNamespaceComponent,
-    KubernetesNamespacePodsComponent
+    KubernetesNamespacePodsComponent,
+    KubeAppcreatedDateComponent,
+    KubeAppChartNameComponent
   ],
   providers: [
     KubernetesService,
@@ -152,7 +156,9 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
     KubernetesNodeLinkComponent,
     KubernetesNodePodsLinkComponent,
     ConditionCellComponent,
-    KubernetesNamespaceLinkComponent
+    KubernetesNamespaceLinkComponent,
+    KubeAppcreatedDateComponent,
+    KubeAppChartNameComponent
   ]
 })
 export class KubernetesModule {

@@ -103,12 +103,8 @@ const kubernetes: Routes = [{
   children: [
     {
       path: '',
-      redirectTo: 'summary',
+      redirectTo: 'pods',
       pathMatch: 'full'
-    },
-    {
-      path: 'summary',
-      component: HelmReleaseSummaryComponent
     },
     {
       path: 'pods',

@@ -32,7 +32,6 @@ import { map } from 'rxjs/operators';
 export class HelmReleaseComponent implements OnInit {
 
   public tabLinks = [
-    { link: 'summary', label: 'Summary' },
     { link: 'pods', label: 'Pods' },
     { link: 'services', label: 'Services' },
   ];
