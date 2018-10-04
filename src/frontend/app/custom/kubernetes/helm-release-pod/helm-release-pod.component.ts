@@ -62,7 +62,7 @@ export class HelmReleasePodComponent implements OnInit {
         if (!!nodeName) {
           return [{
             breadcrumbs: [
-              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes` },
               { value: nodeName, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes/${nodeName}` },
             ]
           }];
@@ -71,7 +71,7 @@ export class HelmReleasePodComponent implements OnInit {
         if (!!this.namespaceName) {
           return [{
             breadcrumbs: [
-              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces` },
               { value: this.namespaceName, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces/${this.namespaceName}` },
             ]
           }];
@@ -81,11 +81,16 @@ export class HelmReleasePodComponent implements OnInit {
         if (!!releaseName) {
           return [{
             breadcrumbs: [
-              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/apps` },
               { value: releaseName, routerLink: `/kubernetes/${endpoint.entity.guid}/apps/${releaseName}` },
             ]
           }];
         }
+        return [{
+          breadcrumbs: [
+            { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/pods`},
+          ]
+        }];
       })
     );
     this.podEntity$ = this.entityServiceFactory.create<KubernetesPod>(

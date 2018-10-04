@@ -47,6 +47,13 @@ import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link.component';
+import { KubeAppChartNameComponent } from './list-types/kubernetes-apps/kube-app-chart-name/kube-app-chart-name.component';
+import {
+  KubeAppcreatedDateComponent,
+} from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
+import {
+  KubeNamespacePodCountComponent,
+} from './list-types/kubernetes-namespaces/kube-namespace-pod-count/kube-namespace-pod-count.component';
 import {
   KubernetesNamespaceLinkComponent,
 } from './list-types/kubernetes-namespaces/kubernetes-namespace-link/kubernetes-namespace-link.component';
@@ -87,9 +94,7 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { KubeAppcreatedDateComponent } from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
-import { KubeAppChartNameComponent } from './list-types/kubernetes-apps/kube-app-chart-name/kube-app-chart-name.component';
-import { KubeNamespacePodCountComponent } from './list-types/kubernetes-namespaces/kube-namespace-pod-count/kube-namespace-pod-count.component';
+import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 
 @NgModule({
   imports: [
@@ -140,7 +145,8 @@ import { KubeNamespacePodCountComponent } from './list-types/kubernetes-namespac
     KubernetesNamespacePodsComponent,
     KubeAppcreatedDateComponent,
     KubeAppChartNameComponent,
-    KubeNamespacePodCountComponent
+    KubeNamespacePodCountComponent,
+    PodNameLinkComponent
   ],
   providers: [
     KubernetesService,
@@ -161,7 +167,8 @@ import { KubeNamespacePodCountComponent } from './list-types/kubernetes-namespac
     KubernetesNamespaceLinkComponent,
     KubeAppcreatedDateComponent,
     KubeAppChartNameComponent,
-    KubeNamespacePodCountComponent
+    KubeNamespacePodCountComponent,
+    PodNameLinkComponent
   ]
 })
 export class KubernetesModule {
