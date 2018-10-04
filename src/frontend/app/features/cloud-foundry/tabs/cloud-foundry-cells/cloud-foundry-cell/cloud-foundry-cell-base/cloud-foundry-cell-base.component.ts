@@ -27,11 +27,11 @@ export class CloudFoundryCellBaseComponent {
     },
     {
       link: 'charts',
-      label: 'Charts'
+      label: 'Metrics'
     },
     {
       link: 'apps',
-      label: 'Applications'
+      label: 'App Instances'
     },
   ];
 
@@ -49,7 +49,7 @@ export class CloudFoundryCellBaseComponent {
 
     this.waitForEntityId = cfCellService.healthyMetricId;
     this.name$ = cfCellService.cellMetric$.pipe(
-      map(metric => `${metric.bosh_job_id} (${metric.bosh_deployment})`)
+      map(metric => `${metric.bosh_job_id}`)
     );
 
     this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(

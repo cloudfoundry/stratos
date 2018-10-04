@@ -22,6 +22,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 
 export interface CfCellApp {
+  metric: IMetricApplication;
   appGuid: string;
   appEntityService: Observable<APIResource<IApp>>;
 }
@@ -58,6 +59,7 @@ export class CfCellAppsDataSource
           return [];
         }
         return response[0].data.result.map<CfCellApp>(res => ({
+          metric: res.metric,
           appGuid: res.metric.application_id,
           appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid, entityServiceFactory)
         }));

@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { IApp, ISpace } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
+import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
-import { APIResource } from '../../../../../store/types/api.types';
-import { IApp, ISpace } from '../../../../../core/cf-api.types';
 
 @Injectable()
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
@@ -24,7 +24,7 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
     noEntries: 'There are no applications'
   };
 
-  constructor(store: Store<AppState>, activeRouteCfCell: ActiveRouteCfCell, entityServiceFactory: EntityServiceFactory) {
+  constructor(store: Store<AppState>, private activeRouteCfCell: ActiveRouteCfCell, entityServiceFactory: EntityServiceFactory) {
     super();
     this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this, entityServiceFactory);
   }
@@ -32,7 +32,7 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
   getColumns = (): ITableColumn<CfCellApp>[] => [
     {
       columnId: 'app',
-      headerCell: () => 'Application',
+      headerCell: () => 'App Name',
       cellFlex: '1',
       cellDefinition: {
         getAsyncLink: (value: APIResource<IApp>) => `/applications/${value.entity.cfGuid}/${value.metadata.guid}/summary`,
@@ -41,6 +41,15 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
           pathToValue: 'entity.name'
         }
       },
+    },
+    {
+      columnId: 'appInstance',
+      headerCell: () => 'App Instance',
+      cellDefinition: {
+        valuePath: 'metric.instance_index',
+        getLink: (row: CfCellApp) => `/applications/${this.activeRouteCfCell.cfGuid}/${row.appGuid}/instances`
+      },
+      cellFlex: '1',
     },
     {
       columnId: 'space',
