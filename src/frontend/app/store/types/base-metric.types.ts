@@ -12,6 +12,7 @@ export interface IMetricsResponse<T = any> {
   status: string;
   data: IMetrics<T>;
 }
+
 export interface IMetricsData<T = any> {
   resultType: string;
   result: [T];
@@ -19,7 +20,7 @@ export interface IMetricsData<T = any> {
 export interface IMetrics<T = any> {
   query: MetricQueryConfig;
   queryType: MetricQueryType;
-  data: IMetricsData;
+  data: IMetricsData<T>;
 }
 
 interface IVectorResult<T> {

@@ -1,7 +1,7 @@
 
-import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 
-import {withLatestFrom, skipWhile,  map, first, filter } from 'rxjs/operators';
+import { withLatestFrom, skipWhile, map, first, filter, tap } from 'rxjs/operators';
 import {
   endpointEntitiesSelector,
   endpointStatusSelector,
@@ -47,7 +47,7 @@ export class EndpointsService implements CanActivate {
         this.haveRegistered$,
         this.haveConnected$,
         this.userService.isAdmin$,
-    ),
+      ),
       map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
         const [authState] = state;
         if (authState.sessionData.valid) {
@@ -68,7 +68,7 @@ export class EndpointsService implements CanActivate {
         }
 
         return false;
-      }), );
+      }));
   }
 
   hasMetrics(endpointId: string) {

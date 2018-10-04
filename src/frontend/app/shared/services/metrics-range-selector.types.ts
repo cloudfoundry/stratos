@@ -14,5 +14,7 @@ export interface StoreMetricTimeRange {
 
 export enum MetricQueryType {
   QUERY = 'query',
-  RANGE_QUERY = 'query_range'
+  RANGE_QUERY = 'query_range',
+  // Response contains a single value instead of a series of values
+  VALUE = 'value'
 }

@@ -1,12 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableCellUsageComponent } from './table-cell-usage.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
-import { UsageGaugeComponent } from '../../../../usage-gauge/usage-gauge.component';
-import { PercentagePipe } from '../../../../../pipes/percentage.pipe';
-import { UtilsService } from '../../../../../../core/utils.service';
 import { CoreModule } from '../../../../../../core/core.module';
-import { SharedModule } from '../../../../../shared.module';
+import { UtilsService } from '../../../../../../core/utils.service';
+import { EntityInfo } from '../../../../../../store/types/api.types';
+import { PercentagePipe } from '../../../../../pipes/percentage.pipe';
+import { UsageGaugeComponent } from '../../../../usage-gauge/usage-gauge.component';
+import { TableCellUsageComponent } from './table-cell-usage.component';
 
 describe('TableCellUsageComponent', () => {
   let component: TableCellUsageComponent<EntityInfo>;
