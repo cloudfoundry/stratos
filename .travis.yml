@@ -67,6 +67,7 @@ jobs:
     - sudo apt-get -qq update
     - sudo apt-get install -y ffmpeg
     script:
+    - "./deploy/ci/travis/fetch-depcache.sh"
     - "./deploy/ci/travis/run-e2e-tests.sh video"
     - "./deploy/ci/travis/upload-e2e-test-report.sh"
 notifications:
