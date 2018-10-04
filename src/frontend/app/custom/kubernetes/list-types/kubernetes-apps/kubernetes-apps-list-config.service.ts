@@ -12,6 +12,7 @@ import { KubernetesApp } from '../../store/kube.types';
 import { AppLinkComponent } from './app-link/app-link.component';
 import { KubeAppcreatedDateComponent } from './kube-appcreated-date/kube-appcreated-date.component';
 import { KubeAppChartNameComponent } from './kube-app-chart-name/kube-app-chart-name.component';
+import { KubeAppVersionComponent } from './kube-app-version/kube-app-version.component';
 
 @Injectable()
 export class KubernetesAppsListConfigService implements IListConfig<KubernetesApp> {
@@ -52,14 +53,7 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
     },
     {
       columnId: 'version', headerCell: () => 'Version',
-      cellDefinition: {
-        getValue: (a) => a.version
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'version',
-        field: 'version'
-      },
+      cellComponent: KubeAppVersionComponent,
       cellFlex: '5',
     },
     {
