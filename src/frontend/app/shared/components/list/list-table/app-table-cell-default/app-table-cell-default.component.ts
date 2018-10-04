@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../list.types';
-import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
-import { ICellDefinition } from './../table.types';
+import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
+import { ICellDefinition } from '../table.types';
 
 @Component({
   moduleId: module.id,

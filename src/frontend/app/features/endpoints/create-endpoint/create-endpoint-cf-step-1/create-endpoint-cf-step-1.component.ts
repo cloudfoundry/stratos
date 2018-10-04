@@ -51,6 +51,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   showAdvancedFields = false;
   clientRedirectURI: string;
 
+  endpointTypeSupportsSSO = false;
+
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
@@ -127,8 +129,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     this.setAdvancedFields(endpoint);
   }
 
-  // Only show the Client ID and Client Secret fields if the endpoint type if Cloud Foundry
+  // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
   setAdvancedFields(endpoint: EndpointTypeHelper) {
     this.showAdvancedFields = endpoint.value === 'cf';
+
+    // Only allow SSL if the endpoint type isCloud Foundry
+    this.endpointTypeSupportsSSO = endpoint.value === 'cf';
   }
 }

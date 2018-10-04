@@ -1,0 +1,14 @@
+<div class="kubernetes-node-summary-card">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Summary</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="kubernetes-node-summary-card__content">
+        <app-metadata-item icon="title" label="Name">{{ (kubeNodeService.nodeEntity$ | async)?.metadata.name }}</app-metadata-item>
+        <app-metadata-item icon="today" label="Created">{{ (kubeNodeService.nodeEntity$ | async)?.metadata.creationTimestamp | date:'medium' }}</app-metadata-item>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</div>

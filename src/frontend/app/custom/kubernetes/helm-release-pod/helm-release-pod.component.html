@@ -1,0 +1,11 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>{{ podName }}</h1>
+  <div class="page-header-right">
+  </div>
+</app-page-header>
+<div class="helm-release-pod">
+  <app-pod-usage metric="container_memory_usage_bytes" title="Memory usage over the past hour / Memory Usage (MB)" yAxisLabel="" seriesTranslation="mb"></app-pod-usage>
+  <app-pod-usage metric="container_cpu_usage_seconds_total" title="CPU usage over the past hour / Usage in seconds" yAxisLabel="" seriesTranslation=""></app-pod-usage>
+  <app-pod-usage metric="container_network_transmit_bytes_total" title="Cumulative Data transmitted over the past hour / Transmitted Data (MB)" yAxisLabel="" seriesTranslation="mb"></app-pod-usage>
+  <app-pod-usage metric="container_network_receive_bytes_total" title="Cumulative Data received over the past hour / Received Data (MB)" yAxisLabel="" seriesTranslation="mb"></app-pod-usage>
+</div>

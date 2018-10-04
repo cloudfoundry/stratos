@@ -224,5 +224,7 @@ d="M0 0z" />
 d="M0 0z" />
     <glyph glyph-name="z" unicode="z" 
 d="M0 0z" />
+<glyph glyph-name="storage" unicode="storage" d="M0 239l199 537 602 0 199-537-80-315-840 0z m78-51l55-213 734 0 55 213-844 0z m654-106q0 16 12 28t28 12 29-12 11-28-11-29-29-11-28 11-12 29z" horiz-adv-x="1000" />
+
   </font>
 </defs></svg>

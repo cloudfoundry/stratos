@@ -19,4 +19,5 @@ export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  showLegend?: boolean;
 }

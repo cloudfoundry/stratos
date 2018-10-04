@@ -1,5 +1,5 @@
 
-import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
+import {combineLatest as observableCombineLatest, of as observableOf, Observable } from 'rxjs';
 
 import {withLatestFrom, skipWhile,  map, first, filter } from 'rxjs/operators';
 import {
@@ -15,7 +15,6 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
-
 
 @Injectable()
 export class EndpointsService implements CanActivate {
@@ -76,6 +75,15 @@ export class EndpointsService implements CanActivate {
       filter(endpoint => !!endpoint),
       map(endpoint => endpoint.metricsAvailable),
       first()
+    );
+  }
+
+  doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
+    return this.endpoints$.pipe(
+      map(endpoints => {
+        const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
+        return !haveAtLeastOne;
+      })
     );
   }
 }

@@ -22,15 +22,24 @@
           <input matInput placeholder="Password" type="password" formControlName="password">
         </mat-form-field>
       </div>
+      <div *ngIf="endpointForm.value.authType === 'kubeconfig'" formGroupName="authValues" class="connection-dialog__auth">
+        <span>Specify `kubeconfig` file:</span>
+        <app-file-input placeholder="kubeconfig" (onFileSelect)="dealWithKubeConfigFile($event)" [accept]="upload">
+        </app-file-input>
+        <mat-form-field hidden=true>
+          <input matInput formControlName="kubeconfig" hidden=true>
+        </mat-form-field>
+      </div>
+      <mat-checkbox *ngIf="canShareEndpointToken" class="connection-dialog__shared" matInput name="systemShared" formControlName="systemShared">Share this endpoint connection</mat-checkbox>
       <div *ngIf="endpointForm.value.authType === 'sso'" formGroupName="authValues" class="connection-dialog__auth">
         <p>You will be redirected to the Single Sign-On UI for this endpoint and returned to Stratos upon completion.</p>
       </div>
-      <mat-checkbox *ngIf="canShareEndpointToken" class="connection-dialog__shared" matInput name="systemShared" formControlName="systemShared">Share this endpoint connection</mat-checkbox>
     </mat-dialog-content>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>
     <mat-dialog-actions class="connection-dialog__actions">
       <button [mat-dialog-close]="true" mat-button color="warn">Cancel</button>
-      <button type="submit" [disabled]="!(canSubmit$ | async)" mat-button color="primary">Connect</button>
+      <!-- <button type="submit" [disabled]="!(canSubmit$ | async)" mat-button color="primary">Connect</button> -->
+      <button type="submit" mat-button color="primary">Connect</button>
     </mat-dialog-actions>
   </form>
 </div>

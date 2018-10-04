@@ -67,6 +67,7 @@ func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugi
 // AddAdminGroupRoutes adds the admin routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
+	echoContext.GET("/metrics/kubernetes/:podName/:op", m.getPodMetrics)
 }
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
@@ -183,6 +184,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 					info.Type = item.Type
 					info.URL = item.URL
 					info.Job = item.Job
+					log.Debugf("Metrics provider: %+v", info)
 					metricsProviders = append(metricsProviders, info)
 				}
 			}
@@ -193,7 +195,15 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 	for _, values := range info.Endpoints {
 		for _, endpoint := range values {
 			// Look to see if we can find the metrics provider for this URL
+			log.Debugf("Processing endpoint: %+v", endpoint)
+			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
+
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
+				endpoint.Metadata["metrics"] = provider.EndpointGUID
+				endpoint.Metadata["metrics_job"] = provider.Job
+			}
+			// For K8S
+			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
 			}
@@ -251,6 +261,17 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 				// Make a copy
 				relate.metrics = &MetricsMetadata{}
 				*relate.metrics = metricProviderInfo
+				results[guid] = relate
+				delete(endpointsMap, guid)
+				break
+			}
+			// K8s
+			log.Debugf("Processing endpoint: %+v", info)
+			log.Debugf("Processing endpoint Metrics provider: %+v", metricProviderInfo)
+			if info.APIEndpoint.String() == metricProviderInfo.URL {
+				relate := EndpointMetricsRelation{}
+				relate.endpoint = info
+				relate.metrics = &metricProviderInfo
 				results[guid] = relate
 				delete(endpointsMap, guid)
 				break

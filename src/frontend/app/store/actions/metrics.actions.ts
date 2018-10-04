@@ -1,6 +1,6 @@
+import { environment } from '../../../environments/environment.prod';
+import { schema } from 'normalizr';
 import { Action } from '@ngrx/store';
-
-import { environment } from './../../../environments/environment.prod';
 
 export const METRICS_START = '[Metrics] Start';
 export const METRICS_START_SUCCESS = '[Metrics] Start succeeded';
