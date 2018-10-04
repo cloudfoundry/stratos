@@ -11,6 +11,7 @@ import { IListConfig, ListViewTypes } from '../../../../shared/components/list/l
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
+import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 
 
 @Injectable()
@@ -19,13 +20,18 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
 
   columns: Array<ITableColumn<KubernetesNamespace>> = [
     {
-      columnId: 'name', headerCell: () => 'ID',
+      columnId: 'name', headerCell: () => 'Name',
       cellComponent: KubernetesNamespaceLinkComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',
         field: 'metadata.name'
       },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'pods', headerCell: () => 'No. of Pods',
+      cellComponent: KubeNamespacePodCountComponent,
       cellFlex: '5',
     },
     {

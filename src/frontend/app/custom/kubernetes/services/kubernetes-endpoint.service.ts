@@ -14,17 +14,19 @@ import {
   kubernetesDeploymentsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
+  kubernetesPodsSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
-import { KubernetesDeployment, KubernetesStatefuleSet, KubeService } from '../store/kube.types';
+import { KubernetesDeployment, KubernetesStatefuleSet, KubeService, KubernetesPod } from '../store/kube.types';
 import {
   GeKubernetesDeployments,
   GetKubernetesServices,
   GetKubernetesStatefulSets,
   KubePaginationAction,
+  GetKubernetesPods,
 } from '../store/kubernetes.actions';
 
 
@@ -40,6 +42,7 @@ export class KubernetesEndpointService {
   deployments$: Observable<KubernetesDeployment[]>;
   statefulSets$: Observable<KubernetesStatefuleSet[]>;
   services$: Observable<KubeService[]>;
+  pods$: Observable<KubernetesPod[]>;
 
   constructor(
     public baseKube: BaseKubeGuid,
@@ -71,6 +74,11 @@ export class KubernetesEndpointService {
     this.deployments$ = this.getObservable<KubernetesDeployment>(
       new GeKubernetesDeployments(this.kubeGuid),
       kubernetesDeploymentsSchemaKey
+    );
+
+    this.pods$ = this.getObservable<KubernetesPod>(
+      new GetKubernetesPods(this.kubeGuid),
+      kubernetesPodsSchemaKey
     );
 
     this.statefulSets$ = this.getObservable<KubernetesStatefuleSet>(
