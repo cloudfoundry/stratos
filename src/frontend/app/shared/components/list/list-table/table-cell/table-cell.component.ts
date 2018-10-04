@@ -103,6 +103,8 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { TableCellSpaceNameComponent } from '../../list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
+import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
+import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 
 
 /* tslint:enable:max-line-length */
@@ -122,6 +124,8 @@ export const listTableCells = [
   TableCellEndpointNameComponent,
   TableCellAppStatusComponent,
   TableCellUsageComponent,
+  TableCellCfCellComponent,
+  TableCellBooleanIndicatorComponent,
   TableCellRouteComponent,
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,

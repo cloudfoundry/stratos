@@ -77,7 +77,8 @@ export class MetricsRangeSelectorManagerService {
           const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
 
           if (timeRange.queryType === MetricQueryType.RANGE_QUERY) {
-            const isDifferent = !start.isSame(this.start) || !end.isSame(this.end);
+
+            const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
             if (isDifferent) {
               this.committedStartEnd = [start, end];
             }

@@ -2,6 +2,7 @@ import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } f
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -10,7 +11,7 @@ import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
-import { MetricsChartTypes } from './metrics-chart.types';
+import { IMetricsChartConfig, MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
 export interface MetricsConfig<T = any> {
@@ -35,7 +36,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @Input()
   public metricsConfig: MetricsConfig;
   @Input()
-  public chartConfig: MetricsChartConfig;
+  public chartConfig: IMetricsChartConfig;
   @Input()
   public title: string;
 

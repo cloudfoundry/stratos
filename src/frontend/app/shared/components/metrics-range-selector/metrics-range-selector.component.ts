@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FetchApplicationMetricsAction, MetricsAction } from '../../../store/actions/metrics.actions';
+
+import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { IMetrics } from '../../../store/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
@@ -44,7 +45,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
 
 
   @Output()
-  public metricsAction = new EventEmitter<FetchApplicationMetricsAction>();
+  public metricsAction = new EventEmitter<MetricsAction>();
 
   private baseActionValue: MetricsAction;
 

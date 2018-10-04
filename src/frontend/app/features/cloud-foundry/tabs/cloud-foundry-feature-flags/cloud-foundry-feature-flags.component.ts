@@ -6,7 +6,6 @@ import {
   CfFeatureFlagsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { APIResource } from '../../../../store/types/api.types';
 
 @Component({
   selector: 'app-cloud-foundry-feature-flags',
