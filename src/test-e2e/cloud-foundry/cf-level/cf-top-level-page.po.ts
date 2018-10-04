@@ -19,6 +19,20 @@ export class CfTopLevelPage extends CFPage {
     return page;
   }
 
+  // Detect cfGuid from the URL
+  public static detect(): promise.Promise<CfTopLevelPage> {
+    return browser.getCurrentUrl().then(url => {
+      if (url.indexOf(browser.baseUrl) === 0) {
+        url = url.substr(browser.baseUrl.length + 1);
+      }
+      const urlParts = url.split('/');
+      expect(urlParts.length).toBe(3);
+      expect(urlParts[0]).toBe('cloud-foundry');
+      const cfGuid = urlParts[1];
+      return CfTopLevelPage.forEndpoint(cfGuid);
+    });
+  }
+
   // Goto the Organizations view (tab)
   goToOrgView(): ListComponent {
     this.subHeader.clickItem('Organizations');
@@ -98,7 +112,7 @@ export class CfTopLevelPage extends CFPage {
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
     // Some tabs don't appear until the page has fully loaded - so wait until the tab is present
     const tabElement = this.subHeader.getItem(label);
-    browser.wait(this.until.presenceOf(tabElement), 10000);
+    browser.wait(this.until.presenceOf(tabElement), 10000, 'Tab: ' + label);
     return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
