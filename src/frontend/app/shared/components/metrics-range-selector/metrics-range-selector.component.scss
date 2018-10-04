@@ -1,35 +1,8 @@
 @import '../../../../sass/mixins';
-.metrics-chart {
+.metrics-range-selector {
   $animation-function: cubic-bezier(0, 0, .2, 1);
   $animation-time: 250ms;
-  height: 100%;
-  width: 100%;
-  &__header {
-    align-items: center;
-    display: flex;
-  }
-  &__card {
-    height: 300px;
-    margin-bottom: 15px;
-  }
-  &__outer {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-  }
-  &__title {
-    margin: 0 10px 10px;
-    text-align: left;
-  }
-  &__loading {
-    margin: auto;
-    min-width: 100px;
-    width: 10%;
-  }
-  &__refreshing {
-    position: absolute;
-  }
+  display: flex;
   &__overlay {
     background-color: rgba(0, 0, 0, 0);
     bottom: 0;
@@ -55,7 +28,7 @@
       background-color: rgba(0, 0, 0, .6);
       transition-delay: 0s;
       visibility: visible;
-      .metrics-chart__overlay-inner {
+      .metrics-range-selector__overlay-inner {
         transform: translateY(0);
       }
     }
@@ -80,6 +53,7 @@
   &__selected-range {
     align-items: center;
     display: flex;
+    margin-left: 10px;
   }
   &__selected-range-dates {
     display: none;
@@ -99,12 +73,5 @@
   &__selected-range-edit {
     cursor: pointer;
     margin-left: 10px;
-  }
-  .no-content {
-    padding: 20px 15px;
-    &__name {
-      font-size: 12px;
-      padding-top: 5px;
-    }
   }
 }

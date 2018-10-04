@@ -6,7 +6,8 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../shared.module';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { MetricsLineChartConfig } from './metrics-chart.types';
-import { FetchApplicationMetricsAction } from '../../../store/actions/metrics.actions';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MetricsChartComponent', () => {
   let component: MetricsChartComponent;
@@ -18,7 +19,8 @@ describe('MetricsChartComponent', () => {
         MDAppModule,
         CoreModule,
         SharedModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        NoopAnimationsModule
       ]
     })
       .compileComponents();
@@ -34,7 +36,7 @@ describe('MetricsChartComponent', () => {
       metricsAction: new FetchApplicationMetricsAction(
         '1',
         '2',
-        'test',
+        new MetricQueryConfig('test'),
       ),
       getSeriesName: () => 'test'
     };
