@@ -84,6 +84,6 @@ export class EndpointsService implements CanActivate {
         const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
         return !haveAtLeastOne;
       })
-    )
-  }  
+    );
+  }
 }
