@@ -16,6 +16,9 @@ export class KubernetesNodeConditionComponent implements OnInit {
   condition: ConditionType;
   condition$: Observable<Condition>;
 
+  @Input()
+  inverse = false;
+
   public titles = {
     'Ready': 'Ready',
     'OutOfDisk': 'Out of Disk',
@@ -35,6 +38,10 @@ export class KubernetesNodeConditionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+
+    console.log('here');
+
+    console.log(this);
 
     this.condition$ = this.kubeNodeService.node$.pipe(
       filter(p => !!p && !!p.entity),

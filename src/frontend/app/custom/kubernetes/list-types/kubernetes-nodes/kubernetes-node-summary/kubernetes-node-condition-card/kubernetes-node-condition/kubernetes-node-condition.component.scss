@@ -1,4 +1,5 @@
 .kube-node-condition {
+  align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -6,6 +7,7 @@
   padding-top: 20px;
 
   &__title {
+    align-items: center;
     display: flex;
     justify-content: center;
 
@@ -13,8 +15,7 @@
       margin-left: 10px;
     }
   }
-
-  // &__green {
-  // background-color: green;
-  // }
+  &__indicator {
+    min-width: 50px;
+  }
 }
