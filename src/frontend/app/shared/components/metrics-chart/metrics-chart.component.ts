@@ -11,7 +11,7 @@ import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
-import { IMetricsChartConfig, MetricsChartTypes } from './metrics-chart.types';
+import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
 export interface MetricsConfig<T = any> {
@@ -20,11 +20,6 @@ export interface MetricsConfig<T = any> {
   mapSeriesItemName?: (value) => string | Date;
   mapSeriesItemValue?: (value) => any;
   sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
-}
-export interface MetricsChartConfig {
-  chartType: MetricsChartTypes;
-  xAxisLabel?: string;
-  yAxisLabel?: string;
 }
 
 @Component({
@@ -36,7 +31,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @Input()
   public metricsConfig: MetricsConfig;
   @Input()
-  public chartConfig: IMetricsChartConfig;
+  public chartConfig: MetricsLineChartConfig;
   @Input()
   public title: string;
 

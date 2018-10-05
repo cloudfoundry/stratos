@@ -31,7 +31,9 @@ export class CloudFoundryCellSummaryComponent {
       MetricQueryType.QUERY,
       (value) => value === '0' ? '1' : '0'
     );
-    this.chartConfig = this.cfCellService.buildChartConfig('Cell Healthy (1)');
+    this.chartConfig = this.cfCellService.buildChartConfig('Cell Health');
+    this.chartConfig.yAxisTickFormatting = (label) => label === '1' ? 'Healthy' : 'Not Healthy';
+    this.chartConfig.yAxisTicks = ['0', '1'];
 
     this.status$ = cfCellService.healthy$.pipe(
       map(health => {

@@ -77,7 +77,7 @@ export class CloudFoundryCellService {
     queryRange: MetricQueryType,
     mapSeriesItemValue?: (value) => any): MetricsConfig<IMetricMatrixResult<IMetricCell>> {
     return {
-      getSeriesName: (result: IMetricMatrixResult<IMetricCell>) => `Cell ${result.metric.bosh_job_id} (${result.metric.bosh_deployment})`,
+      getSeriesName: (result: IMetricMatrixResult<IMetricCell>) => `Cell ${result.metric.bosh_job_id}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       mapSeriesItemValue,
       metricsAction: new FetchCFCellMetricsAction(
@@ -94,6 +94,7 @@ export class CloudFoundryCellService {
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yAxisLabel;
     lineChartConfig.showLegend = false;
+    lineChartConfig.autoScale = false;
     return lineChartConfig;
   }
 
@@ -102,7 +103,8 @@ export class CloudFoundryCellService {
       this.cfGuid,
       this.cellId,
       new MetricQueryConfig(metric + `{bosh_job_id="${this.cellId}"}`, {}),
-      MetricQueryType.VALUE
+      MetricQueryType.QUERY,
+      false
     );
     if (metric === CellMetrics.HEALTHY) {
       this.healthyMetricId = action.metricId;
