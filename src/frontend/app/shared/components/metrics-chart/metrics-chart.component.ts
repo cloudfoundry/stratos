@@ -25,7 +25,6 @@ export interface MetricsChartConfig {
   chartType: MetricsChartTypes;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  showLegend?: boolean;
 }
 
 @Component({
@@ -170,8 +169,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       this.timeSelectorSub.unsubscribe();
     }
   }
-
-  showLegend = () => !!this.chartConfig.showLegend ? this.chartConfig.showLegend : true;
 
   private mapMetricsToChartData(metrics: IMetrics, metricsConfig: MetricsConfig) {
     if (metrics && metrics.data) {

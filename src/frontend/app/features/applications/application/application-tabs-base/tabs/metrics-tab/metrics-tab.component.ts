@@ -28,8 +28,7 @@ export class MetricsTabComponent {
     this.instanceMetricConfigs = [
       [
         {
-          getSeriesName: result => `Instance ${result.metric.instance_index}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
+          getSeriesName: result => `Instance ${result.metric.instance}`,
           sort: MetricsChartHelpers.sortBySeriesName,
           metricsAction: new FetchApplicationMetricsAction(
             applicationService.appGuid,
@@ -41,7 +40,7 @@ export class MetricsTabComponent {
       ],
       [
         {
-          getSeriesName: result => `Instance ${result.metric.instance_index}`,
+          getSeriesName: result => `Instance ${result.metric.instance}`,
           mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
           sort: MetricsChartHelpers.sortBySeriesName,
           mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),
@@ -55,7 +54,7 @@ export class MetricsTabComponent {
       ],
       [
         {
-          getSeriesName: result => `Instance ${result.metric.instance_index}`,
+          getSeriesName: result => `Instance ${result.metric.instance}`,
           mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
           sort: MetricsChartHelpers.sortBySeriesName,
           mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),

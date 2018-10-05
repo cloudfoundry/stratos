@@ -13,7 +13,6 @@ export enum MetricsChartTypes {
 
 export interface IMetricsChartConfig {
   chartType: MetricsChartTypes;
-  showLegend?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
 }
@@ -22,5 +21,4 @@ export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  showLegend?: boolean;
 }
