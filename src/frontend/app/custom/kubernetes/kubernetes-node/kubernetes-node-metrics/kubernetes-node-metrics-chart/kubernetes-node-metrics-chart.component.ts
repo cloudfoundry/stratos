@@ -14,52 +14,45 @@ import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions'
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {
 
-    @Input()
-    private nodeName: string;
-    @Input()
-    private endpointGuid: string;
-    @Input()
-    private yAxisLabel: string;
-    @Input()
-    private metricName: string;
-    @Input()
-    private seriesTranslation: string;
-    @Input()
-    public title: string;
+  @Input()
+  private nodeName: string;
+  @Input()
+  private endpointGuid: string;
+  @Input()
+  private yAxisLabel: string;
+  @Input()
+  private metricName: string;
+  @Input()
+  private seriesTranslation: string;
+  @Input()
+  public title: string;
 
-    public instanceChartConfig: MetricsLineChartConfig;
-    public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
-    constructor() { }
+  public instanceChartConfig: MetricsLineChartConfig;
+  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+  constructor() { }
 
-    private buildChartConfig() {
-      const lineChartConfig = new MetricsLineChartConfig();
-      lineChartConfig.xAxisLabel = 'Time';
-      lineChartConfig.yAxisLabel = this.yAxisLabel;
-      return lineChartConfig;
+  ngOnInit() {
+    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
+    const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
+    this.instanceMetricConfig = {
+      getSeriesName: result => result.metric.name ? result.metric.name : result.metric.id,
+      mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
+      sort: MetricsChartHelpers.sortBySeriesName,
+      mapSeriesItemValue: this.getmapSeriesItemValue(),
+      metricsAction: new FetchKubernetesMetricsAction(
+        this.nodeName,
+        this.endpointGuid,
+        query,
+      ),
+    };
+  }
+
+  private getmapSeriesItemValue() {
+    switch (this.seriesTranslation) {
+      case 'mb':
+        return (bytes) => bytes / 1000000;
+      default:
+        return undefined;
     }
-
-    ngOnInit() {
-      this.instanceChartConfig = this.buildChartConfig();
-      const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
-      this.instanceMetricConfig = {
-        getSeriesName: result => result.metric.name ? result.metric.name : result.metric.id,
-        mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-        sort: MetricsChartHelpers.sortBySeriesName,
-        mapSeriesItemValue: this.getmapSeriesItemValue(),
-        metricsAction: new FetchKubernetesMetricsAction(
-          this.nodeName,
-          this.endpointGuid,
-          query,
-        ),
-      };
-    }
-
-    private getmapSeriesItemValue() {
-      switch (this.seriesTranslation) {
-        case 'mb':
-          return (bytes) => bytes / 1000000;
-        default:
-          return undefined;
-      }
-    }
+  }
 }

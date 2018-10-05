@@ -1,26 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-import { HelmReleaseService } from '../services/helm-release.service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { kubernetesPodsSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { KubernetesPod } from '../store/kube.types';
-import { GetKubernetesPod, FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 import { Observable } from 'rxjs';
-import { EntityInfo } from '../../../store/types/api.types';
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
-import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { BaseKubeGuid } from '../kubernetes-page.types';
-import { KubernetesService } from '../services/kubernetes.service';
 import { map } from 'rxjs/operators';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
+import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';
+import { getMetricsChartConfigBuilder, ChartDataTypes } from '../../../shared/components/metrics-chart/metrics.component.helpers';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { AppState } from '../../../store/app-state';
+import { entityFactory, kubernetesPodsSchemaKey } from '../../../store/helpers/entity-factory';
+import { EntityInfo } from '../../../store/types/api.types';
 import { IMetricMatrixResult } from '../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../store/types/metric.types';
-import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';
-import { MetricsChartHelpers } from '../../../shared/components/metrics-chart/metrics.component.helpers';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
+import { BaseKubeGuid } from '../kubernetes-page.types';
+import { HelmReleaseService } from '../services/helm-release.service';
+import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { KubernetesService } from '../services/kubernetes.service';
+import { KubernetesPod } from '../store/kube.types';
+import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
 
 @Component({
   selector: 'app-helm-release-pod',
@@ -54,13 +53,6 @@ export class HelmReleasePodComponent implements OnInit {
     MetricsLineChartConfig
   ][];
 
-  private buildChartConfig(yLabel: string) {
-    const lineChartConfig = new MetricsLineChartConfig();
-    lineChartConfig.xAxisLabel = 'Time';
-    lineChartConfig.yAxisLabel = yLabel;
-    return lineChartConfig;
-  }
-
   constructor(
     public helmReleaseService: HelmReleaseService,
     public activatedRoute: ActivatedRoute,
@@ -70,63 +62,43 @@ export class HelmReleasePodComponent implements OnInit {
   ) {
     this.podName = activatedRoute.snapshot.params['podName'];
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
-
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
     this.instanceMetricConfigs = [
-      [
-        {
-          getSeriesName: result => `Container ${result.metric.container_name}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),
-          metricsAction: new FetchKubernetesMetricsAction(
-            this.podName,
-            helmReleaseService.kubeGuid,
-            `container_memory_usage_bytes{pod_name="${this.podName}"}`
-          )
-        },
-        this.buildChartConfig('Memory Usage (MB)')
-      ],
-      [
-        {
-          getSeriesName: result => `Container ${result.metric.container_name}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          metricsAction: new FetchKubernetesMetricsAction(
-            this.podName,
-            helmReleaseService.kubeGuid,
-            `container_cpu_usage_seconds_total{pod_name="${this.podName}"}`
-          )
-        },
-        this.buildChartConfig('CPU Usage (%)')
-      ],
-      [
-        {
-          getSeriesName: result => `Container ${result.metric.container_name}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),
-          metricsAction: new FetchKubernetesMetricsAction(
-            this.podName,
-            helmReleaseService.kubeGuid,
-            `container_network_transmit_bytes_total{pod_name="${this.podName}"}`
-          )
-        },
-        this.buildChartConfig('Cumulative Data transmitted (MB)')
-      ],
-      [
-        {
-          getSeriesName: result => `Container ${result.metric.container_name}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),
-          metricsAction: new FetchKubernetesMetricsAction(
-            this.podName,
-            helmReleaseService.kubeGuid,
-            `container_network_receive_bytes_total{pod_name="${this.podName}"}`
-          )
-        },
-        this.buildChartConfig('Cumulative Data received (MB)')
-      ]
+      chartConfigBuilder(
+        new FetchKubernetesMetricsAction(
+          this.podName,
+          helmReleaseService.kubeGuid,
+          `container_memory_usage_bytes{pod_name="${this.podName}"}`
+        ),
+        'Memory Usage (MB)',
+        ChartDataTypes.BYTES
+      ),
+      chartConfigBuilder(
+        new FetchKubernetesMetricsAction(
+          this.podName,
+          helmReleaseService.kubeGuid,
+          `container_cpu_usage_seconds_total{pod_name="${this.podName}"}`
+        ),
+        'CPU Usage (%)'
+      ),
+      chartConfigBuilder(
+        new FetchKubernetesMetricsAction(
+          this.podName,
+          helmReleaseService.kubeGuid,
+          `container_network_transmit_bytes_total{pod_name="${this.podName}"}`
+        ),
+        'Cumulative Data transmitted (MB)',
+        ChartDataTypes.BYTES
+      ),
+      chartConfigBuilder(
+        new FetchKubernetesMetricsAction(
+          this.podName,
+          helmReleaseService.kubeGuid,
+          `container_network_receive_bytes_total{pod_name="${this.podName}"}`
+        ),
+        'Cumulative Data received (MB)',
+        ChartDataTypes.BYTES
+      )
     ];
 
 
