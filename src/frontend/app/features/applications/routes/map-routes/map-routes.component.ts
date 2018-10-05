@@ -36,7 +36,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig<APIResource>,
+    listConfig: ListConfig<APIResource>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;

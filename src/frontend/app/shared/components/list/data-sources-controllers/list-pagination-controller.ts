@@ -133,8 +133,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         }
       }
     });
-
-
   }
 
   private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {

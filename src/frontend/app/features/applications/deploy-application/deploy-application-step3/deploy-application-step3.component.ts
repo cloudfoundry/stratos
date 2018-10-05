@@ -49,19 +49,17 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private errorSub: Subscription;
   private validSub: Subscription;
 
-  private fsData: FileScannerInfo;
-
   constructor(
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
+    snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private http: HttpClient,
+    http: HttpClient,
   ) {
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, http);
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
-    ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
+    ).subscribe(status => snackBar.open(status.errorMsg, 'Dismiss'));
 
     const appGuid$ = this.deployer.applicationGuid$.pipe(
       filter((appGuid) => appGuid !== null),
