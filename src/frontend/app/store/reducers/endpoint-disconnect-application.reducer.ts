@@ -1,26 +1,23 @@
-import { APIResource } from '../types/api.types';
-import { IRequestEntityTypeState } from '../app-state';
+import { IApp } from '../../core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
-export function endpointDisconnectApplicationReducer(entityKey) {
-  return function (state: APIResource, action: DisconnectEndpoint) {
+import { APIResource } from '../types/api.types';
+
+export function endpointDisconnectApplicationReducer() {
+  return function (state: { [appGuid: string]: APIResource<{ cfGuid: string }> }, action: DisconnectEndpoint) {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:
-        return deletionApplicationFromEndpoint(state, action.guid, entityKey);
+        return deletionApplicationFromEndpoint(state, action.guid);
     }
     return state;
   };
 }
 
-function deletionApplicationFromEndpoint(state: APIResource, endpointGuid, entityKey: string) {
-  const oldEntities = Object.values(state);
-  const entities = {};
-  oldEntities.forEach(app => {
-    if (app.cfGuid !== endpointGuid && app.guid) {
-      entities[app.guid] = app;
+function deletionApplicationFromEndpoint(state: { [appGuid: string]: APIResource<{ cfGuid: string }> }, endpointGuid) {
+  return Object.values(state).reduce((newEntities, app) => {
+    if (app.entity.cfGuid !== endpointGuid && app.metadata.guid) {
+      newEntities[app.metadata.guid] = app;
     }
-  });
-  return entities;
+    return newEntities;
+  }, {});
 }
-
-

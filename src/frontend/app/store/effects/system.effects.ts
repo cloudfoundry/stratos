@@ -1,18 +1,14 @@
-
-import {catchError, mergeMap} from 'rxjs/operators';
-import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFailed } from './../types/request.types';
-import {
-  IRequestAction
-} from '../types/request.types';
-import { endpointStoreNames } from '../types/endpoint.types';
-import { SystemInfo, systemStoreNames } from './../types/system.types';
 import { HttpClient } from '@angular/common/http';
-import { GET_SYSTEM_INFO, GetSystemInfo, GetSystemSuccess, GetSystemFailed } from './../actions/system.actions';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
-import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
-import { GetAllEndpoints } from '../actions/endpoint.actions';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { catchError, mergeMap } from 'rxjs/operators';
+
+import { AppState } from '../app-state';
+import { IRequestAction } from '../types/request.types';
+import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from './../actions/system.actions';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import { SystemInfo, systemStoreNames } from './../types/system.types';
 
 @Injectable()
 export class SystemEffects {
@@ -47,6 +43,6 @@ export class SystemEffects {
             new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
             new WrapperRequestActionFailed('Could not fetch system info', apiAction)
           ];
-        }), );
+        }));
     }));
 }
