@@ -93,7 +93,6 @@ export class CloudFoundryCellService {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yAxisLabel;
-    lineChartConfig.showLegend = false;
     return lineChartConfig;
   }
 

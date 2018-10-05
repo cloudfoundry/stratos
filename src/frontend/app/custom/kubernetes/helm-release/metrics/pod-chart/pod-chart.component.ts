@@ -44,7 +44,6 @@ export class PodChartComponent implements OnInit {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = this.yAxisLabel;
-    lineChartConfig.showLegend = false;
     return lineChartConfig;
   }
 

@@ -26,7 +26,6 @@ export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod, any
       schema: entityFactory(kubernetesPodsSchemaKey),
       getRowUniqueId: object => object.name,
       paginationKey: action.paginationKey,
-      // transformEntity: (pods: Observable<KubernetesPod[]>) => helmReleaseService.getReleasePods(pods),
       isLocal: true,
       listConfig
     });

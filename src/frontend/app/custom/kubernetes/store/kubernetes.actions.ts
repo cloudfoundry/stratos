@@ -76,7 +76,7 @@ export class GetKubernetesReleasePods implements KubePaginationAction {
   constructor(public kubeGuid: string, releaseName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, releaseName, kubeGuid);
     this.initialParams = {
-      labelSelector: `release=${releaseName}`
+      labelSelector: `app.kubernetes.io/instance=${releaseName}`
     };
   }
   initialParams: { labelSelector: string; };
