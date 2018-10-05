@@ -14,8 +14,8 @@
         </div>
       </div>
     </ng-template>
-    <div class="metrics-chart" *ngIf="results$ | async as results; else other_content">
-      <div class="metrics-chart" *ngIf="results.length; else other_content" [ngSwitch]="chartConfig.chartType">
+    <div class="metrics-chart" *ngIf="!(isFetching$ | async)">
+      <div class="metrics-chart" *ngIf="results$ | async as results; else other_content" [ngSwitch]="chartConfig.chartType">
         <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="hasMultipleInstances"
           [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true"
           [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="true">

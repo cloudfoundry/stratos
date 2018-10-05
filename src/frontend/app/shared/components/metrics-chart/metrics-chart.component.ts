@@ -2,7 +2,6 @@ import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } f
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
-
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -13,6 +12,7 @@ import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { IMetricsChartConfig, MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
+
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -111,7 +111,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       map(metrics => {
         const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
         if (!metricsArray.length) {
-          return [];
+          return null;
         }
         this.hasMultipleInstances = metricsArray.length > 1;
         return this.postFetchMiddleware(metricsArray);
@@ -132,7 +132,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       baseResults$.pipe(startWith(null)),
       this.metricsMonitor.isFetchingEntity$
     ).pipe(
-      map(([results, fetching]) => !results && fetching)
+      map(([results, fetching]) => !results && fetching),
     );
   }
 
