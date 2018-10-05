@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 
 @Component({

@@ -13,6 +13,7 @@ import { KubernetesNode, ConditionType } from '../../../../../../../src/frontend
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
 import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';
 import { getConditionSort } from '../kube-sort.helper';
+import { NodePodCountComponent } from './node-pod-count/node-pod-count.component';
 
 @Injectable()
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
@@ -20,7 +21,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
 
   columns: Array<ITableColumn<KubernetesNode>> = [
     {
-      columnId: 'name', headerCell: () => 'ID',
+      columnId: 'name', headerCell: () => 'Name',
       cellComponent: KubernetesNodeLinkComponent,
       sort: {
         type: 'sort',
@@ -51,6 +52,15 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     {
       columnId: 'memPressure', headerCell: () => 'Memory Pressure',
       cellComponent: InverseConditionCellComponent,
+      cellConfig: {
+        conditionType: ConditionType.MemoryPressure
+      },
+      sort: getConditionSort(ConditionType.MemoryPressure),
+      cellFlex: '2',
+    },
+    {
+      columnId: 'numPods', headerCell: () => 'No. of Pods',
+      cellComponent: NodePodCountComponent,
       cellConfig: {
         conditionType: ConditionType.MemoryPressure
       },

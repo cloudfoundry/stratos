@@ -14,7 +14,8 @@ import { Observable } from 'rxjs';
 import { EntityInfo } from '../../../store/types/api.types';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { IMetrics } from '../../../store/types/base-metric.types';
-import { MetricsAction } from '../../../store/actions/metrics.actions';
+import { MetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
+import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
 
 
 export enum KubeNodeMetric {
@@ -67,8 +68,8 @@ export class KubernetesNodeService {
 
     const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"}[1h]))`;
     const metricsAction = new FetchKubernetesMetricsAction(this.nodeName, this.kubeGuid, query);
-    const metricsId = MetricsAction.buildMetricKey(this.nodeName, query);
-    const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(metricsId, metricSchemaKey, entityFactory(metricSchemaKey));
+    const metricsId = MetricsAction.buildMetricKey(this.nodeName, new MetricQueryConfig(query), MetricQueryType.QUERY);
+    const metricsMonitor = this.entityMonitorFactory.create<any>(metricsId, metricSchemaKey, entityFactory(metricSchemaKey));
     this.store.dispatch(metricsAction);
     const pollSub = metricsMonitor.poll(30000, () => this.store.dispatch(metricsAction),
       request => ({ busy: request.fetching, error: request.error, message: request.message }))

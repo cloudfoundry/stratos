@@ -11,6 +11,7 @@ import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { KubernetesPod } from '../../store/kube.types';
 import { KubernetesPodTagsComponent } from './kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { getContainerLengthSort } from '../kube-sort.helper';
+import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
 
 @Injectable()
 export class KubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
@@ -19,9 +20,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
   columns: Array<ITableColumn<KubernetesPod>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
-      cellDefinition: {
-        getValue: (row) => `${row.metadata.name}`
-      },
+      cellComponent: PodNameLinkComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',
