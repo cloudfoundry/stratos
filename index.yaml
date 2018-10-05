@@ -187,4 +187,13 @@ entries:
     urls:
     - https://github.com/SUSE/stratos-metrics/releases/download/2.0.0-metrics-dev/metrics-0.2.0.tgz
     version: 2.0.0-metrics-dev
+  - apiVersion: v1
+    created: 2018-10-05T11:54:42.658213114Z
+    description: Stratos Metrics component to fetch metrics data from S/CF. Uses Prometheus
+      and Firehose Exporter
+    digest: 4a7e3cac41802807c50e550d6362022d3ac456a2ed6b9896ef24ba88fddc6879
+    name: metrics
+    urls:
+    - https://github.com/SUSE/stratos-metrics/releases/download/2.1.0-metrics-dev/metrics-0.3.0.tgz
+    version: 2.1.0-metrics-dev
 generated: 2018-09-25T21:23:09.776678806Z
