@@ -27,27 +27,7 @@ export class LocalListController<T = any> {
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
     );
 
-    const cleanPage$ = this.buildCleanPageObservable(page$, pagination$);
-
-    return this.buildFullCleanPageObservable(cleanPage$, cleanPagination$, dataFunctions);
-  }
-
-  private buildCleanPageObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>) {
-    return combineLatest(
-      page$.pipe(
-        distinctUntilChanged((oldPage, newPage) => oldPage.length === newPage.length),
-      ),
-      pagination$.pipe(
-        filter(pagination => {
-          return !getCurrentPageRequestInfo(pagination).busy;
-        }),
-        distinctUntilChanged((oldPag, newPag) => {
-          return getCurrentPageRequestInfo(oldPag).busy === getCurrentPageRequestInfo(newPag).busy;
-        }),
-      )
-    ).pipe(
-      map(([page]) => page)
-    );
+    return this.buildFullCleanPageObservable(page$, cleanPagination$, dataFunctions);
   }
 
   private buildFullCleanPageObservable(cleanPage$: Observable<T[]>, cleanPagination$: Observable<PaginationEntityState>, dataFunctions?) {

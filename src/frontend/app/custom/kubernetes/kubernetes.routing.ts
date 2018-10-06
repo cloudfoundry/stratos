@@ -43,6 +43,13 @@ const kubernetes: Routes = [{
   },
 },
 {
+  path: ':kubeId/pods/:podName',
+  component: HelmReleasePodComponent,
+  data: {
+    uiFullView: true
+  },
+},
+{
   path: ':kubeId/namespaces/:namespaceName/pods/:podName',
   component: HelmReleasePodComponent,
   data: {
@@ -103,12 +110,8 @@ const kubernetes: Routes = [{
   children: [
     {
       path: '',
-      redirectTo: 'summary',
+      redirectTo: 'pods',
       pathMatch: 'full'
-    },
-    {
-      path: 'summary',
-      component: HelmReleaseSummaryComponent
     },
     {
       path: 'pods',

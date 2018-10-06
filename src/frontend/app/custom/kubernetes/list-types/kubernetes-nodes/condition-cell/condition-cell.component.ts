@@ -11,6 +11,8 @@ import { ConditionalExpr } from '@angular/compiler';
 export class ConditionCellComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   condition: string;
 
+  inverse = false;
+
   constructor() {
     super();
   }
@@ -19,4 +21,13 @@ export class ConditionCellComponent extends TableCellCustom<KubernetesNode> impl
     this.condition = this.row.status.conditions.filter(c => c.type === this.config.conditionType)[0].status;
   }
 
+}
+
+
+export class InverseConditionCellComponent extends ConditionCellComponent {
+
+  constructor() {
+    super();
+    this.inverse = true;
+  }
 }

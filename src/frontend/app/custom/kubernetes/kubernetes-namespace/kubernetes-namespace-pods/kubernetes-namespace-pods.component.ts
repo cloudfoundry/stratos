@@ -1,9 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Injector } from '@angular/core';
 
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import {
   KubernetesNamespacePodsListConfigService
  } from '../../list-types/kubernetes-namespace-pods/kubernetes-namespace-pods-list-config.service';
+import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../store/app-state';
+import { EndpointsService } from '../../../../core/endpoints.service';
+import { first } from 'rxjs/operators';
+import {
+  KubernetesNodePodsLinkComponent
+} from '../../list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
 
 @Component({
   selector: 'app-kubernetes-namespace-pods',
@@ -16,9 +25,36 @@ import {
 })
 export class KubernetesNamespacePodsComponent implements OnInit {
 
-  constructor() { }
+  listConfig = null;
+
+  constructor(
+    private store: Store<AppState>,
+    private kubeNamespaceService: KubernetesNamespaceService,
+    private kubeGuid: BaseKubeGuid,
+    private endpointsService: EndpointsService
+  ) { }
 
   ngOnInit() {
-  }
+    // Make the pod name clickable only if we have metrics available
+    this.endpointsService.hasMetrics(this.kubeGuid.guid).pipe(
+      first()
+    ).subscribe(hasMetrics => {
+      const config = new KubernetesNamespacePodsListConfigService(
+        this.store, this.kubeGuid, this.kubeNamespaceService);
 
+      if (hasMetrics) {
+        config.columns[0].cellComponent = KubernetesNodePodsLinkComponent;
+        config.columns[0].cellDefinition = null;
+      } else {
+        config.columns[0].cellComponent = null;
+        config.columns[0].cellDefinition = {
+          getValue: (row) => {
+            return row.metadata.name;
+          }
+        };
+      }
+
+      this.listConfig = config;
+    });
+  }
 }

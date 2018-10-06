@@ -126,7 +126,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   dealWithKubeConfigFile($event) {
-    const file = $event[0];
+    const file = $event;
     const reader = new FileReader();
     reader.onload = () => {
       this.kubeconfig = reader.result;

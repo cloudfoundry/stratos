@@ -53,38 +53,13 @@ export class HelmReleaseService {
       share()
     );
 
-    const statefulSetsAction = new GetKubernetesStatefulSets(this.kubeGuid);
-
-    this.statefulSets$ = getPaginationObservables<KubernetesStatefuleSet>({
-      store: this.store,
-      action: statefulSetsAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        statefulSetsAction.paginationKey,
-        entityFactory(kubernetesStatefulSetsSchemaKey)
-      )
-    }, true).entities$.pipe(
-      filter(p => !!p),
-      map(p => p.filter(r => r.metadata.labels['release'] === this.helmReleaseName)),
+    this.statefulSets$ = kubeEndpointService.statefulSets$.pipe(
+      map(p => p.filter(r => r.metadata.labels['app.kubernetes.io/instance'] === this.helmReleaseName)),
       first(),
     );
 
-    const deploymentsAction = new GeKubernetesDeployments(this.kubeGuid);
-
-    this.deployments$ = getPaginationObservables<KubernetesDeployment>({
-      store: this.store,
-      action: deploymentsAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        deploymentsAction.paginationKey,
-        entityFactory(kubernetesDeploymentsSchemaKey)
-      )
-    }, true).entities$.pipe(
-      filter(p => !!p),
-      map(p => {
-        return p.filter(r => {
-          return r.metadata.labels['release'] === this.helmReleaseName;
-        });
-
-      }),
+    this.deployments$ = kubeEndpointService.deployments$.pipe(
+      map(p => p.filter(r => r.metadata.labels['app.kubernetes.io/instance'] === this.helmReleaseName)),
       first()
     );
 

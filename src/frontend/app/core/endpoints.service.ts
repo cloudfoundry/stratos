@@ -1,20 +1,20 @@
 
-import {combineLatest as observableCombineLatest, of as observableOf, Observable } from 'rxjs';
-
-import {withLatestFrom, skipWhile,  map, first, filter } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
+import { RouterNav } from '../store/actions/router.actions';
+import { AppState, IRequestEntityTypeState } from '../store/app-state';
+import { AuthState } from '../store/reducers/auth.reducer';
 import {
   endpointEntitiesSelector,
-  endpointStatusSelector,
-  endpointsEntityRequestDataSelector
+  endpointsEntityRequestDataSelector,
+  endpointStatusSelector
 } from '../store/selectors/endpoint.selectors';
-import { Injectable } from '@angular/core';
-import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
-import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../store/app-state';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { EndpointModel, EndpointState } from '../store/types/endpoint.types';
 import { UserService } from './user.service';
-import { AuthState } from '../store/reducers/auth.reducer';
-import { RouterNav } from '../store/actions/router.actions';
+
 
 @Injectable()
 export class EndpointsService implements CanActivate {
@@ -46,7 +46,7 @@ export class EndpointsService implements CanActivate {
         this.haveRegistered$,
         this.haveConnected$,
         this.userService.isAdmin$,
-    ),
+      ),
       map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
         const [authState] = state;
         if (authState.sessionData.valid) {
@@ -67,7 +67,7 @@ export class EndpointsService implements CanActivate {
         }
 
         return false;
-      }), );
+      }));
   }
 
   hasMetrics(endpointId: string) {
@@ -84,6 +84,6 @@ export class EndpointsService implements CanActivate {
         const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
         return !haveAtLeastOne;
       })
-    )
-  }  
+    );
+  }
 }

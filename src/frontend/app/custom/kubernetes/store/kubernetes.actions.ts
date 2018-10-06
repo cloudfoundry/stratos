@@ -1,4 +1,4 @@
-import { MetricsAction } from '../../../store/actions/metrics.actions';
+import { MetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import {
   entityFactory,
@@ -76,7 +76,7 @@ export class GetKubernetesReleasePods implements KubePaginationAction {
   constructor(public kubeGuid: string, releaseName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, releaseName, kubeGuid);
     this.initialParams = {
-      labelSelector: `release=${releaseName}`
+      labelSelector: `app.kubernetes.io/instance=${releaseName}`
     };
   }
   initialParams: { labelSelector: string; };
@@ -263,8 +263,7 @@ export class GeKubernetesDeployments implements KubePaginationAction {
 }
 
 export class FetchKubernetesMetricsAction extends MetricsAction {
-  constructor(public guid: string, public cfGuid: string, public query: string) {
-    super(guid, query);
-    this.url = `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
+  constructor(public guid: string, public cfGuid: string, public metricQuery: string) {
+    super(guid, cfGuid, new MetricQueryConfig(metricQuery), `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`);
   }
 }

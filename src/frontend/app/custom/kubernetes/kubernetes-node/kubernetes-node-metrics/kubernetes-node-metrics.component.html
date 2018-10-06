@@ -8,28 +8,9 @@
         <app-kubernetes-node-metric-stats-card title="CPU" [metric]="cpuMetric" [unit]="cpuUnit"></app-kubernetes-node-metric-stats-card>
       </app-tile>
     </app-tile-group>
-    <app-tile-group>
-      <app-tile>
-        <app-kubernetes-node-metrics-chart
-         [nodeName]="kubeNodeService.nodeName"
-         [endpointGuid]="kubeNodeService.kubeGuid"
-         [yAxisLabel]=""
-         [metricName]="memoryMetric"
-         title = "Memory Usage"
-        ></app-kubernetes-node-metrics-chart>
-      </app-tile>
-    </app-tile-group>
-    <app-tile-group>
-      <app-tile>
-        <app-kubernetes-node-metrics-chart
-         [nodeName]="kubeNodeService.nodeName"
-         [endpointGuid]="kubeNodeService.kubeGuid"
-         [yAxisLabel]=""
-         [metricName]="cpuMetric"
-         title= "CPU Usage"
-        ></app-kubernetes-node-metrics-chart>
-      </app-tile>
-    </app-tile-group>
+    <app-metrics-parent-range-selector class="kubernetes-node-metrics__charts">
+      <app-metrics-chart *ngFor="let config of instanceMetricConfigs" [metricsConfig]="config[0]" [chartConfig]="config[1]">
+      </app-metrics-chart>
+    </app-metrics-parent-range-selector>
   </app-tile>
 </div>
-  

@@ -82,7 +82,6 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		req.URI = makePrometheusRequestURI(c, prometheusOp, addQueries)
 		requests = append(requests, req)
 	}
-
 	return requests
 }
 

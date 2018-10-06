@@ -10,6 +10,9 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesAppsDataSource } from './kubernetes-apps-data-source';
 import { KubernetesApp } from '../../store/kube.types';
 import { AppLinkComponent } from './app-link/app-link.component';
+import { KubeAppcreatedDateComponent } from './kube-appcreated-date/kube-appcreated-date.component';
+import { KubeAppChartNameComponent } from './kube-app-chart-name/kube-app-chart-name.component';
+import { KubeAppVersionComponent } from './kube-app-version/kube-app-version.component';
 
 @Injectable()
 export class KubernetesAppsListConfigService implements IListConfig<KubernetesApp> {
@@ -23,6 +26,43 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
         type: 'sort',
         orderKey: 'name',
         field: 'name'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'chartName', headerCell: () => 'Chart Name',
+      cellComponent: KubeAppChartNameComponent,
+      sort: {
+        type: 'sort',
+        orderKey: 'chartName',
+        field: 'chartName'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'status', headerCell: () => 'Status',
+      cellDefinition: {
+        getValue: (a) => a.status
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'status',
+        field: 'status'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'version', headerCell: () => 'Version',
+      cellComponent: KubeAppVersionComponent,
+      cellFlex: '5',
+    },
+    {
+      columnId: 'createdAt', headerCell: () => 'Created At',
+      cellComponent: KubeAppcreatedDateComponent,
+      sort: {
+        type: 'sort',
+        orderKey: 'createdAt',
+        field: 'createdAt'
       },
       cellFlex: '5',
     },

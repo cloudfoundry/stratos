@@ -40,16 +40,8 @@ export class PodChartComponent implements OnInit {
 
   constructor() { }
 
-  private buildChartConfig() {
-    const lineChartConfig = new MetricsLineChartConfig();
-    lineChartConfig.xAxisLabel = 'Time';
-    lineChartConfig.yAxisLabel = this.yAxisLabel;
-    lineChartConfig.showLegend = false;
-    return lineChartConfig;
-  }
-
   ngOnInit() {
-    this.instanceChartConfig = this.buildChartConfig();
+    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
 
     const query = `${this.metricName}{pod_name="${this.podName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
     this.instanceMetricConfig = {

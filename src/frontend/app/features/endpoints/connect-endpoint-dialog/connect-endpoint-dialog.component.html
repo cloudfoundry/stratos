@@ -26,8 +26,17 @@
         <span>Specify `kubeconfig` file:</span>
         <app-file-input placeholder="kubeconfig" (onFileSelect)="dealWithKubeConfigFile($event)" [accept]="upload">
         </app-file-input>
-        <mat-form-field hidden=true>
-          <input matInput formControlName="kubeconfig" hidden=true>
+        <input matInput formControlName="kubeconfig" hidden=true>
+      </div>
+      <div *ngIf="endpointForm.value.authType === 'aws-iam'" formGroupName="authValues" class="connection-dialog__auth">
+        <mat-form-field>
+          <input matInput placeholder="Cluster" formControlName="cluster">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Access Key ID" formControlName="access_key">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Secret Access Key" type="password" formControlName="secret_key">
         </mat-form-field>
       </div>
       <mat-checkbox *ngIf="canShareEndpointToken" class="connection-dialog__shared" matInput name="systemShared" formControlName="systemShared">Share this endpoint connection</mat-checkbox>
