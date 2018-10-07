@@ -73,6 +73,13 @@ func (c *KubernetesSpecification) FetchIAMToken(cnsiRecord interfaces.CNSIRecord
 	return &tokenRecord, &cnsiRecord, nil
 }
 
+func (c *KubernetesSpecification) GetCNSIUserFromIAMToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+	return &interfaces.ConnectedUser{
+		GUID: "AWS IAM",
+		Name: "IAM",
+	}, true
+}
+
 func (c *KubernetesSpecification) getTokenIAM(info AWSIAMUserInfo) (string, error) {
 	generator, err := token.NewGenerator(false)
 	if err != nil {

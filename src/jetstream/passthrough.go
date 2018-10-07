@@ -368,8 +368,8 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 
 	// Find the auth provider for the auth type - default ot oauthflow
 	authHandler := p.GetAuthProvider(tokenRec.AuthType)
-	if authHandler != nil {
-		res, err = authHandler(cnsiRequest, req)
+	if authHandler.Handler != nil {
+		res, err = authHandler.Handler(cnsiRequest, req)
 	} else {
 		res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}

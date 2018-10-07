@@ -1034,7 +1034,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 
 	cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, &cfTokenRecord)
 
-	// If this is a system shared endpoint, then remove some metadata that should be send back to other users
+	// If this is a system shared endpoint, then remove some metadata that should not be send back to other users
 	santizeInfoForSystemSharedTokenUser(cnsiUser, cfTokenRecord.SystemShared)
 
 	return cnsiUser, &cfTokenRecord, ok
@@ -1043,36 +1043,42 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
 	log.Debug("GetCNSIUserFromToken")
 
+	// Custom handler for the Auth type available?
+	authProvider := p.GetAuthProvider(cfTokenRecord.AuthType)
+	if authProvider.UserInfo != nil {
+		return authProvider.UserInfo(cnsiGUID, cfTokenRecord)
+	}
+
+	// Default
+	return p.GetCNSIUserFromOAuthToken(cnsiGUID, cfTokenRecord)
+}
+
+func (p *portalProxy) GetCNSIUserFromBasicToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+	return &interfaces.ConnectedUser{
+		GUID: cfTokenRecord.RefreshToken,
+		Name: cfTokenRecord.RefreshToken,
+	}, true
+}
+
+func (p *portalProxy) GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
 	var cnsiUser *interfaces.ConnectedUser
 	var scope = []string{}
 
-	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
-		cnsiUser = &interfaces.ConnectedUser{
-			GUID: cfTokenRecord.RefreshToken,
-			Name: cfTokenRecord.RefreshToken,
-		}
-	} else if cfTokenRecord.AuthType == "aws-iam" {
-		cnsiUser = &interfaces.ConnectedUser{
-			GUID: "AWS IAM",
-			Name: "IAM",
-		}
-	} else {
-		// get the scope out of the JWT token data
-		userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
-		if err != nil {
-			msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
-			log.Errorf(msg, err)
-			return nil, false
-		}
-
-		// add the uaa entry to the output
-		cnsiUser = &interfaces.ConnectedUser{
-			GUID:   userTokenInfo.UserGUID,
-			Name:   userTokenInfo.UserName,
-			Scopes: userTokenInfo.Scope,
-		}
-		scope = userTokenInfo.Scope
+	// get the scope out of the JWT token data
+	userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
+	if err != nil {
+		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
+		log.Errorf(msg, err)
+		return nil, false
 	}
+
+	// add the uaa entry to the output
+	cnsiUser = &interfaces.ConnectedUser{
+		GUID:   userTokenInfo.UserGUID,
+		Name:   userTokenInfo.UserName,
+		Scopes: userTokenInfo.Scope,
+	}
+	scope = userTokenInfo.Scope
 
 	// is the user an CF admin?
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)

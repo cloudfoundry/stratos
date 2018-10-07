@@ -88,7 +88,11 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 }
 
 func (c *KubernetesSpecification) Init() error {
-	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, c.doAWSIAMFlowRequest)
+	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
+		Handler:  c.doAWSIAMFlowRequest,
+		UserInfo: c.GetCNSIUserFromIAMToken,
+	})
+
 	return nil
 }
 
