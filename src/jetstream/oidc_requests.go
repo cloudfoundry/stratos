@@ -12,8 +12,8 @@ import (
 func (p *portalProxy) doOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOidcFlowRequest")
 
-	authHandler := p.oAuthHandlerFunc(cnsiRequest, req, p.RefreshOidcToken)
-	return p.doAuthFlowRequest(cnsiRequest, req, authHandler)
+	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOidcToken)
+	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {

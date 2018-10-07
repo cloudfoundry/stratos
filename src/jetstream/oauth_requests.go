@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *portalProxy) oAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req *http.Request, refreshOAuthTokenFunc RefreshOAuthTokenFunc) AuthHandlerFunc {
+func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req *http.Request, refreshOAuthTokenFunc interfaces.RefreshOAuthTokenFunc) interfaces.AuthHandlerFunc {
 
 	return func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error) {
 
@@ -49,8 +49,8 @@ func (p *portalProxy) oAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req 
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
-	authHandler := p.oAuthHandlerFunc(cnsiRequest, req, p.RefreshOAuthToken)
-	return p.doAuthFlowRequest(cnsiRequest, req, authHandler)
+	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOAuthToken)
+	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 
 }
 
@@ -69,8 +69,6 @@ func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interf
 
 	return t, c, nil
 }
-
-type RefreshOAuthTokenFunc func(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error)
 
 func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
 	log.Debug("refreshToken")

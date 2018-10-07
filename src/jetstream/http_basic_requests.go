@@ -17,6 +17,6 @@ func (p *portalProxy) doHttpBasicFlowRequest(cnsiRequest *interfaces.CNSIRequest
 		client := p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
 		return client.Do(req)
 	}
-	return p.doAuthFlowRequest(cnsiRequest, req, authHandler)
+	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 
 }

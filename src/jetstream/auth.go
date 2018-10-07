@@ -431,12 +431,20 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				Admin:       isAdmin,
 			}
 
+			// TODO: Only do this for OAuth token types
 			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
 			if ok {
 				// If this is a system shared endpoint, then remove some metadata that should be send back to other users
 				santizeInfoForSystemSharedTokenUser(cnsiUser, systemSharedToken)
-
 				resp.User = cnsiUser
+			} else {
+				// Need to record a user
+				resp.User = &interfaces.ConnectedUser{
+					GUID:   "Unknown",
+					Name:   "Unknown",
+					Scopes: []string{"read"},
+					Admin:  true,
+				}
 			}
 
 			return resp, nil
@@ -1043,6 +1051,11 @@ func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *inter
 			GUID: cfTokenRecord.RefreshToken,
 			Name: cfTokenRecord.RefreshToken,
 		}
+	} else if cfTokenRecord.AuthType == "aws-iam" {
+		cnsiUser = &interfaces.ConnectedUser{
+			GUID: "AWS IAM",
+			Name: "IAM",
+		}
 	} else {
 		// get the scope out of the JWT token data
 		userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
@@ -1077,9 +1090,7 @@ func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *inter
 	return cnsiUser, true
 }
 
-type AuthHandlerFunc func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error)
-
-func (p *portalProxy) doAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error) {
+func (p *portalProxy) DoAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request, authHandler interfaces.AuthHandlerFunc) (*http.Response, error) {
 
 	// get a cnsi token record and a cnsi record
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)

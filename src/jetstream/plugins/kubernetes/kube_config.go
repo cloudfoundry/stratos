@@ -126,7 +126,7 @@ func (p *KubernetesSpecification) FetchKubeConfigToken(cnsiRecord interfaces.CNS
 		return nil, nil, errors.New("Can not find config for Kubernetes cluster")
 	}
 
-	// We onlt support OIDC auth provider at the moment
+	// We onlu support OIDC auth provider at the moment
 	if user.User.AuthProvider.Name != "oidc" {
 		return nil, nil, errors.New("Unsupported authentication provider")
 	}
