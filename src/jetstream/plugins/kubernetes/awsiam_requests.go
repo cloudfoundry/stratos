@@ -25,19 +25,14 @@ type AWSIAMUserInfo struct {
 	SecretKey string `json:"secretKey"`
 }
 
-type customCredentialProvider struct {
-	AccessKeyID     string
-	SecretAccessKey string
-}
-
-func (c *customCredentialProvider) Retrieve() (credentials.Value, error) {
+func (c *AWSIAMUserInfo) Retrieve() (credentials.Value, error) {
 	return credentials.Value{
-		AccessKeyID:     c.AccessKeyID,
-		SecretAccessKey: c.SecretAccessKey,
+		AccessKeyID:     c.AccessKey,
+		SecretAccessKey: c.SecretKey,
 	}, nil
 }
 
-func (c *customCredentialProvider) IsExpired() bool {
+func (c *AWSIAMUserInfo) IsExpired() bool {
 	return true
 }
 
@@ -79,7 +74,6 @@ func (c *KubernetesSpecification) FetchIAMToken(cnsiRecord interfaces.CNSIRecord
 }
 
 func (c *KubernetesSpecification) getTokenIAM(info AWSIAMUserInfo) (string, error) {
-
 	generator, err := token.NewGenerator(false)
 	if err != nil {
 		return "", fmt.Errorf("AWS IAM: Failed to create generator due to %+v", err)
@@ -93,14 +87,8 @@ func (c *KubernetesSpecification) getTokenIAM(info AWSIAMUserInfo) (string, erro
 		return "", fmt.Errorf("AWS IAM: Failed to create new session %+v", err)
 	}
 
-	credentialProvider := &customCredentialProvider{
-		AccessKeyID:     info.AccessKey,
-		SecretAccessKey: info.SecretKey,
-	}
-	creds := credentials.NewCredentials(credentialProvider)
-
+	creds := credentials.NewCredentials(&info)
 	stsAPI := sts.New(sess, &aws.Config{Credentials: creds})
-
 	token, err := generator.GetWithSTS(info.Cluster, stsAPI)
 	if err != nil {
 		return "", fmt.Errorf("AWS IAM: Failed to get token due to: %+v ", err)
