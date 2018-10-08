@@ -58,3 +58,4 @@ spec:
     targetPort: mysql
   selector:
     app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/component: "console"
