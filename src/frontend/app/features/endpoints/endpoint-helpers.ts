@@ -66,6 +66,16 @@ const endpointAuthTypes = [
     form: {},
     types: new Array<EndpointType>('cf')
   },
+  {
+    name: 'AWS IAM',
+    value: 'aws-iam',
+    form: {
+      cluster: ['', Validators.required],
+      access_key: ['', Validators.required],
+      secret_key: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
 ];
 
 const endpointTypesMap = {};

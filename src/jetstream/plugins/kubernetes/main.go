@@ -25,6 +25,7 @@ const (
 	EndpointType              = "k8s"
 	CLIENT_ID_KEY             = "K8S_CLIENT"
 	AuthConnectTypeKubeConfig = "KubeConfig"
+	AuthConnectTypeAWSIAM     = "aws-iam"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -64,19 +65,34 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
-	if !strings.EqualFold(connectType, AuthConnectTypeKubeConfig) {
-		return nil, false, errors.New("Only Kubernetes config is accepted for Kubernetes endpoints")
+
+	// Kube Config file?
+	if strings.EqualFold(connectType, AuthConnectTypeKubeConfig) {
+		tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
+		if err != nil {
+			return nil, false, err
+		}
+		return tokenRecord, false, nil
 	}
 
-	tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
-	if err != nil {
-		return nil, false, err
+	// IAM Creds?
+	if strings.EqualFold(connectType, AuthConnectTypeAWSIAM) {
+		tokenRecord, _, err := c.FetchIAMToken(cnsiRecord, ec)
+		if err != nil {
+			return nil, false, err
+		}
+		return tokenRecord, false, nil
 	}
 
-	return tokenRecord, false, nil
+	return nil, false, errors.New("Unsporrted Auth connectio type for Kubernetes endpoint")
 }
 
 func (c *KubernetesSpecification) Init() error {
+	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
+		Handler:  c.doAWSIAMFlowRequest,
+		UserInfo: c.GetCNSIUserFromIAMToken,
+	})
+
 	return nil
 }
 

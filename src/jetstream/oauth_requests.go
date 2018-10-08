@@ -10,45 +10,48 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req *http.Request, refreshOAuthTokenFunc interfaces.RefreshOAuthTokenFunc) interfaces.AuthHandlerFunc {
+
+	return func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error) {
+
+		got401 := false
+
+		for {
+			expTime := time.Unix(tokenRec.TokenExpiry, 0)
+			if got401 || expTime.Before(time.Now()) {
+				refreshedTokenRec, err := refreshOAuthTokenFunc(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
+				if err != nil {
+					log.Info(err)
+					return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
+				}
+				tokenRec = refreshedTokenRec
+			}
+			req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
+
+			var client http.Client
+			client = p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
+			res, err := client.Do(req)
+			if err != nil {
+				return nil, fmt.Errorf("Request failed: %v", err)
+			}
+
+			if res.StatusCode != 401 {
+				return res, nil
+			}
+
+			if got401 {
+				return res, errors.New("Failed to authorize")
+			}
+			got401 = true
+		}
+	}
+}
+
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
+	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOAuthToken)
+	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 
-	// get a cnsi token record and a cnsi record
-	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
-	}
-
-	got401 := false
-
-	for {
-		expTime := time.Unix(tokenRec.TokenExpiry, 0)
-		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
-			if err != nil {
-				log.Info(err)
-				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
-			}
-			tokenRec = refreshedTokenRec
-		}
-		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
-
-		var client http.Client
-		client = p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
-		res, err := client.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("Request failed: %v", err)
-		}
-
-		if res.StatusCode != 401 {
-			return res, nil
-		}
-
-		if got401 {
-			return res, errors.New("Failed to authorize")
-		}
-		got401 = true
-	}
 }
 
 func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
