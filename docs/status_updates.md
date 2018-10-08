@@ -2,6 +2,22 @@
 
 Weekly status updates are published here.
 
+## 5th October 2018
+
+The team have been preparing for the CF Summit in Basel next week.
+
+Highlights for this week (continuing from last week):
+
+- E2E Tests and Automation - Focusing on making the E2E tests more resilient to timing issues. 
+
+- Metrics - Added Diego Cell to the App Instances table when metrics are available and added a Cell view which shows metrics for a given Diego cell.
+
+Fixes:
+
+- Ensure we handle orgs with no users [\#3098](https://github.com/cloudfoundry-incubator/stratos/pull/3098) - fixes a bug creating a space in a new org.
+
+- Endpoint Registration: Only show SSO option for CF Endpoint type [#\3105](https://github.com/cloudfoundry-incubator/stratos/pull/3105)
+
 ## 28th September 2018
 
 This week saw the release of 2.1.1 and an update 2.1.2. It was necessary to tag a 2.1.2 release to resolve a broken backend dependency that would affect users deploying via 'cf push'. You should use 2.1.2 and not 2.1.1. 

@@ -92,14 +92,8 @@ export class MetricsEffect {
     }));
 
   private buildFullUrl(action: MetricsAction) {
-    return `${action.url}/${this.queryType(action.queryType)}?query=${getFullMetricQueryQuery(action.query)}`;
+    return `${action.url}/${action.queryType}?query=${getFullMetricQueryQuery(action.query)}`;
   }
 
-  private queryType(type: MetricQueryType): string {
-    if (type === MetricQueryType.VALUE) {
-      return MetricQueryType.QUERY;
-    }
-    return type;
-  }
 }
 

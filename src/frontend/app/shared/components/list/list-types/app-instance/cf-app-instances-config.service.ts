@@ -116,7 +116,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       metricResults$: null
     },
     cellComponent: TableCellCfCellComponent,
-    cellFlex: '3'
+    cellFlex: '2'
   };
 
   viewType = ListViewTypes.TABLE_ONLY;

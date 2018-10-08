@@ -11,14 +11,20 @@ export enum MetricsChartTypes {
   LINE = 'line'
 }
 
-export interface IMetricsChartConfig {
+interface IMetricsChartConfig {
   chartType: MetricsChartTypes;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  autoScale?: boolean;
+  yAxisTicks?: any[];
+  yAxisTickFormatting?: (label: string) => string;
 }
 
 export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  autoScale = true; // This should be on by default
+  yAxisTicks?: any[];
+  yAxisTickFormatting?: (label: string) => string;
 }
