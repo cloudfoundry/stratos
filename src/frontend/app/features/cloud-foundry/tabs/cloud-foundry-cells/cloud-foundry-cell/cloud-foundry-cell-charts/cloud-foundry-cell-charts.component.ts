@@ -1,15 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
-import {
-  MetricsRangeSelectorManagerService,
-} from '../../../../../../shared/services/metrics-range-selector-manager.service';
 import { MetricQueryType } from '../../../../../../shared/services/metrics-range-selector.types';
 import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../../store/types/metric.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
-import { MetricsRangeSelectorService } from '../../../../../../shared/services/metrics-range-selector.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-charts',
@@ -27,7 +23,10 @@ export class CloudFoundryCellChartsComponent {
     this.metricConfigs = [
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_containers', MetricQueryType.RANGE_QUERY),
-        this.cfCellService.buildChartConfig('Containers Remaining')
+        {
+          ...this.cfCellService.buildChartConfig('Containers Remaining'),
+          yAxisTickFormatting: (label: string) => Math.round(Number(label)).toString()
+        }
       ],
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_memory', MetricQueryType.QUERY),

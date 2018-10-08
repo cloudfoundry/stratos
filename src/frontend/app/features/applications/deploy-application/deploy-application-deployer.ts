@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
@@ -64,8 +63,6 @@ export class DeployApplicationDeployer {
   // Are we deploying?
   deploying = false;
 
-  private hasSentSource = false;
-
   private inputStream;
 
   private isOpen = false;
@@ -79,7 +76,6 @@ export class DeployApplicationDeployer {
   constructor(
     private store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private http: HttpClient,
   ) { }
 
   updateStatus(error = false, errorMsg?: string) {
@@ -152,7 +148,7 @@ export class DeployApplicationDeployer {
             filter((log) => log.type === SocketEventTypes.DATA),
             map((log) => log.message),
             share(),
-        );
+          );
         this.msgSub = this.messages.subscribe();
       })
     ).subscribe();

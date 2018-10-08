@@ -29,6 +29,9 @@ import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.s
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
+  CloudFoundryCellAppsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-apps/cloud-foundry-cell-apps.component';
+import {
   CloudFoundryCellBaseComponent,
 } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-base/cloud-foundry-cell-base.component';
 import {
@@ -104,6 +107,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryCellsComponent,
     CloudFoundryCellBaseComponent,
     CloudFoundryCellSummaryComponent,
+    CloudFoundryCellAppsComponent,
     CloudFoundryCellChartsComponent,
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
