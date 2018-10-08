@@ -45,7 +45,7 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
       filter(metric => !!metric),
       tap(metric => {
         this.cellLink = `/cloud-foundry/${cfGuid}/cells/${metric.bosh_job_id}/summary`;
-        // If we're polled to get metric then make sure to unsub
+        // If we're polling to get metric then make sure to unsub
         if (this.fetchMetricsSub) {
           this.fetchMetricsSub.unsubscribe();
         }

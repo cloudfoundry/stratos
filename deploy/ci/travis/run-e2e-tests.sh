@@ -24,6 +24,18 @@ export CERTS_PATH=./dev-certs
 # Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1
 
+# Test report folder name override
+TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
+
+export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
+mkdir -p "${E2E_REPORT_FOLDER}"
+
+if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Starting background install of ffmpeg"
+  sudo apt-get install -y ffmpeg > ${E2E_REPORT_FOLDER}/ffmpeg-install.log &
+  FFMPEG_INSTALL_PID=$!
+fi
+
 echo "Using local deployment for e2e tests"
 # Quick deploy locally
 # Start a local UAA - this will take a few seconds to come up in the background
@@ -47,13 +59,10 @@ popd
 
 E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
 
-# Test report folder name override
-TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
-export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
-mkdir -p "${E2E_REPORT_FOLDER}"
-
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Waiting for ffmpeg install to complete..."
+  wait ${FFMPEG_INSTALL_PID}
   echo "Starting video capture"
   ffmpeg -video_size 1366x768 -framerate 25 -f x11grab -draw_mouse 0 -i :99.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 >/dev/null 2>&1 &
   FFMPEG=$!

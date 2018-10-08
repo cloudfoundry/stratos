@@ -1,5 +1,5 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
-  <h1> {{ name$ | async }}</h1>
+  <h1 *ngIf="name$ | async as name"> Cell: {{ name }}</h1>
 </app-page-header>
 <app-loading-page [entityId]="waitForEntityId" [entitySchema]="waitForEntitySchema" [text]="'Retrieving cell'">
   <router-outlet></router-outlet>

@@ -45,7 +45,6 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
         getLink: (row: IMetricVectorResult<IMetricCell>) =>
           `/cloud-foundry/${this.activeRouteCfCell.cfGuid}/cells/${row.metric.bosh_job_id}/summary`
       },
-      class: 'table-column-select',
       cellFlex: '1',
       sort: {
         type: 'sort',

@@ -62,10 +62,9 @@ jobs:
   - name: E2E Tests
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
-    # Install ffmpeg so we can capture a video of the display as the tests run
+    # We will install ffmpeg so we can capture a video of the display as the tests run
     - sudo add-apt-repository -y ppa:mc3man/trusty-media
     - sudo apt-get -qq update
-    - sudo apt-get install -y ffmpeg
     script:
     - "./deploy/ci/travis/fetch-depcache.sh"
     - "./deploy/ci/travis/run-e2e-tests.sh video"
