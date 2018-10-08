@@ -3,8 +3,8 @@ import { Subscription } from 'rxjs';
 
 import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
-import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
-import { ICellDefinition } from './../table.types';
+import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
+import { ICellDefinition } from '../table.types';
 
 @Component({
   moduleId: module.id,

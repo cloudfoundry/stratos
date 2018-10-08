@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -54,12 +55,12 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 	}
 
 	// Construct the metadata for proxying
-	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "application_id=\""+appID+"\"")
+	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "application_id=\""+appID+"\"", true)
 	responses, err = m.portalProxy.DoProxyRequest(requests)
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }
 
-func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string) []interfaces.ProxyRequestInfo {
+func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string, addJob bool) []interfaces.ProxyRequestInfo {
 	// Construct the metadata for proxying
 	requests := make([]interfaces.ProxyRequestInfo, 0)
 	for _, metric := range metrics {
@@ -73,7 +74,10 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		if len(addQueries) > 0 {
 			addQueries = addQueries + ","
 		}
-		addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
+
+		if addJob {
+			addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
+		}
 
 		req.URI = makePrometheusRequestURI(c, prometheusOp, addQueries)
 		requests = append(requests, req)
@@ -103,6 +107,7 @@ func makePrometheusRequestURI(c echo.Context, prometheusOp string, modify string
 		}
 	}
 	uri.RawQuery = values.Encode()
+	log.Debugf("Sending prometheus query: %+v", uri.String())
 	return &uri
 }
 
@@ -130,7 +135,7 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 	}
 
 	// Construct the metadata for proxying
-	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "")
+	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "", true)
 	responses, err := m.portalProxy.DoProxyRequest(requests)
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }

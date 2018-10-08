@@ -15,7 +15,7 @@ import {
   WrapperRequestActionFailed
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { Store } from '../../../../../../node_modules/@ngrx/store';
+import { Store } from '@ngrx/store';
 import { APIResponse } from '../../actions/request.actions';
 
 

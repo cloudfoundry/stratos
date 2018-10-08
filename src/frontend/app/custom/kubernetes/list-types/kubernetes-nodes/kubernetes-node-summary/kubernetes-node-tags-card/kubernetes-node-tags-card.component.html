@@ -1,0 +1,13 @@
+<div class="kubernetes-node-tags-card">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ title }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="kubernetes-node-tags-card__content">
+        <app-chips [chips]="(chipTags$ | async)" [stacked]="true" [orientation]="'rtl'"></app-chips>
+        </div>
+      </mat-card-content>
+  </mat-card>
+
+</div>
