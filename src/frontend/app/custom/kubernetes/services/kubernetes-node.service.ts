@@ -76,7 +76,7 @@ export class KubernetesNodeService {
       .subscribe();
     return {
       entity$: metricsMonitor.entity$.pipe(filter(metrics => !!metrics), map(metrics => {
-        if (metrics.result.length === 1) {
+        if (metrics.result && metrics.result.length === 1) {
           return metrics.result[0].value[1];
         } else {
           return 0;
