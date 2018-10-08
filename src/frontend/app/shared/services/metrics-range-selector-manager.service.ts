@@ -40,6 +40,8 @@ export class MetricsRangeSelectorManagerService {
 
   private baseAction: MetricsAction;
 
+  private pollIndex: number;
+
   constructor(public metricRangeService: MetricsRangeSelectorService) { }
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
@@ -94,6 +96,7 @@ export class MetricsRangeSelectorManagerService {
     if (this.initSub) {
       this.initSub.unsubscribe();
     }
+    this.endWindowPoll();
   }
 
   get selectedTimeRange() {
@@ -127,13 +130,28 @@ export class MetricsRangeSelectorManagerService {
     return this.startEnd[this.endIndex];
   }
 
-  private commitWindow(window: ITimeRange) {
-    if (!window) {
+  private startWindowPoll(timeWindow: ITimeRange) {
+    this.pollIndex = window.setInterval(
+      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow)),
+      10000
+    );
+  }
+
+  private endWindowPoll() {
+    window.clearInterval(this.pollIndex);
+  }
+
+  private commitWindow(timeWindow: ITimeRange) {
+    this.endWindowPoll();
+    if (!timeWindow) {
       return;
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, window));
+    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow));
+    if (timeWindow.queryType === MetricQueryType.QUERY) {
+      this.startWindowPoll(timeWindow);
+    }
   }
 
   private commitAction(action: MetricsAction) {
