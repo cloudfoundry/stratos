@@ -18,6 +18,7 @@ interface IMetricsChartConfig {
   autoScale?: boolean;
   yAxisTicks?: any[];
   yAxisTickFormatting?: (label: string) => string;
+  showLegend?: boolean;
 }
 
 export class MetricsLineChartConfig implements IMetricsChartConfig {
@@ -27,4 +28,5 @@ export class MetricsLineChartConfig implements IMetricsChartConfig {
   autoScale = true; // This should be on by default
   yAxisTicks?: any[];
   yAxisTickFormatting?: (label: string) => string;
+  showLegend = true;
 }
