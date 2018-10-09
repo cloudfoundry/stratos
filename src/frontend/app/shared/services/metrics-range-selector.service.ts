@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as moment from 'moment';
 import { MetricQueryConfig, MetricsAction } from '../../store/actions/metrics.actions';
 import { IMetrics } from '../../store/types/base-metric.types';
-import { ITimeRange, StoreMetricTimeRange, MetricQueryType } from './metrics-range-selector.types';
+import { ITimeRange, StoreMetricTimeRange, MetricQueryType, momentTuple } from './metrics-range-selector.types';
 
 @Injectable()
 export class MetricsRangeSelectorService {
@@ -13,16 +13,19 @@ export class MetricsRangeSelectorService {
     {
       value: '5m',
       label: 'The past 5 minutes',
+      momentTuple: [5, 'minute'],
       queryType: MetricQueryType.QUERY
     },
     {
       value: '1h',
       label: 'The past hour',
+      momentTuple: [1, 'hour'],
       queryType: MetricQueryType.QUERY
     },
     {
       value: '1w',
       label: 'The past week',
+      momentTuple: [1, 'week'],
       queryType: MetricQueryType.QUERY
     },
     {
@@ -39,6 +42,13 @@ export class MetricsRangeSelectorService {
     };
   }
 
+  private convertWindowToRange(tuple: momentTuple): [moment.Moment, moment.Moment] {
+    return [
+      moment().subtract(tuple[0], tuple[1]),
+      moment()
+    ];
+  }
+
   public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
     const startUnix = start.unix();
     const endUnix = end.unix();
@@ -51,22 +61,13 @@ export class MetricsRangeSelectorService {
       ...params,
       start: startUnix,
       end: end.unix(),
-      step: Math.max((endUnix - startUnix) / 200, 0)
+      step: Math.max((endUnix - startUnix) / 100, 0)
     }), MetricQueryType.RANGE_QUERY);
   }
 
   public getNewTimeWindowAction(action: MetricsAction, window: ITimeRange) {
-    const {
-      start,
-      end,
-      step,
-      ...params
-    } = action.query.params || { start: undefined, end: undefined, step: undefined };
-
-    return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
-      ...params,
-      window: window.value
-    }), MetricQueryType.QUERY);
+    const [start, end] = this.convertWindowToRange(window.momentTuple);
+    return this.getNewDateRangeAction(action, start, end);
   }
 
   public getDateFromStoreMetric(metrics: IMetrics, times = this.times): StoreMetricTimeRange {

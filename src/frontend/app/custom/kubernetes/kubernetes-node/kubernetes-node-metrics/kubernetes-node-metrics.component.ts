@@ -25,7 +25,10 @@ export class KubernetesNodeMetricsComponent implements OnInit {
 
   constructor(
     public kubeNodeService: KubernetesNodeService
-  ) { }
+  ) {
+    this.memoryMetric = KubeNodeMetric.MEMORY;
+    this.cpuMetric = KubeNodeMetric.CPU;
+  }
 
   ngOnInit() {
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(

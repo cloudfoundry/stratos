@@ -47,8 +47,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   public chartTypes = MetricsChartTypes;
 
-  private pollSub: Subscription;
-
   private timeSelectorSub: Subscription;
 
   public results$;
@@ -140,26 +138,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     }
   }
 
-  private setup(action: MetricsAction) {
-    if (this.pollSub) {
-      this.pollSub.unsubscribe();
-    }
-    if (action.queryType === MetricQueryType.QUERY) {
-      this.pollSub = this.metricsMonitor
-        .poll(
-          10000,
-          () => {
-            this.store.dispatch(action);
-          },
-          request => ({ busy: request.fetching, error: request.error, message: request.message })
-        ).subscribe();
-    }
-  }
-
   ngOnDestroy() {
-    if (this.pollSub) {
-      this.pollSub.unsubscribe();
-    }
     if (this.timeSelectorSub) {
       this.timeSelectorSub.unsubscribe();
     }
@@ -184,7 +163,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   private commitAction(action: MetricsAction) {
     this.committedAction = action;
-    this.setup(action);
     this.store.dispatch(action);
   }
 }
