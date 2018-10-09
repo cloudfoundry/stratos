@@ -35,8 +35,7 @@ export class MetricsEffect {
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
       const apiAction = {
-        guid: action.metricId,
-        entityKey: metricSchemaKey
+        ...action,
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {

@@ -18,7 +18,7 @@ export class MetricsTabComponent {
     MetricsLineChartConfig
   ][];
   constructor(public applicationService: ApplicationService) {
-    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Instance ${result.metric.instance}`);
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Instance ${result.metric.instance_index}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchApplicationMetricsAction(

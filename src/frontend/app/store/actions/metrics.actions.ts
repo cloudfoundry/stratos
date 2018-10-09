@@ -57,7 +57,7 @@ export class MetricsAction implements IRequestAction {
   }
 
   // Builds the key that is used to store the metric in the app state.
-  static buildMetricKey(guid: string, query: MetricQueryConfig, isSeries: boolean) {
+  static buildMetricKey(guid: string, query: MetricQueryConfig, isSeries: boolean = true) {
     return `${guid}:${query.metric}:${isSeries ? 'series' : 'value'}`;
   }
 }
