@@ -53,8 +53,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
       this.animationsDisabled = true;
     }
 
-    console.log('Applying extensions');
-
     // Apply extensions (if any)
     ext.applyRouteConfig();
     initEndpointTypes(ext.getEndpointTypes());

@@ -10,14 +10,11 @@ export class ExtensionRouterModule {
 
     const injector = ReflectiveInjector.resolveAndCreate([ExtensionManager]);
     const ext = injector.get(ExtensionManager);
-    console.log(ext);
 
     const v = routes.find(r => {
       return r.path === '' && !!r.children;
     });
-    console.log(ext);
 
-    console.log(v);
     v.children = [
       ...v.children,
       ...ext.routes
