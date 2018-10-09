@@ -34,6 +34,7 @@ export class MetricsRangeSelectorService {
   private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig): MetricsAction {
     return {
       ...action,
+      queryType: MetricQueryType.RANGE_QUERY,
       query: newQuery
     };
   }

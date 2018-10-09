@@ -46,6 +46,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
           const oldAction = chart.metricsConfig.metricsAction;
           chart.metricsAction = {
             ...oldAction,
+            queryType: newAction.queryType,
             query: {
               ...oldAction.query,
               params: newAction.query.params
