@@ -2,7 +2,6 @@ import * as moment from 'moment';
 export type momentTuple = [moment.DurationInputArg1, moment.unitOfTime.DurationConstructor];
 export interface ITimeRange {
   value?: string;
-  momentTuple?: momentTuple;
   label: string;
   queryType: MetricQueryType;
 }

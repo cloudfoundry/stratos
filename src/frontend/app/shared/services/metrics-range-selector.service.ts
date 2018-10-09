@@ -11,21 +11,18 @@ export class MetricsRangeSelectorService {
 
   public times: ITimeRange[] = [
     {
-      value: '5m',
+      value: '5:minute',
       label: 'The past 5 minutes',
-      momentTuple: [5, 'minute'],
       queryType: MetricQueryType.QUERY
     },
     {
-      value: '1h',
+      value: '1:hour',
       label: 'The past hour',
-      momentTuple: [1, 'hour'],
       queryType: MetricQueryType.QUERY
     },
     {
-      value: '1w',
+      value: '1:week',
       label: 'The past week',
-      momentTuple: [1, 'week'],
       queryType: MetricQueryType.QUERY
     },
     {
@@ -34,17 +31,17 @@ export class MetricsRangeSelectorService {
     }
   ];
 
-  private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig, queryType: MetricQueryType): MetricsAction {
+  private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig): MetricsAction {
     return {
       ...action,
-      query: newQuery,
-      queryType
+      query: newQuery
     };
   }
 
-  private convertWindowToRange(tuple: momentTuple): [moment.Moment, moment.Moment] {
+  private convertWindowToRange(value: string): [moment.Moment, moment.Moment] {
+    const windowSplit = value.split(':');
     return [
-      moment().subtract(tuple[0], tuple[1]),
+      moment().subtract(parseInt(windowSplit[0], 10), windowSplit[1] as moment.unitOfTime.DurationConstructor),
       moment()
     ];
   }
@@ -52,39 +49,34 @@ export class MetricsRangeSelectorService {
   public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
     const startUnix = start.unix();
     const endUnix = end.unix();
-    const {
-      window,
-      ...params
-    } = action.query.params || { window: undefined };
-
     return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
-      ...params,
+      ...action.query.params,
       start: startUnix,
       end: end.unix(),
       step: Math.max((endUnix - startUnix) / 100, 0)
-    }), MetricQueryType.RANGE_QUERY);
+    }));
   }
 
   public getNewTimeWindowAction(action: MetricsAction, window: ITimeRange) {
-    const [start, end] = this.convertWindowToRange(window.momentTuple);
-    return this.getNewDateRangeAction(action, start, end);
+    const [start, end] = this.convertWindowToRange(window.value);
+    const newAction = { ...action };
+    newAction.windowValue = window.value;
+    return this.getNewDateRangeAction(newAction, start, end);
   }
 
   public getDateFromStoreMetric(metrics: IMetrics, times = this.times): StoreMetricTimeRange {
     if (metrics) {
-      if (metrics.queryType === MetricQueryType.RANGE_QUERY) {
+      if (metrics.windowValue) {
+        return {
+          timeRange: times.find(time => time.value === metrics.windowValue)
+        };
+      } else {
         const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
         const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
         return {
-          timeRange: times.find(time => time.queryType === MetricQueryType.RANGE_QUERY),
+          timeRange: times.find(time => time.label === MetricQueryType.RANGE_QUERY),
           start,
           end
-        };
-      } else {
-        return {
-          timeRange: metrics.query.params.window ?
-            times.find(time => time.value === metrics.query.params.window) :
-            this.getDefaultTimeRange(times)
         };
       }
     } else {
@@ -96,7 +88,7 @@ export class MetricsRangeSelectorService {
   }
 
   private getDefaultTimeRange(times = this.times) {
-    return times.find(time => time.value === '1h') || this.times[0];
+    return times.find(time => time.value === '1:hour') || this.times[0];
   }
 
 }

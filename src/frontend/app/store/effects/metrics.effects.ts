@@ -34,8 +34,10 @@ export class MetricsEffect {
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
+      const guid = action.metricId;
       const apiAction = {
-        ...action,
+        guid,
+        entityKey: metricSchemaKey
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
@@ -44,9 +46,9 @@ export class MetricsEffect {
         map(metrics => {
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
-            [action.metricId]: {
+            [guid]: {
               query: action.query,
-              queryType: action.queryType,
+              windowValue: action.windowValue,
               data: metric.data
             }
           } : {};
@@ -55,7 +57,7 @@ export class MetricsEffect {
               entities: {
                 [metricSchemaKey]: metricObject
               },
-              result: [action.metricId]
+              result: [guid]
             },
             apiAction
           );

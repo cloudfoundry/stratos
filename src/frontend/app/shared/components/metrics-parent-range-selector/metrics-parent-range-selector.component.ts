@@ -50,7 +50,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
               ...oldAction.query,
               params: newAction.query.params
             },
-            queryType: newAction.queryType
+            windowValue: newAction.windowValue
           };
         });
       }

@@ -19,7 +19,7 @@ export interface IMetricsData<T = any> {
 }
 export interface IMetrics<T = any> {
   query: MetricQueryConfig;
-  queryType: MetricQueryType;
+  windowValue: string;
   data: IMetricsData<T>;
 }
 

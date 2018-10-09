@@ -38,7 +38,6 @@ export class KubernetesNodeConditionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-
     this.condition$ = this.kubeNodeService.node$.pipe(
       filter(p => !!p && !!p.entity),
       map(p => p.entity.status.conditions),

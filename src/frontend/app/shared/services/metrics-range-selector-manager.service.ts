@@ -77,13 +77,9 @@ export class MetricsRangeSelectorManagerService {
       tap(metrics => {
         if (!this.selectedTimeRange) {
           const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
-
-          if (timeRange.queryType === MetricQueryType.RANGE_QUERY) {
-
-            const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
-            if (isDifferent) {
-              this.committedStartEnd = [start, end];
-            }
+          const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
+          if (isDifferent) {
+            this.committedStartEnd = [start, end];
           }
           this.selectedTimeRange = timeRange;
         }
@@ -104,12 +100,13 @@ export class MetricsRangeSelectorManagerService {
   }
 
   set selectedTimeRange(timeRange: ITimeRange) {
+    this.endWindowPoll();
     this.commit = null;
     this.start = null;
     this.end = null;
     this.selectedTimeRangeValue = timeRange;
     this.timeWindow$.next(this.selectedTimeRangeValue);
-    if (this.selectedTimeRangeValue.queryType === MetricQueryType.QUERY) {
+    if (this.selectedTimeRangeValue.value) {
       this.commitWindow(this.selectedTimeRangeValue);
     }
   }
@@ -131,6 +128,7 @@ export class MetricsRangeSelectorManagerService {
   }
 
   private startWindowPoll(timeWindow: ITimeRange) {
+    this.endWindowPoll();
     this.pollIndex = window.setInterval(
       () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow)),
       10000
@@ -149,7 +147,7 @@ export class MetricsRangeSelectorManagerService {
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
     this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow));
-    if (timeWindow.queryType === MetricQueryType.QUERY) {
+    if (timeWindow.value) {
       this.startWindowPoll(timeWindow);
     }
   }
