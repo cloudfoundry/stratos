@@ -35,7 +35,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
     }
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.metricId,
+      action.guid,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );

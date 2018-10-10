@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { ChartDataTypes, getMetricsChartConfigBuilder } from '../../../../../../shared/components/metrics-chart/metrics.component.helpers';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../store/actions/metrics.actions';
+import { FetchApplicationChartMetricsAction, MetricQueryConfig } from '../../../../../../store/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../store/types/metric.types';
 import { ApplicationService } from '../../../../application.service';
@@ -21,7 +21,7 @@ export class MetricsTabComponent {
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Instance ${result.metric.instance_index}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
-        new FetchApplicationMetricsAction(
+        new FetchApplicationChartMetricsAction(
           applicationService.appGuid,
           applicationService.cfGuid,
           new MetricQueryConfig('firehose_container_metric_cpu_percentage')
@@ -29,7 +29,7 @@ export class MetricsTabComponent {
         'CPU Usage (%)',
       ),
       chartConfigBuilder(
-        new FetchApplicationMetricsAction(
+        new FetchApplicationChartMetricsAction(
           applicationService.appGuid,
           applicationService.cfGuid,
           new MetricQueryConfig('firehose_container_metric_memory_bytes')
@@ -38,7 +38,7 @@ export class MetricsTabComponent {
         ChartDataTypes.BYTES
       ),
       chartConfigBuilder(
-        new FetchApplicationMetricsAction(
+        new FetchApplicationChartMetricsAction(
           applicationService.appGuid,
           applicationService.cfGuid,
           new MetricQueryConfig('firehose_container_metric_disk_bytes')

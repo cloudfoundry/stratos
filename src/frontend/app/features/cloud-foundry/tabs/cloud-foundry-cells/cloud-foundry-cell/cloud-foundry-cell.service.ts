@@ -106,12 +106,12 @@ export class CloudFoundryCellService {
       false
     );
     if (metric === CellMetrics.HEALTHY) {
-      this.healthyMetricId = action.metricId;
+      this.healthyMetricId = action.guid;
     }
     return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
       metricSchemaKey,
       entityFactory(metricSchemaKey),
-      action.metricId,
+      action.guid,
       action,
       false
     ).waitForEntity$.pipe(

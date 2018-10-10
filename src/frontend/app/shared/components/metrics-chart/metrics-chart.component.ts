@@ -88,8 +88,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   ngOnInit() {
     this.committedAction = this.metricsConfig.metricsAction;
+
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      this.metricsConfig.metricsAction.metricId,
+      this.metricsConfig.metricsAction.guid,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );

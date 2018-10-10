@@ -4,7 +4,7 @@ import { MetricsLineChartConfig } from '../../../../shared/components/metrics-ch
 import { MetricsConfig } from '../../../../shared/components/metrics-chart/metrics-chart.component';
 import { IMetricMatrixResult } from '../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../store/types/metric.types';
-import { FetchKubernetesMetricsAction } from '../../store/kubernetes.actions';
+import { FetchKubernetesMetricsAction, FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 import { ChartDataTypes, getMetricsChartConfigBuilder } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
 
 @Component({
@@ -36,7 +36,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
     );
     this.instanceMetricConfigs = [
       chartConfigBuilder(
-        new FetchKubernetesMetricsAction(
+        new FetchKubernetesChartMetricsAction(
           this.kubeNodeService.nodeName,
           this.kubeNodeService.kubeGuid,
           `${KubeNodeMetric.MEMORY}{instance="${this.kubeNodeService.nodeName}"}`
@@ -45,7 +45,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         ChartDataTypes.BYTES
       ),
       chartConfigBuilder(
-        new FetchKubernetesMetricsAction(
+        new FetchKubernetesChartMetricsAction(
           this.kubeNodeService.nodeName,
           this.kubeNodeService.kubeGuid,
           `${KubeNodeMetric.CPU}{instance="${this.kubeNodeService.nodeName}"}`

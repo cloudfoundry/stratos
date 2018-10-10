@@ -21,7 +21,7 @@ export class CfCellsDataSource
   constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
     const action = new FetchCFMetricsPaginatedAction(
       cfGuid,
-      new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
+      new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell'),
       MetricQueryType.QUERY
     );
 

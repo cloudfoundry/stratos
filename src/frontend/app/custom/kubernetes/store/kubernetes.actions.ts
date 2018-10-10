@@ -1,4 +1,4 @@
-import { MetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
+import { MetricsAction, MetricQueryConfig, MetricsChartAction } from '../../../store/actions/metrics.actions';
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import {
   entityFactory,
@@ -261,9 +261,18 @@ export class GeKubernetesDeployments implements KubePaginationAction {
   paginationKey: string;
 
 }
+function getKubeMetricsAction(guid: string) {
+  return `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
+}
 
 export class FetchKubernetesMetricsAction extends MetricsAction {
-  constructor(public guid: string, public cfGuid: string, public metricQuery: string) {
-    super(guid, cfGuid, new MetricQueryConfig(metricQuery), `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`);
+  constructor(guid: string, cfGuid: string, metricQuery: string) {
+    super(guid, cfGuid, new MetricQueryConfig(metricQuery), getKubeMetricsAction(guid));
+  }
+}
+
+export class FetchKubernetesChartMetricsAction extends MetricsChartAction {
+  constructor(guid: string, cfGuid: string, metricQuery: string) {
+    super(guid, cfGuid, new MetricQueryConfig(metricQuery), getKubeMetricsAction(guid));
   }
 }
