@@ -10,9 +10,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { first } from 'rxjs/operators';
-import {
-  KubernetesNodePodsLinkComponent
-} from '../../list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
+import { PodNameLinkComponent } from '../../list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 
 @Component({
   selector: 'app-kubernetes-namespace-pods',
@@ -43,7 +41,7 @@ export class KubernetesNamespacePodsComponent implements OnInit {
         this.store, this.kubeGuid, this.kubeNamespaceService);
 
       if (hasMetrics) {
-        config.columns[0].cellComponent = KubernetesNodePodsLinkComponent;
+        config.columns[0].cellComponent = PodNameLinkComponent;
         config.columns[0].cellDefinition = null;
       } else {
         config.columns[0].cellComponent = null;

@@ -29,21 +29,21 @@ const kubernetes: Routes = [{
   component: KubernetesComponent
 },
 {
-  path: ':kubeId/apps/:releaseName/pods/:podName',
+  path: ':kubeId/apps/:releaseName/pods/:namespace/:podName',
   component: HelmReleasePodComponent,
   data: {
     uiFullView: true
   },
 },
 {
-  path: ':kubeId/nodes/:nodeName/pods/:podName',
+  path: ':kubeId/nodes/:nodeName/pods/:namespace/:podName',
   component: HelmReleasePodComponent,
   data: {
     uiFullView: true
   },
 },
 {
-  path: ':kubeId/pods/:podName',
+  path: ':kubeId/pods/:namespace/:podName',
   component: HelmReleasePodComponent,
   data: {
     uiFullView: true
