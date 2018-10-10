@@ -7,9 +7,6 @@ import {
 import {
   HelmReleasePodsTabComponent,
 } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
-import {
-  HelmReleasePodNameLinkComponent,
-} from '../../../../../src/frontend/app/custom/kubernetes/list-types/helm-release-pods/helm-release-pod-name-link/helm-release-pod-name-link.component';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { HelmReleasePodComponent } from './helm-release-pod/helm-release-pod.component';
@@ -57,9 +54,6 @@ import {
 import {
   KubernetesNamespaceLinkComponent,
 } from './list-types/kubernetes-namespaces/kubernetes-namespace-link/kubernetes-namespace-link.component';
-import {
-  KubernetesNodePodsLinkComponent,
-} from './list-types/kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
 import {
   ConditionCellComponent,
   InverseConditionCellComponent
@@ -127,9 +121,8 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     HelmReleaseSummaryCardComponent,
     HelmReleasePodComponent,
     PodChartComponent,
-    HelmReleasePodNameLinkComponent,
-    PodUsageComponent,
     KubernetesNodeLinkComponent,
+    PodUsageComponent,
     KubernetesNodeComponent,
     KubernetesNodeSummaryComponent,
     KubernetesNodePodsComponent,
@@ -137,7 +130,6 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     KubernetesNodeConditionCardComponent,
     KubernetesNodeTagsCardComponent,
     KubernetesNodePodsComponent,
-    KubernetesNodePodsLinkComponent,
     KubernetesNodeInfoCardComponent,
     KubernetesNodeMetricsComponent,
     KubernetesNodeConditionComponent,
@@ -167,10 +159,8 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     KubernetesNodeCapacityComponent,
     KubernetesPodTagsComponent,
     AppLinkComponent,
-    HelmReleasePodNameLinkComponent,
     PodUsageComponent,
     KubernetesNodeLinkComponent,
-    KubernetesNodePodsLinkComponent,
     ConditionCellComponent,
     InverseConditionCellComponent,
     KubernetesNamespaceLinkComponent,

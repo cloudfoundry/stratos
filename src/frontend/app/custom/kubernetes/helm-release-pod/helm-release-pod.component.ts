@@ -62,13 +62,14 @@ export class HelmReleasePodComponent implements OnInit {
   ) {
     this.podName = activatedRoute.snapshot.params['podName'];
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
+    const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
-          `container_memory_usage_bytes{pod_name="${this.podName}"}`
+          `container_memory_usage_bytes{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Memory Usage (MB)',
         ChartDataTypes.BYTES
@@ -77,7 +78,7 @@ export class HelmReleasePodComponent implements OnInit {
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
-          `container_cpu_usage_seconds_total{pod_name="${this.podName}"}`
+          `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'CPU Usage (%)'
       ),
@@ -85,7 +86,7 @@ export class HelmReleasePodComponent implements OnInit {
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
-          `container_network_transmit_bytes_total{pod_name="${this.podName}"}`
+          `container_network_transmit_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
         ChartDataTypes.BYTES
@@ -94,7 +95,7 @@ export class HelmReleasePodComponent implements OnInit {
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
-          `container_network_receive_bytes_total{pod_name="${this.podName}"}`
+          `container_network_receive_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
         ChartDataTypes.BYTES
