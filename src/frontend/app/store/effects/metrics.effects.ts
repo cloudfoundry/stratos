@@ -35,7 +35,6 @@ export class MetricsEffect {
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
       const { guid } = action;
-      console.log(guid)
       this.store.dispatch(new StartRequestAction(action));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
