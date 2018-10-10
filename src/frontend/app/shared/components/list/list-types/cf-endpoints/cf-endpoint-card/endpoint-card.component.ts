@@ -11,7 +11,7 @@ import { CardCell } from '../../../list.types';
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss']
 })
-export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
+export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
   static columns = 2;
 

@@ -5,22 +5,31 @@ import { map, filter, first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { AppState } from '../../../store/app-state';
 import { RouterNav } from '../../../store/actions/router.actions';
-
+import { ListConfig } from '../../../shared/components/list/list.component.types';
+import {KubernetesEndpointsListConfigService} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
+import { EndpointModel } from '../../../store/types/endpoint.types';
 @Component({
   selector: 'app-kubernetes',
   templateUrl: './kubernetes.component.html',
-  styleUrls: ['./kubernetes.component.scss']
+  styleUrls: ['./kubernetes.component.scss'],
+  providers: [
+    {
+      provide: ListConfig,
+      useClass: KubernetesEndpointsListConfigService,
+    },
+    KubernetesService
+  ]
 })
 export class KubernetesComponent implements OnInit {
 
-  hasOneKube$: Observable<boolean>;
+  connectedEndpoints$: Observable<number>;
   constructor(
     private store: Store<AppState>,
     private kubeService: KubernetesService
   ) {
-    this.hasOneKube$ = kubeService.kubeEndpoints$.pipe(
-      map(cfEndpoints => {
-        const connectedEndpoints = cfEndpoints.filter(
+    this.connectedEndpoints$ = kubeService.kubeEndpoints$.pipe(
+      map(kubeEndpoints => {
+        const connectedEndpoints = kubeEndpoints.filter(
           c => c.connectionStatus === 'connected'
         );
         const hasOne = connectedEndpoints.length === 1;
@@ -29,7 +38,7 @@ export class KubernetesComponent implements OnInit {
             path: ['kubernetes', connectedEndpoints[0].guid]
           }));
         }
-        return connectedEndpoints.length === 1;
+        return connectedEndpoints.length;
       }),
       filter(hasOne => !hasOne),
       first()
