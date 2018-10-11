@@ -72,15 +72,8 @@ export interface IServicePlan {
 export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
-  cost: IServicePlanCost;
 }
 
-export interface IServicePlanCost {
-  amount: {
-    [key: string]: number;
-  };
-  unit: string;
-}
 export interface IService {
   label: string;
   description: string;

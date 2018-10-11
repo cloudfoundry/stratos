@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HelmReleaseService } from '../../../../services/helm-release.service';
+import { HelmReleaseService } from '../../../services/helm-release.service';
 import { combineLatest, Observable } from 'rxjs';
 import { deepStrictEqual } from 'assert';
 import { map } from 'rxjs/operators';

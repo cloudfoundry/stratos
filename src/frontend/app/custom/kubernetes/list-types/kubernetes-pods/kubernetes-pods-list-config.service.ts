@@ -1,16 +1,14 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
 import { Store } from '@ngrx/store';
 
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { KubernetesPod } from '../../store/kube.types';
-import { KubernetesPodTagsComponent } from './kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { getContainerLengthSort } from '../kube-sort.helper';
+import { KubernetesPodTagsComponent } from './kubernetes-pod-tags/kubernetes-pod-tags.component';
+import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
 
 @Injectable()

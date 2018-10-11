@@ -3,15 +3,15 @@ import { RouterModule, Routes } from '@angular/router';
 
 import {
   HelmReleasePodsTabComponent,
-} from './helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
+} from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
 import { HelmReleaseComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release.component';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import {
   HelmReleaseServicesComponent,
-} from './helm-release/helm-release-tabs-base/helm-release-services/helm-release-services.component';
+} from './helm-release/helm-release-services/helm-release-services.component';
 import {
   HelmReleaseSummaryComponent,
-} from './helm-release/helm-release-tabs-base/helm-release-summary/helm-release-summary.component';
+} from './helm-release/helm-release-summary/helm-release-summary.component';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
