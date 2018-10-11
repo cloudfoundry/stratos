@@ -7,13 +7,9 @@ import { TableCellCustom } from '../../../../../shared/components/list/list.type
   templateUrl: './kube-appcreated-date.component.html',
   styleUrls: ['./kube-appcreated-date.component.scss']
 })
-export class KubeAppcreatedDateComponent extends TableCellCustom<KubernetesApp> implements OnInit {
+export class KubeAppcreatedDateComponent extends TableCellCustom<KubernetesApp> {
 
   constructor() {
     super();
    }
-
-  ngOnInit() {
-  }
-
 }

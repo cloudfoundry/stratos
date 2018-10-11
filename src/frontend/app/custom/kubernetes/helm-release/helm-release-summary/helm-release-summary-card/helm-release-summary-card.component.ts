@@ -9,13 +9,12 @@ import { map } from 'rxjs/operators';
   templateUrl: './helm-release-summary-card.component.html',
   styleUrls: ['./helm-release-summary-card.component.scss']
 })
-export class HelmReleaseSummaryCardComponent implements OnInit {
+export class HelmReleaseSummaryCardComponent {
   chartName$: Observable<string>;
 
   constructor(
     public helmReleaseService: HelmReleaseService
   ) {
-
     // get chart name
     this.chartName$ = combineLatest(this.helmReleaseService.deployments$, this.helmReleaseService.statefulSets$).pipe(
       map(([deployments, statefulsets]) => {
@@ -28,8 +27,4 @@ export class HelmReleaseSummaryCardComponent implements OnInit {
       })
     );
    }
-
-  ngOnInit() {
-  }
-
 }

@@ -13,12 +13,7 @@ import { ListConfig } from '../../../../shared/components/list/list.component.ty
     useClass: KubernetesNamespacesListConfigService,
   }]
 })
-export class KubernetesNamespacesTabComponent implements OnInit {
+export class KubernetesNamespacesTabComponent {
 
-  constructor(private activatedRoute: ActivatedRoute) {
-  }
-
-  ngOnInit() {
-  }
-
+  constructor(private activatedRoute: ActivatedRoute) {}
 }

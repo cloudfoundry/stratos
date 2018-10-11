@@ -28,9 +28,7 @@ export class KubernetesNodeMetricStatsCardComponent implements OnInit, OnDestroy
   subscriptions: Subscription[] = [];
   constructor(
     public kubeNodeService: KubernetesNodeService
-  ) {
-
-  }
+  ) {}
 
   ngOnInit() {
 

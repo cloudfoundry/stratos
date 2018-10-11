@@ -20,7 +20,7 @@ import { EndpointModel } from '../../../store/types/endpoint.types';
     KubernetesService
   ]
 })
-export class KubernetesComponent implements OnInit {
+export class KubernetesComponent {
 
   connectedEndpoints$: Observable<number>;
   constructor(
@@ -43,8 +43,5 @@ export class KubernetesComponent implements OnInit {
       filter(connectedEndpointsCount => connectedEndpointsCount > 1),
       first()
     );
-  }
-
-  ngOnInit() {
   }
 }

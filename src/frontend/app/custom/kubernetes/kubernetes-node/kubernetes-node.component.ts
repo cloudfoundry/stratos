@@ -29,7 +29,7 @@ import { map } from 'rxjs/operators';
     KubernetesNodeService
   ]
 })
-export class KubernetesNodeComponent implements OnInit {
+export class KubernetesNodeComponent {
 
   tabLinks = [
     { link: 'summary', label: 'Summary' },
@@ -52,8 +52,4 @@ export class KubernetesNodeComponent implements OnInit {
       )
     );
   }
-
-  ngOnInit() {
-  }
-
 }

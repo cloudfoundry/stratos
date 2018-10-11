@@ -42,7 +42,7 @@ import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kuberne
     KubernetesEndpointService
   ]
 })
-export class PodMetricsComponent implements OnInit {
+export class PodMetricsComponent {
   podName: string;
   podEntity$: Observable<EntityInfo<KubernetesPod>>;
   namespaceName: any;
@@ -150,8 +150,4 @@ export class PodMetricsComponent implements OnInit {
       false
     ).entityObs$;
   }
-
-  ngOnInit() {
-  }
-
 }

@@ -11,7 +11,7 @@ import { map, tap } from 'rxjs/operators';
   templateUrl: './kubernetes-node-summary-card.component.html',
   styleUrls: ['./kubernetes-node-summary-card.component.scss']
 })
-export class KubernetesNodeSummaryCardComponent implements OnInit {
+export class KubernetesNodeSummaryCardComponent {
   node$: Observable<KubernetesNode>;
   labels$: Observable<AppChip[]>;
   annotations$: Observable<AppChip[]>;
@@ -20,9 +20,4 @@ export class KubernetesNodeSummaryCardComponent implements OnInit {
     public kubeEndpointService: KubernetesEndpointService,
     public kubeNodeService: KubernetesNodeService
   ) { }
-
-  ngOnInit() {
-  }
-
-
 }

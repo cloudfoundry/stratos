@@ -13,12 +13,8 @@ import { KubernetesNodesListConfigService } from '../../list-types/kubernetes-no
     useClass: KubernetesNodesListConfigService,
   }]
 })
-export class KubernetesNodesTabComponent implements OnInit {
+export class KubernetesNodesTabComponent {
 
-  constructor(private activatedRoute: ActivatedRoute) {
-  }
-
-  ngOnInit() {
-  }
+  constructor(private activatedRoute: ActivatedRoute) {}
 
 }

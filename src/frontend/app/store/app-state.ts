@@ -13,7 +13,6 @@ import { PaginationState } from './types/pagination.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
 import { UsersRolesState } from './types/users-roles.types';
-import { KubernetesInfo } from '../custom/kubernetes/store/kube.types';
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
 }
@@ -37,5 +36,4 @@ export interface AppState {
   manageUsersRoles: UsersRolesState;
   internalEvents: InternalEventsState;
   currentUserRoles: ICurrentUserRolesState;
-  kubernetesInfo: KubernetesInfo;
 }
