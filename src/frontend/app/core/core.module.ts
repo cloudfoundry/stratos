@@ -3,7 +3,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
-import { BytesToHumanSize, MegaBytesToHumanSize, NoopPipe } from './byte-formatters.pipe';
+import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation';
 import { Customizations } from './customizations.types';
 import { DotContentComponent } from './dot-content/dot-content.component';
@@ -41,7 +41,6 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
     ClickStopPropagationDirective,
     DotContentComponent,
     ButtonBlurOnClickDirective,
-    NoopPipe
   ],
   providers: [
     AuthGuardService,
@@ -62,7 +61,6 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
     InfinityPipe,
     BytesToHumanSize,
     MegaBytesToHumanSize,
-    NoopPipe,
     SafeImgPipe,
     ClickStopPropagationDirective,
     DotContentComponent,

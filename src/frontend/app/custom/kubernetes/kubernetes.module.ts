@@ -5,21 +5,20 @@ import {
 } from './pod-metrics/pod-usage/pod-usage.component';
 import {
   HelmReleasePodsTabComponent,
-} from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
+} from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { HelmReleaseBaseComponent } from './helm-release/helm-release-base/helm-release-base.component';
 import {
   HelmReleaseServicesComponent,
-} from './helm-release/helm-release-tabs-base/helm-release-services/helm-release-services.component';
+} from './helm-release/helm-release-services/helm-release-services.component';
 import {
   HelmReleaseSummaryCardComponent,
-} from './helm-release/helm-release-tabs-base/helm-release-summary/helm-release-summary-card/helm-release-summary-card.component';
+} from './helm-release/helm-release-summary/helm-release-summary-card/helm-release-summary-card.component';
 import {
   HelmReleaseSummaryComponent,
-} from './helm-release/helm-release-tabs-base/helm-release-summary/helm-release-summary.component';
-import { HelmReleaseTabsBaseComponent } from './helm-release/helm-release-tabs-base/helm-release-tabs-base.component';
+} from './helm-release/helm-release-summary/helm-release-summary.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { PodChartComponent } from './helm-release/metrics/pod-chart/pod-chart.component';
 import {
@@ -113,7 +112,6 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     HelmReleaseComponent,
     AppLinkComponent,
     HelmReleaseBaseComponent,
-    HelmReleaseTabsBaseComponent,
     HelmReleasePodsTabComponent,
     HelmReleaseSummaryComponent,
     HelmReleaseServicesComponent,

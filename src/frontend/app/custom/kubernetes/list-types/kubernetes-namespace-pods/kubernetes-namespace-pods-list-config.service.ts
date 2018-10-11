@@ -6,7 +6,6 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesNamespacePodsDataSource } from './kubernetes-namespace-pods-data-source';
-import { PodNameLinkComponent } from '../kubernetes-pods/pod-name-link/pod-name-link.component';
 
 @Injectable()
 export class KubernetesNamespacePodsListConfigService extends KubernetesPodsListConfigService {

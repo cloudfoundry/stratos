@@ -28,14 +28,6 @@ export class BytesToHumanSize implements PipeTransform {
     return retBytes;
   }
 }
-@Pipe({
-  name: 'noopPipe'
-})
-export class NoopPipe implements PipeTransform {
-  transform(value: string): string {
-    return value;
-  }
-}
 
 function precisionIfUseful(size, precision = 1) {
   const floored = Math.floor(size);
