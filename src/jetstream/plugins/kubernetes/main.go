@@ -1,10 +1,6 @@
 package kubernetes
 
 import (
-	// "bytes"
-	// "encoding/json"
-	// "fmt"
-	// "io"
 	"net/url"
 	"strings"
 
@@ -115,30 +111,6 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	if err != nil {
 		return newCNSI, nil, err
 	}
-
-	// No info endpoint that we can fetch to check if the Endpoint is K8S
-	// We'll discover that when we try and connect
-
-	// uri.Path = "v2/info"
-	// h := c.portalProxy.GetHttpClient(skipSSLValidation)
-
-	// res, err := h.Get(uri.String())
-	// if err != nil {
-	// 	return newCNSI, nil, err
-	// }
-
-	// if res.StatusCode != 200 {
-	// 	buf := &bytes.Buffer{}
-	// 	io.Copy(buf, res.Body)
-	// 	defer res.Body.Close()
-
-	// 	return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
-	// }
-
-	// dec := json.NewDecoder(res.Body)
-	// if err = dec.Decode(&v2InfoResponse); err != nil {
-	// 	return newCNSI, nil, err
-	// }
 
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
