@@ -4,7 +4,6 @@ import { spreadClientPagination } from './pagination-reducer.helper';
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
   const { apiAction, response, result } = action;
   let { totalResults, totalPages } = action;
-  console.log(action)
   totalResults = totalResults || (response ? response.result.length : state.totalResults);
   totalPages = totalPages || (response ? response.totalPages : state.pageCount);
   const page = apiAction.pageNumber || state.currentPage;
