@@ -1,21 +1,20 @@
 import { Injectable } from '@angular/core';
-import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
-import { KubernetesNode, MetricStatistic } from '../store/kube.types';
-import { kubernetesNodesSchemaKey, entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { GetKubernetesNode, FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
-import { first, shareReplay, filter, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { EntityInfo } from '../../../store/types/api.types';
+import { filter, first, map, shareReplay } from 'rxjs/operators';
+
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { IMetrics } from '../../../store/types/base-metric.types';
-import { MetricsAction, MetricQueryConfig } from '../../../store/actions/metrics.actions';
-import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { MetricQueryConfig, MetricsAction } from '../../../store/actions/metrics.actions';
+import { AppState } from '../../../store/app-state';
+import { entityFactory, kubernetesNodesSchemaKey, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { EntityInfo } from '../../../store/types/api.types';
+import { KubernetesNode, MetricStatistic } from '../store/kube.types';
+import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';
+import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
 
 export enum KubeNodeMetric {
@@ -37,7 +36,6 @@ export class KubernetesNodeService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     public entityServiceFactory: EntityServiceFactory,
     public entityMonitorFactory: EntityMonitorFactory
-
   ) {
     this.nodeName = getIdFromRoute(activatedRoute, 'nodeName');
     this.kubeGuid = kubeEndpointService.kubeGuid;
@@ -55,7 +53,6 @@ export class KubernetesNodeService {
       first(),
       shareReplay(1),
     );
-
 
     this.nodeEntity$ = this.node$.pipe(
       map(p => p.entity)

@@ -11,11 +11,6 @@ import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.se
     useClass: HelmReleasePodsListConfigService,
   }]
 })
-export class HelmReleasePodsTabComponent implements OnInit {
-
-  constructor(public kubeEndpointService: KubernetesEndpointService) {
-  }
-
-  ngOnInit() { }
-
+export class HelmReleasePodsTabComponent {
+  constructor(public kubeEndpointService: KubernetesEndpointService) {}
 }

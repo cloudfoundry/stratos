@@ -11,11 +11,4 @@ import { KubernetesNodePodsListConfigService } from '../../list-types/kubernetes
     useClass: KubernetesNodePodsListConfigService,
   }]
 })
-export class KubernetesNodePodsComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class KubernetesNodePodsComponent {}

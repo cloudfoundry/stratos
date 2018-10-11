@@ -29,7 +29,7 @@ import { map } from 'rxjs/operators';
     KubernetesNamespaceService
   ]
 })
-export class KubernetesNamespaceComponent implements OnInit {
+export class KubernetesNamespaceComponent {
 
   tabLinks = [
     { link: 'pods', label: 'Pods' },
@@ -49,8 +49,5 @@ export class KubernetesNamespaceComponent implements OnInit {
       }])
       )
     );
-  }
-
-  ngOnInit() {
   }
 }

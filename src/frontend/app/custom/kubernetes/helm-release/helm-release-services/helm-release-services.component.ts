@@ -10,11 +10,4 @@ import { HelmReleaseServicesListConfig } from '../../list-types/helm-release-ser
     useClass: HelmReleaseServicesListConfig,
   }]
 })
-export class HelmReleaseServicesComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class HelmReleaseServicesComponent {}

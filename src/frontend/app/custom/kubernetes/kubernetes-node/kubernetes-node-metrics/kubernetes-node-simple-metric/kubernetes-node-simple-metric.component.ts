@@ -5,7 +5,7 @@ import { Component, OnInit, Input } from '@angular/core';
   templateUrl: './kubernetes-node-simple-metric.component.html',
   styleUrls: ['./kubernetes-node-simple-metric.component.scss']
 })
-export class KubernetesNodeSimpleMetricComponent implements OnInit {
+export class KubernetesNodeSimpleMetricComponent {
 
   @Input()
   key: string;
@@ -15,10 +15,4 @@ export class KubernetesNodeSimpleMetricComponent implements OnInit {
 
   @Input()
   unit: string;
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
 }

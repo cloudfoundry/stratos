@@ -1,9 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import {
-  PodUsageComponent,
-} from './pod-metrics/pod-usage/pod-usage.component';
-import {
   HelmReleasePodsTabComponent,
 } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
 import { CoreModule } from '../../core/core.module';
@@ -117,7 +114,6 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     PodMetricsComponent,
     PodChartComponent,
     KubernetesNodeLinkComponent,
-    PodUsageComponent,
     KubernetesNodeComponent,
     KubernetesNodeSummaryComponent,
     KubernetesNodePodsComponent,
@@ -154,7 +150,6 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     KubernetesNodeCapacityComponent,
     KubernetesPodTagsComponent,
     AppLinkComponent,
-    PodUsageComponent,
     KubernetesNodeLinkComponent,
     ConditionCellComponent,
     InverseConditionCellComponent,

@@ -5,11 +5,4 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './helm-release-summary.component.html',
   styleUrls: ['./helm-release-summary.component.scss']
 })
-export class HelmReleaseSummaryComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class HelmReleaseSummaryComponent {}
