@@ -37,6 +37,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     return getFullEndpointApiUrl(row);
   }
 
+  public getRouterPath(row: EndpointModel) {
+    if (row.cnsi_type === 'cf') {
+      return ['/cloud-foundry', row.guid];
+    } else if (row.cnsi_type === 'k8s') {
+      return ['/kubernetes', row.guid];
+    }
+  }
 
   private mapStatus(endpoint: EndpointModel) {
     const connectionStatus = endpoint ? endpoint.connectionStatus : '';
