@@ -1,12 +1,11 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
-import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { debounce, distinctUntilChanged, finalize, map, pairwise, startWith, takeWhile, tap, filter } from 'rxjs/operators';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
-import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
@@ -88,7 +87,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   ngOnInit() {
     this.committedAction = this.metricsConfig.metricsAction;
-
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.guid,
       metricSchemaKey,
@@ -109,7 +107,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         }
         this.hasMultipleInstances = metricsArray.length > 1;
         return this.postFetchMiddleware(metricsArray);
-      })
+      }),
+      distinctUntilChanged(),
+      startWith(null),
     );
 
     this.isRefreshing$ = combineLatest(
@@ -119,14 +119,22 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       debounce(([results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
       }),
-      map(([results, fetching]) => results && fetching)
+      map(([results, fetching]) => results && fetching),
+      distinctUntilChanged()
     );
 
     this.isFetching$ = combineLatest(
-      baseResults$.pipe(startWith(null)),
+      baseResults$,
       this.metricsMonitor.isFetchingEntity$
     ).pipe(
       map(([results, fetching]) => !results && fetching),
+      distinctUntilChanged(),
+      pairwise(),
+      filter(([oldFetching, newFetching]) => {
+        return !newFetching && oldFetching || oldFetching && newFetching;
+      }),
+      map(([old, fetching]) => fetching),
+      distinctUntilChanged(),
       startWith(true)
     );
   }
