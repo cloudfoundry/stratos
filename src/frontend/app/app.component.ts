@@ -23,10 +23,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   public animationsDisabled = false;
 
   constructor(
-    private store: Store<AppState>,
-    private router: Router,
     private loggedInService: LoggedInService,
-    private ext: ExtensionManager,
+    ext: ExtensionManager,
   ) {
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
