@@ -73,7 +73,6 @@ export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
 }
-
 export interface IService {
   label: string;
   description: string;
