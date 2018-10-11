@@ -40,7 +40,7 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
     SafeImgPipe,
     ClickStopPropagationDirective,
     DotContentComponent,
-    ButtonBlurOnClickDirective,
+    ButtonBlurOnClickDirective
   ],
   providers: [
     AuthGuardService,

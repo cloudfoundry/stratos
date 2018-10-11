@@ -9,7 +9,6 @@ import {
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
-import { HelmReleaseBaseComponent } from './helm-release/helm-release-base/helm-release-base.component';
 import {
   HelmReleaseServicesComponent,
 } from './helm-release/helm-release-services/helm-release-services.component';
@@ -111,7 +110,6 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     KubernetesAppsTabComponent,
     HelmReleaseComponent,
     AppLinkComponent,
-    HelmReleaseBaseComponent,
     HelmReleasePodsTabComponent,
     HelmReleaseSummaryComponent,
     HelmReleaseServicesComponent,
