@@ -6,7 +6,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesNamespacePodsDataSource } from './kubernetes-namespace-pods-data-source';
-import { KubernetesNodePodsLinkComponent } from '../kubernetes-node-pods/kubernetes-node-pods-link/kubernetes-node-pods-link.component';
+import { PodNameLinkComponent } from '../kubernetes-pods/pod-name-link/pod-name-link.component';
 
 @Injectable()
 export class KubernetesNamespacePodsListConfigService extends KubernetesPodsListConfigService {
@@ -17,16 +17,6 @@ export class KubernetesNamespacePodsListConfigService extends KubernetesPodsList
   ) {
     super(store, kubeId);
     this.podsDataSource = new KubernetesNamespacePodsDataSource(store, kubeId, this, kubeNamespaceService);
-    this.columns[0] = {
-      columnId: 'name', headerCell: () => 'Pod Name',
-      cellComponent: KubernetesNodePodsLinkComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'name',
-        field: 'metadata.name'
-      },
-      cellFlex: '5',
-    };
   }
 
 }
