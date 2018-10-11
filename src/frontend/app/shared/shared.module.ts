@@ -134,6 +134,12 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
+import { MomentModule } from 'ngx-moment';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 
 @NgModule({
   imports: [
@@ -145,6 +151,7 @@ import { ExtensionButtonsComponent } from './components/extension-buttons/extens
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -238,6 +245,10 @@ import { ExtensionButtonsComponent } from './components/extension-buttons/extens
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     ExtensionButtonsComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -328,6 +339,10 @@ import { ExtensionButtonsComponent } from './components/extension-buttons/extens
     CfEndpointsMissingComponent,
     RoutingIndicatorComponent,
     ExtensionButtonsComponent
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -345,7 +360,8 @@ import { ExtensionButtonsComponent } from './components/extension-buttons/extens
     PaginationMonitorFactory,
     CloudFoundryService,
     InternalEventMonitorFactory,
-    ServiceActionHelperService
+    ServiceActionHelperService,
+    MetricsRangeSelectorService
   ]
 })
 export class SharedModule { }

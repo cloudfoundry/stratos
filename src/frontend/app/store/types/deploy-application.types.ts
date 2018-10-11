@@ -1,7 +1,5 @@
 import { NewAppCFDetails } from './create-application.types';
-import { schema } from 'normalizr';
-import { GithubCommit, GitBranch } from './github.types';
-
+import { GitBranch, GithubCommit } from './github.types';
 
 export interface SourceType {
   name: string;
@@ -73,6 +71,10 @@ export interface OverrideAppDetails {
   host: string;
   domain: string;
   path: string;
+  startCmd: string;
+  healthCheckType: string;
+  stack: string;
+  time: number;
 }
 
 export interface ProjectExists {

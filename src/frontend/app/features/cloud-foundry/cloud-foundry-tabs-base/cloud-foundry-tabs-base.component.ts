@@ -10,6 +10,7 @@ import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-s
 import { canUpdateOrgSpaceRoles } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { AppState } from './../../../store/app-state';
+import { EndpointsService } from '../../../core/endpoints.service';
 import {
   StratosTabType,
   getTabsFromExtensions,
@@ -25,6 +26,7 @@ import {
 export class CloudFoundryTabsBaseComponent implements OnInit {
   static firehose = 'firehose';
   static users = 'users';
+  static cells = 'cells';
 
   public tabLinks: ISubHeaderTabs[];
 
@@ -40,7 +42,8 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    endpointsService: EndpointsService
   ) {
     const firehoseHidden$ = this.currentUserPermissionsService
       .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
@@ -51,10 +54,19 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       map(users => !users)
     );
 
+    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+      map(hasMetrics => !hasMetrics)
+    );
+    
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
       { link: 'summary', label: 'Summary' },
       { link: 'organizations', label: 'Organizations' },
+      {
+        link: CloudFoundryTabsBaseComponent.cells,
+        label: 'Cells',
+        hidden: cellsHidden$
+      },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',

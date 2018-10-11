@@ -132,16 +132,16 @@ export function requestDataReducer(state, action) {
     [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
     [applicationSchemaKey]: [
       updateApplicationRoutesReducer(),
-      endpointDisconnectApplicationReducer('application')
+      endpointDisconnectApplicationReducer()
     ],
     [spaceSchemaKey]: [
-      endpointDisconnectApplicationReducer('space'),
-      applicationAddRemoveReducer('space'),
+      endpointDisconnectApplicationReducer(),
+      applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
     [organizationSchemaKey]: [
       updateOrganizationSpaceReducer(),
-      endpointDisconnectApplicationReducer('organization'),
+      endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)
     ]
   };
