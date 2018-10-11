@@ -40,7 +40,7 @@ export class KubernetesComponent implements OnInit {
         }
         return connectedEndpoints.length;
       }),
-      filter(hasOne => !hasOne),
+      filter(connectedEndpointsCount => connectedEndpointsCount > 1),
       first()
     );
   }
