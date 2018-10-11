@@ -15,6 +15,7 @@ import { EntityInfo } from '../../../store/types/api.types';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
+import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
 
 
 export enum KubeNodeMetric {
