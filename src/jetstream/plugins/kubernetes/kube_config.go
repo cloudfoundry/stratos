@@ -1,10 +1,6 @@
 package kubernetes
 
 import (
-	// "bytes"
-	// "encoding/json"
-	// "fmt"
-	// "io"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -185,9 +181,6 @@ func unMarshalHelper(values map[string]interface{}, intf interface{}) error {
 		return errors.New("config: must provide pointer to struct value")
 	}
 
-	// params := reflect.ValueOf(values).Elem()
-	// log.Info(params)
-
 	nFields := value.NumField()
 	typ := value.Type()
 
@@ -198,19 +191,6 @@ func unMarshalHelper(values map[string]interface{}, intf interface{}) error {
 		if tag == "" {
 			continue
 		}
-
-		log.Info(field)
-		log.Info(tag)
-
-		log.Info(values[tag])
-
-		// paramValue:= params.FieldByName(tag)
-		// log.Info(paramValue)
-		// if paramValue != nil {
-		// 	if err := config.SetStructFieldValue(value, field, paramValue.(string)); err != nil {
-		// 		return err
-		// 	}
-		//}
 
 		if tagValue, ok := values[tag].(string); ok {
 			if err := config.SetStructFieldValue(value, field, tagValue); err != nil {
