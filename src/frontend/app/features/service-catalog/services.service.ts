@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import {
   IService,
@@ -148,8 +148,6 @@ export class ServicesService {
       map(([serviceBroker, allServicePlanVisibilities]) => getSvcAvailability(servicePlan, serviceBroker, allServicePlanVisibilities))
     );
   }
-
-
 
   getServiceName = () => {
     return observableCombineLatest(this.serviceExtraInfo$, this.service$)

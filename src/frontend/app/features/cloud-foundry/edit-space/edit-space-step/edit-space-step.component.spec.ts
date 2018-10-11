@@ -5,7 +5,6 @@ import {
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../test-framework/cloud-foundry-space.service.mock';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { EditSpaceStepComponent } from './edit-space-step.component';
 

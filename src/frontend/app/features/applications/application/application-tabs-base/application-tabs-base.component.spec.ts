@@ -12,7 +12,7 @@ import { applicationSchemaKey, entityFactory } from '../../../../store/helpers/e
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { ApplicationEnvVarsService } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
 
 describe('ApplicationTabsBaseComponent', () => {
@@ -44,7 +44,7 @@ describe('ApplicationTabsBaseComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsHelper
       ]
     })
       .compileComponents();

@@ -2,7 +2,8 @@ import { e2e, E2ESetup } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfTopLevelPage } from './cf-top-level-page.po';
-
+import { SideNavMenuItem } from '../../po/side-nav.po';
+import { CFPage } from '../../po/cf-page.po';
 
 describe('CF - Top Level - ', () => {
 
@@ -10,45 +11,45 @@ describe('CF - Top Level - ', () => {
   let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
 
-  function setup(user: ConsoleUserType) {
+  function navToCfPage() {
+    // There is only one CF endpoint registered (since that is what we setup)
+    const page = new CFPage();
+    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+    CfTopLevelPage.detect().then(p => {
+      cfPage = p;
+      cfPage.waitForPageOrChildPage();
+      cfPage.loadingIndicator.waitUntilNotShown();
+    });
+  }
+
+  beforeAll(() => {
+    defaultCf = e2e.secrets.getDefaultCFEndpoint();
     e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(user)
-      .loginAs(user)
-      .getInfo(user);
-  }
-
-
-  function navToCfPage() {
-    defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    cfPage = CfTopLevelPage.forEndpoint(endpointGuid);
-    cfPage.navigateTo();
-    cfPage.waitForPageOrChildPage();
-    cfPage.loadingIndicator.waitUntilNotShown();
-  }
-
-  function testTitle() {
-    expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
-  }
-
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .connectAllEndpoints(ConsoleUserType.user);
+  });
 
   describe('As Admin', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.admin);
+    beforeAll(() => {
+      e2eSetup.loginAs(ConsoleUserType.admin);
     });
 
-    describe('Basic Tests - ', () => {
-
+    describe('Basic Tests -', () => {
       beforeEach(navToCfPage);
 
-      it('Breadcrumb', testTitle);
+      beforeEach(() => {
+      });
+
+      it('Breadcrumb', () => {
+        expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
+      });
 
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.admin.username);
-        expect(cfPage.waitForAdministrator().getValue()).toBe('Yes');
+        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('Yes');
       });
 
       it('Walk Tabs', () => {
@@ -67,11 +68,12 @@ describe('CF - Top Level - ', () => {
   });
 
   describe('As User', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.user);
+    beforeAll(() => {
+      e2eSetup = e2e.setup(ConsoleUserType.admin)
+      .loginAs(ConsoleUserType.user);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
 
       beforeEach(navToCfPage);
 
@@ -82,7 +84,7 @@ describe('CF - Top Level - ', () => {
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
-        expect(cfPage.waitForAdministrator().getValue()).toBe('No');
+        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('No');
       });
 
       it('Walk Tabs', () => {

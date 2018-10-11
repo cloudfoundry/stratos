@@ -125,7 +125,8 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     public spaceGuid: string,
     public paginationKey: string,
     public includeRelations = [],
-    public populateMissing = true
+    public populateMissing = true,
+    public flattenPagination = true
   ) {
     super();
     this.options = new RequestOptions();
@@ -145,7 +146,6 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);
-  flattenPagination = true;
 }
 
 export abstract class BaseSpaceAction extends CFStartAction implements ICFAction {

@@ -1,12 +1,5 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async">
   <h1>CLI Info</h1>
-  <div class="page-header-right">
-    <span>
-      <button mat-icon-button (click)="back()">
-        <mat-icon matTooltip="Back to App">close</mat-icon>
-      </button>
-    </span>
-  </div>
 </app-page-header>
 
 <app-cli-info *ngIf="context$ | async as context" [context]="context">

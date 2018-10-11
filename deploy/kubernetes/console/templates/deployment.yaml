@@ -9,8 +9,11 @@ spec:
   template:
     metadata:
       labels:
-        app: "{{ .Release.Name }}"
-        component: "console"
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "console"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
@@ -207,6 +210,10 @@ spec:
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
           value: "{{ .Release.Time }}"
+        - name: SSO_LOGIN
+          value: {{default "false" .Values.console.ssoLogin | quote}}
+        - name: SSO_OPTIONS
+          value: {{default "" .Values.console.ssoOptions | quote}}
         ports:
         - containerPort: 3003
           name: proxy
@@ -239,12 +246,20 @@ kind: Deployment
 metadata:
   name: console-mariadb
   labels:
-    app: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-mariadb"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   template:
     metadata:
       labels:
-        app: "{{ .Release.Name }}"
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "console-mariadb"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
       containers:
       - name: mariadb

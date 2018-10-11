@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	findUAATokenSql = `SELECT auth_token, refresh_token, token_expiry, auth_type, meta_data FROM tokens .*`
+	findUAATokenSql = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data FROM tokens .*`
 )
 
 func TestLoginToUAA(t *testing.T) {
@@ -183,8 +183,8 @@ func TestLoginToCNSI(t *testing.T) {
 			DopplerLoggingEndpoint: mockDopplerEndpoint,
 		}
 
-		expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret"}).
-			AddRow(mockCNSIGUID, mockCNSI.Name, stringCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret)
+		expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso"}).
+			AddRow(mockCNSIGUID, mockCNSI.Name, stringCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret, true)
 
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
@@ -549,9 +549,10 @@ func TestVerifySession(t *testing.T) {
 			t.Error(errors.New("Unable to mock/stub user in session object."))
 		}
 
+		mockTokenGUID := "mock-token-guid"
 		encryptedUAAToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
-		expectedTokensRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
-			AddRow(encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "")
+		expectedTokensRow := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
+			AddRow(mockTokenGUID, encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "")
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockUserGUID).
@@ -561,8 +562,8 @@ func TestVerifySession(t *testing.T) {
 			AddRow(mockProxyVersion)
 		mock.ExpectQuery(getDbVersion).WillReturnRows(expectVersionRow)
 
-		rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
-			AddRow(encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "")
+		rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
+			AddRow(mockTokenGUID, encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "")
 		mock.ExpectQuery(findUAATokenSql).
 			WillReturnRows(rs)
 

@@ -26,6 +26,7 @@ const (
 	CFApiForceSecure       = "CF_API_FORCE_SECURE"
 	cfSessionCookieName    = "JSESSIONID"
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
+	SkipAutoRegister       = "SKIP_AUTO_REGISTER"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -178,8 +179,12 @@ func (ch *CFHosting) Init() error {
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 
-		log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
-		ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
+		if !config.IsSet(SkipAutoRegister) {
+			log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
+			ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
+		} else {
+			log.Info("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
+		}
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{

@@ -15,7 +15,8 @@
       display: block;
     }
   }
-  &__errored {
+  &__errored,
+  &__warning {
     .table-row__error {
       display: flex;
     }
