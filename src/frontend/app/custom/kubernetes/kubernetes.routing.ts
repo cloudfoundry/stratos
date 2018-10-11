@@ -5,7 +5,7 @@ import {
   HelmReleasePodsTabComponent,
 } from './helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
 import { HelmReleaseComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release.component';
-import { HelmReleasePodComponent } from './helm-release-pod/helm-release-pod.component';
+import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import {
   HelmReleaseServicesComponent,
 } from './helm-release/helm-release-tabs-base/helm-release-services/helm-release-services.component';
@@ -30,28 +30,28 @@ const kubernetes: Routes = [{
 },
 {
   path: ':kubeId/apps/:releaseName/pods/:namespace/:podName',
-  component: HelmReleasePodComponent,
+  component: PodMetricsComponent,
   data: {
     uiFullView: true
   },
 },
 {
   path: ':kubeId/nodes/:nodeName/pods/:namespace/:podName',
-  component: HelmReleasePodComponent,
+  component: PodMetricsComponent,
   data: {
     uiFullView: true
   },
 },
 {
   path: ':kubeId/pods/:namespace/:podName',
-  component: HelmReleasePodComponent,
+  component: PodMetricsComponent,
   data: {
     uiFullView: true
   },
 },
 {
   path: ':kubeId/namespaces/:namespaceName/pods/:podName',
-  component: HelmReleasePodComponent,
+  component: PodMetricsComponent,
   data: {
     uiFullView: true
   },

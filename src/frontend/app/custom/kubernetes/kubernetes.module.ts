@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-
 import {
   PodUsageComponent,
-} from '../../../../../src/frontend/app/custom/kubernetes/helm-release-pod/pod-usage/pod-usage.component';
+} from './pod-metrics/pod-usage/pod-usage.component';
 import {
   HelmReleasePodsTabComponent,
 } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release-tabs-base/helm-release-pods-tab/helm-release-pods-tab.component';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { HelmReleasePodComponent } from './helm-release-pod/helm-release-pod.component';
+import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { HelmReleaseBaseComponent } from './helm-release/helm-release-base/helm-release-base.component';
 import {
   HelmReleaseServicesComponent,
@@ -119,7 +118,7 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     HelmReleaseSummaryComponent,
     HelmReleaseServicesComponent,
     HelmReleaseSummaryCardComponent,
-    HelmReleasePodComponent,
+    PodMetricsComponent,
     PodChartComponent,
     KubernetesNodeLinkComponent,
     PodUsageComponent,

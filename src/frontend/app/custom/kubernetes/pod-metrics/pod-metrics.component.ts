@@ -22,9 +22,9 @@ import { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
 
 @Component({
-  selector: 'app-helm-release-pod',
-  templateUrl: './helm-release-pod.component.html',
-  styleUrls: ['./helm-release-pod.component.scss'],
+  selector: 'app-pod-metrics',
+  templateUrl: './pod-metrics.component.html',
+  styleUrls: ['./pod-metrics.component.scss'],
   providers: [
     {
       provide: BaseKubeGuid,
@@ -42,7 +42,7 @@ import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kuberne
     KubernetesEndpointService
   ]
 })
-export class HelmReleasePodComponent implements OnInit {
+export class PodMetricsComponent implements OnInit {
   podName: string;
   podEntity$: Observable<EntityInfo<KubernetesPod>>;
   namespaceName: any;
