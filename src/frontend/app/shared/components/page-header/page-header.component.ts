@@ -35,6 +35,7 @@ export class PageHeaderComponent {
 
   @Input()
   tabs: ISubHeaderTabs[];
+
   @Input() showUnderFlow = false;
 
   @Input()

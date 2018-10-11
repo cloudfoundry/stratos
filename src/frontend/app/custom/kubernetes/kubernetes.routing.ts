@@ -31,9 +31,6 @@ const kubernetes: Routes = [{
 {
   path: ':kubeId/apps/:releaseName/pods/:podName',
   component: HelmReleasePodComponent,
-  data: {
-    uiFullView: true
-  },
 },
 {
   path: ':kubeId/nodes/:nodeName/pods/:podName',
@@ -102,7 +99,6 @@ const kubernetes: Routes = [{
 },
 {
   path: ':kubeId/apps/:releaseName',
-  // pathMatch: 'full',
   component: HelmReleaseComponent,
   data: {
     uiFullView: true
