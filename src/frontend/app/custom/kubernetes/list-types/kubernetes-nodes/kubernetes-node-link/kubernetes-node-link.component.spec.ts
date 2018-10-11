@@ -3,14 +3,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link.component';
 
 describe('KubernetesNodeLinkComponent', () => {
-  let component: KubernetesNodeLinkComponent;
-  let fixture: ComponentFixture<KubernetesNodeLinkComponent>;
+  let component: KubernetesNodeLinkComponent<any>;
+  let fixture: ComponentFixture<KubernetesNodeLinkComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNodeLinkComponent ]
+      declarations: [KubernetesNodeLinkComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

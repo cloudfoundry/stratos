@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { PodUsageComponent } from './pod-usage.component';
 
-import { PodMemoryUsageComponent } from './pod-memory-usage.component';
 
 describe('PodMemoryUsageComponent', () => {
-  let component: PodMemoryUsageComponent;
-  let fixture: ComponentFixture<PodMemoryUsageComponent>;
+  let component: PodUsageComponent;
+  let fixture: ComponentFixture<PodUsageComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PodMemoryUsageComponent ]
+      declarations: [PodUsageComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PodMemoryUsageComponent);
+    fixture = TestBed.createComponent(PodUsageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

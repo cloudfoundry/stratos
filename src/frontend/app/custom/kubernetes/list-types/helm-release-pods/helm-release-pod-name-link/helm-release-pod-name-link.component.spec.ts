@@ -3,14 +3,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HelmReleasePodNameLinkComponent } from './helm-release-pod-name-link.component';
 
 describe('HelmReleasePodNameLinkComponent', () => {
-  let component: HelmReleasePodNameLinkComponent;
-  let fixture: ComponentFixture<HelmReleasePodNameLinkComponent>;
+  let component: HelmReleasePodNameLinkComponent<any>;
+  let fixture: ComponentFixture<HelmReleasePodNameLinkComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleasePodNameLinkComponent ]
+      declarations: [HelmReleasePodNameLinkComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

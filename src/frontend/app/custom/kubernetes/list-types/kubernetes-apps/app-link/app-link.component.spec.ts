@@ -3,14 +3,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppLinkComponent } from './app-link.component';
 
 describe('AppLinkComponent', () => {
-  let component: AppLinkComponent;
-  let fixture: ComponentFixture<AppLinkComponent>;
+  let component: AppLinkComponent<any>;
+  let fixture: ComponentFixture<AppLinkComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AppLinkComponent ]
+      declarations: [AppLinkComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

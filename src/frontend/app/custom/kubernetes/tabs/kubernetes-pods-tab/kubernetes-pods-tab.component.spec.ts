@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { KubernetesNodesTabComponent } from '../kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 
-import { KubernetesNodesTabComponent } from './kubernetes-nodes-tab.component';
 
 describe('KubernetesNodesTabComponent', () => {
   let component: KubernetesNodesTabComponent;
@@ -8,9 +8,9 @@ describe('KubernetesNodesTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNodesTabComponent ]
+      declarations: [KubernetesNodesTabComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
