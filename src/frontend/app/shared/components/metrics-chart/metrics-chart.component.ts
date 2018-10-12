@@ -61,28 +61,28 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     private store: Store<AppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
-
-  private postFetchMiddleware(metricsArray: ChartSeries[]) {
+  private sort(metricsArray: ChartSeries[]) {
     if (this.metricsConfig.sort) {
       const newMetricsArray = [
         ...metricsArray
       ];
-      newMetricsArray.sort(this.metricsConfig.sort);
-      if (
-        this.committedAction.query.params &&
-        this.committedAction.query.params.start &&
-        this.committedAction.query.params.end
-      ) {
-        return MetricsChartManager.fillOutTimeOrderedChartSeries(
-          newMetricsArray,
-          this.committedAction.query.params.start as number,
-          this.committedAction.query.params.end as number,
-          this.committedAction.query.params.step as number,
-          this.metricsConfig,
-        );
-      }
+      return newMetricsArray.sort(this.metricsConfig.sort);
     }
     return metricsArray;
+  }
+  private postFetchMiddleware(metricsArray: ChartSeries[], params: [number, number, number]) {
+    const [start, end, step] = params;
+    const sortedArray = this.sort(metricsArray);
+    if (start && end && step) {
+      return MetricsChartManager.fillOutTimeOrderedChartSeries(
+        sortedArray,
+        start,
+        end,
+        step,
+        this.metricsConfig,
+      );
+    }
+    return sortedArray;
   }
 
   ngOnInit() {
@@ -109,8 +109,10 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         if (!metricsArray.length) {
           return [];
         }
+        const query = metrics.query;
+        const { start, end, step } = query.params as { start: number, end: number, step: number };
         this.hasMultipleInstances = metricsArray.length > 1;
-        return this.postFetchMiddleware(metricsArray);
+        return this.postFetchMiddleware(metricsArray, [start, end, step]);
       }),
       distinctUntilChanged()
     );

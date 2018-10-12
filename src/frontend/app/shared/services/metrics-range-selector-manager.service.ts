@@ -69,6 +69,7 @@ export class MetricsRangeSelectorManagerService {
       };
     }
   }
+
   private setTimeWindowFromStore(metrics: IMetrics) {
     const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
     const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
@@ -77,6 +78,7 @@ export class MetricsRangeSelectorManagerService {
     }
     this.selectedTimeRange = timeRange;
   }
+
   public init(entityMonitor: EntityMonitor<IMetrics>, baseAction: MetricsAction) {
     this.baseAction = baseAction;
     this.initSub = entityMonitor.entity$.pipe(

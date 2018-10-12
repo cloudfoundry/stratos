@@ -10,6 +10,7 @@ export interface StoreMetricTimeRange {
   timeRange: ITimeRange;
   start?: moment.Moment;
   end?: moment.Moment;
+  step?: number;
 }
 
 export enum MetricQueryType {
