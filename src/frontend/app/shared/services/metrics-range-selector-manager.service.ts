@@ -69,19 +69,28 @@ export class MetricsRangeSelectorManagerService {
       };
     }
   }
-
+  private setTimeWindowFromStore(metrics: IMetrics) {
+    const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
+    const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
+    if (isDifferent) {
+      this.committedStartEnd = [start, end];
+    }
+    this.selectedTimeRange = timeRange;
+  }
   public init(entityMonitor: EntityMonitor<IMetrics>, baseAction: MetricsAction) {
     this.baseAction = baseAction;
     this.initSub = entityMonitor.entity$.pipe(
-      debounceTime(1),
       tap(metrics => {
-        if (!this.selectedTimeRange) {
-          const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
-          const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
-          if (isDifferent) {
-            this.committedStartEnd = [start, end];
-          }
-          this.selectedTimeRange = timeRange;
+        if (metrics && !this.selectedTimeRange) {
+          this.setTimeWindowFromStore(metrics);
+        }
+      }),
+      debounceTime(0),
+      tap(metrics => {
+        // entity$ emits null first.
+        // If its still null after the debounce then we run setTimeWindowFromStore to get default selection
+        if (!metrics && !this.selectedTimeRange) {
+          this.setTimeWindowFromStore(metrics);
         }
       }),
       takeWhile(metrics => !metrics)

@@ -96,25 +96,28 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     const baseResults$ = this.metricsMonitor.entity$.pipe(
       distinctUntilChanged((oldMetrics, newMetrics) => {
         return oldMetrics && oldMetrics.data === newMetrics.data;
-      })
+      }),
+
     );
 
     this.results$ = baseResults$.pipe(
       map(metrics => {
+        if (!metrics) {
+          return metrics;
+        }
         const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
         if (!metricsArray.length) {
-          return null;
+          return [];
         }
         this.hasMultipleInstances = metricsArray.length > 1;
         return this.postFetchMiddleware(metricsArray);
       }),
-      distinctUntilChanged(),
-      startWith(null),
+      distinctUntilChanged()
     );
 
     this.isRefreshing$ = combineLatest(
-      baseResults$,
-      this.metricsMonitor.isFetchingEntity$
+      this.results$,
+      this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
     ).pipe(
       debounce(([results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
@@ -124,18 +127,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     );
 
     this.isFetching$ = combineLatest(
-      baseResults$,
-      this.metricsMonitor.isFetchingEntity$
+      this.results$.pipe(startWith(null)),
+      this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
     ).pipe(
       map(([results, fetching]) => !results && fetching),
       distinctUntilChanged(),
-      pairwise(),
-      filter(([oldFetching, newFetching]) => {
-        return !newFetching && oldFetching || oldFetching && newFetching;
-      }),
-      map(([old, fetching]) => fetching),
-      distinctUntilChanged(),
-      startWith(true)
+      startWith(true),
     );
   }
 
