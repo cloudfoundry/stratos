@@ -54,7 +54,7 @@ export class MetricsRangeSelectorService {
       ...action.query.params,
       start: startUnix,
       end: end.unix(),
-      step: Math.max((endUnix - startUnix) / 100, 0)
+      step: Math.max((endUnix - startUnix) / 50, 0)
     }));
   }
 
