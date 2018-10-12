@@ -76,6 +76,15 @@ const endpointAuthTypes = [
     },
     types: new Array<EndpointType>('k8s')
   },
+  {
+    name: 'Kubernetes Cert Auth',
+    value: 'kube-cert-auth',
+    form: {
+      cert: ['', Validators.required],
+      certKey: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
 ];
 
 const endpointTypesMap = {};

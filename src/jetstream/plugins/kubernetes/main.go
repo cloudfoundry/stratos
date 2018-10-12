@@ -22,6 +22,7 @@ const (
 	CLIENT_ID_KEY             = "K8S_CLIENT"
 	AuthConnectTypeKubeConfig = "KubeConfig"
 	AuthConnectTypeAWSIAM     = "aws-iam"
+	AuthConnectTypeCertAuth   = "kube-cert-auth"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -73,6 +74,14 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 
 	// IAM Creds?
 	if strings.EqualFold(connectType, AuthConnectTypeAWSIAM) {
+		tokenRecord, _, err := c.FetchIAMToken(cnsiRecord, ec)
+		if err != nil {
+			return nil, false, err
+		}
+		return tokenRecord, false, nil
+	}
+	// Cert Auth?
+	if strings.EqualFold(connectType, AuthConnectTypeCertAuth) {
 		tokenRecord, _, err := c.FetchIAMToken(cnsiRecord, ec)
 		if err != nil {
 			return nil, false, err
