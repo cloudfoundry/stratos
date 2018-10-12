@@ -75,7 +75,7 @@ export class MetricsRangeSelectorService {
         const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
         const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
         return {
-          timeRange: times.find(time => time.label === MetricQueryType.RANGE_QUERY),
+          timeRange: times.find(time => time.queryType === MetricQueryType.RANGE_QUERY),
           start,
           end
         };
