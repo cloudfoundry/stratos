@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { TableCellCustom } from '../../../../../shared/components/list/list.types';
-import { KubernetesNode } from '../../../store/kube.types';
-import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { TableCellCustom } from '../../../../../shared/components/list/list.types';
+import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-node-pod-count',
@@ -10,7 +12,7 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./node-pod-count.component.scss']
 })
 export class NodePodCountComponent extends TableCellCustom<KubernetesNode> implements OnInit {
-  podCount$: any;
+  podCount$: Observable<string>;
 
   constructor(
     private kubeEndpointService: KubernetesEndpointService
@@ -22,7 +24,7 @@ export class NodePodCountComponent extends TableCellCustom<KubernetesNode> imple
 
     this.podCount$ = this.kubeEndpointService.pods$.pipe(
       map(pods =>  pods.filter(p => p.spec.nodeName === this.row.metadata.name)),
-      map(p => p.length)
+      map(p => `${p.length} / ${this.row.status.capacity.pods}`)
     );
   }
 
