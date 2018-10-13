@@ -223,7 +223,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.bodyContent = this.kubeconfig;
     }
     if (this.endpointForm.value.authType === 'kube-cert-auth') {
-      this.bodyContent = `{ "cert": "${this.cert}", "key": "${this.certKey}"}`;
+      /** Body content is in the following encoding:
+       * base64encoded:base64encoded
+       */
+      const certBase64 = btoa(this.cert);
+      const certKeyBase64 = btoa(this.certKey);
+      this.bodyContent = `${certBase64}:${certKeyBase64}`;
     }
 
     this.store.dispatch(new ConnectEndpoint(

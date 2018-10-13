@@ -82,7 +82,7 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 	}
 	// Cert Auth?
 	if strings.EqualFold(connectType, AuthConnectTypeCertAuth) {
-		tokenRecord, _, err := c.FetchIAMToken(cnsiRecord, ec)
+		tokenRecord, _, err := c.FetchCertAuth(cnsiRecord, ec)
 		if err != nil {
 			return nil, false, err
 		}
@@ -96,6 +96,10 @@ func (c *KubernetesSpecification) Init() error {
 	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
 		Handler:  c.doAWSIAMFlowRequest,
 		UserInfo: c.GetCNSIUserFromIAMToken,
+	})
+	c.portalProxy.AddAuthProvider(AuthConnectTypeCertAuth, interfaces.AuthProvider{
+		Handler:  c.doCertAuthFlowRequest,
+		UserInfo: c.GetCNSIUserFromCertAuth,
 	})
 
 	return nil
