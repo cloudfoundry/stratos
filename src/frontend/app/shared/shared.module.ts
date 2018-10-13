@@ -338,7 +338,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     CapitalizeFirstPipe,
     CfEndpointsMissingComponent,
     RoutingIndicatorComponent,
-    ExtensionButtonsComponent
+    ExtensionButtonsComponent,
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
