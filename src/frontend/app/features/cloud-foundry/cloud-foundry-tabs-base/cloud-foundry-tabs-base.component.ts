@@ -57,7 +57,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
     );
- 
+
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
       { link: 'summary', label: 'Summary' },
