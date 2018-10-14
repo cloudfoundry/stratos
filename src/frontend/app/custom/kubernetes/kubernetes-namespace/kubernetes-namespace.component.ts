@@ -44,7 +44,7 @@ export class KubernetesNamespaceComponent {
     this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [
-          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces` },
         ]
       }])
       )
