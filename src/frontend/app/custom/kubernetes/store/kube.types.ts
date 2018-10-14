@@ -82,6 +82,8 @@ export interface KubernetesApp {
   createdAt: Date;
   status: string;
   version: string;
+  chartName: string;
+  appVersion: string;
 }
 export interface NodeStatus {
   capacity: Capacity;

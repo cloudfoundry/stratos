@@ -38,7 +38,6 @@ import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link.component';
-import { KubeAppChartNameComponent } from './list-types/kubernetes-apps/kube-app-chart-name/kube-app-chart-name.component';
 import {
   KubeAppcreatedDateComponent,
 } from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
@@ -87,7 +86,6 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
-import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-version/kube-app-version.component';
 
 @NgModule({
   imports: [
@@ -133,11 +131,9 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent,
     KubeAppcreatedDateComponent,
-    KubeAppChartNameComponent,
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
-    KubeAppVersionComponent,
   ],
   providers: [
     KubernetesService,
@@ -155,11 +151,9 @@ import { KubeAppVersionComponent } from './list-types/kubernetes-apps/kube-app-v
     InverseConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubeAppcreatedDateComponent,
-    KubeAppChartNameComponent,
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
-    KubeAppVersionComponent,
   ]
 })
 export class KubernetesModule {

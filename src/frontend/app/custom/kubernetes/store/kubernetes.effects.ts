@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, flatMap, mergeMap } from 'rxjs/operators';
+import { catchError, flatMap, mergeMap, combineLatest } from 'rxjs/operators';
 
 import {
   kubernetesAppsSchemaKey,
@@ -226,9 +226,26 @@ export class KubernetesEffects {
       return this.http
         .get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
         .pipe(
-          mergeMap(response => {
+          combineLatest(
+            this.http.get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`, requestArgs),
+            this.http.get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`, requestArgs)),
+          mergeMap(([configMapsResponse, deploymentsResponse, statefulesetResponse]) => {
             const id = action.kubeGuid;
-            const items = response[id].items as Array<any>;
+            const items = configMapsResponse[id].items as Array<any>;
+            const deployments = deploymentsResponse[id].items as Array<KubernetesDeployment>;
+            const statefulSets = statefulesetResponse[id].items as Array<any>;
+
+            const getChartName = (name: string, labelName: string) : string => {
+              const releaseDeployment = deployments.filter(d => d.metadata.labels['app.kubernetes.io/instance'] === name);
+              const releaseStatefulSets = statefulSets.filter(d => d.metadata.labels['app.kubernetes.io/instance'] === name);
+      
+              if (releaseDeployment.length !== 0) {
+                return releaseDeployment[0].metadata.labels[labelName];
+              }
+              if (releaseStatefulSets.length !== 0) {
+                return releaseStatefulSets[0].metadata.labels[labelName];
+              }
+            };
             const releases = items
               .filter((configMap) => !!configMap.metadata.labels &&
                 !!configMap.metadata.labels.NAME &&
@@ -239,7 +256,9 @@ export class KubernetesEffects {
                 kubeId: action.kubeGuid,
                 createdAt: configMap.metadata.creationTimestamp,
                 status: configMap.metadata.labels.STATUS,
-                version: configMap.metadata.labels.VERSION
+                version: configMap.metadata.labels.VERSION,
+                chartName: getChartName(configMap.metadata.labels.NAME, 'helm.sh/chart'),
+                appVersion: getChartName(configMap.metadata.labels.NAME, 'app.kubernetes.io/version')
               })
               ).reduce((res, app) => {
                 const _id = `${app.kubeId}-${app.name}`;
