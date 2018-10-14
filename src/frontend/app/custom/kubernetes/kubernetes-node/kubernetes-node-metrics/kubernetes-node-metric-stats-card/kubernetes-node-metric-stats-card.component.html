@@ -11,8 +11,8 @@
     </mat-card-content>
     <mat-card-content *ngIf="metric==='container_cpu_usage_seconds_total'">
       <div class="app-metadata kubernetes-node-metric-stats-card__metadata">
-        <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | number:'1.0-2' }}" [unit]="unit"></app-kubernetes-node-simple-metric>
-        <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | number:'1.0-2' }}" [unit]="unit"></app-kubernetes-node-simple-metric>
+        <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
+        <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
       </div>
     </mat-card-content>
   </mat-card>
