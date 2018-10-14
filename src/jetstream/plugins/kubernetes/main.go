@@ -22,6 +22,7 @@ const (
 	CLIENT_ID_KEY             = "K8S_CLIENT"
 	AuthConnectTypeKubeConfig = "KubeConfig"
 	AuthConnectTypeAWSIAM     = "aws-iam"
+	AuthConnectTypeCertAuth   = "kube-cert-auth"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -79,6 +80,14 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 		}
 		return tokenRecord, false, nil
 	}
+	// Cert Auth?
+	if strings.EqualFold(connectType, AuthConnectTypeCertAuth) {
+		tokenRecord, _, err := c.FetchCertAuth(cnsiRecord, ec)
+		if err != nil {
+			return nil, false, err
+		}
+		return tokenRecord, false, nil
+	}
 
 	return nil, false, errors.New("Unsporrted Auth connectio type for Kubernetes endpoint")
 }
@@ -87,6 +96,10 @@ func (c *KubernetesSpecification) Init() error {
 	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
 		Handler:  c.doAWSIAMFlowRequest,
 		UserInfo: c.GetCNSIUserFromIAMToken,
+	})
+	c.portalProxy.AddAuthProvider(AuthConnectTypeCertAuth, interfaces.AuthProvider{
+		Handler:  c.doCertAuthFlowRequest,
+		UserInfo: c.GetCNSIUserFromCertAuth,
 	})
 
 	return nil

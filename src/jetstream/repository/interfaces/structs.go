@@ -81,15 +81,17 @@ type EndpointTokenRecord struct {
 
 // TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
-	TokenGUID    string
-	AuthToken    string
-	RefreshToken string
-	TokenExpiry  int64
-	Disconnected bool
-	AuthType     string
-	Metadata     string
-	SystemShared bool
-	LinkedGUID   string // Indicates the GUID of the token that this token is linked to (if any)
+	TokenGUID      string
+	AuthToken      string
+	RefreshToken   string
+	TokenExpiry    int64
+	Disconnected   bool
+	AuthType       string
+	Metadata       string
+	SystemShared   bool
+	LinkedGUID     string // Indicates the GUID of the token that this token is linked to (if any)
+	Certificate    string
+	CertificateKey string
 }
 
 type CFInfo struct {

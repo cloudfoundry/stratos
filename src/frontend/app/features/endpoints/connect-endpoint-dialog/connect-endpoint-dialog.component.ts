@@ -48,6 +48,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   public authTypesForEndpoint = [];
   public upload = true;
   private kubeconfig = '';
+  private cert = '';
+  private certKey = '';
   public canShareEndpointToken = false;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
@@ -125,11 +127,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       });
   }
 
-  dealWithKubeConfigFile($event) {
+  dealWithFile($event, fileName: string) {
     const file = $event;
     const reader = new FileReader();
     reader.onload = () => {
-      this.kubeconfig = reader.result;
+      this[fileName] = reader.result;
     };
     reader.readAsText(file);
   }
@@ -219,6 +221,14 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     const authVal = authValues;
     if (this.endpointForm.value.authType === 'kubeconfig') {
       this.bodyContent = this.kubeconfig;
+    }
+    if (this.endpointForm.value.authType === 'kube-cert-auth') {
+      /** Body content is in the following encoding:
+       * base64encoded:base64encoded
+       */
+      const certBase64 = btoa(this.cert);
+      const certKeyBase64 = btoa(this.certKey);
+      this.bodyContent = `${certBase64}:${certKeyBase64}`;
     }
 
     this.store.dispatch(new ConnectEndpoint(
