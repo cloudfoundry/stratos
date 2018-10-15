@@ -1,20 +1,20 @@
+
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { PodMetricsComponent } from './pod-metrics.component';
 
-import { HelmReleasePodComponent } from './helm-release-pod.component';
-
-describe('HelmReleasePodComponent', () => {
-  let component: HelmReleasePodComponent;
-  let fixture: ComponentFixture<HelmReleasePodComponent>;
+describe('PodMetricsComponent', () => {
+  let component: PodMetricsComponent;
+  let fixture: ComponentFixture<PodMetricsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleasePodComponent ]
+      declarations: [PodMetricsComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(HelmReleasePodComponent);
+    fixture = TestBed.createComponent(PodMetricsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
