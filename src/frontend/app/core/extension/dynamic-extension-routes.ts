@@ -3,6 +3,19 @@ import { CanActivate, Router, RouterStateSnapshot, ActivatedRouteSnapshot, Route
 import { Observable } from 'rxjs';
 import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
 
+/**
+ * This is used to dynamically add an extension's routes - since we can't do this
+ * if the extentsion's module is lazy-loaded.
+ *
+ * This CanActive plugin typically is added to the route config to catch all unknown routes '**'
+ * When activated, it removes itself from the routing congif, so it only evern activates once.
+ *
+ * It checks if there are any new routes from extensions that need to be added and add them.
+ *
+ * Lastly, it navigates to the saem route that it intercepted - if a new extension route
+ * was added that now matches, it gets the route, otherwise the route goes up the chain
+ * as it would have before.
+ */
 
 @Injectable()
 export class DynamicExtenstionRoutes implements CanActivate {
@@ -12,22 +25,24 @@ export class DynamicExtenstionRoutes implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean>|Promise<boolean>|boolean {
+    const childRoutes = this.getChildRoutes(route.parent.routeConfig);
+    // Remove the last route (which is us, the '**' route)
+    let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
+
     // Does the parent root have metadata to tell us what route group this is?
+    // i.e. are there extension routes we need to try and add?
     if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
       const tabGroup = route.routeConfig.data.stratosRouteGroup;
-      const childRoutes = this.getChildRoutes(route.parent.routeConfig);
-
-      // Remove the last route
-      let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
 
       // Add the missing routes
       const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
       newChildRoutes = newChildRoutes.concat(newRoutes);
-      this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
-      this.router.navigateByUrl(state.url);
-      return false;
     }
-    return true;
+
+    // Update the route config and navigate again to the same route that was intercepted
+    this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
+    this.router.navigateByUrl(state.url);
+    return false;
   }
 
   private getChildRoutes(r: any) {
