@@ -71,23 +71,6 @@ import { PageNotFoundComponentComponent } from '../../core/page-not-found-compon
 import { StratosActionType } from '../../core/extension/extension-service';
 
 /* tslint:enable:max-line-length */
-const usersRoles = [
-  {
-    path: 'users/manage',
-    component: UsersRolesComponent,
-    pathMatch: 'full'
-  },
-  {
-    path: 'organizations/:orgId/users/manage',
-    component: UsersRolesComponent,
-    pathMatch: 'full'
-  },
-  {
-    path: 'organizations/:orgId/spaces/:spaceId/users/manage',
-    component: UsersRolesComponent,
-    pathMatch: 'full'
-  },
-];
 
 const cloudFoundry: Routes = [{
   path: '',
@@ -154,6 +137,10 @@ const cloudFoundry: Routes = [{
             {
               path: 'users',
               component: CloudFoundryUsersComponent
+            },
+            {
+              path: 'users/manage',
+              component: UsersRolesComponent
             },
             {
               path: 'cells',
@@ -244,6 +231,10 @@ const cloudFoundry: Routes = [{
                   component: CloudFoundryOrganizationUsersComponent
                 },
                 {
+                  path: 'users/manage',
+                  component: UsersRolesComponent
+                },
+                {
                   path: '**',
                   component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtenstionRoutes],
@@ -286,6 +277,10 @@ const cloudFoundry: Routes = [{
                   component: CloudFoundrySpaceUsersComponent
                 },
                 {
+                  path: 'users/manage',
+                  component: UsersRolesComponent
+                },
+                {
                   path: '**',
                   component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtenstionRoutes],
@@ -298,7 +293,6 @@ const cloudFoundry: Routes = [{
           ]
         }]
     },
-    ...usersRoles,
     {
       path: '**',
       component: PageNotFoundComponentComponent,
