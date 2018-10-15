@@ -1,5 +1,5 @@
 import { MetricsAction } from './../../../store/actions/metrics.actions';
-import { ChartSeries, IMetricMatrixResult } from '../../../store/types/base-metric.types';
+import { ChartSeries, IMetricMatrixResult, MetricsFilterSeries } from '../../../store/types/base-metric.types';
 import { MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsConfig } from './metrics-chart.component';
 
@@ -32,8 +32,9 @@ export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result) =>
   return (
     metricsAction: MetricsAction,
     yAxisLabel: string,
-    dataType: ChartDataTypes = null
-  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType);
+    dataType: ChartDataTypes = null,
+    filterSeries: MetricsFilterSeries = null
+  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType, filterSeries);
 }
 
 export function buildMetricsChartConfig<T = any>(
@@ -41,6 +42,7 @@ export function buildMetricsChartConfig<T = any>(
   yAxisLabel: string,
   getSeriesName: (result) => string,
   dataType: ChartDataTypes = null,
+  filterSeries: MetricsFilterSeries = null
 ): [
     MetricsConfig<IMetricMatrixResult<T>>,
     MetricsLineChartConfig
@@ -51,7 +53,8 @@ export function buildMetricsChartConfig<T = any>(
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: dataType === ChartDataTypes.BYTES ? (bytes) => (bytes / 1000000).toFixed(2) : null,
-      metricsAction
+      metricsAction,
+      filterSeries: filterSeries,
     },
     MetricsChartHelpers.buildChartConfig(yAxisLabel)
   ];

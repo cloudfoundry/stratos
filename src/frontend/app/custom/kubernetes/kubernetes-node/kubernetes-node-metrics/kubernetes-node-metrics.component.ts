@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { KubernetesNodeService, KubeNodeMetric } from '../../services/kubernetes-node.service';
 import { MetricsLineChartConfig } from '../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsConfig } from '../../../../shared/components/metrics-chart/metrics-chart.component';
-import { IMetricMatrixResult } from '../../../../store/types/base-metric.types';
+import { IMetricMatrixResult, ChartSeries } from '../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../store/types/metric.types';
 import { FetchKubernetesMetricsAction, FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 import { ChartDataTypes, getMetricsChartConfigBuilder } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
@@ -33,7 +33,6 @@ export class KubernetesNodeMetricsComponent implements OnInit {
   ngOnInit() {
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(
       result => {
-
         const metric = result.metric;
         if (!!metric.pod_name && !!metric.namespace) {
           return `${metric.namespace}:${metric.pod_name}`;
@@ -45,8 +44,9 @@ export class KubernetesNodeMetricsComponent implements OnInit {
 
         return result.metric.id;
 
-      }
+      },
     );
+
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchKubernetesChartMetricsAction(
@@ -55,7 +55,10 @@ export class KubernetesNodeMetricsComponent implements OnInit {
           `${KubeNodeMetric.MEMORY}{instance="${this.kubeNodeService.nodeName}"}`
         ),
         'Memory Usage (MB)',
-        ChartDataTypes.BYTES
+        ChartDataTypes.BYTES,
+        (series: ChartSeries[]) => {
+          return series.filter(s => !(s.name.indexOf('/') === 0));
+        }
       ),
       chartConfigBuilder(
         new FetchKubernetesChartMetricsAction(
@@ -63,7 +66,11 @@ export class KubernetesNodeMetricsComponent implements OnInit {
           this.kubeNodeService.kubeGuid,
           `${KubeNodeMetric.CPU}{instance="${this.kubeNodeService.nodeName}"}`
         ),
-        'CPU Usage (%)'
+        'CPU Usage (%)',
+        null,
+        (series: ChartSeries[]) => {
+          return series.filter(s => !(s.name.indexOf('/') === 0));
+        }
       )
     ];
   }

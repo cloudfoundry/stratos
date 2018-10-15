@@ -48,3 +48,5 @@ export interface ChartSeries<T = any> {
     value: T;
   }[];
 }
+
+export type MetricsFilterSeries = (chartSeries: ChartSeries[]) => ChartSeries[];
