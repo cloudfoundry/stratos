@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { IApp } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { GetApplication } from '../../../../../store/actions/application.actions';
-import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
+import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -40,9 +40,9 @@ export class CfCellAppsDataSource
     listConfig: IListConfig<CfCellApp>,
     entityServiceFactory: EntityServiceFactory
   ) {
-    const action = new FetchCFCellMetricsPaginatedAction(
-      cfGuid,
+    const action = new FetchCFMetricsPaginatedAction(
       cellId,
+      cfGuid,
       new MetricQueryConfig(`firehose_container_metric_cpu_percentage{bosh_job_id="${cellId}"}`, {}),
       MetricQueryType.QUERY
     );
