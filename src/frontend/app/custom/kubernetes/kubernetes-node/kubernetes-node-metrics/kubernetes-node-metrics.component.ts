@@ -32,7 +32,20 @@ export class KubernetesNodeMetricsComponent implements OnInit {
 
   ngOnInit() {
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(
-      result => result.metric.name ? result.metric.name : result.metric.id
+      result => {
+
+        const metric = result.metric;
+        if (!!metric.pod_name && !!metric.namespace) {
+          return `${metric.namespace}:${metric.pod_name}`;
+        }
+
+        if (metric.name) {
+          return metric.name;
+        }
+
+        return result.metric.id;
+
+      }
     );
     this.instanceMetricConfigs = [
       chartConfigBuilder(
