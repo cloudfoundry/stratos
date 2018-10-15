@@ -66,7 +66,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
           this.kubeNodeService.kubeGuid,
           `${KubeNodeMetric.CPU}{instance="${this.kubeNodeService.nodeName}"}`
         ),
-        'CPU Usage (%)',
+        'CPU Usage (secs)',
         null,
         (series: ChartSeries[]) => {
           return series.filter(s => !(s.name.indexOf('/') === 0));
