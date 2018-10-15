@@ -235,10 +235,10 @@ export class KubernetesEffects {
             const deployments = deploymentsResponse[id].items as Array<KubernetesDeployment>;
             const statefulSets = statefulesetResponse[id].items as Array<any>;
 
-            const getChartName = (name: string, labelName: string) : string => {
+            const getChartName = (name: string, labelName: string): string => {
               const releaseDeployment = deployments.filter(d => d.metadata.labels['app.kubernetes.io/instance'] === name);
               const releaseStatefulSets = statefulSets.filter(d => d.metadata.labels['app.kubernetes.io/instance'] === name);
-      
+
               if (releaseDeployment.length !== 0) {
                 return releaseDeployment[0].metadata.labels[labelName];
               }

@@ -61,10 +61,6 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     {
       columnId: 'numPods', headerCell: () => 'No. of Pods',
       cellComponent: NodePodCountComponent,
-      cellConfig: {
-        conditionType: ConditionType.MemoryPressure
-      },
-      sort: getConditionSort(ConditionType.MemoryPressure),
       cellFlex: '2',
     },
     {
