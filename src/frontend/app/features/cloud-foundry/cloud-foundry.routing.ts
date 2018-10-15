@@ -104,6 +104,7 @@ const cloudFoundry: Routes = [{
       path: 'organizations/:orgId/add-space',
       component: AddSpaceComponent
     },
+    ...usersRoles,
     {
       path: '',
       // Root for attaching CF wide actions (i.e assignments, tabs)
@@ -298,7 +299,6 @@ const cloudFoundry: Routes = [{
           ]
         }]
     },
-    ...usersRoles,
     {
       path: '**',
       component: PageNotFoundComponentComponent,
