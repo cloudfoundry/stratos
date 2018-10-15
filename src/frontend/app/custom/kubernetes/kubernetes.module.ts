@@ -16,7 +16,6 @@ import {
   HelmReleaseSummaryComponent,
 } from './helm-release/helm-release-summary/helm-release-summary.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
-import { PodChartComponent } from './helm-release/metrics/pod-chart/pod-chart.component';
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
@@ -110,7 +109,6 @@ import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-co
     HelmReleaseServicesComponent,
     HelmReleaseSummaryCardComponent,
     PodMetricsComponent,
-    PodChartComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodeComponent,
     KubernetesNodeSummaryComponent,
