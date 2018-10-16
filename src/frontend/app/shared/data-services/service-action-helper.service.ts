@@ -50,13 +50,19 @@ export class ServiceActionHelperService {
 
   deleteServiceInstance = (
     serviceInstanceGuid: string,
+    serviceInstanceName: string,
     endpointGuid: string
   ) => {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
-      'Are you sure you want to delete the service instance?',
+      `Are you sure you want to permanently delete the service instance '${serviceInstanceName}'?`,
       'Delete',
-      true
+      true,
+      {
+        message: 'Please type the name of the service instance to continue',
+        label: 'Name',
+        textToMatch: serviceInstanceName
+      }
     );
     this.confirmDialog.open(confirmation, () =>
       this.store.dispatch(new DeleteServiceInstance(endpointGuid, serviceInstanceGuid))

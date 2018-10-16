@@ -156,7 +156,12 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
       'Delete Space',
       `Are you sure you want to delete space '${this.row.entity.name}'?`,
       'Delete',
-      true
+      true,
+      {
+        message: 'Please type the name of the space to continue',
+        label: 'Name',
+        textToMatch: this.row.entity.name
+      }
     );
     this.confirmDialog.open(confirmation, () => {
       this.cfOrgService.deleteSpace(

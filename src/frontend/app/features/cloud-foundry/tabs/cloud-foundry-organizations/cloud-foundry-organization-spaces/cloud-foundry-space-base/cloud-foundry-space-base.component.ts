@@ -157,7 +157,12 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
         'Delete Space',
         `Are you sure you want to delete space '${name}'?`,
         'Delete',
-        true
+        true,
+        {
+          message: 'Please type the name of the space to continue',
+          label: 'Name',
+          textToMatch: name
+        }
       );
       this.confirmDialog.open(confirmation, this.deleteSpace);
     });
