@@ -16,9 +16,6 @@ export class ExtensionButtonsComponent implements OnInit {
   constructor(private logger: LoggerService) { }
 
   ngOnInit() {
-    if (!StratosActionType[this.type]) {
-      this.logger.warn('Extension Buttons: Unknown StratosActionType: ' + this.type);
-    }
     this.extensionActions = getActionsFromExtensions(this.type);
   }
 }

@@ -16,7 +16,7 @@
           </ng-container>
         </div>
         <ng-content></ng-content>
-        <app-extension-buttons *ngIf="actionsKey" type="actionsKey"></app-extension-buttons>
+        <app-extension-buttons *ngIf="actionsKey" [type]="actionsKey"></app-extension-buttons>
         <div class="page-header__filler"></div>
         <ng-content select=".page-header-right"></ng-content>
         <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu">
