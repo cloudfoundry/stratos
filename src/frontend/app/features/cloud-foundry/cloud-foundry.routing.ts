@@ -135,7 +135,8 @@ const cloudFoundry: Routes = [{
         {
           path: '',
           data: {
-            uiFullView: true
+            uiFullView: true,
+            extensionsActionsKey: StratosActionType.Application
           },
           component: CloudFoundryTabsBaseComponent,
           children: [
@@ -225,6 +226,7 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryOrganizationBaseComponent,
               data: {
                 uiFullView: true,
+                extensionsActionsKey: StratosActionType.CloudFoundryOrg
               },
               children: [
                 {
@@ -257,7 +259,8 @@ const cloudFoundry: Routes = [{
             {
               path: 'organizations/:orgId/spaces/:spaceId',
               data: {
-                uiFullView: true
+                uiFullView: true,
+                extensionsActionsKey: StratosActionType.CloudFoundrySpace
               },
               component: CloudFoundrySpaceBaseComponent,
               children: [

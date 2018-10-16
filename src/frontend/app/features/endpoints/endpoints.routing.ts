@@ -8,9 +8,15 @@ import { PageNotFoundComponentComponent } from '../../core/page-not-found-compon
 import { StratosActionType } from '../../core/extension/extension-service';
 
 const endpointsRoutes: Routes = [
-  { path: '', component: EndpointsPageComponent, },
+  {
+    path: '', component: EndpointsPageComponent,
+    data: {
+      extensionsActionsKey: StratosActionType.Endpoints
+    }
+  },
   { path: 'new', component: CreateEndpointComponent },
-  { path: '**',
+  {
+    path: '**',
     component: PageNotFoundComponentComponent,
     canActivate: [DynamicExtenstionRoutes],
     data: {

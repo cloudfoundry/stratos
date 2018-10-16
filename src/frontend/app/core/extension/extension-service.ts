@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
+export const extensionsActionRouteKey = 'extensionsActionsKey';
+
 export interface EndpointTypeExtension {
   type: string;
   label: string;
@@ -58,7 +60,7 @@ const extensionMetadata = {
  * Decortator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadata) {
-  return function(target) {
+  return function (target) {
     addExtensionTab(props.type, target, props);
   };
 }
@@ -67,7 +69,7 @@ export function StratosTab(props: StratosTabMetadata) {
  * Decortator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return function(target) {
+  return function (target) {
     addExtensionAction(props.type, target, props);
   };
 }
@@ -123,7 +125,7 @@ export class ExtensionService {
 
   public metadata = extensionMetadata;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   /**
    * Initialize the extensions - to be invoked in the AppModule

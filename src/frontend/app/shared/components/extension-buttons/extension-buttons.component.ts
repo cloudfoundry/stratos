@@ -11,7 +11,7 @@ export class ExtensionButtonsComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = [];
 
-  @Input() type: string;
+  @Input() type: StratosActionType;
 
   constructor(private logger: LoggerService) { }
 
@@ -19,6 +19,6 @@ export class ExtensionButtonsComponent implements OnInit {
     if (!StratosActionType[this.type]) {
       this.logger.warn('Extension Buttons: Unknown StratosActionType: ' + this.type);
     }
-    this.extensionActions = getActionsFromExtensions(StratosActionType[this.type]);
+    this.extensionActions = getActionsFromExtensions(this.type);
   }
 }
