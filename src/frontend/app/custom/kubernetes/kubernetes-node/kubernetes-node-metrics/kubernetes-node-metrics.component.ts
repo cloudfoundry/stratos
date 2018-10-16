@@ -35,7 +35,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
       result => {
         const metric = result.metric;
         if (!!metric.pod_name && !!metric.namespace) {
-          return `${metric.namespace}:${metric.pod_name}`;
+          return `${metric.namespace}:${metric.pod_name}:${metric.container_name}`;
         }
 
         if (metric.name) {
@@ -57,7 +57,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
-          return series.filter(s => !(s.name.indexOf('/') === 0));
+          return series.filter(s => !(s.name.indexOf('/') === 0) && !s.name.endsWith('POD'));
         }
       ),
       chartConfigBuilder(
@@ -69,7 +69,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'CPU Usage (secs)',
         null,
         (series: ChartSeries[]) => {
-          return series.filter(s => !(s.name.indexOf('/') === 0));
+          return series.filter(s => !(s.name.indexOf('/') === 0) && !s.name.endsWith('POD'));
         }
       )
     ];

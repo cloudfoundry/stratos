@@ -12,7 +12,7 @@ import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-h
 import { AppState } from '../../../store/app-state';
 import { entityFactory, kubernetesPodsSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityInfo } from '../../../store/types/api.types';
-import { IMetricMatrixResult } from '../../../store/types/base-metric.types';
+import { IMetricMatrixResult, ChartSeries } from '../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../store/types/metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { HelmReleaseService } from '../services/helm-release.service';
@@ -64,6 +64,8 @@ export class PodMetricsComponent {
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
+    const networkChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
+    (result => `Network Interface: ${result.metric.interface}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -72,7 +74,10 @@ export class PodMetricsComponent {
           `container_memory_usage_bytes{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Memory Usage (MB)',
-        ChartDataTypes.BYTES
+        ChartDataTypes.BYTES,
+        (series: ChartSeries[]) => {
+          return series.filter(s => !s.name.endsWith('POD'));
+        }
       ),
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -80,9 +85,13 @@ export class PodMetricsComponent {
           helmReleaseService.kubeGuid,
           `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
-        'CPU Usage (%)'
+        'CPU Usage (secs)',
+        null,
+        (series: ChartSeries[]) => {
+          return series.filter(s => !s.name.endsWith('POD'));
+        }
       ),
-      chartConfigBuilder(
+      networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
@@ -91,7 +100,7 @@ export class PodMetricsComponent {
         'Cumulative Data transmitted (MB)',
         ChartDataTypes.BYTES
       ),
-      chartConfigBuilder(
+      networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
