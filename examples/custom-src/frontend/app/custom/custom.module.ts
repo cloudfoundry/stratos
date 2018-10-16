@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared.module';
 import { AcmeLoginComponent } from './acme-login/acme-login.component';
 import { StratosExtension } from '../core/extension/extension-service';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
+import { AppActionExtensionComponent } from './app-action-extension/app-action-extension.component';
 
 const AcmeCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2018 ACME Corp',
@@ -33,12 +34,14 @@ const AcmeCustomizations: CustomizationsMetadata = {
   ],
   declarations: [
     AcmeLoginComponent,
-    AppTabExtensionComponent
+    AppTabExtensionComponent,
+    AppActionExtensionComponent
   ],
   entryComponents: [
     AcmeLoginComponent,
-    // You must specify the tab as an entry component
-    AppTabExtensionComponent
+    // You must specify the tab and action as an entry components
+    AppTabExtensionComponent,
+    AppActionExtensionComponent
   ],
   providers: [
     { provide: Customizations, useValue: AcmeCustomizations }
