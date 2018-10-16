@@ -22,7 +22,7 @@
           <input matInput placeholder="Password" type="password" formControlName="password">
         </mat-form-field>
       </div>
-      <div *ngIf="endpointForm.value.authType === 'kubeconfig'" formGroupName="authValues" class="connection-dialog__auth">
+      <div *ngIf="endpointForm.value.authType === 'kubeconfig' || endpointForm.value.authType === 'kubeconfig-az'" formGroupName="authValues" class="connection-dialog__auth">
         <span>Specify `kubeconfig` file:</span>
         <app-file-input placeholder="kubeconfig" (onFileSelect)="dealWithFile($event, 'kubeconfig')" [accept]="upload">
         </app-file-input>

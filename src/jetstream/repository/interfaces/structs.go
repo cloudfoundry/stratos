@@ -64,6 +64,7 @@ const (
 	AuthTypeOAuth2    = "OAuth2"
 	AuthTypeOIDC      = "OIDC"
 	AuthTypeHttpBasic = "HttpBasic"
+	AuthTypeAKS       = "AKS"
 )
 
 const (

@@ -18,11 +18,12 @@ type KubernetesSpecification struct {
 }
 
 const (
-	EndpointType              = "k8s"
-	CLIENT_ID_KEY             = "K8S_CLIENT"
-	AuthConnectTypeKubeConfig = "KubeConfig"
-	AuthConnectTypeAWSIAM     = "aws-iam"
-	AuthConnectTypeCertAuth   = "kube-cert-auth"
+	EndpointType                = "k8s"
+	CLIENT_ID_KEY               = "K8S_CLIENT"
+	AuthConnectTypeKubeConfig   = "KubeConfig"
+	AuthConnectTypeKubeConfigAz = "kubeconfig-az"
+	AuthConnectTypeAWSIAM       = "aws-iam"
+	AuthConnectTypeCertAuth     = "kube-cert-auth"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -63,9 +64,17 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 
 	connectType := ec.FormValue("connect_type")
 
-	// Kube Config file?
+	// OIDC ?
 	if strings.EqualFold(connectType, AuthConnectTypeKubeConfig) {
-		tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
+		tokenRecord, _, err := c.FetchKubeConfigTokenOIDC(cnsiRecord, ec)
+		if err != nil {
+			return nil, false, err
+		}
+		return tokenRecord, false, nil
+	}
+	// AKS ?
+	if strings.EqualFold(connectType, AuthConnectTypeKubeConfigAz) {
+		tokenRecord, _, err := c.FetchKubeConfigTokenAKS(cnsiRecord, ec)
 		if err != nil {
 			return nil, false, err
 		}
@@ -98,6 +107,10 @@ func (c *KubernetesSpecification) Init() error {
 		UserInfo: c.GetCNSIUserFromIAMToken,
 	})
 	c.portalProxy.AddAuthProvider(AuthConnectTypeCertAuth, interfaces.AuthProvider{
+		Handler:  c.doCertAuthFlowRequest,
+		UserInfo: c.GetCNSIUserFromCertAuth,
+	})
+	c.portalProxy.AddAuthProvider(AuthConnectTypeKubeConfigAz, interfaces.AuthProvider{
 		Handler:  c.doCertAuthFlowRequest,
 		UserInfo: c.GetCNSIUserFromCertAuth,
 	})
