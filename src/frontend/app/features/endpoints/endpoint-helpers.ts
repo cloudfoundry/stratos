@@ -1,3 +1,6 @@
+import { Validators } from '@angular/forms';
+
+import { EndpointTypeExtension } from '../../core/extension/extension-manager-service';
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 
@@ -10,7 +13,6 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
-
 export interface EndpointTypeHelper {
   value: EndpointType;
   label: string;
@@ -40,11 +42,85 @@ const endpointTypes: EndpointTypeHelper[] = [
   },
 ];
 
+const endpointAuthTypes = [
+  {
+    name: 'Username and Password',
+    value: 'creds',
+    form: {
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('cf', 'metrics')
+  },
+  {
+    name: 'CAASP (OIDC)',
+    value: 'kubeconfig',
+    form: {
+      kubeconfig: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
+  {
+    name: 'Single Sign-On (SSO)',
+    value: 'sso',
+    form: {},
+    types: new Array<EndpointType>('cf')
+  },
+  {
+    name: 'Azure AKS',
+    value: 'kubeconfig-az',
+    form: {
+      kubeconfig: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
+  {
+    name: 'AWS IAM (EKS)',
+    value: 'aws-iam',
+    form: {
+      cluster: ['', Validators.required],
+      access_key: ['', Validators.required],
+      secret_key: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
+  {
+    name: 'Kubernetes Cert Auth',
+    value: 'kube-cert-auth',
+    form: {
+      cert: ['', Validators.required],
+      certKey: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
+];
+
 const endpointTypesMap = {};
 
-endpointTypes.forEach(ept => {
-  endpointTypesMap[ept.value] = ept;
-});
+export function initEndpointTypes(epTypes: EndpointTypeExtension[]) {
+  epTypes.forEach(type => {
+    endpointTypes.push({
+      value: type.type,
+      label: type.label,
+      icon: type.icon,
+      iconFont: type.iconFont
+    });
+
+    // Map in the authentication providers
+    type.authTypes.forEach(authType => {
+      const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
+      if (endpointAuthType) {
+        endpointAuthType.types.push(type.type);
+      }
+    });
+  });
+
+  // TODO: Sort alphabetically
+
+  endpointTypes.forEach(ept => {
+    endpointTypesMap[ept.value] = ept;
+  });
+}
 
 // Get the name to display for a given Endpoint type
 export function getNameForEndpointType(type: string): string {
@@ -61,7 +137,7 @@ export function getEndpointTypes() {
 
 export function getIconForEndpoint(type: string): EndpointIcon {
   const icon = {
-    name: 'endpoint',
+    name: 'settings_ethernet',
     font: ''
   };
 
@@ -71,4 +147,8 @@ export function getIconForEndpoint(type: string): EndpointIcon {
     icon.font = ep.iconFont;
   }
   return icon;
+}
+
+export function getEndpointAuthTypes() {
+  return endpointAuthTypes;
 }

@@ -13,7 +13,6 @@ export enum MetricsChartTypes {
 
 interface IMetricsChartConfig {
   chartType: MetricsChartTypes;
-  showLegend?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
   autoScale?: boolean;
@@ -23,7 +22,6 @@ interface IMetricsChartConfig {
 
 export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
-  showLegend = true;
   xAxisLabel?: string;
   yAxisLabel?: string;
   autoScale = true; // This should be on by default

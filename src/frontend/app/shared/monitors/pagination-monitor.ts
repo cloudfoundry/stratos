@@ -19,9 +19,9 @@ import {
   selectEntities,
 } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { AppState } from './../../store/app-state';
-import { ActionState } from './../../store/reducers/api-request-reducer/types';
-import { PaginationEntityState } from './../../store/types/pagination.types';
+import { AppState } from '../../store/app-state';
+import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
 
 export class PaginationMonitor<T = any> {
   /**

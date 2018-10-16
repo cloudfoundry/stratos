@@ -8,6 +8,18 @@ import (
 	"github.com/labstack/echo"
 )
 
+type AuthHandlerFunc func(tokenRec TokenRecord, cnsi CNSIRecord) (*http.Response, error)
+type RefreshOAuthTokenFunc func(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
+
+type GetUserInfoFromToken func(cnsiGUID string, cfTokenRecord *TokenRecord) (*ConnectedUser, bool)
+
+type AuthFlowHandlerFunc func(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+
+type AuthProvider struct {
+	Handler  AuthFlowHandlerFunc
+	UserInfo GetUserInfoFromToken
+}
+
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
 	TokenEndpoint            string `json:"token_endpoint"`
@@ -43,6 +55,7 @@ type ConnectedEndpoint struct {
 	Account                string   `json:"account"`
 	TokenExpiry            int64    `json:"token_expiry"`
 	DopplerLoggingEndpoint string   `json:"-"`
+	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
 }
@@ -51,6 +64,7 @@ const (
 	AuthTypeOAuth2    = "OAuth2"
 	AuthTypeOIDC      = "OIDC"
 	AuthTypeHttpBasic = "HttpBasic"
+	AuthTypeAKS       = "AKS"
 )
 
 const (
@@ -68,15 +82,17 @@ type EndpointTokenRecord struct {
 
 // TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
-	TokenGUID    string
-	AuthToken    string
-	RefreshToken string
-	TokenExpiry  int64
-	Disconnected bool
-	AuthType     string
-	Metadata     string
-	SystemShared bool
-	LinkedGUID   string // Indicates the GUID of the token that this token is linked to (if any)
+	TokenGUID      string
+	AuthToken      string
+	RefreshToken   string
+	TokenExpiry    int64
+	Disconnected   bool
+	AuthType       string
+	Metadata       string
+	SystemShared   bool
+	LinkedGUID     string // Indicates the GUID of the token that this token is linked to (if any)
+	Certificate    string
+	CertificateKey string
 }
 
 type CFInfo struct {

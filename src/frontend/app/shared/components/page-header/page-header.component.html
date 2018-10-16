@@ -4,12 +4,13 @@
       <mat-toolbar color="primary">
         <div class="page-header__nav-toggle-wrapper">
           <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
-        <mat-icon class="page-header__nav-toggle">menu</mat-icon>
-      </button>
+            <mat-icon class="page-header__nav-toggle">menu</mat-icon>
+          </button>
         </div>
         <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
           <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
-            <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink" [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+            <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
+              [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
             <span class="page-header__breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
             <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
           </ng-container>
@@ -23,7 +24,7 @@
         <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
           <div *ngIf="!logoutOnly">
             <button mat-menu-item routerLink="/about">
-            <span>About</span>
+              <span>About</span>
             </button>
             <div class="page-header__menu-separator"></div>
             <button mat-menu-item routerLink="/user-profile">

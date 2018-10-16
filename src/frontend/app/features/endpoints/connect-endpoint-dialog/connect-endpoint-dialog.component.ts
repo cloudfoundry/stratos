@@ -13,6 +13,8 @@ import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { getEndpointAuthTypes } from '../endpoint-helpers';
+
 import { getCanShareTokenForEndpointType } from '../endpoint-helpers';
 
 import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
@@ -42,27 +44,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private bodyContent = '';
 
-  private authTypes = [
-    {
-      name: 'Username and Password',
-      value: 'creds',
-      form: {
-        username: ['', Validators.required],
-        password: ['', Validators.required],
-      },
-      types: new Array<EndpointType>('cf', 'metrics')
-    },
-    {
-      name: 'Single Sign-On (SSO)',
-      value: 'sso',
-      form: {},
-      types: new Array<EndpointType>('cf')
-    },
-  ];
-
   private hasAttemptedConnect: boolean;
   public authTypesForEndpoint = [];
-
+  public upload = true;
+  private kubeconfig = '';
+  private cert = '';
+  private certKey = '';
   public canShareEndpointToken = false;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
@@ -83,7 +70,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     }
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
-    this.authTypes.forEach(authType => {
+    getEndpointAuthTypes().forEach(authType => {
       if (authType.types.find(t => t === this.data.type)) {
         this.authTypesForEndpoint.push(authType);
       }
@@ -138,6 +125,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
       });
+  }
+
+  dealWithFile($event, fileName: string) {
+    const file = $event;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this[fileName] = reader.result;
+    };
+    reader.readAsText(file);
   }
 
   setupObservables() {
@@ -215,18 +211,34 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
+  toggleAccept() {
+    this.upload = !this.upload;
+  }
+
   submit() {
     this.hasAttemptedConnect = true;
     const { guid, authType, authValues, systemShared } = this.endpointForm.value;
+    const authVal = authValues;
+    if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
+      this.bodyContent = this.kubeconfig;
+    }
+    if (this.endpointForm.value.authType === 'kube-cert-auth') {
+      /** Body content is in the following encoding:
+       * base64encoded:base64encoded
+       */
+      const certBase64 = btoa(this.cert);
+      const certKeyBase64 = btoa(this.certKey);
+      this.bodyContent = `${certBase64}:${certKeyBase64}`;
+    }
 
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       this.data.type,
       authType,
-      authValues,
+      authVal,
       systemShared,
       this.bodyContent,
-    ));
+    )); { }
   }
 
   ngOnDestroy() {

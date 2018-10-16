@@ -8,6 +8,5 @@ files:
   eula.html: "assets/eula.html" 
 
 folders:
-  - "app/custom"
   - "assets/custom"
   - "sass/custom"
