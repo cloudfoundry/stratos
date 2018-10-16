@@ -8,18 +8,18 @@ import { TableCellCustom } from '../../../../../shared/components/list/list.type
   styleUrls: ['./kubernetes-node-capacity.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> implements OnInit {
+export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> {
 
   constructor() {
     super();
   }
 
-  private value: string;
-  private label: string;
+  public getMemory(memoryCapacity: string) {
+    if (memoryCapacity.endsWith('Ki')) {
+      const value = parseInt(memoryCapacity, 10);
+      return (value * 1024);
 
-  ngOnInit() {
-    this.value = this.config ? this.config.value : row => 0;
-    this.label = this.config ? this.config.label : row => '-';
+    }
+    return memoryCapacity;
   }
-
 }
