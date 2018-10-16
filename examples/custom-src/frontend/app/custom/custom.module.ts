@@ -4,7 +4,7 @@ import { Customizations, CustomizationsMetadata } from '../core/customizations.t
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { AcmeLoginComponent } from './acme-login/acme-login.component';
-import { StratosNavExtension } from '../core/extension/extension-service';
+import { StratosExtension } from '../core/extension/extension-service';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
 
 const AcmeCustomizations: CustomizationsMetadata = {
@@ -13,7 +13,7 @@ const AcmeCustomizations: CustomizationsMetadata = {
 };
 
 // CustomModule is bundled in to the main application bundle
-@StratosNavExtension({
+@StratosExtension({
   routes: [{
     path: 'example',
     loadChildren: 'app/custom/nav-extension/nav-extension.module#NavExtensionModule',
