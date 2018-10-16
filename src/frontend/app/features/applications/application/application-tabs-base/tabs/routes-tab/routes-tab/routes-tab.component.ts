@@ -23,7 +23,6 @@ import { ApplicationService } from '../../../../../application.service';
   providers: [
     {
       provide: ListConfig,
-      useClass: CfAppRoutesListConfigService,
       useFactory: (
         store: Store<AppState>,
         appService: ApplicationService,
