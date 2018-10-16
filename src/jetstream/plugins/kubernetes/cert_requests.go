@@ -21,6 +21,7 @@ import (
 type KubeCertAuth struct {
 	Certificate    string `json:"cert"`
 	CertificateKey string `json:"certKey"`
+	Token          string `json:"token,omitempty"`
 }
 
 func (k *KubeCertAuth) GetJSON() (string, error) {
@@ -129,6 +130,10 @@ func (c *KubernetesSpecification) doCertAuthFlowRequest(cnsiRequest *interfaces.
 		kubeCertClient := http.Client{}
 		kubeCertClient.Transport = sslTransport
 		kubeCertClient.Timeout = time.Duration(30) * time.Second
+
+		if kubeAuthToken.Token != "" {
+			req.Header.Set("Authorization", "bearer "+kubeAuthToken.Token)
+		}
 
 		res, err := kubeCertClient.Do(req)
 		if err != nil {

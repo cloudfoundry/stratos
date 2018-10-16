@@ -219,7 +219,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.hasAttemptedConnect = true;
     const { guid, authType, authValues, systemShared } = this.endpointForm.value;
     const authVal = authValues;
-    if (this.endpointForm.value.authType === 'kubeconfig') {
+    if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
       this.bodyContent = this.kubeconfig;
     }
     if (this.endpointForm.value.authType === 'kube-cert-auth') {

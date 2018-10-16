@@ -53,7 +53,7 @@ const endpointAuthTypes = [
     types: new Array<EndpointType>('cf', 'metrics')
   },
   {
-    name: 'Kubernetes Config',
+    name: 'CAASP (OIDC)',
     value: 'kubeconfig',
     form: {
       kubeconfig: ['', Validators.required],
@@ -67,7 +67,15 @@ const endpointAuthTypes = [
     types: new Array<EndpointType>('cf')
   },
   {
-    name: 'AWS IAM',
+    name: 'Azure AKS',
+    value: 'kubeconfig-az',
+    form: {
+      kubeconfig: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('k8s')
+  },
+  {
+    name: 'AWS IAM (EKS)',
     value: 'aws-iam',
     form: {
       cluster: ['', Validators.required],
