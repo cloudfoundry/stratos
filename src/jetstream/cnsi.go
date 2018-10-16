@@ -119,7 +119,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	}
 
 	h := sha1.New()
-	h.Write([]byte(apiEndpointURL.String()))
+	h.Write([]byte(apiEndpointURL.Host))
 	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	newCNSI.Name = cnsiName
