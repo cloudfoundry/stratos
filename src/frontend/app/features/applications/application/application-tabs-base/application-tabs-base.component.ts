@@ -49,13 +49,6 @@ const appRestartConfirmation = new ConfirmationDialogConfig(
   'Are you sure you want to restart this Application?',
   'Restart'
 );
-// App delete will have a richer delete experience
-const appDeleteConfirmation = new ConfirmationDialogConfig(
-  'Delete Application',
-  'Are you sure you want to delete this Application?',
-  'Delete',
-  true
-);
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -244,7 +237,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         filter(({ resource }) => {
           return resource.entity.state === stateString;
         }),
-    );
+      );
   }
 
   startApplication() {

@@ -1,8 +1,7 @@
-import { browser, ElementFinder, promise } from 'protractor';
+import { browser } from 'protractor';
 
 import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
@@ -119,19 +118,8 @@ function createService(marketplaceSummaryPage: MarketplaceSummaryPage,
 
     servicesWall.waitForPage();
 
-    const createdServiceInstanceName = servicesHelperE2E.serviceInstanceName;
+    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
 
-    servicesWall.serviceInstancesList.cards.getCards().then(
-      (cards: ElementFinder[]) => {
-        return cards.map(card => {
-          const metaCard = new MetaCard(card, MetaCardTitleType.CUSTOM);
-          return metaCard.getTitle();
-        });
-      }).then(cardTitles => {
-        promise.all(cardTitles).then(titles => {
-          expect(titles.filter(t => t === createdServiceInstanceName).length).toBe(1);
-        });
-      }).catch(e => fail(e));
   });
 }
 

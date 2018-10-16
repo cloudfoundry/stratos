@@ -1,7 +1,7 @@
 
-import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 
-import {startWith,  map, share } from 'rxjs/operators';
+import { startWith, map, share } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';

@@ -9,6 +9,7 @@ const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 const globby = require('globby');
+const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -39,8 +40,19 @@ try {
 }
 
 // This is the maximum amount of time ALL before/after/it's must execute in
-const timeout = 40000;
+let timeout = 40000;
 const checkSuiteGlob = './src/test-e2e/check/*-e2e.spec.ts';
+
+if (process.env.STRATOS_SCRIPTS_TIMEOUT) {
+  timeout = parseInt(process.env.STRATOS_SCRIPTS_TIMEOUT);
+  console.log('Setting allScriptsTimeout to: ' + timeout);
+}
+
+// Allow test report to show relative times of tests
+const specReporterCustomProcessors = [];
+if (process.env.STRATOS_E2E_LOG_TIME) {
+  specReporterCustomProcessors.push(timeReporterPlugin);
+}
 
 exports.config = {
   allScriptsTimeout: timeout,
@@ -68,7 +80,7 @@ exports.config = {
     'browserName': 'chrome',
     chromeOptions: {
       useAutomationExtension: false,
-      args: ['--no-sandbox', '--disable-dev-shm-usage']
+      args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-infobars']
     },
     acceptInsecureCerts: true
   },
@@ -97,7 +109,8 @@ exports.config = {
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
         displayStacktrace: true
-      }
+      },
+      customProcessors: specReporterCustomProcessors
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
   }

@@ -15,26 +15,25 @@ set -euo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 STRATOS="`cd "${DIR}/..";pwd`"
 
-pushd ${STRATOS} > /dev/null
-
+pushd "${STRATOS}" > /dev/null
 
 STRATOS_GOBASE=tmp/go/src/github.com/cloudfoundry-incubator/stratos
 mkdir -p ${STRATOS_GOBASE}/src
 
 # Remove the temporary source folder if it is already there
-rm -rf ${STRATOS_GOBASE}/src/jetstream
+rm -rf "${STRATOS_GOBASE}/src/jetstream"
 
 # Copy vendor folder if needed
 if [ ! -d "${STRATOS_GOBASE}/vendor" ] && [ -d "${STRATOS}/vendor" ]; then
-  cp -R ${STRATOS}/vendor ${STRATOS_GOBASE}
+  cp -R "${STRATOS}/vendor" ${STRATOS_GOBASE}
 fi
 
 # Set go path
-export GOPATH=${STRATOS}/tmp/go
+export GOPATH="${STRATOS}/tmp/go"
 
 # Link in the backend source
 pushd ${STRATOS_GOBASE}/src > /dev/null
-ln -s ${STRATOS}/src/jetstream jetstream
+ln -s "${STRATOS}/src/jetstream" jetstream
 popd > /dev/null
 
 # Copy dep files

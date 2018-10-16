@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -18,14 +17,11 @@ import {
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
+import { GetApplication } from '../../../../store/actions/application.actions';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
-import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
-
-// Interval to check for new application
-const APP_CHECK_INTERVAL = 3000;
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -49,19 +45,16 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private errorSub: Subscription;
   private validSub: Subscription;
 
-  private fsData: FileScannerInfo;
-
   constructor(
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
+    snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private http: HttpClient,
   ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, http);
+    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
-    ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
+    ).subscribe(status => snackBar.open(status.errorMsg, 'Dismiss'));
 
     const appGuid$ = this.deployer.applicationGuid$.pipe(
       filter((appGuid) => appGuid !== null),
@@ -131,6 +124,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     if (this.appGuid) {
       this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+      // Ensure the application package_state is correct
+      this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
     }
     return observableOf({ success: true });
   }
