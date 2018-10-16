@@ -73,7 +73,7 @@ export class ApplicationDeleteComponent<T> {
       cellDefinition: {
         getValue: row => row.entity.service_instance.entity.name
       },
-      cellFlex: '0 0 200px'
+      cellFlex: '1 0'
     },
     {
       columnId: 'service',
@@ -102,12 +102,13 @@ export class ApplicationDeleteComponent<T> {
       headerCell: () => 'Host',
       columnId: 'host',
       cellComponent: TableCellRouteComponent,
-      cellFlex: '0 0 400px'
+      cellFlex: '1 0'
     },
     {
       columnId: 'tcproute',
       headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
+      cellFlex: '1'
     }
   ];
   public appDeleteColumns: ITableColumn<APIResource<IApp>>[] = [
@@ -119,24 +120,27 @@ export class ApplicationDeleteComponent<T> {
         getLink: row => `/applications/${row.metadata.guid}`,
         newTab: true,
       },
-      cellFlex: '0 0 200px'
+      cellFlex: '1 0'
     },
     {
       columnId: 'status',
       headerCell: () => 'Status',
       cellComponent: TableCellAppStatusComponent,
+      cellFlex: '1'
     },
     {
       columnId: 'instances',
       headerCell: () => 'Instances',
-      cellComponent: TableCellAppInstancesComponent
+      cellComponent: TableCellAppInstancesComponent,
+      cellFlex: '1'
     },
     {
       columnId: 'creation',
       headerCell: () => 'Creation Date',
       cellDefinition: {
         getValue: (row: APIResource) => this.datePipe.transform(row.metadata.created_at, 'medium')
-      }
+      },
+      cellFlex: '1'
     }
   ];
 
