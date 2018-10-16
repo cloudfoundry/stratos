@@ -102,7 +102,7 @@ export class ApplicationDeleteComponent<T> {
       headerCell: () => 'Host',
       columnId: 'host',
       cellComponent: TableCellRouteComponent,
-      cellFlex: '0 0 200px'
+      cellFlex: '0 0 400px'
     },
     {
       columnId: 'tcproute',
@@ -146,7 +146,6 @@ export class ApplicationDeleteComponent<T> {
   public selectedApplication$: Observable<APIResource<IApp>[]>;
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
-  private appWallFetchAction: GetAllApplications;
   public fetchingApplicationData$: Observable<boolean>;
 
   public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
@@ -168,7 +167,7 @@ export class ApplicationDeleteComponent<T> {
     private datePipe: DatePipe
   ) {
     this.setupAppMonitor();
-    this.cancelUrl = `/application/${applicationService.cfGuid}/${applicationService.appGuid}`;
+    this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
     const { fetch, monitors } = this.buildRelatedEntitiesActionMonitors();
     const { instanceMonitor, routeMonitor } = monitors;
     this.instanceMonitor = instanceMonitor;
@@ -221,7 +220,6 @@ export class ApplicationDeleteComponent<T> {
    * Builds the related entities actions and monitors to monitor the state of the entities.
    */
   public buildRelatedEntitiesActionMonitors() {
-    const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
     const routesAction = new GetAppRoutes(appGuid, cfGuid);
