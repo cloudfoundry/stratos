@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { BaseKubeGuid } from '../kubernetes-page.types';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KubernetesService } from '../services/kubernetes.service';
+import { Observable } from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
+
+import { EndpointsService } from '../../../core/endpoints.service';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../services/kubernetes-node.service';
-import { Observable } from 'rxjs';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { map } from 'rxjs/operators';
+import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
   selector: 'app-kubernetes-node',
@@ -41,8 +43,21 @@ export class KubernetesNodeComponent {
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
-    public kubeNodeService: KubernetesNodeService
+    public kubeNodeService: KubernetesNodeService,
+    public endpointsService: EndpointsService
   ) {
+    this.endpointsService.hasMetrics(this.kubeEndpointService.kubeGuid).pipe(
+      first(),
+      tap(haveMetrics => {
+        if (!haveMetrics) {
+          this.tabLinks = [
+            { link: 'summary', label: 'Summary' },
+            { link: 'pods', label: 'Pods' },
+          ];
+        }
+      })
+    ).subscribe();
+
     this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [

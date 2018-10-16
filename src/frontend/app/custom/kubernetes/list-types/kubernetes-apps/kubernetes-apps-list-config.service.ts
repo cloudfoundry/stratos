@@ -52,7 +52,7 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
       cellFlex: '5',
     },
     {
-      columnId: 'appVersion', headerCell: () => 'Version',
+      columnId: 'appVersion', headerCell: () => 'App Version',
       cellDefinition: {
         getValue: (a) => a.appVersion,
       },
