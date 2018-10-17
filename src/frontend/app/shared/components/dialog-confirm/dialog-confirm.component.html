@@ -3,10 +3,10 @@
   <mat-icon class="confirm-dialog__warn-icon" color="warn" *ngIf="data.critical">warning</mat-icon>
 </h1>
 <div class="confirm-dialog__message" mat-dialog-content [innerHtml]="data.msg"></div>
-<div class="confirm-dialog__enter-text">
+<div class="confirm-dialog__enter-text" *ngIf="data.typeToConfirm">
   <span>{{data.typeToConfirm.message}}</span>
-  <mat-form-field *ngIf="data.typeToConfirm">
-    <input required matInput [placeholder]="data.typeToConfirm.label" [(ngModel)]="textToMatch" [pattern]="data.typeToConfirm.textToMatch">
+  <mat-form-field>
+    <input required matInput id="typeToConfirm" [placeholder]="data.typeToConfirm.label" [(ngModel)]="textToMatch" [pattern]="data.typeToConfirm.textToMatch">
   </mat-form-field>
 </div>
 <div mat-dialog-actions class="confirm-dialog__actions">
