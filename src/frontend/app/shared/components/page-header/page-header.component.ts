@@ -15,6 +15,8 @@ import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.sele
 import { InternalEventSubjectState, InternalEventSeverity } from '../../../store/types/internal-events.types';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { map } from 'rxjs/operators';
+import { AuthState } from '../../../store/reducers/auth.reducer';
 
 @Component({
   selector: 'app-page-header',
@@ -36,6 +38,9 @@ export class PageHeaderComponent {
   @Input()
   tabs: ISubHeaderTabs[];
   @Input() showUnderFlow = false;
+
+  public userNameFirstLetter$: Observable<string>;
+  public username$: Observable<string>;
 
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
@@ -71,6 +76,12 @@ export class PageHeaderComponent {
 
   constructor(private store: Store<AppState>, private route: ActivatedRoute) {
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
+    this.username$ = store.select(s => s.auth).pipe(
+      map((auth: AuthState) => auth.sessionData.user.name)
+    );
+    this.userNameFirstLetter$ = this.username$.pipe(
+      map(name => name[0].toLocaleUpperCase())
+    );
   }
 
 }
