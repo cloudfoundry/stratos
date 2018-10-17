@@ -64,6 +64,7 @@ $bottom-index: $top-index - 1;
   &__username-icon {
     $menu-button-height: 50px;
     border-radius: 50%;
+    font-size: 24px;
     height: $menu-button-height;
     line-height: $menu-button-height;
     text-align: center;
