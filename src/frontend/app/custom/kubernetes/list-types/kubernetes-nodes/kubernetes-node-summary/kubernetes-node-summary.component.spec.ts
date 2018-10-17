@@ -1,12 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesNodeSummaryComponent } from './kubernetes-node-summary.component';
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { KubernetesNodeSummaryCardComponent } from './kubernetes-node-summary-card/kubernetes-node-summary-card.component';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../services/kubernetes-node.service';
+import {
+  KubernetesNodeConditionCardComponent,
+} from './kubernetes-node-condition-card/kubernetes-node-condition-card.component';
+import {
+  KubernetesNodeConditionComponent,
+} from './kubernetes-node-condition-card/kubernetes-node-condition/kubernetes-node-condition.component';
 import { KubernetesNodeInfoCardComponent } from './kubernetes-node-info-card/kubernetes-node-info-card.component';
+import { KubernetesNodeSummaryCardComponent } from './kubernetes-node-summary-card/kubernetes-node-summary-card.component';
+import { KubernetesNodeSummaryComponent } from './kubernetes-node-summary.component';
+import { KubernetesNodeTagsCardComponent } from './kubernetes-node-tags-card/kubernetes-node-tags-card.component';
 
 describe('KubernetesNodeSummaryComponent', () => {
   let component: KubernetesNodeSummaryComponent;
@@ -14,7 +21,13 @@ describe('KubernetesNodeSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeSummaryComponent, KubernetesNodeSummaryCardComponent, KubernetesNodeInfoCardComponent],
+      declarations: [KubernetesNodeSummaryComponent,
+        KubernetesNodeConditionComponent,
+        KubernetesNodeConditionCardComponent,
+        KubernetesNodeSummaryCardComponent,
+        KubernetesNodeInfoCardComponent,
+        KubernetesNodeTagsCardComponent,
+      ],
       imports: BaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })

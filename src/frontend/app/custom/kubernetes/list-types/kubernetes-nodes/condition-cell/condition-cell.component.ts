@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
-import { Condition, KubernetesNode } from '../../../store/kube.types';
-import { ConditionalExpr } from '@angular/compiler';
+import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-condition-cell',
@@ -18,7 +18,11 @@ export class ConditionCellComponent extends TableCellCustom<KubernetesNode> impl
   }
 
   ngOnInit() {
-    this.condition = this.row.status.conditions.filter(c => c.type === this.config.conditionType)[0].status;
+
+    const condition = this.row.status.conditions.filter(c => c.type === this.config.conditionType);
+    if (condition && condition.length === 1) {
+      this.condition = condition[0].status;
+    }
   }
 
 }

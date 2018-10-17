@@ -4,7 +4,7 @@ import { KubernetesNodesTabComponent } from './kubernetes-nodes-tab.component';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 
-xdescribe('KubernetesNodesTabComponent', () => {
+describe('KubernetesNodesTabComponent', () => {
   let component: KubernetesNodesTabComponent;
   let fixture: ComponentFixture<KubernetesNodesTabComponent>;
 

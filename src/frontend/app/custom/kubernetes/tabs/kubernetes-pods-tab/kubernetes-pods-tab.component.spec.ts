@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { KubernetesNodesTabComponent } from '../kubernetes-nodes-tab/kubernetes-nodes-tab.component';
+import { KubernetesPodsTabComponent } from './kubernetes-pods-tab.component';
 
 
-describe('KubernetesNodesTabComponent', () => {
-  let component: KubernetesNodesTabComponent;
-  let fixture: ComponentFixture<KubernetesNodesTabComponent>;
+describe('KubernetesPodsTabComponent', () => {
+  let component: KubernetesPodsTabComponent;
+  let fixture: ComponentFixture<KubernetesPodsTabComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodesTabComponent]
+      declarations: [KubernetesPodsTabComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(KubernetesNodesTabComponent);
+    fixture = TestBed.createComponent(KubernetesPodsTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

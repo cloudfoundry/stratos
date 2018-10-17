@@ -15,6 +15,6 @@ import { KubernetesNodesListConfigService } from '../../list-types/kubernetes-no
 })
 export class KubernetesNodesTabComponent {
 
-  constructor(private activatedRoute: ActivatedRoute) {}
+  constructor() { }
 
 }

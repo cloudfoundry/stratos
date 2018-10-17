@@ -11,7 +11,7 @@ describe('KubernetesAppsTabComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesAppsTabComponent],
-      imports: BaseTestModules,
+      imports: [BaseTestModules],
       providers: [BaseKubeGuid]
     })
       .compileComponents();

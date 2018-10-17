@@ -1,18 +1,16 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
 import { Store } from '@ngrx/store';
 
+import { ConditionType, KubernetesNode } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
-import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
-import { KubernetesNode, ConditionType } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
-import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
-import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';
 import { getConditionSort } from '../kube-sort.helper';
+import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';
+import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
+import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
+import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
 import { NodePodCountComponent } from './node-pod-count/node-pod-count.component';
 
 @Injectable()
@@ -84,10 +82,9 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
 
   constructor(
     private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
     private kubeId: BaseKubeGuid,
   ) {
-    this.nodesDataSource = new KubernetesNodesDataSource(this.store, kubeId, this);
+    this.nodesDataSource = new KubernetesNodesDataSource(this.store, this.kubeId, this);
   }
 
 }

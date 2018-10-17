@@ -55,11 +55,10 @@ export class HelmReleaseServicesListConfig implements IListConfig<KubeService> {
 
   constructor(
     private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
     private kubeId: BaseKubeGuid,
     private helmReleaseService: HelmReleaseService
   ) {
-    this.podsDataSource = new HelmReleaseServicesDataSource(this.store, kubeId, this, helmReleaseService);
+    this.podsDataSource = new HelmReleaseServicesDataSource(this.store, this.kubeId, this, this.helmReleaseService);
   }
 
 }

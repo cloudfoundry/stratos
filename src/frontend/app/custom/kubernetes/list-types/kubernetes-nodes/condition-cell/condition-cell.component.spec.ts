@@ -18,6 +18,24 @@ describe('ConditionCellComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ConditionCellComponent);
     component = fixture.componentInstance;
+    component.row = {
+      metadata: {
+        namespace: 'test',
+        name: 'test',
+        uid: 'test'
+      },
+      status: {
+        conditions: [],
+        addresses: [],
+        images: []
+      },
+      spec: {
+        containers: [],
+        nodeName: 'test',
+        schedulerName: 'test',
+        initContainers: []
+      }
+    };
     fixture.detectChanges();
   });
 
