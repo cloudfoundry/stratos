@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesNodeInfoCardComponent } from './kubernetes-node-info-card.component';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
+import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 
 describe('KubernetesNodeInfoCardComponent', () => {
   let component: KubernetesNodeInfoCardComponent;
@@ -8,9 +12,11 @@ describe('KubernetesNodeInfoCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNodeInfoCardComponent ]
+      declarations: [KubernetesNodeInfoCardComponent],
+      imports: BaseTestModules,
+      providers: [BaseKubeGuid, KubernetesNodeService, KubernetesEndpointService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesNamespaceComponent } from './kubernetes-namespace.component';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('KubernetesNamespaceComponent', () => {
   let component: KubernetesNamespaceComponent;
@@ -8,9 +9,10 @@ describe('KubernetesNamespaceComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNamespaceComponent ]
+      declarations: [KubernetesNamespaceComponent],
+      imports: BaseTestModules
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesAppsTabComponent } from './kubernetes-apps-tab.component';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
 
 describe('KubernetesAppsTabComponent', () => {
   let component: KubernetesAppsTabComponent;
@@ -8,9 +10,11 @@ describe('KubernetesAppsTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesAppsTabComponent ]
+      declarations: [KubernetesAppsTabComponent],
+      imports: BaseTestModules,
+      providers: [BaseKubeGuid]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

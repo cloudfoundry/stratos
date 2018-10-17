@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { createBasicStoreModule } from './test-framework/store-test-helper';
+import { ExtensionManager } from './core/extension/extension-manager-service';
 
 describe('AppComponent', () => {
 
@@ -14,7 +15,8 @@ describe('AppComponent', () => {
         AppComponent
       ],
       providers: [
-        LoggedInService
+        LoggedInService,
+        ExtensionManager
       ],
       imports: [
         SharedModule,

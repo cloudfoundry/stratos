@@ -1,16 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesNodesTabComponent } from './kubernetes-nodes-tab.component';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
 
-describe('KubernetesNodesTabComponent', () => {
+xdescribe('KubernetesNodesTabComponent', () => {
   let component: KubernetesNodesTabComponent;
   let fixture: ComponentFixture<KubernetesNodesTabComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNodesTabComponent ]
+      declarations: [KubernetesNodesTabComponent],
+      imports: BaseTestModules,
+      providers: [BaseKubeGuid]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

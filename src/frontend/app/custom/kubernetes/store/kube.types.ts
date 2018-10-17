@@ -86,12 +86,12 @@ export interface KubernetesApp {
   appVersion: string;
 }
 export interface NodeStatus {
-  capacity: Capacity;
-  allocatable: Allocatable;
+  capacity?: Capacity;
+  allocatable?: Allocatable;
   conditions: Condition[];
   addresses: Address[];
-  daemonEndpoints: DaemonEndpoints;
-  nodeInfo: NodeInfo;
+  daemonEndpoints?: DaemonEndpoints;
+  nodeInfo?: NodeInfo;
   images: Image[];
 }
 
@@ -231,21 +231,21 @@ export interface State {
 }
 
 export interface PodSpec {
-  volumes: Volume[];
+  volumes?: Volume[];
   containers: Container[];
-  restartPolicy: string;
-  terminationGracePeriodSeconds: number;
-  dnsPolicy: string;
-  serviceAccountName: string;
-  serviceAccount: string;
+  restartPolicy?: string;
+  terminationGracePeriodSeconds?: number;
+  dnsPolicy?: string;
+  serviceAccountName?: string;
+  serviceAccount?: string;
   nodeName: string;
-  securityContext: SecurityContext;
-  affinity: Affinity;
+  securityContext?: SecurityContext;
+  affinity?: Affinity;
   schedulerName: string;
-  tolerations: Toleration[];
+  tolerations?: Toleration[];
   hostNetwork?: boolean;
   initContainers: InitContainer[];
-  nodeSelector: NodeSelector;
+  nodeSelector?: NodeSelector;
 }
 export interface InitContainer {
   name: string;

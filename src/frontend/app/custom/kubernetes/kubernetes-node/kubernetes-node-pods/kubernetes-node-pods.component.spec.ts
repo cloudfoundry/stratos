@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { KubernetesNodeService } from '../../services/kubernetes-node.service';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 describe('KubernetesNodePodsComponent', () => {
   let component: KubernetesNodePodsComponent;
@@ -8,9 +12,11 @@ describe('KubernetesNodePodsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNodePodsComponent ]
+      declarations: [KubernetesNodePodsComponent],
+      imports: BaseTestModules,
+      providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

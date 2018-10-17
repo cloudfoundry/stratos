@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HelmReleaseServicesComponent } from './helm-release-services.component';
+import { BaseTestModulesNoShared, BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { HelmReleaseService } from '../../services/helm-release.service';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 describe('HelmReleaseServicesComponent', () => {
   let component: HelmReleaseServicesComponent;
@@ -8,9 +12,11 @@ describe('HelmReleaseServicesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseServicesComponent ]
+      declarations: [HelmReleaseServicesComponent],
+      imports: BaseTestModules,
+      providers: [BaseKubeGuid, HelmReleaseService, KubernetesEndpointService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

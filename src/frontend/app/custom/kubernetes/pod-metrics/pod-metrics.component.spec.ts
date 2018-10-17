@@ -1,6 +1,7 @@
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { PodMetricsComponent } from './pod-metrics.component';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('PodMetricsComponent', () => {
   let component: PodMetricsComponent;
@@ -8,7 +9,8 @@ describe('PodMetricsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [PodMetricsComponent]
+      declarations: [PodMetricsComponent],
+      imports: BaseTestModules
     })
       .compileComponents();
   }));

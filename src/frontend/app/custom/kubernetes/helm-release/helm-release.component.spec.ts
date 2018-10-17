@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HelmReleaseComponent } from './helm-release.component';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('HelmReleaseComponent', () => {
   let component: HelmReleaseComponent;
@@ -8,9 +9,10 @@ describe('HelmReleaseComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseComponent ]
+      declarations: [HelmReleaseComponent],
+      imports: BaseTestModules
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
