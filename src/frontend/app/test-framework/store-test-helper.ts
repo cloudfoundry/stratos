@@ -583,7 +583,14 @@ export function getInitialTestStoreState(): AppState {
       service: {},
       githubCommits: {},
       domain: {},
-      metrics: {}
+      metrics: {},
+      kubernetesApp: {},
+      kubernetesDeployment: {},
+      kubernetesNamespace: {},
+      kubernetesNode: {},
+      kubernetesPod: {},
+      kubernetesService:{},
+      kubernetesStatefulSet: {}
     },
     dashboard: {
       sidenavOpen: true,
