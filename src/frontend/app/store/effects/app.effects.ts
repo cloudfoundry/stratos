@@ -3,8 +3,12 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import {
+  createAppInstancesMetricAction,
+} from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 import { GetAppSummaryAction } from '../actions/app-metadata.actions';
-import { ASSIGN_ROUTE, AssociateRouteWithAppApplication, ASSIGN_ROUTE_SUCCESS } from '../actions/application-service-routes.actions';
+import { ASSIGN_ROUTE_SUCCESS } from '../actions/application-service-routes.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
 import { AppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
@@ -17,10 +21,23 @@ export class AppEffects {
     private store: Store<AppState>,
   ) { }
 
-  @Effect({ dispatch: false }) upateSummary$ = this.actions$.ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS).pipe(
+  @Effect({ dispatch: false }) updateSummary$ = this.actions$.ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS).pipe(
     map(action => {
-        this.store.dispatch(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
+      this.store.dispatch(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
     }),
+  );
 
+  @Effect({ dispatch: false }) clearCellMetrics$ = this.actions$.ofType<APISuccessOrFailedAction>(UPDATE_SUCCESS).pipe(
+    map(action => {
+      // User's can scale down instances and previous instance data is kept in store, when the user scales up again this stale data can
+      // be incorrectly shown straight away. In order to work around this fetch the latest metrics again when scaling up
+      // Note - If this happens within the metrics update time period (60 seconds) the stale one is returned again, unfortunately there's
+      // no way to work around this.
+      const updateAction: UpdateExistingApplication = action.apiAction as UpdateExistingApplication;
+      if (updateAction.newApplication.instances > updateAction.existingApplication.instances) {
+        const metricsAction = createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid);
+        this.store.dispatch(metricsAction);
+      }
+    }),
   );
 }
