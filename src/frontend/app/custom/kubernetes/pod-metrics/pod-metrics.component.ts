@@ -1,18 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';
-import { getMetricsChartConfigBuilder, ChartDataTypes } from '../../../shared/components/metrics-chart/metrics.component.helpers';
+import {
+  ChartDataTypes,
+  getMetricsChartConfigBuilder,
+} from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, kubernetesPodsSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityInfo } from '../../../store/types/api.types';
-import { IMetricMatrixResult, ChartSeries } from '../../../store/types/base-metric.types';
+import { ChartSeries, IMetricMatrixResult } from '../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../store/types/metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { HelmReleaseService } from '../services/helm-release.service';
@@ -64,8 +69,9 @@ export class PodMetricsComponent {
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
+    const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
     const networkChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
-    (result => `Network Interface: ${result.metric.interface}`);
+      (result => `Network Interface: ${result.metric.interface}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -79,16 +85,35 @@ export class PodMetricsComponent {
           return series.filter(s => !s.name.endsWith('POD'));
         }
       ),
-      chartConfigBuilder(
+      cpuChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
           helmReleaseService.kubeGuid,
           `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
-        'CPU Usage (secs)',
+        'CPU Usage',
         null,
         (series: ChartSeries[]) => {
           return series.filter(s => !s.name.endsWith('POD'));
+        },
+        (tick: string) => {
+          const duration = moment.duration(parseFloat(tick) * 1000);
+          if (duration.asDays() >= 1) {
+            return `${duration.asDays().toPrecision(2)} d`;
+          }
+          if (duration.asHours() >= 1) {
+            return `${duration.asHours().toPrecision(2)} hrs`;
+          }
+          if (duration.asMinutes() >= 1) {
+            return `${duration.asMinutes().toPrecision(2)} min`;
+          }
+          if (duration.asSeconds() >= 1) {
+            return `${duration.asSeconds().toPrecision(2)} sec`;
+          }
+          if (duration.asMilliseconds() >= 1) {
+            return `${duration.asSeconds().toPrecision(2)} msec`;
+          }
+          return tick;
         }
       ),
       networkChartConfigBuilder(

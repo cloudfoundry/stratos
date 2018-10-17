@@ -1,6 +1,6 @@
 import { MetricsAction } from './../../../store/actions/metrics.actions';
 import { ChartSeries, IMetricMatrixResult, MetricsFilterSeries } from '../../../store/types/base-metric.types';
-import { MetricsLineChartConfig } from './metrics-chart.types';
+import { MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsConfig } from './metrics-chart.component';
 
 export class MetricsChartHelpers {
@@ -18,10 +18,13 @@ export class MetricsChartHelpers {
     }
     return 0;
   }
-  static buildChartConfig(yLabel: string) {
+  static buildChartConfig(yLabel: string, yAxisTickFormatter?: YAxisTickFormattingFunc) {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yLabel;
+    if (!!yAxisTickFormatter) {
+      lineChartConfig.yAxisTickFormatting = yAxisTickFormatter;
+    }
     return lineChartConfig;
   }
 }
@@ -33,8 +36,9 @@ export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result) =>
     metricsAction: MetricsAction,
     yAxisLabel: string,
     dataType: ChartDataTypes = null,
-    filterSeries: MetricsFilterSeries = null
-  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType, filterSeries);
+    filterSeries?: MetricsFilterSeries,
+    yAxisTickFormatter?: YAxisTickFormattingFunc
+  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType, filterSeries, yAxisTickFormatter);
 }
 
 export function buildMetricsChartConfig<T = any>(
@@ -42,7 +46,8 @@ export function buildMetricsChartConfig<T = any>(
   yAxisLabel: string,
   getSeriesName: (result) => string,
   dataType: ChartDataTypes = null,
-  filterSeries: MetricsFilterSeries = null
+  filterSeries?: MetricsFilterSeries,
+  yAxisTickFormatter?: YAxisTickFormattingFunc
 ): [
     MetricsConfig<IMetricMatrixResult<T>>,
     MetricsLineChartConfig
@@ -56,6 +61,6 @@ export function buildMetricsChartConfig<T = any>(
       metricsAction,
       filterSeries: filterSeries,
     },
-    MetricsChartHelpers.buildChartConfig(yAxisLabel)
+    MetricsChartHelpers.buildChartConfig(yAxisLabel, yAxisTickFormatter)
   ];
 }
