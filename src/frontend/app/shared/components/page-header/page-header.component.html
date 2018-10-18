@@ -27,23 +27,27 @@
           <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
         </button>
         <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
-          <div class="page-header__username">
-            <div class="page-header__username-icon"> {{ userNameFirstLetter$ | async }} </div>
-            <div class="page-header__username-text"> {{ username$ | async }} </div>
-          </div>
-          <div *ngIf="!logoutOnly">
-            <button mat-menu-item routerLink="/about">
-              <span>About</span>
+          <div class="page-header__menu-inner">
+            <div class="page-header__username">
+              <div class="page-header__username-icon"> {{ userNameFirstLetter$ | async }} </div>
+              <div class="page-header__username-text">
+                <div class="page-header__username-subtext">user</div>
+                <div>{{ username$ | async }}</div>
+              </div>
+            </div>
+            <div *ngIf="!logoutOnly">
+              <button mat-menu-item routerLink="/about">
+                <span>About</span>
+              </button>
+              <button mat-menu-item routerLink="/user-profile">
+                <span>Profile</span>
+              </button>
+              <div class="page-header__menu-separator"></div>
+            </div>
+            <button mat-menu-item (click)="logout()">
+              <span>Logout</span>
             </button>
-            <div class="page-header__menu-separator"></div>
-            <button mat-menu-item routerLink="/user-profile">
-              <span>Profile</span>
-            </button>
-            <div class="page-header__menu-separator"></div>
           </div>
-          <button mat-menu-item (click)="logout()">
-            <span>Logout</span>
-          </button>
         </mat-menu>
       </mat-toolbar>
     </div>

@@ -51,7 +51,7 @@ $bottom-index: $top-index - 1;
     height: 20vh;
   }
   &__divider {
-    opacity: .6;
+    opacity: .3;
     padding: 0 10px 0 5px;
   }
   &__menu-button-icon {
@@ -70,6 +70,10 @@ $bottom-index: $top-index - 1;
     text-align: center;
     width: $menu-button-height;
   }
+  &__username-subtext {
+    font-size: 12px;
+    opacity: .6;
+  }
   &__menu-button {
     display: flex;
     justify-content: center;
@@ -81,6 +85,10 @@ $bottom-index: $top-index - 1;
   }
   &__username-text {
     margin-left: 10px;
+  }
+  &__menu-inner {
+    max-width: 400px;
+    min-width: 200px;
   }
 }
 
