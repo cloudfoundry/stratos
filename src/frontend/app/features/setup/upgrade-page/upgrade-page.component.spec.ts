@@ -11,15 +11,15 @@ describe('UpgradePageComponent', () => {
   let component: UpgradePageComponent;
   let fixture: ComponentFixture<UpgradePageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ UpgradePageComponent, IntroScreenComponent, StratosTitleComponent ],
+      declarations: [UpgradePageComponent, IntroScreenComponent, StratosTitleComponent],
       imports: [
         MDAppModule,
       ]
     })
-    .compileComponents();
-  }));
+      .compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UpgradePageComponent);
