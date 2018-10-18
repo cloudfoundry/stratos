@@ -2,13 +2,14 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouterStateSnapshot } from '@angular/router';
-
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
-import { ExtensionManager } from './core/extension/extension-manager-service';
+import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
+import { ExtensionService } from './core/extension/extension-service';
+import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
@@ -21,10 +22,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
-import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { XSRFModule } from './xsrf.module';
-import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
-
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -63,7 +61,6 @@ export class CustomRouterStateSerializer
   declarations: [
     AppComponent,
     NoEndpointsNonAdminComponent,
-    PageNotFoundComponentComponent,
   ],
   imports: [
     BrowserModule,
@@ -85,10 +82,15 @@ export class CustomRouterStateSerializer
   ],
   providers: [
     LoggedInService,
-    ExtensionManager,
+    ExtensionService,
+    DynamicExtenstionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private ext: ExtensionService) {
+    ext.init();
+  }
+}

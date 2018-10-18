@@ -74,7 +74,6 @@
             "sourceMap": false,
             "main": "src/frontend/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "sourceMap": false,
             "polyfills": "src/frontend/polyfills.ts",
             "tsConfig": "src/frontend/tsconfig.spec.json",
             "scripts": [],
