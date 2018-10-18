@@ -1,15 +1,8 @@
-import { AfterContentInit, Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
-import { Router } from '@angular/router';
-
-import { Store } from '@ngrx/store';
+import { AfterContentInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { create } from 'rxjs-spy';
 
 import { environment } from '../environments/environment';
-import { ExtensionManager } from './core/extension/extension-manager-service';
-import { initEndpointTypes } from './features/endpoints/endpoint-helpers';
 import { LoggedInService } from './logged-in.service';
-import { AppState } from './store/app-state';
-
-import { create } from 'rxjs-spy';
 
 
 @Component({
@@ -24,7 +17,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    ext: ExtensionManager,
   ) {
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
@@ -51,9 +43,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
       this.animationsDisabled = true;
     }
 
-    // Apply extensions (if any)
-    ext.applyRouteConfig();
-    initEndpointTypes(ext.getEndpointTypes());
   }
   title = 'app';
 

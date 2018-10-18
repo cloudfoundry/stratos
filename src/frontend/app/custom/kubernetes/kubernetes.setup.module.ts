@@ -1,44 +1,36 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
-import { ExtensionManager } from '../../core/extension/extension-manager-service';
-
+import { StratosExtension } from '../../core/extension/extension-service';
+import { EndpointTypeConfig } from '../../features/endpoints/endpoint-helpers';
 
 const kubernetes: Routes = [{
-  path: 'kubernetes', loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule'
+  path: 'kubernetes',
+  loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule',
+  data: {
+    stratosNavigation: {
+      text: 'Kubernetes',
+      matIcon: 'kubernetes',
+      matIconFont: 'stratos-icons',
+      position: 60,
+      requiresEndpointType: 'k8s'
+    }
+  }
 }];
 
-@NgModule({
-  imports: [RouterModule.forChild(kubernetes)]
+const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
+  value: 'k8s',
+  label: 'Kubernetes',
+  authTypes: ['kubeconfig'],
+  icon: 'kubernetes',
+  iconFont: 'stratos-icons'
+}];
+
+@StratosExtension({
+  routes: kubernetes,
+  endpointTypes: kubernetesEndpointTypes
 })
-export class KubernetesSetupRoutesModule { }
-
-@NgModule({
-  imports: [
-    KubernetesSetupRoutesModule,
-    // KubernetesModule,
-    // KubernetesRoutingModule,
-  ]
-})
-export class KubernetesSetupModule {
-
-  constructor(private ext: ExtensionManager) {
-
-    ext.registerRoutes(kubernetes);
-
-    ext.registerSideNav({
-      text: 'Kubernetes',
-      matIcon: 'apps',
-      link: '/kubernetes'
-    }).registerEndpointType({
-      type: 'k8s',
-      label: 'Kubernetes',
-      authTypes: ['kubeconfig'],
-      icon: 'kubernetes',
-      iconFont: 'stratos-icons'
-    });
-
-  }
-}
+@NgModule()
+export class KubernetesSetupModule { }
 
 
