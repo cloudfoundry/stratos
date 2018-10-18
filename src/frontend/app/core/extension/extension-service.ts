@@ -139,11 +139,21 @@ export class ExtensionService {
    */
   private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
+
     const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
     let needsReset = false;
     if (dashboardRoute) {
       extensionMetadata.routes.forEach(routes => dashboardRoute.children = dashboardRoute.children.concat(routes));
       needsReset = true;
+
+      // Remove duplicare routes at the top-level - due to needing to use RouteModule.forChild
+      extensionMetadata.routes.forEach(routes => {
+        routes.forEach(route => {
+          if (route.path && route.loadChildren) {
+            while (this.removeRoute(routeConfig, route)) {}
+          }
+        });
+      });
     }
 
     if (extensionMetadata.loginComponent) {
@@ -157,7 +167,16 @@ export class ExtensionService {
       router.resetConfig(routeConfig);
     }
   }
+
+  private removeRoute(routeConfig: Route[], route: Route): boolean {
+    const index = routeConfig.findIndex(r => r.path === route.path && r.loadChildren === route.loadChildren);
+    if (index >= 0 ) {
+      routeConfig.splice(index, 1);
+    }
+    return index >= 0;
+  }
 }
+
 
 // Helpers to access Extension metadata (without using the injectable Extension Service)
 
