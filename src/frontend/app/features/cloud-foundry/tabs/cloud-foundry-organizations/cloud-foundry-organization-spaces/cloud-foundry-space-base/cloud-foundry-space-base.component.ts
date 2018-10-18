@@ -17,8 +17,13 @@ import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-
-
+import {
+  getTabsFromExtensions,
+  StratosTabType,
+  StratosActionMetadata,
+  getActionsFromExtensions,
+  StratosActionType
+} from '../../../../../../core/extension/extension-service';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -72,6 +77,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   public schema = entityFactory(spaceSchemaKey);
   deleteRedirectSub: any;
 
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfSpaceService: CloudFoundrySpaceService,
@@ -110,7 +117,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       })
     ).subscribe();
 
-
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
   }
 
   private setUpBreadcrumbs(

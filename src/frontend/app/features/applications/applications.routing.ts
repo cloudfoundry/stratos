@@ -25,8 +25,11 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
+import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { StratosActionType, StratosTabType, extensionsActionRouteKey } from '../../core/extension/extension-service';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 
-const appplicationsRoutes: Routes = [
+const applicationsRoutes: Routes = [
   {
     path: 'new',
     component: CreateApplicationComponent,
@@ -42,6 +45,9 @@ const appplicationsRoutes: Routes = [
         path: '',
         component: ApplicationWallComponent,
         pathMatch: 'full',
+        data: {
+          extensionsActionsKey: StratosActionType.Applications
+        }
       },
       {
         path: ':cfId/:id',
@@ -71,7 +77,8 @@ const appplicationsRoutes: Routes = [
             path: '',
             component: ApplicationTabsBaseComponent,
             data: {
-              uiFullView: true
+              uiFullView: true,
+              extensionsActionsKey: StratosActionType.Application
             },
             children: [
               { path: '', redirectTo: 'summary', pathMatch: 'full' },
@@ -84,15 +91,39 @@ const appplicationsRoutes: Routes = [
               { path: 'events', component: EventsTabComponent },
               { path: 'github', component: GithubTabComponent },
               { path: 'metrics', component: MetricsTabComponent },
+              {
+                path: '**',
+                component: PageNotFoundComponentComponent,
+                canActivate: [DynamicExtenstionRoutes],
+                data: {
+                  stratosRouteGroup: StratosTabType.Application
+                }
+              }
             ]
           },
           {
             path: 'add-route',
             component: AddRouteStepperComponent,
+          },
+          {
+            path: '**',
+            component: PageNotFoundComponentComponent,
+            canActivate: [DynamicExtenstionRoutes],
+            data: {
+              stratosRouteGroup: StratosActionType.Application
+            }
           }
         ]
       }
     ]
+  },
+  {
+    path: '**',
+    component: PageNotFoundComponentComponent,
+    canActivate: [DynamicExtenstionRoutes],
+    data: {
+      stratosRouteGroup: StratosActionType.Applications
+    }
   }
 ];
 
@@ -100,7 +131,7 @@ const appplicationsRoutes: Routes = [
   imports: [
     CreateApplicationModule,
     DeployApplicationModule,
-    RouterModule.forChild(appplicationsRoutes)
+    RouterModule.forChild(applicationsRoutes)
 
   ]
 })
