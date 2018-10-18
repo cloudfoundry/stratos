@@ -293,7 +293,11 @@ export class KubernetesEffects {
   }
 
 
-  private processListAction<T>(action: KubePaginationAction | KubeAction, url: string, schemaKey: string, getId: GetID<T>, filterResults?: Filter<T>) {
+  private processListAction<T>(
+    action: KubePaginationAction | KubeAction,
+    url: string, schemaKey: string,
+    getId: GetID<T>,
+    filterResults?: Filter<T>) {
     this.store.dispatch(new StartRequestAction(action));
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
     const requestArgs = {

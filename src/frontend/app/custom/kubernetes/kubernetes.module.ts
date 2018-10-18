@@ -59,9 +59,11 @@ import {
 import {
   KubernetesNodeConditionCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
+/* tslint:disable:max-line-length */
 import {
   KubernetesNodeConditionComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition/kubernetes-node-condition.component';
+/* tslint:enable */
 import {
   KubernetesNodeInfoCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-info-card/kubernetes-node-info-card.component';
