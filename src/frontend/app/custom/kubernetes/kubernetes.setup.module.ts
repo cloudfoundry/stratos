@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 import { StratosExtension } from '../../core/extension/extension-service';
 import { EndpointTypeConfig } from '../../features/endpoints/endpoint-helpers';
@@ -30,7 +30,9 @@ const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
   routes: kubernetes,
   endpointTypes: kubernetesEndpointTypes
 })
-@NgModule()
+@NgModule({
+  imports: [
+    RouterModule.forChild(kubernetes)
+  ]
+})
 export class KubernetesSetupModule { }
-
-
