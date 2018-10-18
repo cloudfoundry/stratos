@@ -11,6 +11,7 @@ import { createBasicStoreModule } from '../../../../../../test-framework/store-t
 import { StoreModule } from '@ngrx/store';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;
@@ -24,6 +25,7 @@ describe('MetricsTabComponent', () => {
         createBasicStoreModule(),
         SharedModule,
         MDAppModule,
+        NoopAnimationsModule
       ],
       providers: [
         ApplicationStateService,
