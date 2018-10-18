@@ -1,22 +1,15 @@
-import { Observable } from 'rxjs';
-import { endpointSchemaKey } from './../../../store/helpers/entity-factory';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-
-import * as moment from 'moment';
-
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Logout } from '../../../store/actions/auth.actions';
+import { AuthState } from '../../../store/reducers/auth.reducer';
+import { InternalEventSeverity } from '../../../store/types/internal-events.types';
+import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
-import { Logout } from '../../../store/actions/auth.actions';
-import { IHeaderBreadcrumb, IHeaderBreadcrumbLink, BREADCRUMB_URL_PARAM, PageHeaderNotice } from './page-header.types';
-import { ActivatedRoute } from '@angular/router';
-import { internalEventTimeStampSelector } from '../../../store/selectors/internal-events.selectors';
-import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
-import { InternalEventSubjectState, InternalEventSeverity } from '../../../store/types/internal-events.types';
-import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
-import { trigger, transition, style, animate } from '@angular/animations';
-import { map } from 'rxjs/operators';
-import { AuthState } from '../../../store/reducers/auth.reducer';
+import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
   selector: 'app-page-header',
@@ -41,6 +34,7 @@ export class PageHeaderComponent {
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;
+  public actionsKey: String;
 
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
@@ -75,6 +69,7 @@ export class PageHeaderComponent {
   }
 
   constructor(private store: Store<AppState>, private route: ActivatedRoute) {
+    this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
       map((auth: AuthState) => auth.sessionData.user.name)
