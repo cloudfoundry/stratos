@@ -4,7 +4,6 @@ import { Customizations, CustomizationsMetadata } from '../core/customizations.t
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { AcmeLoginComponent } from './acme-login/acme-login.component';
-import { StratosExtension } from '../core/extension/extension-service';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
 import { AppActionExtensionComponent } from './app-action-extension/app-action-extension.component';
 
@@ -13,19 +12,6 @@ const AcmeCustomizations: CustomizationsMetadata = {
   hasEula: true,
 };
 
-// CustomModule is bundled in to the main application bundle
-@StratosExtension({
-  routes: [{
-    path: 'example',
-    loadChildren: 'app/custom/nav-extension/nav-extension.module#NavExtensionModule',
-    data: {
-      stratosNavigation: {
-        text: 'Example',
-        matIcon: 'extension'
-      }
-    }
-  }]
-})
 @NgModule({
   imports: [
     CoreModule,

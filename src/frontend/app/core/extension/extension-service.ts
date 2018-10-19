@@ -49,7 +49,6 @@ export type StratosRouteType = StratosTabType | StratosActionType;
 
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
-  routes: [],
   loginComponent: null,
   extensionRoutes: {},
   tabs: {},
@@ -75,15 +74,12 @@ export function StratosAction(props: StratosActionMetadata) {
 }
 
 /**
- * Decorator for an Extension module providing routes etc.
+ * Decorator for an Extension module
  */
 
 export function StratosExtension(config: StratosExtensionConfig) {
   return (_target) => {
-    if (config.routes) {
-      extensionMetadata.routes.push(config.routes);
-    }
-  };
+};
 }
 
 export function StratosLoginComponent() {
@@ -139,10 +135,12 @@ export class ExtensionService {
    */
   private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
+
     const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
     let needsReset = false;
     if (dashboardRoute) {
-      extensionMetadata.routes.forEach(routes => dashboardRoute.children = dashboardRoute.children.concat(routes));
+      // Move any stratos extension routes under the dashboard base route
+      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) {}
       needsReset = true;
     }
 
@@ -157,9 +155,19 @@ export class ExtensionService {
       router.resetConfig(routeConfig);
     }
   }
+
+  private moveExtensionRoute(routeConfig: Route[], dashboardRoute: Route): boolean {
+    const index = routeConfig.findIndex(r => !!r.data && !!r.data.stratosNavigation);
+    if (index >= 0 ) {
+      const removed = routeConfig.splice(index, 1);
+      dashboardRoute.children = dashboardRoute.children.concat(removed);
+    }
+    return index >= 0;
+  }
 }
 
 // Helpers to access Extension metadata (without using the injectable Extension Service)
+
 
 export function getRoutesFromExtensions(routeType: StratosRouteType) {
   return extensionMetadata.extensionRoutes[routeType] || [];

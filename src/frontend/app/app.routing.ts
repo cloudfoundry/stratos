@@ -14,6 +14,7 @@ import { SharedModule } from './shared/shared.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
 import { environment } from '../environments/environment';
+import { CustomRoutingImportModule } from './custom-import.module';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'applications', pathMatch: 'full' },
@@ -113,7 +114,8 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    CustomRoutingImportModule,
   ]
 })
 export class RouteModule { }
