@@ -1,5 +1,4 @@
-import { protractor } from 'protractor';
-
+import { protractor, by, element, browser } from 'protractor';
 import { e2e } from '../e2e';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ManagerUsersPage } from './manage-users-page.po';
@@ -18,6 +17,17 @@ describe('Manage Users Stepper', () => {
   const userName = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
 
   let manageUsersPage: ManagerUsersPage, cfHelper: CFHelpers, cfGuid, userGuid;
+
+  let originalTimeout = 40000;
+
+  beforeEach(function() {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000;
+  });
+
+  afterEach(function() {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  });
 
   beforeAll(() => {
     setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true).then(res => {
@@ -145,6 +155,14 @@ describe('Manage Users Stepper', () => {
 
     stpr.next();
     expect(stpr.getActiveStepName()).toBe('Confirm');
+
+    // Wait until all of the spinners have gone
+    const spinners = element.all(by.tagName('mat-progress-spinner'));
+    browser.wait(function() {
+      return spinners.isPresent().then(function(present) {
+        return !present;
+      });
+    });
 
     // ... action table state after submit
     expect(confirmStep.actionTable.table.getTableData()).toEqual(createActionTableDate(orgTarget, spaceTarget, 'done'));

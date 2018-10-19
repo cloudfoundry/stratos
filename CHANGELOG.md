@@ -1,5 +1,30 @@
 # Change Log
 
+## 2.1.2
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.1...2.1.2)
+
+This release fixes an issue with a broken backend dependency, where the pinned version that was being used is no longer available.
+
+- Fix go-flags dependency pinned version broken [\#3071](https://github.com/cloudfoundry-incubator/stratos/pull/3071)
+
+## 2.1.1
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.0...2.1.1)
+
+This is a bug fix release that addresses the following issues:
+
+**Fixes:**
+
+- App wall filtering can stop working  with some filter combinations [\#3043](https://github.com/cloudfoundry-incubator/stratos/pull/3043)
+
+- Can not connect a metrics endpoint [\#3035](https://github.com/cloudfoundry-incubator/stratos/issues/3035)
+
+- Backend build issue due to the pinned commit for a dependency being removed [\#3060](https://github.com/cloudfoundry-incubator/stratos/pull/3060)
+
+
+- Metrics: Wrong job can be matched up when there are multiple jobs [\#3057](https://github.com/cloudfoundry-incubator/stratos/pull/3057)
+
 ## 2.1.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.0.1...2.1.0)
@@ -9,7 +34,7 @@ Release highlights:
 - Stratos frontend can be pre-built before pushing to Cloud Foundry to enable AOT and reduce push time
 - SSO support refinements with the ability to now connect a Cloud Foundry endpoint using SSO in addition to SSO login to Straos itself
 - Ability to specify manifest overrides when deploying an application
-- Ability to optionally specify Client ID anc Client Secret when registering an endpoint
+- Ability to optionally specify Client ID and Client Secret when registering an endpoint
 - Add ability to restage an application
 - Endpoints list now shows logged in user's username and whether they're an admin
 - Switched to new Stratos logo for login and about pages
