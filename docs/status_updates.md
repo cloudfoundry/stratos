@@ -15,7 +15,7 @@ Highlights for this week:
 - Metrics: Ensure CF Cells info is shown for non cf admins [\#3121](https://github.com/cloudfoundry-incubator/stratos/pull/3121)
 - Add 'type text to continue' to confirmation modal [\#3131](https://github.com/cloudfoundry-incubator/stratos/pull/3131)
 - Delete App Stepper: Disable delete of routes and services that are bound to other app/s [\#3129](https://github.com/cloudfoundry-incubator/stratos/pull/3129)
-- Endpoints Table: Only show 'Admin' check icon for cf endpoints [\#3132](Endpoints Table: Only show 'Admin' check icon for cf endpoints #3132)
+- Endpoints Table: Only show 'Admin' check icon for cf endpoints [\#3132](https://github.com/cloudfoundry-incubator/stratos/pull/3132)
 
 
 ## 12th October 2018
