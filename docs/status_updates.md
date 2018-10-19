@@ -2,6 +2,22 @@
 
 Weekly status updates are published here.
 
+## 19th October 2018
+
+We are preparing for this month's 2.2.0 release which will be out towards the end of the month.
+
+Highlights for this week:
+
+- Extensions: Fix for side nav. Add initial docs [\#3140](https://github.com/cloudfoundry-incubator/stratos/pull/3140)
+- User menu improvements [\#3136](https://github.com/cloudfoundry-incubator/stratos/pull/3136)
+- Metrics: Show table of cell health state changes instead of chart [\#3135](https://github.com/cloudfoundry-incubator/stratos/pull/3135)
+- Metrics: Update app instance cell data when scaling up [\#3133](https://github.com/cloudfoundry-incubator/stratos/pull/3133)
+- Metrics: Ensure CF Cells info is shown for non cf admins [\#3121](https://github.com/cloudfoundry-incubator/stratos/pull/3121)
+- Add 'type text to continue' to confirmation modal [\#3131](https://github.com/cloudfoundry-incubator/stratos/pull/3131)
+- Delete App Stepper: Disable delete of routes and services that are bound to other app/s [\#3129](https://github.com/cloudfoundry-incubator/stratos/pull/3129)
+- Endpoints Table: Only show 'Admin' check icon for cf endpoints [\#3132](Endpoints Table: Only show 'Admin' check icon for cf endpoints #3132)
+
+
 ## 12th October 2018
 
 The team have been preparing for and attending the CF Summit in Basel.
