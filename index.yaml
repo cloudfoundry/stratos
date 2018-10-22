@@ -10,6 +10,15 @@ entries:
     - https://github.com/SUSE/stratos/releases/download/2.1.0-dev-kube-integration/console-helm-chart-v2.1.0-dev-kube-integration.tgz
     version: 2.1.0-dev-kube-integration
   - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-10-22T10:31:32.486999738Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: a599d45c14b3ea51525d580976686f3980696b9a1238eb9946ab29a7c79298f3
+    name: console
+    urls:
+    - https://github.com/SUSE/stratos/releases/download/2.0.0-dev/console-helm-chart-v2.0.0-dev.tgz
+    version: 2.0.0-dev
+  - apiVersion: v1
     created: 2018-01-09T11:48:55.233833731Z
     description: A Helm chart for deploying Stratos UI Console
     digest: 378df78adeebfad7d81b63a9f01afbb830c35cf948e3b662349e1d20a0972955
@@ -81,4 +90,4 @@ entries:
     urls:
     - https://github.com/suse/stratos-ui/releases/download/0.9.0/console-helm-chart-0.9.0.tgz
     version: 0.9.0
-generated: 2018-10-04T13:13:48.553077364Z
+generated: 2018-10-22T10:31:32.48601894Z
