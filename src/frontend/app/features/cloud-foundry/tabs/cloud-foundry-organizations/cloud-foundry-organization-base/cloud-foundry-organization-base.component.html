@@ -1,17 +1,22 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
   <h1> {{ name$ | async }}</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="edit-org" *appUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org" matTooltip="Edit Organization">
+    <button mat-icon-button name="edit-org" *appUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid"
+      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org"
+      matTooltip="Edit Organization">
       <mat-icon>mode_edit</mat-icon>
     </button>
-    <button mat-icon-button name="add-space" *appUserPermission="permsSpaceCreate;endpointGuid:cfEndpointService.cfGuid;organizationGuid:cfOrgService.orgGuid" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space"
+    <button mat-icon-button name="add-space" *appUserPermission="permsSpaceCreate;endpointGuid:cfEndpointService.cfGuid;organizationGuid:cfOrgService.orgGuid"
+      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space"
       matTooltip="Create Space">
       <mat-icon>add</mat-icon>
     </button>
-    <button mat-icon-button name="user-management" *ngIf="canUpdateRoles$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users/manage" matTooltip="Manage Users">
+    <button mat-icon-button name="user-management" *ngIf="canUpdateRoles$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users/manage"
+      matTooltip="Manage Users">
       <mat-icon>people</mat-icon>
     </button>
-    <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli" matTooltip="CLI Info">
+    <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli"
+      matTooltip="CLI Info">
       <mat-icon>keyboard</mat-icon>
     </button>
   </div>

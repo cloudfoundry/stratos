@@ -1,7 +1,4 @@
-import { RequestAction } from '../../types/request.types';
-import { State } from '@ngrx/store';
-import { AppState } from '../../app-state';
-import { PaginationAction, PaginationEntityState } from '../../types/pagination.types';
+import { PaginationEntityState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
 
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {

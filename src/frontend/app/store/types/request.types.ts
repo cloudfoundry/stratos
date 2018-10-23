@@ -41,7 +41,6 @@ export interface IRequestAction extends RequestAction {
   /**
    * For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
-   *
    */
   removeEntityOnDelete?: boolean;
 }

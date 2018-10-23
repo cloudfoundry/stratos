@@ -100,7 +100,7 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    this.space$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
+    this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
           createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
@@ -143,7 +143,7 @@ export class CloudFoundrySpaceService {
       }
     }));
 
-    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
+    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
         return getPaginationObservables({

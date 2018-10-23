@@ -11,3 +11,6 @@ import { CustomModule } from './custom/custom.module';
   ]
 })
 export class CustomImportModule { }
+
+@NgModule()
+export class CustomRoutingImportModule { }
