@@ -64,11 +64,12 @@ export class MetricsAction implements IRequestAction {
 
 export class FetchCFMetricsAction extends MetricsAction {
   constructor(
+    guid: string,
     cfGuid: string,
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(cfGuid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, queryType, isSeries);
+    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, queryType, isSeries);
   }
 }
 
@@ -79,13 +80,17 @@ export class FetchCFCellMetricsAction extends MetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, queryType, isSeries);
+    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, queryType, isSeries);
   }
 }
 
 export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implements PaginatedAction {
-  constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
-    super(cfGuid, query, queryType);
+  constructor(
+    guid: string,
+    cfGuid: string,
+    public query: MetricQueryConfig,
+    queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(guid, cfGuid, query, queryType);
     this.paginationKey = this.metricId;
   }
   actions = [];

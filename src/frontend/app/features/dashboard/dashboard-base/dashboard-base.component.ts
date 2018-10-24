@@ -138,11 +138,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   private collectNavigationRoutes(path: string, routes: Route[]): SideNavItem[] {
-    let nav: SideNavItem[] = [];
     if (!routes) {
-      return nav;
+      return [];
     }
-    routes.forEach(route => {
+    return routes.reduce((nav, route) => {
       if (route.data && route.data.stratosNavigation) {
         nav.push({
           ...route.data.stratosNavigation,
@@ -150,8 +149,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
         });
       }
       const navs = this.collectNavigationRoutes(route.path, route.children);
-      nav = nav.concat(navs);
-    });
-    return nav;
+      return nav.concat(navs);
+    }, []);
   }
 }
