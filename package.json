@@ -57,6 +57,7 @@
     "@ngrx/router-store": "^6.0.1",
     "@ngrx/store": "^6.0.1",
     "@ngrx/store-devtools": "^6.0.1",
+    "@nrwl/schematics": "^6.4.0",
     "@swimlane/ngx-charts": "^9.0.0",
     "angular2-virtual-scroll": "^0.3.1",
     "core-js": "^2.5.7",
