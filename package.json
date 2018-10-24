@@ -80,6 +80,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.7.4",
+    "@angular-devkit/build-ng-packagr": "~0.8.0",
     "@angular/cli": "^6.1.5",
     "@angular/compiler-cli": "^6.1.1",
     "@angular/language-service": "^6.1.1",
@@ -107,6 +108,7 @@
     "karma-spec-reporter": "0.0.31",
     "lodash": "^4.17.10",
     "mktemp": "^0.4.0",
+    "ng-packagr": "^4.1.0",
     "ngrx-store-freeze": "^0.2.3",
     "protractor": "^5.4.0",
     "q": "^1.4.1",
@@ -117,6 +119,8 @@
     "stratos-merge-dirs": "^0.2.3",
     "stratos-protractor-reporter": "^1.2.3",
     "ts-node": "~3.2.0",
+    "tsickle": ">=0.29.0",
+    "tslib": "^1.9.0",
     "tslint": "~5.10.0",
     "typescript": "~2.9.0"
   }
