@@ -9,7 +9,7 @@ import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.
   styleUrls: ['./dialog-confirm.component.scss']
 })
 export class DialogConfirmComponent {
-  private textToMatch: string;
+  public textToMatch: string;
 
   constructor(
     public dialogRef: MatDialogRef<DialogConfirmComponent>,
