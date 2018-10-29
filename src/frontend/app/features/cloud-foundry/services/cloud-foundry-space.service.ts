@@ -126,7 +126,7 @@ export class CloudFoundrySpaceService {
           new GetSpace(this.spaceGuid, this.cfGuid, relations),
           true
         );
-        return spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
+        return spaceEntityService.entityObs$.pipe(filter(o => !!o && !!o.entity));
       }),
       publishReplay(1),
       refCount()
