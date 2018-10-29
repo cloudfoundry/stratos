@@ -154,14 +154,11 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   delete = () => {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Space',
-      `Are you sure you want to delete space '${this.row.entity.name}'?`,
-      'Delete',
-      true,
       {
-        message: 'Please type the name of the space to continue',
-        label: 'Name',
         textToMatch: this.row.entity.name
-      }
+      },
+      'Delete',
+      true
     );
     this.confirmDialog.open(confirmation, () => {
       this.cfOrgService.deleteSpace(

@@ -1,4 +1,5 @@
 .confirm-dialog {
+  min-width: 250px;
   &__actions {
     justify-content: flex-end;
     margin-top: 24px;
@@ -25,10 +26,5 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-
-    > * {
-      padding-top: 12px;
-    }
-
   }
 }

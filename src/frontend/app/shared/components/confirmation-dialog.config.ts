@@ -1,13 +1,13 @@
 // Configuration for a confirmation dialog
+
+export interface TypeToConfirm {
+  textToMatch: string;
+}
 export class ConfirmationDialogConfig {
   constructor(
     public title: string,
-    public msg: string,
+    public message: string | TypeToConfirm,
     public confirm = 'Ok',
-    public critical = false,
-    public typeToConfirm: {
-      message: string,
-      label: string,
-      textToMatch: string
-    } = null) { }
+    public critical = false
+  ) { }
 }

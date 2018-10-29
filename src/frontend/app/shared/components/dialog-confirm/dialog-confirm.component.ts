@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
-import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
+import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.config';
 
 @Component({
   selector: 'app-dialog-confirm',
@@ -9,11 +9,17 @@ import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
   styleUrls: ['./dialog-confirm.component.scss']
 })
 export class DialogConfirmComponent {
+  private textToMatch: string;
 
   constructor(
     public dialogRef: MatDialogRef<DialogConfirmComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogConfig
-  ) { }
+  ) {
+    const typeToConfirm = data.message as TypeToConfirm;
+    if (typeToConfirm.textToMatch) {
+      this.textToMatch = typeToConfirm.textToMatch;
+    }
+  }
 
   onNoClick(): void {
     this.dialogRef.close();
