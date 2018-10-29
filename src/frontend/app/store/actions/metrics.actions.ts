@@ -86,6 +86,7 @@ export class MetricsChartAction extends MetricsAction {
 
 export class FetchCFMetricsAction extends MetricsAction {
   constructor(
+    guid: string,
     cfGuid: string,
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.RANGE_QUERY,
@@ -106,9 +107,13 @@ export class FetchCFCellMetricsAction extends MetricsAction {
 }
 
 export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implements PaginatedAction {
-  constructor(cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.RANGE_QUERY) {
-    super(cfGuid, query, queryType);
-    this.paginationKey = this.guid;
+  constructor(
+    guid: string,
+    cfGuid: string,
+    public query: MetricQueryConfig,
+    queryType: MetricQueryType = MetricQueryType.QUERY) {
+    super(guid, cfGuid, query, queryType);
+    this.paginationKey = this.metricId;
   }
   actions = [];
   paginationKey: string;

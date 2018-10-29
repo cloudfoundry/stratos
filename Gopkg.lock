@@ -422,13 +422,13 @@
   revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
 
 [[projects]]
-  branch = "master"
   digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
   pruneopts = "UT"
   revision = "dac4e0ac4cd75079a03e408685a6140ef57a6aa3"
-  source = "github.com/XenoPhex/go-flags"
+  source = "github.com/nwmac/go-flags"
+  version = "1.1"
 
 [[projects]]
   digest = "1:e22af8c7518e1eab6f2eab2b7d7558927f816262586cd6ed9f349c97a6c285c4"

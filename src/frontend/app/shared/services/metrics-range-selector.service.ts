@@ -72,12 +72,10 @@ export class MetricsRangeSelectorService {
           timeRange: times.find(time => time.value === metrics.windowValue)
         };
       } else {
-        const start = moment.unix(parseInt(metrics.query.params.start as string, 10));
-        const end = moment.unix(parseInt(metrics.query.params.end as string, 10));
         return {
-          timeRange: times.find(time => time.queryType === MetricQueryType.RANGE_QUERY),
-          start,
-          end
+          timeRange: metrics.query.params && metrics.query.params.window ?
+            times.find(time => time.value === metrics.query.params.window) :
+            this.getDefaultTimeRange(times)
         };
       }
     } else {

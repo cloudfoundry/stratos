@@ -2,7 +2,9 @@ import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Logout } from '../../../store/actions/auth.actions';
+import { AuthState } from '../../../store/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../store/types/internal-events.types';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
@@ -31,6 +33,8 @@ export class PageHeaderComponent {
 
   @Input() showUnderFlow = false;
 
+  public userNameFirstLetter$: Observable<string>;
+  public username$: Observable<string>;
   public actionsKey: String;
 
   @Input()
@@ -68,6 +72,12 @@ export class PageHeaderComponent {
   constructor(private store: Store<AppState>, private route: ActivatedRoute) {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
+    this.username$ = store.select(s => s.auth).pipe(
+      map((auth: AuthState) => auth && auth.sessionData ? auth.sessionData.user.name : 'Unknown')
+    );
+    this.userNameFirstLetter$ = this.username$.pipe(
+      map(name => name[0].toLocaleUpperCase())
+    );
   }
 
 }

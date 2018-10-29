@@ -73,6 +73,7 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
+	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
 }
 
 func (m *MetricsSpecification) GetType() string {

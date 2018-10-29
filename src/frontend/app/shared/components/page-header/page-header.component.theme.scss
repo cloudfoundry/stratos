@@ -14,9 +14,16 @@
     &__underflow {
       background-color: mat-color($primary);
     }
-  } // Menu size changes - done in theme otherwise would need ViewEncapsulation.None
-  .mat-menu-panel.page-header__menu {
-    max-width: 400px;
-    min-width: 200px;
+    &__divider {
+      color: mat-contrast($primary, 500);
+    }
+    &__menu-button-icon {
+      background-color: mat-contrast($primary, 500);
+      color: mat-color($primary);
+    }
+    &__username-icon {
+      background-color: mat-color($primary);
+      color: mat-contrast($primary, 500);
+    }
   }
 }

@@ -8,6 +8,7 @@ import { entityFactory, metricSchemaKey } from '../../../../../../store/helpers/
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-base',
@@ -20,6 +21,8 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 })
 export class CloudFoundryCellBaseComponent {
 
+  static AppsLinks = 'apps';
+
   tabLinks: ISubHeaderTabs[] = [
     {
       link: 'summary',
@@ -30,7 +33,7 @@ export class CloudFoundryCellBaseComponent {
       label: 'Metrics'
     },
     {
-      link: 'apps',
+      link: CloudFoundryCellBaseComponent.AppsLinks,
       label: 'App Instances'
     },
   ];
@@ -65,5 +68,10 @@ export class CloudFoundryCellBaseComponent {
       ])),
       first()
     );
+
+    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks).hidden =
+      cfEndpointService.currentUser$.pipe(
+        map(user => !user.admin)
+      );
   }
 }
