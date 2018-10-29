@@ -14,6 +14,7 @@ const kubernetes: Routes = [{
     }
   }
 }];
+
 @NgModule({
   imports: [
     RouterModule.forRoot(kubernetes),
