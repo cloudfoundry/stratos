@@ -64,8 +64,17 @@ $suse-side-nav-active: #003358;
   }
 }
 
-// Remove background image from setup screen (e..g. upgrade screen)
+// Remove background image from setup screen (e.g. upgrade screen)
 .stratos app-intro-screen > .intro {
   background-color: $suse-blue;
   background-image: none;
+}
+
+.stratos .page-header__divider {
+  color: #333;
+}
+
+.stratos .page-header__menu-button-icon {
+  background-color: $suse-primary-color;
+  color: $suse-text;
 }

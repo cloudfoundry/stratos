@@ -19,7 +19,7 @@ const kubernetes: Routes = [{
 }];
 
 const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
-  value: 'k8s',
+  value: 'kubernetes',
   label: 'Kubernetes',
   authTypes: ['kubeconfig'],
   icon: 'kubernetes',
@@ -27,7 +27,6 @@ const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
 }];
 
 @StratosExtension({
-  routes: kubernetes,
   endpointTypes: kubernetesEndpointTypes
 })
 @NgModule({

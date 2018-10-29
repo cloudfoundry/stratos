@@ -91,6 +91,9 @@ export function StratosAction(props: StratosActionMetadata) {
  */
 export function StratosExtension(config: StratosExtensionConfig) {
   return (_target) => {
+    if (config.endpointTypes) {
+      extensionMetadata.endpointTypes.push(...config.endpointTypes);
+    }
   };
 }
 
@@ -155,15 +158,6 @@ export class ExtensionService {
       // Move any stratos extension routes under the dashboard base route
       while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { }
       needsReset = true;
-
-      // Remove duplicare routes at the top-level - due to needing to use RouteModule.forChild
-      extensionMetadata.routes.forEach(routes => {
-        routes.forEach(route => {
-          if (route.path && route.loadChildren) {
-            while (this.removeRoute(routeConfig, route)) { }
-          }
-        });
-      });
     }
 
     if (extensionMetadata.loginComponent) {
@@ -185,6 +179,10 @@ export class ExtensionService {
       dashboardRoute.children = dashboardRoute.children.concat(removed);
     }
     return index >= 0;
+  }
+
+  private applyNewEndpointTypes() {
+    initEndpointTypes(this.metadata.endpointTypes);
   }
 }
 
