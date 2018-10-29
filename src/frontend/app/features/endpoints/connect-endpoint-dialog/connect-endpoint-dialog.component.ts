@@ -87,7 +87,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
-    if (ssoIndex >= 0 ) {
+    if (ssoIndex >= 0) {
       autoSelected = this.authTypesForEndpoint[ssoIndex];
     }
 
@@ -120,9 +120,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     this.connectingSub = this.endpointConnected$.pipe(
       filter(connected => connected),
-      delay(this.connectDelay), )
+      delay(this.connectDelay))
       .subscribe(() => {
-        this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
+        this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
         this.dialogRef.close();
       });
   }
@@ -145,13 +145,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.getRequestSelector()
     ).pipe(
       filter(request => !!request),
-      map(request => request.fetching), );
+      map(request => request.fetching));
 
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     ).pipe(
       map(request => !!(request && request.api_endpoint && request.user)));
-    const busy$ = this.update$.pipe(map(update => update.busy), startWith(false), );
+    const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
     this.connecting$ = busy$.pipe(
       pairwise(),
       switchMap(([oldBusy, newBusy]) => {
@@ -217,7 +217,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   submit() {
     this.hasAttemptedConnect = true;
-    const { guid, authType, authValues, systemShared } = this.endpointForm.value;
+    const { authType, authValues, systemShared } = this.endpointForm.value;
     const authVal = authValues;
     if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
       this.bodyContent = this.kubeconfig;
