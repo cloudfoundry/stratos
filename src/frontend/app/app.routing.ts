@@ -27,7 +27,8 @@ const appRoutes: Routes = [
     component: DashboardBaseComponent,
     canActivate: [AuthGuardService, EndpointsService],
     children: [
-      { path: 'dashboard', component: HomePageComponent,
+      {
+        path: 'dashboard', component: HomePageComponent,
         data: {
           stratosNavigation: {
             text: 'Dashboard',
@@ -38,7 +39,8 @@ const appRoutes: Routes = [
           }
         }
       },
-      { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
+      {
+        path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             text: 'Applications',
@@ -65,7 +67,8 @@ const appRoutes: Routes = [
           loadChildren: 'app/features/metrics/metrics.module#MetricsModule',
         }]
       },
-      { path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule',
+      {
+        path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
           stratosNavigation: {
             text: 'Marketplace',
@@ -74,7 +77,8 @@ const appRoutes: Routes = [
           }
         },
       },
-      { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule',
+      {
+        path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule',
         data: {
           stratosNavigation: {
             text: 'Services',
@@ -84,24 +88,14 @@ const appRoutes: Routes = [
           }
         },
       },
-      { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
+      {
+        path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
         data: {
           stratosNavigation: {
             text: 'Cloud Foundry',
             matIcon: 'cloud_foundry',
             matIconFont: 'stratos-icons',
             position: 50
-          }
-        },
-      },
-      {path: 'kubernetes', loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule',
-      data: {
-          stratosNavigation: {
-            text: 'Kubernetes',
-            matIcon: 'kubernetes',
-            matIconFont: 'stratos-icons',
-            position: 60,
-            requiresEndpointType: 'k8s'
           }
         },
       },

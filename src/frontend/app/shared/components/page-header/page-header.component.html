@@ -17,6 +17,7 @@
         </div>
         <ng-content></ng-content>
         <div class="page-header__filler"></div>
+        <app-extension-buttons *ngIf="actionsKey" [type]="actionsKey"></app-extension-buttons>
         <ng-content select=".page-header-right"></ng-content>
         <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>

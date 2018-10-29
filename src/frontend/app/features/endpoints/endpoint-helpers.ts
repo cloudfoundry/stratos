@@ -1,6 +1,6 @@
 import { Validators } from '@angular/forms';
 
-import { EndpointTypeExtension } from '../../core/extension/extension-manager-service';
+import { StratosEndpointMetadata } from '../../core/extension/extension-service';
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 
@@ -13,13 +13,14 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
-export interface EndpointTypeHelper {
+export interface EndpointTypeConfig {
   value: EndpointType;
   label: string;
   urlValidation?: string;
   allowTokenSharing?: boolean;
   icon?: string;
   iconFont?: string;
+  authTypes?: string[];
 }
 
 export interface EndpointIcon {
@@ -27,7 +28,7 @@ export interface EndpointIcon {
   font: string;
 }
 
-const endpointTypes: EndpointTypeHelper[] = [
+const endpointTypes: EndpointTypeConfig[] = [
   {
     value: 'cf',
     label: 'Cloud Foundry',
@@ -97,22 +98,20 @@ const endpointAuthTypes = [
 
 const endpointTypesMap = {};
 
-export function initEndpointTypes(epTypes: EndpointTypeExtension[]) {
-  epTypes.forEach(type => {
-    endpointTypes.push({
-      value: type.type,
-      label: type.label,
-      icon: type.icon,
-      iconFont: type.iconFont
-    });
+export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
+  epTypes.forEach(epType => {
+    endpointTypes.push(epType);
 
-    // Map in the authentication providers
-    type.authTypes.forEach(authType => {
-      const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
-      if (endpointAuthType) {
-        endpointAuthType.types.push(type.type);
-      }
-    });
+    if (epType.authTypes) {
+      // Map in the authentication providers
+      epType.authTypes.forEach(authType => {
+        const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
+        if (endpointAuthType) {
+          // endpointAuthType.types.push(epType.type);
+          endpointAuthType.types.push(endpointAuthType.value); // TODO: RC Check this change
+        }
+      });
+    }
   });
 
   // TODO: Sort alphabetically

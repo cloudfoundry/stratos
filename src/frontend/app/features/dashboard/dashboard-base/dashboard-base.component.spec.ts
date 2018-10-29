@@ -11,7 +11,6 @@ import { appReducers } from '../../../store/reducers.module';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { DashboardBaseComponent } from './dashboard-base.component';
 import { MetricsService } from '../../metrics/services/metrics-service';
-import { ExtensionManager } from '../../../core/extension/extension-manager-service';
 
 describe('DashboardBaseComponent', () => {
   let component: DashboardBaseComponent;
@@ -33,7 +32,6 @@ describe('DashboardBaseComponent', () => {
       providers: [
         PageHeaderService,
         MetricsService,
-        ExtensionManager
       ]
     })
       .compileComponents();
