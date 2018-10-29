@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { RouterNav } from '../store/actions/router.actions';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import { AuthState } from '../store/reducers/auth.reducer';
 
 export function queryParamMap() {

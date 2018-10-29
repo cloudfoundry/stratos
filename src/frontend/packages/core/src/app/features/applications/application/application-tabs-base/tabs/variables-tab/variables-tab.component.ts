@@ -12,7 +12,7 @@ import {
   CfAppVariablesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { ApplicationService } from '../../../../application.service';
 
 

@@ -4,7 +4,7 @@ import { AuthState } from '../store/reducers/auth.reducer';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 
 @Injectable()
 export class UserService {

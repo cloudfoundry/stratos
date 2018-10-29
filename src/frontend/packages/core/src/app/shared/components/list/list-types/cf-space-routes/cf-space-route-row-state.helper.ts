@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { EntityMonitor } from '../../../../monitors/entity-monitor';

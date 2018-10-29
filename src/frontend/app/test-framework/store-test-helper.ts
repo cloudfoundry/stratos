@@ -2,8 +2,8 @@ import { ModuleWithProviders } from '@angular/core';
 
 import { StoreModule } from '@ngrx/store';
 
-import { AppState } from '../store/app-state';
-import { appReducers } from '../store/reducers.module';
+import { AppState } from '../../packages/store/src/lib/app-state';
+import { appReducers } from '../../packages/store/src/lib/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../store/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../store/types/user.types';
 

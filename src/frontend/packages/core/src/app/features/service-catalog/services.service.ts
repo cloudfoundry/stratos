@@ -20,7 +20,7 @@ import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../store/actions/service.actions';
 import { GetSpace } from '../../store/actions/space.actions';
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import {
   entityFactory,
   serviceBrokerSchemaKey,

@@ -10,7 +10,7 @@ import { Subscription, } from 'rxjs';
 import { queryParamMap } from '../../../core/auth-guard.service';
 import { delay, first, map, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } from '../../../core/extension/extension-service';
 

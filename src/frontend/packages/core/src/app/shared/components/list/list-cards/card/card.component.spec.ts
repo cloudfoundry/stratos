@@ -14,7 +14,7 @@ import { TableCellComponent, listTableCells } from '../../list-table/table-cell/
 import { EventTabActorIconPipe } from '../../list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../../../pipes/values.pipe';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../../store/reducers.module';
+import { appReducers } from '../../../../../../packages/store/src/lib/reducers.module';
 import { CardStatusComponent } from '../../../cards/card-status/card-status.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';

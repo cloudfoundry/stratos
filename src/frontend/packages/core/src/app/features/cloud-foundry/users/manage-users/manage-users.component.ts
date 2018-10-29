@@ -12,7 +12,7 @@ import {
   UsersRolesExecuteChanges,
   UsersRolesSetUsers,
 } from '../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { selectUsersRoles, selectUsersRolesPicked } from '../../../../store/selectors/users-roles.selector';
 import { CfUser } from '../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';

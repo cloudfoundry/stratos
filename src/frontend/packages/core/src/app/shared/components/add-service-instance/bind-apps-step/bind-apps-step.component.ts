@@ -8,7 +8,7 @@ import { IApp } from '../../../../core/cf-api.types';
 import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';

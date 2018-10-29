@@ -8,7 +8,7 @@ import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import {
   getSpacesFromOrgWithRole,
 } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';

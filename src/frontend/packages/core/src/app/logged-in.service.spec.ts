@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 
 import { CoreModule } from './core/core.module';
 import { LoggedInService } from './logged-in.service';
-import { createBasicStoreModule } from './test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../app/test-framework/store-test-helper';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('LoggedInService', () => {

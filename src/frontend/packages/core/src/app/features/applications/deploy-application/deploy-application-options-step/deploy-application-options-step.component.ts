@@ -11,7 +11,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SaveAppOverrides } from '../../../../store/actions/deploy-applications.actions';
 import { FetchAllDomains } from '../../../../store/actions/domains.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { entityFactory, stackSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCfDetails } from '../../../../store/selectors/deploy-application.selector';

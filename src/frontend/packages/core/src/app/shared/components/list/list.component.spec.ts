@@ -7,7 +7,7 @@ import { switchMap } from 'rxjs/operators';
 
 import { CoreModule } from '../../../core/core.module';
 import { ListView } from '../../../store/actions/list.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../test-framework/store-test-helper';

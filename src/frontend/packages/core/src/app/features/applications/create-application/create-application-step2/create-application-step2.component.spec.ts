@@ -5,7 +5,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { appReducers } from '../../../../store/reducers.module';
+import { appReducers } from '../../../../../packages/store/src/lib/reducers.module';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
 import { AppNameUniqueDirective } from '../../app-name-unique.directive/app-name-unique.directive';
 import { HttpModule, ConnectionBackend, Http } from '@angular/http';

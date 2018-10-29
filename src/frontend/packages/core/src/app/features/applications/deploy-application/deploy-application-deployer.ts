@@ -5,7 +5,7 @@ import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } f
 
 import { environment } from '../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../store/selectors/api.selectors';
 import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';

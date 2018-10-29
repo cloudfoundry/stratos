@@ -3,7 +3,7 @@ import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { Store } from '@ngrx/store';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { HttpClient } from '@angular/common/http';

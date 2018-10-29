@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import { schema as normalizrSchema } from 'normalizr';
 import { EntityService } from './entity-service';
 import { IRequestAction } from '../store/types/request.types';

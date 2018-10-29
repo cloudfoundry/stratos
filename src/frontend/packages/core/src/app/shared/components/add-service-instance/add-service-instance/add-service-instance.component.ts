@@ -22,7 +22,7 @@ import {
 } from '../../../../store/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   entityFactory,

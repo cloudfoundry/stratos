@@ -6,7 +6,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { EventsTabComponent } from './events-tab.component';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../../../store/reducers.module';
+import { appReducers } from '../../../../../../../packages/store/src/lib/reducers.module';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';

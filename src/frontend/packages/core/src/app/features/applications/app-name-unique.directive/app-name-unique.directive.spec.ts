@@ -4,8 +4,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { inject, TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { AppState } from '../../../store/app-state';
-import { AppStoreModule } from '../../../store/store.module';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppStoreModule } from '../../../../packages/store/src/lib/store.module';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';

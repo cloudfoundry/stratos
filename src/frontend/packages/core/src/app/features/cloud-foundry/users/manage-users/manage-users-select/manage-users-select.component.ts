@@ -11,7 +11,7 @@ import { CfUserService } from '../../../../../shared/data-services/cf-user.servi
 import { EntityMonitorFactory } from '../../../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';

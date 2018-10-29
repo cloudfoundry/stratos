@@ -6,7 +6,7 @@ import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { RouterRedirect } from '../../../store/reducers/routing.reducer';
 import { EndpointState } from '../../../store/types/endpoint.types';

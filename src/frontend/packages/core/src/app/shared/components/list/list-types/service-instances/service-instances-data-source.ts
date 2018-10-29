@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetServiceInstances } from '../../../../../store/actions/service-instances.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { endpointSchemaKey, entityFactory, serviceInstancesSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';

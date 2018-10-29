@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   entityFactory,

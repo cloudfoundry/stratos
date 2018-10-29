@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { SessionData } from '../../../store/types/auth.types';
 

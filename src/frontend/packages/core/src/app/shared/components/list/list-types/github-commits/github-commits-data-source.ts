@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
 import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { EntitySchema, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';

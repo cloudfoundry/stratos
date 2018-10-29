@@ -10,7 +10,7 @@ import {
 import { Injectable } from '@angular/core';
 import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../store/app-state';
+import { AppState, IRequestEntityTypeState } from '../../packages/store/src/lib/app-state';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';

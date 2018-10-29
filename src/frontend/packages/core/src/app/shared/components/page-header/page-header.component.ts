@@ -6,7 +6,7 @@ import { Logout } from '../../../store/actions/auth.actions';
 import { InternalEventSeverity } from '../../../store/types/internal-events.types';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
-import { AppState } from './../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({

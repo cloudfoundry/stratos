@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
 import {

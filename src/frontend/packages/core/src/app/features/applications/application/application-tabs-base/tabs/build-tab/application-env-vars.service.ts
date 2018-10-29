@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import { GetAppEnvVarsAction } from '../../../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { appEnvVarsSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import {
   getPaginationObservables,

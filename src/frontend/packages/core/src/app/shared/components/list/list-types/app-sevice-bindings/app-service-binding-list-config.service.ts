@@ -8,7 +8,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
 import { IGlobalListAction, ListViewTypes } from '../../list.component.types';

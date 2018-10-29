@@ -1,7 +1,7 @@
 import { HostListener, Inject, Injectable, NgZone } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { AppState } from './store/app-state';
+import { AppState } from '../packages/store/src/lib/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
 import { VerifySession } from './store/actions/auth.actions';
 import { MatDialog } from '@angular/material';

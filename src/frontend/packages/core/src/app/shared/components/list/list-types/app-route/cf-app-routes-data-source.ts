@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getMappedApps, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';

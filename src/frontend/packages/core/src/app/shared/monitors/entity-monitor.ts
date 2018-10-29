@@ -6,7 +6,7 @@ import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
-import { AppState } from './../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import {
   ActionState,
   getDefaultActionState,

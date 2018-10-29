@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,

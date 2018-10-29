@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 
 import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';

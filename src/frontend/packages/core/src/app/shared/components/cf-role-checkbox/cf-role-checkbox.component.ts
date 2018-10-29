@@ -8,7 +8,7 @@ import { CurrentUserPermissionsService } from '../../../core/current-user-permis
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../store/actions/users-roles.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { selectUsersRolesPicked } from '../../../store/selectors/users-roles.selector';
 import {
   CfUser,

@@ -2,7 +2,7 @@ import { Component, OnInit, Inject, OnDestroy, Optional } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { Logout } from '../../store/actions/auth.actions';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import { interval ,  Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 

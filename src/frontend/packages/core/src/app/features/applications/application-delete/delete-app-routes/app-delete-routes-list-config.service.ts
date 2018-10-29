@@ -7,7 +7,7 @@ import {
   CfAppRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { ListView } from '../../../../store/actions/list.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 import { ApplicationService } from '../../application.service';
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';

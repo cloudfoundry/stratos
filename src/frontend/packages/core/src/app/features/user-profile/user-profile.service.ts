@@ -10,7 +10,7 @@ import {
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
 } from '../../store/actions/user-profile.actions';
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../store/effects/user-profile.effects';
 import { entityFactory, userProfileSchemaKey } from '../../store/helpers/entity-factory';
 import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';

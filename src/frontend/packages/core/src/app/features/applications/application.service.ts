@@ -16,7 +16,7 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { GetSpace } from '../../store/actions/space.actions';
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   appStatsSchemaKey,

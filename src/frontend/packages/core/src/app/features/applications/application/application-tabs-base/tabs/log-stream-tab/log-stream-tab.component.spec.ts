@@ -11,7 +11,7 @@ import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-m
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import { GetApplication } from '../../../../../../store/actions/application.actions';
 import { applicationSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
-import { AppStoreModule } from '../../../../../../store/store.module';
+import { AppStoreModule } from '../../../../../../../packages/store/src/lib/store.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';

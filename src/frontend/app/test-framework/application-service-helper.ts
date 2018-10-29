@@ -9,7 +9,7 @@ import {
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { AppStat, AppSummary } from '../store/types/app-metadata.types';

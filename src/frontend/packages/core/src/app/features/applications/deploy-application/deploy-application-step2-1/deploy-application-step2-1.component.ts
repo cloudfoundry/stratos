@@ -13,7 +13,7 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetDeployCommit } from '../../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 import { GithubCommit } from '../../../../store/types/github.types';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';

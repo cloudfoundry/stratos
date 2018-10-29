@@ -6,7 +6,7 @@ import { filter, map } from 'rxjs/operators';
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { GetService } from '../../../../../../store/actions/service.actions';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { entityFactory, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';

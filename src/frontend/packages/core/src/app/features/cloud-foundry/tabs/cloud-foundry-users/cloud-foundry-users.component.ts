@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import {
   CfUserListConfigService,

@@ -5,7 +5,7 @@ import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } fr
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { CfUser, CfUserMissingRoles } from '../../../../../store/types/user.types';

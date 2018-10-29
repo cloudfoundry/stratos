@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, publishReplay, refCount, tap } from 'rxjs/operators';
 
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import { internalEventStateSelector } from '../../store/selectors/internal-events.selectors';
 import { InternalEventsState } from '../../store/types/internal-events.types';
 import { InternalEventMonitor } from './internal-event.monitor';

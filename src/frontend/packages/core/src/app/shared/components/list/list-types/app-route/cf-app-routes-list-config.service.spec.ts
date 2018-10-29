@@ -6,7 +6,7 @@ import { ApplicationServiceMock } from '../../../../../test-framework/applicatio
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../../store/reducers.module';
+import { appReducers } from '../../../../../../packages/store/src/lib/reducers.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 

@@ -9,7 +9,7 @@ import { CfAppsDataSource } from '../../../shared/components/list/list-types/app
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';

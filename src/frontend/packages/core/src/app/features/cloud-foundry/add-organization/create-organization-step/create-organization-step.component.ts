@@ -9,7 +9,7 @@ import { IOrganization } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CreateOrganization } from '../../../../store/actions/organization.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';

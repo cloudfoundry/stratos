@@ -5,7 +5,7 @@ import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { ServicesService } from '../services.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 

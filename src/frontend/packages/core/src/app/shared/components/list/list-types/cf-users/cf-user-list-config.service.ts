@@ -11,7 +11,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
-import { AppState } from './../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';

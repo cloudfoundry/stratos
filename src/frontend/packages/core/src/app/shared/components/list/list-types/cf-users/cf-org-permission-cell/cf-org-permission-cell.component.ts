@@ -9,7 +9,7 @@ import { CurrentUserPermissionsService } from '../../../../../../core/current-us
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';

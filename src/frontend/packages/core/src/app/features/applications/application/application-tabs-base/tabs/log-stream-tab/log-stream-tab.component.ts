@@ -10,7 +10,7 @@ import websocketConnect from 'rxjs-websockets';
 
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { ApplicationService } from '../../../../application.service';
 
 export interface LogItem {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { DeleteServiceBinding } from '../../store/actions/service-bindings.actions';

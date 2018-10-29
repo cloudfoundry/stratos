@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   organizationSchemaKey,

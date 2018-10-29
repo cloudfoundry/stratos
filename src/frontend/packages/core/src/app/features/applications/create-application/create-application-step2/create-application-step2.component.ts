@@ -9,7 +9,7 @@ import { Store } from '@ngrx/store';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { AppNameUniqueChecking } from '../../app-name-unique.directive/app-name-unique.directive';
 
 @Component({

@@ -7,7 +7,7 @@ import { IService } from '../../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAllServices } from '../../../store/actions/service.actions';
 import { GetServicesForSpace } from '../../../store/actions/space.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { entityFactory, serviceSchemaKey } from '../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';

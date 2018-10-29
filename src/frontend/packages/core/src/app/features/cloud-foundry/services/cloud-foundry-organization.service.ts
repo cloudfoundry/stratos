@@ -12,7 +12,7 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrgUsers, GetOrganization } from '../../../store/actions/organization.actions';
 import { DeleteSpace } from '../../../store/actions/space.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   cfUserSchemaKey,

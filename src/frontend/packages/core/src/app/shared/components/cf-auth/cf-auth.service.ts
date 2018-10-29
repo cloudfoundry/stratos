@@ -6,7 +6,7 @@ import { SessionData } from '../../../store/types/auth.types';
 import { Injectable } from '@angular/core';
 import { EndpointModel, EndpointState, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../../../store/app-state';
+import { AppState, IRequestEntityTypeState } from '../../../../packages/store/src/lib/app-state';
 import { AuthUser, selectSessionData } from '../../../store/reducers/auth.reducer';
 import { CfAuthPrinciple } from './principal';
 import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';

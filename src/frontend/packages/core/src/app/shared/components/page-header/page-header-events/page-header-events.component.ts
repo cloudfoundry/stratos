@@ -8,7 +8,7 @@ import { withLatestFrom, map, filter, distinctUntilChanged } from 'rxjs/operator
 import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { Store } from '@ngrx/store';
 import { DashboardState } from '../../../../store/reducers/dashboard-reducer';
 import { ToggleHeaderEvent } from '../../../../store/actions/dashboard-actions';

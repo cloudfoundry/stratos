@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 

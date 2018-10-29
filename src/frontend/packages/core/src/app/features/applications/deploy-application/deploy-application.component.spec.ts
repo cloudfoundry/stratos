@@ -9,7 +9,7 @@ import { CoreModule } from '../../../core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../core/github.helpers';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { appReducers } from '../../../store/reducers.module';
+import { appReducers } from '../../../../packages/store/src/lib/reducers.module';
 import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CreateApplicationModule } from '../create-application/create-application.module';

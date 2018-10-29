@@ -9,7 +9,7 @@ import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { GetApplication } from '../store/actions/application.actions';
 import { APIResponse } from '../store/actions/request.actions';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import { applicationSchemaKey, entityFactory } from '../store/helpers/entity-factory';
 import { completeApiRequest, startApiRequest, failApiRequest } from '../store/reducers/api-request-reducer/request-helpers';
 import { RequestSectionKeys } from '../store/reducers/api-request-reducer/types';

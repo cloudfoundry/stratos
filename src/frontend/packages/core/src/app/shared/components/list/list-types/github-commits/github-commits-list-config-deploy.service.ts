@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 import { selectPEProjectName, selectApplicationSource } from '../../../../../store/selectors/deploy-application.selector';
 import { first, filter, map } from 'rxjs/operators';

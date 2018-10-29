@@ -14,7 +14,7 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { FetchBranchesForProject, FetchCommit } from '../../../../../../store/actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import {
   entityFactory,
   githubBranchesSchemaKey,

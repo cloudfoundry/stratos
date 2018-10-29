@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
 import { waitForCFPermissions } from '../features/cloud-foundry/cf.helpers';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 
 @Directive({
   selector: '[appUserPermission]'

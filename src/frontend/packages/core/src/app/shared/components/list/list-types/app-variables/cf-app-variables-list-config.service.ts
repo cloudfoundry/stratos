@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';

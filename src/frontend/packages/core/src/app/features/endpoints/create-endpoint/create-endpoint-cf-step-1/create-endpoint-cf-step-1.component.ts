@@ -8,7 +8,7 @@ import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 import { UtilsService } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
 import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';

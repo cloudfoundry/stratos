@@ -5,7 +5,7 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';

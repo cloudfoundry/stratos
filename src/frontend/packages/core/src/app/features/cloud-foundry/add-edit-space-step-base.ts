@@ -8,7 +8,7 @@ import { StepOnNextResult } from '../../shared/components/stepper/step/step.comp
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
 import { getPaginationKey } from '../../store/actions/pagination.actions';
-import { AppState } from '../../store/app-state';
+import { AppState } from '../../../packages/store/src/lib/app-state';
 import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';

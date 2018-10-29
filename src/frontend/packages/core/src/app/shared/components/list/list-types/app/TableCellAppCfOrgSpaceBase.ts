@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 
 import { IApp } from '../../../../../core/cf-api.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { TableCellCustom } from '../../list.types';
 

@@ -6,7 +6,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { appReducers } from '../../../store/reducers.module';
+import { appReducers } from '../../../../packages/store/src/lib/reducers.module';
 import { EndpointsPageComponent } from './endpoints-page.component';
 
 describe('EndpointsPageComponent', () => {

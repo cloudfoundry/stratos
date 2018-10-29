@@ -4,7 +4,7 @@ import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatest
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import {
   RequestInfoState,
   RequestSectionKeys,

@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';

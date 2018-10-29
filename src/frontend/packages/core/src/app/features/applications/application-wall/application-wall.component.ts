@@ -11,7 +11,7 @@ import { CfAppsDataSource } from '../../../shared/components/list/list-types/app
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Component({

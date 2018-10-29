@@ -32,7 +32,7 @@ import { CloudFoundryService } from '../shared/data-services/cloud-foundry.servi
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../shared/shared.module';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';

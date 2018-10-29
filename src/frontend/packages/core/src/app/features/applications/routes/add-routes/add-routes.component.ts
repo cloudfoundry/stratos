@@ -16,7 +16,7 @@ import {
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../packages/store/src/lib/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,

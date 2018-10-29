@@ -6,7 +6,7 @@ import { IOrganization } from '../../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { UsersRolesSetOrg } from '../../../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { selectUsersRolesOrgGuid } from '../../../../../../store/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';

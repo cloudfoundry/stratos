@@ -7,7 +7,7 @@ import {
   createCFFeatureFlagPaginationKey,
 } from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../packages/store/src/lib/app-state';
 import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-factory';
 import {
   getCurrentUserCFEndpointHasScope,

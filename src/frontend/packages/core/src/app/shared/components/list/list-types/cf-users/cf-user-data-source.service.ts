@@ -5,7 +5,7 @@ import { cfUserSchemaKey, entityFactory } from '../../../../../store/helpers/ent
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListConfig } from '../../list.component.types';
-import { AppState } from './../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from './../../../../../store/types/api.types';
 import { CfUser } from './../../../../../store/types/user.types';
 

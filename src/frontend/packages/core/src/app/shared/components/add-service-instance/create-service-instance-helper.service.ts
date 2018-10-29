@@ -15,7 +15,7 @@ import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-
 import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
 import { GetService } from '../../../store/actions/service.actions';
 import { GetAllServicesForSpace, GetServiceInstancesForSpace, GetSpace } from '../../../store/actions/space.actions';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import {
   entityFactory,
   organizationSchemaKey,

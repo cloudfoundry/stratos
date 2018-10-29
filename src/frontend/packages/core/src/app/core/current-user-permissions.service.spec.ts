@@ -9,7 +9,7 @@ import {
   ScopeStrings
 } from './current-user-permissions.config';
 import { tap, first } from 'rxjs/operators';
-import { appReducers } from '../store/reducers.module';
+import { appReducers } from '../../packages/store/src/lib/reducers.module';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 const initialState = {
   pagination: {

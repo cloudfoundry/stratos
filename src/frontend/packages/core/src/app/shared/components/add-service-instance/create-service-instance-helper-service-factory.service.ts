@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
-import { AppState } from '../../../store/app-state';
+import { AppState } from '../../../../packages/store/src/lib/app-state';
 import { isMarketplaceMode, isAppServicesMode, isServicesWallMode } from '../../../features/service-catalog/services-helper';
 
 @Injectable()

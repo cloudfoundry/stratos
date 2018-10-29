@@ -4,7 +4,7 @@ import { of as observableOf } from 'rxjs';
 
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';

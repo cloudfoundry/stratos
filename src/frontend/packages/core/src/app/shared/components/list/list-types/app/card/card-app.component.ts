@@ -6,7 +6,7 @@ import { map, startWith } from 'rxjs/operators';
 import { IApp } from '../../../../../../core/cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
 import { endpointSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';

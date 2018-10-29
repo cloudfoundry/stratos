@@ -8,7 +8,7 @@ import {
   GithubCommitsListConfigServiceDeploy,
 } from '../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../../packages/store/src/lib/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 
