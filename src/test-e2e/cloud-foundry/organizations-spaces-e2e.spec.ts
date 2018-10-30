@@ -94,7 +94,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitForCardByTitle(testOrgName).then(card => {
       card.openActionMenu().then(menu => {
         menu.clickItem('Delete');
-        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', testOrgName);
         // Wait until the card has gone
         card.waitUntilNotShown();
       });
@@ -153,7 +153,7 @@ describe('CF - Manage Organizations and Spaces', () => {
       cardView.cards.findCardByTitle(testSpaceName).then(space => {
         space.openActionMenu().then(menu => {
           menu.clickItem('Delete');
-          ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space');
+          ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
           cardView.cards.getCardCount().then(c => {
             expect(c).toBe(0);
           });
