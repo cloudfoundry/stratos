@@ -12,7 +12,7 @@
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>
     <app-metadata-item label="Public">
-      {{ isPublic(selPlan.entity) | titlecase}}
+      {{ isPublic(selPlan) | titlecase}}
       <span *ngIf="(getPlanAccessibility(selPlan.entity) | async) !== 'ok'"> ({{ getAccessibilityMessage(selPlan.entity) | async }})</span>
     </app-metadata-item>
     <app-metadata-item label="Free"> {{ isFree(selPlan.entity) | titlecase}} </app-metadata-item>
