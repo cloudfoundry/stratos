@@ -1,8 +1,9 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
-
 import { Store } from '@ngrx/store';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -13,12 +14,7 @@ import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
-import { getEndpointAuthTypes } from '../endpoint-helpers';
-
-import { getCanShareTokenForEndpointType } from '../endpoint-helpers';
-
-import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
 
 
 @Component({
@@ -51,6 +47,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   private cert = '';
   private certKey = '';
   public canShareEndpointToken = false;
+  private cachedAuthTypeFormFields: string[] = [];
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
@@ -84,6 +81,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     // Create the endpoint form
     let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    this.cachedAuthTypeFormFields = Object.keys(autoSelected.form || {});
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
@@ -101,11 +99,20 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.setupSubscriptions();
   }
 
-  authChanged(e) {
+  authChanged() {
     const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
-    this.endpointForm.removeControl('authValues');
-    this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    const authTypeFormFields = Object.keys(authType.form);
+    if (!this.sameAuthTypeFormFields(this.cachedAuthTypeFormFields, authTypeFormFields)) {
+      // Don't remove and re-add the same control, this helps with form validation
+      this.cachedAuthTypeFormFields = authTypeFormFields;
+      this.endpointForm.removeControl('authValues');
+      this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    }
     this.bodyContent = '';
+  }
+
+  private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
+    return a.length === b.length && a.filter(item => b.indexOf(item) < 0).length === 0;
   }
 
   setupSubscriptions() {
@@ -131,9 +138,19 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     const file = $event;
     const reader = new FileReader();
     reader.onload = () => {
-      this[fileName] = reader.result;
+      this.updateFileState(fileName, reader.result);
+    };
+    reader.onerror = () => {
+      // Clear the form and thus make it invalid on error
+      this.updateFileState(fileName, null);
     };
     reader.readAsText(file);
+  }
+
+  private updateFileState(fileName: string, value: string | ArrayBuffer) {
+    this[fileName] = value;
+    const authValues: FormGroup = this.endpointForm.controls.authValues as FormGroup;
+    authValues.controls[fileName].setValue(value);
   }
 
   setupObservables() {
@@ -186,7 +203,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.fetchingInfo$.pipe(startWith(false)),
       this.valid$.pipe(startWith(this.endpointForm.valid))
     ).pipe(
-      map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid));
+      map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid)
+    );
   }
 
   private getUpdateSelector() {
