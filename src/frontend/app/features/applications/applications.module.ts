@@ -31,12 +31,14 @@ import { CliInfoApplicationComponent } from './cli-info-application/cli-info-app
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
 import { DeleteAppServiceInstancesComponent } from './application-delete/delete-app-instances/delete-app-instances.component';
+import { CustomImportModule } from '../../custom-import.module';
 
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
-    ApplicationsRoutingModule
+    ApplicationsRoutingModule,
+    CustomImportModule
   ],
   declarations: [
     ApplicationWallComponent,

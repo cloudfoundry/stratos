@@ -11,12 +11,25 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
+var (
+	cellQueryWhiteList = []string{
+		"firehose_value_metric_rep_unhealthy_cell",
+		"firehose_value_metric_rep_capacity_remaining_containers",
+		"firehose_value_metric_rep_capacity_remaining_disk",
+		"firehose_value_metric_rep_capacity_remaining_memory",
+		"firehose_value_metric_rep_capacity_total_containers",
+		"firehose_value_metric_rep_capacity_total_disk",
+		"firehose_value_metric_rep_capacity_total_memory",
+		"firehose_value_metric_rep_num_cpus",
+	}
+)
+
 // Metrics endpoints - non-admin - for a Cloud Foundry Application
 func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 
 	// We need to go and fetch the CF App, to make sure that the user is permitted to access it
 
-	// We'll do this synchronously here for now - this can be done optimistically in parallel in t he future
+	// We'll do this synchronously here for now - this can be done optimistically in parallel in the future
 
 	// Use the passthrough mechanism to get the App metadata from Cloud Foundry
 	appID := c.Param("appId")
@@ -41,22 +54,7 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 		}
 	}
 
-	// get the user
-	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return errors.New("Could not find session user_id")
-	}
-
-	// For each CNSI, find the metrics endpoint that we need to talk to
-	metrics, err2 := m.getMetricsEndpoints(userGUID, cnsiList)
-	if err2 != nil {
-		return errors.New("Can not get metric endpoint metadata")
-	}
-
-	// Construct the metadata for proxying
-	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "application_id=\""+appID+"\"")
-	responses, err = m.portalProxy.DoProxyRequest(requests)
-	return m.portalProxy.SendProxiedResponse(c, responses)
+	return m.makePrometheusRequest(c, cnsiList, "application_id=\""+appID+"\"")
 }
 
 func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string) []interfaces.ProxyRequestInfo {
@@ -113,9 +111,13 @@ func getEchoURL(c echo.Context) url.URL {
 
 // Metrics API endpoints - admin - for a Cloud Foundry deployment
 func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
-
-	prometheusOp := c.Param("op")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+
+	return m.makePrometheusRequest(c, cnsiList, "")
+}
+
+func (m *MetricsSpecification) makePrometheusRequest(c echo.Context, cnsiList []string, queries string) error {
+	prometheusOp := c.Param("op")
 
 	// get the user
 	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")
@@ -130,7 +132,33 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 	}
 
 	// Construct the metadata for proxying
-	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "")
+	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, queries)
 	responses, err := m.portalProxy.DoProxyRequest(requests)
 	return m.portalProxy.SendProxiedResponse(c, responses)
+}
+
+func isAllowedCellMetricsQuery(query string) bool {
+	for _, whiteListQuery := range cellQueryWhiteList {
+		if strings.Index(query, whiteListQuery) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// Metrics endpoints - cells - with white list of cell prometheus query values
+func (m *MetricsSpecification) getCloudFoundryCellMetrics(c echo.Context) error {
+
+	uri := getEchoURL(c)
+	values := uri.Query()
+	query := values.Get("query")
+
+	// Fail all queries that are not of type 'cell'
+	if !isAllowedCellMetricsQuery(query) {
+		return errors.New("Unsupported prometheus query")
+	}
+
+	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+
+	return m.makePrometheusRequest(c, cnsiList, "")
 }

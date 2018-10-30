@@ -25,7 +25,13 @@ import { EndpointsService } from './../../../../core/endpoints.service';
 import { RestageApplication } from '../../../../store/actions/application.actions';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
 import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
-
+import {
+  getTabsFromExtensions,
+  StratosTabType,
+  StratosActionMetadata,
+  getActionsFromExtensions,
+  StratosActionType
+} from '../../../../core/extension/extension-service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -54,6 +60,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   public appState$: Observable<ApplicationStateData>;
   isBusyUpdating$: Observable<{ updating: boolean }>;
+
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -100,6 +109,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         });
       }
     });
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
