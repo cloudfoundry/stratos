@@ -16,7 +16,7 @@ export class DialogConfirmComponent {
     @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogConfig
   ) {
     const typeToConfirm = data.message as TypeToConfirm;
-    if (typeToConfirm.textToMatch) {
+    if (typeToConfirm && typeToConfirm.textToMatch) {
       this.textToMatch = typeToConfirm.textToMatch;
     }
   }
