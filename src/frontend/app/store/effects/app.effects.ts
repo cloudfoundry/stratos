@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
+import { endpointHasMetrics } from '../../features/endpoints/endpoint-helpers';
 import {
   createAppInstancesMetricAction,
 } from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
@@ -35,8 +36,12 @@ export class AppEffects {
       // no way to work around this.
       const updateAction: UpdateExistingApplication = action.apiAction as UpdateExistingApplication;
       if (updateAction.newApplication.instances > updateAction.existingApplication.instances) {
-        const metricsAction = createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid);
-        this.store.dispatch(metricsAction);
+        // First check that we have a metrics endpoint associated with this cf
+        endpointHasMetrics(updateAction.endpointGuid, this.store).pipe(first()).subscribe(hasMetrics => {
+          if (hasMetrics) {
+            this.store.dispatch(createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid));
+          }
+        });
       }
     }),
   );
