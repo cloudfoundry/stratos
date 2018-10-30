@@ -90,6 +90,7 @@ export interface RowState {
   highlighted?: boolean;
   deleting?: boolean;
   warning?: boolean;
+  disabled?: boolean;
   [customState: string]: any;
 }
 
