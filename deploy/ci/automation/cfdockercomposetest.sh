@@ -35,6 +35,13 @@ pushd deploy
 docker-compose -f docker-compose.development.yml up -d
 popd
 
+echo "Docker Containers"
+docker ps
+
+# Wait for the UAA to become available
+echo "Waiting 30 seconds for UAA to start up ..."
+sleep 30
+
 # Get the E2E config
 rm -f secrets.yaml
 curl -k ${TEST_CONFIG_URL} --output secrets.yaml
