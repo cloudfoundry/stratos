@@ -17,7 +17,7 @@ import {
   EntityInlineChildAction,
   EntityInlineParentAction,
 } from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction, PaginationAction, QParam } from '../types/pagination.types';
+import { PaginatedAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { GetAllOrgUsers } from './organization.actions';
@@ -217,7 +217,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
 }
 
 
-export class GetAllServicesForSpace extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+export class GetAllServicesForSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
     public endpointGuid: string = null,
@@ -243,11 +243,12 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginationA
     'order-direction': 'desc',
     'order-direction-field': 'label',
   };
+  flattenPagination = true;
 }
 
 
 export class GetServiceInstancesForSpace
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
+  extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public spaceGuid: string,
     public endpointGuid: string,
@@ -282,7 +283,7 @@ export class GetServiceInstancesForSpace
 }
 
 export class GetServicesForSpace
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public spaceGuid: string,
     public endpointGuid: string,
