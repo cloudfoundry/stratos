@@ -43,7 +43,7 @@ export class CfCellAppsDataSource
     const action = new FetchCFMetricsPaginatedAction(
       cellId,
       cfGuid,
-      new MetricQueryConfig(`firehose_container_metric_cpu_percentage{bosh_job_id="${cellId}"}`, {}),
+      new MetricQueryConfig(`firehose_container_metric_cpu_percentage{bosh_job_id="${cellId}"}`),
       MetricQueryType.QUERY
     );
 

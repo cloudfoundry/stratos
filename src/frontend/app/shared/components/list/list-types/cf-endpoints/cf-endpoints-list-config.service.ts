@@ -10,17 +10,17 @@ import { EndpointModel, endpointStoreNames } from '../../../../../store/types/en
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';
 import { EndpointsListConfigService, endpointColumns } from '../endpoint/endpoints-list-config.service';
-import { CFEndpointsDataSource } from './cf-endpoints-data-source';
+import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 import { TableCellEndpointStatusComponent } from '../endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { CfEndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
+import { EndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
-  dataSource: CFEndpointsDataSource;
+  dataSource: BaseEndpointsDataSource;
   viewType = ListViewTypes.CARD_ONLY;
-  cardComponent = CfEndpointCardComponent;
+  cardComponent = EndpointCardComponent;
   text = {
     title: '',
     filter: 'Filter Endpoints',
@@ -51,7 +51,7 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
     this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';
     });
-    this.dataSource = new CFEndpointsDataSource(this.store, this);
+    this.dataSource = new BaseEndpointsDataSource(this.store, this, 'cf');
   }
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];
