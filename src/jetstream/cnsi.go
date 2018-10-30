@@ -113,8 +113,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		}
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
-			"Failed to get endpoint v2/info",
-			"Failed to get api endpoint v2/info: %v",
+			"Failed to validate endpoint",
+			"Failed to validate endpoint: %v",
 			err)
 	}
 
