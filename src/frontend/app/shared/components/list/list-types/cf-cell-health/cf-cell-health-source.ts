@@ -38,7 +38,7 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntity: map((response) => {
-        if (!response || response.length === 0 || !response[0].data.result[0].values) {
+        if (!response || !response[0] || !response[0].data.result[0] || !response[0].data.result[0].values) {
           return [];
         }
         return this.mapMetricsToStates(response[0].data.result[0].values);
