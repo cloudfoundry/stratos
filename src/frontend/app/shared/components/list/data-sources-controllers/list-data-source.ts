@@ -22,6 +22,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { MetricsAction } from '../../../../store/actions/metrics.actions';
 
 
 export class DataFunctionDefinition {
@@ -78,8 +79,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public rowsState: Observable<RowsState>;
 
   // ------------- Private
-  private entities$: Observable<T>;
-  private paginationToStringFn: (PaginationEntityState) => string;
   private externalDestroy: () => void;
 
   protected store: Store<AppState>;
@@ -95,6 +94,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
+  private metricsAction: MetricsAction;
 
   public refresh: () => void;
 
@@ -184,7 +184,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     return config.refresh ? config.refresh : () => {
-      this.store.dispatch(this.action);
+      this.store.dispatch(this.metricsAction || this.action);
     };
   }
 
@@ -304,5 +304,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
   public setFilterParam(filterParam: string, pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
+  }
+
+  public updateMetricsAction(newAction: MetricsAction) {
+    this.metricsAction = newAction;
+    this.store.dispatch(newAction);
   }
 }

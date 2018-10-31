@@ -37,7 +37,6 @@ import {
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
-import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory } from '../../../store/helpers/entity-factory';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
@@ -565,9 +564,5 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   private getRowStateFromRowsState = (row: T): Observable<RowState> =>
     this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
-
-  private metricsActionNew(newAction: MetricsAction) {
-    this.store.dispatch(newAction);
-  }
 
 }
