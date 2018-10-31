@@ -4,7 +4,8 @@
     <button mat-icon-button name="add-org" *ngIf="canAddOrg$ | async" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
       <mat-icon>add</mat-icon>
     </button>
-    <button mat-icon-button name="user-management" *ngIf="(canUpdateRoles$ | async) && (cfEndpointService.users$ | async)?.length" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/users/manage" matTooltip="Manage Users">
+    <button mat-icon-button name="user-management" *ngIf="(canUpdateRoles$ | async) && (cfEndpointService.users$ | async)?.length"
+      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/users/manage" matTooltip="Manage Users">
       <mat-icon>people</mat-icon>
     </button>
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli" matTooltip="CLI Info">

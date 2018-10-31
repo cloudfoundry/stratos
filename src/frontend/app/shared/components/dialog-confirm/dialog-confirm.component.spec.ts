@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RequestInfoState } from '../../../store/reducers/api-request-reducer/types';
 
-describe('DialogConfirmComponent', () => {
+fdescribe('DialogConfirmComponent', () => {
   let component: DialogConfirmComponent;
   let fixture: ComponentFixture<DialogConfirmComponent>;
 
@@ -24,7 +24,7 @@ describe('DialogConfirmComponent', () => {
   }
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogConfirmComponent ],
+      declarations: [DialogConfirmComponent],
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },
         { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
@@ -35,7 +35,7 @@ describe('DialogConfirmComponent', () => {
         BrowserAnimationsModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
