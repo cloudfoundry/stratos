@@ -1,10 +1,9 @@
-
-import { of as observableOf, BehaviorSubject, OperatorFunction, Observable, Subscription, ReplaySubject } from 'rxjs';
-
-import { tap, distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
+import { BehaviorSubject, Observable, of as observableOf, OperatorFunction, ReplaySubject, Subscription, combineLatest } from 'rxjs';
+import { tag } from 'rxjs-spy/operators';
+import { publishReplay, refCount, tap, first } from 'rxjs/operators';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
@@ -12,10 +11,10 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
-import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
+import { getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { tag } from 'rxjs-spy/operators';
+
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -69,7 +68,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Misc
   public isLoadingPage$: Observable<boolean> = observableOf(false);
   public rowsState: Observable<RowsState>;
-  public getRowState: (row: T) => Observable<RowState> = null;
 
   // ------------- Private
   private entities$: Observable<T>;
@@ -91,6 +89,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private seedSyncSub: Subscription;
 
   public refresh: () => void;
+
+  public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -203,32 +203,55 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   selectedRowToggle(row: T, multiMode: boolean = true) {
-    const exists = this.selectedRows.has(this.getRowUniqueId(row));
-    if (exists) {
-      this.selectedRows.delete(this.getRowUniqueId(row));
-      this.selectAllChecked = false;
-    } else {
-      if (!multiMode) {
-        this.selectedRows.clear();
+    this.getRowState(row).pipe(
+      first()
+    ).subscribe(rowState => {
+      if (rowState.disabled) {
+        return;
       }
-      this.selectedRows.set(this.getRowUniqueId(row), row);
-      this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
-    }
-    this.selectedRows$.next(this.selectedRows);
-    this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
+      const exists = this.selectedRows.has(this.getRowUniqueId(row));
+      if (exists) {
+        this.selectedRows.delete(this.getRowUniqueId(row));
+        this.selectAllChecked = false;
+      } else {
+        if (!multiMode) {
+          this.selectedRows.clear();
+        }
+        this.selectedRows.set(this.getRowUniqueId(row), row);
+        this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
+      }
+      this.selectedRows$.next(this.selectedRows);
+      this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
+    });
   }
 
   selectAllFilteredRows() {
     this.selectAllChecked = !this.selectAllChecked;
-    for (const row of this.filteredRows) {
-      if (this.selectAllChecked) {
-        this.selectedRows.set(this.getRowUniqueId(row), row);
-      } else {
-        this.selectedRows.delete(this.getRowUniqueId(row));
-      }
-    }
-    this.selectedRows$.next(this.selectedRows);
-    this.isSelecting$.next(this.selectedRows.size > 0);
+
+    const updatedAllRows = this.filteredRows.reduce((obs, row) => {
+      obs.push(this.getRowState(row).pipe(
+        first(),
+        tap(rowState => {
+          if (rowState.disabled) {
+            return;
+          }
+          if (this.selectAllChecked) {
+            this.selectedRows.set(this.getRowUniqueId(row), row);
+          } else {
+            this.selectedRows.delete(this.getRowUniqueId(row));
+          }
+        })
+      ));
+      return obs;
+    }, []);
+
+    combineLatest(...updatedAllRows).pipe(
+      first()
+    ).subscribe(() => {
+      this.selectedRows$.next(this.selectedRows);
+      this.isSelecting$.next(this.selectedRows.size > 0);
+    });
+
   }
 
   selectClear() {
