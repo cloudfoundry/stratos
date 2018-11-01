@@ -58,7 +58,7 @@ export class CfCellAppsDataSource
         if (!response || response.length === 0) {
           return [];
         }
-        return response[0].data.result.map<CfCellApp>(res => ({
+        return response[0].data.result.map(res => ({
           metric: res.metric,
           appGuid: res.metric.application_id,
           appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid, entityServiceFactory)
