@@ -1,23 +1,27 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
+import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
+import {
+  MetricsChartTypes,
+  MetricsLineChartConfig,
+} from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
+import { MetricsChartHelpers } from '../../../../../../shared/components/metrics-chart/metrics.component.helpers';
+import { MetricQueryType } from '../../../../../../shared/services/metrics-range-selector.types';
+import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../store/actions/metrics.actions';
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellSummaryComponent } from './cloud-foundry-cell-summary.component';
-import { MetricQueryType } from '../../../../../../shared/services/metrics-range-selector.types';
-import { MetricsChartHelpers } from '../../../../../../shared/components/metrics-chart/metrics.component.helpers';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../store/actions/metrics.actions';
-import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig, MetricsChartTypes } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
 
 class MockCloudFoundryCellService {
   cfGuid = 'cfGuid';
   cellId = 'cellId';
-  cellMetric$ = observableOf({});
+  cellMetric$ = observableOf(null);
 
   healthy$ = observableOf(null);
-  healthyMetricId = observableOf(null);
+  healthyMetricId = null;
   cpus$ = observableOf(null);
 
   usageContainers$ = observableOf(null);
@@ -59,7 +63,7 @@ describe('CloudFoundryCellSummaryComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        CloudFoundryCellSummaryComponent,
+        CloudFoundryCellSummaryComponent
       ],
       imports: [...BaseTestModules],
       providers: [
@@ -67,7 +71,8 @@ describe('CloudFoundryCellSummaryComponent', () => {
           provide: CloudFoundryCellService,
           useValue: new MockCloudFoundryCellService()
         },
-        ActiveRouteCfCell
+        ActiveRouteCfCell,
+        DatePipe
       ]
     })
       .compileComponents();
