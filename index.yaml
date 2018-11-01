@@ -2,6 +2,14 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v1
+    created: 2018-11-01T16:57:23.509317698Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 4fc0eef08ba2a5e2967ace91695f99bbcce98518b3ecad3605c127a7c72c4236
+    name: console
+    urls:
+    - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.2.0/console-helm-chart-2.2.0-592c239.tgz
+    version: 2.2.0-592c239
+  - apiVersion: v1
     created: 2018-09-25T21:23:09.777934013Z
     description: A Helm chart for deploying Stratos UI Console
     digest: e0d1f41299e32b2fa258cf049867afe5d18e42661eaf8368e797418945f990d6
@@ -179,15 +187,6 @@ entries:
     version: 0.9.0
   metrics:
   - apiVersion: v1
-    created: 2018-04-12T11:14:42.658213114Z
-    description: Stratos Metrics component to fetch metrics data from S/CF. Uses Prometheus
-      and Firehose Exporter
-    digest: 9c6bac79b2f8a6c9b52a077eaf4343c61fed764913c8d2d40d7baddcf7e34866
-    name: metrics
-    urls:
-    - https://github.com/SUSE/stratos-metrics/releases/download/2.0.0-metrics-dev/metrics-0.2.0.tgz
-    version: 2.0.0-metrics-dev
-  - apiVersion: v1
     created: 2018-10-05T15:38:27.766108302+01:00
     description: Stratos Metrics component to fetch metrics data from S/CF. Uses Prometheus
       and Firehose Exporter
@@ -196,4 +195,13 @@ entries:
     urls:
     - https://github.com/SUSE/stratos-metrics/releases/download/2.1.0-metrics-dev/metrics-0.3.0.tgz
     version: 2.1.0-metrics-dev
-generated: 2018-09-25T21:23:09.776678806Z
+  - apiVersion: v1
+    created: 2018-04-12T11:14:42.658213114Z
+    description: Stratos Metrics component to fetch metrics data from S/CF. Uses Prometheus
+      and Firehose Exporter
+    digest: 9c6bac79b2f8a6c9b52a077eaf4343c61fed764913c8d2d40d7baddcf7e34866
+    name: metrics
+    urls:
+    - https://github.com/SUSE/stratos-metrics/releases/download/2.0.0-metrics-dev/metrics-0.2.0.tgz
+    version: 2.0.0-metrics-dev
+generated: 2018-11-01T16:57:23.508914728Z
