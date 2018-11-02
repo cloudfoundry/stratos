@@ -2,6 +2,12 @@
 
 Weekly status updates are published here.
 
+## 26th October 2018
+
+The team were away attending a workshop this week.
+
+The only item of note is that we have now forked the go-flags package that was causing broken dependency issues for us and updated Stratos to use this package. This should allow us to avoid future issues with this package.
+
 ## 19th October 2018
 
 We are preparing for this month's 2.2.0 release which will be out towards the end of the month.
