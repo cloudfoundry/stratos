@@ -4,15 +4,15 @@ resource_types:
   type: docker-image
   privileged: true
   source:
-    repository: ((docker-image-resource))
-    tag: ((docker-image-resource-tag))
+    repository: ((docker-resource-image))
+    tag: ((docker-resource-image-tag))
 
 resources:
 - name: stratos
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: ((stratos-branch))
+    uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
+    branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
 - name: aio-docker-image
   type: docker-image
@@ -32,49 +32,49 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-dc-jetstream
+    repository: ((docker-organization))/stratos-dc-jetstream
 - name: dc-db-migrator-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-dc-db-migrator
+    repository: ((docker-organization))/stratos-dc-db-migrator
 - name: mariadb-dc-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-dc-mariadb
+    repository: ((docker-organization))/stratos-dc-mariadb
 - name: ui-dc-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-dc-console
+    repository: ((docker-organization))/stratos-dc-console
 - name: jetstream-helm-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-jetstream
+    repository: ((docker-organization))/stratos-jetstream
 - name: postflight-helm-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-postflight-job
+    repository: ((docker-organization))/stratos-postflight-job
 - name: mariadb-helm-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-mariadb
+    repository: ((docker-organization))/stratos-mariadb
 - name: ui-helm-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-console
+    repository: ((docker-organization))/stratos-console
 
 groups:
 - name: tests
