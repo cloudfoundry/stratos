@@ -2,6 +2,13 @@
 
 Weekly status updates are published here.
 
+## 2nd November 2018
+This week we have mostly been….
+
+- Releasing Stratos 2.2.0. More details can be found at https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.2.0. 
+- Discussing integration of the Autoscaler (https://github.com/cloudfoundry-incubator/app-autoscaler) UI (https://github.com/cloudfoundry-incubator/app-autoscaler-ui) into Stratos. We’ve provided a first round of guidance to the Autoscaler team and are looking forward to the second round next week. The initial designs look great.
+- Knowledge sharing activities revolving helm charts and concourse release pipelines
+
 ## 26th October 2018
 
 The team were away attending a workshop this week.
