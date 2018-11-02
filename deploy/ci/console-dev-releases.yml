@@ -27,25 +27,25 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos-jetstream
+    repository: ((docker-registry))/((docker-organization))/stratos-jetstream
 - name: postflight-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos-postflight-job
+    repository: ((docker-registry))/((docker-organization))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos-mariadb
+    repository: ((docker-registry))/((docker-organization))/stratos-mariadb
 - name: ui-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos-console
+    repository: ((docker-registry))/((docker-organization))/stratos-console
 
 # Artifacts
 - name: image-tag
