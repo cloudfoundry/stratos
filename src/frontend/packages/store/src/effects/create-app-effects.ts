@@ -16,6 +16,7 @@ import {
 } from '../actions/create-applications-page.actions';
 import { AppState } from './../app-state';
 import { NewAppCFDetails, CreateNewApplicationState } from '../types/create-application.types';
+import { environment } from '../../../core/src/environments/environment.prod';
 
 
 @Injectable()
