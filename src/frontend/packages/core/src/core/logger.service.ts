@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../../store/src/app-state';
 import { LoggerInfoAction, LoggerDebugAction, LoggerWarnAction, LoggerErrorAction, LogLevel } from '../../../store/src/actions/log.actions';
-import { environment } from '../../environments/environment';
+import { environment } from '../environments/environment.prod';
 
 export enum LogLevelStringToNumber {
   DEBUG = 0,

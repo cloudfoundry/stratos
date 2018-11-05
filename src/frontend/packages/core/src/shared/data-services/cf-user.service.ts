@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { environment } from '../../../environments/environment';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -18,29 +17,30 @@ import {
   waitForCFPermissions,
   filterEntitiesByGuid,
 } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllOrgUsers } from '../../store/actions/organization.actions';
-import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import { cfUserSchemaKey, entityFactory, organizationSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
-import {
-  getPaginationObservables,
-  PaginationObservables,
-} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { getCurrentUserCFGlobalStates } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { APIResource } from '../../store/types/api.types';
-import { PaginatedAction } from '../../store/types/pagination.types';
-import {
-  CfUser,
-  createUserRoleInOrg,
-  createUserRoleInSpace,
-  IUserPermissionInOrg,
-  IUserPermissionInSpace,
-  UserRoleInOrg,
-  UserRoleInSpace,
-} from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import { environment } from '../../environments/environment.prod';
+import {
+  PaginationObservables,
+  getPaginationObservables
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
+import {
+  CfUser,
+  IUserPermissionInOrg,
+  createUserRoleInOrg,
+  IUserPermissionInSpace,
+  createUserRoleInSpace,
+  UserRoleInOrg,
+  UserRoleInSpace
+} from '../../../../store/src/types/user.types';
+import { AppState } from '../../../../store/src/app-state';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { GetUser, GetAllUsersAsAdmin, GetAllUsersAsNonAdmin } from '../../../../store/src/actions/users.actions';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { GetAllOrgUsers } from '../../../../store/src/actions/organization.actions';
+import { getCurrentUserCFGlobalStates } from '../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

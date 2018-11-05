@@ -43,7 +43,6 @@ import {
   IRequestAction,
   RequestEntityLocation,
 } from '../types/request.types';
-import { environment } from './../../../environments/environment';
 import {
   ApiActionTypes,
   ValidateEntitiesStart,
@@ -63,6 +62,7 @@ import {
   RecursiveDeleteComplete,
   RecursiveDeleteFailed,
 } from './recursive-entity-delete.effect';
+import { environment } from '../../../core/src/environments/environment.prod';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -106,7 +106,7 @@ export class APIEffect {
       mergeMap(([action, state]) => {
         return this.doApiRequest(action, state);
       }),
-  );
+    );
 
   private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
@@ -280,7 +280,7 @@ export class APIEffect {
             apiAction.guid,
             apiAction.endpointGuid,
             entityFactory(apiAction.entityKey),
-          ), );
+          ));
         }
         return errorActions;
       }),
@@ -414,7 +414,7 @@ export class APIEffect {
           data[guid] !== null &&
           errorCheck.findIndex(error => error.guid === guid && !error.error) >=
           0,
-    )
+      )
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {

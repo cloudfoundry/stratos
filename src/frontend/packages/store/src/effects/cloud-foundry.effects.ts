@@ -7,9 +7,9 @@ import { flatMap, mergeMap, catchError } from 'rxjs/operators';
 import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, ICFAction } from '../types/request.types';
-import { environment } from './../../../environments/environment';
 import { AppState } from './../app-state';
 import { cfInfoSchemaKey } from '../helpers/entity-factory';
+import { environment } from '../../../core/src/environments/environment.prod';
 
 @Injectable()
 export class CloudFoundryEffects {

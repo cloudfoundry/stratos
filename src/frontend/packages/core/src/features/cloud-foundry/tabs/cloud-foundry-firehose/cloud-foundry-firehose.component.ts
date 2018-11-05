@@ -3,11 +3,11 @@ import { Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, share } from 'rxjs/operators';
 
-import { environment } from '../../../../../environments/environment';
 import { LoggerService } from '../../../../core/logger.service';
 import { UtilsService } from '../../../../core/utils.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
+import { environment } from '../../../../environments/environment.prod';
 
 @Component({
   selector: 'app-cloud-foundry-firehose',

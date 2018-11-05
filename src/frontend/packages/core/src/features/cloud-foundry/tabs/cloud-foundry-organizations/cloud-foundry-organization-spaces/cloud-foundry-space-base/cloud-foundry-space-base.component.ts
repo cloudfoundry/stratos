@@ -3,16 +3,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { environment } from '../../../../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+
 import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
@@ -24,6 +21,10 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../../../core/extension/extension-service';
+import { environment } from '../../../../../../environments/environment.prod';
+import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',

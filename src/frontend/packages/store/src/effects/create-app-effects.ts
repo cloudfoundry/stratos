@@ -1,14 +1,13 @@
 
-import {of as observableOf, throwError as observableThrowError,  Observable } from 'rxjs';
+import { of as observableOf, throwError as observableThrowError, Observable } from 'rxjs';
 
-import {catchError, map, withLatestFrom, switchMap} from 'rxjs/operators';
+import { catchError, map, withLatestFrom, switchMap } from 'rxjs/operators';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
-import { environment } from '../../../environments/environment';
 import {
   AppNameFree,
   AppNameTaken,
@@ -55,8 +54,8 @@ export class CreateAppPageEffects {
         }),
         catchError(err => {
           return observableOf(new AppNameTaken(action.name));
-        }), );
-    }), );
+        }));
+    }));
 }
 
 export const selectNewAppState = (state: AppState): CreateNewApplicationState => state.createApplication;

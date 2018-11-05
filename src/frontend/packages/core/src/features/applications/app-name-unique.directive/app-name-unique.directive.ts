@@ -6,10 +6,9 @@ import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
-
-import { environment } from '../../../../environments/environment';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { selectNewAppState } from '../../../store/effects/create-app-effects';
+import { selectNewAppState } from '../../../../../store/src/effects/create-app-effects';
+import { environment } from '../../../environments/environment.prod';
+import { AppState } from '../../../../../store/src/app-state';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -81,7 +80,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
       catchError(err => {
         this.appApplicationNameUnique.set(false);
         return observableThrowError(err);
-      }), );
+      }));
   }
 
   private appNameTaken(cfGuid, spaceGuid, currentName, name): Observable<any> {
