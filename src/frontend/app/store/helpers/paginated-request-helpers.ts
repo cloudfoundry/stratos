@@ -15,7 +15,7 @@ export interface IPaginationFlattener<T, C> {
   mergePages: (res: T[]) => T;
   fetch: (...args) => Observable<C>;
   buildFetchParams: (i: number) => any[];
-  clearResults: (res: C) => Observable<C>;
+  clearResults: (res: C, allResults: number) => Observable<C>;
 }
 
 export class BaseHttpClientFetcher<T> {
@@ -105,11 +105,11 @@ export class CfAPIFlattener extends BaseHttpFetcher implements IPaginationFlatte
       return count + endpoint.total_results;
     }, 0);
   }
-  public clearResults = (res: { [cfGuid: string]: CFResponse }): Observable<any> => {
+  public clearResults = (res: { [cfGuid: string]: CFResponse }, allResults: number): Observable<any> => {
     Object.keys(res).forEach(endpointKey => {
       const endpoint = res[endpointKey];
       endpoint.total_pages = 1;
-      endpoint.total_results = endpoint.resources.length;
+      endpoint.total_results = allResults; // endpoint.resources.length;//TODO: RC
     });
     return observableOf(res);
   }
@@ -130,8 +130,8 @@ export function flattenPagination<T, C>(
       const allResults = flattener.getTotalResults(firstResData);
       // If we have too many results only return basic first page information
       if (maxCount && allResults > maxCount) {
-        store.dispatch(new PaginationMaxedResults(true, entityKey, paginationKey));
-        return forkJoin([flattener.clearResults(firstResData)]);
+        store.dispatch(new PaginationMaxedResults(allResults, entityKey, paginationKey));
+        return forkJoin([flattener.clearResults(firstResData, allResults)]);
       }
       // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
       // Make those requests

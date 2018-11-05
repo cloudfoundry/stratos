@@ -18,7 +18,7 @@ export function paginationMaxReached(state: PaginationState, action): Pagination
     ...newState[action.entityKey],
     [action.paginationKey]: {
       ...newState[action.entityKey][action.paginationKey],
-      maxedResults: true
+      maxedResults: maxAction.maxReached
     }
   };
   return {

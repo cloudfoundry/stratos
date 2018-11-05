@@ -287,6 +287,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         distinctUntilChanged(),
         map(([pagination, filters]) => {
           const totalResults = this.dataSource.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
+          // Text filter is only shown when the current result set is not maxed, so we're safe to show the list if there's a text filter set
           return !filters.string && this.dataSource.action.flattenPaginationMax < totalResults;
         }),
       ) : observableOf(false);

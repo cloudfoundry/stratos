@@ -161,7 +161,7 @@ export class RemoveParams implements PaginationAction {
 export class PaginationMaxedResults implements Action {
   type = SET_PAGINATION_MAX_REACHED;
   constructor(
-    public maxReached: boolean,
+    public maxReached: number,
     public entityKey: string,
     public paginationKey: string
   ) { }
