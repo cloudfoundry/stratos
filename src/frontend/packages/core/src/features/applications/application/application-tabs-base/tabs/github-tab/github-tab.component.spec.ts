@@ -4,9 +4,9 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { SharedModule } from '../../../../../../shared/shared.module';
-import { appReducers } from '../../../../../../../packages/store/src/lib/reducers.module';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { appReducers } from '../../../../../../../../store/src/reducers.module';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { GithubTabComponent } from './github-tab.component';
 import { DatePipe } from '@angular/common';

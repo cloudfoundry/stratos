@@ -16,12 +16,12 @@ import { SteppersModule } from '../../../shared/components/stepper/steppers.modu
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { appReducers } from '../../../../packages/store/src/lib/reducers.module';
 import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { appReducers } from '../../../../../store/src/reducers.module';
 
 describe('CreateApplicationComponent', () => {
   let component: CreateApplicationComponent;

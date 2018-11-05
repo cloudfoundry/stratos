@@ -1,11 +1,10 @@
 import { ModuleWithProviders } from '@angular/core';
 
 import { StoreModule } from '@ngrx/store';
-
-import { AppState } from '../../../store/src/app-state';
-import { appReducers } from '../../../store/src/lib/reducers.module';
-import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../../store/src/types/current-user-roles.types';
-import { createUserRoleInOrg } from '../../../store/src/types/user.types';
+import { AppState } from '../../store/src/app-state';
+import { createUserRoleInOrg } from '../../store/src/types/user.types';
+import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
+import { appReducers } from '../../store/src/reducers.module';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 

@@ -9,14 +9,15 @@ import { ApplicationStateService } from '../../../../../../shared/components/app
 import { LogViewerComponent } from '../../../../../../shared/components/log-viewer/log-viewer.component';
 import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import { GetApplication } from '../../../../../../store/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
-import { AppStoreModule } from '../../../../../../../packages/store/src/lib/store.module';
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
+import { generateTestEntityServiceProvider } from '../../../../../../../test-framework/entity-service.helper';
+import { entityFactory, applicationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../../../store/src/actions/application.actions';
+import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
+import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 
 
 describe('LogStreamTabComponent', () => {

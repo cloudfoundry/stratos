@@ -1,5 +1,5 @@
-import { TestBed, inject } from '@angular/core/testing';
-import { StoreModule, Store } from '@ngrx/store';
+import { TestBed } from '@angular/core/testing';
+import { StoreModule } from '@ngrx/store';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import {
   CurrentUserPermissions,
@@ -9,7 +9,7 @@ import {
   ScopeStrings
 } from './current-user-permissions.config';
 import { tap, first } from 'rxjs/operators';
-import { appReducers } from '../../../store/src/lib/reducers.module';
+import { appReducers } from '../../../store/src/reducers.module';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 const initialState = {
   pagination: {

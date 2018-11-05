@@ -7,7 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { CoreModule } from '../../../core/core.module';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { appReducers } from '../../../../packages/store/src/lib/reducers.module';
+import { appReducers } from '../../../../../store/src/reducers.module';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { DashboardBaseComponent } from './dashboard-base.component';
 import { MetricsService } from '../../metrics/services/metrics-service';

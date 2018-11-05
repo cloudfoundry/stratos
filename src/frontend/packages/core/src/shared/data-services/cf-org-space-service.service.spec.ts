@@ -3,8 +3,8 @@ import { HttpModule } from '@angular/http';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../core/core.module';
-import { appReducers } from '../../../packages/store/src/lib/reducers.module';
-import { getInitialTestStoreState } from '../../test-framework/store-test-helper';
+import { appReducers } from '../../../../store/src/reducers.module';
+import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { SharedModule } from '../shared.module';
 import { CfOrgSpaceDataService } from './cf-org-space-service.service';
 

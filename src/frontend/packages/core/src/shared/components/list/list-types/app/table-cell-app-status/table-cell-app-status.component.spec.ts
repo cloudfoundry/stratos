@@ -1,9 +1,7 @@
-import { appReducers } from '../../../../../../../packages/store/src/lib/reducers.module';
-import { getInitialTestStoreState, createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellAppStatusComponent } from './table-cell-app-status.component';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { ApplicationStateComponent } from '../../../../application-state/application-state.component';
 import { ApplicationStateService } from '../../../../application-state/application-state.service';
 import {

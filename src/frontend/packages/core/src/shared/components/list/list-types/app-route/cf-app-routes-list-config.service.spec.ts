@@ -2,13 +2,13 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../../../packages/store/src/lib/reducers.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
+import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { appReducers } from '../../../../../../../store/src/reducers.module';
 
 describe('CfAppRoutesListConfigService', () => {
 

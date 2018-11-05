@@ -5,11 +5,11 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { appReducers } from '../../../../../../packages/store/src/lib/reducers.module';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../shared.module';
 import { CfAppMapRoutesListConfigService } from './cf-app-map-routes-list-config.service';
+import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { appReducers } from '../../../../../../../store/src/reducers.module';
 
 describe('CfAppMapRoutesListConfigService', () => {
   const initialState = { ...getInitialTestStoreState() };

@@ -4,10 +4,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../shared.module';
-import { appReducers } from '../../../../../packages/store/src/lib/reducers.module';
+import { appReducers } from '../../../../../../store/src/reducers.module';
 import { CreateApplicationStep1Component } from './create-application-step1.component';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 

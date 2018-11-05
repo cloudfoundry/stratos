@@ -5,14 +5,14 @@ import { CoreModule } from '../../../../../../core/core.module';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../../../../packages/store/src/lib/reducers.module';
 import { ApplicationService } from '../../../../application.service';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { AppStoreModule } from '../../../../../../../packages/store/src/lib/store.module';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { RouterTestingModule } from '@angular/router/testing';
-import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { appReducers } from '../../../../../../../../store/src/reducers.module';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
+import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 
 describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;

@@ -4,15 +4,15 @@ import { SharedModule } from '../../../shared/shared.module';
 import { inject, TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { AppState } from '../../../../packages/store/src/app-state';
-import { AppStoreModule } from '../../../../packages/store/src/lib/store.module';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 import { MockBackend } from '@angular/http/testing';
 import { HttpModule, Http, ConnectionBackend } from '@angular/http';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
+import { AppStoreModule } from '../../../../../store/src/store.module';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { AppState } from '../../../../../store/src/app-state';
 
 describe('AppNameUniqueDirective', () => {
 
