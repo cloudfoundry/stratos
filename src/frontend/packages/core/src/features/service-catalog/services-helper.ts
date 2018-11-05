@@ -13,7 +13,7 @@ import {
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceInstances } from '../../store/actions/service-instances.actions';
 import { GetServicePlansForService } from '../../store/actions/service.actions';
-import { AppState } from '../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../packages/store/src/app-state';
 import { entityFactory, serviceInstancesSchemaKey, servicePlanSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';

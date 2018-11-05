@@ -10,7 +10,7 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
 import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/types/metric.types';

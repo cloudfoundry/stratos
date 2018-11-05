@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { defaultPaginationPageSizeOptionsCards, ListViewTypes } from '../../list.component.types';

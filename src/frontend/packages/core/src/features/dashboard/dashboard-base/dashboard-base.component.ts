@@ -7,7 +7,7 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router, Route } 
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';

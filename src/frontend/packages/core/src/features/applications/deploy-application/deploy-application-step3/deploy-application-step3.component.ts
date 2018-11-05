@@ -20,7 +20,7 @@ import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.acti
 import { GetApplication } from '../../../../store/actions/application.actions';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 
 @Component({

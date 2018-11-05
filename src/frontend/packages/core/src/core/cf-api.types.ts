@@ -1,7 +1,7 @@
 import { IRoute } from './cf-api.types';
-import { APIResource } from '../../packages/store/src/types/api.types';
+import { APIResource } from '../../../store/src/types/api.types';
 import { IServiceBinding, IService } from './cf-api-svc.types';
-import { CfUser } from '../../packages/store/src/types/user.types';
+import { CfUser } from '../../../store/src/types/user.types';
 
 export interface IRoute {
   host: string;

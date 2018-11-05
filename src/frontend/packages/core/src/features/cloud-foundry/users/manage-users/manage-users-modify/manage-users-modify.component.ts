@@ -36,7 +36,7 @@ import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 import { UsersRolesSetOrg } from '../../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   selectUsersRolesOrgGuid,
   selectUsersRolesPicked,

@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
 import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';

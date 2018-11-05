@@ -4,7 +4,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';

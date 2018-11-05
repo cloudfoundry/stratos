@@ -17,7 +17,7 @@ import {
   SetBranch,
   SetDeployBranch,
 } from '../../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UtilsService } from '../../../../core/utils.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { CardStatus } from '../../application-state/application-state.service';

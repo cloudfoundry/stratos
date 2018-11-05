@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { ApplicationStateService } from '../../../application-state/application-state.service';

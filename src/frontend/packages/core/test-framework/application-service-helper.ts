@@ -9,10 +9,10 @@ import {
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
-import { AppState } from '../../packages/store/src/lib/app-state';
-import { RequestInfoState } from '../../packages/store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../packages/store/src/types/api.types';
-import { AppStat, AppSummary } from '../../packages/store/src/types/app-metadata.types';
+import { AppState } from '../../../store/src/app-state';
+import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../../store/src/types/api.types';
+import { AppStat, AppSummary } from '../../../store/src/types/app-metadata.types';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { ISpace } from '../core/cf-api.types';

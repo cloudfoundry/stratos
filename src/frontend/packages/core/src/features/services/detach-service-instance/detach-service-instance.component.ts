@@ -14,7 +14,7 @@ import { ITableColumn } from '../../../shared/components/list/list-table/table.t
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { GetServiceInstance } from '../../../store/actions/service-instances.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { entityFactory, serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
 import { APIResource } from '../../../store/types/api.types';
 

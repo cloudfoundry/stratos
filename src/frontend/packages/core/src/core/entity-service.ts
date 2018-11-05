@@ -3,17 +3,17 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { ValidateEntitiesStart } from '../../packages/store/src/actions/request.actions';
-import { AppState } from '../../packages/store/src/lib/app-state';
+import { ValidateEntitiesStart } from '../../../store/src/actions/request.actions';
+import { AppState } from '../../../store/src/app-state';
 import {
   RequestInfoState,
   RequestSectionKeys,
   TRequestTypeKeys,
   UpdatingSection,
-} from '../../packages/store/src/reducers/api-request-reducer/types';
-import { getEntityUpdateSections, getUpdateSectionById } from '../../packages/store/src/selectors/api.selectors';
-import { EntityInfo } from '../../packages/store/src/types/api.types';
-import { ICFAction, IRequestAction } from '../../packages/store/src/types/request.types';
+} from '../../../store/src/reducers/api-request-reducer/types';
+import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
+import { EntityInfo } from '../../../store/src/types/api.types';
+import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {

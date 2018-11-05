@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { entityFactory } from '../../../store/helpers/entity-factory';
 import { appStatsSchemaKey } from '../../../store/helpers/entity-factory';

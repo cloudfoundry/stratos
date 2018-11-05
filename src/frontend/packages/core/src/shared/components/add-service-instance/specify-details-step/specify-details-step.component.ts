@@ -25,7 +25,7 @@ import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../..
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 import { CreateServiceInstance, GetServiceInstance, UpdateServiceInstance } from '../../../../store/actions/service-instances.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';

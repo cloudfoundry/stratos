@@ -1,6 +1,5 @@
-import { APIResource } from '../../packages/store/src/types/api.types';
+import { APIResource } from '../../../store/src/types/api.types';
 import { IApp, IOrganization, ISpace } from './cf-api.types';
-import { StringLiteral } from 'typescript';
 
 export interface ILastOperation {
   type: string;

@@ -4,7 +4,7 @@ import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAppServiceBindings } from '../../../../../store/actions/application-service-routes.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,

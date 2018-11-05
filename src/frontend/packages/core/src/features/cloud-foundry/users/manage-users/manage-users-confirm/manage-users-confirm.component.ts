@@ -23,7 +23,7 @@ import {
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../store/actions/users.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   cfUserSchemaKey,
   entityFactory,

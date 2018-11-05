@@ -7,7 +7,7 @@ import { filter } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CreateSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';

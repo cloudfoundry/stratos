@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

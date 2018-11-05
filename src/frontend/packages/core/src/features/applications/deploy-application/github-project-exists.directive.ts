@@ -5,7 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
 
 import { CheckProjectExists } from '../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';
 
 interface GithubProjectExistsResponse {

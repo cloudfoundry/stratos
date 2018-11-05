@@ -11,7 +11,7 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
 import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListMultiFilterConfig } from '../list.component.types';

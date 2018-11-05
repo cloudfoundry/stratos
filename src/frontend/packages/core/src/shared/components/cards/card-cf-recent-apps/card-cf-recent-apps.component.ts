@@ -10,7 +10,7 @@ import {
   CloudFoundryEndpointService
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 
 

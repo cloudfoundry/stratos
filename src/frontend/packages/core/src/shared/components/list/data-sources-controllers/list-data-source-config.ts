@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { OperatorFunction, Observable } from 'rxjs';
 
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';

@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,

@@ -15,7 +15,7 @@ import { catchError, first, map, switchMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/logger.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';

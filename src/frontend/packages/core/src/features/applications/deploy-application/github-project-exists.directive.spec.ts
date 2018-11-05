@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 
 
 describe('GithubProjectExistsDirective', () => {

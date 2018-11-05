@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../packages/store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';

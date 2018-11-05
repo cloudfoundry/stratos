@@ -4,7 +4,7 @@ import { first } from 'rxjs/operators';
 import { ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { selectUsersRolesRoles } from '../../../../../store/selectors/users-roles.selector';
 import { APIResource } from '../../../../../store/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../packages/store/src/lib/app-state';
+import { AppState } from '../../../store/src/app-state';
 import { schema as normalizrSchema } from 'normalizr';
 import { EntityService } from './entity-service';
-import { IRequestAction } from '../../packages/store/src/types/request.types';
-import { TRequestTypeKeys, RequestSectionKeys } from '../../packages/store/src/reducers/api-request-reducer/types';
+import { IRequestAction } from '../../../store/src/types/request.types';
+import { TRequestTypeKeys, RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 
 @Injectable()

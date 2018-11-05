@@ -10,7 +10,7 @@ import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-t
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { FetchAllDomains } from '../../../../store/actions/domains.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/types/api.types';
 import { ApplicationService } from '../../application.service';

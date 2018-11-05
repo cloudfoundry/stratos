@@ -6,7 +6,7 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { MetricsAPIAction, MetricsAPITargets } from '../../../store/actions/metrics-api.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
 import { EndpointIcon, getIconForEndpoint, getNameForEndpointType } from '../../endpoints/endpoint-helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';

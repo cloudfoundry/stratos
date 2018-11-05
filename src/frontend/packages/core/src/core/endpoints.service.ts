@@ -6,15 +6,15 @@ import {
   endpointEntitiesSelector,
   endpointStatusSelector,
   endpointsEntityRequestDataSelector
-} from '../../packages/store/src/selectors/endpoint.selectors';
+} from '../../../store/src/selectors/endpoint.selectors';
 import { Injectable } from '@angular/core';
-import { EndpointState, EndpointModel, endpointStoreNames } from '../../packages/store/src/types/endpoint.types';
+import { EndpointState, EndpointModel, endpointStoreNames } from '../../../store/src/types/endpoint.types';
 import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../../packages/store/src/lib/app-state';
+import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { UserService } from './user.service';
-import { AuthState } from '../../packages/store/src/reducers/auth.reducer';
-import { RouterNav } from '../../packages/store/src/actions/router.actions';
+import { AuthState } from '../../../store/src/reducers/auth.reducer';
+import { RouterNav } from '../../../store/src/actions/router.actions';
 
 
 @Injectable()

@@ -1,10 +1,10 @@
 
 import {map} from 'rxjs/operators';
-import { AuthState } from '../../packages/store/src/reducers/auth.reducer';
+import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../packages/store/src/lib/app-state';
+import { AppState } from '../../../store/src/app-state';
 
 @Injectable()
 export class UserService {

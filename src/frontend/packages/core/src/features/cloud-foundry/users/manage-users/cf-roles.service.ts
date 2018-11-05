@@ -21,7 +21,7 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetOrganization } from '../../../../store/actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import {
   endpointSchemaKey,
   entityFactory,

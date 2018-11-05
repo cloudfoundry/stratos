@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';

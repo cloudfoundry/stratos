@@ -3,9 +3,9 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { create } from 'rxjs-spy';
 
-import { environment } from '../environments/environment';
+import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
-import { AppState } from '../../../store/src/app-state';
+import { AppState } from '../../store/src/app-state';
 
 
 @Component({

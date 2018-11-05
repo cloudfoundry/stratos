@@ -38,7 +38,7 @@ import {
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServicePlan,
 } from '../../../../store/actions/create-service-instance.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { CardStatus } from '../../application-state/application-state.service';

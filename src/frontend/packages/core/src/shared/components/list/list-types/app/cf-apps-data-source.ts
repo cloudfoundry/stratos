@@ -9,7 +9,7 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { CreatePagination } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,

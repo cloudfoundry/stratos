@@ -7,7 +7,7 @@ import { take, tap, map } from 'rxjs/operators';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';

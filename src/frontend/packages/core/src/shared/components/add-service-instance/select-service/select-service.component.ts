@@ -7,7 +7,7 @@ import { filter, switchMap, tap, map } from 'rxjs/operators';
 import { IService } from '../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import {
   selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceSpaceGuid,

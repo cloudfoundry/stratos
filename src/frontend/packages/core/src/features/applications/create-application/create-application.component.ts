@@ -5,7 +5,7 @@ import { filter, first, tap } from 'rxjs/operators';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 

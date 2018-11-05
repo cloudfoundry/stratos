@@ -9,7 +9,7 @@ import { CurrentUserPermissionsService } from '../../../../../../core/current-us
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
-import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';

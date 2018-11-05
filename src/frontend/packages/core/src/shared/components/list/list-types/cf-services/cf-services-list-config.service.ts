@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import { EndpointsService } from '../../../../../core/endpoints.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { endpointsRegisteredEntitiesSelector } from '../../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';

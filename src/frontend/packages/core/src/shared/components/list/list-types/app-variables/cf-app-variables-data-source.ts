@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { GetAppEnvVarsAction } from '../../../../../store/actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../store/actions/app-variables.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { appEnvVarsSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { EntityMonitor } from './entity-monitor';
-import { AppState } from '../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../packages/store/src/app-state';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
 

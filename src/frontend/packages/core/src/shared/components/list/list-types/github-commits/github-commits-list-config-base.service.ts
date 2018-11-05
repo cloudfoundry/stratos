@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { ITableColumn } from '../../list-table/table.types';

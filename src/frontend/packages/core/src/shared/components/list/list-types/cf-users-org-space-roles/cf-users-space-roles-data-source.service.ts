@@ -5,7 +5,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { GetAllOrganizationSpaces } from '../../../../../store/actions/organization.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { cfUserSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';

@@ -11,7 +11,7 @@ import { ConfirmationDialogService } from '../../../../../../shared/components/c
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';

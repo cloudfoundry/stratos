@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { IBuildpack } from '../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';

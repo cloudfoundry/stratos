@@ -15,7 +15,7 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';

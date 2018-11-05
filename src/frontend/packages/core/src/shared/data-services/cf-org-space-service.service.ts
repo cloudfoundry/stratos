@@ -5,7 +5,7 @@ import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, wi
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
-import { AppState } from '../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../packages/store/src/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import {

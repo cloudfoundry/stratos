@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { IListConfig } from '../../list.component.types';

@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
-import { createBasicStoreModule } from '../../../../app/test-framework/store-test-helper';
+import { createBasicStoreModule } from '../test-framework/store-test-helper';
 
 describe('AppComponent', () => {
 

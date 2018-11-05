@@ -10,7 +10,7 @@ import { CurrentUserPermissions } from '../../../core/current-user-permissions.c
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../store/types/routing.type';

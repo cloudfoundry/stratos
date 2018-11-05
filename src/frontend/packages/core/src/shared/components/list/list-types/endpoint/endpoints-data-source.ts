@@ -3,7 +3,7 @@ import { pairwise, tap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';

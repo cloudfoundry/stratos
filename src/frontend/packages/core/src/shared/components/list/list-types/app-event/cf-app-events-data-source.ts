@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 
 import { GetAllAppEvents } from '../../../../../store/actions/app-event.actions';
 import { AddParams, RemoveParams } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

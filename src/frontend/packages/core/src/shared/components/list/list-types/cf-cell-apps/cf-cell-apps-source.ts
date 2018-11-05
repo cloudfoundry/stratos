@@ -6,7 +6,7 @@ import { IApp } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { GetApplication } from '../../../../../store/actions/application.actions';
 import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,

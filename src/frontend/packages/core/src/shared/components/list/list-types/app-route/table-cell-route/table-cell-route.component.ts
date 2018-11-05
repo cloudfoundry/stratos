@@ -4,7 +4,7 @@ import { filter, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
-import { AppState } from '../../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { EntityInfo } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';

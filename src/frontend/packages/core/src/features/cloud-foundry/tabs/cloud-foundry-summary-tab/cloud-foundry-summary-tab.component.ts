@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { goToAppWall } from '../../cf.helpers';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 
 @Component({
   selector: 'app-cloud-foundry-summary-tab',

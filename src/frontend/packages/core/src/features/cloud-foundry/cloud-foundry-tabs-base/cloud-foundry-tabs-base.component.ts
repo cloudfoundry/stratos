@@ -9,7 +9,7 @@ import { CurrentUserPermissionsService } from '../../../core/current-user-permis
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 import { canUpdateOrgSpaceRoles } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   StratosTabType,

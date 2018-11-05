@@ -8,7 +8,7 @@ import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angula
 import { Store } from '@ngrx/store';
 
 import { environment } from '../../../../environments/environment';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
 
 /* tslint:disable:no-use-before-declare  */

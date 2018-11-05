@@ -8,7 +8,7 @@ import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { VerifySession } from '../../../store/actions/auth.actions';
 import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { UAASetupState } from '../../../store/types/uaa-setup.types';
 

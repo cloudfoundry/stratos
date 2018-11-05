@@ -41,7 +41,7 @@ import { DeleteApplication, GetAllApplications, GetApplication } from '../../../
 import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,

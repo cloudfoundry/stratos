@@ -17,7 +17,7 @@ import {
   StoreCFSettings,
 } from '../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../store/types/api.types';

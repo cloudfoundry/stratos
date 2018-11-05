@@ -8,7 +8,7 @@ import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { GetSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { entityFactory, spaceSchemaKey, spaceWithOrgKey } from '../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../store/types/api.types';
 

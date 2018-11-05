@@ -37,7 +37,7 @@ import {
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { entityFactory } from '../../../store/helpers/entity-factory';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { EntityMonitor } from '../../monitors/entity-monitor';

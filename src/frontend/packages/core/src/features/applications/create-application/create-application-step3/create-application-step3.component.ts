@@ -13,7 +13,7 @@ import { CreateNewApplication } from '../../../../store/actions/application.acti
 import { GetOrganization } from '../../../../store/actions/organization.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../packages/store/src/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 import {
   applicationSchemaKey,

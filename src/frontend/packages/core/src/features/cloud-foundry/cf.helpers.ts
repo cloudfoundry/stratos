@@ -8,7 +8,7 @@ import { CurrentUserPermissionsService } from '../../core/current-user-permissio
 import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
-import { AppState } from '../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../packages/store/src/app-state';
 import { applicationSchemaKey, endpointSchemaKey } from '../../store/helpers/entity-factory';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';

@@ -19,7 +19,7 @@ import {
   selectEntities,
 } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { AppState } from '../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../packages/store/src/app-state';
 import { ActionState } from './../../store/reducers/api-request-reducer/types';
 import { PaginationEntityState } from './../../store/types/pagination.types';
 

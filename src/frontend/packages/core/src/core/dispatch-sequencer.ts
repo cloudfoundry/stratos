@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { from, Observable, of as observableOf } from 'rxjs';
 import { bufferTime, concatMap, delay, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
-import { AppState } from '../../packages/store/src/lib/app-state';
+import { AppState } from '../../../store/src/app-state';
 
 
 export interface DispatchSequencerAction {

@@ -5,7 +5,7 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';

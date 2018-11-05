@@ -8,7 +8,7 @@ import {
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 @Component({

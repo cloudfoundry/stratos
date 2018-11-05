@@ -7,7 +7,7 @@ import {
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../../../packages/store/src/app-state';
 import { EntityInfo, APIResource } from '../../../../../../../store/types/api.types';
 import { ApplicationService } from '../../../../../application.service';
 import { FetchAllDomains } from '../../../../../../../store/actions/domains.actions';

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../packages/store/src/app-state';
 import { filter, map, first } from 'rxjs/operators';
 import { SessionData } from '../../../store/types/auth.types';
 import { AuthState } from '../../../store/reducers/auth.reducer';

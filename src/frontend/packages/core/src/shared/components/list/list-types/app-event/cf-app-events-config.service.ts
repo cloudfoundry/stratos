@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppState } from '../../../../../../packages/store/src/lib/app-state';
+import { AppState } from '../../../../../../packages/store/src/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';

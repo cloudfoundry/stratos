@@ -7,9 +7,9 @@ import { ActivatedRoute, CanActivate, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { RouterNav } from '../../packages/store/src/actions/router.actions';
-import { AppState } from '../../packages/store/src/lib/app-state';
-import { AuthState } from '../../packages/store/src/reducers/auth.reducer';
+import { RouterNav } from '../../../store/src/actions/router.actions';
+import { AppState } from '../../../store/src/app-state';
+import { AuthState } from '../../../store/src/reducers/auth.reducer';
 
 export function queryParamMap() {
   const paramMap = {};
@@ -47,7 +47,7 @@ export class AuthGuardService implements CanActivate {
           return false;
         }
         return true;
-      }), first(), );
+      }), first());
   }
 
 }
