@@ -1,4 +1,3 @@
-import { IApp } from '../../core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
 import { APIResource } from '../types/api.types';
 

@@ -3,16 +3,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
-import { MetricsAction } from '../../../store/actions/metrics.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
-import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { ChartSeries, IMetrics, MetricResultTypes } from '../../../../../store/src/types/base-metric.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
