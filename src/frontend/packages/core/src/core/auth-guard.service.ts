@@ -7,9 +7,9 @@ import { ActivatedRoute, CanActivate, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { RouterNav } from '../store/actions/router.actions';
+import { RouterNav } from '../../packages/store/src/actions/router.actions';
 import { AppState } from '../../packages/store/src/lib/app-state';
-import { AuthState } from '../store/reducers/auth.reducer';
+import { AuthState } from '../../packages/store/src/reducers/auth.reducer';
 
 export function queryParamMap() {
   const paramMap = {};

@@ -1,6 +1,6 @@
 
 import {map} from 'rxjs/operators';
-import { AuthState } from '../store/reducers/auth.reducer';
+import { AuthState } from '../../packages/store/src/reducers/auth.reducer';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';

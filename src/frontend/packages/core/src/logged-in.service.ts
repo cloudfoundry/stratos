@@ -1,13 +1,13 @@
 import { HostListener, Inject, Injectable, NgZone } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/src/app-state';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { VerifySession } from '../../../store/src/actions/auth.actions';
+import { AppState } from '../../store/src/app-state';
+import { AuthState } from '../../store/src/reducers/auth.reducer';
+import { VerifySession } from '../../store/src/actions/auth.actions';
 import { MatDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { Observable, interval, Subscription, fromEvent, merge } from 'rxjs';
-import { SessionData } from '../../../store/src/types/auth.types';
+import { SessionData } from '../../store/src/types/auth.types';
 
 import { tap } from 'rxjs/operators';
 

@@ -4,8 +4,8 @@ import { StoreModule } from '@ngrx/store';
 
 import { AppState } from '../../packages/store/src/lib/app-state';
 import { appReducers } from '../../packages/store/src/lib/reducers.module';
-import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../store/types/current-user-roles.types';
-import { createUserRoleInOrg } from '../store/types/user.types';
+import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../packages/store/src/types/current-user-roles.types';
+import { createUserRoleInOrg } from '../../packages/store/src/types/user.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 

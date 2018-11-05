@@ -8,17 +8,17 @@ import {
 } from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { AppState } from '../../packages/store/src/lib/app-state';
-import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-factory';
+import { entityFactory, featureFlagSchemaKey } from '../../packages/store/src/helpers/entity-factory';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-} from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
-import { APIResource } from '../store/types/api.types';
-import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/current-user-roles.types';
+} from '../../packages/store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { endpointsRegisteredEntitiesSelector } from '../../packages/store/src/selectors/endpoint.selectors';
+import { APIResource } from '../../packages/store/src/types/api.types';
+import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../../packages/store/src/types/current-user-roles.types';
 import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,

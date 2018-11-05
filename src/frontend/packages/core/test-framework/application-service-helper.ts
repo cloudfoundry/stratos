@@ -10,9 +10,9 @@ import {
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
 import { AppState } from '../../packages/store/src/lib/app-state';
-import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../store/types/api.types';
-import { AppStat, AppSummary } from '../store/types/app-metadata.types';
+import { RequestInfoState } from '../../packages/store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../packages/store/src/types/api.types';
+import { AppStat, AppSummary } from '../../packages/store/src/types/app-metadata.types';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { ISpace } from '../core/cf-api.types';
