@@ -1,10 +1,10 @@
+import { AppState } from './../../../../../../../../store/src/app-state';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { TableCellCustom } from '../../../list.types';

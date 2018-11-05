@@ -1,12 +1,11 @@
 
-import {of as observableOf,  BehaviorSubject ,  Observable } from 'rxjs';
+import { of as observableOf, BehaviorSubject, Observable } from 'rxjs';
 
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { Type } from '@angular/core';
-import { ListView } from '../../../store/actions/list.actions';
-import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
+import { ListView } from '../../../../../store/src/actions/list.actions';
+import { defaultClientPaginationPageSize } from '../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',

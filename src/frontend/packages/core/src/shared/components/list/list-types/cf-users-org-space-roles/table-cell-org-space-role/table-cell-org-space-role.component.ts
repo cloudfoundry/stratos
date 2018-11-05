@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-table-cell-org-space-role',

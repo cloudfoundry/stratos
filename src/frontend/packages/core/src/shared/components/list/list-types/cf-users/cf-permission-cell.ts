@@ -4,16 +4,16 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { selectSessionData } from '../../../../../store/reducers/auth.reducer';
-import { APIResource } from '../../../../../store/types/api.types';
-import { CfUser } from '../../../../../store/types/user.types';
-import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { AppChip } from '../../../chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellCustom } from '../../list.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
+import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 
 
 export interface ICellPermissionList<T> extends IUserRole<T> {

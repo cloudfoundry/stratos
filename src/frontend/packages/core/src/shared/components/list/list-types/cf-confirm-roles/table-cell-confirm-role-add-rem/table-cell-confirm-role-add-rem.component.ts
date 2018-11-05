@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { CfRoleChangeWithNames } from '../../../../../../store/types/users-roles.types';
 import { TableCellCustom } from '../../../list.types';
+import { CfRoleChangeWithNames } from '../../../../../../../../store/src/types/users-roles.types';
 
 @Component({
   selector: 'app-table-cell-confirm-role-add-rem',

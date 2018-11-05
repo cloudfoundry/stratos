@@ -19,31 +19,31 @@ import { CurrentUserPermissionsService } from '../../../../core/current-user-per
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { GetAllOrganizations, GetOrganization } from '../../../../store/actions/organization.actions';
-import { UsersRolesSetChanges } from '../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import {
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
-import {
-  selectUsersRolesCf,
-  selectUsersRolesPicked,
-  selectUsersRolesRoles,
-} from '../../../../store/selectors/users-roles.selector';
-import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
-import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
+import { CfUserRolesSelected, CfRoleChange } from '../../../../../../store/src/types/users-roles.types';
+import { IUserPermissionInOrg, CfUser, UserRoleInOrg, UserRoleInSpace } from '../../../../../../store/src/types/user.types';
+import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import {
+  selectUsersRolesPicked,
+  selectUsersRolesCf,
+  selectUsersRolesRoles
+} from '../../../../../../store/src/selectors/users-roles.selector';
+import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../../../store/src/reducers/users-roles.reducer';
+import { UsersRolesSetChanges } from '../../../../../../store/src/actions/users-roles.actions';
+import {
+  organizationSchemaKey,
+  entityFactory,
+  spaceSchemaKey,
+  endpointSchemaKey
+} from '../../../../../../store/src/helpers/entity-factory';
+import { GetOrganization, GetAllOrganizations } from '../../../../../../store/src/actions/organization.actions';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey
+} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 
 @Injectable()

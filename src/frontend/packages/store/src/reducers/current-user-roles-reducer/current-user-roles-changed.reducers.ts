@@ -1,10 +1,10 @@
-import { PermissionStrings } from '../../../core/current-user-permissions.config';
 import { ChangeUserRole } from '../../actions/users.actions';
 import { ICfRolesState, ICurrentUserRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
 import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
 import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
+import { PermissionStrings } from '../../../../core/src/core/current-user-permissions.config';
 
 export function updateAfterRoleChange(
   state: ICurrentUserRolesState,

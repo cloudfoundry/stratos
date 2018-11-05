@@ -3,10 +3,10 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../../core/entity-service';
-import { IMetricMatrixResult, IMetrics } from '../../../../../../store/types/base-metric.types';
-import { IMetricCell } from '../../../../../../store/types/metric.types';
 import { TableCellCustom } from '../../../list.types';
 import { ListAppInstance } from '../app-instance-types';
+import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
+import { IMetrics, IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 
 @Component({
   selector: 'app-table-cell-cf-cell-usage',

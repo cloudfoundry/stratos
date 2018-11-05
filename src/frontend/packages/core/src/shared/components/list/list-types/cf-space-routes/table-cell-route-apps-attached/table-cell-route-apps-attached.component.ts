@@ -1,7 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { CfRoute } from '../../../../../../store/types/route.types';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { CloudFoundrySpaceService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { CfRoute } from '../../../../../../../../store/src/types/route.types';
 
 @Component({
   selector: 'app-table-cell-route-apps-attached',

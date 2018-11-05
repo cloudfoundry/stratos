@@ -1,13 +1,10 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { EntityInfo } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-table-cell-route',

@@ -5,13 +5,13 @@ import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IService } from '../../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAllServices } from '../../../store/actions/service.actions';
-import { GetServicesForSpace } from '../../../store/actions/space.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { entityFactory, serviceSchemaKey } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../store/types/api.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { serviceSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { GetAllServices } from '../../../../../store/src/actions/service.actions';
+import { GetServicesForSpace } from '../../../../../store/src/actions/space.actions';
 
 @Injectable()
 export class ServicesWallService {

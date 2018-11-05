@@ -1,21 +1,21 @@
 
 import { of as observableOf, BehaviorSubject, OperatorFunction, Observable, Subscription, ReplaySubject } from 'rxjs';
 
-import { tap, distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { tap, publishReplay, refCount } from 'rxjs/operators';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
-import { SetResultCount } from '../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
-import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
+import { getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { tag } from 'rxjs-spy/operators';
+import { PaginationEntityState, PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';

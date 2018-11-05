@@ -3,9 +3,9 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { TableCellCustom } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-table-cell-service-instance-apps-attached',

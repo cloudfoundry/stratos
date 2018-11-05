@@ -13,40 +13,40 @@ import {
 import { APP_GUID, CF_GUID } from '../../shared/entity.tokens';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../store/actions/app-metadata.actions';
-import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
-import { GetSpace } from '../../store/actions/space.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import {
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  appSummarySchemaKey,
-  domainSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-  stackSchemaKey,
-} from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
-import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
-import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
-import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
-import { APIResource, EntityInfo } from '../../store/types/api.types';
-import { AppStat, AppSummary } from '../../store/types/app-metadata.types';
-import { PaginationEntityState } from '../../store/types/pagination.types';
-import {
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
-  PaginationObservables,
-} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { GetApplication, UpdateExistingApplication, UpdateApplication } from '../../../../store/src/actions/application.actions';
+import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  applicationSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+  stackSchemaKey,
+  serviceBindingSchemaKey,
+  domainSchemaKey,
+  organizationSchemaKey,
+  entityFactory,
+  appSummarySchemaKey,
+  appStatsSchemaKey,
+  spaceWithOrgKey
+} from '../../../../store/src/helpers/entity-factory';
+import { EntityInfo, APIResource } from '../../../../store/src/types/api.types';
+import { AppState } from '../../../../store/src/app-state';
+import { GetAppSummaryAction, GetAppStatsAction, AppMetadataTypes } from '../../../../store/src/actions/app-metadata.actions';
+import { AppSummary, AppStat } from '../../../../store/src/types/app-metadata.types';
+import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import {
+  PaginationObservables,
+  getPaginationObservables,
+  getCurrentPageRequestInfo
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { selectEntity, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { rootUpdatingKey, ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {

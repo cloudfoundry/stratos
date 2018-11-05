@@ -2,9 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { tap, map } from 'rxjs/operators';
 import { Subscription, Observable } from 'rxjs';
-import { EntityInfo, APIResource } from '../../../../store/types/api.types';
-import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ICfV2Info } from '../../../../core/cf-api.types';
+import { EntityInfo, APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-card-cf-info',

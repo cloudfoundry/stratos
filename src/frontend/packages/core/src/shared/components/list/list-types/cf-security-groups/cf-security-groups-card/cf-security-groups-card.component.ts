@@ -4,9 +4,9 @@ import { IRule, IRuleType, ISpace } from '../../../../../../core/cf-api.types';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-cf-security-groups-card',

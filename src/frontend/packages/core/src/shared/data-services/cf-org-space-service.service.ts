@@ -4,19 +4,20 @@ import { BehaviorSubject, combineLatest, Observable, Subscription, of as observa
 import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { GetAllOrganizations } from '../../store/actions/organization.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
-import {
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
-} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { APIResource } from '../../store/types/api.types';
-import { EndpointModel } from '../../store/types/endpoint.types';
+
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { AppState } from '../../../../store/src/app-state';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { GetAllOrganizations } from '../../../../store/src/actions/organization.actions';
+import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { organizationSchemaKey, spaceSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
+import {
+  getPaginationObservables,
+  getCurrentPageRequestInfo
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;

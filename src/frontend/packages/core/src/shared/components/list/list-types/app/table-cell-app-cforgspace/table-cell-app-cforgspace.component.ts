@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { endpointSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
+import { endpointSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-table-cell-app-cforgspace',

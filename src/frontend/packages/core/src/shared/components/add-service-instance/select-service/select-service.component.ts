@@ -6,17 +6,17 @@ import { filter, switchMap, tap, map } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
-import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import {
-  selectCreateServiceInstanceCfGuid,
-  selectCreateServiceInstanceSpaceGuid,
-} from '../../../../store/selectors/create-service-instance.selectors';
-import { APIResource } from '../../../../store/types/api.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
-import { entityFactory, serviceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import {
+  selectCreateServiceInstanceCfGuid,
+  selectCreateServiceInstanceSpaceGuid
+} from '../../../../../../store/src/selectors/create-service-instance.selectors';
+import { entityFactory, serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { SetCreateServiceInstanceServiceGuid } from '../../../../../../store/src/actions/create-service-instance.actions';
 
 @Component({
   selector: 'app-select-service',

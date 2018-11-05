@@ -2,22 +2,21 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { IApp } from '../../../../core/cf-api.types';
-import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
-import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { APIResource } from '../../../../store/types/api.types';
+
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { CsiGuidsService } from '../csi-guids.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
+import { createEntityRelationPaginationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { spaceSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { GetAllAppsInSpace } from '../../../../../../store/src/actions/space.actions';
+import { SetCreateServiceInstanceApp } from '../../../../../../store/src/actions/create-service-instance.actions';
 
 @Component({
   selector: 'app-bind-apps-step',

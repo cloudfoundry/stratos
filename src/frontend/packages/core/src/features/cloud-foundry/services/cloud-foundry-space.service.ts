@@ -9,29 +9,29 @@ import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAllSpaceUsers, GetSpace } from '../../../store/actions/space.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import {
-  applicationSchemaKey,
-  cfUserSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  spaceQuotaSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-} from '../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfUser, SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CfUser, SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../store/src/app-state';
+import {
+  createEntityRelationPaginationKey,
+  createEntityRelationKey
+} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  spaceSchemaKey,
+  applicationSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceQuotaSchemaKey,
+  serviceBindingSchemaKey,
+  routeSchemaKey,
+  entityFactory,
+  spaceWithOrgKey,
+  cfUserSchemaKey
+} from '../../../../../store/src/helpers/entity-factory';
+import { GetSpace, GetAllSpaceUsers } from '../../../../../store/src/actions/space.actions';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 const noQuotaDefinition = (orgGuid: string) => ({
   entity: {

@@ -8,16 +8,16 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { AppChip } from '../../../../chips/chips.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { OrgUserRoleNames, CfUser, IUserPermissionInOrg } from '../../../../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
+import { organizationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-org-user-permission-cell',

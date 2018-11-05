@@ -5,11 +5,11 @@ import { filter, map } from 'rxjs/operators';
 
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { GetService } from '../../../../../../store/actions/service.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { entityFactory, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { serviceSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import { GetService } from '../../../../../../../../store/src/actions/service.actions';
 
 @Component({
   selector: 'app-table-cell-service-name',

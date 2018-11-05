@@ -7,17 +7,17 @@ import { CurrentUserPermissions } from '../../../core/current-user-permissions.c
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { selectUsersRolesPicked } from '../../../store/selectors/users-roles.selector';
+import { CfUserRolesSelected } from '../../../../../store/src/types/users-roles.types';
 import {
-  CfUser,
   IUserPermissionInOrg,
+  CfUser,
   IUserPermissionInSpace,
-  OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../../../store/types/user.types';
-import { CfUserRolesSelected } from '../../../store/types/users-roles.types';
+  OrgUserRoleNames
+} from '../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
+import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../store/src/actions/users-roles.actions';
 
 /**
  * Component to manage the display and change of a specific org or space role. Will be checked if all users have role or user has selected

@@ -4,10 +4,10 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { IServicePlan } from '../../../../../../core/cf-api-svc.types';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-table-cell-service-plan',

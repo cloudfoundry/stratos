@@ -1,11 +1,10 @@
-import { Observable ,  combineLatest } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, tap, withLatestFrom, delay } from 'rxjs/operators';
 
-import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginationEntityState } from '../../../../store/types/pagination.types';
-import { splitCurrentPage, getCurrentPageStartIndex } from './local-list-controller.helpers';
+import { splitCurrentPage } from './local-list-controller.helpers';
 import { tag } from 'rxjs-spy/operators/tag';
-import { SetResultCount } from '../../../../store/actions/pagination.actions';
+import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+import { getCurrentPageRequestInfo } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;

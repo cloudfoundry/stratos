@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
-import { CfRoleChangeWithNames } from '../../../../../../store/types/users-roles.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { TableCellCustom } from '../../../list.types';
+import { CfRoleChangeWithNames } from '../../../../../../../../store/src/types/users-roles.types';
 
 @Component({
   selector: 'app-table-cell-confirm-org-space',

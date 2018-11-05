@@ -1,4 +1,4 @@
-import { InternalEventSeverity } from '../../../store/types/internal-events.types';
+import { InternalEventSeverity } from "../../../../../store/src/types/internal-events.types";
 
 export interface IHeaderBreadcrumbLink {
   value: string;

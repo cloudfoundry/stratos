@@ -8,34 +8,34 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
-import { FetchAllDomains } from '../../../store/actions/domains.actions';
-import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { DeleteOrganization, GetAllOrganizations } from '../../../store/actions/organization.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import {
-  applicationSchemaKey,
-  cfInfoSchemaKey,
-  domainSchemaKey,
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  privateDomainsSchemaKey,
-  quotaDefinitionSchemaKey,
-  routeSchemaKey,
-  serviceInstancesSchemaKey,
-  spaceSchemaKey,
-} from '../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplicationState } from '../../../store/types/application.types';
-import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
-import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CfUser } from '../../../../../store/src/types/user.types';
+import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
+import { GetAllOrganizations, DeleteOrganization } from '../../../../../store/src/actions/organization.actions';
+import {
+  createEntityRelationPaginationKey,
+  createEntityRelationKey
+} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  endpointSchemaKey,
+  organizationSchemaKey,
+  spaceSchemaKey,
+  domainSchemaKey,
+  quotaDefinitionSchemaKey,
+  privateDomainsSchemaKey,
+  applicationSchemaKey,
+  serviceInstancesSchemaKey,
+  routeSchemaKey,
+  entityFactory,
+  cfInfoSchemaKey
+} from '../../../../../store/src/helpers/entity-factory';
+import { AppState } from '../../../../../store/src/app-state';
+import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { CfApplicationState } from '../../../../../store/src/types/application.types';
+import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);

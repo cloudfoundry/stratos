@@ -6,13 +6,6 @@ import { filter, first, map, tap, share, publishReplay, refCount } from 'rxjs/op
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
 import { pathGet } from '../../core/utils.service';
-import { SetClientFilter } from '../../store/actions/pagination.actions';
-import { RouterNav } from '../../store/actions/router.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import { applicationSchemaKey, endpointSchemaKey } from '../../store/helpers/entity-factory';
-import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { APIResource } from '../../store/types/api.types';
-import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
   CfUser,
   CfUserRoleParams,
@@ -20,13 +13,22 @@ import {
   SpaceUserRoleNames,
   UserRoleInOrg,
   UserRoleInSpace,
-} from '../../store/types/user.types';
-import { UserRoleLabels } from '../../store/types/users-roles.types';
+} from '../../../../store/src/types/user.types';
+import { UserRoleLabels } from '../../../../store/src/types/users-roles.types';
+import { APIResource } from '../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace, ActiveRouteCfCell } from './cf-page.types';
-import { ICfRolesState } from '../../store/types/current-user-roles.types';
-import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { EndpointModel } from '../../store/types/endpoint.types';
-import { selectEntities } from '../../store/selectors/api.selectors';
+import { AppState } from '../../../../store/src/app-state';
+import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
+import { applicationSchemaKey, endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { RouterNav } from '../../../../store/src/actions/router.actions';
+import { ICfRolesState } from '../../../../store/src/types/current-user-roles.types';
+import {
+  getCurrentUserCFEndpointRolesState
+} from '../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 
 
 export interface IUserRole<T> {

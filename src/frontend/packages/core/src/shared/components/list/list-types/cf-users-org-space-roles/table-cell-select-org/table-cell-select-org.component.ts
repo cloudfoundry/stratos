@@ -5,12 +5,12 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { UsersRolesSetOrg } from '../../../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { selectUsersRolesOrgGuid } from '../../../../../../store/selectors/users-roles.selector';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
 import { map } from 'rxjs/operators';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
+import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/users-roles.actions';
 
 @Component({
   selector: 'app-table-cell-select-org',

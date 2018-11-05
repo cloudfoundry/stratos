@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-
+import { OverrideAppDetails } from '../../../../../../../../store/src/types/deploy-application.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import { GetAppEnvVarsAction } from '../../../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { appEnvVarsSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import {
-  getPaginationObservables,
   PaginationObservables,
-} from '../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { OverrideAppDetails } from '../../../../../../store/types/deploy-application.types';
+  getPaginationObservables
+} from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { GetAppEnvVarsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
+import { entityFactory, appEnvVarsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+
 
 export interface EnvVarStratosProject {
   deploySource: EnvVarStratosProjectSource;

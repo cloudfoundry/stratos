@@ -1,7 +1,6 @@
 import { IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
-import { AppStat } from '../../../store/types/app-metadata.types';
 
 export abstract class TableCellCustom<T> {
   dataSource: IListDataSource<T>;

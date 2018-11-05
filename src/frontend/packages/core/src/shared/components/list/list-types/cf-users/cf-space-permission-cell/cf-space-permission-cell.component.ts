@@ -8,22 +8,16 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { RemoveUserRole } from '../../../../../../store/actions/users.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { APIResource } from '../../../../../../store/types/api.types';
-import {
-  CfUser,
-  CfUserRoleParams,
-  IUserPermissionInSpace,
-  SpaceUserRoleNames,
-} from '../../../../../../store/types/user.types';
-import { UserRoleLabels } from '../../../../../../store/types/users-roles.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { SpaceUserRoleNames, CfUser, IUserPermissionInSpace } from '../../../../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
+import { organizationSchemaKey, spaceSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
 
 @Component({
   selector: 'app-cf-space-permission-cell',

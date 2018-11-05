@@ -11,14 +11,14 @@ import {
   IServicePlanVisibility,
 } from '../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { GetServiceInstances } from '../../store/actions/service-instances.actions';
-import { GetServicePlansForService } from '../../store/actions/service.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import { entityFactory, serviceInstancesSchemaKey, servicePlanSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { AppState } from '../../../../store/src/app-state';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { serviceInstancesSchemaKey, entityFactory, servicePlanSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { GetServiceInstances } from '../../../../store/src/actions/service-instances.actions';
+import { GetServicePlansForService } from '../../../../store/src/actions/service.actions';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
@@ -90,23 +90,23 @@ export const getServicePlans = (
   cfGuid: string,
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
-): Observable<APIResource<IServicePlan>[]>  => {
+): Observable<APIResource<IServicePlan>[]> => {
   return service$.pipe(
     filter(p => !!p),
     switchMap(service => {
-    if (service.entity.service_plans && service.entity.service_plans.length > 0) {
-      return observableOf(service.entity.service_plans);
-    } else {
-      const guid = service.metadata.guid;
-      const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
-      const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
-      // Could be a space-scoped service, make a request to fetch the plan
-      return getPaginationObservables<APIResource<IServicePlan>>({
-        store: store,
-        action: getServicePlansAction,
-        paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
-      }, true)
-        .entities$.pipe(share(), first());
-    }
-  }));
+      if (service.entity.service_plans && service.entity.service_plans.length > 0) {
+        return observableOf(service.entity.service_plans);
+      } else {
+        const guid = service.metadata.guid;
+        const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
+        const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
+        // Could be a space-scoped service, make a request to fetch the plan
+        return getPaginationObservables<APIResource<IServicePlan>>({
+          store: store,
+          action: getServicePlansAction,
+          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
+        }, true)
+          .entities$.pipe(share(), first());
+      }
+    }));
 };

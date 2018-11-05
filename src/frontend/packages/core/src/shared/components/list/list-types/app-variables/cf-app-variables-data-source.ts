@@ -2,15 +2,16 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { GetAppEnvVarsAction } from '../../../../../store/actions/app-metadata.actions';
-import { AppVariablesAdd, AppVariablesEdit } from '../../../../../store/actions/app-variables.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { appEnvVarsSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
+
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppEnvVarsState } from '../../../../../../../store/src/types/app-metadata.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GetAppEnvVarsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
+import { entityFactory, appEnvVarsSchemaKey, applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { AppVariablesAdd, AppVariablesEdit } from '../../../../../../../store/src/actions/app-variables.actions';
 
 export interface ListAppEnvVar {
   name: string;

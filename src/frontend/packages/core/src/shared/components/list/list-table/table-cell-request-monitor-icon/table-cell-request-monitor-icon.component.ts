@@ -1,8 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { rootUpdatingKey } from '../../../../../store/reducers/api-request-reducer/types';
 import { schema } from 'normalizr';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
-import { APIResource } from '../../../../../store/types/api.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 export interface ITableCellRequestMonitorIconConfig {
   entityKey: string;

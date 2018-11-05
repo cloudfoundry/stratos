@@ -1,5 +1,5 @@
+import { APIResource } from './../../../../../../../../store/src/types/api.types';
 import { Component, OnInit, Input } from '@angular/core';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { IFeatureFlag } from '../../../../../../core/cf-api.types';
 
 @Component({
