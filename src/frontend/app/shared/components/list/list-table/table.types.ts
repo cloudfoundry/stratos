@@ -5,6 +5,15 @@ import { listTableCells, TableCellComponent } from './table-cell/table-cell.comp
 import { TableRowComponent } from './table-row/table-row.component';
 import { TableComponent } from './table.component';
 
+export interface ICellAsyncValue {
+  pathToObs: string;
+  pathToValue: string;
+}
+
+export interface ICellAsyncLink {
+  pathToValue: string;
+}
+
 export interface ICellDefinition<T> {
   // Dot separated path to get the value from the row
   valuePath?: string;
@@ -12,9 +21,12 @@ export interface ICellDefinition<T> {
   getValue?: (row: T) => string;
   // Should the value of getLink be used in a href or routerLink
   externalLink?: boolean;
-  // Automatically turns the row into a link
+  // Automatically turns the cell into a link
   getLink?: (row: T) => string;
+  // Used in conjunction with asyncValue
+  getAsyncLink?: (value) => string;
   newTab?: boolean;
+  asyncValue?: ICellAsyncValue;
 }
 
 export type CellConfigFunction<T> = (row: T) => any;

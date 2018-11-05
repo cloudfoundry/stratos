@@ -24,7 +24,7 @@ describe('DialogConfirmComponent', () => {
   }
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogConfirmComponent ],
+      declarations: [DialogConfirmComponent],
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },
         { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
@@ -35,7 +35,7 @@ describe('DialogConfirmComponent', () => {
         BrowserAnimationsModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

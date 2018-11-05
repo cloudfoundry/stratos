@@ -582,7 +582,8 @@ export function getInitialTestStoreState(): AppState {
       serviceBinding: {},
       service: {},
       githubCommits: {},
-      domain: {}
+      domain: {},
+      metrics: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -21729,7 +21730,7 @@ export function getInitialTestStoreState(): AppState {
           token_endpoint: 'https://cf.uaa.127.0.0.1.xip.io:2793',
           doppler_logging_endpoint: 'wss://doppler.127.0.0.1.xip.io:4443',
           skip_ssl_validation: true,
-          sso_allowed: true,          
+          sso_allowed: true,
           user: {
             guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
             name: 'admin',

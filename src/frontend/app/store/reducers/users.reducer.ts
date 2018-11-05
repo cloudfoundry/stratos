@@ -150,6 +150,9 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
   // (via WrapperRequestActionSuccess). Therefore in order to avoid partial entities we need to stick the whole user set into the store
   // including `missingRoles`.
   const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserSchemaKey];
+  if (!usersInResponse) {
+    return users;
+  }
 
   // Create a delta of the changes, this will ensure we only return an updated state if there are updates
   const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {

@@ -59,7 +59,6 @@ import {
 } from './list.component.types';
 
 
-
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
@@ -123,7 +122,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       map(value => value as string),
       tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      }), ).subscribe();
+      })).subscribe();
   }
 
   private initialPageEvent: PageEvent;

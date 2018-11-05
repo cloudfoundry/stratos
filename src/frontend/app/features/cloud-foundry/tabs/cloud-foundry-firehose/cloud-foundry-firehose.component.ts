@@ -1,16 +1,13 @@
-import { OnInit, Component } from '@angular/core';
-import * as moment from 'moment';
-import websocketConnect from 'rxjs-websockets';
+import { Component, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { catchError, filter, map, share } from 'rxjs/operators';
+import websocketConnect from 'rxjs-websockets';
+import { catchError, filter, share } from 'rxjs/operators';
 
 import { environment } from '../../../../../environments/environment';
-import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
-import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 import { LoggerService } from '../../../../core/logger.service';
 import { UtilsService } from '../../../../core/utils.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 
 @Component({
   selector: 'app-cloud-foundry-firehose',

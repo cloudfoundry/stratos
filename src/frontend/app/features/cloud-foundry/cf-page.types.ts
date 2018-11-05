@@ -6,3 +6,9 @@ export class ActiveRouteCfOrgSpace {
   orgGuid: string;
   spaceGuid: string;
 }
+
+@Injectable()
+export class ActiveRouteCfCell {
+  cfGuid: string;
+  cellId: string;
+}

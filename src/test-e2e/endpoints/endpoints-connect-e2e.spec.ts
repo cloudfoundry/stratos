@@ -31,6 +31,7 @@ describe('Endpoints', () => {
         // expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Close the snack bar telling us that there are no connected endpoints
+        connectDialog.snackBar.waitForMessage('There are no connected endpoints, connect with your personal credentials to get started.');
         connectDialog.snackBar.safeClose();
 
         // Get the row in the table for this endpoint
@@ -74,14 +75,13 @@ describe('Endpoints', () => {
 
       it('should update service instance data on register', () => {
         connectDialog.connect();
-        connectDialog.waitUntilNotShown();
         // Wait for snackbar
-        connectDialog.snackBar.waitUntilShown('Connect success snackbar');
+        connectDialog.snackBar.waitForMessage('Connected ' + toConnect.name);
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
-
+        connectDialog.waitUntilNotShown();
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
           endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();

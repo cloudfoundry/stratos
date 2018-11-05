@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MomentModule } from 'ngx-moment';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
@@ -65,6 +66,7 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
 import {
   CreateApplicationStep1Component,
 } from './components/create-application/create-application-step1/create-application-step1.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
@@ -100,6 +102,10 @@ import { LoadingPageComponent } from './components/loading-page/loading-page.com
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
+import {
+  MetricsParentRangeSelectorComponent,
+} from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
@@ -109,6 +115,7 @@ import { RunningInstancesComponent } from './components/running-instances/runnin
 import { SchemaFormComponent } from './components/schema-form/schema-form.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
@@ -134,6 +141,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
 @NgModule({
@@ -146,7 +154,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
-    MaterialDesignFrameworkModule
+    MaterialDesignFrameworkModule,
+    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -240,6 +249,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     SchemaFormComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -328,7 +341,11 @@ import { UserPermissionDirective } from './user-permission.directive';
     BindAppsStepComponent,
     CapitalizeFirstPipe,
     CfEndpointsMissingComponent,
-    RoutingIndicatorComponent
+    RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -346,7 +363,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     PaginationMonitorFactory,
     CloudFoundryService,
     InternalEventMonitorFactory,
-    ServiceActionHelperService
+    ServiceActionHelperService,
+    MetricsRangeSelectorService
   ]
 })
 export class SharedModule { }

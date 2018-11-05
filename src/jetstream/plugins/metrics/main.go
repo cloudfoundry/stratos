@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 )
@@ -72,6 +73,7 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
+	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
 }
 
 func (m *MetricsSpecification) GetType() string {
@@ -195,6 +197,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 			// Look to see if we can find the metrics provider for this URL
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
+				endpoint.Metadata["metrics_job"] = provider.Job
 			}
 		}
 	}
@@ -215,12 +218,30 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	endpointsMap := make(map[string]*interfaces.ConnectedEndpoint)
 	results := make(map[string]EndpointMetricsRelation)
 
+	// Get Endpoints the user is connected to
 	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID)
+
 	if err != nil {
 		return nil, err
 	}
 
-	for _, endpoint := range userEndpoints {
+	allUserAccessibleEndpoints := userEndpoints
+
+	// Get Endpoints that are shared in the system
+	systemSharedEndpoints, err := m.portalProxy.ListEndpointsByUser(tokens.SystemSharedUserGuid)
+
+	if err != nil {
+		return nil, err
+	}
+	for _, endpoint := range systemSharedEndpoints {
+		allUserAccessibleEndpoints = append(allUserAccessibleEndpoints, endpoint)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, endpoint := range allUserAccessibleEndpoints {
 		if stringInSlice(endpoint.GUID, cnsiList) {
 			// Found the Endpoint, so add it to our list
 			endpointsMap[endpoint.GUID] = endpoint
@@ -244,10 +265,12 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	for _, metricProviderInfo := range metricsProviders {
 		for guid, info := range endpointsMap {
 			// Depends on the type
-			if info.DopplerLoggingEndpoint == metricProviderInfo.URL {
+			if info.CNSIType == metricProviderInfo.Type && info.DopplerLoggingEndpoint == metricProviderInfo.URL {
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info
-				relate.metrics = &metricProviderInfo
+				// Make a copy
+				relate.metrics = &MetricsMetadata{}
+				*relate.metrics = metricProviderInfo
 				results[guid] = relate
 				delete(endpointsMap, guid)
 				break
@@ -255,11 +278,10 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 		}
 	}
 
-	// If there are still items in the endpoints map, then we did not find all metric providers
+	// Did we find a metric provider for each endpoint?
 	if len(endpointsMap) != 0 {
 		return nil, errors.New("Can not find a metric provider for all of the specified endpoints")
 	}
-
 	return results, nil
 }
 

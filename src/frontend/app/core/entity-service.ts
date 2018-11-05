@@ -1,21 +1,19 @@
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
 import {
-  ActionState,
   RequestInfoState,
   RequestSectionKeys,
   TRequestTypeKeys,
-  UpdatingSection
+  UpdatingSection,
 } from '../store/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
-import { APIResource, EntityInfo } from '../store/types/api.types';
+import { EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
-
-type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
