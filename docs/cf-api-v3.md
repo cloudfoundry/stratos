@@ -77,6 +77,9 @@ Then Stratos should either ..
   - Stratos show summary information such as number of users (see [Cloud Foundry API v2 Feature Usage V2 Specifics - Cloud Foundry, Organisation and Space Summary Information](cf-api-v2-usage.md#cloud-foundry-organisation-and-space-summary-information) for specific stats)
   - In an ideal world we could hit one endpoint that would give us the counts for all of these details. Filters could then limit this to
     an organisation or space
+- Fetching a list of users as a non-cf admin involves making a request to every organisation (`organization/${guid}/users`). The response
+  of all of these calls contains a lot of overlapping data
+  - Ideally making a request to `/users` as a user with 0:M org roles would return a list of users in those organisations
 
 ### Stratos Tasks
 - Depending on adoption approach, Stratos needs to support v2 and v3 endpoints concurrently
