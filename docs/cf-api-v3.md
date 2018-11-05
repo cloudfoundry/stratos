@@ -19,14 +19,14 @@ See [Cloud Foundry API v2 Feature Usage](cf-api-v2-usage.md) for v2 information
 ### Collections - Sorting
 - It looks like all endpoints can be sorted via `created_at` and `updated_at` dates, plus some also have `name`. Given that v2 really only
   supported sorting by `created_at` date this should be fine for feature parity
-- However in order for Stratos to leave behind local sorting there are many missing sort fields (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#Sorting/Filtering))
+- However in order for Stratos to leave behind local sorting there are many missing sort fields (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingfiltering))
 
 ### Collections - Filtering
 - Similar level of filtering is available with the addition of `name`
-- In order for Stratos to leave behind local filtering there are still some fields that need to be implemented (see [Cloud Foundry API v2 Feature Usage # V2 Specifics # Sorting/Filtering](cf-api-v2-usage.md))
+- In order for Stratos to leave behind local filtering there are still some fields that need to be implemented (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingfiltering))
 
 ### Entity Validation
-- For v2 info see [Cloud Foundry API v2 Feature Usage - Entity Relations & Validation](cf-api-v2-usage.md#Entity-Relations-&-Validation)
+- For v2 info see [Cloud Foundry API v2 Feature Usage - Entity Relations & Validation](cf-api-v2-usage.md#entity-relations--validation)
 - It looks like, given that `include` is considerable beefed up, this will still be possible in v3. An update of the entity relations
   process will be required though.
 
@@ -67,14 +67,14 @@ Then Stratos should either ..
   - Might be wrong on this one due to the lack of current `include` integration
 
 ### Frustrating Issues
-- Cannot utilise v3 pagination due to limited sorting and filtering functionality (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#Sorting/Filtering) for missing fields)
+- Cannot utilise v3 pagination due to limited sorting and filtering functionality (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingFiltering) for missing fields)
   - This is currently on par with v2, but causes us a lot of headaches for large data sets
 - The Stratos method of calculating application state is much harder
   - Additional requests to app `/packages` are required. This would be resolved if applications were `link`ed to package
   - Would love a flag in `/apps` to also return the `processes` data. This would mean a longer request time, but we're making that request
     in the frontend anyway.
 - No easy way to fetch organisation or space summary information
-  - Stratos show summary information such as number of users (see [Cloud Foundry API v2 Feature Usage V2 Specifics - Cloud Foundry, Organisation and Space Summary Information](cf-api-v2-usage.md#Cloud-Foundry,-Organisation-and-Space-Summary-Information) for specific stats)
+  - Stratos show summary information such as number of users (see [Cloud Foundry API v2 Feature Usage V2 Specifics - Cloud Foundry, Organisation and Space Summary Information](cf-api-v2-usage.md#cloud-foundry-organisation-and-space-summary-information) for specific stats)
   - In an ideal world we could hit one endpoint that would give us the counts for all of these details. Filters could then limit this to
     an organisation or space
 
