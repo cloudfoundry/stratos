@@ -9,9 +9,9 @@ import {
   appDataSort,
   CloudFoundryEndpointService
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../store/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 
 
 const RECENT_ITEMS_COUNT = 10;

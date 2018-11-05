@@ -4,13 +4,13 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-service-instance-card',

@@ -3,7 +3,6 @@ import { DataSource } from '@angular/cdk/table';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
-import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/types';
 import { AppMonitorComponentTypes, IApplicationMonitorComponentState } from '../app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
 import {
@@ -11,6 +10,7 @@ import {
   TableCellRequestMonitorIconComponent
 } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../list/list-table/table.types';
+import { rootUpdatingKey } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 @Component({
   selector: 'app-action-monitor',

@@ -12,19 +12,9 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
-import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
-import { ResetPagination } from '../../../../store/actions/pagination.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
-import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
-import { APIResource } from '../../../../store/types/api.types';
-import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { RestageApplication } from '../../../../store/actions/application.actions';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
-import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
 import {
   getTabsFromExtensions,
   StratosTabType,
@@ -32,6 +22,16 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../core/extension/extension-service';
+import { entityFactory, applicationSchemaKey, appStatsSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
+import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { ResetPagination } from '../../../../../../store/src/actions/pagination.actions';
+import { RestageApplication } from '../../../../../../store/src/actions/application.actions';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(

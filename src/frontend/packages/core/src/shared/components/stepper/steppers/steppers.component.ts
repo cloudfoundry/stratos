@@ -14,11 +14,11 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/logger.service';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
+import { AppState } from '../../../../../../store/src/app-state';
+import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 
 
 
@@ -136,7 +136,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss');
           }
           return [];
-        }), ).subscribe();
+        })).subscribe();
     }
   }
 

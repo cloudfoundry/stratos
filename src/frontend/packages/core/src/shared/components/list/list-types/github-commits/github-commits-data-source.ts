@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { EntitySchema, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../store/types/api.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { GithubCommit } from '../../../../../../../store/src/types/github.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
+import { EntitySchema, githubCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {

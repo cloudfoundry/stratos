@@ -2,12 +2,12 @@ import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { Logout } from '../../../store/actions/auth.actions';
-import { InternalEventSeverity } from '../../../store/types/internal-events.types';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
-import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
-import { AppState } from '../../../../packages/store/src/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
+import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { Logout } from '../../../../../store/src/actions/auth.actions';
+import { AppState } from '../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-page-header',

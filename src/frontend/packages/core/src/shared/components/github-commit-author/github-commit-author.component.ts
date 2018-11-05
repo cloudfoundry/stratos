@@ -1,6 +1,5 @@
+import { GithubCommit } from './../../../../../store/src/types/github.types';
 import { Component, Input } from '@angular/core';
-
-import { GithubCommit } from '../../../store/types/github.types';
 
 @Component({
   selector: 'app-github-commit-author',

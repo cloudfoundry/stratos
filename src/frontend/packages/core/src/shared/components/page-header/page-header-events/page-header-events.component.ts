@@ -5,13 +5,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { withLatestFrom, map, filter, distinctUntilChanged } from 'rxjs/operators';
 
-import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
-import { AppState } from '../../../../../packages/store/src/app-state';
 import { Store } from '@ngrx/store';
-import { DashboardState } from '../../../../store/reducers/dashboard-reducer';
-import { ToggleHeaderEvent } from '../../../../store/actions/dashboard-actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-page-header-events',

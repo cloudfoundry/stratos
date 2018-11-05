@@ -1,16 +1,16 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 
-import {map} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
 import { AppNameUniqueChecking } from '../../app-name-unique.directive/app-name-unique.directive';
+import { AppState } from '../../../../../../store/src/app-state';
+import { SetNewAppName } from '../../../../../../store/src/actions/create-applications-page.actions';
 
 @Component({
   selector: 'app-create-application-step2',

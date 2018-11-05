@@ -6,11 +6,7 @@ import { map, startWith } from 'rxjs/operators';
 import { IApp } from '../../../../../../core/cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { endpointSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { EndpointModel } from '../../../../../../store/types/endpoint.types';
+
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -18,6 +14,11 @@ import {
 } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { entityFactory, applicationSchemaKey, endpointSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
 
 @Component({
   selector: 'app-card-app',

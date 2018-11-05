@@ -14,17 +14,17 @@ import {
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 
 
 @Component({

@@ -2,14 +2,7 @@ import { NgZone } from '@angular/core';
 import * as moment from 'moment';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
-
-import {
-  InternalEventSeverity,
-  InternalEventsState,
-  InternalEventSubjectState,
-} from '../../store/types/internal-events.types';
-
-
+import { InternalEventSubjectState, InternalEventsState, InternalEventSeverity } from '../../../../store/src/types/internal-events.types';
 
 export function newNonnAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {

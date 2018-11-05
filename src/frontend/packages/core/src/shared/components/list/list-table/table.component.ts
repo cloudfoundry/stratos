@@ -1,9 +1,9 @@
+import { ListSort } from './../../../../../../store/src/actions/list.actions';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material';
 import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { ListSort } from '../../../../store/actions/list.actions';
 import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';

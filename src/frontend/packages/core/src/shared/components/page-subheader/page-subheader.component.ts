@@ -7,8 +7,8 @@ import { ISubHeaderTabs } from './page-subheader.types';
 
 import { getScrollBarWidth } from '../../../core/helper-classes/dom-helpers';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { selectSideNavState } from '../../../store/selectors/dashboard.selectors';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectSideNavState } from '../../../../../store/src/selectors/dashboard.selectors';
 
 @Component({
   selector: 'app-page-subheader',

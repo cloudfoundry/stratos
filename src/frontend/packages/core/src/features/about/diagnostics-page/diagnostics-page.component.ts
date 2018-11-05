@@ -5,9 +5,9 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { AuthState } from '../../../store/reducers/auth.reducer';
-import { SessionData } from '../../../store/types/auth.types';
+import { SessionData } from '../../../../../store/src/types/auth.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 
 @Component({
   selector: 'app-diagnostics-page',

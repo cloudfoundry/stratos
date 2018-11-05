@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../packages/store/src/app-state';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
-import { DeleteServiceBinding } from '../../store/actions/service-bindings.actions';
-import { DeleteServiceInstance } from '../../store/actions/service-instances.actions';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
-import { APIResource } from '../../store/types/api.types';
-import { RouterNav, RouterQueryParams } from '../../store/actions/router.actions';
+import { AppState } from '../../../../store/src/app-state';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
+import { DeleteServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
+import { DeleteServiceInstance } from '../../../../store/src/actions/service-instances.actions';
+
 
 @Injectable()
 export class ServiceActionHelperService {

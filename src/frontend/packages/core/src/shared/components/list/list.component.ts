@@ -36,12 +36,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { entityFactory } from '../../../store/helpers/entity-factory';
-import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { EntityMonitor } from '../../monitors/entity-monitor';
-import { ListView } from './../../../store/actions/list.actions';
 import { getDefaultRowState, IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
@@ -57,6 +52,10 @@ import {
   ListConfig,
   ListViewTypes,
 } from './list.component.types';
+import { ListView, ListPagination, ListSort, ListFilter, SetListViewAction } from '../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 
 
 
@@ -123,7 +122,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       map(value => value as string),
       tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      }), ).subscribe();
+      })).subscribe();
   }
 
   private initialPageEvent: PageEvent;

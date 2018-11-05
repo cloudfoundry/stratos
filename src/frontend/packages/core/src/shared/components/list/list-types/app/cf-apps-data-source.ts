@@ -1,27 +1,27 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
-import { GetAllApplications } from '../../../../../store/actions/application.actions';
-import { CreatePagination } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
+
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { GetAllApplications } from '../../../../../../../store/src/actions/application.actions';
+import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  applicationSchemaKey,
+  spaceSchemaKey,
+  organizationSchemaKey,
+  routeSchemaKey,
+  entityFactory
+} from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
+import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
   return new GetAllApplications(paginationKey, [

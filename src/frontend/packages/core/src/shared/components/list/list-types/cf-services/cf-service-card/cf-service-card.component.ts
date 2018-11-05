@@ -3,11 +3,12 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../../store/types/api.types';
+
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 
 export interface ServiceTag {
   value: string;

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { APIResource } from '../../../../store/types/api.types';
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { AppChip } from '../../chips/chips.component';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-compact-service-instance-card',

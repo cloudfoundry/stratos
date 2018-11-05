@@ -1,16 +1,16 @@
 
-import {combineLatest as observableCombineLatest,  Observable } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 
-import {take} from 'rxjs/operators';
-import { SessionData } from '../../../store/types/auth.types';
+import { take } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { EndpointModel, EndpointState, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../../../../packages/store/src/app-state';
-import { AuthUser, selectSessionData } from '../../../store/reducers/auth.reducer';
 import { CfAuthPrinciple } from './principal';
 import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
-import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
+import { IRequestEntityTypeState, AppState } from '../../../../../store/src/app-state';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { SessionData } from '../../../../../store/src/types/auth.types';
+import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 
 /**
  * NOTE - WIP

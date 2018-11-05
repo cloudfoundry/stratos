@@ -1,14 +1,12 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 
-import { GetAllAppEvents } from '../../../../../store/actions/app-event.actions';
-import { AddParams, RemoveParams } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { EntityInfo } from '../../../../../store/types/api.types';
-import { PaginationEntityState, QParam } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { appEventSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
+import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-event.actions';
+import { entityFactory, appEventSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 

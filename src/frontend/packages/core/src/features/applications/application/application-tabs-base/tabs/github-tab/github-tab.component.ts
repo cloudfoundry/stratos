@@ -12,18 +12,19 @@ import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
-import { FetchBranchesForProject, FetchCommit } from '../../../../../../store/actions/deploy-applications.actions';
-import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
-import {
-  entityFactory,
-  githubBranchesSchemaKey,
-  githubCommitSchemaKey,
-  githubRepoSchemaKey,
-} from '../../../../../../store/helpers/entity-factory';
-import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
+
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { GithubRepo, GithubCommit } from '../../../../../../../../store/src/types/github.types';
+import {
+  githubRepoSchemaKey,
+  entityFactory,
+  githubCommitSchemaKey,
+  githubBranchesSchemaKey
+} from '../../../../../../../../store/src/helpers/entity-factory';
+import { FetchGitHubRepoInfo } from '../../../../../../../../store/src/actions/github.actions';
+import { FetchCommit, FetchBranchesForProject } from '../../../../../../../../store/src/actions/deploy-applications.actions';
 
 
 @Component({

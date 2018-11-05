@@ -7,12 +7,10 @@ import { map, startWith, switchMap, withLatestFrom, observeOn } from 'rxjs/opera
 import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import {
-  getSpacesFromOrgWithRole,
-} from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { AppState } from '../../../../../../store/src/app-state';
+import { SetCFDetails } from '../../../../../../store/src/actions/create-applications-page.actions';
+import { getSpacesFromOrgWithRole } from '../../../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
 
 @Component({
   selector: 'app-create-application-step1',

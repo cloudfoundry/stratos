@@ -3,20 +3,14 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, distinctUntilChanged } from 'rxjs/operators';
 
-import { ListFilter, ListPagination, ListSort } from '../../../../store/actions/list.actions';
-import {
-  AddParams,
-  SetClientFilter,
-  SetClientPage,
-  SetClientPageSize,
-  SetPage,
-} from '../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
-import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource } from './list-data-source-types';
 import { tag } from 'rxjs-spy/operators';
+import { ListPagination, ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
+import { PaginationEntityState, PaginationClientFilter } from '../../../../../../store/src/types/pagination.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { SetClientPage, SetPage, SetClientPageSize, AddParams, SetClientFilter } from '../../../../../../store/src/actions/pagination.actions';
+import { defaultClientPaginationPageSize } from '../../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;

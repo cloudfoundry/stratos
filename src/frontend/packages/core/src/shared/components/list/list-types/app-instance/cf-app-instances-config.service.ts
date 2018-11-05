@@ -8,12 +8,6 @@ import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { IMetricMatrixResult, IMetrics } from '../../../../../store/types/base-metric.types';
-import { IMetricApplication } from '../../../../../store/types/metric.types';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -24,6 +18,12 @@ import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
+import { DeleteApplicationInstance } from '../../../../../../../store/src/actions/application.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { metricSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 
 @Injectable()

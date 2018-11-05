@@ -3,9 +3,6 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { UtilsService } from '../../../../../core/utils.service';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { ITableColumn } from '../../list-table/table.types';
@@ -20,6 +17,9 @@ import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/tab
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 
 @Injectable()
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {

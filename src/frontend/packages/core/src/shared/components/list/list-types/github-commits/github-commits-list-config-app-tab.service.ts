@@ -8,23 +8,24 @@ import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import {
-  CheckProjectExists,
-  FetchBranchesForProject,
-  SetAppSourceDetails,
-  SetDeployBranch,
-  SetDeployCommit,
-  StoreCFSettings,
-} from '../../../../../store/actions/deploy-applications.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { selectEntity } from '../../../../../store/selectors/api.selectors';
-import { APIResource } from '../../../../../store/types/api.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
+
 import { IListAction } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { GithubCommit } from '../../../../../../../store/src/types/github.types';
+import {
+  StoreCFSettings,
+  CheckProjectExists,
+  SetAppSourceDetails,
+  SetDeployBranch,
+  SetDeployCommit,
+  FetchBranchesForProject
+} from '../../../../../../../store/src/actions/deploy-applications.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { githubBranchesSchemaKey, entityFactory, githubCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {

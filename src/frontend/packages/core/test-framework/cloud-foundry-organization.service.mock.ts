@@ -1,8 +1,7 @@
 import { Observable, of as observableOf } from 'rxjs';
-
-import { GetAllOrgUsers } from '../../../store/src/actions/organization.actions';
-import { getDefaultRequestState } from '../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../../store/src/types/api.types';
+import { EntityInfo, APIResource } from '../../store/src/types/api.types';
+import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
+import { GetAllOrgUsers } from '../../store/src/actions/organization.actions';
 
 export class CloudFoundryOrganizationServiceMock {
   org$: Observable<EntityInfo<APIResource<any>>> = observableOf(

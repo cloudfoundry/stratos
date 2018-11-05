@@ -9,22 +9,22 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
-import { GetService } from '../../../../../../store/actions/service.actions';
-import {
-  entityFactory,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceSchemaKey,
-} from '../../../../../../store/helpers/entity-factory';
-import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
-import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
+import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import {
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceSchemaKey
+} from '../../../../../../../../store/src/helpers/entity-factory';
+import { GetServiceInstance } from '../../../../../../../../store/src/actions/service-instances.actions';
+import { GetService } from '../../../../../../../../store/src/actions/service.actions';
+import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
 
 
 
@@ -141,7 +141,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
           return null;
         }),
         filter(p => !!p),
-    );
+      );
   }
 
   showEnvVars = (envVarData: EnvVarData) => {
