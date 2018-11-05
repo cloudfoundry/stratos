@@ -74,7 +74,7 @@ func (k *KubeConfigUser) getOIDCConfig() (*KubeConfigAuthProviderOIDC, error) {
 		return nil, errors.New("User doesn't use OIDC")
 	}
 	OIDCConfig := &KubeConfigAuthProviderOIDC{}
-	err := unMarshalHelper(k.User.AuthProvider.Config, k)
+	err := unMarshalHelper(k.User.AuthProvider.Config, OIDCConfig)
 	if err != nil {
 		log.Info(err)
 		return nil, errors.New("Can not unmarshal OIDC Auth Provider configuration")
