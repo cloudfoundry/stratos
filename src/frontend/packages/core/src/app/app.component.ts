@@ -5,7 +5,7 @@ import { create } from 'rxjs-spy';
 
 import { environment } from '../environments/environment';
 import { LoggedInService } from './logged-in.service';
-import { AppState } from './store/app-state';
+import { AppState } from '../../../store/src/app-state';
 
 
 @Component({
