@@ -1,6 +1,6 @@
 import { Observable, of as observableOf } from 'rxjs';
 
-import { GetAllSpaceUsers } from '../store/actions/space.actions';
+import { GetAllSpaceUsers } from '../../packages/store/src/actions/space.actions';
 
 export class CloudFoundrySpaceServiceMock {
 

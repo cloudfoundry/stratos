@@ -3,8 +3,8 @@ import { schema as normalizrSchema } from 'normalizr';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { AppState } from '../../packages/store/src/lib/app-state';
-import { RequestSectionKeys } from '../store/reducers/api-request-reducer/types';
-import { IRequestAction } from '../store/types/request.types';
+import { RequestSectionKeys } from '../../packages/store/src/reducers/api-request-reducer/types';
+import { IRequestAction } from '../../packages/store/src/types/request.types';
 
 export function generateTestEntityServiceProvider(
   guid: string,
