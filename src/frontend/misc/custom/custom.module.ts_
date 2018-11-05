@@ -7,3 +7,5 @@ import { NgModule } from '@angular/core';
 @NgModule()
 export class CustomImportModule { }
 
+@NgModule()
+export class CustomRoutingImportModule { }

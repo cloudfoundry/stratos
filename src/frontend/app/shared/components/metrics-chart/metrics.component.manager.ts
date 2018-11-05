@@ -1,8 +1,12 @@
+import { ChartSeries, IMetricsData } from '../../../store/types/base-metric.types';
 import { MetricsConfig } from './metrics-chart.component';
-import { IMetrics, ChartSeries } from '../../../store/types/base-metric.types';
 
+function dateLessThanUnix(date: Date, unix: number) {
+  const unixDate = date.getTime() / 1000;
+  return unixDate < unix;
+}
 export class MetricsChartManager {
-  static mapMatrix<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
+  static mapMatrix<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
     return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),
@@ -13,7 +17,7 @@ export class MetricsChartManager {
       })
     );
   }
-  static mapVector<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
+  static mapVector<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
     return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),
@@ -23,5 +27,40 @@ export class MetricsChartManager {
         }]
       })
     );
+  }
+  static fillOutTimeOrderedChartSeries(
+    timeOrdered: ChartSeries[],
+    start: number,
+    end: number,
+    step: number,
+    metricConfig: MetricsConfig
+  ): ChartSeries[] {
+    if (!timeOrdered || !timeOrdered.length) {
+      return timeOrdered;
+    }
+    return timeOrdered.reduce((allSeries, series) => {
+      let pos = 0;
+      const newSeries = [];
+      for (let t = start; t <= end; t += step) {
+        const current = series.series[pos];
+        if (series.series.length > pos && dateLessThanUnix(series.series[pos].name as Date, t + step)) {
+          newSeries.push({
+            name: current.name,
+            value: current.value
+          });
+          pos++;
+        } else {
+          newSeries.push({
+            name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
+            value: 0
+          });
+        }
+      }
+      allSeries.push({
+        name: series.name,
+        series: newSeries
+      });
+      return allSeries;
+    }, []);
   }
 }

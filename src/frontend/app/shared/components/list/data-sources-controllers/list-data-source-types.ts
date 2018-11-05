@@ -2,6 +2,7 @@ import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
+import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
 
@@ -86,6 +87,8 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
    */
   setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam);
   refresh();
+
+  updateMetricsAction(newAction: MetricsAction);
 }
 
 export type getRowUniqueId<T> = (T) => string;
@@ -101,6 +104,7 @@ export interface RowState {
   highlighted?: boolean;
   deleting?: boolean;
   warning?: boolean;
+  disabled?: boolean;
   [customState: string]: any;
 }
 

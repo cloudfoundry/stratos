@@ -60,7 +60,6 @@ import {
 } from './list.component.types';
 
 
-
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',

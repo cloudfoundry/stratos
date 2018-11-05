@@ -12,6 +12,7 @@ import { delay, first, map, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
+import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } from '../../../core/extension/extension-service';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -28,6 +29,8 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   constructor(public endpointsService: EndpointsService, public store: Store<AppState> ) { }
 
   sub: Subscription;
+
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
   ngOnInit(): void {
     const params = queryParamMap();

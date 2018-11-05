@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ListConfig } from '../../../../../shared/components/list/list.component.types';
+import { Component } from '@angular/core';
+
 import {
-  CfOrgUsersListConfigService
+  CfOrgUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-org-users/cf-org-users-list-config.service';
+import { ListConfig } from '../../../../../shared/components/list/list.component.types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-users',
@@ -13,11 +14,4 @@ import {
     useClass: CfOrgUsersListConfigService
   }]
 })
-export class CloudFoundryOrganizationUsersComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class CloudFoundryOrganizationUsersComponent { }

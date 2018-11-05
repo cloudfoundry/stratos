@@ -4,13 +4,18 @@
     <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
       <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
         <div class="list-component__header__left">
+          <!-- List Title -->
           <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
+          <!-- Time range selector -->
+          <div class="list-component__header__left--metrics-range" *ngIf="config.showMetricsRange && !(isAddingOrSelecting$ | async)">
+            <app-metrics-range-selector [baseAction]="config.getDataSource().action" (metricsAction)="config.getDataSource().updateMetricsAction($event)"></app-metrics-range-selector>
+          </div>
+          <!-- Text to show when selecting rows -->
           <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'">
-              <mat-select matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length"
-                (selectionChange)="multiFilterConfig.select.next($event.value)">
+              <mat-select id="{{multiFilterConfig.key}}" matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length" (selectionChange)="multiFilterConfig.select.next($event.value)">
                 <mat-option>All</mat-option>
                 <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                   {{selectItem.label}}
@@ -101,8 +106,7 @@
     <div class="list-component__body">
       <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
         <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController"
-          [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController" [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
         </app-table>
       </div>
       <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">

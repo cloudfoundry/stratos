@@ -54,6 +54,16 @@ export class E2E {
     protractor.promise.controlFlow().execute(() => console.log(log));
     /* tslint:disable */
   }
+
+
+  /**
+   * Log message in the control flow if debug logging is set
+   */
+  debugLog(log: string) {
+    /* tslint:disable:no-console*/
+    protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
+    /* tslint:disable */
+  }  
 }
 
 /**
