@@ -1,6 +1,5 @@
 import { Validators } from '@angular/forms';
 
-import { StratosEndpointMetadata } from '../../core/extension/extension-service';
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 
@@ -73,7 +72,7 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
         const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
         if (endpointAuthType) {
           // endpointAuthType.types.push(epType.type);
-          endpointAuthType.types.push(endpointAuthType.value); // TODO: RC Check this change
+          endpointAuthType.types.push(endpointAuthType.value as EndpointType);
         }
       });
     }
