@@ -13,8 +13,8 @@
           "options": {
             "preserveSymlinks": true,
             "outputPath": "dist",
-            "index": "src/frontend/index.html",
-            "main": "src/frontend/main.ts",
+            "index": "src/frontend/packages/core/src/index.html",
+            "main": "src/frontend/packages/core/src/main.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "assets": [
