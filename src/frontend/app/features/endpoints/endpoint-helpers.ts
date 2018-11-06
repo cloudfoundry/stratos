@@ -54,45 +54,10 @@ const endpointAuthTypes = [
     types: new Array<EndpointType>('cf', 'metrics')
   },
   {
-    name: 'CAASP (OIDC)',
-    value: 'kubeconfig',
-    form: {
-      kubeconfig: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
     name: 'Single Sign-On (SSO)',
     value: 'sso',
     form: {},
     types: new Array<EndpointType>('cf')
-  },
-  {
-    name: 'Azure AKS',
-    value: 'kubeconfig-az',
-    form: {
-      kubeconfig: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
-    name: 'AWS IAM (EKS)',
-    value: 'aws-iam',
-    form: {
-      cluster: ['', Validators.required],
-      access_key: ['', Validators.required],
-      secret_key: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
-    name: 'Kubernetes Cert Auth',
-    value: 'kube-cert-auth',
-    form: {
-      cert: ['', Validators.required],
-      certKey: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
   },
 ];
 
