@@ -59,12 +59,14 @@ Then Stratos should either ..
 ### Blocking Issues
 - `include` replacement does not have parity with v2.
   - Not supported on all endpoints and does not cover enough `links`/relations (see [Cloud Foundry API v2 Feature Usage - Inline-Relations](cf-api-v2-usage.md#Inline-Relations))
+  - New v3 entities are not `links` (`/apps` `package`, `processes`, `route_mappings`, `environment_variables`, `droplets`, `tasks`)
   - Not supported by common CFs used to develop with (SCF, PCFDev).
 - Cannot determine if a CF supports v3 or when it does support v3 which endpoints it has
   - Getting the v2 version is simple, I don't know if there's correlation to v3 version
   - Having a v3/info which published which endpoints are supported would help a lot. Including whether `include` is supported
 - Chained `links`/relations don't appear to be supported (fetch app-->space-->org all in one request)
   - Might be wrong on this one due to the lack of current `include` integration
+- `/organizations` and `/spaces` endpoints are not completed and contain only guid, create/updated date and name (space additionally has experimental `organization`)
 
 ### Frustrating Issues
 - Cannot utilise v3 pagination due to limited sorting and filtering functionality (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingFiltering) for missing fields)
@@ -80,6 +82,8 @@ Then Stratos should either ..
 - Fetching a list of users as a non-cf admin involves making a request to every organisation (`organization/${guid}/users`). The response
   of all of these calls contains a lot of overlapping data
   - Ideally making a request to `/users` as a user with 0:M org roles would return a list of users in those organisations
+- Not all v2 endpoints exist in v3, for instance no `domains`, `events`, `route`, org/space quota definitions, etc
+  - This would make our entity validation much more complex
 
 ### Stratos Tasks
 - Depending on adoption approach, Stratos needs to support v2 and v3 endpoints concurrently

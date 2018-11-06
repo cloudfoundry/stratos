@@ -826,7 +826,8 @@ Last 10 updated apps | *yep* | *yep* | *yep*
 - The `<role>_url` in a user entity can only be called by an administrator or by the same user
   > Desired - URL behaves as per the `/users` suggestion above the response contains the organisaitons that are visible to the user that
     calls the url
-- `include-relations` works by specifying the name of the child property. If the inline-depth is greater than one this can lead relations being fetched that might not actually be required
+- `include-relations` works by specifying the name of the child property. If the `inline-relations-depth` is greater than one this can lead
+ relations being fetched that might not actually be required
   > Desired - Minor nice to have. Be able to specify relations like `include-relations=application-route,route-domain`
 
 ### Critical v2 Features
