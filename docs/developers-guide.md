@@ -38,7 +38,7 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
 Configuration information can be found in two places
 
 * `./proxy.conf.js`
-  * In new forks this is missing and needs to be created using `./proxy.conf.templage.js` as a template.
+  * In new forks this is missing and needs to be created using `./proxy.conf.template.js` as a template.
   * Contains the address of the backend. Which will either be...
      * If the backend is deployed via the instructions in the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md)
        the url will be the same address as the V1 console's frontend address. For instance `https://localhost` would translate to
