@@ -240,11 +240,11 @@ db provider this can be done by deleting `src/jetstream/console-database.db`
 #### Automatically register and connect to an existing endpoint
 To automatically register a Cloud Foundry add the environment variable/config setting below:
 
-> **Note** When a user logs in to Stratos, jestream will attempt to auto-connect to the Cloud Foundry using same username/password.
-
 ```
 AUTO_REG_CF_URL=<api url of cf>
 ```
+
+Jetstream will then attempt to auto-connect to it with the credentials supplied when logging into Stratos.
 
 #### Running Jetstream in a container
 * Follow instructions in the deploy/docker-compose docs
