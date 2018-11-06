@@ -1,16 +1,21 @@
-mat-card {
-  margin-bottom: 20px;
-}
+.cell-summary {
 
-.app-metadata {
-  display: flex;
-  flex-direction: row;
+  &__summary {
+    margin-bottom: 20px;
 
-  &__two-cols {
-    flex: 1;
+    &__app-metadata {
+      display: flex;
+      flex-direction: row;
 
-    app-metadata-item:first-child {
-      margin-top: 0;
+      &--twoCols {
+        flex: 1;
+
+        app-metadata-item:first-child {
+          margin-top: 0;
+        }
+      }
     }
   }
+
+
 }

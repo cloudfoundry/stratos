@@ -1,14 +1,14 @@
-<mat-card>
+<mat-card class="cell-summary__summary">
   <app-card-status [status$]="status$"></app-card-status>
   <mat-card-content>
-    <div class="app-metadata">
-      <div class="app-metadata__two-cols">
+    <div class="cell-summary__summary__app-metadata">
+      <div class="cell-summary__summary__app-metadata--twoCols">
         <app-metadata-item icon="perm_identity" label="ID">{{ (cfCellService.cellMetric$ | async)?.bosh_job_id}}</app-metadata-item>
         <app-metadata-item icon="perm_identity" label="Name">{{ (cfCellService.cellMetric$ | async)?.bosh_job_name}}</app-metadata-item>
         <app-metadata-item icon="perm_identity" label="Deployment">{{ (cfCellService.cellMetric$ | async)?.bosh_deployment}}</app-metadata-item>
 
       </div>
-      <div class="app-metadata__two-cols">
+      <div class="cell-summary__summary__app-metadata--twoCols">
         <app-metadata-item icon="wallpaper" label="Environment">{{ (cfCellService.cellMetric$ | async)?.environment}}</app-metadata-item>
         <app-metadata-item icon="local_hospital" label="Healthy" matTooltip="Has the cell passed the garden backend health check?">
           <app-boolean-indicator [isTrue]="(status$ | async) === 'ok'" type="yes-no" [subtle]="false" [showText]="true"></app-boolean-indicator>
@@ -19,7 +19,7 @@
   </mat-card-content>
 </mat-card>
 
-<app-tile-grid [fit]="false">
+<app-tile-grid [fit]="false" class="cell-summary__usage">
   <app-tile-group>
     <app-tile>
       <app-card-number-metric icon="memory" label="Memory" units="mb" value="{{ cfCellService.usageMemory$ | async}} " limit="{{ cfCellService.totalMemory$ | async}}"></app-card-number-metric>
@@ -33,6 +33,6 @@
   </app-tile-group>
 </app-tile-grid>
 
-<app-metrics-chart [metricsConfig]="metricsConfig" [chartConfig]="chartConfig">
-  <app-metrics-range-selector></app-metrics-range-selector>
-</app-metrics-chart>
+<div class="cell-summary__health">
+  <app-list></app-list>
+</div>
