@@ -25,10 +25,12 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
 
 ### Set up Dependencies
 
-* Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo. To set up a backend
-  run through the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md), choose a deployment method and bring
-  one up. These deployments will bring up the entire backend, including api service and database along with a V2 frontend.
-* Install [NodeJs](https://nodejs.org) (mininum version v8.6.0)
+* Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo.
+  * Don't need to make changes to the backend code? To set up a backend run through the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md),
+    choose a deployment method and bring one up. These deployments will bring up the entire backend, including api service and database
+    along with a V2 frontend.
+  * Need to make changes to the backend code? Follow the below [Backend Development](#Backend-Development) set up guide
+* Install [NodeJs](https://nodejs.org) (minimum node version 8.11.3)
 * Install [Angular CLI](https://cli.angular.io/) - `npm install -g @angular/cli`
 
 ### Configuration
@@ -36,34 +38,53 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
 Configuration information can be found in two places
 
 * `./proxy.conf.js`
-  * In fresh environments this is missing and needs to be created using `./proxy.conf.templage.js` as a template.
-  * Contains the address of the backend.
-  * If the backend is deployed via the instructions above this will be the same address as the V1 console's frontend address. For instance
-  `https://localhost` would translate to
-
-    ```const PROXY_CONFIG = {
-      "/pp": {
-        "target": {
-        "host": "localhost",
-        "protocol": "https:",
-        "port": 443
-      },
-      "secure": false,
-      "changeOrigin": true,
-      "ws": true,
-    }
-    ```
-
-* `./src/frontend/environments/environment.ts` for UAA config
-  * This contains more general settings for the frontend
-  * By default we output every Redux action to the console. If this is too verbose for yourself, simply set `logEnableConsoleActions` to false
+  * In new forks this is missing and needs to be created using `./proxy.conf.template.js` as a template.
+  * Contains the address of the backend. Which will either be...
+     * If the backend is deployed via the instructions in the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md)
+       the url will be the same address as the V1 console's frontend address. For instance `https://localhost` would translate to
+        ```
+        const PROXY_CONFIG = {
+          "/pp": {
+            "target": {
+            "host": "localhost",
+            "protocol": "https:",
+            "port": 443
+          },
+          "secure": false,
+          "changeOrigin": true,
+          "ws": true,
+        }
+        ```
+      * If the backend is running locally using the instructions [Backend Development](#Backend-Development) below the url will local host
+        with a port of the `CONSOLE_PROXY_TLS_ADDRESS` value from `src/jetstream/config.properties`. By default this will be 5445. For
+        instance
+        ```
+        const PROXY_CONFIG = {
+          "/pp": {
+            "target": {
+              "host": "localhost",
+              "protocol": "https:",
+              "port": 5443
+            },
+            "ws": true,
+            "secure": false,
+            "changeOrigin": true,
+          }
+        }
+        ```
+* `./src/frontend/environments/environment.ts` for developer vs production like config
+  * This contains more general settings for the frontend and does not usually need to be changed
 
 ## Run the frontend
 
-1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required Jet Stream url (see above for more info)
+1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required Jetstream url (see above for more info)
 1. Run `npm install`
 1. Run `npm start` for a dev server. (the app will automatically reload if you change any of the source files)
-1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the Jet Stream the console points at. Please refer
+   * If this times out please use `npm run start-high-mem` instead
+   * To change the port from the default 4200, add `-- --port [new port number]`
+   * To stop the automatic reload every time a resource changes add `-- --live-reload false`
+   * To do both the above use `-- --live-reload false --port [new port number]`
+1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the Jetstream the console points at. Please refer
    to the guides used when setting up the backend for more information
 
 ## Build
@@ -87,13 +108,31 @@ We use the angular material theming mechanism. See [here](https://material.angul
 
 Run `npm run lint` to execute tslint lint checking.
 
+### Unit tests
+
+Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in ./coverage
+
+> **NOTE** npm test will search for chrome on your path. If this is not so please set an env var CHROME_BIN pointing to your executable
+(chromium is fine too).
+
+Run `npm test-debug` to execute unit tests in a mode that will re-run whenever there's a code change
+
+### End-to-end tests
+
+Run `npm run e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+
+Run `npm run e2e-dev` to execute end-to-end tests against a locally running instance on `https://localhost:4200`
+
+More information on the E2E tests and pre-requisites for running them is available here - [E2E Tests](developers-guide-e2e-tests.md).
+
 ### Code Climate
 
 We use [Code Climate](https://codeclimate.com/github/SUSE/stratos) to check for general code quality issues. This executes against Pull
 Requests on creation/push.
 
-
 #### Running Code Climate locally
+> Generally we would not advise doing this and just rely on the code climate gate to run when pull requests are submitted
+
 To run locally see instructions [here](https://github.com/codeclimate/codeclimate) to install Code Climate CLI
 and engine via docker. Once set ensure you're in the root of the project and execute the following (it may take a while)
 
@@ -121,18 +160,16 @@ You can also run the above command via npm
 npm run climate
 ```
 
-### Unit tests
-
-Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in ./coverage
-
-> **NOTE** npm test will search for chrome on your path. If this is not so please set an env var CHROME_BIN pointing to your executable
-(chromium is fine too).
-
-### End-to-end tests
-
-Run `npm run e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-More information on the E2E tests and pre-requisites for running them is available here - [E2E Tests](developers-guide-e2e-tests.md).
+### Stratos Continue Integration
+For each new pull request and any subsequent pushes to it the following actions are executed
+- Code quality analysis via Code Climate - https://codeclimate.com/
+- Jenkins CI run, covering..
+  - Frontend lint check
+  - Backend lint check
+  - Frontend unit tests
+  - Backend unit tests
+  - End to end tests
+- Security anaylsis via Snyk - https://snyk.io/
 
 ## Backend Development
 
@@ -150,33 +187,38 @@ You will need the following installed/available:
 
 ### Building the back-end
 
+
+#### Build
 You will need to ensure that Stratos is cloned into a folder within your GOPATH that matches the Stratos package structure, i.e.
 
 ```
 $GOPATH/src/github.com/cloudfoundry-incubator/stratos
 ```
 
-From the stratos folder, ensure that dep has downloaded the required dependencies by running:
-
-```
-dep ensure -vendor-only -v
-```
-
 From the `src/jetstream` folder, build the Stratos back-end with:
 
 ```
-go build
+npm run build-backend
 ```
 
 The back-end executable is named `jetstream` and should be created within the `src/jetstream` folder.
 
+#### Minimum Configure
+
 To run, ensure you have set the following environment variables:
 
-`UAA_ENDPOINT` - the URL of your UAA (for example for PCF Dev, use: `UAA_ENDPOINT=https://login.local.pcfdev.io`)
-`CONSOLE_CLIENT` - the Client ID to use when authenticating against your UAA (defaults to: 'cf')
-`CONSOLE_CLIENT_SECRET` - the Client ID to use when authenticating against your UAA (defaults to empty)
+- `UAA_ENDPOINT`- the URL of your UAA
+  - If you have an existing CF and want to use the same UAA use the `authorization_endpoint` value from `[cf url]/v2/info`
+    For example for PCF Dev, use: `UAA_ENDPOINT=https://login.local.pcfdev.io`.
+- `CONSOLE_CLIENT` - the Client ID to use when authenticating against your UAA (defaults to: 'cf')
+- `CONSOLE_CLIENT_SECRET` - the Client ID to use when authenticating against your UAA (defaults to empty)
 
-then run:
+> To use a pre-built Stratos UAA container execute `docker run --name=uaa --rm -p 8080:8080 -P splatform/stratos-uaa`. The UAA will be
+  available at `http://localhost:8080` with a `CONSOLE_CLIENT` value of `console`
+
+To avoid using environment variables, and for additional settings, see [Configuration](#Full-Configuration) below
+
+#### Run
 
 ```
 jetstream
@@ -184,22 +226,25 @@ jetstream
 
 You should see the log as the backend starts up. You can press CTRL+C to stop the backend.
 
-### Configuration
+### Full Configuration
 
 By default, the configuration in the file `src/jetstream/default.config.properties` will be used.
 
-To modify the configuration, copy this file to `src/jetstream/config.properties` and edit this file. The backend will load its configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings by setting the corresponding environment variable.
+To modify the configuration copy `default.config.properties` to `src/jetstream/config.properties` and edit. The backend will load its
+configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings
+by setting the corresponding environment variable.
 
-> **Note** The properties are saved to the database on first run. Any subsequent changes require the db to be reset. For the default sqlite db provider this can be done by deleting `src/jetstream/console-database.db` 
+> **Note** The properties are saved to the database on first run. Any subsequent changes require the db to be reset. For the default sqlite
+db provider this can be done by deleting `src/jetstream/console-database.db`
 
 #### Automatically register and connect to an existing endpoint
 To automatically register a Cloud Foundry add the environment variable/config setting below:
 
-> **Note** On login, Stratos will also attempt to auto-connect to the Cloud Foundry using the username/password provided.
-
 ```
 AUTO_REG_CF_URL=<api url of cf>
 ```
+
+Jetstream will then attempt to auto-connect to it with the credentials supplied when logging into Stratos.
 
 #### Running Jetstream in a container
 * Follow instructions in the deploy/docker-compose docs
