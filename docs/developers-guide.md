@@ -77,7 +77,7 @@ Configuration information can be found in two places
 
 ## Run the frontend
 
-1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required Jet Stream url (see above for more info)
+1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required Jetstream url (see above for more info)
 1. Run `npm install`
 1. Run `npm start` for a dev server. (the app will automatically reload if you change any of the source files)
    * If this times out please use `npm run start-high-mem` instead
