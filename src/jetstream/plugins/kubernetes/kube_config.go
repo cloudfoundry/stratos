@@ -291,8 +291,6 @@ func (p *KubernetesSpecification) FetchKubeConfigTokenAKS(cnsiRecord interfaces.
 
 func unMarshalHelper(values map[string]interface{}, intf interface{}) error {
 
-	log.Info(values)
-
 	value := reflect.ValueOf(intf)
 
 	if value.Kind() != reflect.Ptr {
