@@ -1,6 +1,6 @@
 import { SideNavModes } from '../types/dashboard.types';
 import { CLOSE_SIDE_NAV, OPEN_SIDE_NAV, TOGGLE_SIDE_NAV, TOGGLE_HEADER_EVENT } from '../actions/dashboard-actions';
-import { CHANGE_SIDE_NAV_MODE } from './../actions/dashboard-actions';
+import { CHANGE_SIDE_NAV_MODE } from '../actions/dashboard-actions';
 
 export interface DashboardState {
   sidenavOpen: boolean;
