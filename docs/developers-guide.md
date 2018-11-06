@@ -131,7 +131,7 @@ We use [Code Climate](https://codeclimate.com/github/SUSE/stratos) to check for 
 Requests on creation/push.
 
 #### Running Code Climate locally
-> Generally we would not advice doing this and just rely on the Jenkins code climate gate to run when pull requests are submitted
+> Generally we would not advise doing this and just rely on the code climate gate to run when pull requests are submitted
 
 To run locally see instructions [here](https://github.com/codeclimate/codeclimate) to install Code Climate CLI
 and engine via docker. Once set ensure you're in the root of the project and execute the following (it may take a while)
