@@ -84,7 +84,7 @@ Configuration information can be found in two places
    * To change the port from the default 4200, add `-- --port [new port number]`
    * To stop the automatic reload every time a resource changes add `-- --live-reload false`
    * To do both the above use `-- --live-reload false --port [new port number]`
-1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the Jet Stream the console points at. Please refer
+1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the Jetstream the console points at. Please refer
    to the guides used when setting up the backend for more information
 
 ## Build
