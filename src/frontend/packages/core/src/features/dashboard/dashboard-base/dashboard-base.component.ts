@@ -7,14 +7,14 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router, Route } 
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { AppState } from '../../../../packages/store/src/app-state';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
-import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
+import { CloseSideNav, ChangeSideNavMode, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 
 @Component({
   selector: 'app-dashboard-base',

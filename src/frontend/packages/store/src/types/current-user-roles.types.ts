@@ -1,4 +1,5 @@
-import { ScopeStrings } from '../../core/current-user-permissions.config';
+import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+
 
 export interface RolesRequestState {
   initialised: boolean;

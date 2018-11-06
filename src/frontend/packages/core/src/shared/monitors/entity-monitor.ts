@@ -4,16 +4,16 @@ import { denormalize, schema as normalizrSchema } from 'normalizr';
 import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
-import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
-import { IRequestDataState } from '../../store/types/entity.types';
-import { AppState } from '../../../packages/store/src/app-state';
+import { AppState } from '../../../../store/src/app-state';
 import {
   ActionState,
   getDefaultActionState,
   getDefaultRequestState,
   RequestInfoState,
   UpdatingSection
-} from './../../store/reducers/api-request-reducer/types';
+} from '../../../../store/src/reducers/api-request-reducer/types';
+import { selectRequestInfo, getAPIRequestDataState, selectEntity } from '../../../../store/src/selectors/api.selectors';
+import { IRequestDataState } from '../../../../store/src/types/entity.types';
 
 export class EntityMonitor<T = any> {
   constructor(

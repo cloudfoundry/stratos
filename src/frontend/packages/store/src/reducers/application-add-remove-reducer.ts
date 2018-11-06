@@ -1,8 +1,8 @@
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 import { CREATE_SUCCESS, DELETE_SUCCESS } from '../actions/application.actions';
-import { IApp, ISpace } from '../../core/cf-api.types';
 import { deepMergeState } from '../helpers/reducer.helper';
+import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
 
 
 export function applicationAddRemoveReducer() {

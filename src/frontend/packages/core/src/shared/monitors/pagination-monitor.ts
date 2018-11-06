@@ -13,15 +13,12 @@ import {
   withLatestFrom,
   tap,
 } from 'rxjs/operators';
+import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { AppState } from '../../../../store/src/app-state';
+import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { selectEntities, getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
 
-import {
-  getAPIRequestDataState,
-  selectEntities,
-} from '../../store/selectors/api.selectors';
-import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { AppState } from '../../../packages/store/src/app-state';
-import { ActionState } from './../../store/reducers/api-request-reducer/types';
-import { PaginationEntityState } from './../../store/types/pagination.types';
 
 export class PaginationMonitor<T = any> {
   /**

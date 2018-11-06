@@ -1,21 +1,19 @@
 
 import { of as observableOf, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-
-import { EntityServiceFactory } from '../core/entity-service-factory.service';
-import { ApplicationData, ApplicationService } from '../features/applications/application.service';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { AppSummary, AppStat } from '../../store/src/types/app-metadata.types';
 import {
-  ApplicationEnvVarsHelper,
   EnvVarStratosProject,
-} from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
-import { AppState } from '../../../store/src/app-state';
-import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../../store/src/types/api.types';
-import { AppStat, AppSummary } from '../../../store/src/types/app-metadata.types';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
-import { ISpace } from '../core/cf-api.types';
+  ApplicationEnvVarsHelper
+} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
+import { ISpace } from '../src/core/cf-api.types';
+import { AppState } from '../../store/src/app-state';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

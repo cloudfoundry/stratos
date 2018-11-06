@@ -3,8 +3,6 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { isEntityBlocked } from '../../../core/entity-service';
-import { pathGet } from '../../../core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import {
   FetchRelationAction,
@@ -35,6 +33,8 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
+import { pathGet } from '../../../../core/src/core/utils.service';
+import { isEntityBlocked } from '../../../../core/src/core/entity-service';
 
 interface ValidateResultFetchingState {
   fetching: boolean;

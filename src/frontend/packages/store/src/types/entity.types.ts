@@ -1,12 +1,4 @@
-import {
-  IService,
-  IServiceBinding,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-  IServiceBroker,
-} from '../../core/cf-api-svc.types';
-import { IApp, IDomain, IFeatureFlag, IOrganization, IRoute, ISecurityGroup, ISpace, IStack } from '../../core/cf-api.types';
+
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import {
   appEnvVarsSchemaKey,
@@ -43,6 +35,15 @@ import { EndpointModel } from './endpoint.types';
 import { GitBranch, GithubCommit } from './github.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
+import {
+  IService,
+  IServiceBinding,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+  IServiceBroker,
+} from '../../../core/src/core/cf-api-svc.types';
+import { IFeatureFlag, IApp, IStack, ISpace, IOrganization, IRoute, IDomain, ISecurityGroup } from '../../../core/src/core/cf-api.types';
 
 export interface IRequestDataState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<EndpointModel>;

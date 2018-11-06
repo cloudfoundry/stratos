@@ -6,11 +6,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { VerifySession } from '../../../store/actions/auth.actions';
-import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { AuthState } from '../../../store/reducers/auth.reducer';
-import { UAASetupState } from '../../../store/types/uaa-setup.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { SetupUAA, SetUAAScope } from '../../../../../store/src/actions/setup.actions';
+import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { VerifySession } from '../../../../../store/src/actions/auth.actions';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -25,7 +25,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
   constructor(private store: Store<AppState>, private router: Router) {
     // Client Redirect URI for SSO
     this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
-    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+      (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
   }
 
   uaaForm: FormGroup;
@@ -62,7 +62,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success,
           message: state.message
         };
-      }), );
+      }));
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
@@ -94,7 +94,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success: !state[0].error,
           message: state[0].message
         };
-      }), );
+      }));
   }
   ngOnInit() {
     this.uaaForm = new FormGroup({

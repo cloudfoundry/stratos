@@ -1,5 +1,4 @@
-import { LogLevel } from '../app/store/actions/log.actions';
-
+import { LogLevel } from './../../../store/src/actions/log.actions';
 
 export const environment = {
   production: true,

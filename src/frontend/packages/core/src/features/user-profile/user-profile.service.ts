@@ -5,18 +5,18 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
+import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../../store/src/types/user-profile.types';
+import { AppState } from '../../../../store/src/app-state';
+import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../../store/src/effects/user-profile.effects';
+import { userProfileSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
+import { AuthState } from '../../../../store/src/reducers/auth.reducer';
 import {
   FetchUserProfileAction,
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
-} from '../../store/actions/user-profile.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../store/effects/user-profile.effects';
-import { entityFactory, userProfileSchemaKey } from '../../store/helpers/entity-factory';
-import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
-import { AuthState } from '../../store/reducers/auth.reducer';
-import { selectUpdateInfo } from '../../store/selectors/api.selectors';
-import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../store/types/user-profile.types';
+} from '../../../../store/src/actions/user-profile.actions';
+import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
+import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 
 
 @Injectable()

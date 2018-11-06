@@ -5,10 +5,10 @@ import { map, publishReplay, refCount } from 'rxjs/operators';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { EndpointModel } from '../../../store/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { EntityInfo, APIResource } from '../../../../../store/src/types/api.types';
+import { entityFactory, endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;

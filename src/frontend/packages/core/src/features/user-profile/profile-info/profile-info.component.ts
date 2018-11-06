@@ -1,16 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { filter, map, first } from 'rxjs/operators';
-import { SessionData } from '../../../store/types/auth.types';
-import { AuthState } from '../../../store/reducers/auth.reducer';
-import { FetchUserProfileAction } from '../../../store/actions/user-profile.actions';
+
 import { Observable } from 'rxjs';
-import { UserProfileInfo } from '../../../store/types/user-profile.types';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { entityFactory, userProfileSchemaKey } from '../../../store/helpers/entity-factory';
-import { UserProfileEffect } from '../../../store/effects/user-profile.effects';
+
 import { UserProfileService } from '../user-profile.service';
+import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-info',
