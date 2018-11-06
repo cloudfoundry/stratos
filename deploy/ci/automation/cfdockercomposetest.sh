@@ -51,7 +51,7 @@ rm -rf node_modules
 npm install
 
 # Run the E2E tests
-"$DIRPATH/runandrecord.sh" https://localhost:443
+"$DIRPATH/runandrecord.sh" https://127.0.0.1:443
 RET=$?
 
 set +e
