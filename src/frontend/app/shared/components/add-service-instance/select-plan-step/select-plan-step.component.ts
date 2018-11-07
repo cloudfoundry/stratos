@@ -204,10 +204,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   isYesOrNo = val => val ? 'yes' : 'no';
   isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
-  isFree = (selPlan: APIResource<IServicePlan>) => this.isYesOrNo(selPlan.entity.free);
-  getCost = (selPlan: EntityInfo<APIResource<IServicePlan>>) => {
-    return selPlan.entity.entity.extra;
-  }
+  isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(
