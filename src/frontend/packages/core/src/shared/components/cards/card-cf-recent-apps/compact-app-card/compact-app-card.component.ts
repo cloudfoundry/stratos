@@ -5,13 +5,13 @@ import { map, startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import {
   ApplicationStateData,
   ApplicationStateService,
   CardStatus,
 } from '../../../application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 
 @Component({

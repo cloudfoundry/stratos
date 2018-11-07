@@ -3,10 +3,10 @@ import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms'
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
+import { CheckProjectExists } from '../../../../../store/src/actions/deploy-applications.actions';
 
-import { CheckProjectExists } from '../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';
 
 interface GithubProjectExistsResponse {
   githubProjectDoesNotExist: boolean;

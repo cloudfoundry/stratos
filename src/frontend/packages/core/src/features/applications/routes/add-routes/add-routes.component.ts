@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Route } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
@@ -10,7 +10,7 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { pathGet } from '../../../../core/utils.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { RouteMode } from '../../../../../../store/src/types/route.types';
+import { RouteMode, Route } from '../../../../../../store/src/types/route.types';
 import { ApplicationService } from '../../application.service';
 import { AppState } from '../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';

@@ -8,9 +8,9 @@ import {
   GithubCommitsListConfigServiceDeploy,
 } from '../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { GithubCommit } from '../../../../../../../store/src/types/github.types';
 
 @Component({
   selector: 'app-commit-list-wrapper',

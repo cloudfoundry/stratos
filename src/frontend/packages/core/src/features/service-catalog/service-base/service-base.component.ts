@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../../packages/store/src/app-state';
 import { ServicesService } from '../services.service';
+import { AppState } from '../../../../../store/src/app-state';
 
 
 

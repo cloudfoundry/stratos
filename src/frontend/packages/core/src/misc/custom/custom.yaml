@@ -9,5 +9,5 @@ files:
 
 folders:
   - "app/custom"
-  - "assets/custom"
+  # - "assets/custom"
   - "sass/custom"

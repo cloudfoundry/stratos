@@ -5,11 +5,11 @@ import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { MetricsAPIAction, MetricsAPITargets } from '../../../store/actions/metrics-api.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
 import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
 import { EndpointIcon, getIconForEndpoint, getNameForEndpointType } from '../../endpoints/endpoint-helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
+import { AppState } from '../../../../../store/src/app-state';
+import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
 
 interface EndpointMetadata {
   type: string;

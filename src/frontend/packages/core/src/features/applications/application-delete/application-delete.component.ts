@@ -37,11 +37,10 @@ import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.fa
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../application.service';
-import { GetAllApplications, GetApplication } from '../../../../../store/src/actions/application.actions';
+import { GetAllApplications, GetApplication, DeleteApplication } from '../../../../../store/src/actions/application.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
-import { DeleteApplication } from '../../../../../../../test-e2e/application/po/delete-app.po';
 import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
 import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';

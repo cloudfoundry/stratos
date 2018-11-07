@@ -16,6 +16,7 @@ import {
 import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { APIResponse } from '../../actions/request.actions';
 import { pathGet } from '../../../../core/src/core/utils.service';
+import { Store } from '@ngrx/store';
 
 
 export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {

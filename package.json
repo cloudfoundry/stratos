@@ -34,8 +34,7 @@
     "customize": "gulp customize",
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
-    "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "npm run customize && gulp dev-setup"
+    "store-git-metadata": "gulp store-git-metadata"
   },
   "author": "",
   "license": "Apache-2.0",

@@ -5,9 +5,9 @@ import { filter, first, tap } from 'rxjs/operators';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
+import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
 
 @Component({
@@ -35,7 +35,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
       if (cf && org && space) {
         this.cfOrgSpaceService.space.select.next(space);
       }
-    }), ).subscribe();
+    })).subscribe();
   }
   ngOnDestroy(): void {
     this.paginationStateSub.unsubscribe();
