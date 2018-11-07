@@ -1,4 +1,4 @@
-import { ChartSeries } from '../../../store/types/base-metric.types';
+import { ChartSeries } from '../../../../../store/src/types/base-metric.types';
 
 export class MetricsChartHelpers {
   static getDateSeriesName(value: number) {

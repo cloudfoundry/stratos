@@ -3,11 +3,11 @@ import { Observable, Subscription } from 'rxjs';
 import { map, first, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { CardStatus } from './../../application-state/application-state.service';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { AppMetadataTypes } from '../../../../../../store/src/actions/app-metadata.actions';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);

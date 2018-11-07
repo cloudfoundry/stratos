@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as moment from 'moment';
-import { MetricQueryConfig, MetricsAction } from '../../store/actions/metrics.actions';
-import { IMetrics } from '../../store/types/base-metric.types';
 import { ITimeRange, StoreMetricTimeRange, MetricQueryType } from './metrics-range-selector.types';
+import { MetricsAction, MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
+import { IMetrics } from '../../../../store/src/types/base-metric.types';
 
 @Injectable()
 export class MetricsRangeSelectorService {

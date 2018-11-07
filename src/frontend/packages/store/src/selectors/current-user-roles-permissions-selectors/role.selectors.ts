@@ -13,7 +13,7 @@ import {
   RoleEntities,
   ISpaceRoleState,
 } from '../../types/current-user-roles.types';
-import { PermissionValues, ScopeStrings, PermissionStrings } from '../../../core/current-user-permissions.config';
+import { PermissionValues, PermissionStrings, ScopeStrings } from '../../../../core/src/core/current-user-permissions.config';
 
 
 

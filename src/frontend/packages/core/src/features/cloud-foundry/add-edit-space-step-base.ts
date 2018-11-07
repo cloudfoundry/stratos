@@ -6,13 +6,13 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
-import { getPaginationKey } from '../../store/actions/pagination.actions';
-import { AppState } from '../../../packages/store/src/app-state';
-import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { AppState } from '../../../../store/src/app-state';
+import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
+import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { entityFactory, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;

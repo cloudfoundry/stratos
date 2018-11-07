@@ -1,16 +1,15 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getMappedApps, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
   public cfGuid: string;

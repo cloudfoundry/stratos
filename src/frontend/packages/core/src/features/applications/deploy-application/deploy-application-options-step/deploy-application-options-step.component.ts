@@ -9,18 +9,16 @@ import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators'
 import { IDomain } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { SaveAppOverrides } from '../../../../store/actions/deploy-applications.actions';
-import { FetchAllDomains } from '../../../../store/actions/domains.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { entityFactory, stackSchemaKey } from '../../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectCfDetails } from '../../../../store/selectors/deploy-application.selector';
-import { APIResource } from '../../../../store/types/api.types';
-import { OverrideAppDetails } from '../../../../store/types/deploy-application.types';
-import {
-  ApplicationEnvVarsHelper,
-} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { GetAllStacks } from '../../../../store/actions/stack.action';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';
+import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { GetAllStacks } from '../../../../../../store/src/actions/stack.action';
+import { OverrideAppDetails } from '../../../../../../store/src/types/deploy-application.types';
+import { SaveAppOverrides } from '../../../../../../store/src/actions/deploy-applications.actions';
 
 @Component({
   selector: 'app-deploy-application-options-step',

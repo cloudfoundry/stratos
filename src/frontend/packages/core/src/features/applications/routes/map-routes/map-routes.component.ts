@@ -9,13 +9,12 @@ import {
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { FetchAllDomains } from '../../../../store/actions/domains.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../application.service';
-import { entityFactory } from '../../../../store/helpers/entity-factory';
-import { domainSchemaKey } from '../../../../store/helpers/entity-factory';
+import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { entityFactory, domainSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-map-routes',

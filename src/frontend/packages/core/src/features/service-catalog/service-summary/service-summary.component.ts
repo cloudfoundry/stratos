@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { IServiceInstance, IServicePlan } from '../../../core/cf-api-svc.types';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { APIResource } from '../../../store/types/api.types';
 import { ServicesService } from '../services.service';
 import { map } from 'rxjs/operators';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-service-summary',

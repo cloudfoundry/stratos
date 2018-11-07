@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { PaginationMonitor } from './pagination-monitor';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../packages/store/src/app-state';
 import { schema as normalizrSchema } from 'normalizr';
+import { AppState } from '../../../../store/src/app-state';
 
 @Injectable()
 export class PaginationMonitorFactory {

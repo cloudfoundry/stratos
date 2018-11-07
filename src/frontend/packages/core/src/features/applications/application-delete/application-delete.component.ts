@@ -36,22 +36,23 @@ import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
-import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
-import { DeleteRoute } from '../../../store/actions/route.actions';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
+import { ApplicationService } from '../application.service';
+import { GetAllApplications, GetApplication } from '../../../../../store/src/actions/application.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
+import { DeleteApplication } from '../../../../../../../test-e2e/application/po/delete-app.po';
+import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
+import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import {
   applicationSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../store/types/api.types';
-import { ApplicationService } from '../application.service';
+} from '../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 
 
 @Component({

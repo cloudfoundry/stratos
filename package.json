@@ -16,7 +16,7 @@
     "prebuild-ui": "npm run build && gulp package-prebuild",
     "ng": "ng",
     "start": "ng serve",
-    "start-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
+    "start-high-mem": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
     "start-prod": "ng serve --prod",
     "start-dev": "ng serve --aot=false",
     "test": "ng test --code-coverage",

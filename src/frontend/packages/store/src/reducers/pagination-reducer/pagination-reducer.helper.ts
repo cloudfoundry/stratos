@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
 
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
@@ -11,6 +10,7 @@ import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam, PaginationClientPagination } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
+import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;

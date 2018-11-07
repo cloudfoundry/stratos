@@ -6,11 +6,11 @@ import { ITableColumn } from '../../../../shared/components/list/list-table/tabl
 import {
   CfAppRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
-import { ListView } from '../../../../store/actions/list.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../store/types/api.types';
 import { ApplicationService } from '../../application.service';
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../store/src/app-state';
 
 @Injectable()
 export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigService {

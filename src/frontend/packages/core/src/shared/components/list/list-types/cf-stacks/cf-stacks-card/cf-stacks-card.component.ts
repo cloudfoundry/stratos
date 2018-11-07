@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { APIResource } from '../../../../../../store/types/api.types';
 import { CardCell } from '../../../list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-cf-stacks-card',

@@ -4,7 +4,7 @@ import { first, map } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 const RECENT_ITEMS_COUNT = 10;
 

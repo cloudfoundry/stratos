@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 
 import { IApp } from '../../../../../core/cf-api.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { TableCellCustom } from '../../list.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 
 export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp>> {

@@ -8,9 +8,6 @@ import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { defaultPaginationPageSizeOptionsTable, IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
@@ -29,6 +26,9 @@ import {
 import {
   TableCellSpaceNameComponent,
 } from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;

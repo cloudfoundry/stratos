@@ -6,10 +6,6 @@ import { switchMap } from 'rxjs/operators';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
 import { IGlobalListAction, ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
@@ -18,6 +14,10 @@ import {
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card/app-service-binding-card.component';
 import { AppServiceBindingDataSource } from './app-service-binding-data-source';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class AppServiceBindingListConfigService extends BaseCfListConfig<APIResource> {

@@ -1,5 +1,4 @@
 import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
-import { ISpace } from '../../../core/cf-api.types';
 import { APIResource } from '../../types/api.types';
 
 export interface IKeyedByIDObject<T> {

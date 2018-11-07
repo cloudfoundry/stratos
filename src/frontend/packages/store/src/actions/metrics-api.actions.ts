@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { environment } from './../../../environments/environment.prod';
+import { environment } from '../../../core/src/environments/environment';
 
 export const METRIC_API_START = '[Metrics] API Start';
 export const METRIC_API_SUCCESS = '[Metrics] API Success';

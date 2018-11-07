@@ -12,11 +12,11 @@ import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { SetDeployCommit } from '../../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../store/types/api.types';
-import { GithubCommit } from '../../../../store/types/github.types';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { GithubCommit } from '../../../../../../store/src/types/github.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { SetDeployCommit } from '../../../../../../store/src/actions/deploy-applications.actions';
 
 @Component({
   selector: 'app-deploy-application-step2-1',

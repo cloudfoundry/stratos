@@ -4,19 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import {
-  applicationSchemaKey,
-  domainSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
@@ -25,6 +12,19 @@ import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-ap
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
+import {
+  createEntityRelationPaginationKey,
+  createEntityRelationKey
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../../../store/src/helpers/entity-factory';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService implements IListConfig<APIResource> {

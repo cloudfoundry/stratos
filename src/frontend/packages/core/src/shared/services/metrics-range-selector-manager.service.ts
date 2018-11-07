@@ -3,11 +3,11 @@ import * as moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 
-import { IMetrics } from '../../store/types/base-metric.types';
 import { EntityMonitor } from '../monitors/entity-monitor';
-import { MetricsAction } from './../../store/actions/metrics.actions';
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 import { ITimeRange, MetricQueryType } from './metrics-range-selector.types';
+import { IMetrics } from '../../../../store/src/types/base-metric.types';
+import { MetricsAction } from '../../../../store/src/actions/metrics.actions';
 
 @Injectable()
 export class MetricsRangeSelectorManagerService {

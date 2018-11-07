@@ -1,4 +1,4 @@
-import { MetricsAction } from '../../../store/actions/metrics.actions';
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 
 export interface IMetricsConfig<T = any> {
   metricsAction: MetricsAction;

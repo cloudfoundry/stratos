@@ -16,12 +16,12 @@ import {
 } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
-import { GetApplication } from '../../../../store/actions/application.actions';
-import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
+import { AppState } from '../../../../../../store/src/app-state';
+import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { DeleteDeployAppSection } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 
 @Component({
   selector: 'app-deploy-application-step3',

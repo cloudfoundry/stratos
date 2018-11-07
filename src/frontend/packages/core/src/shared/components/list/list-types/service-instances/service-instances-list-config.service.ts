@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstancesDataSource } from './service-instances-data-source';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 /**
  * Service instance list shown for `service / service instances` component

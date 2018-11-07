@@ -1,4 +1,3 @@
-import { IServiceInstance, IServiceBinding } from '../../core/cf-api-svc.types';
 import {
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   CREATE_SERVICE_BINDING_ACTION_SUCCESS,
@@ -9,6 +8,7 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 import { UpdateServiceInstance, UPDATE_SERVICE_INSTANCE_SUCCESS } from '../actions/service-instances.actions';
+import { IServiceInstance, IServiceBinding } from '../../../core/src/core/cf-api-svc.types';
 
 export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResource<IServiceInstance>>, action: APISuccessOrFailedAction) {
   let serviceInstanceGuid, serviceInstanceEntity, serviceBindingGuid;

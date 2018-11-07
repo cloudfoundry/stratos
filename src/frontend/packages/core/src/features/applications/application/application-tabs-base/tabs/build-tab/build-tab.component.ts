@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { combineLatest, distinct, map } from 'rxjs/operators';
 
-import { EntityInfo } from '../../../../../../store/types/api.types';
-import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { AppSummary } from '../../../../../../../../store/src/types/app-metadata.types';
 
 
 @Component({

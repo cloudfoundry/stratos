@@ -3,8 +3,8 @@ import { Subscription } from 'rxjs';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { APIResource } from '../../../../store/types/api.types';
 import { AppDeleteServiceInstancesListConfigService } from './app-delete-instances-routes-list-config.service';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-delete-app-instances',

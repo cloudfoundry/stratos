@@ -9,6 +9,9 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { GITHUB_API_URL } from '../../../../core/github.helpers';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { GithubCommit, GithubRepo, GitBranch } from '../../../../../../store/src/types/github.types';
+import { SourceType, GitAppDetails } from '../../../../../../store/src/types/deploy-application.types';
+import { AppState } from '../../../../../../store/src/app-state';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -16,21 +19,18 @@ import {
   SetAppSourceDetails,
   SetBranch,
   SetDeployBranch,
-} from '../../../../store/actions/deploy-applications.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+} from '../../../../../../store/src/actions/deploy-applications.actions';
 import {
+  selectSourceType,
+  selectProjectExists,
   selectDeployBranchName,
   selectNewProjectCommit,
-  selectPEProjectName,
-  selectProjectExists,
-  selectSourceType,
-} from '../../../../store/selectors/deploy-application.selector';
-import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { GitAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
-import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
-import { PaginatedAction } from '../../../../store/types/pagination.types';
+  selectPEProjectName
+} from '../../../../../../store/src/selectors/deploy-application.selector';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 
 @Component({
   selector: 'app-deploy-application-step2',

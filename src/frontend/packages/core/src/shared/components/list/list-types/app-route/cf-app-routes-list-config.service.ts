@@ -4,12 +4,6 @@ import { take, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { GetAppRoutes } from '../../../../../store/actions/application-service-routes.actions';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { selectEntity } from '../../../../../store/selectors/api.selectors';
-import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
@@ -17,6 +11,12 @@ import { IGlobalListAction, IListAction, IMultiListAction, ListConfig, ListViewT
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { DeleteRoute, UnmapRoute } from '../../../../../../../store/src/actions/route.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GetAppRoutes } from '../../../../../../../store/src/actions/application-service-routes.actions';
+import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 
 @Injectable()
 export class CfAppRoutesListConfigService extends ListConfig<APIResource> {

@@ -7,13 +7,13 @@ import {
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../../../../../../packages/store/src/app-state';
-import { EntityInfo, APIResource } from '../../../../../../../store/types/api.types';
-import { ApplicationService } from '../../../../../application.service';
-import { FetchAllDomains } from '../../../../../../../store/actions/domains.actions';
-import { getPaginationObservables } from '../../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { entityFactory, domainSchemaKey } from '../../../../../../../store/helpers/entity-factory';
 import { first } from 'rxjs/operators';
+import { AppState } from '../../../../../../../../../store/src/app-state';
+import { ApplicationService } from '../../../../../application.service';
+import { EntityInfo, APIResource } from '../../../../../../../../../store/src/types/api.types';
+import { FetchAllDomains } from '../../../../../../../../../store/src/actions/domains.actions';
+import { getPaginationObservables } from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { entityFactory, domainSchemaKey } from '../../../../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-routes-tab',

@@ -1,12 +1,12 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { IUpdateOrganization } from '../../core/cf-api.types';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { createDefaultUserRelations } from './users.actions';
+import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';

@@ -1,6 +1,6 @@
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
-import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { GetAllFeatureFlags } from '../../../../../../../store/src/actions/feature-flags.actions';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 
 export function createCfFeatureFlagFetchAction(cfGuid: string) {
   const paginationKey = createCFFeatureFlagPaginationKey(cfGuid);

@@ -1,6 +1,5 @@
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
-import { EntityInfo } from '../../../../../../../store/types/api.types';
-import { Component, OnInit, Inject, Optional } from '@angular/core';
+
+import { Component, Inject, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
 @Component({

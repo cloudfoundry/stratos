@@ -2,18 +2,18 @@
 import { of as observableOf, Observable, Subscription } from 'rxjs';
 
 import { map, filter, take } from 'rxjs/operators';
-import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
-import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
+import { AppState } from '../../../../../store/src/app-state';
+import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
+import { AppMetadataTypes } from '../../../../../store/src/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-edit-application',

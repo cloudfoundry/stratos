@@ -1,5 +1,5 @@
 
-import {switchMap, mergeMap, catchError} from 'rxjs/operators';
+import { switchMap, mergeMap, catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -16,13 +16,13 @@ import {
 import { AppState } from '../app-state';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo, userProfileStoreNames } from '../types/user-profile.types';
-import { environment } from './../../../environments/environment.prod';
 import {
   IRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from './../types/request.types';
+import { environment } from '../../../core/src/environments/environment';
 
 
 const { proxyAPIVersion } = environment;
@@ -60,7 +60,7 @@ export class UserProfileEffect {
           return [
             new WrapperRequestActionFailed('Could not get User Profile Info', apiAction),
           ];
-        }), );
+        }));
     }));
 
   @Effect() updateUserProfileInfo$ = this.actions$.ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE).pipe(
@@ -92,7 +92,7 @@ export class UserProfileEffect {
           return [
             new WrapperRequestActionFailed('Could not update User Profile Info', apiAction),
           ];
-        }), );
+        }));
     }));
 
   @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD).pipe(
@@ -123,6 +123,6 @@ export class UserProfileEffect {
           return [
             new WrapperRequestActionFailed('Could not update User Password', apiAction),
           ];
-        }), );
+        }));
     }));
 }

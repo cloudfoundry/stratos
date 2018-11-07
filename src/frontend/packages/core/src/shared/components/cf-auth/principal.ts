@@ -4,8 +4,8 @@ import { CFAuthCheckerServiceInstance } from './checkers/service-instance-access
 import { CFAuthCheckerRoute } from './checkers/route-access';
 import { CFAuthCheckerOrganization } from './checkers/organization-access';
 import { CFAuthCheckerApplication } from './checkers/application-access';
-import { SessionData } from '../../../store/types/auth.types';
 import { CfAuthUserSummaryMapped, CFFeatureFlags, CFAuthResource, CFAuthAction, CFAuthChecker, CFFeatureFlagTypes } from './cf-auth.types';
+import { SessionData } from '../../../../../store/src/types/auth.types';
 
 export class CfAuthPrinciple {
 

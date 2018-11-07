@@ -1,7 +1,7 @@
-import { ScopeStrings } from '../../core/current-user-permissions.config';
 import { MetricsAPITargets } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
 
 export interface INewlyConnectedEndpointInfo {
   account: string;

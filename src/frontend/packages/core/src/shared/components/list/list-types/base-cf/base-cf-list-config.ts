@@ -1,6 +1,6 @@
-import { ListView } from '../../../../../store/actions/list.actions';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 
 
 export class BaseCfListConfig<T> implements IListConfig<T> {

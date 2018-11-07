@@ -1,5 +1,4 @@
 import { RequestMethod } from '@angular/http';
-import { pathGet } from '../../../core/utils.service';
 import { IRequestTypeState, AppState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
@@ -15,8 +14,8 @@ import {
   WrapperRequestActionFailed
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { Store } from '../../../../../../node_modules/@ngrx/store';
 import { APIResponse } from '../../actions/request.actions';
+import { pathGet } from '../../../../core/src/core/utils.service';
 
 
 export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {

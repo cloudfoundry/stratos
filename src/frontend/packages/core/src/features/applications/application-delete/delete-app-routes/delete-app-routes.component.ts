@@ -1,13 +1,10 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { APIResource } from '../../../../store/types/api.types';
-import { IRoute } from '../../../../core/cf-api.types';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
+import { Component, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { CfAppRoutesListConfigService } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-config.service';
 import { Subscription } from 'rxjs';
 
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-delete-app-routes',

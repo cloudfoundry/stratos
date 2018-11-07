@@ -1,16 +1,15 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { map } from 'rxjs/operators';
 
-import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { AppStat } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppStat } from '../../../../../../../store/src/types/app-metadata.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { applicationSchemaKey, entityFactory, appStatsSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
 

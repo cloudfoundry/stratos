@@ -7,15 +7,15 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { selectApplicationSource, selectCfDetails } from '../../../store/selectors/deploy-application.selector';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { DeployApplicationSource } from '../../../store/types/deploy-application.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { AppState } from '../../../../../store/src/app-state';
+import { DeployApplicationSource } from '../../../../../store/src/types/deploy-application.types';
+import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';
+import { StoreCFSettings, DeleteDeployAppSection } from '../../../../../store/src/actions/deploy-applications.actions';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
+import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-deploy-application',

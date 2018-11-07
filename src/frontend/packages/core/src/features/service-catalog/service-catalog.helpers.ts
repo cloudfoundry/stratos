@@ -1,11 +1,11 @@
 
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../packages/store/src/app-state';
 import { ActivatedRoute } from '@angular/router';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ServicesService } from './services.service';
 import { Provider } from '@angular/core';
+import { AppState } from '../../../../store/src/app-state';
 
 export function servicesServiceFactory(
   store: Store<AppState>,

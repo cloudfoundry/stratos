@@ -2,15 +2,13 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-import { selectPEProjectName, selectApplicationSource } from '../../../../../store/selectors/deploy-application.selector';
 import { first, filter, map } from 'rxjs/operators';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
-import { DeployApplicationSource } from '../../../../../store/types/deploy-application.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { DeployApplicationSource } from '../../../../../../../store/src/types/deploy-application.types';
+import { selectApplicationSource } from '../../../../../../../store/src/selectors/deploy-application.selector';
 
 @Injectable()
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {

@@ -1,17 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
-import { Login, VerifySession } from '../../../store/actions/auth.actions';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { AuthState } from '../../../store/reducers/auth.reducer';
-import { RouterRedirect } from '../../../store/reducers/routing.reducer';
-import { EndpointState } from '../../../store/types/endpoint.types';
 import { NgForm } from '@angular/forms';
 import { queryParamMap } from '../../../core/auth-guard.service';
+import { AppState } from '../../../../../store/src/app-state';
+import { RouterRedirect } from '../../../../../store/src/reducers/routing.reducer';
+import { VerifySession, Login } from '../../../../../store/src/actions/auth.actions';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { EndpointState } from '../../../../../store/src/types/endpoint.types';
 
 @Component({
   selector: 'app-login-page',
@@ -69,7 +69,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             const validSession = auth.sessionData && auth.sessionData.valid;
             return !(loggedIn && validSession);
           }),
-      )
+        )
         .subscribe(null, null, () => this.handleSuccess());
   }
 
@@ -78,12 +78,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   formSSOredirectURL() {
-      const queryKeys = this.redirect ? Object.keys(this.redirect.queryParams) : undefined;
-      return window.location.protocol + '//' + window.location.hostname +
+    const queryKeys = this.redirect ? Object.keys(this.redirect.queryParams) : undefined;
+    return window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') +
       (this.redirect ?
-          this.redirect.path +
-          (queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + this.redirect.queryParams[k]).join('&') : '') : '/');
+        this.redirect.path +
+        (queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + this.redirect.queryParams[k]).join('&') : '') : '/');
   }
 
   login() {
@@ -169,7 +169,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   private doSSOLogin() {
     const returnUrl = encodeURIComponent(this.formSSOredirectURL());
-    window.open('/pp/v1/auth/sso_login?state=' + returnUrl , '_self');
+    window.open('/pp/v1/auth/sso_login?state=' + returnUrl, '_self');
     this.busy$ = new Observable<boolean>((observer) => {
       observer.next(true);
       observer.complete();

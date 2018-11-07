@@ -1,8 +1,8 @@
 
-import {never as observableNever,  Observable, Subject } from 'rxjs';
+import { never as observableNever, Observable, Subject } from 'rxjs';
 
-import {filter, share, catchError} from 'rxjs/operators';
-import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import { filter, share, catchError } from 'rxjs/operators';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
@@ -10,8 +10,8 @@ import websocketConnect from 'rxjs-websockets';
 
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { ApplicationService } from '../../../../application.service';
+import { AppState } from '../../../../../../../../store/src/app-state';
 
 export interface LogItem {
   message: string;
@@ -62,7 +62,7 @@ export class LogStreamTabComponent implements OnInit {
         return [];
       }),
         share(),
-        filter(data => !!data && data.length), );
+        filter(data => !!data && data.length));
 
       this.messages = messages;
       this.connectionStatus = connectionStatus;

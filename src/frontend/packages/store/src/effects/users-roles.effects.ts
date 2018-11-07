@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../actions/users.actions';
 import { AppState } from '../app-state';
@@ -15,6 +14,7 @@ import { SessionDataEndpoint } from '../types/auth.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
 import { OrgUserRoleNames } from '../types/user.types';
 import { CfRoleChange } from '../types/users-roles.types';
+import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
 
 
 @Injectable()

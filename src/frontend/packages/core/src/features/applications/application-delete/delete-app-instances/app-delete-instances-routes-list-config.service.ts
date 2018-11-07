@@ -12,14 +12,14 @@ import {
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { FetchAllServiceBindings } from '../../../../store/actions/service-bindings.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { entityFactory, serviceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/types/api.types';
-import { QParam } from '../../../../store/types/pagination.types';
 import { ApplicationService } from '../../application.service';
+import { FetchAllServiceBindings } from '../../../../../../store/src/actions/service-bindings.actions';
+import { createEntityRelationPaginationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { serviceSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { QParam } from '../../../../../../store/src/types/pagination.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {

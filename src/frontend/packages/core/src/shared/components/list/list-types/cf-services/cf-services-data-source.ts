@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetAllServices } from '../../../../../store/actions/service.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { endpointSchemaKey, entityFactory, serviceSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { endpointSchemaKey, entityFactory, serviceSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { GetAllServices } from '../../../../../../../store/src/actions/service.actions';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {

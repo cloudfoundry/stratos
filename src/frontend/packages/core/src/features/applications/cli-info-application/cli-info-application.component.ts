@@ -4,10 +4,10 @@ import { filter, first, map } from 'rxjs/operators';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { ApplicationService } from '../application.service';
+import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 
 @Component({
   selector: 'app-cli-info-application',

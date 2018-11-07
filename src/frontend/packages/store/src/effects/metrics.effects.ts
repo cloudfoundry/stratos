@@ -4,7 +4,6 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
-import { MetricQueryType } from '../../shared/services/metrics-range-selector.types';
 import {
   METRIC_API_FAILED,
   METRIC_API_START,
