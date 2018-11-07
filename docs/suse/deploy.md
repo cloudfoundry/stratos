@@ -78,6 +78,9 @@ When connecting to Kubernetes you need to provide authentication information in 
 
 - For Minikube use the Auth Type `Kubernetes Cert Auth` and provide the Certificate and Certificate Key files
 
+
+> NOTE: For more details - see [here](https://github.com/SUSE/stratos/blob/v2-master/docs/connecting-k8s.md).
+
 ## Deploying Metrics
 
 Stratos can show metrics data from Prometheus for both Cloud Foundry and Kubernetes.
