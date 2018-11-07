@@ -5,9 +5,9 @@ import {
   CfUsersSpaceRolesListConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../../packages/store/src/app-state';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { AppState } from '../../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-space-roles-list-wrapper',

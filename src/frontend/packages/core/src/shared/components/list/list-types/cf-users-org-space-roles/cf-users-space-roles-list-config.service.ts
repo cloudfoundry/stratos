@@ -3,15 +3,15 @@ import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { selectUsersRolesRoles } from '../../../../../store/selectors/users-roles.selector';
-import { APIResource } from '../../../../../store/types/api.types';
-import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
 
 
 export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResource<ISpace>> {

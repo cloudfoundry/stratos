@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { cfUserSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../store/types/api.types';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { entityFactory, cfUserSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string,

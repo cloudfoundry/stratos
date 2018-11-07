@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { cfUserSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ListConfig } from '../../list.component.types';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from './../../../../../store/types/api.types';
-import { CfUser } from './../../../../../store/types/user.types';
+import { entityFactory, cfUserSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 
 export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>> {

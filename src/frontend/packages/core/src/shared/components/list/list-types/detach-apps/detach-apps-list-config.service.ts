@@ -4,12 +4,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { DetachAppsDataSource } from './detach-apps-data-source';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class DetachAppsListConfigService implements IListConfig<APIResource> {

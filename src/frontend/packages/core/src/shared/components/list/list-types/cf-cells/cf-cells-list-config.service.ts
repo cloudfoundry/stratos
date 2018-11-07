@@ -2,10 +2,6 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { IMetricVectorResult } from '../../../../../store/types/base-metric.types';
-import { IMetricCell } from '../../../../../store/types/metric.types';
 import {
   TableCellBooleanIndicatorComponent,
   TableCellBooleanIndicatorComponentConfig,
@@ -14,6 +10,10 @@ import { ITableColumn } from '../../list-table/table.types';
 import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
+import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {

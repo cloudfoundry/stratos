@@ -1,7 +1,14 @@
 import { Store } from '@ngrx/store';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../packages/store/src/app-state';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import {
+  createEntityRelationPaginationKey,
+  createEntityRelationKey
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
   applicationSchemaKey,
   entityFactory,
@@ -11,15 +18,8 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
   serviceInstancesWithSpaceSchemaKey,
-} from '../../../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
-import { GetServiceInstancesForSpace } from '../../../../../store/actions/space.actions';
+} from '../../../../../../../store/src/helpers/entity-factory';
+import { GetServiceInstancesForSpace } from '../../../../../../../store/src/actions/space.actions';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {

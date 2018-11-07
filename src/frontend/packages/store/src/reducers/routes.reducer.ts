@@ -1,10 +1,9 @@
 import { AppState, IRequestEntityTypeState } from '../app-state';
-import { Action } from '@ngrx/store';
 import { APIResource } from '../types/api.types';
 import { RouteEvents, UnmapRoute, DeleteRoute } from '../actions/route.actions';
 import { APISuccessOrFailedAction } from '../types/request.types';
-import { IRoute, IAppSummary } from '../../core/cf-api.types';
 import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../actions/application-service-routes.actions';
+import { IRoute, IAppSummary } from '../../../core/src/core/cf-api.types';
 
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: APISuccessOrFailedAction) {
   switch (action.type) {

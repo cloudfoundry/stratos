@@ -7,9 +7,9 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfOrgUsersListConfigService extends CfUserListConfigService {

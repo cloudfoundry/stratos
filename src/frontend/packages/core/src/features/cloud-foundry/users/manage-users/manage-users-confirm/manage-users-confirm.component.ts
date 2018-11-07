@@ -21,20 +21,20 @@ import {
   // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';
-import { ChangeUserRole } from '../../../../../store/actions/users.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
+import { CfRolesService } from '../cf-roles.service';
+import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
 import {
   cfUserSchemaKey,
   entityFactory,
   organizationSchemaKey,
   spaceSchemaKey,
-} from '../../../../../store/helpers/entity-factory';
-import { selectUsersRoles, selectUsersRolesChangedRoles } from '../../../../../store/selectors/users-roles.selector';
-import { APIResource } from '../../../../../store/types/api.types';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
-import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
-import { CfRolesService } from '../cf-roles.service';
+} from '../../../../../../../store/src/helpers/entity-factory';
+import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { selectUsersRoles, selectUsersRolesChangedRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
+import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
 
 @Component({
   selector: 'app-manage-users-confirm',

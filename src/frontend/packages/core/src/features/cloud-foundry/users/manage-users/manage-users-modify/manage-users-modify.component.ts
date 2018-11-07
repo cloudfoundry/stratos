@@ -35,19 +35,15 @@ import {
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
-import { UsersRolesSetOrg } from '../../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import {
-  selectUsersRolesOrgGuid,
-  selectUsersRolesPicked,
-  selectUsersRolesRoles,
-} from '../../../../../store/selectors/users-roles.selector';
-import { APIResource } from '../../../../../store/types/api.types';
-import { CfUser, OrgUserRoleNames } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
+import { CfUser, OrgUserRoleNames } from '../../../../../../../store/src/types/user.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { selectUsersRolesOrgGuid, selectUsersRolesPicked, selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
+import { UsersRolesSetOrg } from '../../../../../../../store/src/actions/users-roles.actions';
 /* tslint:enable:max-line-length */
 
 interface Org { metadata: { guid: string }; }

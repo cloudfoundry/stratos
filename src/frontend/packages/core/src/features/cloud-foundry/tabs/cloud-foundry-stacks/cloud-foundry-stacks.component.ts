@@ -4,8 +4,8 @@ import {
   CfStacksListConfigService,
 } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-list-config.service';
 import { CfStacksCardComponent } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import { APIResource } from '../../../../store/types/api.types';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 @Component({
   selector: 'app-cloud-foundry-stacks',
   templateUrl: './cloud-foundry-stacks.component.html',

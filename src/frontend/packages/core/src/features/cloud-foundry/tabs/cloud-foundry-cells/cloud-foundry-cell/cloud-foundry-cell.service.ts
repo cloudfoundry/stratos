@@ -7,11 +7,11 @@ import { MetricsConfig } from '../../../../../shared/components/metrics-chart/me
 import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
-import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
-import { IMetricCell } from '../../../../../store/types/metric.types';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { metricSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 
 export const enum CellMetrics {

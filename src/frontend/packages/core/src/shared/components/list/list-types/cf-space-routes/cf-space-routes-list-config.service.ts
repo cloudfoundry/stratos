@@ -1,15 +1,11 @@
 
-import { of as observableOf, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { take, tap, map } from 'rxjs/operators';
 
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { selectEntity } from '../../../../../store/selectors/api.selectors';
-import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
@@ -22,6 +18,10 @@ import {
 import { DatePipe } from '@angular/common';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { DeleteRoute, UnmapRoute } from '../../../../../../../store/src/actions/route.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {

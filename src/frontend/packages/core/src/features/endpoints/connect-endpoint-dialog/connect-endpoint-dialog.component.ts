@@ -4,19 +4,19 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 
 import { Store } from '@ngrx/store';
 
-import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
-import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
-import { SystemEffects } from '../../../store/effects/system.effects';
-import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
 import { getCanShareTokenForEndpointType } from '../endpoint-helpers';
 
 import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { EndpointType, endpointStoreNames, EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
+import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
+import { selectUpdateInfo, selectRequestInfo, selectEntity } from '../../../../../store/src/selectors/api.selectors';
+import { EndpointsEffect } from '../../../../../store/src/effects/endpoint.effects';
+import { SystemEffects } from '../../../../../store/src/effects/system.effects';
+import { ConnectEndpoint } from '../../../../../store/src/actions/endpoint.actions';
 
 
 @Component({
@@ -100,7 +100,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
-    if (ssoIndex >= 0 ) {
+    if (ssoIndex >= 0) {
       autoSelected = this.authTypesForEndpoint[ssoIndex];
     }
 
@@ -133,7 +133,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     this.connectingSub = this.endpointConnected$.pipe(
       filter(connected => connected),
-      delay(this.connectDelay), )
+      delay(this.connectDelay))
       .subscribe(() => {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
@@ -149,13 +149,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.getRequestSelector()
     ).pipe(
       filter(request => !!request),
-      map(request => request.fetching), );
+      map(request => request.fetching));
 
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     ).pipe(
       map(request => !!(request && request.api_endpoint && request.user)));
-    const busy$ = this.update$.pipe(map(update => update.busy), startWith(false), );
+    const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
     this.connecting$ = busy$.pipe(
       pairwise(),
       switchMap(([oldBusy, newBusy]) => {

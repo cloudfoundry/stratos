@@ -6,9 +6,9 @@ import { CardStatus } from '../../../../../../shared/components/application-stat
 import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricQueryType } from '../../../../../../shared/services/metrics-range-selector.types';
-import { IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
-import { IMetricCell } from '../../../../../../store/types/metric.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
 
 @Component({
   selector: 'app-cloud-foundry-cell-summary',

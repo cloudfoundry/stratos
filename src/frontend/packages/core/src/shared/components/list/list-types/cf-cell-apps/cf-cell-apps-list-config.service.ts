@@ -4,13 +4,13 @@ import { Store } from '@ngrx/store';
 import { IApp, ISpace } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 @Injectable()
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {

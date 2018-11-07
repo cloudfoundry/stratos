@@ -4,12 +4,6 @@ import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } fr
 
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
-import { CfUser, CfUserMissingRoles } from '../../../../../store/types/user.types';
-import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
@@ -19,6 +13,11 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser, CfUserMissingRoles } from '../../../../../../../store/src/types/user.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 function cfUserHasAllRoleProperties(user: APIResource<CfUser>): boolean {
   return !!user.entity.audited_organizations &&

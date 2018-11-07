@@ -1,7 +1,7 @@
-import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { BaseSpaceAction, CREATE_SPACE_SUCCESS, DELETE_SPACE_SUCCESS } from '../actions/space.actions';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
+import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
 
 // Note - This reducer will be updated when we address general entity relation deletion
 export function updateOrganizationSpaceReducer() {

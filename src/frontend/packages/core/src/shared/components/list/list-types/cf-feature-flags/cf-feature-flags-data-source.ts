@@ -2,12 +2,13 @@ import { Store } from '@ngrx/store';
 
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../store/types/api.types';
+
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityFactory, featureFlagSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export const FeatureFlagDescriptions = {
   user_org_creation: 'Any user can create an organization',

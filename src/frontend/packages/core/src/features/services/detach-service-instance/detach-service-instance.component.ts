@@ -12,11 +12,11 @@ import {
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { GetServiceInstance } from '../../../store/actions/service-instances.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { entityFactory, serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
-import { APIResource } from '../../../store/types/api.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { serviceBindingSchemaKey, serviceInstancesSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { AppState } from '../../../../../store/src/app-state';
+import { GetServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-detach-service-instance',

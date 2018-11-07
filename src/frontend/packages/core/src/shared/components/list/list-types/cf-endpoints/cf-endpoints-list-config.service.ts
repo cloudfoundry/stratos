@@ -1,18 +1,17 @@
 
-import {pairwise} from 'rxjs/operators';
+import { pairwise } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';
-import { EndpointsListConfigService, endpointColumns } from '../endpoint/endpoints-list-config.service';
+import { IListConfig, ListViewTypes } from '../../list.component.types';
+import { endpointColumns } from '../endpoint/endpoints-list-config.service';
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
-import { TableCellEndpointStatusComponent } from '../endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { CfEndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
+import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {

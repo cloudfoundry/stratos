@@ -13,13 +13,6 @@ import {
   getNameForEndpointType,
   getEndpointUsername,
 } from '../../../../../features/endpoints/endpoint-helpers';
-import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
-import { GetSystemInfo } from '../../../../../store/actions/system.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
@@ -34,6 +27,13 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
 import { map, pairwise } from 'rxjs/operators';
 import { combineLatest, Observable } from 'rxjs';
 import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { UnregisterEndpoint, DisconnectEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
+import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
+import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
+import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { selectUpdateInfo, selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {

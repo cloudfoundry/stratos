@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
-import { IMetricCell } from '../../../../../store/types/metric.types';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { IMetricVectorResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfCellsDataSource
   extends ListDataSource<IMetricVectorResult<IMetricCell>, IMetrics<IMetricVectorResult<IMetricCell>>> {

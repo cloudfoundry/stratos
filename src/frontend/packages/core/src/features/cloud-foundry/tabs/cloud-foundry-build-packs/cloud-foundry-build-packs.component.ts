@@ -1,14 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
-import {
-  CfBuildpackCardComponent,
-} from '../../../../shared/components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
 import {
   CfBuildpacksListConfigService,
 } from '../../../../shared/components/list/list-types/cf-buildpacks/cf-buildpacks-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-cloud-foundry-build-packs',

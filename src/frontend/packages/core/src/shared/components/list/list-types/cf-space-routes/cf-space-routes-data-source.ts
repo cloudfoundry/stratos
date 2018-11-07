@@ -1,24 +1,23 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
+import { SpaceRouteDataSourceHelper } from './cf-space-route-row-state.helper';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import {
+  createEntityRelationPaginationKey,
+  createEntityRelationKey
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
   applicationSchemaKey,
   domainSchemaKey,
   entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
-} from '../../../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
-import { SpaceRouteDataSourceHelper } from './cf-space-route-row-state.helper';
+} from '../../../../../../../store/src/helpers/entity-factory';
+import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
 
 export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
 

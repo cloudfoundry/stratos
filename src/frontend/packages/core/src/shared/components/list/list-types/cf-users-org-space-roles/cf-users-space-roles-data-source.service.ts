@@ -4,13 +4,13 @@ import { ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { GetAllOrganizationSpaces } from '../../../../../store/actions/organization.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { cfUserSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../store/types/api.types';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { cfUserSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
   constructor(

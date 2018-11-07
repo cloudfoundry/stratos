@@ -2,9 +2,9 @@ import { Component, OnInit, EventEmitter, Output, OnDestroy } from '@angular/cor
 import { DetachAppsListConfigService } from '../../../../shared/components/list/list-types/detach-apps/detach-apps-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
-import { APIResource } from '../../../../store/types/api.types';
 import { of as observableOf, Subscription, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-detach-apps',

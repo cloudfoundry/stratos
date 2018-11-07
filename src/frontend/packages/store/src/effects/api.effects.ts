@@ -11,7 +11,6 @@ import { Store, Action } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { map, mergeMap, withLatestFrom, catchError } from 'rxjs/operators';
-import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
@@ -63,6 +62,7 @@ import {
   RecursiveDeleteFailed,
 } from './recursive-entity-delete.effect';
 import { environment } from '../../../core/src/environments/environment.prod';
+import { LoggerService } from '../../../core/src/core/logger.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';

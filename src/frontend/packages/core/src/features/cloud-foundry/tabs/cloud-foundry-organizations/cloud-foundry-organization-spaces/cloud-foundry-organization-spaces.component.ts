@@ -5,8 +5,8 @@ import {
   CfSpacesListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-spaces/cf-spaces-list-config.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
-import { APIResource } from '../../../../../store/types/api.types';
 import { ISpace } from '../../../../../core/cf-api.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-spaces',

@@ -1,13 +1,13 @@
-import { EndpointModel } from '../../../../../store/types/endpoint.types';
+
 import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
 
 export function EndpointRowStateSetUpManager(
   paginationMonitor: PaginationMonitor<EndpointModel>,

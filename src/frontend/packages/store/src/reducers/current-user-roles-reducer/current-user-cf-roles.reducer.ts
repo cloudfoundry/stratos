@@ -1,4 +1,3 @@
-import { ISpace } from '../../../core/cf-api.types';
 import { GetCurrentUserRelationsComplete } from '../../actions/permissions.actions';
 import { APIResource } from '../../types/api.types';
 import { getDefaultEndpointRoles, ICfRolesState, IOrgsRoleState } from '../../types/current-user-roles.types';
@@ -6,6 +5,7 @@ import { isOrgRelation, isSpaceRelation } from './current-user-reducer.helpers';
 import { createOrgRoleStateState } from './current-user-roles-org.reducer';
 import { currentUserOrgRolesReducer } from './current-user-roles-orgs.reducer';
 import { currentUserSpaceRolesReducer } from './current-user-roles-spaces.reducer';
+import { ISpace } from '../../../../core/src/core/cf-api.types';
 
 export function currentUserCFRolesReducer(
   state: ICfRolesState = getDefaultEndpointRoles(),

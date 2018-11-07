@@ -9,16 +9,16 @@ import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
-import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
-import { CfUser } from '../../../../../store/types/user.types';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';
 import { IListAction, IMultiListAction, ListConfig, ListViewTypes } from './../../list.component.types';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 
 @Injectable()

@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { AppState } from '../../../../../packages/store/src/app-state';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import {
   CfUserListConfigService,
 } from './../../../../shared/components/list/list-types/cf-users/cf-user-list-config.service';
 import { ListConfig } from './../../../../shared/components/list/list.component.types';
+import { AppState } from '../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-cloud-foundry-users',

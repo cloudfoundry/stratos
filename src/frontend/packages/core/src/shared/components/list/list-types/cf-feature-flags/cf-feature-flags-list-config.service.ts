@@ -3,14 +3,14 @@ import { Store } from '@ngrx/store';
 
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-flags-data-source';
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state/table-cell-feature-flag-state.component';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResource<IFeatureFlag>> {

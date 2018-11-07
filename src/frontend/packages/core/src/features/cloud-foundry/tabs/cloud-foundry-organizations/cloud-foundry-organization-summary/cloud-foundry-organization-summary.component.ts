@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',

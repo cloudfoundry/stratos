@@ -10,12 +10,12 @@ import { ListConfig } from '../../../../../shared/components/list/list.component
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
-import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
-import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
 
 
 @Component({

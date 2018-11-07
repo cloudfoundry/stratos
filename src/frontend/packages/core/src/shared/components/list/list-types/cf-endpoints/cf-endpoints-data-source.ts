@@ -1,14 +1,13 @@
 import { Store } from '@ngrx/store';
 
-import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
-import { CreatePagination } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { GetSystemInfo } from '../../../../../store/actions/system.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
+import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { entityFactory, endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
 
 function syncPaginationSection(
   store: Store<AppState>,

@@ -7,13 +7,13 @@ import { filter, map, take, tap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { UpdateSpace } from '../../../../store/actions/space.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
+import { AppState } from '../../../../../../store/src/app-state';
+import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 
 @Component({

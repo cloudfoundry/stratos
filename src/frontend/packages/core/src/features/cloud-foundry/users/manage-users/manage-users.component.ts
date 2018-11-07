@@ -3,21 +3,18 @@ import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, tap, startWith } from 'rxjs/operators';
+import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import {
-  UsersRolesClear,
-  UsersRolesExecuteChanges,
-  UsersRolesSetUsers,
-} from '../../../../store/actions/users-roles.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { selectUsersRoles, selectUsersRolesPicked } from '../../../../store/selectors/users-roles.selector';
-import { CfUser } from '../../../../store/types/user.types';
+
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
+import { CfUser } from '../../../../../../store/src/types/user.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { selectUsersRolesPicked, selectUsersRoles } from '../../../../../../store/src/selectors/users-roles.selector';
+import { UsersRolesSetUsers, UsersRolesClear, UsersRolesExecuteChanges } from '../../../../../../store/src/actions/users-roles.actions';
 
 @Component({
   selector: 'app-manage-users',

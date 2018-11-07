@@ -1,5 +1,5 @@
 
-import {of as observableOf,  BehaviorSubject ,  Observable ,  combineLatest } from 'rxjs';
+import { of as observableOf, BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { Component, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
@@ -9,17 +9,17 @@ import { CurrentUserPermissionsChecker } from '../../../core/current-user-permis
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { EndpointModel } from '../../../store/types/endpoint.types';
-import { getPreviousRoutingState } from '../../../store/types/routing.type';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
+import { EntityInfo, APIResource } from '../../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-cli-info-cloud-foundry',

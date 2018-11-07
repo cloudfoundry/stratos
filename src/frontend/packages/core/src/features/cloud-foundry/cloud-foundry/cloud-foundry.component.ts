@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, distinctUntilChanged } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import {
   CFEndpointsListConfigService,
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { AppState } from '../../../../../store/src/app-state';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-cloud-foundry',

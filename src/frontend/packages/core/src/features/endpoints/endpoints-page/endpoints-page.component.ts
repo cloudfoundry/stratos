@@ -10,9 +10,9 @@ import { Subscription, } from 'rxjs';
 import { queryParamMap } from '../../../core/auth-guard.service';
 import { delay, first, map, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } from '../../../core/extension/extension-service';
+import { AppState } from '../../../../../store/src/app-state';
+import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -26,7 +26,7 @@ import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } fr
 
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState> ) { }
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState>) { }
 
   sub: Subscription;
 

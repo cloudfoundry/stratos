@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Params, RouterStateSnapshot, RouteConfigLoadEnd, Route } from '@angular/router';
+import { Params, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
@@ -17,11 +17,11 @@ import { ServiceCatalogModule } from './features/service-catalog/service-catalog
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
-import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
 import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
 import { ExtensionService } from './core/extension/extension-service';
 import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
+import { AppStoreModule } from '../../store/src/store.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68

@@ -8,9 +8,9 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {

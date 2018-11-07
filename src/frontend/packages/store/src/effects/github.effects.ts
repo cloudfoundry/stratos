@@ -4,13 +4,13 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { GITHUB_API_URL } from '../../core/github.helpers';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
 import { AppState } from '../app-state';
 import { githubRepoSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
+import { GITHUB_API_URL } from '../../../core/src/core/github.helpers';
 
 
 @Injectable()
@@ -57,6 +57,6 @@ export class GithubEffects {
             catchError(err => [
               new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
             ]
-            ), );
+            ));
       }));
 }

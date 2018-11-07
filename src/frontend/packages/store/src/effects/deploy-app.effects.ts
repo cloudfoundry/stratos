@@ -5,22 +5,6 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { GITHUB_API_URL } from '../../core/github.helpers';
-import { LoggerService } from '../../core/logger.service';
-import { parseHttpPipeError } from '../../core/utils.service';
-import {
-  CHECK_PROJECT_EXISTS,
-  CheckProjectExists,
-  FETCH_BRANCHES_FOR_PROJECT,
-  FETCH_COMMIT,
-  FETCH_COMMITS,
-  FetchBranchesForProject,
-  FetchCommit,
-  FetchCommits,
-  ProjectDoesntExist,
-  ProjectExists,
-  ProjectFetchFail,
-} from '../../store/actions/deploy-applications.actions';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
@@ -33,6 +17,22 @@ import {
 } from '../types/request.types';
 import { AppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
+import { parseHttpPipeError } from '../../../core/src/core/utils.service';
+import { LoggerService } from '../../../core/src/core/logger.service';
+import { GITHUB_API_URL } from '../../../core/src/core/github.helpers';
+import {
+  CHECK_PROJECT_EXISTS,
+  CheckProjectExists,
+  FETCH_BRANCHES_FOR_PROJECT,
+  FETCH_COMMIT,
+  FETCH_COMMITS,
+  FetchBranchesForProject,
+  FetchCommit,
+  FetchCommits,
+  ProjectDoesntExist,
+  ProjectExists,
+  ProjectFetchFail,
+} from '../actions/deploy-applications.actions';
 
 export function createFailedGithubRequestMessage(error) {
   const response = parseHttpPipeError(error);
@@ -107,7 +107,7 @@ export class DeployAppEffects {
             }),
             catchError(err => [
               new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+            ]));
       }));
 
   @Effect()
@@ -135,7 +135,7 @@ export class DeployAppEffects {
             }),
             catchError(err => [
               new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+            ]));
       }));
 
   @Effect()
@@ -166,7 +166,7 @@ export class DeployAppEffects {
             }),
             catchError(err => [
               new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+            ]));
       }));
 
   addCommit(mappedData: NormalizedResponse, projectName: string, commit: GithubCommit) {

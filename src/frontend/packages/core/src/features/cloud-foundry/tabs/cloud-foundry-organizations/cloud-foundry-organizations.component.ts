@@ -4,7 +4,7 @@ import { ListDataSource } from '../../../../shared/components/list/data-sources-
 import { CfOrgCardComponent } from '../../../../shared/components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { CfOrgsListConfigService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-cloud-foundry-organizations',

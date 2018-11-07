@@ -7,14 +7,14 @@ import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
-import { AppState } from '../../../../../packages/store/src/app-state';
-import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
-import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
-import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
-import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
-import { endpointStoreNames } from '../../../../store/types/endpoint.types';
 import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl, EndpointTypeHelper } from '../../endpoint-helpers';
+import { AppState } from '../../../../../../store/src/app-state';
+import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
+import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.types';
+import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
+import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { entityFactory, endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/

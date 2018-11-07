@@ -21,7 +21,7 @@ const appRoutes: Routes = [
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
-  { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
+  { path: 'login', loadChildren: './features/login/login.module#LoginModule' },
   {
     path: '',
     component: DashboardBaseComponent,
@@ -40,7 +40,7 @@ const appRoutes: Routes = [
         }
       },
       {
-        path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
+        path: 'applications', loadChildren: './features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             text: 'Applications',
@@ -60,15 +60,15 @@ const appRoutes: Routes = [
         },
         children: [{
           path: '',
-          loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule',
+          loadChildren: './features/endpoints/endpoints.module#EndpointsModule',
         },
         {
           path: 'metrics',
-          loadChildren: 'app/features/metrics/metrics.module#MetricsModule',
+          loadChildren: './features/metrics/metrics.module#MetricsModule',
         }]
       },
       {
-        path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule',
+        path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
           stratosNavigation: {
             text: 'Marketplace',
@@ -78,7 +78,7 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule',
+        path: 'services', loadChildren: './features/services/services.module#ServicesModule',
         data: {
           stratosNavigation: {
             text: 'Services',
@@ -89,7 +89,7 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
+        path: 'cloud-foundry', loadChildren: './features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
         data: {
           stratosNavigation: {
             text: 'Cloud Foundry',
@@ -99,8 +99,8 @@ const appRoutes: Routes = [
           }
         },
       },
-      { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
-      { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
+      { path: 'about', loadChildren: './features/about/about.module#AboutModule' },
+      { path: 'user-profile', loadChildren: './features/user-profile/user-profile.module#UserProfileModule' },
     ]
   },
   {

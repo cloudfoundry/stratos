@@ -2,12 +2,12 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../store/types/api.types';
 import { EntityMonitor } from '../../../../monitors/entity-monitor';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 export class SpaceRouteDataSourceHelper {
   static getRowStateManager(

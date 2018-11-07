@@ -4,7 +4,6 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
 
-import { environment } from '../../environments/environment';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
@@ -20,6 +19,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
+import { environment } from '../../core/src/environments/environment';
 
 
 export function logger(reducer) {

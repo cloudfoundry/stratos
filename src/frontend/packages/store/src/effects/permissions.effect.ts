@@ -5,10 +5,6 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { LoggerService } from '../../core/logger.service';
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
@@ -30,6 +26,10 @@ import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { LoggerService } from '../../../core/src/core/logger.service';
+import {
+  createCfFeatureFlagFetchAction,
+} from '../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 
 class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFlattener<CFResponse> {
 
