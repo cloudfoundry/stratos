@@ -13,7 +13,7 @@ These instructions assume that you are deploying the SUSE Cloud Application Plat
 
 To deploy Stratos, use the same `scf-config-values.yaml` file that you used to deploy SCF/UAA.
 
-Ensure you have a Storage Class configured and that is set to be the default.
+Ensure you have a Storage Class configured and that is set to be the default - see [here](https://github.com/SUSE/stratos/tree/v2-master/deploy/kubernetes#specifying-a-custom-storage-class) for more information.
 
 Install with:
 
@@ -61,12 +61,22 @@ Next you will need to connect to this endpoint.
 
 1. In the table of endpoints, click the three-dot menu icon alongside the endpoint that you added above
 1. Click on 'Connect' in the dropdown menu
-1. Select the appropriate authentication type and provide the necessary values
+1. Select the appropriate authentication type and provide the necessary values (see below for more information)
 1. Click `Connect`
 
-> Note: For CaaSP, the Auth Type is `CAASP (OIDC)` and you must browse to a valid `kubeconfig` file for your environment.
-
 Once connected, you should see a `Kubernetes` menu item in the left-hand side navigation - click on this to view the Kubernetes metadata.
+
+### Connecting to Kubernetes
+
+When connecting to Kubernetes you need to provide authentication information in order to connect - the `Auth Type` and information required depends on the Kubernetes platform that you are using:
+
+- For CaaSP, use the Auth Type `CAASP (OIDC)` and provide a valid `kubeconfig` file for your environment
+
+- For Amazon EKS use the Auth Type `AWS IAM (EKS)` and provide the name of your EKS cluster and your AWS Access Key ID and Secret Access Key
+
+- For Azure AKS use the Auth Type `Azure AKS` and provide a valid `kubeconfig` file for your environment
+
+- For Minikube use the Auth Type `Kubernetes Cert Auth` and provide the Certificate and Certificate Key files
 
 ## Deploying Metrics
 
@@ -139,3 +149,11 @@ Next you will need to connect to this endpoint.
 1. Click `Connect`
 
 Once connected, you should see that the name of your Metrices endpoint is a hyperlink and clicking on it should show basic metadata about the Stratos Metrics endpoint.
+
+Metrics data and views should also be available in the UI for example:
+
+- On the `Instances` tab for an Application, the table should show an additional `Cell` column to indicate which Diego Cell the instance is running on. This should be clicbale to navigate to a Cell view showing Cell information and metrics.
+
+- On the view for an Application there should be a new `Metrics` tab that shows Application metrics
+
+- On the Kubernetes views, views such as the `Node` view should show an additional `Metrics` tab with additional information
