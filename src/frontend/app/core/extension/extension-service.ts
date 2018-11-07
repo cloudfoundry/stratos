@@ -152,7 +152,15 @@ export class ExtensionService {
   private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
 
-    const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
+    // Find the route that has the 'about' page as a child - this is the dashboard base
+    const dashboardRoute = routeConfig.find(r => {
+      if (r.path === '' && !!r.component && r.children) {
+        return !!r.children.find(c => c.path === 'about');
+      } else {
+        return false;
+      }
+    });
+
     let needsReset = false;
     if (dashboardRoute) {
       // Move any stratos extension routes under the dashboard base route
