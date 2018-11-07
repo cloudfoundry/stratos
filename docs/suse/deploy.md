@@ -7,7 +7,7 @@ The following instructions cover how to:
 - Deploy Stratos Metrics
 - Connect Stratos Metrics to Stratos to enable Metrics views in Stratos
 
-These instructions assume that you are deploying the SUSE Cloud Application Platform and that you are deploying UAA/SCF using a `scf-config-values` configuration file.
+These instructions assume that you are deploying the SUSE Cloud Application Platform and that you have deployed UAA/SCF using a `scf-config-values` configuration file.
 
 ## Install Stratos with Helm
 
@@ -39,7 +39,7 @@ NAME             TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)              
 stratos-ui-ext   NodePort   172.24.239.140   10.17.3.1     80:30862/TCP,8443:32129/TCP   1h
 ```
 
-> NOTE: When you log in to Stratos, your SUASE Cloud Foundry dpeloyment should already be registered and connected to Stratos.
+> NOTE: When you log in to Stratos, your SUSE Cloud Foundry dpeloyment should already be registered and connected to Stratos.
 
 ## Connecting Kubernetes to Stratos
 
@@ -94,9 +94,18 @@ kubernetes:
 prometheus:
   kubeStateMetrics:    
     enabled: true
+nginx:
+  username: $USERNAME
+  password: $PASSWORD 
 ```
 
-Where `$KUBE_SERVER_ADDRESS` is the same URL that you used when registering your Kubernetes environment with Stratos (the Kubernetes API Server URL).
+Where:
+
+- `$KUBE_SERVER_ADDRESS` is the same URL that you used when registering your Kubernetes environment with Stratos (the Kubernetes API Server URL).
+- `$USERNAME` should be chosen by you as the username that you will use when connecting to Stratos Metrics
+- `$PASSWORD` should be chosen by you as the password that you will use when connecting to Stratos Metrics
+
+> Note: If you omit the `nginx` section in this file, the default username and password will be `metrics` and `s3cr3t`.
 
 Install Metrics with:
 
