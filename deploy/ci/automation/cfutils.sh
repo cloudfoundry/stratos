@@ -69,6 +69,8 @@ if [ "$STATUS" == "Not Created" ]; then
   cf pcfdev start -m 10240 -c 3
   echo "Setting PCF DEV up for E2E Tests ..."
   "${DIRPATH}/../../tools/init-cf-for-e2e.sh"
+  # Ensure that PCF Dev's UAA is configured to allow SSO Login
+  "${DIRPATH}/init-pcfdev-uaa.sh"
 else if [ "$STATUS" == "Running" ]; then
   echo "PCF DEV is already running"
   else if [ "$STATUS" == "Stopped" ]; then
