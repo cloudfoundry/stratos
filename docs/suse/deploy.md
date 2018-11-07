@@ -150,10 +150,10 @@ Next you will need to connect to this endpoint.
 
 Once connected, you should see that the name of your Metrices endpoint is a hyperlink and clicking on it should show basic metadata about the Stratos Metrics endpoint.
 
-Metrics data and views should also be available in the UI for example:
+Metrics data and views should now be available in the UI, for example:
 
-- On the `Instances` tab for an Application, the table should show an additional `Cell` column to indicate which Diego Cell the instance is running on. This should be clicbale to navigate to a Cell view showing Cell information and metrics.
+- On the `Instances` tab for an Application, the table should show an additional `Cell` column to indicate which Diego Cell the instance is running on. This should be clickable to navigate to a Cell view showing Cell information and metrics
 
 - On the view for an Application there should be a new `Metrics` tab that shows Application metrics
 
-- On the Kubernetes views, views such as the `Node` view should show an additional `Metrics` tab with additional information
+- On the Kubernetes views, views such as the `Node` view should show an additional `Metrics` tab with metric information
