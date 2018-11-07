@@ -1,10 +1,17 @@
 # Deploying Stratos
 
-When deploying Stratos as part of SUSE Cloud Application Platform, you should deploy using the same `scf-config-values` file that you used to deploy Cloud Foundry.
+The following instructions cover how to:
+
+- Deploy Stratos
+- Connect Kubernetes to Stratos to enable Kubernetes views in Stratos
+- Deploy Stratos Metrics
+- Connect Stratos Metrics to Stratos to enable Metrics views in Stratos
+
+These instructions assume that you are deploying the SUSE Cloud Application Platform and that you are deploying UAA/SCF using a `scf-config-values` configuration file.
 
 ## Install Stratos with Helm
 
-To deploy Stratos, use the same `scf-config-values.yaml` file that you used to deplot SCF/UAA.
+To deploy Stratos, use the same `scf-config-values.yaml` file that you used to deploy SCF/UAA.
 
 Ensure you have a Storage Class configured and that is set to be the default.
 
@@ -32,9 +39,7 @@ NAME             TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)              
 stratos-ui-ext   NodePort   172.24.239.140   10.17.3.1     80:30862/TCP,8443:32129/TCP   1h
 ```
 
-The port to use is the one shown alongside `8443:`, so in this example, `32129`.
-
-When you log in to Stratos, your SUASE Cloud Foundry dpeloyment should already be registered and connected to Stratos.
+> NOTE: When you log in to Stratos, your SUASE Cloud Foundry dpeloyment should already be registered and connected to Stratos.
 
 ## Connecting Kubernetes to Stratos
 
@@ -42,7 +47,7 @@ Stratos can show information from your Kubernetes environment.
 
 To enable this, you must register and connect your Kubernetes environment with Stratos.
 
-Go to `Endpoints` in the left-hand side navigation and click on the `+` icon in the top-right on the view - you should be shown the `Register new Endpoint` view.
+In the Stratos UI, go to `Endpoints` in the left-hand side navigation and click on the `+` icon in the top-right on the view - you should be shown the `Register new Endpoint` view.
 
 1. Select `Kubernetes` from the `Endpoint Type` dropdown
 1. Enter a memorable name for yor environment in the `Name` field
@@ -71,7 +76,7 @@ In order to do this, you need to deploy the `stratos-metrics` Helm chart - this 
 
 As with deploying Stratos, you should deploy the metrics Helm chart using the same `scf-config-values.yaml` file that was used for deploying SCF and UAA.
 
-Create a new yaml file named `kube-metrics-values.yaml`, with the following contents:
+Create a new yaml file named `stratos-metrics-values.yaml`, with the following contents:
 
 ```
 kubernetes:
@@ -90,8 +95,47 @@ helm install suse/metrics \
     --name susecf-metrics \
     --namespace metrics \
     --values scf-config-values.yaml \
-    --values kube-metrics-values.yaml \
+    --values stratos-metrics-values.yaml \
 ```
 
 Wait until all pods are in the Ready state.
 
+You can locate the IP and Port that Stratos Metrics is running on with:
+
+```
+kubectl get service stratos-ui-ext --namespace=susecf-console
+```
+
+This will give output similar to:
+
+```
+NAME             TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                       AGE
+stratos-ui-ext   NodePort   172.24.239.140   10.17.3.1     80:30862/TCP,8443:32129/TCP   1h
+```
+
+> Note: If you are using a private container registry, you will need to provide your registry details and credentials in a configuration file - see [here](https://github.com/SUSE/stratos-metrics/blob/master/README.md#deploying-metrics-from-a-private-image-repository) for more details.
+
+## Connecting Stratos Metrics to Stratos
+
+When Stratos Metrics is connected to Stratos, additional views are enabled that show metrics metadata that has been ingested into the Stratos Metrics Prometheus server.
+
+To enable this, you must register and connect your Stratos Metrics instance with Stratos.
+
+In the Stratos UI, go to `Endpoints` in the left-hand side navigation and click on the `+` icon in the top-right on the view - you should be shown the `Register new Endpoint` view.
+
+1. Select `Metrics` from the `Endpoint Type` dropdown
+1. Enter a memorable name for yor environment in the `Name` field
+1. Enter the URL of your Metrics endpoint
+1. Check the `Skip SSL validation for the endpoint` if using self-signed certificates
+1. Click `Finish`
+
+The view will refresh to show the new endpoint in the disconnected state.
+
+Next you will need to connect to this endpoint.
+
+1. In the table of endpoints, click the three-dot menu icon alongside the endpoint that you added above
+1. Click on 'Connect' in the dropdown menu
+1. Enter the username and password for your Stratos Metrics instance
+1. Click `Connect`
+
+Once connected, you should see that the name of your Metrices endpoint is a hyperlink and clicking on it should show basic metadata about the Stratos Metrics endpoint.
