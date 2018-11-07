@@ -29,7 +29,7 @@ Wait until all pods are in the Ready state.
 You can locate the IP and Port that Stratos is running on with:
 
 ```
-kubectl get service stratos-ui-ext --namespace=susecf-console
+kubectl get service stratos-ui-ext --namespace=stratos
 ```
 
 This will give output similar to:
@@ -103,14 +103,14 @@ Wait until all pods are in the Ready state.
 You can locate the IP and Port that Stratos Metrics is running on with:
 
 ```
-kubectl get service stratos-ui-ext --namespace=susecf-console
+kubectl get service susecf-metrics-metrics-nginx --namespace=metrics
 ```
 
 This will give output similar to:
 
 ```
-NAME             TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                       AGE
-stratos-ui-ext   NodePort   172.24.239.140   10.17.3.1     80:30862/TCP,8443:32129/TCP   1h
+NAME                           TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE
+susecf-metrics-metrics-nginx   NodePort   172.24.218.219   10.17.3.1     443:31173/TCP   13s
 ```
 
 > Note: If you are using a private container registry, you will need to provide your registry details and credentials in a configuration file - see [here](https://github.com/SUSE/stratos-metrics/blob/master/README.md#deploying-metrics-from-a-private-image-repository) for more details.
