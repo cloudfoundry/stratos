@@ -58,7 +58,6 @@ import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 
 
-
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',

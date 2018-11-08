@@ -85,6 +85,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
+    this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
   )
 

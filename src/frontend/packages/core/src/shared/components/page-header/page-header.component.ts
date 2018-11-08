@@ -2,12 +2,15 @@ import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
-import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { map } from 'rxjs/operators';
+import { IHeaderBreadcrumbLink, IHeaderBreadcrumb, BREADCRUMB_URL_PARAM } from './page-header.types';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
+import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+
 
 @Component({
   selector: 'app-page-header',
@@ -30,6 +33,8 @@ export class PageHeaderComponent {
   tabs: ISubHeaderTabs[];
   @Input() showUnderFlow = false;
 
+  public userNameFirstLetter$: Observable<string>;
+  public username$: Observable<string>;
   public actionsKey: String;
 
   @Input()
@@ -67,6 +72,12 @@ export class PageHeaderComponent {
   constructor(private store: Store<AppState>, private route: ActivatedRoute) {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
+    this.username$ = store.select(s => s.auth).pipe(
+      map((auth: AuthState) => auth && auth.sessionData ? auth.sessionData.user.name : 'Unknown')
+    );
+    this.userNameFirstLetter$ = this.username$.pipe(
+      map(name => name[0].toLocaleUpperCase())
+    );
   }
 
 }

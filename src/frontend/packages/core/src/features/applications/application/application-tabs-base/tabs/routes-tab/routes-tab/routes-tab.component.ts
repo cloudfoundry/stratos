@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
+import { ConfirmationDialogService } from '../../../../../../../shared/components/confirmation-dialog.service';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
@@ -10,7 +11,7 @@ import { PaginationMonitorFactory } from '../../../../../../../shared/monitors/p
 import { first } from 'rxjs/operators';
 import { AppState } from '../../../../../../../../../store/src/app-state';
 import { ApplicationService } from '../../../../../application.service';
-import { EntityInfo, APIResource } from '../../../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../../../store/src/types/api.types';
 import { FetchAllDomains } from '../../../../../../../../../store/src/actions/domains.actions';
 import { getPaginationObservables } from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { entityFactory, domainSchemaKey } from '../../../../../../../../../store/src/helpers/entity-factory';
@@ -22,7 +23,13 @@ import { entityFactory, domainSchemaKey } from '../../../../../../../../../store
   providers: [
     {
       provide: ListConfig,
-      useClass: CfAppRoutesListConfigService
+      useFactory: (
+        store: Store<AppState>,
+        appService: ApplicationService,
+        confirmDialog: ConfirmationDialogService) => {
+        return new CfAppRoutesListConfigService(store, appService, confirmDialog);
+      },
+      deps: [Store, ApplicationService, ConfirmationDialogService]
     }
   ]
 })
@@ -32,7 +39,6 @@ export class RoutesTabComponent implements OnInit {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig<EntityInfo>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
   }

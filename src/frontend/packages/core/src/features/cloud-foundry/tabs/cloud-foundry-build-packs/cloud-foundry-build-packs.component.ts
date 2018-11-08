@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 
-import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
   CfBuildpacksListConfigService,
 } from '../../../../shared/components/list/list-types/cf-buildpacks/cf-buildpacks-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-cloud-foundry-build-packs',
@@ -18,8 +16,4 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
     }
   ]
 })
-export class CloudFoundryBuildPacksComponent {
-  constructor(private listConfig: ListConfig<APIResource>) {
-    const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
-  }
-}
+export class CloudFoundryBuildPacksComponent { }

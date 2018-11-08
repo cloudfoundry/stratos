@@ -127,9 +127,11 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   delete = () => {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Organization',
-      `Are you sure you want to delete organization '${this.row.entity.name}'?`,
+      {
+        textToMatch: this.row.entity.name
+      },
       'Delete',
-      true
+      true,
     );
     this.confirmDialog.open(confirmation, () => {
       this.cfEndpointService.deleteOrg(

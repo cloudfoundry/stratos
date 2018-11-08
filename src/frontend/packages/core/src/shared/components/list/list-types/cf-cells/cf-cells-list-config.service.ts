@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-
-import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
-import {
-  TableCellBooleanIndicatorComponent,
-  TableCellBooleanIndicatorComponentConfig,
-} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { ITableColumn } from '../../list-table/table.types';
-import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import { CfCellsDataSource } from './cf-cells-data-source';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { CfCellsDataSource } from './cf-cells-data-source';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { ListViewTypes } from '../../list.component.types';
+import {
+  TableCellBooleanIndicatorComponentConfig,
+  TableCellBooleanIndicatorComponent
+} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
+import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
+import { ITableColumn } from '../../list-table/table.types';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+
+
 
 @Injectable()
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {
@@ -31,7 +33,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<IMetricVectorResult<IMetricCell>> = {
     // "0 signifies healthy, and 1 signifies unhealthy"
     isEnabled: (row: IMetricVectorResult<IMetricCell>) => row ? row.value[1] === '0' : false,
-    type: 'enabled-disabled',
+    type: BooleanIndicatorType.enabledDisabled,
     subtle: false,
     showText: false
   };

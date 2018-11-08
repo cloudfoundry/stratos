@@ -1,13 +1,15 @@
-import { TestBed, inject } from '@angular/core/testing';
-
-import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CoreModule } from '../../../../../core/core.module';
-import { SharedModule } from '../../../../shared.module';
-import { StoreModule } from '@ngrx/store';
+import { inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { Store, StoreModule } from '@ngrx/store';
+
+import { CoreModule } from '../../../../../core/core.module';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { SharedModule } from '../../../../shared.module';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { appReducers } from '../../../../../../../store/src/reducers.module';
 
 describe('CfAppRoutesListConfigService', () => {
@@ -18,7 +20,17 @@ describe('CfAppRoutesListConfigService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        CfAppRoutesListConfigService
+        {
+          provide: CfAppRoutesListConfigService,
+          useFactory: (
+            store: Store<AppState>,
+            appService: ApplicationService,
+            confirmDialog: ConfirmationDialogService) => {
+            return new CfAppRoutesListConfigService(store, appService, confirmDialog);
+          },
+          deps: [Store, ApplicationService, ConfirmationDialogService]
+        }
+
       ],
       imports: [
         SharedModule,

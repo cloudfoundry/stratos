@@ -19,6 +19,15 @@ $acme-side-nav-active: #003358;
     }
   }
 
+  .page-header__divider {
+    color: #333;
+  }
+
+  .page-header__menu-button-icon {
+    background-color: $acme-primary-color;
+    color: $acme-text;
+  }
+
   .mat-tab-nav-bar.mat-primary.mat-background-primary {
     .mat-tab-links {
       background-color: #fff;

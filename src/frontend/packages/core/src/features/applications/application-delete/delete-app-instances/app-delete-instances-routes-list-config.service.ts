@@ -41,8 +41,8 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
 
   constructor(store: Store<AppState>,
     appService: ApplicationService,
-    private _datePipe: DatePipe,
-    private currentUserPermissionService: CurrentUserPermissionsService,
+    _datePipe: DatePipe,
+    currentUserPermissionService: CurrentUserPermissionsService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     super(store, appService, _datePipe, currentUserPermissionService);
@@ -56,7 +56,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     this.viewType = ListViewTypes.TABLE_ONLY;
     this.allowSelection = true;
 
-    // Show a warning if there is more than one service binding associated with a service instance
+    // Disable select if there is more than one service binding associated with a service instance
     this.dataSource.getRowState = (serviceBinding: APIResource<IServiceBinding>): Observable<RowState> => {
       if (!serviceBinding) {
         return observableOf({});
@@ -76,8 +76,8 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
         });
         this.obsCache[serviceBinding.entity.service_instance_guid] = pagObs.pagination$.pipe(
           map(pag => ({
-            message: `There are other applications bound to this service instance (${pag.totalResults - 1}).`,
-            warning: pag.totalResults > 1,
+            disabledReason: 'Service is attached to other applications',
+            disabled: pag.totalResults > 1
           }))
         );
         // Ensure the request is made by sub'ing to the entities observable

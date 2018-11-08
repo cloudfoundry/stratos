@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -76,7 +76,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   public canUpdateRoles$: Observable<boolean>;
 
   public schema = entityFactory(spaceSchemaKey);
-  deleteRedirectSub: any;
+
+  private deleteRedirectSub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
@@ -161,12 +162,16 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   deleteSpaceWarn = () => {
     // .first within name$
-    this.name$.subscribe(name => {
+    this.name$.pipe(
+      first()
+    ).subscribe(name => {
       const confirmation = new ConfirmationDialogConfig(
         'Delete Space',
-        `Are you sure you want to delete space '${name}'?`,
+        {
+          textToMatch: name
+        },
         'Delete',
-        true
+        true,
       );
       this.confirmDialog.open(confirmation, this.deleteSpace);
     });

@@ -1,11 +1,11 @@
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
-import { of as observableOf, BehaviorSubject, Observable } from 'rxjs';
-
+import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
+
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -83,6 +83,10 @@ export interface IListConfig<T> {
    * Allow selection regardless of number or visibility of multi actions
    */
   allowSelection?: boolean;
+  /**
+   * For metrics based data show a metrics range selector
+   */
+  showMetricsRange?: boolean;
 }
 
 export interface IListMultiFilterConfig {
