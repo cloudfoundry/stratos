@@ -193,6 +193,6 @@ entries:
     digest: 63c633669260908fbc27c75c9d118d43e640a1aa741ebddba2a8451aefaa83af
     name: metrics
     urls:
-    - https://github.com/SUSE/stratos-metrics/releases/download/1.0.0-ddbf0c5/console-metrics-helm-chart-v1.0.0-ddbf0c5.tgz
+    - https://github.com/SUSE/stratos-metrics/releases/download/1.0.0/console-metrics-helm-chart-v1.0.0-ddbf0c5.tgz
     version: 1.0.0
 generated: 2018-11-02T10:58:17.308462674Z
