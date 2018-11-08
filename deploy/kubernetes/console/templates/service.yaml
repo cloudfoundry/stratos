@@ -29,8 +29,8 @@ spec:
     protocol: TCP
     targetPort: 443
   selector:
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/component: "console"
+    app: "{{ .Release.Name }}"
+    component: console
 {{- if or .Values.useLb .Values.services.loadbalanced }}
   type: LoadBalancer
 {{- else }}
@@ -57,5 +57,4 @@ spec:
     port: 3306
     targetPort: mysql
   selector:
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/component: "console-mariadb"
+    app: "{{ .Release.Name }}"
