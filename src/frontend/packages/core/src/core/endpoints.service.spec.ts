@@ -2,8 +2,8 @@ import { CoreModule } from './core.module';
 import { TestBed, inject } from '@angular/core/testing';
 
 import { EndpointsService } from './endpoints.service';
-import { createBasicStoreModule } from '../test-framework/store-test-helper';
 import { UtilsService } from './utils.service';
+import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
 describe('EndpointsService', () => {
   beforeEach(() => {

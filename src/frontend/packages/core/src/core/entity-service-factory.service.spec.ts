@@ -1,8 +1,8 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { EntityServiceFactory } from './entity-service-factory.service';
-import { createBasicStoreModule } from '../test-framework/store-test-helper';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
 describe('EntityServiceFactoryService', () => {
   beforeEach(() => {

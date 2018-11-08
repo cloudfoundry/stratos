@@ -5,7 +5,7 @@ import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;

@@ -15,10 +15,10 @@ import { completeApiRequest, startApiRequest, failApiRequest } from '../../../st
 import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
-import { generateTestEntityServiceProvider } from '../test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../test-framework/store-test-helper';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
+import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
