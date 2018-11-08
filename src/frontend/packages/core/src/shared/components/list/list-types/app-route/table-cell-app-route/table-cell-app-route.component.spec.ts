@@ -2,12 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellAppRouteComponent } from './table-cell-app-route.component';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 
 import { CoreModule } from '../../../../../../core/core.module';
-import { SharedModule } from '../../../../../../shared/shared.module';
-import { combineAll } from 'rxjs/operators';
-import { APIResource } from '../../../../../../store/types/api.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellAppRouteComponent', () => {
   let component: TableCellAppRouteComponent<any>;

@@ -4,7 +4,7 @@ import { DeployApplicationFsComponent } from './deploy-application-fs.component'
 import { CoreModule } from '../../../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../../shared/shared.module';
 
 describe('DeployApplicationFsComponent', () => {

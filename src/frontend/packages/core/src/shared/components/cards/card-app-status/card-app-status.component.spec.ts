@@ -8,7 +8,7 @@ import { ApplicationStateIconPipe } from '../../application-state/application-st
 import { ApplicationStateComponent } from '../../application-state/application-state.component';
 import { ApplicationStateService } from '../../application-state/application-state.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
+import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
 
 describe('CardAppStatusComponent', () => {
   let component: CardAppStatusComponent;

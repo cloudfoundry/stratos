@@ -1,7 +1,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfAuthService } from './cf-auth.service';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('CfAuthService', () => {
   beforeEach(() => {

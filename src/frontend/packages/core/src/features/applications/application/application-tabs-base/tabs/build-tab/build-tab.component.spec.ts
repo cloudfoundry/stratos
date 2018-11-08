@@ -7,14 +7,14 @@ import { CoreModule } from '../../../../../../core/core.module';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { endpointStoreNames } from '../../../../../../../../store/src/types/endpoint.types';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;

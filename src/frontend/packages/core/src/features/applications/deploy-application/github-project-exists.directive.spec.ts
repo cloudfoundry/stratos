@@ -4,8 +4,8 @@ import { inject, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { AppState } from '../../../../packages/store/src/app-state';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { AppState } from '../../../../../store/src/app-state';
 
 
 describe('GithubProjectExistsDirective', () => {
@@ -19,7 +19,7 @@ describe('GithubProjectExistsDirective', () => {
       ]
     });
   });
-  it('should create an instance',  inject([Store], (store: Store<AppState>) => {
+  it('should create an instance', inject([Store], (store: Store<AppState>) => {
     const directive = new GithubProjectExistsDirective(store);
     expect(directive).toBeTruthy();
   }));

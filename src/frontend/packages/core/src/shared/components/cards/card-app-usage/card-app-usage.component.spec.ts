@@ -5,8 +5,8 @@ import { CoreModule } from '../../../../core/core.module';
 import { UtilsService } from '../../../../core/utils.service';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { PercentagePipe } from '../../../pipes/percentage.pipe';
 import {
   ApplicationStateIconComponent,

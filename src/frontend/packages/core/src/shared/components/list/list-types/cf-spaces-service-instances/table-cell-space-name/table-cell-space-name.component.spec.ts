@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellSpaceNameComponent } from './table-cell-space-name.component';
-import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('TableCellSpaceNameComponent', () => {
   let component: TableCellSpaceNameComponent<any>;

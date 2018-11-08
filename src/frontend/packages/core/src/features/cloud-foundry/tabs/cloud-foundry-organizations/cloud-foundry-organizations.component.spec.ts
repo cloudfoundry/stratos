@@ -4,7 +4,7 @@ import { CloudFoundryOrganizationsComponent } from './cloud-foundry-organization
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgsListConfigService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 
 describe('CloudFoundryOrganizationsComponent', () => {

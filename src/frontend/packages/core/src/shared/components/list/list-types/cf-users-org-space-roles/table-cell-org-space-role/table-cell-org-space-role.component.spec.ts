@@ -6,14 +6,13 @@ import { ISpace } from '../../../../../../core/cf-api.types';
 import { CoreModule } from '../../../../../../core/core.module';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role.component';
-import { CfUserServiceTestProvider } from '../../../../../../test-framework/user-service-helper';
+import { CfUserServiceTestProvider } from '../../../../../../../test-framework/user-service-helper';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellSpaceRoleComponent', () => {
   let component: TableCellRoleOrgSpaceComponent;

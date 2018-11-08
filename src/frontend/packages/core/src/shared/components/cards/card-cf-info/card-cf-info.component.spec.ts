@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   BaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { CardCfInfoComponent } from './card-cf-info.component';

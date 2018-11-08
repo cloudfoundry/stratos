@@ -3,7 +3,7 @@ import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('CreateEndpointCfStep1Component', () => {

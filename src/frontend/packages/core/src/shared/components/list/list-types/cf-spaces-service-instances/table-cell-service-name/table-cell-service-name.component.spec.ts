@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { TableCellServiceNameComponent } from './table-cell-service-name.component';
 

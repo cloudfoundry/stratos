@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   generateTestCfEndpointServiceProvider,
   BaseTestModules,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
 import { UtilsService } from '../../../../core/utils.service';
 import { LoggerService } from '../../../../core/logger.service';

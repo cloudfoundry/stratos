@@ -9,11 +9,11 @@ import {
 } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../../shared/services/metrics-range-selector.types';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../store/actions/metrics.actions';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellSummaryComponent } from './cloud-foundry-cell-summary.component';
+import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
 
 class MockCloudFoundryCellService {
   cfGuid = 'cfGuid';

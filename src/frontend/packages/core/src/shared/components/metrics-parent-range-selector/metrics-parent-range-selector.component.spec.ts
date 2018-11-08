@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { DateFormatPipe } from 'ngx-moment';
 
 import { CoreModule } from '../../../core/core.module';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorService } from '../../services/metrics-range-selector.service';
 import { DateTimeComponent } from '../date-time/date-time.component';

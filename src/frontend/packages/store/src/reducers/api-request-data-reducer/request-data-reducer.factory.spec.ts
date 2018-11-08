@@ -1,10 +1,10 @@
-import { IDomain } from './../../../core/cf-api.types';
 import { domainSchemaKey } from './../../helpers/entity-factory';
 import { requestDataReducerFactory } from './request-data-reducer.factory';
 import { ISuccessRequestAction, IRequestAction } from '../../types/request.types';
 import { applicationSchemaKey, endpointSchemaKey } from '../../helpers/entity-factory';
 import { IRequestDataState } from '../../types/entity.types';
 import { APIResource } from '../../types/api.types';
+import { IDomain } from '../../../../core/src/core/cf-api.types';
 
 describe('RequestDataReducerFactory', () => {
   it('should create', () => {

@@ -2,7 +2,7 @@ import { ValuesPipe } from '../../../../../pipes/values.pipe';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellEventDetailComponent', () => {
   let component: TableCellEventDetailComponent<EntityInfo>;

@@ -2,13 +2,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { APIResource } from '../../../../../../store/types/api.types';
 import {
   BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
@@ -24,6 +23,7 @@ import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-
 import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from './cf-org-card.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;

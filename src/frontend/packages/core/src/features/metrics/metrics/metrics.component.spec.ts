@@ -6,7 +6,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { MetricsService } from '../services/metrics-service';
 
 describe('MetricsComponent', () => {

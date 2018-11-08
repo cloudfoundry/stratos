@@ -3,8 +3,8 @@ import { inject, TestBed } from '@angular/core/testing';
 
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../../features/service-catalog/services.service.mock';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ServiceInstancesListConfigService } from './service-instances-list-config.service';
 
 describe('ServiceInstancesListConfigService', () => {

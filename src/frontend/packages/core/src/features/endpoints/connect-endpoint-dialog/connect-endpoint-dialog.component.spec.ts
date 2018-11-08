@@ -1,4 +1,3 @@
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
@@ -8,6 +7,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 class MatDialogRefMock {
 }

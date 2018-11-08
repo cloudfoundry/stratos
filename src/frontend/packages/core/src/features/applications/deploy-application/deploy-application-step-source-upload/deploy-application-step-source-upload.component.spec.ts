@@ -4,7 +4,7 @@ import { DeployApplicationStepSourceUploadComponent } from './deploy-application
 import { SharedModule } from '../../../../shared/shared.module';
 import { CoreModule } from '../../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';

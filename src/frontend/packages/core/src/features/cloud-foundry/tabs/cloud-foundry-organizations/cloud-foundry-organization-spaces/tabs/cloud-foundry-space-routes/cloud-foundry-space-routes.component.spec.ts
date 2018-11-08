@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CloudFoundrySpaceRoutesComponent } from './cloud-foundry-space-routes.component';
 import { DatePipe } from '@angular/common';

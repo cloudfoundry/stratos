@@ -5,9 +5,9 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
 
 describe('CfSpaceUsersListConfigService', () => {

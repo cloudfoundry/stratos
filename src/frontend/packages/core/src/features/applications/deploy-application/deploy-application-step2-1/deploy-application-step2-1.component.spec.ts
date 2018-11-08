@@ -5,7 +5,7 @@ import { DeployApplicationModule } from '../deploy-application.module';
 import { CoreModule } from '../../../../core/core.module';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 import { SharedModule } from '../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 
 describe('DeployApplicationStep21Component', () => {
   let component: DeployApplicationStep21Component;

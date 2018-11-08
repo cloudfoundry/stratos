@@ -1,7 +1,6 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { GetOrganization } from '../../actions/organization.actions';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
@@ -25,6 +24,7 @@ import {
   EntityRelationSpecHelper,
 } from './entity-relations.spec';
 import { createEntityRelationKey, createEntityRelationPaginationKey, EntityTreeRelation } from './entity-relations.types';
+import { getInitialTestStoreState, createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
 
 describe('Entity Relations - validate', () => {
 

@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MDAppModule } from '../../../core/md.module';
 import { LoadingPageComponent } from './loading-page.component';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../shared.module';
 
 describe('LoadingPageComponent', () => {

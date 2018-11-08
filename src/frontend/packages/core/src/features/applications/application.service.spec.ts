@@ -8,11 +8,11 @@ import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.facto
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { AppStoreModule } from '../../../../store/src/store.module';
-import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';
 import { ApplicationService } from './application.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { GetApplication } from '../../../../store/src/actions/application.actions';
+import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';
+import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
 
 describe('ApplicationService', () => {
 

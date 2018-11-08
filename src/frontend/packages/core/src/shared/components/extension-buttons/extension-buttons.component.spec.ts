@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ExtensionButtonsComponent } from './extension-buttons.component';
-import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('ExtensionButtonsComponent', () => {
   let component: ExtensionButtonsComponent;

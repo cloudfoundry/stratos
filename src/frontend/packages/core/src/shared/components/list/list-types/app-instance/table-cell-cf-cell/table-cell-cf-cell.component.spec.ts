@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { UtilsService } from '../../../../../../core/utils.service';
-import { EntityInfo } from '../../../../../../store/types/api.types';
 import { TableCellCfCellComponent } from './table-cell-cf-cell.component';
 
 describe('TableCellCfCellComponent', () => {

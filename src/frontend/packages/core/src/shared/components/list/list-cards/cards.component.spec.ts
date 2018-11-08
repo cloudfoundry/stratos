@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../core/core.module';
-import { EntityInfo } from '../../../../store/types/api.types';
 import { SharedModule } from '../../../shared.module';
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { CardsComponent } from './cards.component';
 import { CardCell } from '../list.types';
+import { EntityInfo } from '../../../../../../store/src/types/api.types';
 
 describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;

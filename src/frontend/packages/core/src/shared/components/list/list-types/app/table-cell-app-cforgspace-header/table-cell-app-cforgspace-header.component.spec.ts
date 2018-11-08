@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import {
   ApplicationStateIconComponent,

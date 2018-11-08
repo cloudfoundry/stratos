@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EnvVarViewComponent } from './env-var-view.component';
 import { CodeBlockComponent } from '../code-block/code-block.component';
-import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 describe('EnvVarViewComponent', () => {

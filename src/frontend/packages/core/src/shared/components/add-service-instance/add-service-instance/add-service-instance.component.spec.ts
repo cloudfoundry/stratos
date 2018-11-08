@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';

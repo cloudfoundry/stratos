@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RoutesTabComponent } from './routes-tab.component';
-import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
+import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestApplicationServiceProvider } from '../../../../../../../../test-framework/application-service-helper';
 import { ApplicationEnvVarsHelper } from '../../build-tab/application-env-vars.service';
 
 describe('RoutesTabComponent', () => {

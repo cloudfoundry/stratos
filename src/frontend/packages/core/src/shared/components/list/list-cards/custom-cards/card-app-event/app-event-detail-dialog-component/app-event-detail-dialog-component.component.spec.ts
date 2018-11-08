@@ -1,12 +1,11 @@
-import { EntityInfo } from '../../../../../../../store/types/api.types';
 import { CoreModule } from '../../../../../../../core/core.module';
 import { ValuesPipe } from '../../../../../../pipes/values.pipe';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppEventDetailDialogComponentComponent } from './app-event-detail-dialog-component.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { RequestInfoState } from '../../../../../../../store/reducers/api-request-reducer/types';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RequestInfoState } from '../../../../../../../../../store/src/reducers/api-request-reducer/types';
 
 describe('AppEventDetailDialogComponentComponent', () => {
   let component: AppEventDetailDialogComponentComponent;

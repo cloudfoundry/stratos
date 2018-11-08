@@ -1,10 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellRouteComponent } from './table-cell-route.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
-import { SharedModule } from '../../../../../shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellRouteComponent', () => {
   let component: TableCellRouteComponent<any>;

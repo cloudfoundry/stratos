@@ -7,7 +7,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CreateEndpointComponent } from './create-endpoint.component';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('CreateEndpointComponent', () => {
   let component: CreateEndpointComponent;

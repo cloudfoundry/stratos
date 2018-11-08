@@ -7,13 +7,13 @@ import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
 import { ApplicationStateService } from '../../../../shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../shared/shared.module';
-import { GetApplication } from '../../../../store/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
+import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ApplicationEnvVarsHelper } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
+import { entityFactory, applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;

@@ -4,7 +4,7 @@ import { inject, TestBed, ComponentFixture, async } from '@angular/core/testing'
 import { Store, StoreModule } from '@ngrx/store';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 

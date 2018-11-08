@@ -1,12 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApplicationDeleteComponent } from './application-delete.component';
-import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationsModule } from '../applications.module';
-import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';
-import { entityFactory, applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { GetApplication } from '../../../store/actions/application.actions';
+import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
+import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
+import { entityFactory, applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../store/src/actions/application.actions';
 
 describe('ApplicationDeleteComponent', () => {
   let component: ApplicationDeleteComponent<any>;

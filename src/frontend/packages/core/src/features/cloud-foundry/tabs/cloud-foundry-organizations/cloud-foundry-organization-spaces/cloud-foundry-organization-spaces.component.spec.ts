@@ -4,9 +4,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from '../../../../../core/core.module';
 import { MDAppModule } from '../../../../../core/md.module';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { generateTestCfEndpointServiceProvider } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { generateTestCfEndpointServiceProvider } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSpacesComponent } from './cloud-foundry-organization-spaces.component';
 

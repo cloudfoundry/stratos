@@ -7,8 +7,8 @@ import { ApplicationStateIconComponent } from '../../application-state/applicati
 import { ApplicationStateIconPipe } from '../../application-state/application-state-icon/application-state-icon.pipe';
 import { CoreModule } from '../../../../core/core.module';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ApplicationStateService } from '../../application-state/application-state.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';

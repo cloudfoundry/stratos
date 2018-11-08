@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEventTypeComponent } from './table-cell-event-type.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellEventTypeComponent', () => {
   let component: TableCellEventTypeComponent<EntityInfo>;

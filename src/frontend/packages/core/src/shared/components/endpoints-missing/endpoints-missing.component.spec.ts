@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EndpointsMissingComponent } from './endpoints-missing.component';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../shared.module';
 
 describe('EndpointsMissingComponent', () => {

@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { EditProfileInfoComponent } from './edit-profile-info.component';
 import { CommonModule } from '@angular/common';
 import { UserProfileService } from '../user-profile.service';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '../../../shared/shared.module';
 import { CoreModule } from '../../../core/core.module';

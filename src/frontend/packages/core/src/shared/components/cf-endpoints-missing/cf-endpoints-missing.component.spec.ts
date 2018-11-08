@@ -4,7 +4,7 @@ import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';
 import { CoreModule } from '../../../core/core.module';
 
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../shared.module';
 
 

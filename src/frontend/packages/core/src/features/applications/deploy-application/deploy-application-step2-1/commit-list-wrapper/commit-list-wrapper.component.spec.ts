@@ -4,7 +4,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper.component';
 import { CommonModule, DatePipe } from '@angular/common';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 
 describe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;

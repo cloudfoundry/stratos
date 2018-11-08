@@ -6,7 +6,7 @@ import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
   MetadataCardTestComponents,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';

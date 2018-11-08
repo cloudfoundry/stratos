@@ -6,8 +6,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { CfUserServiceTestProvider } from '../../../../test-framework/user-service-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { CfUserServiceTestProvider } from '../../../../../test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from './cf-roles.service';
 import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';

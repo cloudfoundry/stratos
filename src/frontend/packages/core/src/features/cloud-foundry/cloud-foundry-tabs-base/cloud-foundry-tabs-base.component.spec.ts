@@ -8,11 +8,11 @@ import { SharedModule } from '../../../shared/shared.module';
 import {
   generateTestCfEndpointServiceProvider,
   BaseTestModules
-} from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   createBasicStoreModule,
   testSCFGuid
-} from '../../../test-framework/store-test-helper';
+} from '../../../../test-framework/store-test-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 describe('CloudFoundryTabsBaseComponent', () => {

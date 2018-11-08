@@ -3,7 +3,7 @@ import { HttpModule } from '@angular/http';
 
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { SharedModule } from '../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CloudFoundryModule } from '../../cloud-foundry.module';
 import { CfRolesService } from './cf-roles.service';
 

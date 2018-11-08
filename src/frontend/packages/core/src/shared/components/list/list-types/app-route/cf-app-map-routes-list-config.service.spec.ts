@@ -7,9 +7,9 @@ import { CoreModule } from '../../../../../core/core.module';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { SharedModule } from '../../../../shared.module';
 import { CfAppMapRoutesListConfigService } from './cf-app-map-routes-list-config.service';
+import { appReducers } from '../../../../../../../store/src/reducers.module';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { appReducers } from '../../../../../../../store/src/reducers.module';
 
 describe('CfAppMapRoutesListConfigService', () => {
   const initialState = { ...getInitialTestStoreState() };

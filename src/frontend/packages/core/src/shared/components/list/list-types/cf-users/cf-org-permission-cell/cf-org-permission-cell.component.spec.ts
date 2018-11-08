@@ -3,8 +3,8 @@ import { HttpModule } from '@angular/http';
 
 import {
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../../shared.module';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
 

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';

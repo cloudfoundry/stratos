@@ -5,7 +5,7 @@ import {
   generateTestCfEndpointService,
   BaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../chips/chips.component';
 import { CfSecurityGroupsCardComponent } from './cf-security-groups-card.component';

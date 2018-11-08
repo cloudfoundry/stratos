@@ -3,8 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   CfCellsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ActiveRouteCfCell } from '../../cf-page.types';
 import { CloudFoundryCellsComponent } from './cloud-foundry-cells.component';
 

@@ -1,7 +1,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfFeatureFlagsListConfigService } from './cf-feature-flags-list-config.service';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 
 describe('CfFeatureFlagsListConfigService', () => {

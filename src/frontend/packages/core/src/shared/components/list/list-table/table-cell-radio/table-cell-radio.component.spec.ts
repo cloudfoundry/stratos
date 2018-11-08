@@ -4,12 +4,9 @@ import { TableCellRadioComponent } from './table-cell-radio.component';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import {
-  EntityInfo,
-  APIResource
-} from '../../../../../store/types/api.types';
+import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 describe('TableCellRadioComponent', () => {
   let component: TableCellRadioComponent<any>;

@@ -2,10 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { UtilsService } from '../../../../../../core/utils.service';
-import { EntityInfo } from '../../../../../../store/types/api.types';
 import { PercentagePipe } from '../../../../../pipes/percentage.pipe';
 import { UsageGaugeComponent } from '../../../../usage-gauge/usage-gauge.component';
 import { TableCellUsageComponent } from './table-cell-usage.component';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellUsageComponent', () => {
   let component: TableCellUsageComponent<EntityInfo>;

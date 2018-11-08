@@ -7,16 +7,16 @@ import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CfUserListConfigService } from './cf-user-list-config.service';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../packages/store/src/app-state';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { Router } from '@angular/router';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { AppState } from '../../../../../../../store/src/app-state';
 
 describe('CfUserListConfigService', () => {
   beforeEach(() => {

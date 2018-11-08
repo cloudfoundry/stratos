@@ -4,7 +4,7 @@ import { CliCommandComponent } from './cli-command.component';
 import { CodeBlockComponent } from '../../code-block/code-block.component';
 import { MDAppModule } from '../../../../core/md.module';
 import { CoreModule } from '../../../../core/core.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 
 describe('CliCommandComponent', () => {
   let component: CliCommandComponent;

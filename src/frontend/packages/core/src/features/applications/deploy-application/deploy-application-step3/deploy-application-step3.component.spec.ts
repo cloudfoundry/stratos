@@ -7,7 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { DeployApplicationStep3Component } from './deploy-application-step3.component';
 
 describe('DeployApplicationStep3Component', () => {

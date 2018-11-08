@@ -6,11 +6,7 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { CoreModule } from '../../../core/core.module';
-import { ListView } from '../../../store/actions/list.actions';
-import { AppState } from '../../../../packages/store/src/app-state';
-import { APIResource } from '../../../store/types/api.types';
-import { EndpointModel } from '../../../store/types/endpoint.types';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
@@ -19,6 +15,10 @@ import { CfEndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-c
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { ListView } from '../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 describe('ListComponent', () => {
 

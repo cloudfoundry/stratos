@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';

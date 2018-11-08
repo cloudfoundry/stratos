@@ -4,8 +4,8 @@ import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/ser
 import {
   BaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../test-framework/cloud-foundry-space.service.mock';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CardCfSpaceDetailsComponent } from './card-cf-space-details.component';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 

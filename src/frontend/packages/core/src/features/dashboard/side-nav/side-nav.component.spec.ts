@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Customizations } from '../../../core/customizations.types';
 import { MDAppModule } from '../../../core/md.module';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { SideNavComponent } from './side-nav.component';
 
 

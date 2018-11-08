@@ -11,8 +11,8 @@ import { MockBackend } from '@angular/http/testing';
 import { HttpModule, Http, ConnectionBackend } from '@angular/http';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
 import { AppStoreModule } from '../../../../../store/src/store.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { AppState } from '../../../../../store/src/app-state';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('AppNameUniqueDirective', () => {
 

@@ -1,15 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeleteAppRoutesComponent } from './delete-app-routes.component';
-import { SharedModule } from '../../../../shared/shared.module';
-import { CoreModule } from '../../../../core/core.module';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
-import { entityFactory, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { GetApplication } from '../../../../store/actions/application.actions';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
+import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DatePipe } from '@angular/common';
+import { entityFactory, applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 
 describe('DeleteAppRoutesComponent', () => {
   let component: DeleteAppRoutesComponent;

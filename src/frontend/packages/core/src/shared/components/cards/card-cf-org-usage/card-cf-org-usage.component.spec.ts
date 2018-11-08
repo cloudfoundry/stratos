@@ -8,14 +8,14 @@ import {
   generateTestCfEndpointServiceProvider,
   BaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../test-framework/cloud-foundry-organization.service.mock';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CardCfOrgUsageComponent } from './card-cf-org-usage.component';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CardCfOrgUsageComponent', () => {
   let component: CardCfOrgUsageComponent;

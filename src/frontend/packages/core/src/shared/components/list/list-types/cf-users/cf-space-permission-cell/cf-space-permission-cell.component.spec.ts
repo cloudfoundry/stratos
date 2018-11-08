@@ -4,7 +4,7 @@ import { CfSpacePermissionCellComponent } from './cf-space-permission-cell.compo
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CfSpacePermissionCellComponent', () => {
   let component: CfSpacePermissionCellComponent;

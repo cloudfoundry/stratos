@@ -5,12 +5,12 @@ import { HttpModule } from '@angular/http';
 import { CoreModule } from '../../../core/core.module';
 import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CfUserService } from '../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { CfRoleCheckboxComponent } from './cf-role-checkbox.component';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { CfUserServiceTestProvider } from '../../../test-framework/user-service-helper';
+import { CfUserServiceTestProvider } from '../../../../test-framework/user-service-helper';
 
 
 describe('CfRoleCheckboxComponent', () => {

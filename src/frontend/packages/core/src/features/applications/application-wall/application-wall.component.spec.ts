@@ -5,7 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { ApplicationWallComponent } from './application-wall.component';
 
 describe('ApplicationWallComponent', () => {

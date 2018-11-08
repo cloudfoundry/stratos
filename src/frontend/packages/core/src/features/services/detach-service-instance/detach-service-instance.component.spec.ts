@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DetachServiceInstanceComponent } from './detach-service-instance.component';
-import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 import { DatePipe } from '@angular/common';
 

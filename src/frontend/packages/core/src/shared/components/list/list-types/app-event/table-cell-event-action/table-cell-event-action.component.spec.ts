@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEventActionComponent } from './table-cell-event-action.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
 import { CoreModule } from '../../../../../../core/core.module';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
 describe('TableCellEventActionComponent', () => {
   let component: TableCellEventActionComponent<EntityInfo>;

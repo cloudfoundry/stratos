@@ -1,13 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeleteAppServiceInstancesComponent } from './delete-app-instances.component';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
-import { entityFactory, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { GetApplication } from '../../../../store/actions/application.actions';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
+import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DatePipe } from '@angular/common';
+import { entityFactory, applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 
 describe('DeleteAppInstancesComponent', () => {
   let component: DeleteAppServiceInstancesComponent;

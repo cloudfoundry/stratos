@@ -4,9 +4,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ApplicationEnvVarsHelper,
 } from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
+import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';

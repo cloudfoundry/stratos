@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesConfirmComponent } from './manage-users-confirm.component';

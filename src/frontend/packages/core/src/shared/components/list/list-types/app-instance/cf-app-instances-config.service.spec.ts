@@ -4,14 +4,14 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { ApplicationsModule } from '../../../../../features/applications/applications.module';
-import { GetApplication } from '../../../../../store/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
-import { endpointStoreNames } from '../../../../../store/types/endpoint.types';
-import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
+import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
+import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../shared.module';
 import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
+import { endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { entityFactory, applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
 
 describe('CfAppInstancesConfigService', () => {
 

@@ -1,4 +1,4 @@
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../../../core/core.module';

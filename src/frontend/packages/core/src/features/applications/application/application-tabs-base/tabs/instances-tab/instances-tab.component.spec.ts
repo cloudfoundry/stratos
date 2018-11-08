@@ -10,9 +10,9 @@ import { ApplicationStateService } from '../../../../../../shared/components/app
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 
 describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;

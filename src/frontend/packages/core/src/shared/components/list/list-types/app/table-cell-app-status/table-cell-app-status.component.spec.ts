@@ -1,4 +1,3 @@
-import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellAppStatusComponent } from './table-cell-app-status.component';
@@ -13,6 +12,7 @@ import {
 import { CoreModule } from '../../../../../../core/core.module';
 import { StoreModule } from '@ngrx/store';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 
 describe('TableCellAppStatusComponent', () => {
   let component: TableCellAppStatusComponent<any>;

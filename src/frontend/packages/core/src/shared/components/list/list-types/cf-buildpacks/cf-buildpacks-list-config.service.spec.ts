@@ -4,7 +4,7 @@ import { CfBuildpacksListConfigService } from './cf-buildpacks-list-config.servi
 
 import {
   BaseTestModules,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 
 describe('CfBuildpacksListConfigService', () => {

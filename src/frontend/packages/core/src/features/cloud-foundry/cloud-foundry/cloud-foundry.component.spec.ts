@@ -5,8 +5,8 @@ import {
   BaseTestModules,
   getBaseProviders,
   generateTestCfServiceProvider
-} from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';

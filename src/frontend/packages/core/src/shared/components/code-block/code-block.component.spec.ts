@@ -1,4 +1,4 @@
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CodeBlockComponent } from './code-block.component';

@@ -6,12 +6,11 @@ import { empty, of as observableOf } from 'rxjs';
 
 import { CoreModule } from '../../../../core/core.module';
 import { UtilsService } from '../../../../core/utils.service';
-import { ListSort } from '../../../../store/actions/list.actions';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../shared.module';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
-import { ITableColumn } from './table.types';
 import { TableComponent } from './table.component';
+import { ListSort } from '../../../../../../store/src/actions/list.actions';
 
 describe('TableComponent', () => {
 

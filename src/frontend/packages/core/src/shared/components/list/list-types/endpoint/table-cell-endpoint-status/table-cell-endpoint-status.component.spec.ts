@@ -1,8 +1,8 @@
 import { CoreModule } from '../../../../../../core/core.module';
-import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status.component';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 
 describe('TableCellEndpointStatusComponent', () => {
   let component: TableCellEndpointStatusComponent<{}>;

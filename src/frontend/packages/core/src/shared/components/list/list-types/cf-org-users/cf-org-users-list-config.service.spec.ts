@@ -7,8 +7,8 @@ import {
 import {
   BaseTestModulesNoShared,
   generateTestCfUserServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { CfOrgUsersListConfigService } from './cf-org-users-list-config.service';

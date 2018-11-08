@@ -1,6 +1,6 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DetachAppsListConfigService } from './detach-apps-list-config.service';
 import { DatePipe } from '@angular/common';
 

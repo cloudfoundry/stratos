@@ -4,9 +4,9 @@ import { SshApplicationComponent } from './ssh-application.component';
 import { SharedModule } from '../../../shared/shared.module';
 import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../application.service';
-import { ApplicationServiceMock } from '../../../test-framework/application-service-helper';
+import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 
 describe('SshApplicationComponent', () => {
   let component: SshApplicationComponent;

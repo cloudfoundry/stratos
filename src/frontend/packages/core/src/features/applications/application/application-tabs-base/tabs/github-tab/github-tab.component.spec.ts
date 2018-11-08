@@ -5,13 +5,13 @@ import { StoreModule } from '@ngrx/store';
 import { CoreModule } from '../../../../../../core/core.module';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { GithubTabComponent } from './github-tab.component';
 import { DatePipe } from '@angular/common';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../../core/github.helpers';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 
 describe('GithubTabComponent', () => {
   let component: GithubTabComponent;

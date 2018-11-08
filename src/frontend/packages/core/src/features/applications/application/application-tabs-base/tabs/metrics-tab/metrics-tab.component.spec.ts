@@ -3,15 +3,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MetricsTabComponent } from './metrics-tab.component';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { MDAppModule } from '../../../../../../core/md.module';
-import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
-import { entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { GetApplication } from '../../../../../../store/actions/application.actions';
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { StoreModule } from '@ngrx/store';
+import { generateTestEntityServiceProvider } from '../../../../../../../test-framework/entity-service.helper';
+import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { entityFactory, applicationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../../../store/src/actions/application.actions';
 
 describe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;

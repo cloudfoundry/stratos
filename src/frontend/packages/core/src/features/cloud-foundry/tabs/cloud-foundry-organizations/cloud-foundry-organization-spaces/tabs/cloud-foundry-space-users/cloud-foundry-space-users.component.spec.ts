@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
+} from '../../../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';

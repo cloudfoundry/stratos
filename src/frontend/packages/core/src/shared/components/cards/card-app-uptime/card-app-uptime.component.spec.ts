@@ -6,8 +6,8 @@ import { CardAppStatusComponent } from '../card-app-status/card-app-status.compo
 import { CardStatusComponent } from '../card-status/card-status.component';
 import { ApplicationStateComponent } from '../../application-state/application-state.component';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../core/core.module';
 import { ApplicationStateIconComponent } from '../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../application-state/application-state-icon/application-state-icon.pipe';

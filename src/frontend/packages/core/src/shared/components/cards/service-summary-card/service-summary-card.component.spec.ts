@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { BaseTestModulesNoShared, MetadataCardTestComponents } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared, MetadataCardTestComponents } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../chips/chips.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
