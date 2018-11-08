@@ -67,7 +67,7 @@ interface ServicePlan {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
-  selectedService$: Observable<ServicePlan>;
+  selectedPlan$: Observable<ServicePlan>;
   cSIHelperService: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef })
   noPlansDiv: ViewContainerRef;
@@ -125,7 +125,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
-    this.selectedService$ = observableCombineLatest(
+    this.selectedPlan$ = observableCombineLatest(
       this.stepperForm.statusChanges.pipe(startWith(true)),
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),

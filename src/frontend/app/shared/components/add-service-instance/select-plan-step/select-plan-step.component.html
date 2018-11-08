@@ -7,7 +7,7 @@
       </mat-select>
     </mat-form-field>
   </form>
-  <mat-card class="select-plan__details" *ngIf="selectedService$ | async as selPlan">
+  <mat-card class="select-plan__details" *ngIf="selectedPlan$ | async as selPlan">
     <app-card-status *ngIf="(getPlanAccessibility(selPlan.entity) | async)" [status$]="getPlanAccessibility(selPlan.entity)"></app-card-status>
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>
@@ -18,7 +18,7 @@
     <app-metadata-item label="Free"> {{ isFree(selPlan) | titlecase}} </app-metadata-item>
     <ng-container *ngIf="!selPlan.entity.entity.free">
       <div *ngFor="let cost of selPlan.extra.costs">
-        <app-metadata-item label="Cost per {{ cost.unit | titlecase }}"> {{ getCostValue(cost) | currency:getCostCurrency(cost, false):'symbol-narrow':'1.2-2':getCurrencyLocale(cost, false) }} </app-metadata-item>
+        <app-metadata-item *ngIf="cost.amount" label="Cost per {{ cost.unit | titlecase }}"> {{ getCostValue(cost) | currency:getCostCurrency(cost, false):'symbol-narrow':'1.2-2':getCurrencyLocale(cost, false) }} </app-metadata-item>
       </div>
     </ng-container>
     <app-metadata-item label="Additional Information" *ngIf="hasAdditionalInfo(selPlan)">
