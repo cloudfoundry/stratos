@@ -14,6 +14,8 @@ spec:
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
         app.kubernetes.io/component: "console"
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        app: "{{ .Release.Name }}"
+        component: console
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
@@ -260,6 +262,7 @@ spec:
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
         app.kubernetes.io/component: "console-mariadb"
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        app: "{{ .Release.Name }}"
     spec:
       containers:
       - name: mariadb
