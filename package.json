@@ -4,6 +4,8 @@
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
+    "cf-get-backend-deps": "gulp cf-get-backend-deps",
+    "cf-build-backend": "gulp cf-build-backend",
     "build-backend": "./build/bk-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",

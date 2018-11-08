@@ -18,6 +18,7 @@ type portalProxy struct {
 	Diagnostics            *interfaces.Diagnostics
 	SessionCookieName      string
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
+	AuthProviders          map[string]interfaces.AuthProvider
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions
