@@ -4,7 +4,7 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationSummary } from './application-summary.po';
+import { ApplicationBasePage } from './po/application-page.po';
 
 
 describe('Application Delete', function () {
@@ -55,11 +55,11 @@ describe('Application Delete', function () {
     });
 
     it('Should return to summary page after cancel', () => {
-      const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
+      const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
       appSummaryPage.navigateTo();
       appSummaryPage.waitForPage();
       // Open delete app dialog
-      const deleteApp = appSummaryPage.delete();
+      const deleteApp = appSummaryPage.delete(testAppName);
       // App did not have a route, so there should be no routes step
       expect(deleteApp.hasRouteStep()).toBeFalsy();
       // 1 step - np header shown
@@ -78,16 +78,14 @@ describe('Application Delete', function () {
       // We created the app after the wall loaded, so refresh to make sure app wall shows the new app
       appWall.appList.refresh();
 
-      let appCount = 0;
-      appWall.appList.getTotalResults().then(count => appCount = count);
-
-      e2e.sleep(5000);
+      appWall.appList.header.setSearchText(testAppName);
+      expect(appWall.appList.getTotalResults()).toBe(1);
 
       // Open delete app dialog
-      const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
+      const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
       appSummaryPage.navigateTo();
       appSummaryPage.waitForPage();
-      const deleteApp = appSummaryPage.delete();
+      const deleteApp = appSummaryPage.delete(testAppName);
 
       // App did not have a route, so there should be no routes step
       expect(deleteApp.hasRouteStep()).toBeFalsy();
@@ -116,14 +114,13 @@ describe('Application Delete', function () {
       // Should go back to app wall
       appWall.waitForPage();
 
-      e2e.sleep(5000);
-
+      appWall.appList.header.waitUntilShown();
 
       // We deleted the app, so don't try and do this on cleanup
       app = null;
 
-      // Check that we have 1 less app
-      appWall.appList.getTotalResults().then(count => expect(count).toBe(appCount - 1));
+      appWall.appList.header.setSearchText(testAppName);
+      expect(appWall.appList.getTotalResults()).toBe(0);
     });
   });
 

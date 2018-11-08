@@ -3,7 +3,7 @@ import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith } from 'rxjs/operators';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { EntityService } from '../../../../core/entity-service';
@@ -22,7 +22,16 @@ import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-
+import { RestageApplication } from '../../../../store/actions/application.actions';
+import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
+import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
+import {
+  getTabsFromExtensions,
+  StratosTabType,
+  StratosActionMetadata,
+  getActionsFromExtensions,
+  StratosActionType
+} from '../../../../core/extension/extension-service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -40,13 +49,6 @@ const appRestartConfirmation = new ConfirmationDialogConfig(
   'Are you sure you want to restart this Application?',
   'Restart'
 );
-// App delete will have a richer delete experience
-const appDeleteConfirmation = new ConfirmationDialogConfig(
-  'Delete Application',
-  'Are you sure you want to delete this Application?',
-  'Delete',
-  true
-);
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -56,6 +58,11 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
+  public appState$: Observable<ApplicationStateData>;
+  isBusyUpdating$: Observable<{ updating: boolean }>;
+
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -102,6 +109,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         });
       }
     });
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
@@ -110,7 +120,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
-  appActions$: Observable<{ [key: string]: boolean }>;
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }
@@ -216,14 +225,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
   }
 
+  restageApplication() {
+    const { cfGuid, appGuid } = this.applicationService;
+    this.store.dispatch(new RestageApplication(appGuid, cfGuid));
+  }
+
   pollEntityService(state, stateString): Observable<any> {
     return this.entityService
       .poll(1000, state).pipe(
         delay(1),
-        filter(({ resource, updatingSection }) => {
+        filter(({ resource }) => {
           return resource.entity.state === stateString;
         }),
-    );
+      );
   }
 
   startApplication() {
@@ -233,6 +247,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private dispatchAppStats = () => {
     const { cfGuid, appGuid } = this.applicationService;
     this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+  }
+
+  private updatingSectionBusy(section: ActionState) {
+    return section && section.busy;
   }
 
   restartApplication() {
@@ -288,6 +306,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
+    this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
+      map(updatingSection => {
+        const updating = this.updatingSectionBusy(updatingSection['restaging']) ||
+          this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
+        return { updating };
+      }),
+      startWith({ updating: true })
+    );
+
     const initialFetch$ = observableCombineLatest(
       this.applicationService.isFetchingApp$,
       this.applicationService.isFetchingEnvVars$,
@@ -307,10 +334,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return !!(isFetchingApp || isUpdating);
     }));
-
-    this.appActions$ = this.applicationService.applicationState$.pipe(
-      map(app => app.actions)
-    );
   }
 
   ngOnDestroy() {

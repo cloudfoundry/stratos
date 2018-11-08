@@ -1,8 +1,7 @@
-import { ElementFinder, promise, by, browser } from 'protractor';
+import { browser, by, ElementFinder } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { MetaCard } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -11,7 +10,6 @@ describe('Create Service Instance with binding', () => {
   const createServiceInstance = new CreateServiceInstance();
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
-  let cardIdx = -1;
   beforeAll(() => {
     const e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -37,33 +35,13 @@ describe('Create Service Instance with binding', () => {
     servicesHelperE2E.createService(servicesSecrets.publicService.name, false, servicesSecrets.bindApp);
     servicesWall.waitForPage();
 
-    const serviceName = servicesHelperE2E.serviceInstanceName;
-
-    servicesWall.serviceInstancesList.cards.getCards().then(
-      (cards: ElementFinder[]) => {
-        return cards.map(card => {
-          const metaCard = new MetaCard(card);
-          return metaCard.getTitle();
-        });
-      }).then(cardTitles => {
-        promise.all(cardTitles).then(titles => {
-          expect(titles.filter((t, idx) => {
-            const isCorrectCard = (t === serviceName);
-            if (isCorrectCard) {
-              cardIdx = idx;
-
-              const card = servicesWall.serviceInstancesList.cards.getCard(cardIdx);
-              card.getMetaCardItems().then(metaCardRows => {
-                expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
-                expect(metaCardRows[2].value).toBe('shared');
-                expect(metaCardRows[3].value).toBe('1');
-              }).catch(e => fail(e));
-            }
-            return isCorrectCard;
-          }).length).toBe(1);
-        });
-      }).catch(e => fail(e));
-
+    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName)
+      .then(card => card.getMetaCardItems())
+      .then(metaCardRows => {
+        expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
+        expect(metaCardRows[2].value).toBe('shared');
+        expect(metaCardRows[3].value).toBe('1');
+      });
 
   });
 

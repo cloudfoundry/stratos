@@ -30,11 +30,12 @@ describe('Endpoints', () => {
 
           // Get the row in the table for this endpoint
           endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-            endpointsPage.table.openActionMenu(row);
+            endpointsPage.table.openRowActionMenuByRow(row);
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
+            endpointsPage.table.waitUntilNotBusy();
             // Should have removed the only row, so we should see welcome message again
             expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
           });
@@ -59,11 +60,12 @@ describe('Endpoints', () => {
 
           // Get the row in the table for this endpoint
           endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-            endpointsPage.table.openActionMenu(row);
+            endpointsPage.table.openRowActionMenuByRow(row);
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
+            endpointsPage.table.waitUntilNotBusy();
             endpointsPage.table.getRows().then(rows => {
               expect(rows.length).toBe(endpointCount - 1);
             });
@@ -88,7 +90,7 @@ describe('Endpoints', () => {
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-          endpointsPage.table.openActionMenu(row);
+          endpointsPage.table.openRowActionMenuByRow(row);
           const menu = new MenuComponent();
           menu.waitUntilShown();
           menu.getItemMap().then(items => {

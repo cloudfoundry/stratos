@@ -1,10 +1,8 @@
-import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { e2e } from '../e2e';
-import { ElementFinder, promise } from 'protractor';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
-import { ServicesWallPage } from './services-wall.po';
-import { MetaCard } from '../po/meta-card.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
+import { ServicesWallPage } from './services-wall.po';
 
 describe('Create Service Instance of Private Service', () => {
   const createServiceInstance = new CreateServiceInstance();
@@ -34,20 +32,7 @@ describe('Create Service Instance of Private Service', () => {
 
     servicesWall.waitForPage();
 
-    const serviceName = servicesHelperE2E.serviceInstanceName;
-
-    servicesWall.serviceInstancesList.cards.getCards().then(
-      (cards: ElementFinder[]) => {
-        return cards.map(card => {
-          const metaCard = new MetaCard(card);
-          return metaCard.getTitle();
-        });
-      }).then(cardTitles => {
-        promise.all(cardTitles).then(titles => {
-          expect(titles.filter(t => t === serviceName).length).toBe(1);
-        });
-      }).catch(e => fail(e));
-
+    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
 
   });
 

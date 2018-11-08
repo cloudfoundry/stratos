@@ -17,7 +17,7 @@ import { CardCell } from '../../../list.types';
   templateUrl: './service-instance-card.component.html',
   styleUrls: ['./service-instance-card.component.scss'],
 })
-export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> implements OnInit {
+export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
   serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
@@ -27,7 +27,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   entityConfig: ComponentEntityMonitorConfig;
 
   @Input('row')
-  set row(row) {
+  set row(row: APIResource<IServiceInstance>) {
     if (row) {
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
       this.serviceInstanceEntity = row;
@@ -36,6 +36,36 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       }));
       this.cfGuid = row.entity.cfGuid;
       this.hasMultipleBindings.next(!(row.entity.service_bindings.length > 0));
+      this.cardMenu = [
+        {
+          label: 'Edit',
+          action: this.edit,
+          can: this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+            this.serviceInstanceEntity.entity.cfGuid,
+            this.serviceInstanceEntity.entity.space_guid
+          )
+        },
+        {
+          label: 'Unbind',
+          action: this.detach,
+          disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
+          can: this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+            this.serviceInstanceEntity.entity.cfGuid,
+            this.serviceInstanceEntity.entity.space_guid
+          )
+        },
+        {
+          label: 'Delete',
+          action: this.delete,
+          can: this.currentUserPermissionsService.can(
+            CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
+            this.serviceInstanceEntity.entity.cfGuid,
+            this.serviceInstanceEntity.entity.space_guid
+          )
+        }
+      ];
     }
   }
 
@@ -46,42 +76,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     super();
   }
 
-  ngOnInit() {
-    this.serviceInstanceTags = this.serviceInstanceEntity.entity.tags.map(t => ({
-      value: t
-    }));
-
-    this.cardMenu = [
-      {
-        label: 'Edit',
-        action: this.edit,
-        can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
-          this.serviceInstanceEntity.entity.cfGuid,
-          this.serviceInstanceEntity.entity.space_guid
-        )
-      },
-      {
-        label: 'Unbind',
-        action: this.detach,
-        disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
-        can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
-          this.serviceInstanceEntity.entity.cfGuid,
-          this.serviceInstanceEntity.entity.space_guid
-        )
-      },
-      {
-        label: 'Delete',
-        action: this.delete,
-        can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
-          this.serviceInstanceEntity.entity.cfGuid,
-          this.serviceInstanceEntity.entity.space_guid
-        )
-      }
-    ];
-  }
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding
       (this.serviceInstanceEntity.entity.service_bindings,
@@ -91,6 +85,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
+    this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
   )
 

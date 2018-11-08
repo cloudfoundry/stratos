@@ -13,9 +13,9 @@ describe('EditProfileInfoComponent', () => {
   let component: EditProfileInfoComponent;
   let fixture: ComponentFixture<EditProfileInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditProfileInfoComponent ],
+      declarations: [EditProfileInfoComponent],
       imports: [
         CommonModule,
         CoreModule,
@@ -26,8 +26,8 @@ describe('EditProfileInfoComponent', () => {
       ],
       providers: [UserProfileService]
     })
-    .compileComponents();
-  }));
+      .compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditProfileInfoComponent);

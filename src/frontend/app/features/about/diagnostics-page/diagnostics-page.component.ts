@@ -1,13 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { SessionData } from '../../../store/types/auth.types';
-import { Meta } from '@angular/platform-browser';
-import * as moment from 'moment';
 
 @Component({
   selector: 'app-diagnostics-page',
@@ -93,9 +93,17 @@ export class DiagnosticsPageComponent implements OnInit {
   }
 
   private getGitHubProject(prj: string): string {
-    const parts = prj.split(':');
-    if (parts.length === 2 && parts[0].indexOf('@github.com') >= 0) {
-      return parts[1];
+    let projectUrl = prj;
+    // Remove trailing .git if it is there
+    if (projectUrl.endsWith('.git')) {
+      projectUrl = projectUrl.substr(0, projectUrl.length - 4);
+    }
+
+    // Handle either SSH or HTTPS GitHub URLs
+    if (projectUrl.toLowerCase().startsWith('git@github.com:')) {
+      return projectUrl.substr(15);
+    } else if (projectUrl.toLowerCase().startsWith('https://github.com/')) {
+      return projectUrl.substr(19);
     }
     return '';
   }

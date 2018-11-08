@@ -8,7 +8,7 @@ import { generateTestEntityServiceProvider } from '../../../../test-framework/en
 import { entityFactory, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { GetApplication } from '../../../../store/actions/application.actions';
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { ApplicationEnvVarsService } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DatePipe } from '@angular/common';
 
 describe('DeleteAppRoutesComponent', () => {
@@ -27,7 +27,7 @@ describe('DeleteAppRoutesComponent', () => {
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
         DatePipe
       ]
 

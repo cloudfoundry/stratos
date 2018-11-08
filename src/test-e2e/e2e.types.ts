@@ -13,6 +13,7 @@ export interface E2EEndpointConfig {
   url: string;
   skipSSLValidation: boolean;
   creds: E2ECreds;
+  skip?: boolean;  // Should this endpoint be skipped when auto-registering
 }
 
 export interface ServiceConfig {
@@ -31,6 +32,7 @@ export interface E2EConfigCloudFoundry extends E2EEndpointConfig {
   testOrg: string;
   testSpace: string;
   testDeployApp: string;
+  testDeployAppStack: string;
   services: E2EServicesConfig;
 }
 

@@ -25,6 +25,11 @@
   name = "github.com/moby/moby"
   revision = "9de84a78d76ed2ffe386fe21466f7401cf5d2e9d"
 
+[[override]]
+  name = "github.com/jessevdk/go-flags"
+  source = "github.com/nwmac/go-flags"
+  version = "=1.1"
+
 [prune]
   go-tests = true
   unused-packages = true

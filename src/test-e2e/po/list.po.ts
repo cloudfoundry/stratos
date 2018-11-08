@@ -3,7 +3,8 @@ import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
-import { MetaCard } from './meta-card.po';
+import { MenuComponent } from './menu.po';
+import { MetaCard, MetaCardTitleType } from './meta-card.po';
 
 const until = protractor.ExpectedConditions;
 
@@ -20,7 +21,7 @@ export class ListTableComponent extends Component {
     super(locator);
   }
 
-  getHeaderText() {
+  getHeaderText(): promise.Promise<string> {
     return this.locator.element(by.css('.list-component__header__left--text')).getText();
   }
 
@@ -33,7 +34,7 @@ export class ListTableComponent extends Component {
   }
 
   // Get the data in the table
-  getTableDataRaw() {
+  getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
     const getRows = this.locator.all(by.css('.app-table__row')).map(row => row.all(by.css('.app-table__cell')).map(cell => cell.getText()));
     return promise.all([getHeaders, getRows]).then(([headers, rows]) => {
@@ -44,7 +45,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData() {
+  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -59,16 +60,55 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number) {
+  selectRow(index: number, radioButton = true): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
-      return rows[index].element(by.css('.mat-radio-button')).click();
+      return rows[index].element(by.css(radioButton ? '.mat-radio-button' : '.mat-checkbox')).click();
     });
+  }
+
+  waitUntilNotBusy() {
+    return Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+    ).then(() => Component.waitUntilNotShown(
+      this.locator.element(by.css('.table-row-wrapper__blocked'))
+    ));
+  }
+
+  getHighlightedRow(): promise.Promise<number> {
+    return this.locator.all(by.css('.app-table__row'))
+      .map((row, index) => row.getAttribute('class').then(classes => classes.indexOf('table-row-wrapper__highlighted')))
+      .then(isHighlighted => {
+        return promise.all(isHighlighted);
+      })
+      .then(isHighlighted => {
+        for (let i = 0; i < isHighlighted.length; i++) {
+          if (isHighlighted[i]) {
+            return i;
+          }
+        }
+        return -1;
+      });
+  }
+
+  openRowActionMenuByIndex(index: number): MenuComponent {
+    return this.openRowActionMenuByRow(this.getRows().get(index));
+  }
+
+  openRowActionMenuByRow(row: ElementFinder): MenuComponent {
+    row.element(by.css('app-table-cell-actions button')).click();
+    return new MenuComponent();
+  }
+
+  toggleSort(headerTitle: string): promise.Promise<any> {
+    return this.locator.element(by.cssContainingText('mat-header-row app-table-cell', headerTitle)).click();
   }
 }
 
 // Page Object for the List Card View
 export class ListCardComponent extends Component {
+
+  static cardsCss = 'app-card:not(.row-filler)';
 
   constructor(locator: ElementFinder) {
     super(locator);
@@ -82,19 +122,26 @@ export class ListCardComponent extends Component {
   }
 
   getCards(): ElementArrayFinder {
-    return this.locator.all(by.css('app-card:not(.row-filler)'));
+    return this.locator.all(by.css(ListCardComponent.cardsCss));
   }
 
-  getCard(index: number): MetaCard {
-    return new MetaCard(this.getCards().get(index));
+  getCard(index: number, metaType = MetaCardTitleType.CUSTOM): MetaCard {
+    return new MetaCard(this.getCards().get(index), metaType);
   }
 
-  findCardByTitle(title: string): promise.Promise<MetaCard> {
-    return this.getCards().filter((elem) => {
-      return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
+  waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
+    const cardTitle = this.locator.element(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title));
+    return browser.wait(until.visibilityOf(cardTitle), 10000).then(() => {
+      return this.findCardByTitle(title, metaType);
+    });
+  }
+
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
+    return this.getCards().filter(elem => {
+      return elem.element(by.cssContainingText(metaType, title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
-      return new MetaCard(e[0]);
+      return new MetaCard(e[0], metaType);
     });
   }
 
@@ -162,8 +209,13 @@ export class ListHeaderComponent extends Component {
   getFilterText(index = 0): promise.Promise<string> {
     return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
   }
-  selectFilterOption(index: number): promise.Promise<any> {
-    return this.getFilterOptions().then(options => options[index].click());
+
+  selectFilterOption(index: number, valueIndex): promise.Promise<any> {
+    return this.getFilterOptions(index).then(options => options[valueIndex].click());
+  }
+
+  getMultiFilterForm(): FormComponent {
+    return new FormComponent(this.locator.element(by.className('list-component__header__left--multi-filters')));
   }
 
   getRefreshListButton(): ElementFinder {
@@ -184,6 +236,14 @@ export class ListHeaderComponent extends Component {
 
   toggleSortOrder() {
     this.findSortSection().element(by.css('button')).click();
+  }
+
+  getAdd(): ElementFinder {
+    return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
+  }
+
+  getIconButton(iconText: string): ElementFinder {
+    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
 }
@@ -208,12 +268,13 @@ export class ListPaginationComponent extends Component {
     return this.locator.element(by.css('.mat-paginator-page-size'));
   }
 
-  getPageSize(): promise.Promise<string> {
-    return this.getPageSizeForm().getText('mat-select-1');
+  getPageSize(customCtrlName?: string): promise.Promise<string> {
+    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-1');
   }
 
-  setPageSize(pageSize): promise.Promise<void> {
-    return this.getPageSizeForm().fill({ 'mat-select-1': pageSize });
+  setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
+    const name = customCtrlName || 'mat-select-1';
+    return this.getPageSizeForm().fill({ [name]: pageSize });
   }
 
   getPageSizeForm(): FormComponent {
@@ -245,6 +306,14 @@ export class ListEmptyComponent extends Component {
 
   getDefault(): Component {
     return new Component(element(by.css('.list-component__default-no-entries')));
+  }
+
+  getCustom(): Component {
+    return new Component(element(by.css('app-no-content-message')));
+  }
+
+  getCustomLineOne(): promise.Promise<string> {
+    return this.getCustom().getComponent().element(by.css('.first-line')).getText();
   }
 }
 /**

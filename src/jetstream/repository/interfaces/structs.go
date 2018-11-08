@@ -31,6 +31,7 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
+	SSOAllowed             bool     `json:"sso_allowed"`
 }
 
 // ConnectedEndpoint
@@ -65,8 +66,9 @@ type EndpointTokenRecord struct {
 	LoggingEndpoint string
 }
 
-//TODO this could be moved back to tokens subpackage, and extensions could import it?
+// TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
+	TokenGUID    string
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64
@@ -74,6 +76,7 @@ type TokenRecord struct {
 	AuthType     string
 	Metadata     string
 	SystemShared bool
+	LinkedGUID   string // Indicates the GUID of the token that this token is linked to (if any)
 }
 
 type CFInfo struct {
@@ -187,6 +190,7 @@ type ConsoleConfig struct {
 	ConsoleClientSecret string   `json:"console_client_secret"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
+	UseSSO              bool     `json:"use_sso"`
 }
 
 // CNSIRequest
@@ -224,6 +228,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
 	SSOOptions                      string   `configName:"SSO_OPTIONS"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`

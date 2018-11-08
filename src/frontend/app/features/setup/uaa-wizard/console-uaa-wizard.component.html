@@ -37,6 +37,15 @@
               <input matInput type="password" formControlName="adminPassword" placeholder="Admin Password">
             </mat-form-field>
           </div>
+          <!-- Single Sign-on -->
+          <p class="uaa-wizard__form-section">UAA Single Sign On (SSO)</p>
+          <div class="uaa-wizard__form-block">
+            <mat-checkbox matInput formControlName="useSSO">Use SSO (Use the UAA's UI to login rather than the Stratos login UI)</mat-checkbox>
+            <p *ngIf="uaaForm.value.useSSO" class="uaa-wizard__sso-block">You must ensure that the client specified above has its 'redirect_uri' configured to include the Stratos SSO Callback URL:
+              <code>{{ clientRedirectURI }}</code>
+            </p>
+          </div>
+
         </form>
       </div>
     </app-step>
