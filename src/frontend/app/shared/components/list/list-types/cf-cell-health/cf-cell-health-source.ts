@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
+import { ListDataSource } from '../../../../../../packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { IMetrics, IMetricMatrixResult } from '../../../../../../packages/store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../packages/store/src/types/metric.types';
+import { AppState } from '../../../../../../packages/store/src/app-state';
+import { IListConfig } from '../../../../../../packages/core/src/shared/components/list/list.component.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../../../../packages/store/src/actions/metrics.actions';
+import { entityFactory } from '../../../../../../packages/store/src/helpers/entity-factory';
 
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../store/actions/metrics.actions';
-import { AppState } from '../../../../../store/app-state';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { IMetricMatrixResult, IMetrics } from '../../../../../store/types/base-metric.types';
-import { IMetricCell } from '../../../../../store/types/metric.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
 
 export interface CfCellHealthEntry {
   timestamp: number;
