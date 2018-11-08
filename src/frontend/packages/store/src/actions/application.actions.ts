@@ -1,5 +1,4 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
-;
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';

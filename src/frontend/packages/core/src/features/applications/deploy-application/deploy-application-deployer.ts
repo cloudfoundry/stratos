@@ -6,7 +6,13 @@ import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } f
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
-import { AppData, OverrideAppDetails, DeployApplicationState, SocketEventTypes, DeployApplicationSource } from '../../../../../store/src/types/deploy-application.types';
+import {
+  AppData,
+  OverrideAppDetails,
+  DeployApplicationState,
+  SocketEventTypes,
+  DeployApplicationSource
+} from '../../../../../store/src/types/deploy-application.types';
 import { environment } from '../../../environments/environment.prod';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';

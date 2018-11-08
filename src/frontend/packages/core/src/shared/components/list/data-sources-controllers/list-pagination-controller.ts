@@ -9,7 +9,13 @@ import { tag } from 'rxjs-spy/operators';
 import { ListPagination, ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { PaginationEntityState, PaginationClientFilter } from '../../../../../../store/src/types/pagination.types';
 import { AppState } from '../../../../../../store/src/app-state';
-import { SetClientPage, SetPage, SetClientPageSize, AddParams, SetClientFilter } from '../../../../../../store/src/actions/pagination.actions';
+import {
+  SetClientPage,
+  SetPage,
+  SetClientPageSize,
+  AddParams,
+  SetClientFilter
+} from '../../../../../../store/src/actions/pagination.actions';
 import { defaultClientPaginationPageSize } from '../../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
 
 export interface IListPaginationController<T> {
