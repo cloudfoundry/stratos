@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import { ListDataSource } from '../../../../../../packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IMetrics, IMetricMatrixResult } from '../../../../../../packages/store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../packages/store/src/types/metric.types';
-import { AppState } from '../../../../../../packages/store/src/app-state';
-import { IListConfig } from '../../../../../../packages/core/src/shared/components/list/list.component.types';
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../../packages/store/src/actions/metrics.actions';
-import { entityFactory } from '../../../../../../packages/store/src/helpers/entity-factory';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IMetrics, IMetricMatrixResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { IListConfig } from '../../list.component.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
+import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 
 export interface CfCellHealthEntry {

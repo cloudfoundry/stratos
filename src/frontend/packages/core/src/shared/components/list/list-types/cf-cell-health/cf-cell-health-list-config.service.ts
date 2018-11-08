@@ -2,22 +2,21 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
-import { BaseCfListConfig } from '../../../../../../packages/core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
-import { ListView } from '../../../../../../packages/store/src/actions/list.actions';
-import { ListViewTypes } from '../../../../../../packages/core/src/shared/components/list/list.component.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { ListViewTypes } from '../../list.component.types';
 import {
   TableCellBooleanIndicatorComponentConfig,
   TableCellBooleanIndicatorComponent
-  // tslint:disable-next-line:max-line-length
-} from '../../../../../../packages/core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { BooleanIndicatorType } from '../../../../../../packages/core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { AppState } from '../../../../../../packages/store/src/app-state';
+} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
+import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
+import { AppState } from '../../../../../../../store/src/app-state';
 import {
   CloudFoundryCellService
-} from '../../../../../../packages/core/src/features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
-import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../packages/store/src/actions/metrics.actions';
-import { MetricQueryType } from '../../../../../../packages/core/src/shared/services/metrics-range-selector.types';
-import { ITableColumn } from '../../../../../../packages/core/src/shared/components/list/list-table/table.types';
+} from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
+import { ITableColumn } from '../../list-table/table.types';
 
 @Injectable()
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {

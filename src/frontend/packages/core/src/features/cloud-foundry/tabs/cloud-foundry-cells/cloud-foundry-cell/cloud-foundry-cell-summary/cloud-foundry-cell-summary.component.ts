@@ -4,10 +4,11 @@ import { map } from 'rxjs/operators';
 
 import { CardStatus } from '../../../../../../shared/components/application-state/application-state.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
+
+import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import {
   CfCellHealthListConfigService
-} from '../../../../../../../../../app/shared/components/list/list-types/cf-cell-health/cf-cell-health-list-config.service';
-import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+} from '../../../../../../shared/components/list/list-types/cf-cell-health/cf-cell-health-list-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-summary',
