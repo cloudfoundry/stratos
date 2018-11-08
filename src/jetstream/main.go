@@ -667,14 +667,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.EchoMiddleware)
 	}
 
-	// Allow the backend to run under /pp if running combined
-	var pp *echo.Group
-	staticDir, err := getStaticFiles()
-	if err == nil {
-		pp = e.Group("/pp")
-	} else {
-		pp = e.Group("")
-	}
+	staticDir, staticDirErr := getStaticFiles()
+
+	// Always serve the backend API from /pp
+	pp := e.Group("/pp")
 
 	pp.Use(p.setSecureCacheContentMiddleware)
 
@@ -770,7 +766,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	// Serve up static resources
-	if err == nil {
+	if staticDirErr == nil {
 		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
