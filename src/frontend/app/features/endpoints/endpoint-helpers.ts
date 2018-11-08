@@ -71,14 +71,11 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
       epType.authTypes.forEach(authType => {
         const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
         if (endpointAuthType) {
-          // endpointAuthType.types.push(epType.type);
           endpointAuthType.types.push(endpointAuthType.value as EndpointType);
         }
       });
     }
   });
-
-  // TODO: Sort alphabetically
 
   endpointTypes.forEach(ept => {
     endpointTypesMap[ept.value] = ept;
