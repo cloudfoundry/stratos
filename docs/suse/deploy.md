@@ -11,6 +11,8 @@ These instructions assume that you are deploying the SUSE Cloud Application Plat
 
 ## Install Stratos with Helm
 
+> NOTE: Full details on deploying Stratos to Kubernetes are available [here](https://github.com/SUSE/stratos/tree/v2-master/deploy/kubernetes)
+
 To deploy Stratos, use the same `scf-config-values.yaml` file that you used to deploy SCF/UAA.
 
 Ensure you have a Storage Class configured and that is set to be the default - see [here](https://github.com/SUSE/stratos/tree/v2-master/deploy/kubernetes#specifying-a-custom-storage-class) for more information.
