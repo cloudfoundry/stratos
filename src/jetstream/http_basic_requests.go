@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -11,12 +12,14 @@ import (
 func (p *portalProxy) doHttpBasicFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doHttpBasicFlowRequest")
 
-	authHandler := func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error) {
-		// Http Basic has no token refresh or expiry - so much simpler than the OAuth flow
-		req.Header.Set("Authorization", "basic "+tokenRec.AuthToken)
-		client := p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
-		return client.Do(req)
+	// get a cnsi token record and a cnsi record
+	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve Endpoint records: %v", err)
 	}
-	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 
+	// Http Basic has no token refresh or expiry - so much simpler than the OAuth flow
+	req.Header.Set("Authorization", "basic "+tokenRec.AuthToken)
+	client := p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
+	return client.Do(req)
 }

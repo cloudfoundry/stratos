@@ -53,7 +53,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
   set baseAction(action: MetricsAction) {
     this.baseActionValue = action;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.guid,
+      action.metricId,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );

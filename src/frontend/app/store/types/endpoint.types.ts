@@ -71,8 +71,7 @@ export interface EndpointState {
 }
 
 // If we support more endpoint types in future, this type should be extended
-// We defined the build-in endpoints and allow for custom ones via any string
-export type EndpointType = 'cf' | 'metrics' | 'k8s' | string;
+export type EndpointType = 'cf' | 'metrics';
 
 export interface StateUpdateAction {
   type: string;

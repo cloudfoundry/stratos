@@ -24,9 +24,6 @@ export class BooleanIndicatorComponent {
   // Should we use a subtle display - this won't show the No option as danger (typically red)
   @Input() subtle = true;
 
-  // Invert the text labels with the icons (No text for yes value and vice-versa)
-  @Input() inverse = false;
-
   private icons = {
     Yes: 'check_circle',
     Enabled: 'check_circle',
@@ -43,13 +40,12 @@ export class BooleanIndicatorComponent {
   };
 
   getIcon = () => {
-    return this.icons[this.getText(this.inverse)];
+    return this.icons[this.getText()];
   }
 
-  getText = (inverse = false): string => {
+  getText = (): string => {
     const [enabledText, disabledText] = this.getTypeText(this.type);
-    const value = inverse ? !this.isTrue : this.isTrue;
-    return this.capitalizeFirstLetter(value ? enabledText : disabledText);
+    return this.capitalizeFirstLetter(this.isTrue ? enabledText : disabledText);
   }
 
   getTypeText = (s) => s.split('-');

@@ -21,16 +21,15 @@ function syncPaginationSection(
     action.paginationKey
   ));
 }
-export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
+export class CFEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
 
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<EndpointModel>,
-    endpointType: string,
+    listConfig: IListConfig<EndpointModel>
   ) {
     const action = new GetAllEndpoints();
-    const paginationKey = `${endpointType}-endpoints`;
+    const paginationKey = 'cf-endpoints';
     // We do this here to ensure we sync up with main endpoint table data.
     syncPaginationSection(store, action, paginationKey);
     action.paginationKey = paginationKey;
@@ -44,7 +43,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       transformEntities: [
         (entities: EndpointModel[]) => {
           return entities.filter(endpoint => {
-            return endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === endpointType;
+            return endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf';
           });
         },
         {

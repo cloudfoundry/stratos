@@ -1,20 +1,12 @@
 import {
   IService,
   IServiceBinding,
-  IServiceBroker,
   IServiceInstance,
   IServicePlan,
   IServicePlanVisibility,
+  IServiceBroker,
 } from '../../core/cf-api-svc.types';
 import { IApp, IDomain, IFeatureFlag, IOrganization, IRoute, ISecurityGroup, ISpace, IStack } from '../../core/cf-api.types';
-import { KubernetesService } from '../../custom/kubernetes/services/kubernetes.service';
-import {
-  KubernetesApp,
-  KubernetesNamespace,
-  KubernetesNode,
-  KubernetesPod,
-  KubernetesStatefuleSet,
-} from '../../custom/kubernetes/store/kube.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import {
   appEnvVarsSchemaKey,
@@ -28,19 +20,12 @@ import {
   endpointSchemaKey,
   featureFlagSchemaKey,
   githubBranchesSchemaKey,
-  githubCommitSchemaKey,
-  kubernetesAppsSchemaKey,
-  kubernetesNamespacesSchemaKey,
-  kubernetesNodesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesServicesSchemaKey,
   metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
   routeSchemaKey,
   securityGroupSchemaKey,
   serviceBindingSchemaKey,
-  serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
   servicePlanVisibilitySchemaKey,
@@ -48,8 +33,8 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
+  githubCommitSchemaKey,
+  serviceBrokerSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -81,13 +66,6 @@ export interface IRequestDataState extends IRequestTypeState {
   servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   metrics: IRequestEntityTypeState<IMetrics>;
-  kubernetesNode: IRequestEntityTypeState<KubernetesNode>;
-  kubernetesPod: IRequestEntityTypeState<KubernetesPod>;
-  kubernetesNamespace: IRequestEntityTypeState<KubernetesNamespace>;
-  kubernetesApp: IRequestEntityTypeState<KubernetesApp>;
-  kubernetesService: IRequestEntityTypeState<KubernetesService>;
-  kubernetesStatefulSet: IRequestEntityTypeState<KubernetesStatefuleSet>;
-  kubernetesDeployment: IRequestEntityTypeState<KubernetesStatefuleSet>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -111,13 +89,6 @@ export interface IRequestState extends IRequestTypeState {
   securityGroup: IRequestEntityTypeState<RequestInfoState>;
   servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
   serviceBroker: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesNode: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesPod: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesNamespace: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesApp: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesService: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesStatefulSet: IRequestEntityTypeState<RequestInfoState>;
-  kubernetesDeployment: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -147,12 +118,5 @@ export const defaultCfEntitiesState = {
   [spaceQuotaSchemaKey]: {},
   [metricSchemaKey]: {},
   [servicePlanVisibilitySchemaKey]: {},
-  [serviceBrokerSchemaKey]: {},
-  [kubernetesNodesSchemaKey]: {},
-  [kubernetesPodsSchemaKey]: {},
-  [kubernetesNamespacesSchemaKey]: {},
-  [kubernetesAppsSchemaKey]: {},
-  [kubernetesServicesSchemaKey]: {},
-  [kubernetesStatefulSetsSchemaKey]: {},
-  [kubernetesDeploymentsSchemaKey]: {},
+  [serviceBrokerSchemaKey]: {}
 };

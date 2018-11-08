@@ -41,7 +41,7 @@ import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
   PaginationObservables,
-} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,

@@ -42,8 +42,15 @@ export class ApplicationInstanceChartComponent implements OnInit {
 
   constructor() { }
 
+  private buildChartConfig() {
+    const lineChartConfig = new MetricsLineChartConfig();
+    lineChartConfig.xAxisLabel = 'Time';
+    lineChartConfig.yAxisLabel = this.yAxisLabel;
+    return lineChartConfig;
+  }
+
   ngOnInit() {
-    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
+    this.instanceChartConfig = this.buildChartConfig();
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,

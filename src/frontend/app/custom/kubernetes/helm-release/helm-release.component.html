@@ -1,8 +1,0 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]=" tabLinks">
-  <h1>{{ helmReleaseService.helmReleaseName }}</h1>
-  <div class="page-header-right">
-  </div>
-</app-page-header>
-<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Release details'">
-  <router-outlet></router-outlet>
-</app-loading-page>

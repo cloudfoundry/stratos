@@ -34,17 +34,19 @@ export class MetricsEffect {
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
-      const { guid } = action;
-      this.store.dispatch(new StartRequestAction(action));
+      const apiAction = {
+        ...action,
+      } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
-            [guid]: {
+            [action.metricId]: {
               query: action.query,
-              windowValue: action.windowValue,
+              queryType: action.queryType,
               data: metric.data
             }
           } : {};
@@ -53,16 +55,16 @@ export class MetricsEffect {
               entities: {
                 [metricSchemaKey]: metricObject
               },
-              result: [guid]
+              result: [action.metricId]
             },
-            action
+            apiAction
           );
         })
       ).pipe(catchError(errObservable => {
         return [
           new WrapperRequestActionFailed(
             errObservable.message,
-            action,
+            apiAction,
             'fetch'
           )
         ];

@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
-import { EndpointTypeConfig, initEndpointTypes } from '../../features/endpoints/endpoint-helpers';
-
-
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
 export interface EndpointTypeExtension {
@@ -14,7 +11,6 @@ export interface EndpointTypeExtension {
 
 export interface StratosExtensionConfig {
   routes?: Route[];
-  endpointTypes?: EndpointTypeConfig[];
 }
 
 // The different types of Tab
@@ -49,14 +45,6 @@ export interface StratosActionMetadata {
   iconFont?: string;
 }
 
-export interface StratosEndpointMetadata {
-  type: string;
-  label: string;
-  authTypes: string[];
-  icon: string;
-  iconFont: string;
-}
-
 export type StratosRouteType = StratosTabType | StratosActionType;
 
 // Stores the extension metadata as defined by the decorators
@@ -65,7 +53,6 @@ const extensionMetadata = {
   extensionRoutes: {},
   tabs: {},
   actions: {},
-  endpointTypes: []
 };
 
 /**
@@ -89,12 +76,10 @@ export function StratosAction(props: StratosActionMetadata) {
 /**
  * Decorator for an Extension module
  */
+
 export function StratosExtension(config: StratosExtensionConfig) {
   return (_target) => {
-    if (config.endpointTypes) {
-      extensionMetadata.endpointTypes.push(...config.endpointTypes);
-    }
-  };
+};
 }
 
 export function StratosLoginComponent() {
@@ -143,7 +128,6 @@ export class ExtensionService {
    */
   public init() {
     this.applyRoutesFromExtensions(this.router);
-    this.applyNewEndpointTypes();
   }
 
   /**
@@ -152,19 +136,11 @@ export class ExtensionService {
   private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
 
-    // Find the route that has the 'about' page as a child - this is the dashboard base
-    const dashboardRoute = routeConfig.find(r => {
-      if (r.path === '' && !!r.component && r.children) {
-        return !!r.children.find(c => c.path === 'about');
-      } else {
-        return false;
-      }
-    });
-
+    const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
     let needsReset = false;
     if (dashboardRoute) {
       // Move any stratos extension routes under the dashboard base route
-      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { }
+      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) {}
       needsReset = true;
     }
 
@@ -182,15 +158,11 @@ export class ExtensionService {
 
   private moveExtensionRoute(routeConfig: Route[], dashboardRoute: Route): boolean {
     const index = routeConfig.findIndex(r => !!r.data && !!r.data.stratosNavigation);
-    if (index >= 0) {
+    if (index >= 0 ) {
       const removed = routeConfig.splice(index, 1);
       dashboardRoute.children = dashboardRoute.children.concat(removed);
     }
     return index >= 0;
-  }
-
-  private applyNewEndpointTypes() {
-    initEndpointTypes(this.metadata.endpointTypes);
   }
 }
 

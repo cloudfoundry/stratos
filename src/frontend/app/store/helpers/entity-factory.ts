@@ -2,7 +2,6 @@ import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
-import { getKubeAPIResourceGuid } from '../../custom/kubernetes/store/kube.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 
 export const applicationSchemaKey = 'application';
@@ -35,14 +34,7 @@ export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
-export const kubernetesSchemaKey = 'kubernetesInfo';
-export const kubernetesNodesSchemaKey = 'kubernetesNode';
-export const kubernetesPodsSchemaKey = 'kubernetesPod';
-export const kubernetesNamespacesSchemaKey = 'kubernetesNamespace';
-export const kubernetesServicesSchemaKey = 'kubernetesService';
-export const kubernetesStatefulSetsSchemaKey = 'kubernetesStatefulSet';
-export const kubernetesDeploymentsSchemaKey = 'kubernetesDeployment';
-export const kubernetesAppsSchemaKey = 'kubernetesApp';
+
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
@@ -94,23 +86,6 @@ export class EntitySchema extends schema.Entity {
 
 const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appSummarySchemaKey] = AppSummarySchema;
-
-const kubernetesSchema = new EntitySchema(kubernetesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[kubernetesSchemaKey] = kubernetesSchema;
-const kubernetesAppsSchema = new EntitySchema(kubernetesAppsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[kubernetesAppsSchemaKey] = kubernetesAppsSchema;
-const kubernetesStatefulSetsSchema = new EntitySchema(kubernetesStatefulSetsSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
-entityCache[kubernetesStatefulSetsSchemaKey] = kubernetesStatefulSetsSchema;
-const kubernetesDeploymentsSchema = new EntitySchema(kubernetesDeploymentsSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
-entityCache[kubernetesDeploymentsSchemaKey] = kubernetesDeploymentsSchema;
-const kubernetesNodesSchema = new EntitySchema(kubernetesNodesSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
-entityCache[kubernetesNodesSchemaKey] = kubernetesNodesSchema;
-const kubernetesPodsSchema = new EntitySchema(kubernetesPodsSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
-entityCache[kubernetesPodsSchemaKey] = kubernetesPodsSchema;
-const kubernetesNamespacesSchema = new EntitySchema(kubernetesNamespacesSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
-entityCache[kubernetesNamespacesSchemaKey] = kubernetesNamespacesSchema;
-const kubernetesServicesSchema = new EntitySchema(kubernetesServicesSchemaKey, {}, { idAttribute: getKubeAPIResourceGuid });
-entityCache[kubernetesServicesSchemaKey] = kubernetesServicesSchema;
 
 const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appStatsSchemaKey] = AppStatSchema;

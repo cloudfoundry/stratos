@@ -1,7 +1,10 @@
+import { browser, ElementFinder, promise } from 'protractor';
+
 import { e2e } from '../e2e';
-import { EndpointMetadata, EndpointsPage } from '../endpoints/endpoints.po';
-import { RegisterDialog } from '../endpoints/register-dialog.po';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
+import { EndpointsPage, EndpointMetadata } from '../endpoints/endpoints.po';
+import { RegisterDialog } from '../endpoints/register-dialog.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
 
 describe('Metrics', () => {
@@ -30,7 +33,7 @@ describe('Metrics', () => {
     register.form.fill({
       'ep-type': 'Metrics',
       name: 'MetricsTest',
-      url: 'https://www.google.com',
+      url: 'https://wwww.google.com',
       skipsll: false
     });
 
@@ -50,7 +53,7 @@ describe('Metrics', () => {
     expect(endpointsPage.table.getRows().count()).toBe(1);
     endpointsPage.table.getEndpointDataForEndpoint('MetricsTest').then((data: EndpointMetadata) => {
       expect(data.name).toEqual('MetricsTest');
-      expect(data.url).toEqual('https://www.google.com');
+      expect(data.url).toEqual('https://wwww.google.com');
       expect(data.connected).toBeFalsy();
     });
   });

@@ -93,6 +93,7 @@ export class CloudFoundryCellService {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yAxisLabel;
+    lineChartConfig.showLegend = false;
     lineChartConfig.autoScale = false;
     return lineChartConfig;
   }
@@ -106,12 +107,12 @@ export class CloudFoundryCellService {
       false
     );
     if (metric === CellMetrics.HEALTHY) {
-      this.healthyMetricId = action.guid;
+      this.healthyMetricId = action.metricId;
     }
     return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
       metricSchemaKey,
       entityFactory(metricSchemaKey),
-      action.guid,
+      action.metricId,
       action,
       false
     ).waitForEntity$.pipe(

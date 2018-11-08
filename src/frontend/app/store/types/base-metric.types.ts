@@ -19,7 +19,7 @@ export interface IMetricsData<T = any> {
 }
 export interface IMetrics<T = any> {
   query: MetricQueryConfig;
-  windowValue: string;
+  queryType: MetricQueryType;
   data: IMetricsData<T>;
 }
 
@@ -48,5 +48,3 @@ export interface ChartSeries<T = any> {
     value: T;
   }[];
 }
-
-export type MetricsFilterSeries = (chartSeries: ChartSeries[]) => ChartSeries[];

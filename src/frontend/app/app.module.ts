@@ -1,15 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Params, RouterStateSnapshot } from '@angular/router';
+import { Params, RouterStateSnapshot, RouteConfigLoadEnd, Route } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
-
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
-import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
-import { ExtensionService } from './core/extension/extension-service';
-import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
@@ -23,6 +19,9 @@ import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
+import { GITHUB_API_URL, getGitHubAPIURL } from './core/github.helpers';
+import { ExtensionService } from './core/extension/extension-service';
+import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68

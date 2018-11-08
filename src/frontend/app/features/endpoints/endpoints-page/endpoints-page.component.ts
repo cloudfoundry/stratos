@@ -26,7 +26,7 @@ import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } fr
 
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState>) { }
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState> ) { }
 
   sub: Subscription;
 
@@ -43,7 +43,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
         map(ep => {
           const endpoint = ep[guid];
           if (endpoint.connectionStatus === 'connected') {
-            this.store.dispatch(new ShowSnackBar(`Connected endpoint '${endpoint.name}'`));
+            this.store.dispatch(new ShowSnackBar(`Connected ${endpoint.name}`));
           } else {
             this.store.dispatch(new ShowSnackBar(`A problem occurred connecting endpoint ${endpoint.name}`));
           }

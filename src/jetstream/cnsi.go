@@ -113,8 +113,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		}
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
-			"Failed to validate endpoint",
-			"Failed to validate endpoint: %v",
+			"Failed to get endpoint v2/info",
+			"Failed to get api endpoint v2/info: %v",
 			err)
 	}
 
@@ -381,7 +381,6 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 
 	cnsiList, err := cnsiRepo.ListByUser(userGUID)
 	if err != nil {
-		log.Debugf("Error was: %+v", err)
 		return nil, err
 	}
 

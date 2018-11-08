@@ -29,7 +29,6 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { UsersEffects } from './effects/users.effects';
 import { AppReducersModule } from './reducers.module';
-import { KubernetesEffects } from '../custom/kubernetes/store/kubernetes.effects';
 
 @NgModule({
   imports: [
@@ -63,7 +62,6 @@ import { KubernetesEffects } from '../custom/kubernetes/store/kubernetes.effects
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
-      KubernetesEffects
     ])
   ]
 })

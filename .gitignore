@@ -97,8 +97,8 @@ src/frontend/sass/custom.scss
 src/frontend/assets/eula.html
 src/frontend/assets/logo.png
 src/frontend/assets/login-bg.jpg
-src/frontend/app/custom.module.ts
 src/frontend/app/custom-import.module.ts
+src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom
 src/frontend/index.html
@@ -106,6 +106,3 @@ src/frontend/index.html
 # Prebuild package
 
 stratos-frontend-prebuild.zip
-src/jetstream/config.properties
-e2e-reports/
-deploy/ci/secrets.yml*
