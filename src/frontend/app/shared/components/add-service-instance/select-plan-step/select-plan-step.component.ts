@@ -210,19 +210,33 @@ export class SelectPlanStepComponent implements OnDestroy {
   isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
   isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
 
-  getCost = (cost: IServicePlanCost, symbol: boolean) => {
-    if (!cost.amount) { return '-'; }
-    return `${this.getCostCurrency(cost, symbol)}${this.getCostValue(cost)}`;
+  /*
+   * Pick the first country listed in the amount object. It's unclear whether there could be a different number of these depending on
+   * which region the CF is being served in (IBM seem to charge different amounts per country)
+   */
+  private getCountryCode = (cost: IServicePlanCost): string => {
+    return Object.keys(cost.amount)[0];
   }
-  getCostCurrency = (cost: IServicePlanCost, symbol: boolean) => {
-    const currency = Object.keys(cost.amount)[0];
-    if (!symbol) {
-      return currency;
-    }
-    return getCurrencySymbol(currency.toUpperCase(), 'wide');
+
+  /*
+   * Find the charge for the chosen country
+   */
+  getCostValue = (cost: IServicePlanCost) => cost.amount[this.getCountryCode(cost)];
+
+  /*
+   * Determine the currency for the chosen country
+   */
+  getCostCurrency = (cost: IServicePlanCost) => {
+    return this.getCountryCode(cost).toUpperCase();
   }
-  getCostValue = (cost: IServicePlanCost) => cost.amount[this.getCostCurrency(cost, false)];
-  getCurrencyLocale = (cost: IServicePlanCost) => this.getCostCurrency(cost, false) === 'EUR' ? 'fr' : 'en-US';
+
+  /*
+   * Artificially supply a locale for the chosen country.
+   */
+  getCurrencyLocale(cost: IServicePlanCost) {
+    // This will be updated once with do i18n
+    return this.getCostCurrency(cost) === 'EUR' ? 'fr' : 'en-US';
+  }
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(
