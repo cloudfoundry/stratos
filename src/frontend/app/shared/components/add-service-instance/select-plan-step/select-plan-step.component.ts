@@ -1,4 +1,4 @@
-import { TitleCasePipe } from '@angular/common';
+import { TitleCasePipe, getCurrencySymbol, registerLocaleData } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,6 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import localeFr from '@angular/common/locales/fr';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -30,7 +31,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
+import { IServicePlan, IServicePlanExtra, IServicePlanCost } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
 import { ServicePlanAccessibility } from '../../../../features/service-catalog/services.service';
@@ -66,7 +67,7 @@ interface ServicePlan {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
-  selectedService$: Observable<ServicePlan>;
+  selectedPlan$: Observable<ServicePlan>;
   cSIHelperService: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef })
   noPlansDiv: ViewContainerRef;
@@ -86,6 +87,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     private modeService: CsiModeService
 
   ) {
+    registerLocaleData(localeFr);
 
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
@@ -121,7 +123,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
-    this.selectedService$ = observableCombineLatest(
+    this.selectedPlan$ = observableCombineLatest(
       this.stepperForm.statusChanges.pipe(startWith(true)),
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),
@@ -205,6 +207,37 @@ export class SelectPlanStepComponent implements OnDestroy {
   isYesOrNo = val => val ? 'yes' : 'no';
   isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
   isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
+
+  /*
+   * Show service plan costs if the object is in the open service broker format, otherwise ignore them
+   */
+  canShowCosts = (servicePlanExtra: IServicePlanExtra): boolean =>
+    !!servicePlanExtra.costs && !!servicePlanExtra.costs[0] && !!servicePlanExtra.costs[0].amount
+
+  /*
+   * Pick the first country listed in the amount object. It's unclear whether there could be a different number of these depending on
+   * which region the CF is being served from (IBM seem to charge different amounts per country)
+   */
+  private getCountryCode = (cost: IServicePlanCost): string => {
+    return Object.keys(cost.amount)[0];
+  }
+
+  /*
+   * Find the charge for the chosen country
+   */
+  getCostValue = (cost: IServicePlanCost) => cost.amount[this.getCountryCode(cost)];
+
+  /*
+   * Determine the currency for the chosen country
+   */
+  getCostCurrency = (cost: IServicePlanCost) => this.getCountryCode(cost).toUpperCase();
+
+  /*
+   * Artificially supply a locale for the chosen country.
+   *
+   * This will be updated once with do i18n
+   */
+  getCurrencyLocale = (cost: IServicePlanCost) => this.getCostCurrency(cost) === 'EUR' ? 'fr' : 'en-US';
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(
