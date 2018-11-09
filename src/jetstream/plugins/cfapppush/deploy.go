@@ -94,29 +94,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	// We use a simple protocol to get the source to use for cf push and any cf push cli overrides
 
-	// Send a message to the client to say that we are awaiting application overrides
-	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
-
-	// Wait for a message from the client
-	log.Debug("Waiting for app overrides from client")
-
-	msgOverrides := SocketMessage{}
-	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
-		log.Errorf("Error reading JSON: %v+", err)
-		return err
-	}
-
-	if msgOverrides.Type != OVERRIDES_SUPPLIED {
-		log.Errorf("Expected app deploy override but received event with type: %v", msgOverrides.Type)
-		return errors.New("Expected app deploy override message but received another type")
-	}
-
-	log.Debugf("Overrides: %v+", msgOverrides)
-	overrides := pushapp.CFPushAppOverrides{}
-	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
-		log.Errorf("Error marshalling json: %v+", err)
-		return err
-	}
+	// Ask for source first, then overrides - to support the case that local file/folder source is uploaded first before overrides are avialable
 
 	// Send a message to the client to say that we are awaiting source details
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
@@ -153,6 +131,30 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	if err != nil {
 		log.Errorf("Failed to fetch source: %v+", err)
+		return err
+	}
+
+	// Send a message to the client to say that we are awaiting application overrides
+	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
+
+	// Wait for a message from the client
+	log.Debug("Waiting for app overrides from client")
+
+	msgOverrides := SocketMessage{}
+	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
+		log.Errorf("Error reading JSON: %v+", err)
+		return err
+	}
+
+	if msgOverrides.Type != OVERRIDES_SUPPLIED {
+		log.Errorf("Expected app deploy override but received event with type: %v", msgOverrides.Type)
+		return errors.New("Expected app deploy override message but received another type")
+	}
+
+	log.Debugf("Overrides: %v+", msgOverrides)
+	overrides := pushapp.CFPushAppOverrides{}
+	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
+		log.Errorf("Error marshalling json: %v+", err)
 		return err
 	}
 

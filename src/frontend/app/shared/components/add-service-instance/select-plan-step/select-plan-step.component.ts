@@ -1,4 +1,5 @@
-import { TitleCasePipe, getCurrencySymbol, registerLocaleData } from '@angular/common';
+import { registerLocaleData, TitleCasePipe } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,7 +8,6 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import localeFr from '@angular/common/locales/fr';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -31,9 +31,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { IServicePlan, IServicePlanExtra, IServicePlanCost } from '../../../../core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
+import { IServicePlan, IServicePlanCost, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
 import { ServicePlanAccessibility } from '../../../../features/service-catalog/services.service';
 import {
   SetCreateServiceInstanceCFDetails,
@@ -46,9 +44,9 @@ import { CardStatus } from '../../application-state/application-state.service';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
-import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
+import { safeUnsubscribe } from '../../../../core/utils.service';
 
 
 interface ServicePlan {

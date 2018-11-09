@@ -41,8 +41,6 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   return svcAvailability;
 };
 
-export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };
-
 export const getServiceJsonParams = (params: any): {} => {
   let prms = params;
   try {
@@ -90,23 +88,23 @@ export const getServicePlans = (
   cfGuid: string,
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
-): Observable<APIResource<IServicePlan>[]>  => {
+): Observable<APIResource<IServicePlan>[]> => {
   return service$.pipe(
     filter(p => !!p),
     switchMap(service => {
-    if (service.entity.service_plans && service.entity.service_plans.length > 0) {
-      return observableOf(service.entity.service_plans);
-    } else {
-      const guid = service.metadata.guid;
-      const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
-      const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
-      // Could be a space-scoped service, make a request to fetch the plan
-      return getPaginationObservables<APIResource<IServicePlan>>({
-        store: store,
-        action: getServicePlansAction,
-        paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
-      }, true)
-        .entities$.pipe(share(), first());
-    }
-  }));
+      if (service.entity.service_plans && service.entity.service_plans.length > 0) {
+        return observableOf(service.entity.service_plans);
+      } else {
+        const guid = service.metadata.guid;
+        const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
+        const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
+        // Could be a space-scoped service, make a request to fetch the plan
+        return getPaginationObservables<APIResource<IServicePlan>>({
+          store: store,
+          action: getServicePlansAction,
+          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
+        }, true)
+          .entities$.pipe(share(), first());
+      }
+    }));
 };
