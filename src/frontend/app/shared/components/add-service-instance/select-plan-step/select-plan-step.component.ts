@@ -80,10 +80,8 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
-    private csiGuidsService: CsiGuidsService,
     private componentFactoryResolver: ComponentFactoryResolver,
     private modeService: CsiModeService
 
