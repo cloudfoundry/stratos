@@ -1,3 +1,4 @@
+import { normalize } from 'normalizr';
 import { browser, element, by } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
@@ -7,6 +8,7 @@ import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
 import { CFPage } from '../po/cf-page.po';
+import * as path from 'path';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -16,7 +18,9 @@ const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
-describe('Application Deploy - ', function () {
+let applicationZipFile;
+
+fdescribe('Application Deploy - ', function () {
   const testAppName = ApplicationE2eHelper.createApplicationName();
   const appDetails = {
     cfGuid: '',
@@ -24,6 +28,7 @@ describe('Application Deploy - ', function () {
   };
 
   beforeAll(() => {
+    applicationZipFile = path.normalize(path.join(__dirname, '../resources/go-env.zip'));
     nav = new SideNavigation();
     appWall = new ApplicationsPage();
     const setup = e2e.setup(ConsoleUserType.user)
@@ -84,10 +89,10 @@ describe('Application Deploy - ', function () {
 
       // Select 'Local Archive file'
       deployApp.stepper.getStepperForm().fill({ 'sourcetype': 'Application Archive File' });
-      e2e.sleep(500);
+      e2e.sleep(1000);
 
       const fileInputElement = element(by.id('localPathSelectFile'));
-      fileInputElement.sendKeys('/Users/nwm/dev/cfapps/go-env.zip');
+      fileInputElement.sendKeys(applicationZipFile);
 
       // Source upload
       deployApp.stepper.waitUntilCanNext('Next');
