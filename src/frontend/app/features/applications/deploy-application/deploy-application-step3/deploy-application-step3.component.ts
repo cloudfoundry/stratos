@@ -47,14 +47,22 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    snackBar: MatSnackBar,
+    private snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
+    this.valid$ = observableOf(false);
+    this.closeable$ = observableOf(false);
+  }
+
+  private initDeployer() {
+    this.deploySub = this.deployer.status$.pipe(
+      filter(status => status.deploying),
+    ).subscribe();
+
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
-    ).subscribe(status => snackBar.open(status.errorMsg, 'Dismiss'));
+    ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
 
     const appGuid$ = this.deployer.applicationGuid$.pipe(
       filter((appGuid) => appGuid !== null),
@@ -78,13 +86,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
           return validated || status.error;
         })
       );
-    this.initDeployer();
-  }
-
-  private initDeployer() {
-    this.deploySub = this.deployer.status$.pipe(
-      filter(status => status.deploying),
-    ).subscribe();
   }
 
   private destroyDeployer() {
@@ -102,11 +103,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
-      // Kill off the deployer we created in out constructor and use the one supplied to us
-      this.destroyDeployer();
       this.deployer = fsDeployer;
-      this.initDeployer();
+    } else {
+      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService);
     }
+
+    this.initDeployer();
 
     // Start deploying
     this.deployer.open();
