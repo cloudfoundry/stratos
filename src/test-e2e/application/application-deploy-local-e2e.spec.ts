@@ -20,7 +20,7 @@ const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
 let applicationZipFile;
 
-fdescribe('Application Deploy - ', function () {
+describe('Application Deploy - ', function () {
   const testAppName = ApplicationE2eHelper.createApplicationName();
   const appDetails = {
     cfGuid: '',
