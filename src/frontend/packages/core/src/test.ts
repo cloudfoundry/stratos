@@ -11,19 +11,35 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
+import { APP_BASE_HREF } from '@angular/common';
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
 declare const __karma__: any;
 declare const require: any;
 
 // Prevent Karma from running prematurely.
-__karma__.loaded = function () {};
+__karma__.loaded = function () { };
 
 // First, initialize the Angular testing environment.
-getTestBed().initTestEnvironment(
+const testBed = getTestBed();
+testBed.initTestEnvironment(
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting()
 );
+
+beforeEach(() => {
+  testBed.configureTestingModule({
+    providers: [{ provide: APP_BASE_HREF, useValue: '/' }]
+  });
+});
+
+/**
+ * Bump up the Jasmine timeout from 5 seconds
+ */
+beforeAll(() => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+});
+
 // Then we find all the tests.
 const context = require.context('./', true, /\.spec\.ts$/);
 // And load the modules.

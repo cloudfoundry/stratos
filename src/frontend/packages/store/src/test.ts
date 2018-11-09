@@ -8,14 +8,31 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
+import { APP_BASE_HREF } from '@angular/common';
 
 declare const require: any;
 
 // First, initialize the Angular testing environment.
-getTestBed().initTestEnvironment(
+const testBed = getTestBed();
+testBed.initTestEnvironment(
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting()
 );
+
+beforeEach(() => {
+  testBed.configureTestingModule({
+    providers: [{ provide: APP_BASE_HREF, useValue: '/' }]
+  });
+});
+
+/**
+ * Bump up the Jasmine timeout from 5 seconds
+ */
+beforeAll(() => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+});
+
+
 // Then we find all the tests.
 const context = require.context('./', true, /\.spec\.ts$/);
 // And load the modules.
