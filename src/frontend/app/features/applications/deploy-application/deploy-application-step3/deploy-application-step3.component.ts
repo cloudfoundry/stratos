@@ -10,6 +10,7 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
+import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
   CfAppsDataSource,
   createGetAllAppAction,
@@ -89,15 +90,15 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   private destroyDeployer() {
-    this.deploySub.unsubscribe();
-    this.errorSub.unsubscribe();
-    this.validSub.unsubscribe();
+    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub);
   }
 
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
     this.destroyDeployer();
-    this.deployer.close();
+    if (this.deployer) {
+      this.deployer.close();
+    }
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
