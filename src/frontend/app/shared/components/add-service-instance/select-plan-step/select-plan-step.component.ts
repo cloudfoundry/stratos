@@ -211,8 +211,14 @@ export class SelectPlanStepComponent implements OnDestroy {
   isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
 
   /*
+   * Show service plan costs if the object is in the open service broker format, otherwise ignore them
+   */
+  canShowCosts = (servicePlanExtra: IServicePlanExtra): boolean =>
+    !!servicePlanExtra.costs && !!servicePlanExtra.costs[0] && !!servicePlanExtra.costs[0].amount
+
+  /*
    * Pick the first country listed in the amount object. It's unclear whether there could be a different number of these depending on
-   * which region the CF is being served in (IBM seem to charge different amounts per country)
+   * which region the CF is being served from (IBM seem to charge different amounts per country)
    */
   private getCountryCode = (cost: IServicePlanCost): string => {
     return Object.keys(cost.amount)[0];
@@ -226,17 +232,14 @@ export class SelectPlanStepComponent implements OnDestroy {
   /*
    * Determine the currency for the chosen country
    */
-  getCostCurrency = (cost: IServicePlanCost) => {
-    return this.getCountryCode(cost).toUpperCase();
-  }
+  getCostCurrency = (cost: IServicePlanCost) => this.getCountryCode(cost).toUpperCase();
 
   /*
    * Artificially supply a locale for the chosen country.
+   *
+   * This will be updated once with do i18n
    */
-  getCurrencyLocale(cost: IServicePlanCost) {
-    // This will be updated once with do i18n
-    return this.getCostCurrency(cost) === 'EUR' ? 'fr' : 'en-US';
-  }
+  getCurrencyLocale = (cost: IServicePlanCost) => this.getCostCurrency(cost) === 'EUR' ? 'fr' : 'en-US';
 
   private createNoPlansComponent() {
     const component = this.componentFactoryResolver.resolveComponentFactory(
