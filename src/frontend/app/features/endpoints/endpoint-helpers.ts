@@ -2,6 +2,8 @@ import { Validators } from '@angular/forms';
 
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -9,6 +11,15 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
+}
+
+/**
+ * Optional interface that an Endpoint Auth Form Component can implement
+ * if it needs to supply content in the request body when connecting an endppoint
+ * e.g. if it needs to send a config file
+ **/
+export interface EndpointAuthComponent {
+  getBody(): string;  // Get the body contents to send
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
@@ -27,6 +38,16 @@ export interface EndpointIcon {
   font: string;
 }
 
+export interface EndpointAuthType {
+  name: string;
+  value: string;
+  formType?: string;
+  types: Array<EndpointType>;
+  form?: any;
+  data?: any;
+  component: any;
+}
+
 const endpointTypes: EndpointTypeConfig[] = [
   {
     value: 'cf',
@@ -42,7 +63,7 @@ const endpointTypes: EndpointTypeConfig[] = [
   },
 ];
 
-const endpointAuthTypes = [
+let endpointAuthTypes: EndpointAuthType[] = [
   {
     name: 'Username and Password',
     value: 'creds',
@@ -50,13 +71,15 @@ const endpointAuthTypes = [
       username: ['', Validators.required],
       password: ['', Validators.required],
     },
-    types: new Array<EndpointType>('cf', 'metrics')
+    types: new Array<EndpointType>('cf', 'metrics'),
+    component: CredentialsAuthFormComponent
   },
   {
     name: 'Single Sign-On (SSO)',
     value: 'sso',
     form: {},
-    types: new Array<EndpointType>('cf')
+    types: new Array<EndpointType>('cf'),
+    component: SSOAuthFormComponent
   },
 ];
 
@@ -80,6 +103,11 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
   endpointTypes.forEach(ept => {
     endpointTypesMap[ept.value] = ept;
   });
+}
+
+export function addEndpointAuthTypes(extensions: EndpointAuthType[]) {
+  endpointAuthTypes.forEach(t => t.formType = t.value);
+  endpointAuthTypes = endpointAuthTypes.concat(extensions);
 }
 
 // Get the name to display for a given Endpoint type

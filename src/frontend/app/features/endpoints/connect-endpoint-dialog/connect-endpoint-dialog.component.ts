@@ -1,4 +1,5 @@
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { EndpointAuthComponent } from './../endpoint-helpers';
+import { Component, Inject, OnInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -16,13 +17,15 @@ import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../stor
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
 
-
 @Component({
   selector: 'app-connect-endpoint-dialog',
   templateUrl: './connect-endpoint-dialog.component.html',
   styleUrls: ['./connect-endpoint-dialog.component.scss']
 })
-export class ConnectEndpointDialogComponent implements OnDestroy {
+export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
+
+  @ViewChild('authForm', { read: ViewContainerRef }) container;
+
   connecting$: Observable<boolean>;
   connectingError$: Observable<boolean>;
   fetchingInfo$: Observable<boolean>;
@@ -42,10 +45,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private hasAttemptedConnect: boolean;
   public authTypesForEndpoint = [];
-  public upload = true;
-  private kubeconfig = '';
-  private cert = '';
-  private certKey = '';
   public canShareEndpointToken = false;
   private cachedAuthTypeFormFields: string[] = [];
 
@@ -53,6 +52,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   // If we don't do this and if we're quick enough, we can navigate to the application page
   // and end up with an empty list where we should have results.
   public connectDelay = 1000;
+
+  // Component reference for the dynamically created auth form
+  private authFormComponentRef;
+
+  // The auth type that was initlaly auto-selected
+  private autoSelected;
 
   constructor(
     public store: Store<AppState>,
@@ -64,7 +69,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       guid: string,
       type: EndpointType,
       ssoAllowed: boolean,
-    }
+    },
+    private resolver: ComponentFactoryResolver
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
     getEndpointAuthTypes().forEach(authType => {
@@ -80,23 +86,28 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
 
     // Create the endpoint form
-    let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
-    this.cachedAuthTypeFormFields = Object.keys(autoSelected.form || {});
+    this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    this.cachedAuthTypeFormFields = Object.keys(this.autoSelected.form || {});
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
     if (ssoIndex >= 0) {
-      autoSelected = this.authTypesForEndpoint[ssoIndex];
+      this.autoSelected = this.authTypesForEndpoint[ssoIndex];
     }
 
     this.endpointForm = this.fb.group({
-      authType: [autoSelected.value || '', Validators.required],
-      authValues: this.fb.group(autoSelected.form || {}),
+      authType: [this.autoSelected.value || '', Validators.required],
+      authValues: this.fb.group(this.autoSelected.form || {}),
       systemShared: false
     });
 
     this.setupObservables();
     this.setupSubscriptions();
+  }
+
+  ngOnInit() {
+    // Template container reference is not available at construction, so do this on init
+    this.createComponent(this.autoSelected.component);
   }
 
   authChanged() {
@@ -107,8 +118,22 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.cachedAuthTypeFormFields = authTypeFormFields;
       this.endpointForm.removeControl('authValues');
       this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+
+      // Update the auth form component
+      this.createComponent(authType.component);
     }
     this.bodyContent = '';
+  }
+
+  // Dynamically create the component for the selected auth type
+  createComponent(component: any) {
+    this.container.clear();
+    if (this.authFormComponentRef) {
+      this.authFormComponentRef.destroy();
+    }
+    const factory = this.resolver.resolveComponentFactory(component);
+    this.authFormComponentRef = this.container.createComponent(factory);
+    this.authFormComponentRef.instance.formGroup = this.endpointForm;
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
@@ -132,25 +157,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
         this.dialogRef.close();
       });
-  }
-
-  dealWithFile($event, fileName: string) {
-    const file = $event;
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.updateFileState(fileName, reader.result);
-    };
-    reader.onerror = () => {
-      // Clear the form and thus make it invalid on error
-      this.updateFileState(fileName, null);
-    };
-    reader.readAsText(file);
-  }
-
-  private updateFileState(fileName: string, value: string | ArrayBuffer) {
-    this[fileName] = value;
-    const authValues: FormGroup = this.endpointForm.controls.authValues as FormGroup;
-    authValues.controls[fileName].setValue(value);
   }
 
   setupObservables() {
@@ -229,24 +235,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
-  toggleAccept() {
-    this.upload = !this.upload;
-  }
-
   submit() {
     this.hasAttemptedConnect = true;
     const { authType, authValues, systemShared } = this.endpointForm.value;
     const authVal = authValues;
-    if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
-      this.bodyContent = this.kubeconfig;
-    }
-    if (this.endpointForm.value.authType === 'kube-cert-auth') {
-      /** Body content is in the following encoding:
-       * base64encoded:base64encoded
-       */
-      const certBase64 = btoa(this.cert);
-      const certKeyBase64 = btoa(this.certKey);
-      this.bodyContent = `${certBase64}:${certKeyBase64}`;
+
+    // Allow the auth form to supply body content if it needs to
+    const authFormInstance = this.authFormComponentRef.instance;
+    if (<EndpointAuthComponent>authFormInstance.getBody) {
+      this.bodyContent = authFormInstance.getBody();
     }
 
     this.store.dispatch(new ConnectEndpoint(
@@ -262,5 +259,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   ngOnDestroy() {
     this.fetchSub.unsubscribe();
     this.connectingSub.unsubscribe();
+    this.authFormComponentRef.destroy();
   }
 }
