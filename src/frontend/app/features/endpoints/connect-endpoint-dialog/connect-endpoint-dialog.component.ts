@@ -127,6 +127,10 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
 
   // Dynamically create the component for the selected auth type
   createComponent(component: any) {
+    if (!component) {
+      return;
+    }
+
     this.container.clear();
     if (this.authFormComponentRef) {
       this.authFormComponentRef.destroy();
