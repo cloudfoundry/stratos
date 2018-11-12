@@ -23,7 +23,8 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode, an
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesNodesSchemaKey, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { HelmReleasePodsListConfigService } from '../../list-types/helm-release-pods/helm-release-pods-list-config.service';
-import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 @Component({
   selector: 'app-helm-release-pods-tab',
@@ -13,6 +12,4 @@ import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.se
     useClass: HelmReleasePodsListConfigService,
   }]
 })
-export class HelmReleasePodsTabComponent {
-  constructor(public kubeEndpointService: KubernetesEndpointService) { }
-}
+export class HelmReleasePodsTabComponent { }
