@@ -25,7 +25,7 @@ export class HelmReleaseServicesListConfig implements IListConfig<KubeService> {
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'metadata.name'
       },
       cellFlex: '5',
     },

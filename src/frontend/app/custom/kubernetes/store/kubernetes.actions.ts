@@ -1,4 +1,6 @@
-import { MetricsAction, MetricQueryConfig, MetricsChartAction } from '../../../store/actions/metrics.actions';
+import { SortDirection } from '@angular/material';
+
+import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../store/actions/metrics.actions';
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import {
   entityFactory,
@@ -8,11 +10,10 @@ import {
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey
+  kubernetesStatefulSetsSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { PaginatedAction, PaginationParam } from '../../../store/types/pagination.types';
 import { IRequestAction } from '../../../store/types/request.types';
-import { encodeUriQuery } from '@angular/router/src/url_tree';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -66,6 +67,10 @@ export const GET_KUBE_DEPLOYMENT = '[KUBERNETES Endpoint] Get K8S Deployments In
 export const GET_KUBE_DEPLOYMENT_SUCCESS = '[KUBERNETES Endpoint] Get Deployments Success';
 export const GET_KUBE_DEPLOYMENT_FAILURE = '[KUBERNETES Endpoint] Get Deployments Failure';
 
+const sortPodsByName = {
+  'order-direction': 'desc' as SortDirection,
+  'order-direction-field': 'name'
+};
 
 export interface KubeAction extends IRequestAction {
   kubeGuid: string;
@@ -77,7 +82,8 @@ export class GetKubernetesReleasePods implements KubePaginationAction {
   constructor(public kubeGuid: string, releaseName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, releaseName, kubeGuid);
     this.initialParams = {
-      labelSelector: `app.kubernetes.io/instance=${releaseName}`
+      labelSelector: `app.kubernetes.io/instance=${releaseName}`,
+      ...sortPodsByName
     };
   }
   initialParams: PaginationParam;
@@ -106,7 +112,12 @@ export class GetKubernetesNodes implements KubePaginationAction {
     GET_NODES_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams = {
+    'order-direction': 'desc' as SortDirection,
+    'order-direction-field': 'name'
+  };
 }
+
 export class GetKubernetesNode implements KubeAction {
   constructor(public nodeName: string, public kubeGuid: string) {
   }
@@ -120,6 +131,7 @@ export class GetKubernetesNode implements KubeAction {
     GET_NODE_INFO_FAILURE
   ];
 }
+
 export class GetKubernetesNamespace implements KubeAction {
   constructor(public namespaceName: string, public kubeGuid: string) {
   }
@@ -147,13 +159,17 @@ export class GetKubernetesPods implements KubePaginationAction {
     GET_POD_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams = {
+    ...sortPodsByName
+  };
 }
 
 export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
   constructor(public kubeGuid: string, public nodeName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, nodeName, kubeGuid);
     this.initialParams = {
-      fieldSelector: `spec.nodeName=${nodeName}`
+      fieldSelector: `spec.nodeName=${nodeName}`,
+      ...sortPodsByName
     };
   }
   type = GET_PODS_ON_NODE_INFO;
@@ -181,7 +197,11 @@ export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction
     GET_PODS_IN_NAMEPSACE_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams = {
+    ...sortPodsByName
+  };
 }
+
 export class GetKubernetesNamespaces implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid);
@@ -195,7 +215,12 @@ export class GetKubernetesNamespaces implements KubePaginationAction {
     GET_NAMESPACES_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams = {
+    'order-direction': 'desc' as SortDirection,
+    'order-direction-field': 'name'
+  };
 }
+
 export class GetKubernetesApps implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesAppsSchemaKey, kubeGuid);
@@ -209,7 +234,12 @@ export class GetKubernetesApps implements KubePaginationAction {
     GET_KUBERNETES_APP_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams = {
+    'order-direction': 'desc' as SortDirection,
+    'order-direction-field': 'name'
+  };
 }
+
 export class GetKubernetesServices implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesServicesSchemaKey, kubeGuid);
@@ -223,7 +253,12 @@ export class GetKubernetesServices implements KubePaginationAction {
     GET_SERVICE_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams = {
+    'order-direction': 'desc' as SortDirection,
+    'order-direction-field': 'name'
+  };
 }
+
 export class GetKubernetesPod implements KubeAction {
   constructor(public podName, public namespaceName, public kubeGuid) {
   }
@@ -236,6 +271,7 @@ export class GetKubernetesPod implements KubeAction {
     GET_KUBE_POD_FAILURE
   ];
 }
+
 export class GetKubernetesStatefulSets implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesStatefulSetsSchemaKey, kubeGuid);
@@ -249,8 +285,8 @@ export class GetKubernetesStatefulSets implements KubePaginationAction {
     GET_KUBE_STATEFULSETS_FAILURE
   ];
   paginationKey: string;
-
 }
+
 export class GeKubernetesDeployments implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesDeploymentsSchemaKey, kubeGuid);
@@ -264,8 +300,8 @@ export class GeKubernetesDeployments implements KubePaginationAction {
     GET_KUBE_DEPLOYMENT_FAILURE
   ];
   paginationKey: string;
-
 }
+
 function getKubeMetricsAction(guid: string) {
   return `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
 }
