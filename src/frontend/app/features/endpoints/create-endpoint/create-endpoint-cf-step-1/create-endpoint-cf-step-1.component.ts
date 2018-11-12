@@ -14,7 +14,7 @@ import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/enti
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl, EndpointTypeHelper } from '../../endpoint-helpers';
+import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl, EndpointTypeConfig } from '../../endpoint-helpers';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
@@ -50,6 +50,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   showAdvancedFields = false;
   clientRedirectURI: string;
+
+  endpointTypeSupportsSSO = false;
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
@@ -127,8 +129,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     this.setAdvancedFields(endpoint);
   }
 
-  // Only show the Client ID and Client Secret fields if the endpoint type if Cloud Foundry
-  setAdvancedFields(endpoint: EndpointTypeHelper) {
+  // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
+  setAdvancedFields(endpoint: EndpointTypeConfig) {
     this.showAdvancedFields = endpoint.value === 'cf';
+
+    // Only allow SSL if the endpoint type isCloud Foundry
+    this.endpointTypeSupportsSSO = endpoint.value === 'cf';
   }
 }

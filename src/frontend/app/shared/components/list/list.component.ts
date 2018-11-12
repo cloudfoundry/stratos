@@ -9,6 +9,10 @@ import {
   OnInit,
   TemplateRef,
   ViewChild,
+  Optional,
+  OnChanges,
+  SimpleChanges,
+  Injector,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
@@ -81,7 +85,7 @@ import {
     ])
   ]
 })
-export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
+export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
   @Input() addForm: NgForm;
@@ -91,6 +95,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
 
   @Input() noEntriesMaxedResults: TemplateRef<any>;
+
+  // List config when supplied as an attribute rather than a dependency
+  @Input() listConfig: ListConfig<T>;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator) {
@@ -199,24 +206,45 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private store: Store<AppState>,
     private cd: ChangeDetectorRef,
-    public config: ListConfig<T>,
+    @Optional() public config: ListConfig<T>,
     private ngZone: NgZone
   ) { }
 
   ngOnInit() {
-    if (this.config.getInitialised) {
-      this.initialised$ = this.config.getInitialised().pipe(
-        filter(initialised => initialised),
-        first(),
-        tap(() => this.initialise()),
-        publishReplay(1), refCount()
-      );
-    } else {
-      this.initialise();
-      this.initialised$ = observableOf(true);
+    // null list means we have list bound but no value available yet
+    if (this.listConfig === null) {
+      // We will watch for changes to the list value
+      return;
+    } else if (this.listConfig) {
+      // A value for the list is already available
+      this.config = this.listConfig;
+    }
+
+    // Otherwise, do we have a value from the config?
+    if (this.config) {
+      if (this.config.getInitialised) {
+        this.initialised$ = this.config.getInitialised().pipe(
+          filter(initialised => initialised),
+          first(),
+          tap(() => this.initialise()),
+          publishReplay(1), refCount()
+        );
+      } else {
+        this.initialise();
+        this.initialised$ = observableOf(true);
+      }
     }
   }
 
+  // If the list changes, update to use the new value
+  ngOnChanges(changes: SimpleChanges) {
+    const listChanges = changes.list;
+    if (!!listChanges && listChanges.currentValue) {
+      this.ngOnDestroy();
+      // ngOnInit will pick up the new value and use it
+      this.ngOnInit();
+    }
+  }
 
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(

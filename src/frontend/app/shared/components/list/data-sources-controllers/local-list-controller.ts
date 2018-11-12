@@ -1,15 +1,19 @@
 import { combineLatest, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, tap, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, map, publishReplay, refCount, tap, withLatestFrom } from 'rxjs/operators';
 
-import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { splitCurrentPage } from './local-list-controller.helpers';
 
+
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
-  constructor(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>,
-    private setResultCount: (pagination: PaginationEntityState, entities: (T | T[])[]) => void, dataFunctions?) {
+  constructor(
+    page$: Observable<T[]>,
+    pagination$: Observable<PaginationEntityState>,
+    private setResultCount: (pagination: PaginationEntityState, entities: (T | T[])[]) => void,
+    dataFunctions?
+  ) {
     const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
     const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
     const currentPageSizeObservable$ = this.buildCurrentPageSizeObservable(pagination$);
@@ -23,27 +27,7 @@ export class LocalListController<T = any> {
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
     );
 
-    const cleanPage$ = this.buildCleanPageObservable(page$, pagination$);
-
     return this.buildFullCleanPageObservable(page$, cleanPagination$, dataFunctions);
-  }
-
-  private buildCleanPageObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>) {
-    return combineLatest(
-      page$.pipe(
-        distinctUntilChanged((oldPage, newPage) => oldPage.length === newPage.length),
-      ),
-      pagination$.pipe(
-        filter(pagination => {
-          return !getCurrentPageRequestInfo(pagination).busy;
-        }),
-        distinctUntilChanged((oldPag, newPag) => {
-          return getCurrentPageRequestInfo(oldPag).busy === getCurrentPageRequestInfo(newPag).busy;
-        }),
-      )
-    ).pipe(
-      map(([page]) => page)
-    );
   }
 
   private buildFullCleanPageObservable(cleanPage$: Observable<T[]>, cleanPagination$: Observable<PaginationEntityState>, dataFunctions?) {
