@@ -1,5 +1,5 @@
-import { EndpointAuthComponent } from './../endpoint-helpers';
-import { Component, Inject, OnInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
+import { IEndpointAuthComponent, EndpointAuthType } from './../endpoint-helpers';
+import { Component, Inject, OnInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -16,6 +16,7 @@ import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
+import { IAuthForm } from '../../../core/extension/extension-types';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -24,7 +25,7 @@ import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoi
 })
 export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
 
-  @ViewChild('authForm', { read: ViewContainerRef }) container;
+  @ViewChild('authForm', { read: ViewContainerRef }) container: ViewContainerRef;
 
   connecting$: Observable<boolean>;
   connectingError$: Observable<boolean>;
@@ -54,10 +55,11 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   public connectDelay = 1000;
 
   // Component reference for the dynamically created auth form
-  private authFormComponentRef;
+  // private authFormComponentRef;
 
-  // The auth type that was initlaly auto-selected
-  private autoSelected;
+  // The auth type that was initially auto-selected
+  private autoSelected: EndpointAuthType;
+  public authFormComponentRef: ComponentRef<IAuthForm>;
 
   constructor(
     public store: Store<AppState>,
@@ -135,8 +137,8 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
     if (this.authFormComponentRef) {
       this.authFormComponentRef.destroy();
     }
-    const factory = this.resolver.resolveComponentFactory(component);
-    this.authFormComponentRef = this.container.createComponent(factory);
+    const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
+    this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
   }
 
@@ -245,9 +247,9 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
     const authVal = authValues;
 
     // Allow the auth form to supply body content if it needs to
-    const authFormInstance = this.authFormComponentRef.instance;
-    if (<EndpointAuthComponent>authFormInstance.getBody) {
-      this.bodyContent = authFormInstance.getBody();
+    const endpointFormInstance = this.authFormComponentRef.instance as IEndpointAuthComponent;
+    if (endpointFormInstance.getBody) {
+      this.bodyContent = endpointFormInstance.getBody();
     }
 
     this.store.dispatch(new ConnectEndpoint(

@@ -4,6 +4,7 @@ import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { IAuthForm } from '../../core/extension/extension-types';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -18,7 +19,7 @@ export function getEndpointUsername(endpoint: EndpointModel) {
  * if it needs to supply content in the request body when connecting an endppoint
  * e.g. if it needs to send a config file
  **/
-export interface EndpointAuthComponent {
+export interface IEndpointAuthComponent extends IAuthForm {
   getBody(): string;  // Get the body contents to send
 }
 
