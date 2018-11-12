@@ -5,6 +5,7 @@ import { EndpointModel, EndpointType } from './../../store/types/endpoint.types'
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 import { IAuthForm } from '../../core/extension/extension-types';
+import { Type } from '@angular/core';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -46,7 +47,7 @@ export interface EndpointAuthType {
   types: Array<EndpointType>;
   form?: any;
   data?: any;
-  component: any;
+  component: Type<IAuthForm>;
 }
 
 const endpointTypes: EndpointTypeConfig[] = [

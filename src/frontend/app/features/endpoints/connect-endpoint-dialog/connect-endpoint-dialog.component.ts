@@ -1,5 +1,5 @@
 import { IEndpointAuthComponent, EndpointAuthType } from './../endpoint-helpers';
-import { Component, Inject, OnInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef, Type } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -126,9 +126,8 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
     }
     this.bodyContent = '';
   }
-
   // Dynamically create the component for the selected auth type
-  createComponent(component: any) {
+  createComponent(component: Type<IAuthForm>) {
     if (!component) {
       return;
     }
