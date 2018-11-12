@@ -203,16 +203,6 @@ npm run build-backend
 
 The back-end executable is named `jetstream` and should be created within the `src/jetstream` folder.
 
-#### Create a dist folder
-
-In the root of `stratos` create a `dist` folder (this will be removed once [this issue](https://github.com/cloudfoundry-incubator/stratos/issues/3183) has been resolved.
-
-When jetstream starts one of the final lines should then be
-
-```
-Serving static UI resources
-```
-
 ### Configuration
 
 Configuration can either be done via
