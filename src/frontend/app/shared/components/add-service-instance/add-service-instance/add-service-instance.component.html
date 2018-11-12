@@ -6,7 +6,7 @@
     <app-step *ngIf="modeService.viewDetail.showSelectCf && !isSpaceScoped()" title="Cloud Foundry" [onEnter]="resetStoreData" [valid]="selectCF.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
       <app-create-application-step1 [stepperText]="stepperText" [isMarketplaceMode]="inMarketplaceMode" #selectCF></app-create-application-step1>
     </app-step>
-    <app-step title="Select Service" *ngIf="modeService.viewDetail.showSelectService" [valid]="selectService.validate | async" [onNext]="selectService.onNext">
+    <app-step title="Select Service" *ngIf="modeService.viewDetail.showSelectService" [valid]="selectService.validate | async" [onNext]="selectService.onNext" [blocked]="selectService.isFetching$ | async">
       <app-select-service #selectService></app-select-service>
     </app-step>
     <app-step title="Select Plan" [onNext]="selectPlan.onNext" [blocked]="initialisedService$ | async" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">

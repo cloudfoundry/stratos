@@ -75,7 +75,7 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
+    this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
           createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
@@ -143,7 +143,7 @@ export class CloudFoundryOrganizationService {
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
 
 
-    this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.store, this.cfGuid).pipe(
+    this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const action = new GetAllOrgUsers(this.orgGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
         return getPaginationObservables<APIResource<CfUser>>({

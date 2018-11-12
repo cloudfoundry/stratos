@@ -12,6 +12,7 @@ import { delay, first, map, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
+import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } from '../../../core/extension/extension-service';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -25,9 +26,11 @@ import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState> ) { }
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState>) { }
 
   sub: Subscription;
+
+  public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
   ngOnInit(): void {
     const params = queryParamMap();
@@ -40,7 +43,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
         map(ep => {
           const endpoint = ep[guid];
           if (endpoint.connectionStatus === 'connected') {
-            this.store.dispatch(new ShowSnackBar(`Connected ${endpoint.name}`));
+            this.store.dispatch(new ShowSnackBar(`Connected endpoint '${endpoint.name}'`));
           } else {
             this.store.dispatch(new ShowSnackBar(`A problem occurred connecting endpoint ${endpoint.name}`));
           }

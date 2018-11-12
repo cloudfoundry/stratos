@@ -18,7 +18,7 @@
   revision = "2aa6f33b730c79971cfc3c742f279195b0abc627"
 
 [[projects]]
-  digest = "1:a255975969865eed8ecbf27f4c54e431eb258ecef57c6dedfd935b8d85bbdd52"
+  digest = "1:6b6b9c5802d5189427d564f6b7334195cf03f3a62e0187dcf2144938959431f1"
   name = "code.cloudfoundry.org/cli"
   packages = [
     "actor/actionerror",
@@ -103,9 +103,9 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "efdd631d2f9f411e4474d4e272f93ebeee068600"
+  revision = "07673feb94139e99a874c5cfd0e1d30f044f4236"
   source = "github.com/cloudfoundry/cli"
-  version = "v6.39.1"
+  version = "v6.40.0"
 
 [[projects]]
   branch = "master"
@@ -197,7 +197,7 @@
   name = "github.com/cloudfoundry/cli-plugin-repo"
   packages = ["web"]
   pruneopts = "UT"
-  revision = "5740b9c86f3bd1c08d32902af5881f451819bc40"
+  revision = "df01f0e47f7106ac57c8ce6a7fd995219a6e86c0"
 
 [[projects]]
   branch = "master"
@@ -250,7 +250,7 @@
   name = "github.com/docker/docker"
   packages = ["pkg/term/windows"]
   pruneopts = "UT"
-  revision = "87e7930892e5d0b3b5d3c17ad1fad793ed6e1c0e"
+  revision = "5271c7cb484d44a22b96709894080ea85c8eef14"
 
 [[projects]]
   branch = "master"
@@ -269,11 +269,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fe91229bde1db1679a05aa7bda00b7b0edb50e411d834347be5be783d7d6c462"
+  digest = "1:ae7af28895023cc60b0c04e7c9e236ff04a0dfbe8bc4c4d9be8c86aad3fc4fcd"
   name = "github.com/fatih/color"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2d684516a8861da43017284349b7e303e809ac21"
+  revision = "3f9d52f7176a6927daacff70a3e8d1dc2025c53e"
 
 [[projects]]
   digest = "1:adea5a94903eb4384abef30f3d878dc9ff6b6b5b0722da25b82e5169216dfb61"
@@ -317,7 +317,7 @@
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   pruneopts = "UT"
-  revision = "0210a2f0f73c96103378b0b935f39868e5731809"
+  revision = "0766667cb4d1cfb8d5fde1fe210ae41ead3cf589"
 
 [[projects]]
   digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
@@ -336,12 +336,12 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:0aa142ca3543fa3aca344c2fa2d52e01d706a3ce4e1fa893e0ef29b5349ddf7a"
+  digest = "1:e5bf52fd66a2e984b57b4c0f2c4ee024ed749a19886246240629998dc0cf31ce"
   name = "github.com/gorilla/sessions"
   packages = ["."]
   pruneopts = "UT"
-  revision = "81547393f870a35be888759a606ba7bf71dbe5c7"
-  version = "v1.1.2"
+  revision = "f57b7e2d29c6211d16ffa52a0998272f75799030"
+  version = "v1.1.3"
 
 [[projects]]
   digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
@@ -360,13 +360,13 @@
   revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
 
 [[projects]]
-  branch = "master"
-  digest = "1:6aef7435133a86356083388b3b64cffdfb5e6ba940515da60cfadd2ebc4c05de"
+  digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c34bc0d561b850901c8b0a3be8ef3d69b666fd6b"
-  source = "github.com/XenoPhex/go-flags"
+  revision = "dac4e0ac4cd75079a03e408685a6140ef57a6aa3"
+  source = "github.com/nwmac/go-flags"
+  version = "1.1"
 
 [[projects]]
   digest = "1:1e15f4e455f94aeaedfcf9c75b3e1c449b5acba1551c58446b4b45be507c707b"
@@ -384,12 +384,12 @@
   revision = "43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f44d34fda864bed6d6c71514cd40b2ee097e6e67f745d5d014113e1faa5af8b7"
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -523,15 +523,15 @@
   version = "1.0.0"
 
 [[projects]]
-  digest = "1:4f0885b3f0dba96128a09a6f4b4231c42688fbd05f323224c6aa5adc9f4e87bf"
+  digest = "1:e39a5ee8fcbec487f8fc68863ef95f2b025e0739b0e4aa55558a2b4cf8f0ecf0"
   name = "github.com/pierrec/lz4"
   packages = [
     ".",
     "internal/xxh32",
   ]
   pruneopts = "UT"
-  revision = "bb6bfd13c6a262f1943c0446eb25b7f54c1fb9a2"
-  version = "v2.0.6"
+  revision = "635575b42742856941dbc767b44905bb9ba083f6"
+  version = "v2.0.7"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -550,12 +550,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:dc2d85c13ac22c22a1f3170a41a8e1b897fa05134aaf533f16df44f66a25b4a1"
+  digest = "1:3f53e9e4dfbb664cd62940c9c4b65a2171c66acd0b7621a1a6b8e78513525a52"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
-  version = "v1.1.0"
+  revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
@@ -635,7 +635,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0a0319f9ca4ef4105cd909596be58789777f985d3ed96bdd01893bb54f639dda"
+  digest = "1:a1a1abedfdfaeac675547fbf03a213f558c111575785d5d57616b697fdb1caf3"
   name = "golang.org/x/crypto"
   packages = [
     "curve25519",
@@ -648,7 +648,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
+  revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
 
 [[projects]]
   branch = "master"
@@ -659,18 +659,18 @@
     "websocket",
   ]
   pruneopts = "UT"
-  revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
+  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
 
 [[projects]]
   branch = "master"
-  digest = "1:6fb1dd382722f93fcf7c52ff631f7b899d8c5d54314d88d42dd1f4e5ac404a30"
+  digest = "1:f5aa274a0377f85735edc7fedfb0811d3cbc20af91633797cb359e29c3272271"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c2ed4eda69e7f62900806e4cd6e45f0429f859fa"
+  revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
 
 [[projects]]
   branch = "master"
@@ -685,7 +685,7 @@
     "unicode/cldr",
   ]
   pruneopts = "UT"
-  revision = "905a57155faa8230500121607930ebb9dd8e139c"
+  revision = "4d1c5fb19474adfe9562c9847ba425e7da817e81"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
@@ -704,12 +704,12 @@
   version = "v1.1.3"
 
 [[projects]]
-  digest = "1:d8cd4f14785b5ae65100524a29ebba8b9dfc5401020fe7504f80b438bb8e8e0d"
+  digest = "1:50ec2f81389fbc7a1e496e1d1dc07adfe080fd15e015e9ba0e08ddaf1d4635ef"
   name = "gopkg.in/cheggaaa/pb.v1"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2af8bbdea9e99e83b3ac400d8f6b6d1b8cbbf338"
-  version = "v1.0.25"
+  revision = "007b75a044e968336a69a6c0c617251ab62ac14c"
+  version = "v1.0.26"
 
 [[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
@@ -747,21 +747,6 @@
     "code.cloudfoundry.org/cli/util",
     "code.cloudfoundry.org/cli/util/randomword",
     "github.com/antonlindstrom/pgstore",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/config",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush/pushapp",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundryhosting",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/metrics",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces",
-    "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens",
     "github.com/cloudfoundry/noaa",
     "github.com/cloudfoundry/noaa/consumer",
     "github.com/cloudfoundry/noaa/errors",

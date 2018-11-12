@@ -37,7 +37,7 @@ export class LoginPage {
   }
 
   getLoginError() {
-    return element(by.css('.login-message.login-message--show.login-message-error')).getText();
+    return element(by.id('login-error-message')).getText();
   }
 
   login(username: string, password: string) {
@@ -84,7 +84,7 @@ export class LoginPage {
   }
 
   waitForLogin() {
-    return browser.wait(until.presenceOf(element(by.tagName('app-login-page'))), 10000);
+    return browser.wait(until.presenceOf(element(by.id('app-login-page'))), 10000);
   }
 
   waitForNoEndpoints() {

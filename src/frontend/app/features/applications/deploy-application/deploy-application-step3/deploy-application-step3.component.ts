@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -11,6 +10,7 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
+import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
   CfAppsDataSource,
   createGetAllAppAction,
@@ -18,14 +18,11 @@ import {
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
+import { GetApplication } from '../../../../store/actions/application.actions';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
-import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
-
-// Interval to check for new application
-const APP_CHECK_INTERVAL = 3000;
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -51,15 +48,22 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    snackBar: MatSnackBar,
+    private snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    http: HttpClient,
   ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, http);
+    this.valid$ = observableOf(false);
+    this.closeable$ = observableOf(false);
+  }
+
+  private initDeployer() {
+    this.deploySub = this.deployer.status$.pipe(
+      filter(status => status.deploying),
+    ).subscribe();
+
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
-    ).subscribe(status => snackBar.open(status.errorMsg, 'Dismiss'));
+    ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
 
     const appGuid$ = this.deployer.applicationGuid$.pipe(
       filter((appGuid) => appGuid !== null),
@@ -83,35 +87,29 @@ export class DeployApplicationStep3Component implements OnDestroy {
           return validated || status.error;
         })
       );
-    this.initDeployer();
-  }
-
-  private initDeployer() {
-    this.deploySub = this.deployer.status$.pipe(
-      filter(status => status.deploying),
-    ).subscribe();
   }
 
   private destroyDeployer() {
-    this.deploySub.unsubscribe();
-    this.errorSub.unsubscribe();
-    this.validSub.unsubscribe();
+    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub);
   }
 
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
     this.destroyDeployer();
-    this.deployer.close();
+    if (this.deployer) {
+      this.deployer.close();
+    }
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
-      // Kill off the deployer we created in out constructor and use the one supplied to us
-      this.destroyDeployer();
       this.deployer = fsDeployer;
-      this.initDeployer();
+    } else {
+      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService);
     }
+
+    this.initDeployer();
 
     // Start deploying
     this.deployer.open();
@@ -129,6 +127,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     if (this.appGuid) {
       this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+      // Ensure the application package_state is correct
+      this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
     }
     return observableOf({ success: true });
   }

@@ -224,7 +224,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
       metricSchemaKey,
       entityFactory(metricSchemaKey),
-      metricsAction.metricId,
+      metricsAction.guid,
       metricsAction,
       false
     );

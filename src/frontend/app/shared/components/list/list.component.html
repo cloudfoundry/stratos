@@ -4,7 +4,13 @@
     <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
       <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
         <div class="list-component__header__left">
+          <!-- List Title -->
           <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
+          <!-- Time range selector -->
+          <div class="list-component__header__left--metrics-range" *ngIf="config.showMetricsRange && !(isAddingOrSelecting$ | async)">
+            <app-metrics-range-selector [baseAction]="config.getDataSource().action" (metricsAction)="config.getDataSource().updateMetricsAction($event)"></app-metrics-range-selector>
+          </div>
+          <!-- Text to show when selecting rows -->
           <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">

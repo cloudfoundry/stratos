@@ -17,7 +17,7 @@ import {
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { CardAppComponent } from '../../list-types/app/card/card-app.component';
 import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
-import { CfEndpointCardComponent } from '../../list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
+import { EndpointCardComponent } from '../../list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import {
   CfSecurityGroupsCardComponent,
@@ -32,7 +32,7 @@ import { CardCell } from '../../list.types';
 
 export const listCards = [
   CardAppComponent,
-  CfEndpointCardComponent,
+  EndpointCardComponent,
   CfOrgCardComponent,
   CfSpaceCardComponent,
   CfBuildpackCardComponent,
