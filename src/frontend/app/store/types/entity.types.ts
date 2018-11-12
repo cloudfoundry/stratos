@@ -13,7 +13,7 @@ import {
   KubernetesNamespace,
   KubernetesNode,
   KubernetesPod,
-  KubernetesStatefuleSet,
+  KubernetesStatefulSet,
 } from '../../custom/kubernetes/store/kube.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import {
@@ -86,8 +86,8 @@ export interface IRequestDataState extends IRequestTypeState {
   kubernetesNamespace: IRequestEntityTypeState<KubernetesNamespace>;
   kubernetesApp: IRequestEntityTypeState<KubernetesApp>;
   kubernetesService: IRequestEntityTypeState<KubernetesService>;
-  kubernetesStatefulSet: IRequestEntityTypeState<KubernetesStatefuleSet>;
-  kubernetesDeployment: IRequestEntityTypeState<KubernetesStatefuleSet>;
+  kubernetesStatefulSet: IRequestEntityTypeState<KubernetesStatefulSet>;
+  kubernetesDeployment: IRequestEntityTypeState<KubernetesStatefulSet>;
 }
 
 export interface IRequestState extends IRequestTypeState {

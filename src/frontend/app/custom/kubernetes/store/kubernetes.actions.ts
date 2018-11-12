@@ -10,8 +10,9 @@ import {
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey
 } from '../../../store/helpers/entity-factory';
-import { PaginatedAction } from '../../../store/types/pagination.types';
+import { PaginatedAction, PaginationParam } from '../../../store/types/pagination.types';
 import { IRequestAction } from '../../../store/types/request.types';
+import { encodeUriQuery } from '@angular/router/src/url_tree';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -33,7 +34,7 @@ export const GET_PODS_ON_NODE_INFO = '[KUBERNETES Endpoint] Get Pods on Node Inf
 export const GET_PODS_ON_NODE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pods on Node Success';
 export const GET_PODS_ON_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods on Node Failure';
 
-export const GET_PODS_IN_NAMEPSACE_INFO = '[KUBERNETES Endpoint] Get Pods in Namespace Info';
+export const GET_PODS_IN_NAMESPACE_INFO = '[KUBERNETES Endpoint] Get Pods in Namespace Info';
 export const GET_PODS_IN_NAMEPSACE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pods in Namespace Success';
 export const GET_PODS_IN_NAMEPSACE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods in Namespace Failure';
 
@@ -79,7 +80,7 @@ export class GetKubernetesReleasePods implements KubePaginationAction {
       labelSelector: `app.kubernetes.io/instance=${releaseName}`
     };
   }
-  initialParams: { labelSelector: string; };
+  initialParams: PaginationParam;
   type = GET_RELEASE_POD_INFO;
   entityKey = kubernetesPodsSchemaKey;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
@@ -151,6 +152,9 @@ export class GetKubernetesPods implements KubePaginationAction {
 export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
   constructor(public kubeGuid: string, public nodeName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, nodeName, kubeGuid);
+    this.initialParams = {
+      fieldSelector: `spec.nodeName=${nodeName}`
+    };
   }
   type = GET_PODS_ON_NODE_INFO;
   entityKey = kubernetesPodsSchemaKey;
@@ -161,17 +165,18 @@ export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
     GET_PODS_ON_NODE_INFO_FAILURE
   ];
   paginationKey: string;
+  initialParams: PaginationParam;
 }
 
 export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction {
   constructor(public kubeGuid: string, public namespaceName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, namespaceName, kubeGuid);
   }
-  type = GET_PODS_IN_NAMEPSACE_INFO;
+  type = GET_PODS_IN_NAMESPACE_INFO;
   entityKey = kubernetesPodsSchemaKey;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
   actions = [
-    GET_PODS_IN_NAMEPSACE_INFO,
+    GET_PODS_IN_NAMESPACE_INFO,
     GET_PODS_IN_NAMEPSACE_INFO_SUCCESS,
     GET_PODS_IN_NAMEPSACE_INFO_FAILURE
   ];
