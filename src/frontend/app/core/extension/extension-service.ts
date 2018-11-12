@@ -148,8 +148,9 @@ export class ExtensionService {
    */
   public init() {
     this.applyRoutesFromExtensions(this.router);
-    this.applyNewEndpointTypes();
+    // Register auth types before applying endpoint types
     addEndpointAuthTypes(extensionMetadata.authTypes);
+    this.applyNewEndpointTypes();
   }
 
   /**
