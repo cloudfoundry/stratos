@@ -72,11 +72,11 @@ exports.config = {
       ...excludeTests
     ]),
     e2ePart1: globby.sync([
-      './src/test-e2e/[a-l]*/**/*-e2e.spec.ts',
+      './src/test-e2e/[a-d]*/**/*-e2e.spec.ts',
       ...excludeTests
     ]),
     e2ePart2: globby.sync([
-      './src/test-e2e/[m-z]*/**/*-e2e.spec.ts',
+      './src/test-e2e/[e-z]*/**/*-e2e.spec.ts',
       ...excludeTests
     ]),
     sso: globby.sync([
