@@ -54,6 +54,11 @@ if (process.env.STRATOS_E2E_LOG_TIME) {
   specReporterCustomProcessors.push(timeReporterPlugin);
 }
 
+const excludeTests = [
+  '!./src/test-e2e/login/*-sso-e2e.spec.ts',
+  '!' + checkSuiteGlob
+]
+
 exports.config = {
   allScriptsTimeout: timeout,
   // Exclude the dashboard tests from all suites for now
@@ -64,8 +69,15 @@ exports.config = {
   suites: {
     e2e: globby.sync([
       './src/test-e2e/**/*-e2e.spec.ts',
-      '!./src/test-e2e/login/*-sso-e2e.spec.ts',
-      '!' + checkSuiteGlob
+      ...excludeTests
+    ]),
+    e2ePart1: globby.sync([
+      './src/test-e2e/[a-l]*/**/*-e2e.spec.ts',
+      ...excludeTests
+    ]),
+    e2ePart2: globby.sync([
+      './src/test-e2e/[m-z]*/**/*-e2e.spec.ts',
+      ...excludeTests
     ]),
     sso: globby.sync([
       './src/test-e2e/**/*-e2e.spec.ts',
