@@ -2,8 +2,19 @@
 
 Weekly status updates are published here.
 
+## 9th November 2018
+
+This week the team has been:
+
+- Testing Stratos 2.2.0
+- Working towards enabling Extensions to be published separately
+- Updating developer documents: [\#3184](https://github.com/cloudfoundry-incubator/stratos/pull/3184)
+- Adding initial document for back-end plugins: [\#3189](https://github.com/cloudfoundry-incubator/stratos/pull/3189)
+- Fixed bug with deploying with folder upload: [\#3191](https://github.com/cloudfoundry-incubator/stratos/pull/3191)
+
 ## 2nd November 2018
-This week we have mostly been….
+
+This week we have mostly been:
 
 - Releasing Stratos 2.2.0. More details can be found at https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.2.0. 
 - Discussing integration of the Autoscaler (https://github.com/cloudfoundry-incubator/app-autoscaler) UI (https://github.com/cloudfoundry-incubator/app-autoscaler-ui) into Stratos. We’ve provided a first round of guidance to the Autoscaler team and are looking forward to the second round next week. The initial designs look great.
