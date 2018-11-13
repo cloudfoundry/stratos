@@ -28,9 +28,10 @@ const (
 )
 
 type MetricsProviderMetadata struct {
-	Type string `json:"type"`
-	URL  string `json:"url"`
-	Job  string `json:"job"`
+	Type        string `json:"type"`
+	URL         string `json:"url"`
+	Job         string `json:"job,omitempty"`
+	Environment string `json:"environment,omitempty"`
 }
 
 type MetricsMetadata struct {
@@ -38,11 +39,34 @@ type MetricsMetadata struct {
 	URL          string
 	Job          string
 	EndpointGUID string
+	Environment  string
 }
 
 type EndpointMetricsRelation struct {
 	metrics  *MetricsMetadata
 	endpoint *interfaces.ConnectedEndpoint
+}
+
+type PrometheusQueryResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string `json:"resultType"`
+		Result     []struct {
+			Metric struct {
+				Name           string `json:"__name__,omitempty"`
+				ApplicationID  string `json:"application_id,omitempty"`
+				BoshDeployment string `json:"bosh_deployment,omitempty"`
+				BoshJobID      string `json:"bosh_job_id,omitempty"`
+				BoshJobName    string `json:"bosh_job_name,omitempty"`
+				Environment    string `json:"environment,omitempty"`
+				Instance       string `json:"instance,omitempty"`
+				InstanceIndex  string `json:"instance_index,omitempty"`
+				Job            string `json:"job,omitempty"`
+				Origin         string `json:"origin,omitempty"`
+			} `json:"metric"`
+			Value []interface{} `json:"value"`
+		} `json:"result"`
+	} `json:"data"`
 }
 
 // Init creates a new MetricsSpecification
@@ -130,7 +154,30 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 
 	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
 	res, err := h.Do(req)
-	if err != nil || res.StatusCode != http.StatusOK {
+
+	if err == nil && res.StatusCode == http.StatusNotFound {
+
+		log.Debug("Checking if this is a prometheus endpoint")
+		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
+		statusEndpoint := fmt.Sprintf("%s/api/v1/status/config", cnsiRecord.APIEndpoint)
+		req, err = http.NewRequest("GET", statusEndpoint, nil)
+		if err != nil {
+			msg := "Failed to create request for the Metrics Endpoint: %v"
+			log.Errorf(msg, err)
+			return nil, false, fmt.Errorf(msg, err)
+		}
+		response, err := h.Do(req)
+		defer response.Body.Close()
+		if err != nil || response.StatusCode != http.StatusOK {
+			log.Errorf("Error performing http request - response: %v, error: %v", response, err)
+			return nil, false, interfaces.LogHTTPError(res, err)
+		}
+
+		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h)
+		return tr, false, nil
+	} else if err != nil || res.StatusCode != http.StatusOK {
+		log.Debugf("Status wasn't StatusNotFound %v %v", err, res.StatusCode)
+
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
 		return nil, false, interfaces.LogHTTPError(res, err)
 	}
@@ -141,6 +188,56 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	tr.Metadata = string(body)
 
 	return tr, false, nil
+}
+
+func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClient http.Client) (string, error) {
+
+	basicMetricRequest := fmt.Sprintf("%s/api/v1/query?query=firehose_total_metrics_received", metricEndpoint)
+	log.Debugf("Request is: %s", basicMetricRequest)
+	req, err := http.NewRequest("GET", basicMetricRequest, nil)
+	if err != nil {
+		msg := "Failed to create request for the Metrics Endpoint: %v"
+		log.Errorf(msg, err)
+		return "", fmt.Errorf(msg, err)
+	}
+	res, err := httpClient.Do(req)
+	defer res.Body.Close()
+	if err != nil || res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Errorf("Unexpected response: %v", err)
+		return "", interfaces.LogHTTPError(res, err)
+
+	}
+
+	queryResponse := &PrometheusQueryResponse{}
+	err = json.Unmarshal(body, queryResponse)
+	if err != nil {
+		log.Errorf("Failed to unmarshal response: %v", err)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+	if len(queryResponse.Data.Result) == 0 {
+		log.Errorf("No series detecthed! No Firehose exporter currently connected")
+		return "", interfaces.LogHTTPError(res, err)
+	}
+
+	if len(queryResponse.Data.Result) > 1 {
+		log.Warnf("Multiple series detected, its possible multiple cloud-foundries are being monitored. Selecting the first one")
+	}
+
+	if queryResponse.Data.Result[0].Metric.Environment == "" {
+		log.Errorf("No environmnent detected in %v", queryResponse)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+
+	environment := queryResponse.Data.Result[0].Metric.Environment
+	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"wss://%s\",\"environment:\":\"%s\"}]", environment, environment)
+	log.Debugf("Body is: %s", stratosMetadata)
+	// return "[{\"type\":\"cf\",\"url\":\"wss://doppler.local.pcfdev.io:443\",\"environment:\":\"\"}]", nil
+	return stratosMetadata, nil
 }
 
 // Init performs plugin initialization
@@ -185,6 +282,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 					info.Type = item.Type
 					info.URL = item.URL
 					info.Job = item.Job
+					info.Environment = item.Environment
 					metricsProviders = append(metricsProviders, info)
 				}
 			}
@@ -251,11 +349,13 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
 			if err == nil {
 				for _, item := range m {
+					log.Debugf("item is: %v", item)
 					info := MetricsMetadata{}
 					info.EndpointGUID = endpoint.GUID
 					info.Type = item.Type
 					info.URL = item.URL
 					info.Job = item.Job
+					info.Environment = item.Environment
 					metricsProviders = append(metricsProviders, info)
 				}
 			}
