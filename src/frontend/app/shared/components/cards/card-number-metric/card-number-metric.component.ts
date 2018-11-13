@@ -35,7 +35,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     this.format();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges() {
     this.format();
   }
 

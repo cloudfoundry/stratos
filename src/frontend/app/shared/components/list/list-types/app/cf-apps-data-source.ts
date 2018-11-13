@@ -27,7 +27,7 @@ import { valueOrCommonFalsy } from '../../data-sources-controllers/list-paginati
 import { IListConfig } from '../../list.component.types';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
-  return new GetAllApplications(paginationKey, [
+  return new GetAllApplications(paginationKey, null, [
     createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
     createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
     createEntityRelationKey(applicationSchemaKey, routeSchemaKey),

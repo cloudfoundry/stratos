@@ -47,7 +47,7 @@ const applicationEntitySchema = entityFactory(applicationSchemaKey);
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string, public includeRelations = [], public populateMissing = false) {
+  constructor(public paginationKey: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'apps';
@@ -57,7 +57,6 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entity = [applicationEntitySchema];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
-  endpointGuid: string = null;
   initialParams = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,

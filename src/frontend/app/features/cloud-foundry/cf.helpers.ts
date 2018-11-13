@@ -27,7 +27,10 @@ import { ICfRolesState } from '../../store/types/current-user-roles.types';
 import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { selectEntities } from '../../store/selectors/api.selectors';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
+import { environment } from '../../../environments/environment';
 
+const { proxyAPIVersion, cfAPIVersion } = environment;
 
 export interface IUserRole<T> {
   string: string;
@@ -264,4 +267,28 @@ export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolea
 
 export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
+}
+
+export function fetchTotalResults(
+  http: Http,
+  cfGuid: string,
+  partialUrl: string,
+  additionalParams: { [key: string]: string } = {}
+): Observable<number> {
+  const options = new RequestOptions();
+  options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${partialUrl}`;
+  options.params = new URLSearchParams('');
+  options.params.set('results-per-page', '1');
+  Object.keys(additionalParams).forEach(key => options.params.set(key, additionalParams[key]));
+  options.method = 'get';
+  options.headers = new Headers();
+  options.headers.set('x-cap-cnsi-list', cfGuid);
+  options.headers.set('x-cap-passthrough', 'true');
+  return http.request(new Request(options)).pipe(
+    map(response => {
+      try {
+        const resData = response.json();
+        return resData.total_results;
+      } catch (e) { }
+    }));
 }
