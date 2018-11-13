@@ -1,11 +1,11 @@
 import { Validators } from '@angular/forms';
 
 import { urlValidationExpression } from '../../core/utils.service';
-import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
+import { EndpointModel } from './../../store/types/endpoint.types';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import { IAuthForm } from '../../core/extension/extension-types';
-import { Type } from '@angular/core';
+import { EndpointType, EndpointAuthTypeConfig } from '../../core/extension/extension-types';
+import { ExtensionService } from '../../core/extension/extension-service';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -13,15 +13,6 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
-}
-
-/**
- * Optional interface that an Endpoint Auth Form Component can implement
- * if it needs to supply content in the request body when connecting an endppoint
- * e.g. if it needs to send a config file
- **/
-export interface IEndpointAuthComponent extends IAuthForm {
-  getBody(): string;  // Get the body contents to send
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
@@ -40,16 +31,6 @@ export interface EndpointIcon {
   font: string;
 }
 
-export interface EndpointAuthType {
-  name: string;
-  value: string;
-  formType?: string;
-  types: Array<EndpointType>;
-  form?: any;
-  data?: any;
-  component: Type<IAuthForm>;
-}
-
 const endpointTypes: EndpointTypeConfig[] = [
   {
     value: 'cf',
@@ -65,7 +46,7 @@ const endpointTypes: EndpointTypeConfig[] = [
   },
 ];
 
-let endpointAuthTypes: EndpointAuthType[] = [
+let endpointAuthTypes: EndpointAuthTypeConfig[] = [
   {
     name: 'Username and Password',
     value: 'creds',
@@ -107,7 +88,7 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
   });
 }
 
-export function addEndpointAuthTypes(extensions: EndpointAuthType[]) {
+export function addEndpointAuthTypes(extensions: EndpointAuthTypeConfig[]) {
   endpointAuthTypes.forEach(t => t.formType = t.value);
   endpointAuthTypes = endpointAuthTypes.concat(extensions);
 }
@@ -141,4 +122,11 @@ export function getIconForEndpoint(type: string): EndpointIcon {
 
 export function getEndpointAuthTypes() {
   return endpointAuthTypes;
+}
+
+export function initEndpointExtensions(extService: ExtensionService) {
+  // Register auth types before applying endpoint types
+  const endpointExtConfig = extService.getEndpointExtensionConfig();
+  addEndpointAuthTypes(endpointExtConfig.authTypes || []);
+  initEndpointTypes(endpointExtConfig.endpointTypes || []);
 }

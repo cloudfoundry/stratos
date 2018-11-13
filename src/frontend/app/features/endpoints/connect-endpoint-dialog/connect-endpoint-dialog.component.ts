@@ -1,4 +1,3 @@
-import { IEndpointAuthComponent, EndpointAuthType } from './../endpoint-helpers';
 import {
   Component,
   Inject,
@@ -24,9 +23,9 @@ import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
 import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { EndpointModel, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
-import { IAuthForm } from '../../../core/extension/extension-types';
+import { IAuthForm, EndpointAuthTypeConfig, EndpointType, IEndpointAuthComponent } from '../../../core/extension/extension-types';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -68,7 +67,7 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   // private authFormComponentRef;
 
   // The auth type that was initially auto-selected
-  private autoSelected: EndpointAuthType;
+  private autoSelected: EndpointAuthTypeConfig;
   public authFormComponentRef: ComponentRef<IAuthForm>;
 
   constructor(
@@ -253,12 +252,13 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   submit() {
     this.hasAttemptedConnect = true;
     const { authType, authValues, systemShared } = this.endpointForm.value;
-    const authVal = authValues;
+    let authVal = authValues;
 
     // Allow the auth form to supply body content if it needs to
     const endpointFormInstance = this.authFormComponentRef.instance as IEndpointAuthComponent;
-    if (endpointFormInstance.getBody) {
+    if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
       this.bodyContent = endpointFormInstance.getBody();
+      authVal = endpointFormInstance.getValues(authValues);
     }
 
     this.store.dispatch(new ConnectEndpoint(

@@ -23,6 +23,7 @@ import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
+import { initEndpointExtensions } from './features/endpoints/endpoint-helpers';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -92,5 +93,7 @@ export class CustomRouterStateSerializer
 export class AppModule {
   constructor(private ext: ExtensionService) {
     ext.init();
+    // Init Auth Types and Endpoint Types provided by extensions
+    initEndpointExtensions(ext);
   }
 }
