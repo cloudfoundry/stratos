@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
 
 chmod +x ${DIRPATH}/deploy/ci/travis/run-e2e-tests.sh

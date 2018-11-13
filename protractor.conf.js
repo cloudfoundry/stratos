@@ -60,6 +60,26 @@ const excludeTests = [
   '!' + checkSuiteGlob
 ]
 
+const fullSuite = globby.sync([
+  './src/test-e2e/**/*-e2e.spec.ts',
+])
+
+const longSuite = globby.sync([
+  './src/test-e2e/application/application-delete-e2e.spec.ts',
+  './src/test-e2e/application/application-deploy-e2e.spec.ts',
+  './src/test-e2e/application/application-deploy-local-e2e.spec.ts',
+  './src/test-e2e/marketplace/**/*-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/cf-level/cf-users-list-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/org-level/org-users-list-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
+])
+
+const fullMinusLongSuite = globby.sync([
+  ...fullSuite,
+  ...longSuite.map(file => '!' + file),
+])
+
 exports.config = {
   allScriptsTimeout: timeout,
   // Exclude the dashboard tests from all suites for now
@@ -69,19 +89,19 @@ exports.config = {
   // Suites - use globby to give us more control over included test specs
   suites: {
     e2e: globby.sync([
-      './src/test-e2e/**/*-e2e.spec.ts',
+      ...fullSuite,
       ...excludeTests
     ]),
-    e2ePart1: globby.sync([
-      './src/test-e2e/[a-d]*/**/*-e2e.spec.ts',
+    longSuite: globby.sync([
+      ...longSuite,
       ...excludeTests
     ]),
-    e2ePart2: globby.sync([
-      './src/test-e2e/[e-z]*/**/*-e2e.spec.ts',
+    fullMinusLongSuite: globby.sync([
+      ...fullMinusLongSuite,
       ...excludeTests
     ]),
     sso: globby.sync([
-      './src/test-e2e/**/*-e2e.spec.ts',
+      ...fullSuite,
       '!./src/test-e2e/login/login-e2e.spec.ts',
       '!' + checkSuiteGlob
     ]),

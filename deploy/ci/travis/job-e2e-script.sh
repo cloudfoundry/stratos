@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
 echo Starting e2e suite \'$1\'
 
