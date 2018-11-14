@@ -17,6 +17,7 @@ import { EventsTabComponent } from './application/application-tabs-base/tabs/eve
 import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
+import { AutoScalerTabComponent } from './application/application-tabs-base/tabs/auto-scaler-tab/auto-scaler-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
 import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
@@ -46,6 +47,7 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     ApplicationBaseComponent,
     EventsTabComponent,
     LogStreamTabComponent,
+    AutoScalerTabComponent,
     ServicesTabComponent,
     BuildTabComponent,
     VariablesTabComponent,
