@@ -94,7 +94,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitForCardByTitle(testOrgName).then(card => {
       card.openActionMenu().then(menu => {
         menu.clickItem('Delete');
-        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', testOrgName);
         // Wait until the card has gone
         card.waitUntilNotShown();
       });
@@ -153,7 +153,7 @@ describe('CF - Manage Organizations and Spaces', () => {
       cardView.cards.findCardByTitle(testSpaceName).then(space => {
         space.openActionMenu().then(menu => {
           menu.clickItem('Delete');
-          ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space');
+          ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
           cardView.cards.getCardCount().then(c => {
             expect(c).toBe(0);
           });
@@ -161,5 +161,43 @@ describe('CF - Manage Organizations and Spaces', () => {
       });
     });
   });
-});
 
+  xit('Should create an org and a space', () => {
+    const cardView = cloudFoundry.goToOrgView();
+
+    // Click the add button to add an organization
+    cloudFoundry.header.clickIconButton('add');
+    const modal = new StepperComponent();
+    modal.getStepperForm().fill({
+      'orgname': testOrgName
+    });
+    expect(modal.canNext()).toBeTruthy();
+    modal.next();
+
+    cardView.cards.waitUntilShown();
+
+    // Go to the org and create a space
+    cardView.cards.findCardByTitle(testOrgName).then(org => {
+      org.click();
+
+      cloudFoundry.subHeader.clickItem('Spaces');
+      cardView.cards.waitUntilShown();
+      const list = new ListComponent();
+      list.refresh();
+
+      // Add space
+      // Click the add button to add a space
+      cloudFoundry.header.clickIconButton('add');
+
+      modal.getStepperForm().fill({
+        'spacename': testSpaceName
+      });
+      expect(modal.canNext()).toBeTruthy();
+      modal.next();
+
+      cloudFoundry.subHeader.clickItem('Spaces');
+      cardView.cards.waitUntilShown();
+    });
+
+  });
+});

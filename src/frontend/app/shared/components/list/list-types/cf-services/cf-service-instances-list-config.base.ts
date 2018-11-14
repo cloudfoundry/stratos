@@ -158,7 +158,11 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.serviceActionHelperService.deleteServiceInstance(serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
+    this.serviceActionHelperService.deleteServiceInstance(
+      serviceInstance.metadata.guid,
+      serviceInstance.entity.name,
+      serviceInstance.entity.cfGuid
+    )
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {

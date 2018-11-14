@@ -21,6 +21,7 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
+import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 
 
 @NgModule({
@@ -40,7 +41,8 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
     SafeImgPipe,
     ClickStopPropagationDirective,
     DotContentComponent,
-    ButtonBlurOnClickDirective
+    ButtonBlurOnClickDirective,
+    PageNotFoundComponentComponent
   ],
   providers: [
     AuthGuardService,
@@ -64,7 +66,8 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
     SafeImgPipe,
     ClickStopPropagationDirective,
     DotContentComponent,
-    ButtonBlurOnClickDirective
+    ButtonBlurOnClickDirective,
+    PageNotFoundComponentComponent
   ],
   entryComponents: [
     LogOutDialogComponent

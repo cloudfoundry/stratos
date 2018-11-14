@@ -75,11 +75,7 @@ describe('Edit Service Instance', () => {
       .then((card: MetaCard) => card.openActionMenu())
       .then(menu => {
         menu.clickItem('Delete');
-        const deleteDialog = new ConfirmDialogComponent();
-        expect(deleteDialog.isDisplayed()).toBeTruthy();
-        expect(deleteDialog.getTitle()).toEqual('Delete Service Instance');
-        deleteDialog.confirm();
-        deleteDialog.waitUntilNotShown();
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Service Instance', editedServiceName);
       }).catch(e => fail(e));
   });
 

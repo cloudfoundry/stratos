@@ -148,7 +148,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       this.confirmDialog.open(confirmation, () => {
         this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
         this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-          this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+          this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
           this.store.dispatch(new GetSystemInfo());
         });
       });
