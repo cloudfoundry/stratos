@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -73,7 +72,6 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 			addQueries = addQueries + ","
 		}
 
-		log.Debugf("Metrics is: %v", metric.metrics)
 		if metric.metrics.Job != "" {
 			// stratos-metrics configures the firehose exporter to tag metrics with `job`
 			addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
@@ -81,8 +79,6 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 			// prometheus-boshrelease deployed firehose exporter tags metrics with `environment`
 			addQueries = addQueries + "environment=\"" + metric.metrics.Environment + "\""
 		}
-
-		log.Debugf("final addqueries: %s", addQueries)
 
 		req.URI = makePrometheusRequestURI(c, prometheusOp, addQueries)
 		requests = append(requests, req)

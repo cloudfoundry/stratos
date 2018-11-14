@@ -176,8 +176,6 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h)
 		return tr, false, nil
 	} else if err != nil || res.StatusCode != http.StatusOK {
-		log.Debugf("Status wasn't StatusNotFound %v %v", err, res.StatusCode)
-
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
 		return nil, false, interfaces.LogHTTPError(res, err)
 	}
@@ -193,7 +191,6 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClient http.Client) (string, error) {
 
 	basicMetricRequest := fmt.Sprintf("%s/api/v1/query?query=firehose_total_metrics_received", metricEndpoint)
-	log.Debugf("Request is: %s", basicMetricRequest)
 	req, err := http.NewRequest("GET", basicMetricRequest, nil)
 	if err != nil {
 		msg := "Failed to create request for the Metrics Endpoint: %v"
@@ -235,8 +232,6 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 
 	environment := queryResponse.Data.Result[0].Metric.Environment
 	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"wss://%s\",\"environment\":\"%s\"}]", environment, environment)
-	log.Debugf("Body is: %s", stratosMetadata)
-	// return "[{\"type\":\"cf\",\"url\":\"wss://doppler.local.pcfdev.io:443\",\"environment:\":\"\"}]", nil
 	return stratosMetadata, nil
 }
 
@@ -349,7 +344,6 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
 			if err == nil {
 				for _, item := range m {
-					log.Debugf("item is: %v", item)
 					info := MetricsMetadata{}
 					info.EndpointGUID = endpoint.GUID
 					info.Type = item.Type
