@@ -24,7 +24,7 @@ Two UAA clients are required to deploy the prometheus-boshrelease:
 
 3. If using BOSH Lite, navigate to you `deployments/vbox` directory.
 
-To deploy the prometheus-boshrelease with CF monitoring enabled, execute the following command:
+To deploy the prometheus-boshrelease with CF monitoring enabled, execute the following commandm, replace 
 ```
   bosh -d prometheus deploy /workspace/prometheus-boshrelease/manifests/prometheus.yml \
   --vars-store /workspace/prometheus-boshrelease/tmp/deployment-vars.yml  \
@@ -48,7 +48,6 @@ To determine the external address of Prometheus, list instances:
 ```
 $ bosh -d prometheus instances -e vbox
 
- ```
  Using environment '192.168.50.6' as client 'admin'
 
 Task 14. Done
