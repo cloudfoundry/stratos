@@ -56,7 +56,7 @@ export class ServicesWallService {
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetAllServicesForSpace(spaceGuid, cfGuid, paginationKey),
+        action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           entityFactory(serviceSchemaKey)
