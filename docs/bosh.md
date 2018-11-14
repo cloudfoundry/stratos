@@ -63,6 +63,7 @@ prometheus2/908bb835-d081-4985-8db4-c78910ea33a4   running        z1  10.244.0.3
 ```
 
 The Prometheus endpoint in this environment is `http://10.244.0.3:9090`
+It is recommended that the endpoint should be added to Stratos, after all targets have been discovered and are live. Visit the Status -> Targets in the Prometheys UI to check if at least the `firehose` target is live. Targets are added asynchronously to Prometheus in this environment.
 
 ### Delete the deployment
 
@@ -70,3 +71,11 @@ To delete the deployment:
 ```
 $ bosh -e vbox delete-deployment -d prometheus
 ```
+
+### Debugging the deployment
+
+If some instances are unavailable, logs can be downloaded:
+```
+$ bosh -e vbox -d prometheus logs
+```
+This will download a tarball of all logs across all instances.
