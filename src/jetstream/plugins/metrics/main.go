@@ -234,7 +234,7 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 	}
 
 	environment := queryResponse.Data.Result[0].Metric.Environment
-	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"wss://%s\",\"environment:\":\"%s\"}]", environment, environment)
+	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"wss://%s\",\"environment\":\"%s\"}]", environment, environment)
 	log.Debugf("Body is: %s", stratosMetadata)
 	// return "[{\"type\":\"cf\",\"url\":\"wss://doppler.local.pcfdev.io:443\",\"environment:\":\"\"}]", nil
 	return stratosMetadata, nil
