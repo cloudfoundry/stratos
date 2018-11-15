@@ -12,9 +12,8 @@ RUN mkdir -p /usr/share/doc/suse
 COPY  deploy/containers/nginx/LICENSE.txt /usr/share/doc/suse/LICENSE.txt
 COPY  deploy/containers/nginx/conf/nginx.k8s.conf /etc/nginx/nginx.conf
 COPY --from=base-build /usr/dist /usr/share/nginx/html
-COPY deploy/containers/nginx/run-nginx.sh/ /run-nginx.sh
 EXPOSE 80 443
-CMD [ "/run-nginx.sh" ]
+CMD [ "nginx", "-g", "daemon off;" ]
 
 FROM splatform/stratos-nginx-base:opensuse as dev-build
 RUN mkdir -p /etc/secrets/ && \
