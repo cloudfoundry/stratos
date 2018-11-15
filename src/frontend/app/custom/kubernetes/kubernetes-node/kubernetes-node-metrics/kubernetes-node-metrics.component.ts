@@ -35,7 +35,11 @@ export class KubernetesNodeMetricsComponent implements OnInit {
       result => {
         const metric = result.metric;
         if (!!metric.pod_name && !!metric.namespace) {
-          return `${metric.namespace}:${metric.pod_name}:${metric.container_name}`;
+          const containerName = `${metric.namespace}:${metric.pod_name}:${metric.container_name}`;
+          if (!!metric.cpu) {
+            return `${containerName}:${metric.cpu}`;
+          }
+          return containerName;
         }
 
         if (metric.name) {
@@ -69,7 +73,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'CPU Usage (secs)',
         null,
         (series: ChartSeries[]) => {
-          return series.filter(s => !(s.name.indexOf('/') === 0) && !s.name.endsWith('POD'));
+          return series.filter(s => !(s.name.indexOf('/') === 0) && s.name.indexOf('POD') === -1);
         }
       )
     ];
