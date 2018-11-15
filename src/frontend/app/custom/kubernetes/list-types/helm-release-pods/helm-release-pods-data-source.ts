@@ -27,7 +27,8 @@ export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod, any
       getRowUniqueId: object => object.name,
       paginationKey: action.paginationKey,
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

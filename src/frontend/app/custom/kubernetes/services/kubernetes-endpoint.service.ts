@@ -20,7 +20,7 @@ import { getPaginationObservables } from '../../../store/reducers/pagination-red
 import { EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
-import { KubernetesDeployment, KubernetesStatefuleSet, KubeService, KubernetesPod } from '../store/kube.types';
+import { KubernetesDeployment, KubernetesStatefulSet, KubeService, KubernetesPod } from '../store/kube.types';
 import {
   GeKubernetesDeployments,
   GetKubernetesServices,
@@ -40,7 +40,7 @@ export class KubernetesEndpointService {
   currentUser$: Observable<EndpointUser>;
   kubeGuid: string;
   deployments$: Observable<KubernetesDeployment[]>;
-  statefulSets$: Observable<KubernetesStatefuleSet[]>;
+  statefulSets$: Observable<KubernetesStatefulSet[]>;
   services$: Observable<KubeService[]>;
   pods$: Observable<KubernetesPod[]>;
 
@@ -81,7 +81,7 @@ export class KubernetesEndpointService {
       kubernetesPodsSchemaKey
     );
 
-    this.statefulSets$ = this.getObservable<KubernetesStatefuleSet>(
+    this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(
       new GetKubernetesStatefulSets(this.kubeGuid),
       kubernetesStatefulSetsSchemaKey
     );
@@ -94,7 +94,7 @@ export class KubernetesEndpointService {
 
   }
 
-  private getObservable<T>(pagintionAction: KubePaginationAction, schemaKey: string ): Observable<T[]> {
+  private getObservable<T>(pagintionAction: KubePaginationAction, schemaKey: string): Observable<T[]> {
     return getPaginationObservables<T>({
       store: this.store,
       action: pagintionAction,
