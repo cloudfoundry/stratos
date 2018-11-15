@@ -130,11 +130,11 @@ export class ListCardComponent extends Component {
   }
 
   waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    const element = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
       elem.getText().then(text => text === title)
     ).first();
-    return browser.wait(until.visibilityOf(element), 10000).then(() => {
-      return new MetaCard(element, metaType);
+    return browser.wait(until.visibilityOf(card), 10000).then(() => {
+      return new MetaCard(card, metaType);
     });
   }
 
