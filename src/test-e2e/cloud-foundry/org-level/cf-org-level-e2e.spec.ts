@@ -1,14 +1,11 @@
-import { browser } from 'protractor';
-
-import { e2e, E2ESetup } from '../../e2e';
+import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
-import { CfOrgLevelPage } from './cf-org-level-page.po';
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
-import { ListComponent } from '../../po/list.po';
+import { CfOrgLevelPage } from './cf-org-level-page.po';
 
 describe('CF - Org Level - ', () => {
 
@@ -40,8 +37,7 @@ describe('CF - Org Level - ', () => {
 
       // Find the Org and click on it
       const list = new ListComponent();
-      list.cards.getCardsMetadata().then(cards => {
-        const card = cards.find(c => c.title === defaultCf.testOrg);
+      list.cards.findCardByTitleWithFilter(defaultCf.testOrg).then(card => {
         expect(card).toBeDefined();
         card.click();
       });
@@ -65,7 +61,7 @@ describe('CF - Org Level - ', () => {
   describe('As Admin', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .loginAs(ConsoleUserType.admin);
+        .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests - ', () => {
@@ -82,7 +78,7 @@ describe('CF - Org Level - ', () => {
   describe('As User', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.user)
-      .loginAs(ConsoleUserType.user);
+        .loginAs(ConsoleUserType.user);
     });
 
     describe('Basic Tests - ', () => {

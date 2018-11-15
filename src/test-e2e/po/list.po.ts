@@ -110,7 +110,7 @@ export class ListCardComponent extends Component {
 
   static cardsCss = 'app-card:not(.row-filler)';
 
-  constructor(locator: ElementFinder) {
+  constructor(locator: ElementFinder, private header: ListHeaderComponent) {
     super(locator);
   }
 
@@ -130,10 +130,18 @@ export class ListCardComponent extends Component {
   }
 
   waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    const cardTitle = this.locator.element(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title));
-    return browser.wait(until.visibilityOf(cardTitle), 10000).then(() => {
-      return this.findCardByTitle(title, metaType);
+    const element = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+      elem.getText().then(text => text === title)
+    ).first();
+    return browser.wait(until.visibilityOf(element), 10000).then(() => {
+      return new MetaCard(element, metaType);
     });
+  }
+
+  findCardByTitleWithFilter(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
+    this.header.waitUntilShown();
+    this.header.setSearchText(title);
+    return this.waitForCardByTitle(title, metaType);
   }
 
   findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
@@ -334,8 +342,8 @@ export class ListComponent extends Component {
   constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
-    this.cards = new ListCardComponent(locator);
     this.header = new ListHeaderComponent(locator);
+    this.cards = new ListCardComponent(locator, this.header);
     this.pagination = new ListPaginationComponent(locator);
     this.empty = new ListEmptyComponent(locator);
   }

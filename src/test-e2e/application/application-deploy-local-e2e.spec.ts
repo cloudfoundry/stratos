@@ -1,14 +1,16 @@
-import { normalize } from 'normalizr';
-import { browser, element, by } from 'protractor';
+import * as path from 'path';
+import { browser, by, element, protractor } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { CFPage } from '../po/cf-page.po';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CFPage } from '../po/cf-page.po';
-import * as path from 'path';
+import { DeployApplication } from './po/deploy-app.po';
+
+const until = protractor.ExpectedConditions;
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -45,28 +47,29 @@ describe('Application Deploy - ', function () {
   });
 
   let originalTimeout = 40000;
+  const newTimeout = 140000;
   beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
   // Might take a bit longer to deploy the app than the global default timeout allows
-  beforeEach(function() {
+  beforeEach(function () {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = newTimeout;
   });
 
-  afterEach(function() {
+  afterEach(function () {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   // Allow up to 2 minutes for the application to be deployed
   describe('Should deploy app from local archive file', () => {
 
-    let deployApp;
+    let deployApp: DeployApplication;
 
     beforeAll(() => {
       // File input box needs to be visible for testing
       const script = 'var style = document.createElement("style");' +
-      'style.innerHTML = "#localPathSelectFile { height: auto !important; visibility: visible !important; width: auto !important; }";' +
-      'document.head.appendChild(style);';
+        'style.innerHTML = "#localPathSelectFile { height: auto !important; visibility: visible !important; width: auto !important; }";' +
+        'document.head.appendChild(style);';
       browser.executeScript(script);
 
       // Should be on deploy app modal
@@ -92,6 +95,7 @@ describe('Application Deploy - ', function () {
       e2e.sleep(1000);
 
       const fileInputElement = element(by.id('localPathSelectFile'));
+      browser.wait(until.presenceOf(fileInputElement));
       fileInputElement.sendKeys(applicationZipFile);
 
       // Source upload
@@ -115,12 +119,12 @@ describe('Application Deploy - ', function () {
       deployApp.stepper.next();
 
       // Wait for the application to be fully deployed - so we see any errors that occur
-      deployApp.waitUntilDeployed();
+      deployApp.waitUntilDeployed(newTimeout);
 
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
-    }, 120000);
+    }, newTimeout);
 
     it('Should go to App Summary Page', () => {
       // Click next

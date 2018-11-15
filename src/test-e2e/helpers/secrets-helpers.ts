@@ -23,7 +23,6 @@ export class SecretsHelpers {
     ) {
       throw new Error(`Failed to validate secrets. Secret contents: '${JSON.stringify(secrets)}'`);
     }
-
   }
 
   haveMultipleCloudFoundryEndpoints = () => {

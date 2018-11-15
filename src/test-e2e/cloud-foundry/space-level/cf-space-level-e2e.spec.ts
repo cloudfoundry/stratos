@@ -41,8 +41,7 @@ describe('CF - Space Level -', () => {
 
       // Find the Org and click on it
       const list = new ListComponent();
-      list.cards.getCardsMetadata().then(cards => {
-        const card = cards.find(c => c.title === defaultCf.testOrg);
+      list.cards.findCardByTitleWithFilter(defaultCf.testOrg).then(card => {
         expect(card).toBeDefined();
         card.click();
       });
@@ -53,8 +52,7 @@ describe('CF - Space Level -', () => {
 
         // Find the Space and click on it
         const spaceList = new ListComponent();
-        spaceList.cards.getCardsMetadata().then(cards => {
-          const card = cards.find(c => c.title === defaultCf.testSpace);
+        spaceList.cards.findCardByTitleWithFilter(defaultCf.testSpace).then(card => {
           expect(card).toBeDefined();
           card.click();
         });
@@ -81,7 +79,7 @@ describe('CF - Space Level -', () => {
   describe('As Admin -', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .loginAs(ConsoleUserType.admin);
+        .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests -', () => {
@@ -97,7 +95,7 @@ describe('CF - Space Level -', () => {
   describe('As User -', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .loginAs(ConsoleUserType.admin);
+        .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests -', () => {
