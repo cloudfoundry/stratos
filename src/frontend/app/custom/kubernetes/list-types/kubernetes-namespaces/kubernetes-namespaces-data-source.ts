@@ -24,7 +24,8 @@ export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNam
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 
