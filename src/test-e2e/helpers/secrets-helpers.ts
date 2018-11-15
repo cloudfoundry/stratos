@@ -21,7 +21,7 @@ export class SecretsHelpers {
       !secrets.consoleUsers || !secrets.consoleUsers.admin || !secrets.consoleUsers.nonAdmin ||
       !secrets.endpoints || !secrets.endpoints.cf
     ) {
-      throw new Error(`Failed to validate secrets. Secret contents: '${JSON.stringify(secrets)}'`);
+      throw new Error(`Failed to validate secrets`);
     }
   }
 

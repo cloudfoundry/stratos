@@ -91,9 +91,9 @@ describe('Application Deploy - ', function () {
       deployApp.stepper.next();
 
       // Select 'Local Archive file'
-      deployApp.stepper.getStepperForm().fill({ 'sourcetype': 'Application Archive File' });
-      e2e.sleep(1000);
-
+      const stepperForm = deployApp.stepper.getStepperForm();
+      stepperForm.waitUntilShown();
+      stepperForm.fill({ 'sourcetype': 'Application Archive File' });
       const fileInputElement = element(by.id('localPathSelectFile'));
       browser.wait(until.presenceOf(fileInputElement));
       fileInputElement.sendKeys(applicationZipFile);
@@ -123,6 +123,10 @@ describe('Application Deploy - ', function () {
 
       // Wait until app summary button can be pressed
       deployApp.stepper.waitUntilCanNext('Go to App Summary');
+
+      browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName).then(appInDefault => {
+        expect(appInDefault.app).not.toBeNull(`Failed to find newly created app '${testAppName}'. Are overrides working successfully?`);
+      }));
 
     }, newTimeout);
 
