@@ -129,28 +129,29 @@ export class ListCardComponent extends Component {
     return new MetaCard(this.getCards().get(index), metaType);
   }
 
-  waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+  private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
+    return this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
       elem.getText().then(text => text === title)
-    ).first();
-    return browser.wait(until.visibilityOf(card), 10000).then(() => {
-      return new MetaCard(card, metaType);
+    ).first().element(by.xpath('ancestor::app-card'));
+  }
+
+  waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
+    const cardElement = this.findCardElementByTitle(title, metaType);
+    return browser.wait(until.visibilityOf(cardElement), 10000).then(() => {
+      // We've found the title, now get the actual element
+      return new MetaCard(cardElement, metaType);
     });
   }
 
-  findCardByTitleWithFilter(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    this.header.waitUntilShown();
-    this.header.setSearchText(title);
-    return this.waitForCardByTitle(title, metaType);
-  }
-
-  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    return this.getCards().filter(elem => {
-      return elem.element(by.cssContainingText(metaType, title)).isPresent();
-    }).then(e => {
-      expect(e.length).toBe(1);
-      return new MetaCard(e[0], metaType);
-    });
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM, filter = false): promise.Promise<MetaCard> {
+    if (filter) {
+      this.header.waitUntilShown();
+      this.header.setSearchText(title);
+      return this.waitForCardByTitle(title, metaType);
+    }
+    const cardElement = this.findCardElementByTitle(title, metaType);
+    expect(cardElement.isPresent).toBeTruthy();
+    return Promise.resolve(new MetaCard(cardElement, metaType));
   }
 
   getCardsMetadata(): promise.Promise<CardMetadata[]> {

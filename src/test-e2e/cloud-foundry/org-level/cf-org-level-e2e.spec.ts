@@ -6,6 +6,7 @@ import { ListComponent } from '../../po/list.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
 
 describe('CF - Org Level - ', () => {
 
@@ -37,7 +38,7 @@ describe('CF - Org Level - ', () => {
 
       // Find the Org and click on it
       const list = new ListComponent();
-      list.cards.findCardByTitleWithFilter(defaultCf.testOrg).then(card => {
+      list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
         expect(card).toBeDefined();
         card.click();
       });

@@ -91,7 +91,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitUntilShown();
 
     // Delete the org
-    cardView.cards.waitForCardByTitle(testOrgName).then(card => {
+    cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(card => {
       card.openActionMenu().then(menu => {
         menu.clickItem('Delete');
         ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', testOrgName);
