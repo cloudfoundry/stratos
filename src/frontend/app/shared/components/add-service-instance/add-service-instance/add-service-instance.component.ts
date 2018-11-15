@@ -164,7 +164,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private configureForEditServiceInstanceMode() {
-    const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
+    const { endpointId, serviceInstanceId } = this.activatedRoute.snapshot.params;
     const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
@@ -228,7 +228,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   isSpaceScoped = () => this.modeService.spaceScopedDetails.isSpaceScoped;
 
   private initialiseForMarketplaceMode(): Observable<boolean> {
-    const { cfId, serviceId } = this.activatedRoute.snapshot.params;
+    const { endpointId, serviceId } = this.activatedRoute.snapshot.params;
     this.csiGuidsService.cfGuid = cfId;
     this.csiGuidsService.serviceGuid = serviceId;
     this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceId);
