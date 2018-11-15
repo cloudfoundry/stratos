@@ -80,12 +80,12 @@ rm /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME || true
 
 echo "Removed the upgrade lock file."
 
-# If DO_NOT_QUIT is set, don't quit script
-# This is only used in toy kubernetes deployments with no shared volume 
-if [ "${DO_NOT_QUIT:-false}" = "false" ]; then
-    echo "Running in shared volume mode, exiting..."
-    exit 0
-else
-    echo "Running in 'DO NOT QUIT' mode"
-    while true; do sleep 5; done   
-fi
+# # If DO_NOT_QUIT is set, don't quit script
+# # This is only used in toy kubernetes deployments with no shared volume 
+# if [ "${DO_NOT_QUIT:-false}" = "false" ]; then
+#     echo "Running in shared volume mode, exiting..."
+#     exit 0
+# else
+#     echo "Running in 'DO NOT QUIT' mode"
+#     while true; do sleep 5; done   
+# fi

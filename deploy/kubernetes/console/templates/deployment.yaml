@@ -71,7 +71,7 @@ spec:
         app.kubernetes.io/component: "console-backend"
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
-      containers:
+      initContainers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: "postflight"
@@ -123,6 +123,7 @@ spec:
             name: "{{ .Release.Name }}-upgrade-volume"
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
+      containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
