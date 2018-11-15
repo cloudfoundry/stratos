@@ -276,8 +276,14 @@ export class KubernetesEffects {
               new WrapperRequestActionSuccess(releases, action)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, action)
+          catchError(error => [
+            new WrapperRequestActionFailed(error.message, action, 'fetch', {
+              endpointIds: [action.kubeGuid],
+              url: error.url || `/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`,
+              eventCode: error.status || '500',
+              message: 'Kubernetes API request error',
+              error
+            })
           ])
         );
     })
@@ -328,8 +334,14 @@ export class KubernetesEffects {
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
-      }), catchError(err => [
-        new WrapperRequestActionFailed(err.message, action)
+      }), catchError(error => [
+        new WrapperRequestActionFailed(error.message, action, 'fetch', {
+          endpointIds: [action.kubeGuid],
+          url: error.url || url,
+          eventCode: error.status || '500',
+          message: 'Kubernetes API request error',
+          error
+        })
       ]));
   }
 
@@ -356,8 +368,14 @@ export class KubernetesEffects {
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
-      }), catchError(err => [
-        new WrapperRequestActionFailed(err.message, action)
+      }), catchError(error => [
+        new WrapperRequestActionFailed(error.message, action, 'fetch', {
+          endpointIds: [action.kubeGuid],
+          url: error.url || url,
+          eventCode: error.status || '500',
+          message: 'Kubernetes API request error',
+          error
+        })
       ]));
   }
 }

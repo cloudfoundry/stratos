@@ -65,7 +65,7 @@ import {
 } from './recursive-entity-delete.effect';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-const endpointHeader = 'x-cap-cnsi-list';
+export const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -106,7 +106,7 @@ export class APIEffect {
       mergeMap(([action, state]) => {
         return this.doApiRequest(action, state);
       }),
-  );
+    );
 
   private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
@@ -260,27 +260,20 @@ export class APIEffect {
       }),
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
-        const endpoints: string[] = endpointString.split(',');
-        endpoints.forEach(endpoint =>
-          this.store.dispatch(
-            new SendEventAction(endpointSchemaKey, endpoint, {
-              eventCode: error.status || '500',
-              severity: InternalEventSeverity.ERROR,
-              message: 'Jetstream API request error',
-              metadata: {
-                error,
-                url: error.url || apiAction.options.url,
-              },
-            }),
-          ),
-        );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        const endpointIds: string[] = endpointString.split(',');
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+          endpointIds,
+          url: error.url || apiAction.options.url,
+          eventCode: error.status || '500',
+          message: 'Jetstream API request error',
+          error
+        });
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
             entityFactory(apiAction.entityKey),
-          ), );
+          ));
         }
         return errorActions;
       }),
@@ -414,7 +407,7 @@ export class APIEffect {
           data[guid] !== null &&
           errorCheck.findIndex(error => error.guid === guid && !error.error) >=
           0,
-    )
+      )
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
