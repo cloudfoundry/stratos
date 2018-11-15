@@ -12,7 +12,7 @@ docker-compose version
 
 echo "Preparing for e2e tests..."
 
-curl -sLk -o ./secrets.yaml https://travis.capbristol.com/yaml
+wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs

@@ -8,6 +8,7 @@ import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
+import { CfOrgLevelPage } from './org-level/cf-org-level-page.po';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
@@ -128,7 +129,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     const cardView = cloudFoundry.goToOrgView();
     const list = new ListComponent();
     list.refresh();
-    cardView.cards.findCardByTitle(testOrgName).then(org => {
+    cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
@@ -150,7 +151,7 @@ describe('CF - Manage Organizations and Spaces', () => {
       cardView.cards.waitUntilShown();
 
       // Get the card for the space
-      cardView.cards.findCardByTitle(testSpaceName).then(space => {
+      cardView.cards.findCardByTitle(testSpaceName).then((space: MetaCard) => {
         space.openActionMenu().then(menu => {
           menu.clickItem('Delete');
           ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
@@ -162,7 +163,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     });
   });
 
-  xit('Should create an org and a space', () => {
+  it('Should create an org and a space', () => {
     const cardView = cloudFoundry.goToOrgView();
 
     // Click the add button to add an organization

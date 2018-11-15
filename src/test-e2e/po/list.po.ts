@@ -130,9 +130,11 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
-    return this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
       elem.getText().then(text => text === title)
-    ).first().element(by.xpath('ancestor::app-card'));
+    ).first();
+    browser.wait(until.presenceOf(card));
+    return card.element(by.xpath('ancestor::app-card'));
   }
 
   waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
@@ -149,9 +151,12 @@ export class ListCardComponent extends Component {
       this.header.setSearchText(title);
       return this.waitForCardByTitle(title, metaType);
     }
+
     const cardElement = this.findCardElementByTitle(title, metaType);
-    expect(cardElement.isPresent).toBeTruthy();
-    return Promise.resolve(new MetaCard(cardElement, metaType));
+    return cardElement.isPresent().then(isPresent => {
+      expect(isPresent).toBeTruthy();
+      return Promise.resolve(new MetaCard(cardElement, metaType));
+    });
   }
 
   getCardsMetadata(): promise.Promise<CardMetadata[]> {
