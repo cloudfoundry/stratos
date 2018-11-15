@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-1. BOSH environment (for developer purposes, see section on deploying this with BOSH Lite)
+1. BOSH environment
 1. BOSH CLI v2
 
 ### Deploying Prometheus-boshrelease
