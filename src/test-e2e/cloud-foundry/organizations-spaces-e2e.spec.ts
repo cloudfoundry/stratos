@@ -172,7 +172,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     modal.getStepperForm().fill({
       'orgname': testOrgName
     });
-    expect(modal.canNext()).toBeTruthy();
+    modal.waitUntilCanNext('Create');
     modal.next();
 
     cardView.cards.waitUntilShown();
