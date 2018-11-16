@@ -10,7 +10,7 @@ This week the team has been working on:
 - Enabling Extensions to be published separately
 - Test automation
 - E2E Test reliability
-- Space service tidy up [\#3197])https://github.com/cloudfoundry-incubator/stratos/pull/3197)
+- Space service tidy up [\#3197](https://github.com/cloudfoundry-incubator/stratos/pull/3197)
 
 ## 9th November 2018
 
