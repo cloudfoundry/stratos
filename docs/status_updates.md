@@ -4,10 +4,10 @@ Weekly status updates are published here.
 
 ## 16th November 2018
 
-This week the team has been:
+This week the team has been working on:
 
-- Continued testing Stratos 2.2.0
-- Working towards enabling Extensions to be published separately
+- Testing Stratos 2.2.0
+- Enabling Extensions to be published separately
 - Test automation
 - E2E Test reliability
 - Space service tidy up [\#3197])https://github.com/cloudfoundry-incubator/stratos/pull/3197)
