@@ -61,7 +61,7 @@ describe('Application Deploy - ', function () {
   });
 
   // Allow up to 2 minutes for the application to be deployed
-  describe('Should deploy app from local archive file', () => {
+  xdescribe('Should deploy app from local archive file', () => {
 
     let deployApp: DeployApplication;
 

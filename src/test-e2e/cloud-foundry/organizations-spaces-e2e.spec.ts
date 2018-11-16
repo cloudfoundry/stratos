@@ -8,18 +8,17 @@ import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
-import { CfOrgLevelPage } from './org-level/cf-org-level-page.po';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
   const testOrgName = e2e.helper.getCustomerOrgSpaceLabel(null, 'org');
+  const testOrg2Name = e2e.helper.getCustomerOrgSpaceLabel(null, 'org2');
   const testSpaceName = e2e.helper.getCustomerOrgSpaceLabel(null, 'space');
   let endpointGuid;
 
   let cloudFoundry: CfTopLevelPage;
 
   let cfHelper: CFHelpers;
-  const listComponent = new ListComponent();
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
@@ -45,7 +44,10 @@ describe('CF - Manage Organizations and Spaces', () => {
     cloudFoundry.waitForPageOrChildPage();
   });
 
-  afterAll(() => cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName));
+  afterAll(() => {
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName);
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrg2Name);
+  });
 
   it('Should validate org name', () => {
     const cardView = cloudFoundry.goToOrgView();
@@ -170,7 +172,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cloudFoundry.header.clickIconButton('add');
     const modal = new StepperComponent();
     modal.getStepperForm().fill({
-      'orgname': testOrgName
+      'orgname': testOrg2Name
     });
     modal.waitUntilCanNext('Create');
     modal.next();
@@ -178,7 +180,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitUntilShown();
 
     // Go to the org and create a space
-    cardView.cards.findCardByTitle(testOrgName).then(org => {
+    cardView.cards.findCardByTitle(testOrg2Name).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
