@@ -14,13 +14,13 @@ function usage {
     echo "       -o Value   Organization in Docker registry"
     echo "       -t Value   Tag for images"
     echo "       -p         Push images to registry"
-    echo "       -s         SLE repos"
+    echo "       -s         Is SLE build"
     echo "       -h         Help"
     exit 1
 }
 
 
-while getopts "b:r:o:t:ps:h" opt ; do
+while getopts "b:r:o:t:psh" opt ; do
     case $opt in
         b)
             BASE_IMAGE=${OPTARG}
@@ -38,7 +38,7 @@ while getopts "b:r:o:t:ps:h" opt ; do
             PUSH_IMAGES=true
             ;;
         s)
-            IS_SLE=${OPTARG}
+            IS_SLE="true"
             ;;
         h)
             usage
