@@ -280,7 +280,7 @@ export class KubernetesEffects {
             new WrapperRequestActionFailed(error.message, action, 'fetch', {
               endpointIds: [action.kubeGuid],
               url: error.url || `/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`,
-              eventCode: error.status || '500',
+              eventCode: error.status ? error.status + '' : '500',
               message: 'Kubernetes API request error',
               error
             })
@@ -338,7 +338,7 @@ export class KubernetesEffects {
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
           endpointIds: [action.kubeGuid],
           url: error.url || url,
-          eventCode: error.status || '500',
+          eventCode: error.status ? error.status + '' : '500',
           message: 'Kubernetes API request error',
           error
         })
@@ -372,7 +372,7 @@ export class KubernetesEffects {
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
           endpointIds: [action.kubeGuid],
           url: error.url || url,
-          eventCode: error.status || '500',
+          eventCode: error.status ? error.status + '' : '500',
           message: 'Kubernetes API request error',
           error
         })
