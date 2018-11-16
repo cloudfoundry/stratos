@@ -60,7 +60,7 @@ createOrgSpace "test-e2e" "test-e2e"
 createOrgSpace "e2e" "e2e"
 
 # Create Services for E2E Tests
-"${DIRPATH}/populate-cf/create-services.sh" -n
+"${DIRPATH}/populate-cf/create-services.sh" -n -o e2e -s e2e
 
 # Deploy go-env for binding services
 cloneRepo "irfanhabib" "go-env"

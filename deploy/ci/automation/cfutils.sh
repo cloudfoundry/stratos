@@ -66,7 +66,7 @@ echo "$FULL_STATUS"
 STATUS=$(echo "$FULL_STATUS" | head -n 1)
 if [ "$STATUS" == "Not Created" ]; then
   echo "PCF DEV not created... starting"
-  cf pcfdev start -m 10240 -c 3
+  cf pcfdev start -m 10240 -c 4 -s none
   echo "Setting PCF DEV up for E2E Tests ..."
   "${DIRPATH}/../../tools/init-cf-for-e2e.sh"
   # Ensure that PCF Dev's UAA is configured to allow SSO Login
