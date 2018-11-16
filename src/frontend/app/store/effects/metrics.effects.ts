@@ -66,7 +66,7 @@ export class MetricsEffect {
             'fetch', {
               endpointIds: [action.endpointGuid],
               url: errObservable.url || fullUrl,
-              eventCode: errObservable.status || '500',
+              eventCode: errObservable.status ? errObservable.status + '' : '500',
               message: 'Metric request error',
             }
           )

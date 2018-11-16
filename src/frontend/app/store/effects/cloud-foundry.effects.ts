@@ -58,7 +58,7 @@ export class CloudFoundryEffects {
             new WrapperRequestActionFailed(error.message, apiAction, actionType, {
               endpointIds: [action.cfGuid],
               url: error.url || url,
-              eventCode: error.status || '500',
+              eventCode: error.status ? error.status + '' : '500',
               message: 'Cloud Foundry Info request error',
               error
             })
