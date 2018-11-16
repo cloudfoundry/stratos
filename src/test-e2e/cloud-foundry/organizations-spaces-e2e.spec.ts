@@ -180,7 +180,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitUntilShown();
 
     // Go to the org and create a space
-    cardView.cards.findCardByTitle(testOrg2Name).then(org => {
+    cardView.cards.findCardByTitle(testOrg2Name, MetaCardTitleType.CUSTOM, true).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
