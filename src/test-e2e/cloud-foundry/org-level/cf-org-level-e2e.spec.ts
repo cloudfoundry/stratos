@@ -31,21 +31,22 @@ describe('CF - Org Level - ', () => {
   function navToPage() {
     const page = new CFPage();
     page.sideNav.goto(SideNavMenuItem.CloudFoundry);
-    CfTopLevelPage.detect().then(cfPage => {
+    return CfTopLevelPage.detect().then(cfPage => {
       cfPage.waitForPageOrChildPage();
       cfPage.loadingIndicator.waitUntilNotShown();
       cfPage.goToOrgTab();
 
       // Find the Org and click on it
       const list = new ListComponent();
-      list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
+      return list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
         expect(card).toBeDefined();
         card.click();
-      });
-      CfOrgLevelPage.detect().then(o => {
-        orgPage = o;
-        orgPage.waitForPageOrChildPage();
-        orgPage.loadingIndicator.waitUntilNotShown();
+
+        return CfOrgLevelPage.detect().then(o => {
+          orgPage = o;
+          orgPage.waitForPageOrChildPage();
+          orgPage.loadingIndicator.waitUntilNotShown();
+        });
       });
     });
   }

@@ -370,7 +370,7 @@ export class ListComponent extends Component {
     return browser.wait(until.invisibilityOf(refreshIcon), 10000);
   }
 
-  getTotalResults() {
+  getTotalResults(): promise.Promise<number> {
     // const paginator = new PaginatorComponent();
     return this.pagination.isDisplayed().then(havePaginator => {
       if (havePaginator) {
