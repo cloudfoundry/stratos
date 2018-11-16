@@ -60,7 +60,7 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
-	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods")
+	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1")
 	if err != nil {
 		return err
 	}
