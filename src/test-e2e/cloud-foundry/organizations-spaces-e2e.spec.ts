@@ -44,10 +44,10 @@ describe('CF - Manage Organizations and Spaces', () => {
     cloudFoundry.waitForPageOrChildPage();
   });
 
-  afterAll(() => {
-    cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName);
-    cfHelper.deleteOrgIfExisting(endpointGuid, testOrg2Name);
-  });
+  afterAll(() => Promise.all([
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName),
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrg2Name)
+  ]));
 
   it('Should validate org name', () => {
     const cardView = cloudFoundry.goToOrgView();
