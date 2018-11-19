@@ -16,7 +16,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -67,7 +66,7 @@ func (p *portalProxy) getUAAIdentityEndpoint() string {
 }
 
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
-	req := c.Request().(*standard.Request).Request
+	//req := c.Request().(*standard.Request).Request
 	originalCookie := req.Header.Get("Cookie")
 	cleanCookie := p.EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
 	req.Header.Set("Cookie", cleanCookie)

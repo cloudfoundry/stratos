@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine"
 	log "github.com/sirupsen/logrus"
 )
 

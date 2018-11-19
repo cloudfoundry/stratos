@@ -25,7 +25,6 @@ import (
 	"github.com/cf-stratos/mysqlstore"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 	log "github.com/sirupsen/logrus"
@@ -580,7 +579,11 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
-	var engine *standard.Server
+	if isUpgrade {
+		go stopEchoWhenUpgraded(e)
+	}
+
+	var engineErr error
 	address := config.TLSAddress
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
@@ -588,18 +591,12 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 			return err
 		}
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine = standard.WithTLS(address, certFile, certKeyFile)
-
+		engineErr = e.StartTLS(address, certFile, certKeyFile)
 	} else {
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine = standard.New(address)
+		engineErr = e.Start(address)
 	}
 
-	if isUpgrade {
-		go stopEchoWhenUpgraded(engine)
-	}
-
-	engineErr := e.Run(engine)
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
@@ -833,7 +830,7 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *standard.Server) {
+func stopEchoWhenUpgraded(e *echo.Echo) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}

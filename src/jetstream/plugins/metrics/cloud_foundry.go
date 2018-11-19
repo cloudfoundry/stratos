@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )

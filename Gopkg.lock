@@ -400,21 +400,6 @@
   revision = "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
 
 [[projects]]
-  digest = "1:09b4b26f6837dbb21698726ccaa6eccae9ab822485726a2a09a9d123cb1ba4d1"
-  name = "github.com/labstack/echo"
-  packages = [
-    ".",
-    "context",
-    "engine",
-    "engine/standard",
-    "log",
-    "middleware",
-  ]
-  pruneopts = "UT"
-  revision = "e08070379af60f5b9c0fb5bb2d1527ba9624fe43"
-  version = "v2.2.0"
-
-[[projects]]
   digest = "1:568171fc14a3d819b112c3e219d351ea7b05e8dad7935c4168c6b3373244a686"
   name = "github.com/labstack/gommon"
   packages = [
@@ -758,10 +743,6 @@
     "github.com/gorilla/websocket",
     "github.com/cf-stratos/mysqlstore",
     "github.com/kat-co/vala",
-    "github.com/labstack/echo",
-    "github.com/labstack/echo/engine",
-    "github.com/labstack/echo/engine/standard",
-    "github.com/labstack/echo/middleware",
     "github.com/mattn/go-sqlite3",
     "github.com/mholt/archiver",
     "github.com/nwmac/sqlitestore",

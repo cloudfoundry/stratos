@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 )
 
