@@ -71,7 +71,11 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
 
-  enableTextFilter = false;
+  enableTextFilter = true;
+  text = {
+    filter: 'Filter by Name',
+    noEntries: 'There are no nodes'
+  };
 
   getGlobalActions = () => null;
   getMultiActions = () => [];
@@ -81,10 +85,10 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   getMultiFiltersConfigs = () => [];
 
   constructor(
-    private store: Store<AppState>,
-    private kubeId: BaseKubeGuid,
+    store: Store<AppState>,
+    kubeId: BaseKubeGuid,
   ) {
-    this.nodesDataSource = new KubernetesNodesDataSource(this.store, this.kubeId, this);
+    this.nodesDataSource = new KubernetesNodesDataSource(store, kubeId, this);
   }
 
 }

@@ -1,16 +1,14 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
 import { Store } from '@ngrx/store';
 
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesAppsDataSource } from './kubernetes-apps-data-source';
 import { KubernetesApp } from '../../store/kube.types';
 import { AppLinkComponent } from './app-link/app-link.component';
 import { KubeAppcreatedDateComponent } from './kube-appcreated-date/kube-appcreated-date.component';
+import { KubernetesAppsDataSource } from './kubernetes-apps-data-source';
 
 @Injectable()
 export class KubernetesAppsListConfigService implements IListConfig<KubernetesApp> {
@@ -78,7 +76,11 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
 
-  enableTextFilter = false;
+  enableTextFilter = true;
+  text = {
+    filter: 'Filter by Name',
+    noEntries: 'There are no applications'
+  };
 
   getGlobalActions = () => null;
   getMultiActions = () => [];
@@ -88,11 +90,10 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
   getMultiFiltersConfigs = () => [];
 
   constructor(
-    private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
-    private kubeId: BaseKubeGuid,
+    store: Store<AppState>,
+    kubeId: BaseKubeGuid,
   ) {
-    this.AppsDataSource = new KubernetesAppsDataSource(this.store, kubeId, this);
+    this.AppsDataSource = new KubernetesAppsDataSource(store, kubeId, this);
   }
 
 }

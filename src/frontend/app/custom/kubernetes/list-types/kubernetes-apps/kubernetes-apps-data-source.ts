@@ -25,7 +25,8 @@ export class KubernetesAppsDataSource extends ListDataSource<KubernetesApp, any>
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesAppsSchemaKey, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'name' }]
     });
   }
 

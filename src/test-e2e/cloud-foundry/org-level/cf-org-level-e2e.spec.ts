@@ -1,14 +1,12 @@
-import { browser } from 'protractor';
-
-import { e2e, E2ESetup } from '../../e2e';
+import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
-import { CfOrgLevelPage } from './cf-org-level-page.po';
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
-import { ListComponent } from '../../po/list.po';
+import { CfOrgLevelPage } from './cf-org-level-page.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
 
 describe('CF - Org Level - ', () => {
 
@@ -33,22 +31,22 @@ describe('CF - Org Level - ', () => {
   function navToPage() {
     const page = new CFPage();
     page.sideNav.goto(SideNavMenuItem.CloudFoundry);
-    CfTopLevelPage.detect().then(cfPage => {
+    return CfTopLevelPage.detect().then(cfPage => {
       cfPage.waitForPageOrChildPage();
       cfPage.loadingIndicator.waitUntilNotShown();
       cfPage.goToOrgTab();
 
       // Find the Org and click on it
       const list = new ListComponent();
-      list.cards.getCardsMetadata().then(cards => {
-        const card = cards.find(c => c.title === defaultCf.testOrg);
+      return list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
         expect(card).toBeDefined();
         card.click();
-      });
-      CfOrgLevelPage.detect().then(o => {
-        orgPage = o;
-        orgPage.waitForPageOrChildPage();
-        orgPage.loadingIndicator.waitUntilNotShown();
+
+        return CfOrgLevelPage.detect().then(o => {
+          orgPage = o;
+          orgPage.waitForPageOrChildPage();
+          orgPage.loadingIndicator.waitUntilNotShown();
+        });
       });
     });
   }
@@ -65,7 +63,7 @@ describe('CF - Org Level - ', () => {
   describe('As Admin', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .loginAs(ConsoleUserType.admin);
+        .loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests - ', () => {
@@ -82,7 +80,7 @@ describe('CF - Org Level - ', () => {
   describe('As User', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.user)
-      .loginAs(ConsoleUserType.user);
+        .loginAs(ConsoleUserType.user);
     });
 
     describe('Basic Tests - ', () => {
