@@ -203,22 +203,54 @@ npm run build-backend
 
 The back-end executable is named `jetstream` and should be created within the `src/jetstream` folder.
 
-#### Minimum Configure
+### Configuration
 
-To run, ensure you have set the following environment variables:
+Configuration can either be done via
+- Environment Variable and/or Config File
+- In the UI when you first use a front end with this backend
+
+In all cases the configuration is saved to the database on first run. Any subsequent changes require the db to be reset. For the default sqlite
+db provider this can be done by deleting `src/jetstream/console-database.db`
+
+#### Configure by Environment Variables and/or Config File
+
+By default, the configuration in file `src/jetstream/default.config.properties` will be used. These can be changed by environment variables
+or an overrides file.
+
+##### Environment variable
+
+If you have a custom uaa, ensure you have set the following environment variables:
 
 - `UAA_ENDPOINT`- the URL of your UAA
   - If you have an existing CF and want to use the same UAA use the `authorization_endpoint` value from `[cf url]/v2/info`
     For example for PCF Dev, use: `UAA_ENDPOINT=https://login.local.pcfdev.io`.
 - `CONSOLE_CLIENT` - the Client ID to use when authenticating against your UAA (defaults to: 'cf')
 - `CONSOLE_CLIENT_SECRET` - the Client ID to use when authenticating against your UAA (defaults to empty)
+- `CONSOLE_ADMIN_SCOPE` - an existing UAA scope that will be used to identify users as `Stratos Admins`
 
 > To use a pre-built Stratos UAA container execute `docker run --name=uaa --rm -p 8080:8080 -P splatform/stratos-uaa`. The UAA will be
   available at `http://localhost:8080` with a `CONSOLE_CLIENT` value of `console`
 
-To avoid using environment variables, and for additional settings, see [Configuration](#Full-Configuration) below
+##### Config File
+
+To easily persist configuration settings copy `src/jetstream/default.config.properties` to `src/jetstream/config.properties`. The backend will load its
+configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings
+by setting the corresponding environment variable.
+
+#### Configure via Stratos
+
+1. Go through the `Config File` step above and comment out the `UAA_ENDPOINT` with a `#` in the new `config.properties` file.
+1. If any previous configuration attempt has been made reset your database as described above.
+1. Continue these steps from [Run](#run).
+   - You should see the line `Will add setup route and middleware` in the logs
+1. Load the Stratos UI as usual and you should be immediately directed to the setup wizard
+
+The setup wizard that allows you to enter the values normally fetched from environment variables or files. The UI will assist you through
+this process, validating that the UAA address and credentials are correct. It will also provide a list of possible scopes for the Stratos Admin
 
 #### Run
+
+Execute the following file from `src/jetstream`
 
 ```
 jetstream
@@ -226,16 +258,6 @@ jetstream
 
 You should see the log as the backend starts up. You can press CTRL+C to stop the backend.
 
-### Full Configuration
-
-By default, the configuration in the file `src/jetstream/default.config.properties` will be used.
-
-To modify the configuration copy `default.config.properties` to `src/jetstream/config.properties` and edit. The backend will load its
-configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings
-by setting the corresponding environment variable.
-
-> **Note** The properties are saved to the database on first run. Any subsequent changes require the db to be reset. For the default sqlite
-db provider this can be done by deleting `src/jetstream/console-database.db`
 
 #### Automatically register and connect to an existing endpoint
 To automatically register a Cloud Foundry add the environment variable/config setting below:

@@ -4,19 +4,15 @@ import {
   applicationSchemaKey,
   entityFactory,
   organizationSchemaKey,
+  serviceBindingNoBindingsSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
   serviceInstancesWithSpaceSchemaKey,
   servicePlanSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
-  serviceBindingNoBindingsSchemaKey,
 } from '../helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
