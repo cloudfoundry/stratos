@@ -431,7 +431,6 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				Admin:       isAdmin,
 			}
 
-			// TODO: Only do this for OAuth token types
 			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
 			if ok {
 				// If this is a system shared endpoint, then remove some metadata that should be send back to other users
