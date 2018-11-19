@@ -35,7 +35,7 @@
    };
    
    TimeProcessor.prototype.displaySpecStarted = function (spec, log) {
-     return getTime() + ' - ' + spec.id + ' (Started)';
+     return getTime() + ' - ' + spec.name + ' (Started)';
    };
 
    TimeProcessor.prototype.displaySuccessfulSpec = function (spec, log) {
