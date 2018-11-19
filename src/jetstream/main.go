@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
+	"github.com/cf-stratos/mysqlstore"
 	"github.com/gorilla/sessions"
-	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
