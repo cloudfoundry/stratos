@@ -6,7 +6,7 @@
         </app-card-cf-space-details>
       </app-tile>
     </app-tile-group>
-    <app-loading-page [isLoading]="detailsLoading$">
+    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
       <app-tile-group>
         <app-tile>
           <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps" icon="apps" label="Applications" labelSingular="Application" value="{{ cfSpaceService.appCount$ | async }}"></app-card-number-metric>
