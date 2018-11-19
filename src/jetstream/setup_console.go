@@ -252,7 +252,7 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 		return func(c echo.Context) error {
 			isSetupRequest := false
 
-			requestURLPath := c.Request().URL().Path()
+			requestURLPath := c.Request().URL.Path
 
 			// When running in Cloud Foundry or in the combined Docker container URL path starts with /pp
 			inCFMode, _ := regexp.MatchString("^/pp", requestURLPath)

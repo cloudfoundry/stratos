@@ -30,8 +30,8 @@ var upgrader = websocket.Upgrader{
 func UpgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker, error) {
 
 	// Adapt echo.Context to Gorilla handler
-	responseWriter := echoContext.Response().(*standard.Response).ResponseWriter
-	request := echoContext.Request().(*standard.Request).Request
+	responseWriter := echoContext.Response().Writer
+	request := echoContext.Request()
 
 	// We're now ok talking to CF, time to upgrade the request to a WebSocket connection
 	log.Debugf("Upgrading request to the WebSocket protocol...")

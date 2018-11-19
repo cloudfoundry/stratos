@@ -64,7 +64,7 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		req.UserGUID = userGUID
 		req.ResultGUID = metric.endpoint.GUID
 		req.EndpointGUID = metric.metrics.EndpointGUID
-		req.Method = c.Request().Method()
+		req.Method = c.Request().Method
 
 		addQueries := queries
 		if len(addQueries) > 0 {
@@ -104,13 +104,13 @@ func makePrometheusRequestURI(c echo.Context, prometheusOp string, modify string
 }
 
 func getEchoURL(c echo.Context) url.URL {
-	u := c.Request().URL().(*standard.URL).URL
+	u := c.Request().URL
 	return *u
 }
 
 // Metrics API endpoints - admin - for a Cloud Foundry deployment
 func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	return m.makePrometheusRequest(c, cnsiList, "")
 }
@@ -157,7 +157,7 @@ func (m *MetricsSpecification) getCloudFoundryCellMetrics(c echo.Context) error 
 		return errors.New("Unsupported prometheus query")
 	}
 
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	return m.makePrometheusRequest(c, cnsiList, "")
 }

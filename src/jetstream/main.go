@@ -549,6 +549,7 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
+	e.HideBanner = true
 
 	// Root level middleware
 	if !isUpgrade {
@@ -768,7 +769,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
 		e.Group("", middleware.Gzip()).Static("/", staticDir)
-		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
+		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
 		log.Info("Serving static UI resources")
 	}
 }
@@ -782,7 +783,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 		}
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
-		if strings.Index(c.Request().URI(), "/pp") != 0 && code == 404 {
+		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
 			c.File(path.Join(staticDir, "index.html"))
 		}
 

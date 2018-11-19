@@ -201,17 +201,19 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
-		if c.Request().Header().Contains("Upgrade") &&
-			c.Request().Header().Contains("Sec-Websocket-Key") {
+		upgrade := c.Request().Header.Get("Sec-Websocket-Key")
+		webSocketKey := c.Request().Header.Get("Sec-Websocket-Key")
+
+		if len(upgrade) > 0 && len(webSocketKey) > 0 {
 			log.Infof("Not redirecting this request")
 			return h(c)
 		}
 
 		// Check that we are on HTTPS - redirect if not
-		if c.Request().Header().Contains("X-Forwarded-Proto") {
-			proto := c.Request().Header().Get("X-Forwarded-Proto")
+		proto := c.Request().Header.Get("X-Forwarded-Proto")
+		if len(proto) > 0 {
 			if proto != "https" {
-				redirect := fmt.Sprintf("https://%s%s", c.Request().Host(), c.Request().URI())
+				redirect := fmt.Sprintf("https://%s%s", c.Request().Host, c.Request().RequestURI)
 				return c.Redirect(301, redirect)
 			}
 			return h(c)
@@ -242,7 +244,7 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			}
 			sessionGUID := fmt.Sprintf("%s", guid)
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity
-			w := c.Response().(*standard.Response).ResponseWriter
+			w := c.Response().Writer
 			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
 			http.SetCookie(w, cookie)
 		}
