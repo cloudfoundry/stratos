@@ -77,10 +77,5 @@ import { EndpointHealthCheck } from './endpoints-health-checks';
     LogOutDialogComponent
   ],
 })
-export class CoreModule {
-  constructor(endpointService: EndpointsService, store: Store<AppState>) {
-    endpointService.registerHealthCheck(new EndpointHealthCheck('cf', (endpoint) => store.dispatch(new GetCFInfo(endpoint.guid))));
-  }
-
-}
+export class CoreModule { }
 
