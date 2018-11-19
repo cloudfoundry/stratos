@@ -6,7 +6,6 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
-import { MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
@@ -173,7 +172,19 @@ export class ServicesHelperE2E {
     let cfGuid: string;
     return getCfCnsi.then(guid => {
       cfGuid = guid;
-      return this.fetchServicesInstances(cfGuid);
+      return this.fetchServicesInstances(cfGuid).catch(failure => {
+        if (failure && failure.error && failure.error.statusCode === 404) {
+          const emptyRes: CFResponse = {
+            next_url: '',
+            prev_url: '',
+            resources: [],
+            total_pages: 0,
+            total_results: 0
+          };
+          return emptyRes;
+        }
+        throw failure;
+      });
     }).then(response => {
       const services = response.resources;
       const serviceInstances = services.filter(serviceInstance => {
