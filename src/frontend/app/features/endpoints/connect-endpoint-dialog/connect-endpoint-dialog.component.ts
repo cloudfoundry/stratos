@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { delay, filter, map, pairwise, startWith, switchMap, distinctUntilChanged, tap } from 'rxjs/operators';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -15,6 +15,7 @@ import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   connecting$: Observable<boolean>;
   connectingError$: Observable<boolean>;
   fetchingInfo$: Observable<boolean>;
-  endpointConnected$: Observable<boolean>;
+  endpointConnected$: Observable<[boolean, EndpointModel]>;
   valid$: Observable<boolean>;
   canSubmit$: Observable<boolean>;
 
@@ -59,6 +60,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     public fb: FormBuilder,
     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
     public snackBar: MatSnackBar,
+    public endpointsService: EndpointsService,
     @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
       guid: string,
@@ -126,12 +128,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       });
 
     this.connectingSub = this.endpointConnected$.pipe(
-      filter(connected => connected),
-      delay(this.connectDelay))
-      .subscribe(() => {
+      filter(([connected]) => connected),
+      delay(this.connectDelay),
+      tap(() => {
         this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
         this.dialogRef.close();
-      });
+      }),
+      distinctUntilChanged(([connected], [oldConnected]) => connected && oldConnected),
+      tap(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
+    ).subscribe();
   }
 
   dealWithFile($event, fileName: string) {
@@ -167,7 +172,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     ).pipe(
-      map(request => !!(request && request.api_endpoint && request.user)));
+      map(endpoint => [!!(endpoint && endpoint.api_endpoint && endpoint.user), endpoint])
+    );
     const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
     this.connecting$ = busy$.pipe(
       pairwise(),
