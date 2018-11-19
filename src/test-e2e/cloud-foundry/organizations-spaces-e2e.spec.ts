@@ -12,13 +12,13 @@ import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 describe('CF - Manage Organizations and Spaces', () => {
 
   const testOrgName = e2e.helper.getCustomerOrgSpaceLabel(null, 'org');
+  const testOrg2Name = e2e.helper.getCustomerOrgSpaceLabel(null, 'org2');
   const testSpaceName = e2e.helper.getCustomerOrgSpaceLabel(null, 'space');
   let endpointGuid;
 
   let cloudFoundry: CfTopLevelPage;
 
   let cfHelper: CFHelpers;
-  const listComponent = new ListComponent();
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
@@ -44,7 +44,10 @@ describe('CF - Manage Organizations and Spaces', () => {
     cloudFoundry.waitForPageOrChildPage();
   });
 
-  afterAll(() => cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName));
+  afterAll(() => Promise.all([
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName),
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrg2Name)
+  ]));
 
   it('Should validate org name', () => {
     const cardView = cloudFoundry.goToOrgView();
@@ -91,7 +94,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitUntilShown();
 
     // Delete the org
-    cardView.cards.waitForCardByTitle(testOrgName).then(card => {
+    cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(card => {
       card.openActionMenu().then(menu => {
         menu.clickItem('Delete');
         ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', testOrgName);
@@ -128,7 +131,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     const cardView = cloudFoundry.goToOrgView();
     const list = new ListComponent();
     list.refresh();
-    cardView.cards.findCardByTitle(testOrgName).then(org => {
+    cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
@@ -150,7 +153,7 @@ describe('CF - Manage Organizations and Spaces', () => {
       cardView.cards.waitUntilShown();
 
       // Get the card for the space
-      cardView.cards.findCardByTitle(testSpaceName).then(space => {
+      cardView.cards.findCardByTitle(testSpaceName).then((space: MetaCard) => {
         space.openActionMenu().then(menu => {
           menu.clickItem('Delete');
           ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
@@ -162,22 +165,22 @@ describe('CF - Manage Organizations and Spaces', () => {
     });
   });
 
-  xit('Should create an org and a space', () => {
+  it('Should create an org and a space', () => {
     const cardView = cloudFoundry.goToOrgView();
 
     // Click the add button to add an organization
     cloudFoundry.header.clickIconButton('add');
     const modal = new StepperComponent();
     modal.getStepperForm().fill({
-      'orgname': testOrgName
+      'orgname': testOrg2Name
     });
-    expect(modal.canNext()).toBeTruthy();
+    modal.waitUntilCanNext('Create');
     modal.next();
 
     cardView.cards.waitUntilShown();
 
     // Go to the org and create a space
-    cardView.cards.findCardByTitle(testOrgName).then(org => {
+    cardView.cards.findCardByTitle(testOrg2Name, MetaCardTitleType.CUSTOM, true).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
