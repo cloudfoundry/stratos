@@ -191,9 +191,13 @@ export class ServicesHelperE2E {
         return serviceInstanceNames.findIndex(name => name === serviceInstance.entity.name) >= 0;
       });
       return serviceInstances.length ?
-        promise.all(serviceInstances.map(serviceInstance => this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid))) :
+        promise.all(serviceInstances.map(serviceInstance => this.cleanUpService(cfGuid, serviceInstance.metadata.guid))) :
         promise.fullyResolved(createEmptyCfResponse());
     });
+  }
+
+  private cleanUpService(cfGuid: string, serviceGuid: string): promise.Promise<any> {
+    return this.deleteServiceInstance(cfGuid, serviceGuid).catch(e => e2e.log(`Ignoring failed service instance delete: ${e}`));
   }
 
   getServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true) {
