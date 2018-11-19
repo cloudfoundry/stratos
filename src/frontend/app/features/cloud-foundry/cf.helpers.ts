@@ -22,7 +22,7 @@ import {
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ActiveRouteCfOrgSpace, ActiveRouteCfCell } from './cf-page.types';
 import { ICfRolesState } from '../../store/types/current-user-roles.types';
 import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
@@ -180,9 +180,24 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   });
 }
 
+export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {
+  return ({
+    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    cellId: getIdFromRoute(activatedRoute, 'cellId'),
+  });
+}
+
 export const getActiveRouteCfOrgSpaceProvider = {
   provide: ActiveRouteCfOrgSpace,
   useFactory: getActiveRouteCfOrgSpace,
+  deps: [
+    ActivatedRoute,
+  ]
+};
+
+export const getActiveRouteCfCellProvider = {
+  provide: ActiveRouteCfCell,
+  useFactory: getActiveRouteCfCell,
   deps: [
     ActivatedRoute,
   ]

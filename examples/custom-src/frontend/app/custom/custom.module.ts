@@ -4,8 +4,8 @@ import { Customizations, CustomizationsMetadata } from '../core/customizations.t
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { AcmeLoginComponent } from './acme-login/acme-login.component';
-import { StratosNavExtension } from '../core/extension/extension-service';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
+import { AppActionExtensionComponent } from './app-action-extension/app-action-extension.component';
 import { AcmeSupportInfoComponent } from './acme-support-info/acme-support-info.component';
 
 const AcmeCustomizations: CustomizationsMetadata = {
@@ -14,19 +14,6 @@ const AcmeCustomizations: CustomizationsMetadata = {
   supportInfoComponent: AcmeSupportInfoComponent,
 };
 
-// CustomModule is bundled in to the main application bundle
-@StratosNavExtension({
-  routes: [{
-    path: 'example',
-    loadChildren: 'app/custom/nav-extension/nav-extension.module#NavExtensionModule',
-    data: {
-      stratosNavigation: {
-        text: 'Example',
-        matIcon: 'extension'
-      }
-    }
-  }]
-})
 @NgModule({
   imports: [
     CoreModule,
@@ -36,12 +23,14 @@ const AcmeCustomizations: CustomizationsMetadata = {
   declarations: [
     AcmeLoginComponent,
     AppTabExtensionComponent,
+    AppActionExtensionComponent,
     AcmeSupportInfoComponent
   ],
   entryComponents: [
     AcmeLoginComponent,
-    // You must specify the tab as an entry component
+    // You must specify the tab and action as an entry components
     AppTabExtensionComponent,
+    AppActionExtensionComponent,
     AcmeSupportInfoComponent
   ],
   providers: [

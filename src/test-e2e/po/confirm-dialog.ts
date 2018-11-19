@@ -1,6 +1,7 @@
-import { Component } from './component.po';
-
 import { by, element, promise } from 'protractor';
+
+import { Component } from './component.po';
+import { FormComponent } from './form.po';
 
 export class DialogButton {
   index: number;
@@ -8,6 +9,7 @@ export class DialogButton {
   class: string;
   click: Function;
   isWarning: boolean;
+  isEnabled: boolean;
 }
 
 /**
@@ -16,7 +18,7 @@ export class DialogButton {
 export class ConfirmDialogComponent extends Component {
 
   // Helper to wait for a dialog to be shown, check button, title then click confirm button and wait for dialog to close
-  public static expectDialogAndConfirm(confirmButtonLabel, title = null) {
+  public static expectDialogAndConfirm(confirmButtonLabel, title = null, enterNameText: string = null) {
     const dialog = new ConfirmDialogComponent();
     dialog.waitUntilShown();
     dialog.getButtons().then(btns => {
@@ -25,6 +27,14 @@ export class ConfirmDialogComponent extends Component {
     });
     if (title) {
       expect(dialog.getTitle()).toBe(title);
+    }
+
+    if (enterNameText) {
+      expect(dialog.confirmEnabled()).toBeFalsy();
+      dialog.enterConfirmText('JUNK132434325365$');
+      expect(dialog.confirmEnabled()).toBeFalsy();
+      dialog.enterConfirmText(enterNameText);
+      expect(dialog.confirmEnabled()).toBeTruthy();
     }
 
     dialog.confirm();
@@ -46,6 +56,15 @@ export class ConfirmDialogComponent extends Component {
     return this.getButtons().then(btns => btns[1].click());
   }
 
+  confirmEnabled(): promise.Promise<boolean> {
+    return this.getButtons().then(btns => btns[1].isEnabled);
+  }
+
+  enterConfirmText(text: string): promise.Promise<void> {
+    const form = new FormComponent(this.locator);
+    return form.fill({ typetoconfirm: text });
+  }
+
   getTitle(): promise.Promise<string> {
     return this.locator.element(by.className('confirm-dialog__header-title')).getText();
   }
@@ -62,7 +81,8 @@ export class ConfirmDialogComponent extends Component {
         label: elm.getText(),
         class: elm.getAttribute('class'),
         isWarning: elm.getAttribute('class').then(v => v.indexOf('mat-warn') >= 0),
-        click: elm.click
+        click: elm.click,
+        isEnabled: elm.isEnabled()
       };
     });
   }

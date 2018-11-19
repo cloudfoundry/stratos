@@ -1,10 +1,12 @@
-import { by, element } from 'protractor';
+import { browser, by, element, protractor } from 'protractor';
 
 import { FormComponent } from '../../po/form.po';
 import { ListComponent } from '../../po/list.po';
 import { Page } from '../../po/page.po';
 import { StepperComponent } from '../../po/stepper.po';
 import { TableComponent } from '../../po/table.po';
+
+const until = protractor.ExpectedConditions;
 
 export class DeployApplication extends Page {
 
@@ -28,4 +30,8 @@ export class DeployApplication extends Page {
     return new FormComponent(element(by.css('app-deploy-application-options-step form')));
   }
 
+  public waitUntilDeployed(timeout = 120000) {
+    const deployStatus = element(by.cssContainingText('.deploy-app__title', 'Deployed'));
+    return browser.wait(until.presenceOf(deployStatus), timeout);
+  }
 }

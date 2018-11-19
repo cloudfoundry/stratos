@@ -1,5 +1,40 @@
 # Change Log
 
+## 2.2.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.2...2.2.0)
+
+This release contains a number of fixes and improvements. It introduces the first set of Extension points to allow
+users to take Stratos and extend it with new functionality. Initial documentation is available [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/docs/extensions.md). Additionally, when a metrics endpoint is connected, Cloud Foundry cell information is now shown in the Application Instances tab. A Cloud Foundry cells table and Cell summary pages have also been added to the Cloud Foundry section.
+
+**Fixes:**
+
+- Can't create an org then space [\#3093](https://github.com/cloudfoundry-incubator/stratos/issues/3093)
+- Fix issue where app status showed old info after successful deploy [\#3115](https://github.com/cloudfoundry-incubator/stratos/pull/3115)
+- Use our fork of go-flags to avoid dependency problems [\#3145](https://github.com/cloudfoundry-incubator/stratos/pull/3145)
+
+**Improvements:**
+
+- Extenstions: Add initial extensions support [\#2962](https://github.com/cloudfoundry-incubator/stratos/pull/2962)
+- When deleting certain entities force user to input name of entity [\#3118](https://github.com/cloudfoundry-incubator/stratos/issues/3118)
+- Usability: Deletion of an app should not allow deletion of "shared" routes and services [\#3034](https://github.com/cloudfoundry-incubator/stratos/issues/3034)
+- User menu improvements [\#3136](https://github.com/cloudfoundry-incubator/stratos/pull/3136)
+- Delete App Stepper: Disable delete of routes and services that are bound to other app/s [\#3129](https://github.com/cloudfoundry-incubator/stratos/pull/3129)
+- Metrics Charts: If only one series in chart don't show legend [\#3124](https://github.com/cloudfoundry-incubator/stratos/issues/3124)
+- Deploy Application: Ensure when leaving the stepper with a successfully deployed app the app state is correct [\#3021](https://github.com/cloudfoundry-incubator/stratos/issues/3021)
+- Endpoints Table: For non-cf endpoints show `-` instead of `\(x\) no` [\#3123](https://github.com/cloudfoundry-incubator/stratos/issues/3123)
+- Endpoints Table: Only show 'Admin' check icon for cf endpoints [\#3132](https://github.com/cloudfoundry-incubator/stratos/pull/3132)
+- Ensure CF Cells info is shown for non cf admins [\#3121](https://github.com/cloudfoundry-incubator/stratos/pull/3121)
+- Add helm chart labels  [\#3110](https://github.com/cloudfoundry-incubator/stratos/pull/3110)
+- Cf Cell: Applications list [\#3107](https://github.com/cloudfoundry-incubator/stratos/pull/3107)
+- Make instance termination more resilient [\#3103](https://github.com/cloudfoundry-incubator/stratos/pull/3103)
+- Remove rogue self dependency [\#3100](https://github.com/cloudfoundry-incubator/stratos/pull/3100)
+- Metrics: Add CF Cells view [\#3099](https://github.com/cloudfoundry-incubator/stratos/pull/3099)
+- Ensure we handle orgs with no users correctly [\#3098](https://github.com/cloudfoundry-incubator/stratos/pull/3098)
+- Metrics: Add Prometheus Job Information [\#3082](https://github.com/cloudfoundry-incubator/stratos/pull/3082)
+- Metrics: Add support for query\_range [\#3081](https://github.com/cloudfoundry-incubator/stratos/pull/3081)
+- Extensions: Add example of extension points [\#3048](https://github.com/cloudfoundry-incubator/stratos/pull/3048)
+
 ## 2.1.2
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.1...2.1.2)

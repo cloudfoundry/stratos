@@ -21,7 +21,7 @@ export class ApplicationE2eHelper {
   }
 
   static createApplicationName = (isoTime?: string, postFix?: string): string =>
-    E2EHelpers.createCustomName(customAppLabel + postFix, isoTime).toLowerCase()
+    E2EHelpers.createCustomName(customAppLabel + (postFix || ''), isoTime).toLowerCase()
   static createRouteName = (isoTime?: string): string =>
     E2EHelpers.createCustomName('route-' + customAppLabel, isoTime).toLowerCase().replace(/[-:.]+/g, '')
 
@@ -154,14 +154,17 @@ export class ApplicationE2eHelper {
           return promise.rejected(errorString);
         });
 
-        const cfRequestHelper = this.cfRequestHelper;
-
         // Delete app
         return deps.then(() => this.cfHelper.basicDeleteApp(cfGuid, app.metadata.guid)).then(() => {
           e2e.debugLog(`'${app.entity.name}': Successfully deleted.`);
         });
       })
-      .catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
+      .catch(err => {
+        /* tslint:disable:no-console*/
+        console.log(`Failed to delete app or associated dependencies: ${err}`);
+        /* tslint:enable:no-console*/
+        fail();
+      });
   }
 
   createApp(cfGuid: string, orgName: string, spaceName: string, appName: string, endpoint: E2EConfigCloudFoundry) {

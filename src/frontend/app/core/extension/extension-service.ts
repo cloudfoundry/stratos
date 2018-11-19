@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
+import { EndpointTypeConfig, initEndpointTypes } from '../../features/endpoints/endpoint-helpers';
+
+
+export const extensionsActionRouteKey = 'extensionsActionsKey';
+
 export interface EndpointTypeExtension {
   type: string;
   label: string;
@@ -9,6 +14,7 @@ export interface EndpointTypeExtension {
 
 export interface StratosExtensionConfig {
   routes?: Route[];
+  endpointTypes?: EndpointTypeConfig[];
 }
 
 // The different types of Tab
@@ -43,22 +49,30 @@ export interface StratosActionMetadata {
   iconFont?: string;
 }
 
+export interface StratosEndpointMetadata {
+  type: string;
+  label: string;
+  authTypes: string[];
+  icon: string;
+  iconFont: string;
+}
+
 export type StratosRouteType = StratosTabType | StratosActionType;
 
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
-  routes: [],
   loginComponent: null,
   extensionRoutes: {},
   tabs: {},
   actions: {},
+  endpointTypes: []
 };
 
 /**
  * Decortator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadata) {
-  return function(target) {
+  return function (target) {
     addExtensionTab(props.type, target, props);
   };
 }
@@ -67,19 +81,18 @@ export function StratosTab(props: StratosTabMetadata) {
  * Decortator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return function(target) {
+  return function (target) {
     addExtensionAction(props.type, target, props);
   };
 }
 
 /**
- * Decorator for an Extension module providing routes etc.
+ * Decorator for an Extension module
  */
-
 export function StratosExtension(config: StratosExtensionConfig) {
   return (_target) => {
-    if (config.routes) {
-      extensionMetadata.routes.push(config.routes);
+    if (config.endpointTypes) {
+      extensionMetadata.endpointTypes.push(...config.endpointTypes);
     }
   };
 }
@@ -123,13 +136,14 @@ export class ExtensionService {
 
   public metadata = extensionMetadata;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   /**
    * Initialize the extensions - to be invoked in the AppModule
    */
   public init() {
     this.applyRoutesFromExtensions(this.router);
+    this.applyNewEndpointTypes();
   }
 
   /**
@@ -137,10 +151,20 @@ export class ExtensionService {
    */
   private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
-    const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
+
+    // Find the route that has the 'about' page as a child - this is the dashboard base
+    const dashboardRoute = routeConfig.find(r => {
+      if (r.path === '' && !!r.component && r.children) {
+        return !!r.children.find(c => c.path === 'about');
+      } else {
+        return false;
+      }
+    });
+
     let needsReset = false;
     if (dashboardRoute) {
-      extensionMetadata.routes.forEach(routes => dashboardRoute.children = dashboardRoute.children.concat(routes));
+      // Move any stratos extension routes under the dashboard base route
+      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { }
       needsReset = true;
     }
 
@@ -155,9 +179,23 @@ export class ExtensionService {
       router.resetConfig(routeConfig);
     }
   }
+
+  private moveExtensionRoute(routeConfig: Route[], dashboardRoute: Route): boolean {
+    const index = routeConfig.findIndex(r => !!r.data && !!r.data.stratosNavigation);
+    if (index >= 0) {
+      const removed = routeConfig.splice(index, 1);
+      dashboardRoute.children = dashboardRoute.children.concat(removed);
+    }
+    return index >= 0;
+  }
+
+  private applyNewEndpointTypes() {
+    initEndpointTypes(this.metadata.endpointTypes);
+  }
 }
 
 // Helpers to access Extension metadata (without using the injectable Extension Service)
+
 
 export function getRoutesFromExtensions(routeType: StratosRouteType) {
   return extensionMetadata.extensionRoutes[routeType] || [];

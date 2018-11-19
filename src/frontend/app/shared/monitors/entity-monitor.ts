@@ -6,14 +6,14 @@ import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
-import { AppState } from './../../store/app-state';
+import { AppState } from '../../store/app-state';
 import {
   ActionState,
   getDefaultActionState,
   getDefaultRequestState,
   RequestInfoState,
   UpdatingSection
-} from './../../store/reducers/api-request-reducer/types';
+} from '../../store/reducers/api-request-reducer/types';
 
 export class EntityMonitor<T = any> {
   constructor(
@@ -21,6 +21,7 @@ export class EntityMonitor<T = any> {
     public id: string,
     public entityKey: string,
     public schema: normalizrSchema.Entity,
+    startWithNull = true
   ) {
     const defaultRequestState = getDefaultRequestState();
     this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
@@ -39,13 +40,19 @@ export class EntityMonitor<T = any> {
       distinctUntilChanged()
     );
 
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount(), );
-    this.entity$ = this.getEntityObservable(
+    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount());
+
+    const entity$ = this.getEntityObservable(
       schema,
       store.select(selectEntity<T>(entityKey, id)),
       this.entityRequest$,
       store.select(getAPIRequestDataState),
     );
+    if (startWithNull) {
+      this.entity$ = entity$.pipe(startWith(null));
+    } else {
+      this.entity$ = entity$;
+    }
   }
   private updatingSectionObservableCache: {
     [key: string]: Observable<ActionState>
@@ -107,8 +114,7 @@ export class EntityMonitor<T = any> {
       ]) => {
         return entity ? denormalize(entity, schema, entities) : null;
       }),
-      distinctUntilChanged(),
-      startWith(null)
+      distinctUntilChanged()
     );
   }
 

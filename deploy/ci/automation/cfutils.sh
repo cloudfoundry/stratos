@@ -33,6 +33,13 @@ function clean_deployments {
     docker kill $RUNNING
   fi
 
+  echo "Stopping previous Docker All-in-one Nightly (if any)"
+  # Kill any existing docker all-in-one nightly docker containers
+  RUNNING=$(docker ps -q --filter "ancestor=splatform/stratos")
+  if [ -n "$RUNNING" ]; then
+    docker kill $RUNNING
+  fi
+
   # Delete existing Stratos instance if there is one
   echo "Deleting previous Stratos app from CF (if any)"
   cf delete -f -r console > /dev/null 2>&1

@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 )
@@ -72,6 +73,7 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
+	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
 }
 
 func (m *MetricsSpecification) GetType() string {
@@ -216,12 +218,30 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	endpointsMap := make(map[string]*interfaces.ConnectedEndpoint)
 	results := make(map[string]EndpointMetricsRelation)
 
+	// Get Endpoints the user is connected to
 	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID)
+
 	if err != nil {
 		return nil, err
 	}
 
-	for _, endpoint := range userEndpoints {
+	allUserAccessibleEndpoints := userEndpoints
+
+	// Get Endpoints that are shared in the system
+	systemSharedEndpoints, err := m.portalProxy.ListEndpointsByUser(tokens.SystemSharedUserGuid)
+
+	if err != nil {
+		return nil, err
+	}
+	for _, endpoint := range systemSharedEndpoints {
+		allUserAccessibleEndpoints = append(allUserAccessibleEndpoints, endpoint)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, endpoint := range allUserAccessibleEndpoints {
 		if stringInSlice(endpoint.GUID, cnsiList) {
 			// Found the Endpoint, so add it to our list
 			endpointsMap[endpoint.GUID] = endpoint
@@ -262,7 +282,6 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	if len(endpointsMap) != 0 {
 		return nil, errors.New("Can not find a metric provider for all of the specified endpoints")
 	}
-
 	return results, nil
 }
 

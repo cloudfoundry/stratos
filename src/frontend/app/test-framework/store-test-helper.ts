@@ -582,7 +582,8 @@ export function getInitialTestStoreState(): AppState {
       serviceBinding: {},
       service: {},
       githubCommits: {},
-      domain: {}
+      domain: {},
+      metrics: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -5454,7 +5455,7 @@ export function getInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073387}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073387}'
             },
             memory: 16,
             instances: 2,
@@ -5633,7 +5634,7 @@ export function getInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073124}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073124}'
             },
             memory: 16,
             instances: 1,
@@ -16335,7 +16336,7 @@ export function getInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '531233b9-4e0f-4252-8866-ec65081df515',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506078991}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506078991}'
             },
             memory: 16,
             instances: 1,
@@ -21729,7 +21730,7 @@ export function getInitialTestStoreState(): AppState {
           token_endpoint: 'https://cf.uaa.127.0.0.1.xip.io:2793',
           doppler_logging_endpoint: 'wss://doppler.127.0.0.1.xip.io:4443',
           skip_ssl_validation: true,
-          sso_allowed: true,          
+          sso_allowed: true,
           user: {
             guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
             name: 'admin',

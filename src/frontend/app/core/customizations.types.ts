@@ -6,6 +6,7 @@ import { InjectionToken } from '@angular/core';
 export interface CustomizationsMetadata {
   hasEula?: boolean;
   copyright?: string;
+  logoText?: string;
   supportInfoComponent?: any;
 }
 
