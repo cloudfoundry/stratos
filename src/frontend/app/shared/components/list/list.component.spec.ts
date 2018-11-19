@@ -15,7 +15,7 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
-import { CfEndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
+import { EndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
@@ -139,7 +139,7 @@ describe('ListComponent', () => {
         component.config.enableTextFilter = false;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;
-        component.config.cardComponent = CfEndpointCardComponent;
+        component.config.cardComponent = EndpointCardComponent;
         component.config.text.title = null;
         const columns = component.config.getColumns();
         columns.forEach(column => column.sort = false);
@@ -191,7 +191,7 @@ describe('ListComponent', () => {
         component.config.enableTextFilter = true;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;
-        component.config.cardComponent = CfEndpointCardComponent;
+        component.config.cardComponent = EndpointCardComponent;
         component.config.getColumns = () => [
           {
             columnId: 'filterTestKey',

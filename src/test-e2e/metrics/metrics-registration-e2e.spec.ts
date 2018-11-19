@@ -1,5 +1,5 @@
 import { e2e } from '../e2e';
-import { EndpointMetadata, EndpointsPage  } from '../endpoints/endpoints.po';
+import { EndpointMetadata, EndpointsPage } from '../endpoints/endpoints.po';
 import { RegisterDialog } from '../endpoints/register-dialog.po';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
