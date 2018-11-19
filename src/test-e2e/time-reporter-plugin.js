@@ -33,6 +33,10 @@
    TimeProcessor.prototype.displaySuite = function (suite, log) {
      return getTime() + ' - ' + log;
    };
+   
+   TimeProcessor.prototype.displaySpecStarted = function (spec, log) {
+     return getTime() + ' - ' + log;
+   };
 
    TimeProcessor.prototype.displaySuccessfulSpec = function (spec, log) {
      return getTime() + ' - ' + log;
