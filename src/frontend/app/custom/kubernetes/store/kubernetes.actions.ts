@@ -92,6 +92,24 @@ export class GetKubernetesReleasePods implements KubePaginationAction {
   paginationKey: string;
 }
 
+export class KubeHealthCheck implements KubePaginationAction {
+  constructor(public kubeGuid) {
+    this.paginationKey = kubeGuid + '-health-check';
+  }
+  initialParams = {
+    limit: 1
+  };
+  type = GET_NODES_INFO;
+  entityKey = kubernetesNodesSchemaKey;
+  entity = [entityFactory(kubernetesNodesSchemaKey)];
+  actions = [
+    GET_NODES_INFO,
+    GET_NODES_INFO_SUCCESS,
+    GET_NODES_INFO_FAILURE
+  ];
+  paginationKey: string;
+}
+
 export class GetKubernetesNodes implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesNodesSchemaKey, kubeGuid);

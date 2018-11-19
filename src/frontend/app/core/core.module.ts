@@ -22,6 +22,10 @@ import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
+import { Store } from '@ngrx/store';
+import { AppState } from '../store/app-state';
+import { GetCFInfo } from '../store/actions/cloud-foundry.actions';
+import { EndpointHealthCheck } from './endpoints-health-checks';
 
 
 @NgModule({
@@ -73,4 +77,10 @@ import { PageNotFoundComponentComponent } from './page-not-found-component/page-
     LogOutDialogComponent
   ],
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor(endpointService: EndpointsService, store: Store<AppState>) {
+    endpointService.registerHealthCheck(new EndpointHealthCheck('cf', (endpoint) => store.dispatch(new GetCFInfo(endpoint.guid))));
+  }
+
+}
+
