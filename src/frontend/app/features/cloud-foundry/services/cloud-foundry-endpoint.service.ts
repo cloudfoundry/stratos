@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -15,7 +15,6 @@ import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { DeleteOrganization, GetAllOrganizations } from '../../../store/actions/organization.actions';
 import { AppState } from '../../../store/app-state';
 import {
-  applicationSchemaKey,
   cfInfoSchemaKey,
   domainSchemaKey,
   endpointSchemaKey,
@@ -59,6 +58,7 @@ export class CloudFoundryEndpointService {
   paginationSubscription: any;
   allApps$: Observable<APIResource<IApp>[]>;
   hasAllApps$: Observable<boolean>;
+  loadingApps$: Observable<boolean>;
   totalApps$: Observable<number>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
@@ -71,6 +71,8 @@ export class CloudFoundryEndpointService {
   cfGuid: string;
 
   getAllOrgsAction: GetAllOrganizations;
+
+  private getAllAppsAction: GetAllApplications;
 
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
@@ -109,6 +111,7 @@ export class CloudFoundryEndpointService {
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
+    this.getAllAppsAction = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       endpointSchemaKey,
@@ -152,18 +155,23 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObservables() {
-    const action = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
     const pagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
-      action,
-      paginationMonitor: this.pmf.create(action.paginationKey, entityFactory(action.entityKey))
+      action: this.getAllAppsAction,
+      paginationMonitor: this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey))
     });
 
     this.allApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
       switchMap(() => pagObs.pagination$),
       filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
       switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$)
+    );
+
+    this.loadingApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
+      switchMap(() => pagObs.pagination$),
+      filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[pagination.currentPage]),
+      map(pagination => pagination.pageRequests[pagination.currentPage].busy)
     );
 
     this.hasAllApps$ = this.allApps$.pipe(
@@ -251,5 +259,9 @@ export class CloudFoundryEndpointService {
 
   deleteOrg(orgGuid: string, endpointGuid: string) {
     this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
+  }
+
+  fetchApps() {
+    this.store.dispatch(this.getAllAppsAction);
   }
 }
