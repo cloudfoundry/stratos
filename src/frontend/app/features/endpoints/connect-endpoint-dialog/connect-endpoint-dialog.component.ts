@@ -172,7 +172,10 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     ).pipe(
-      map(endpoint => [!!(endpoint && endpoint.api_endpoint && endpoint.user), endpoint])
+      map(endpoint => {
+        const isConnected = !!(endpoint && endpoint.api_endpoint && endpoint.user);
+        return [isConnected, endpoint] as [boolean, EndpointModel];
+      })
     );
     const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
     this.connecting$ = busy$.pipe(
