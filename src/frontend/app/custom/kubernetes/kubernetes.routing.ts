@@ -29,26 +29,26 @@ const kubernetes: Routes = [{
   component: KubernetesComponent
 },
 {
-  path: ':kubeId/apps/:releaseName/pods/:namespace/:podName',
+  path: ':endpointId/apps/:releaseName/pods/:namespace/:podName',
   component: PodMetricsComponent,
 },
 {
-  path: ':kubeId/nodes/:nodeName/pods/:namespace/:podName',
+  path: ':endpointId/nodes/:nodeName/pods/:namespace/:podName',
   component: PodMetricsComponent,
 },
 {
-  path: ':kubeId/pods/:namespace/:podName',
+  path: ':endpointId/pods/:namespace/:podName',
   component: PodMetricsComponent,
 },
 {
-  path: ':kubeId/namespaces/:namespaceName/pods/:podName',
+  path: ':endpointId/namespaces/:namespaceName/pods/:podName',
   component: PodMetricsComponent,
   data: {
     uiFullView: true
   },
 },
 {
-  path: ':kubeId/nodes/:nodeName',
+  path: ':endpointId/nodes/:nodeName',
   component: KubernetesNodeComponent,
   data: {
     uiFullView: true
@@ -74,7 +74,7 @@ const kubernetes: Routes = [{
   ]
 },
 {
-  path: ':kubeId/namespaces/:namespaceName',
+  path: ':endpointId/namespaces/:namespaceName',
   component: KubernetesNamespaceComponent,
   data: {
     uiFullView: true
@@ -92,7 +92,7 @@ const kubernetes: Routes = [{
   ]
 },
 {
-  path: ':kubeId/apps/:releaseName',
+  path: ':endpointId/apps/:releaseName',
   component: HelmReleaseComponent,
   data: {
     uiFullView: true
@@ -114,7 +114,7 @@ const kubernetes: Routes = [{
   ]
 },
 {
-  path: ':kubeId',
+  path: ':endpointId',
   component: KubernetesTabBaseComponent,
   data: {
     uiFullView: true

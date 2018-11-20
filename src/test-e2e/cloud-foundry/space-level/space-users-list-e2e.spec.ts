@@ -3,6 +3,7 @@ import { protractor } from 'protractor';
 import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { E2EHelpers } from '../../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../../po/cf-users-list.po';
 import { setUpTestOrgSpaceE2eTest } from '../users-list-e2e.helper';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
@@ -32,6 +33,9 @@ describe('Space Users List -', () => {
       return orgPage.goToUsersTab();
     });
   });
+
+  const timeout = 60000;
+  extendE2ETestTime(timeout);
 
   it('Correct role pills shown, pills removed successfully', () => {
     expect(orgPage.isActivePageOrChildPage()).toBeTruthy();
@@ -76,10 +80,8 @@ describe('Space Users List -', () => {
 
     const spaceChipList = usersTable.getPermissions(userRowIndex, true);
     expect(spaceChipList.getChipElements().count()).toBe(0);
-  });
+  }, timeout);
 
 
-  afterAll(() => {
-    return cfHelper.deleteOrgIfExisting(cfGuid, orgName);
-  });
+  afterAll(() => cfHelper.deleteOrgIfExisting(cfGuid, orgName));
 });
