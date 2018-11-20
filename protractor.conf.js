@@ -10,6 +10,7 @@ const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
+const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -51,8 +52,10 @@ if (process.env.STRATOS_SCRIPTS_TIMEOUT) {
 
 // Allow test report to show relative times of tests
 const specReporterCustomProcessors = [];
+let showTimesInReport = false;
 if (process.env.STRATOS_E2E_LOG_TIME || browserstackHelper.isConfigured()) {
   specReporterCustomProcessors.push(timeReporterPlugin);
+  showTimesInReport = true;
 }
 
 const excludeTests = [
@@ -127,6 +130,9 @@ exports.config = {
   params: secrets,
   onPrepare() {
     skipPlugin.install(jasmine);
+    if (showTimesInReport) {
+      browserReporterPlugin.install(jasmine, browser);
+    }
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
@@ -146,6 +152,9 @@ exports.config = {
       customProcessors: specReporterCustomProcessors
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
+    if (showTimesInReport) {
+      jasmine.getEnv().addReporter(browserReporterPlugin.reporter());
+    }
   }
 };
 

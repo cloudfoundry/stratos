@@ -30,7 +30,7 @@
 
   // Need name and key environment variables set to run with Browserstack
   module.exports.isConfigured = function () {
-    return process.env[BROWSERSTACK_USER] && process.env[BROWSERSTACK_KEY];
+    return process.env[BROWSERSTACK_USER] && process.env[BROWSERSTACK_KEY] && process.env[BROWSERSTACK_TARGET] ;
   };
 
   module.exports.configure = function (config) {
