@@ -550,6 +550,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	log.Debug("start")
 	e := echo.New()
 	e.HideBanner = true
+	e.HidePort = true
 
 	// Root level middleware
 	if !isUpgrade {
@@ -601,7 +602,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
-			log.Warnf("Failed to start HTTP/S server", engineErr)
+			log.Warnf("Failed to start HTTP/S server: %v+", engineErr)
 		}
 	}
 

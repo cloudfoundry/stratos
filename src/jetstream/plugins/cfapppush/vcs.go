@@ -93,7 +93,7 @@ func (v *vcsCmd) run1(dir string, cmdline string, keyval []string, verbose bool)
 
 	_, err := exec.LookPath(v.cmd)
 	if err != nil {
-		log.Warnf("Missing %s command. Make sure %s is in your path", v.name)
+		log.Warnf("Missing command. Make sure %s is in your path", v.cmd)
 		return nil, err
 	}
 

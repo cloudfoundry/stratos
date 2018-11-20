@@ -70,7 +70,7 @@ const mockURLString = "http://localhost:9999/some/fake/url/"
 
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
-	ctx := e.NewContext(standard.NewRequest(req, nil), standard.NewResponse(res, nil))
+	ctx := e.NewContext(req, res)
 
 	return e, ctx
 }

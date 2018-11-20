@@ -87,7 +87,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 
 // Save - Persist a Console setup to a datastore
 func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleConfig) error {
-	log.Debug("Saving ConsoleConfig: %+v", config)
+	log.Debugf("Saving ConsoleConfig: %+v", config)
 
 	// First wipe any values that may exist in the table
 	err := c.deleteConsoleConfig()
@@ -105,7 +105,7 @@ func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleCo
 }
 
 func (c *ConsoleConfigRepository) UpdateConsoleConfig(config *interfaces.ConsoleConfig) error {
-	log.Debug("Saving ConsoleConfig: %+v", config)
+	log.Debugf("Saving ConsoleConfig: %+v", config)
 	if _, err := c.db.Exec(updateConsoleConfig, config.ConsoleAdminScope); err != nil {
 		return fmt.Errorf("Unable to Save Console Config record: %v", err)
 	}

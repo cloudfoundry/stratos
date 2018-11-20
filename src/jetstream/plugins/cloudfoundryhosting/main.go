@@ -182,7 +182,7 @@ func (ch *CFHosting) Init() error {
 			log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
 			ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
 		} else {
-			log.Info("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
+			log.Infof("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
 		}
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end

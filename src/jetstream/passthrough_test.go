@@ -238,7 +238,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 			WithArgs(mockCFGUID).
 			WillReturnRows(expectCFRow())
 
-		cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
+		cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method, ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
 
 		So(err, ShouldBeNil)
 
