@@ -36,6 +36,8 @@ export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const userFavoritesSchemaKey = 'userFavorites';
 export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
+export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
+export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -312,6 +314,12 @@ entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
 const UserFavoritesSchemaKey = new EntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
+
+const AppAutoscalerPolicySchema = new EntitySchema(appAutoscalerPolicySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerPolicySchemaKey] = AppAutoscalerPolicySchema;
+
+const AppAutoscalerHealthSchema = new EntitySchema(appAutoscalerHealthSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerHealthSchemaKey] = AppAutoscalerHealthSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,

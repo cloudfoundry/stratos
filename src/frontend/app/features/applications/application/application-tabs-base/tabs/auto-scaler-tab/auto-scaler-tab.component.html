@@ -1,3 +1,39 @@
-<div class="app-auto-scaler">
-  <iframe width='100%' height='2000' frameborder=0 [src]="srcUrl"></iframe>
+<div class="app-auto-scaler" *ngIf="appAutoscalerPolicy$ | async as policy">
+  <app-tile-grid>
+    <app-tile-group>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Status</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="app-metadata">
+              <div class="app-metadata__two-cols">
+                <app-metadata-item icon="check_circle">Enabled</app-metadata-item>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Limits</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="app-metadata">
+              <div class="app-metadata__two-cols">
+                <app-metadata-item label="Minimum">{{ policy.instance_min_count }}</app-metadata-item>
+                <app-metadata-item label="Maximum">{{ policy.instance_max_count }}</app-metadata-item>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>
+
+  <!-- <div *ngIf="applicationService.appAutoscalerHealth$ | async as health">
+    {{ health.status}}
+  </div> -->
 </div>
