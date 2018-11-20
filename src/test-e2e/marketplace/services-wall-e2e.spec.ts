@@ -1,7 +1,8 @@
-import { browser, protractor } from 'protractor';
+import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
@@ -11,15 +12,26 @@ describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
   const secretsHelper = new SecretsHelpers();
   let servicesHelperE2E: ServicesHelperE2E;
+  let e2eSetup;
+
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
+  });
 
-    // Ensure setup executes before creating the instance, or adding to exec stack
-    protractor.promise.controlFlow().execute(() => {
+  beforeEach(() => {
+    servicesWallPage.navigateTo();
+    servicesWallPage.waitForPage();
+  });
+
+  describe('', () => {
+    const timeout = 60000;
+    extendE2ETestTime(timeout);
+
+    it('- should create service instance all tests depend on', () => {
       // Create service instance
       const createServiceInstance = new CreateServiceInstance();
       servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
@@ -28,12 +40,6 @@ describe('Service Instances Wall', () => {
       createServiceInstance.waitForPage();
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
-
-  });
-
-  beforeEach(() => {
-    servicesWallPage.navigateTo();
-    servicesWallPage.waitForPage();
   });
 
   it('- should reach service instances wall page', () => {
