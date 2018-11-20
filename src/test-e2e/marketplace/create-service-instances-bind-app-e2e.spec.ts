@@ -76,9 +76,5 @@ describe('Create Service Instance with binding', () => {
       });
   });
 
-  afterAll((done) => {
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
 });
-
-

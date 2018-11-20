@@ -54,9 +54,5 @@ describe('Create Service Instance of Space Scoped Service', () => {
   });
 
 
-  afterAll((done) => {
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
 });
-
-
