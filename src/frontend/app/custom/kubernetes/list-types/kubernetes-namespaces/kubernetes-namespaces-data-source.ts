@@ -4,12 +4,10 @@ import { ListDataSource } from '../../../../shared/components/list/data-sources-
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
+import { entityFactory, kubernetesNamespacesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { GetKubernetesNamespaces } from '../../store/kubernetes.actions';
-
-import { map } from 'rxjs/operators';
-import { entityFactory, kubernetesPodsSchemaKey, kubernetesNamespacesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { KubernetesNamespace } from '../../store/kube.types';
+import { GetKubernetesNamespaces } from '../../store/kubernetes.actions';
 
 
 export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNamespace, any> {
@@ -24,10 +22,10 @@ export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNam
       action: new GetKubernetesNamespaces(kubeGuid.guid),
       schema: entityFactory(kubernetesNamespacesSchemaKey),
       getRowUniqueId: object => object.name,
-      //   getEmptyType: () => ({ name: '', value: '', }),
       paginationKey: getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

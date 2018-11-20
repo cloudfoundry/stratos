@@ -4,15 +4,11 @@ import { ListDataSource } from '../../../../shared/components/list/data-sources-
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { GetKubernetesPods, GetKubernetesPodsOnNode } from '../../store/kubernetes.actions';
-
-import { map, switchMap, flatMap } from 'rxjs/operators';
 import { entityFactory, kubernetesPodsSchemaKey } from '../../../../store/helpers/entity-factory';
-import { KubernetesPod } from '../../store/kube.types';
-import { HelmReleaseService } from '../../services/helm-release.service';
-import { Observable } from 'rxjs';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
+import { KubernetesPod } from '../../store/kube.types';
+import { GetKubernetesPodsOnNode } from '../../store/kubernetes.actions';
 
 export class KubernetesNodePodsDataSource extends ListDataSource<KubernetesPod, any> {
 
@@ -29,7 +25,8 @@ export class KubernetesNodePodsDataSource extends ListDataSource<KubernetesPod, 
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesPodsSchemaKey, kubeNodeService.nodeName, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

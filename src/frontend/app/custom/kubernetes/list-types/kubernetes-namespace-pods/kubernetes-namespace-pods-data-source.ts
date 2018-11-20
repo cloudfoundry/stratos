@@ -6,10 +6,9 @@ import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, kubernetesPodsSchemaKey } from '../../../../store/helpers/entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesNodeService } from '../../services/kubernetes-node.service';
+import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesPod } from '../../store/kube.types';
 import { GetKubernetesPodsInNamespace } from '../../store/kubernetes.actions';
-import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 
 export class KubernetesNamespacePodsDataSource extends ListDataSource<KubernetesPod, any> {
 
@@ -26,7 +25,8 @@ export class KubernetesNamespacePodsDataSource extends ListDataSource<Kubernetes
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesPodsSchemaKey, kubeNamespaceService.namespaceName, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

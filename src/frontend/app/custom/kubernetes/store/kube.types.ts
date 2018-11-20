@@ -19,7 +19,7 @@ export interface KubeService {
   status: ServiceStatus;
   spec: DeploymentSpec;
 }
-export interface KubernetesStatefuleSet {
+export interface KubernetesStatefulSet {
   metadata: ServiceMetadata;
   status: ServiceStatus;
   spec: ServiceSpec;

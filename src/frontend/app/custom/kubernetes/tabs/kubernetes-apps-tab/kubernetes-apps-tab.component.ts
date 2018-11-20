@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { KubernetesAppsListConfigService } from '../../list-types/kubernetes-apps/kubernetes-apps-list-config.service';
+import { Component } from '@angular/core';
+
 import { ListConfig } from '../../../../../../../src/frontend/app/shared/components/list/list.component.types';
+import { KubernetesAppsListConfigService } from '../../list-types/kubernetes-apps/kubernetes-apps-list-config.service';
 
 @Component({
   selector: 'app-kubernetes-apps-tab',
@@ -11,11 +12,4 @@ import { ListConfig } from '../../../../../../../src/frontend/app/shared/compone
     useClass: KubernetesAppsListConfigService,
   }]
 })
-export class KubernetesAppsTabComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class KubernetesAppsTabComponent { }

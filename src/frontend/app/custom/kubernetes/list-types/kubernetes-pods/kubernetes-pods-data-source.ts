@@ -24,7 +24,8 @@ export class KubernetesPodsDataSource extends ListDataSource<KubernetesPod, any>
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesPodsSchemaKey, kubeGuid.guid),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

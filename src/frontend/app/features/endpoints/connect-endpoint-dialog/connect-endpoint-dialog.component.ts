@@ -245,9 +245,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   submit() {
     this.hasAttemptedConnect = true;
     const { authType, authValues, systemShared } = this.endpointForm.value;
-    const authVal = authValues;
+    const authVal = { ...authValues };
+
     if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
       this.bodyContent = this.kubeconfig;
+      delete authVal.kubeconfig;
     }
     if (this.endpointForm.value.authType === 'kube-cert-auth') {
       /** Body content is in the following encoding:
@@ -256,6 +258,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       const certBase64 = btoa(this.cert);
       const certKeyBase64 = btoa(this.certKey);
       this.bodyContent = `${certBase64}:${certKeyBase64}`;
+      delete authVal.cert;
+      delete authVal.certKey;
     }
 
     this.store.dispatch(new ConnectEndpoint(

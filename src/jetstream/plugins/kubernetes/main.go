@@ -59,6 +59,19 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
+func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1")
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode >= 400 {
+		return errors.New("Unable to connect to endpoint")
+	}
+
+	return nil
+}
+
 func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Kubernetes Connect...")
 
