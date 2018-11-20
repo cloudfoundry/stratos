@@ -1,4 +1,4 @@
-<div class="suse-login">
+<div class="suse-login" id="app-login-page">
   <div class="suse-login__header">
     <div class="suse-login__title">SUSE Stratos</div>
   </div>
@@ -22,10 +22,10 @@
           </button>
         </form>
       </div>
-      <div class="suse-login__loading">
+      <div id="login__loading" class="suse-login__loading">
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       </div>
-      <div class="suse-login__message" [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
+      <div id="login-error-message" class="suse-login__message" [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
         {{ message }}
       </div>
     </div>
