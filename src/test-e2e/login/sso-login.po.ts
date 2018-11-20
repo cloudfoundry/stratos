@@ -65,7 +65,7 @@ export class SSOLoginPage {
     // We only need to login once, then we are logged in with SSO, so subsequent login
     // do not need to enter credentials - we need to detect this!
     browser.getTitle().then(function (title) {
-      if (title.indexOf('Stratos') === -1 ) {
+      if (title.indexOf('Stratos') === -1) {
         if (!SSOLoginPage.ssoLoginURL) {
           // SSO Login
           browser.getCurrentUrl().then(url => {
@@ -109,8 +109,13 @@ export class SSOLoginPage {
     return this.getLoginError().then(text => text === LOGIN_FAIL_MSG);
   }
 
+  waitForDashboardPage() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
+  }
+
   // Wait until an application page is shown (one that uses the dashboard base)
   waitForApplicationPage() {
+    // return browser.wait(until.presenceOf(element(by.tagName('app-application-wall'))), 5000);
     return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
   }
 
