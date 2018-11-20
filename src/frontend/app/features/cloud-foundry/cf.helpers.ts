@@ -9,10 +9,10 @@ import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
 import { AppState } from '../../store/app-state';
-import { applicationSchemaKey, endpointSchemaKey } from '../../store/helpers/entity-factory';
+import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';
-import { PaginationEntityState } from '../../store/types/pagination.types';
+import { PaginationEntityState, PaginatedAction } from '../../store/types/pagination.types';
 import {
   CfUser,
   CfUserRoleParams,
@@ -29,6 +29,8 @@ import { EndpointModel } from '../../store/types/endpoint.types';
 import { selectEntities } from '../../store/selectors/api.selectors';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { environment } from '../../../environments/environment';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -269,26 +271,35 @@ export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
 }
 
+export function createFetchTotalResultsPagKey(standardActionKey: string): string {
+  return standardActionKey + '-totalResults';
+}
+
 export function fetchTotalResults(
-  http: Http,
-  cfGuid: string,
-  partialUrl: string,
-  additionalParams: { [key: string]: string } = {}
+  action: PaginatedAction,
+  store: Store<AppState>,
+  paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<number> {
-  const options = new RequestOptions();
-  options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${partialUrl}`;
-  options.params = new URLSearchParams('');
-  options.params.set('results-per-page', '1');
-  Object.keys(additionalParams).forEach(key => options.params.set(key, additionalParams[key]));
-  options.method = 'get';
-  options.headers = new Headers();
-  options.headers.set('x-cap-cnsi-list', cfGuid);
-  options.headers.set('x-cap-passthrough', 'true');
-  return http.request(new Request(options)).pipe(
-    map(response => {
-      try {
-        const resData = response.json();
-        return resData.total_results;
-      } catch (e) { }
-    }));
+
+  action.paginationKey = createFetchTotalResultsPagKey(action.paginationKey);
+  action.initialParams['results-per-page'] = 1;
+  action.flattenPagination = false;
+
+  const pagObs = getPaginationObservables({
+    store,
+    action,
+    paginationMonitor: paginationMonitorFactory.create(
+      action.paginationKey,
+      entityFactory(action.entityKey)
+    )
+  });
+  // Ensure the request is made by sub'ing to the entities observable
+  pagObs.entities$.pipe(
+    first(),
+  ).subscribe();
+
+  return pagObs.pagination$.pipe(
+    filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
+    map(pag => pag.totalResults)
+  );
 }

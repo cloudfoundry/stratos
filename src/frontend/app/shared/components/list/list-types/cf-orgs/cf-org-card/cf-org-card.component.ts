@@ -11,6 +11,9 @@ import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.h
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import {
+  CloudFoundryOrganizationService,
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -18,6 +21,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
@@ -39,8 +43,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   subscriptions: Subscription[] = [];
   memoryTotal: number;
   instancesCount: number;
-  orgApps$: Observable<APIResource<any>[]>;
-  appCount: number;
+  appCount$: Observable<number>;
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
@@ -50,7 +53,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private cfEndpointService: CloudFoundryEndpointService,
     private store: Store<AppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     super();
 
@@ -81,9 +85,22 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       map(u => getOrgRolesString(u)),
     );
 
+    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasAllApps$.pipe(
+      switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrg(this.row) : observableOf(null))
+    );
+
+    this.appCount$ = allApps$.pipe(
+      switchMap(allApps => allApps ? observableOf(allApps.length) : CloudFoundryEndpointService.fetchAppCount(
+        this.store,
+        this.paginationMonitorFactory,
+        this.cfEndpointService.cfGuid,
+        this.row.metadata.guid
+      ))
+    );
+
     const fetchData$ = observableCombineLatest(
       userRole$,
-      this.cfEndpointService.getAppsInOrg(this.row)
+      allApps$
     ).pipe(
       tap(([role, apps]) => {
         this.setValues(role, apps);
@@ -95,20 +112,31 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
   }
 
-  setCounts = (apps: APIResource<any>[]) => {
-    this.appCount = apps.length;
+  setAppsDependentCounts = (apps: APIResource<IApp>[]) => {
     this.instancesCount = getStartedAppInstanceCount(apps);
   }
 
   setValues = (role: string, apps: APIResource<IApp>[]) => {
     this.userRolesInOrg = role;
-    this.setCounts(apps);
-    this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
-    const quotaDefinition = this.row.entity.quota_definition;
+    if (apps) {
+      this.setAppsDependentCounts(apps);
+      this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
+      this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
+    }
+    const quotaDefinition = this.row.entity.quota_definition || {
+      entity: {
+        memory_limit: -1,
+        app_instance_limit: -1,
+        instance_memory_limit: -1,
+        name: 'None assigned',
+        organization_guid: this.orgGuid,
+        total_services: -1,
+        total_routes: -1
+      },
+      metadata: null
+    };
     this.instancesLimit = quotaDefinition.entity.app_instance_limit;
     this.memoryLimit = quotaDefinition.entity.memory_limit;
-    this.
-      normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
   }
 
   ngOnDestroy = () => this.
