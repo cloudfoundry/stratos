@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -27,7 +27,7 @@ import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } fr
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState>) { }
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) { }
 
   sub: Subscription;
 
@@ -35,9 +35,13 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
 
   private startEndpointHealthCheckPulse() {
     this.endpointsService.checkAllEndpoints();
-    this.healthCheckTimeout = window.setInterval(() => {
-      this.endpointsService.checkAllEndpoints();
-    }, 30000);
+    this.ngZone.runOutsideAngular(() => {
+      this.healthCheckTimeout = window.setInterval(() => {
+        this.ngZone.run(() => {
+          this.endpointsService.checkAllEndpoints();
+        });
+      }, 30000);
+    });
   }
 
   private stopEndpointHealthCheckPulse() {
