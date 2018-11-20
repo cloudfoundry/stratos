@@ -11,4 +11,3 @@ export function extendE2ETestTime(newTimeout = 140000) {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 }
-

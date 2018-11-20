@@ -8,6 +8,7 @@ import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
@@ -120,49 +121,54 @@ describe('CF - Manage Organizations and Spaces', () => {
     });
   });
 
-  it('Should create and delete space', () => {
-    expect(testOrgName).toBeDefined();
-    expect(testSpaceName).toBeDefined();
+  describe('Long running tests - ', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
 
-    const ep = e2e.secrets.getDefaultCFEndpoint();
-    browser.driver.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, ep, testOrgName));
+    it('Should create and delete space', () => {
+      expect(testOrgName).toBeDefined();
+      expect(testSpaceName).toBeDefined();
 
-    // Go to org tab
-    const cardView = cloudFoundry.goToOrgView();
-    const list = new ListComponent();
-    list.refresh();
-    cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
-      org.click();
+      const ep = e2e.secrets.getDefaultCFEndpoint();
+      browser.driver.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, ep, testOrgName));
 
-      cloudFoundry.subHeader.clickItem('Spaces');
-      cardView.cards.waitUntilShown();
+      // Go to org tab
+      const cardView = cloudFoundry.goToOrgView();
+      const list = new ListComponent();
       list.refresh();
+      cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
+        org.click();
 
-      // Add space
-      // Click the add button to add a space
-      cloudFoundry.header.clickIconButton('add');
+        cloudFoundry.subHeader.clickItem('Spaces');
+        cardView.cards.waitUntilShown();
+        list.refresh();
 
-      const modal = new StepperComponent();
-      modal.getStepperForm().fill({
-        'spacename': testSpaceName
-      });
-      expect(modal.canNext()).toBeTruthy();
-      modal.next();
+        // Add space
+        // Click the add button to add a space
+        cloudFoundry.header.clickIconButton('add');
 
-      cloudFoundry.subHeader.clickItem('Spaces');
-      cardView.cards.waitUntilShown();
+        const modal = new StepperComponent();
+        modal.getStepperForm().fill({
+          'spacename': testSpaceName
+        });
+        expect(modal.canNext()).toBeTruthy();
+        modal.next();
 
-      // Get the card for the space
-      cardView.cards.findCardByTitle(testSpaceName).then((space: MetaCard) => {
-        space.openActionMenu().then(menu => {
-          menu.clickItem('Delete');
-          ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
-          cardView.cards.getCardCount().then(c => {
-            expect(c).toBe(0);
+        cloudFoundry.subHeader.clickItem('Spaces');
+        cardView.cards.waitUntilShown();
+
+        // Get the card for the space
+        cardView.cards.findCardByTitle(testSpaceName).then((space: MetaCard) => {
+          space.openActionMenu().then(menu => {
+            menu.clickItem('Delete');
+            ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
+            cardView.cards.getCardCount().then(c => {
+              expect(c).toBe(0);
+            });
           });
         });
       });
-    });
+    }, timeout);
   });
 
   it('Should create an org and a space', () => {
