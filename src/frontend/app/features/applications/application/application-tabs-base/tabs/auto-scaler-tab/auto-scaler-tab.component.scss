@@ -4,3 +4,14 @@
   position: relative;
   width: 100%;
 }
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  &__two-cols {
+    flex: 1;
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
+}
