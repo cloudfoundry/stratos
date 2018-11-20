@@ -238,7 +238,7 @@ export class APIEffect {
         const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
           endpointIds,
           url: error.url || apiAction.options.url,
-          eventCode: error.status || '500',
+          eventCode: error.status ? error.status + '' : '500',
           message: 'Jetstream API request error',
           error
         });

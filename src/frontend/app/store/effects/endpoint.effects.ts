@@ -121,6 +121,8 @@ export class EndpointsEffect {
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
         action.body,
+      ).pipe(
+        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
