@@ -130,9 +130,6 @@ exports.config = {
   params: secrets,
   onPrepare() {
     skipPlugin.install(jasmine);
-    if (showTimesInReport) {
-      browserReporterPlugin.install(jasmine, browser);
-    }
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
@@ -153,6 +150,7 @@ exports.config = {
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
     if (showTimesInReport) {
+      browserReporterPlugin.install(jasmine, browser);
       jasmine.getEnv().addReporter(browserReporterPlugin.reporter());
     }
   }
