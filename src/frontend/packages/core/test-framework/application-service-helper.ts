@@ -13,6 +13,7 @@ import { AppState } from '../../store/src/app-state';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { Observable, of as observableOf } from 'rxjs';
+import { AppAutoscalerPolicy, AppAutoscalerHealth } from '../store/types/app-autoscaler.types';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -51,6 +52,8 @@ export class ApplicationServiceMock {
   appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
     entityRequestInfo: { fetching: false }
   } as EntityInfo<APIResource<IAppSummary>>);
+  appAutoscalerPolicy$: Observable<EntityInfo<AppAutoscalerPolicy>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppAutoscalerPolicy>));
+  appAutoscalerHealth$: Observable<EntityInfo<AppAutoscalerHealth>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppAutoscalerHealth>));
   appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });
