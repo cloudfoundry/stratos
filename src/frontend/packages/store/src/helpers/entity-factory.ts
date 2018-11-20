@@ -38,6 +38,9 @@ export const userFavoritesSchemaKey = 'userFavorites';
 export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
 export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
 export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
+export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
+export const appAutoscalerAppMetricHistorySchemaKey = 'autoscalerAppMetricHistory';
+export const appAutoscalerInsMetricHistorySchemaKey = 'autoscalerInsMetricHistory';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -320,6 +323,15 @@ entityCache[appAutoscalerPolicySchemaKey] = AppAutoscalerPolicySchema;
 
 const AppAutoscalerHealthSchema = new EntitySchema(appAutoscalerHealthSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appAutoscalerHealthSchemaKey] = AppAutoscalerHealthSchema;
+
+const AppAutoscalerScalingHistorySchema = new EntitySchema(appAutoscalerScalingHistorySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerScalingHistorySchemaKey] = AppAutoscalerScalingHistorySchema;
+
+const AppAutoscalerAppMetricSchema = new EntitySchema(appAutoscalerAppMetricHistorySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerAppMetricHistorySchemaKey] = AppAutoscalerAppMetricSchema;
+
+const AppAutoscalerInsMetricSchema = new EntitySchema(appAutoscalerInsMetricHistorySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerInsMetricHistorySchemaKey] = AppAutoscalerInsMetricSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,

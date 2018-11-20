@@ -5,11 +5,19 @@ import { EntityServiceFactory } from '../../../../../../core/entity-service-fact
 import {
   entityFactory,
   appAutoscalerPolicySchemaKey,
+  appAutoscalerScalingHistorySchemaKey,
+  appAutoscalerAppMetricHistorySchemaKey,
+  appAutoscalerInsMetricHistorySchemaKey,
+  appAutoscalerHealthSchemaKey
 } from '../../../../../../store/helpers/entity-factory';
 import { ApplicationService } from '../../../../application.service';
-import { GetAppAutoscalerPolicyAction } from '../../../../../../store/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../../../../store/types/app-autoscaler.types';
+import { GetAppAutoscalerPolicyAction, GetAppAutoscalerScalingHistoryAction, GetAppAutoscalerHealthAction } from '../../../../../../store/actions/app-autoscaler.actions';
+import { AppAutoscalerPolicy, AppAutoscalerScalingHistory, AppAutoscalerHealth } from '../../../../../../store/types/app-autoscaler.types';
 import { map } from 'rxjs/operators';
+import {
+  CfAppInstancesConfigService,
+} from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 
 @Component({
   selector: 'app-auto-scaler-tab',
@@ -18,8 +26,13 @@ import { map } from 'rxjs/operators';
 })
 export class AutoScalerTabComponent implements OnInit {
 
+  appAutoscalerHealthService: EntityService;
   appAutoscalerPolicyService: EntityService;
+  appAutoscalerScalingHistoryService: EntityService;
+
+  appAutoscalerHealth$: Observable<AppAutoscalerHealth>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
 
   constructor(
     private applicationService: ApplicationService,
@@ -27,6 +40,13 @@ export class AutoScalerTabComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.appAutoscalerHealthService = this.entityServiceFactory.create(
+      appAutoscalerHealthSchemaKey,
+      entityFactory(appAutoscalerHealthSchemaKey),
+      "public",
+      new GetAppAutoscalerHealthAction(),
+      false
+    );
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       appAutoscalerPolicySchemaKey,
       entityFactory(appAutoscalerPolicySchemaKey),
@@ -34,11 +54,42 @@ export class AutoScalerTabComponent implements OnInit {
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid),
       false
     );
+    this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
+      appAutoscalerScalingHistorySchemaKey,
+      entityFactory(appAutoscalerScalingHistorySchemaKey),
+      this.applicationService.appGuid,
+      new GetAppAutoscalerScalingHistoryAction(this.applicationService.appGuid),
+      false
+    );
+
+    this.appAutoscalerHealth$ = this.appAutoscalerHealthService.entityObs$.pipe(
+      map(({ entity }) => {
+        console.log(entity)
+        return entity
+      }),
+      map((healthEntity, ddd) => {
+        console.log("appAutoscalerHealth", healthEntity, ddd)
+        return healthEntity && healthEntity.entity
+      })
+    );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      map(({ entity }) => entity),
-      map(policyEntity => {
-        console.log("appAutoscalerPolicy", policyEntity)
+      map(({ entity }) => {
+        console.log(entity)
+        return entity
+      }),
+      map((policyEntity, ddd) => {
+        console.log("appAutoscalerPolicy", policyEntity, ddd)
         return policyEntity && policyEntity.entity
+      })
+    );
+    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
+      map(({ entity }) => {
+        console.log(entity)
+        return entity
+      }),
+      map((historyEntity,ddd) => {
+        console.log("appAutoscalerScalingHistory", historyEntity, ddd)
+        return historyEntity && historyEntity.entity
       })
     );
   }

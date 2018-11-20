@@ -48,6 +48,9 @@ import {
   userProvidedServiceInstanceSchemaKey,
   appAutoscalerHealthSchemaKey,
   appAutoscalerPolicySchemaKey,
+  appAutoscalerScalingHistorySchemaKey,
+  appAutoscalerAppMetricHistorySchemaKey,
+  appAutoscalerInsMetricHistorySchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -143,4 +146,7 @@ export const defaultCfEntitiesState = {
   [userProvidedServiceInstanceSchemaKey]: [],
   [appAutoscalerHealthSchemaKey]: {},
   [appAutoscalerPolicySchemaKey]: {},
+  [appAutoscalerScalingHistorySchemaKey]: {},
+  [appAutoscalerAppMetricHistorySchemaKey]: {},
+  [appAutoscalerInsMetricHistorySchemaKey]: {},
 };
