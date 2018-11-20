@@ -1,11 +1,11 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { entityFactory, serviceBrokerSchemaKey } from '../helpers/entity-factory';
-import { PaginationAction } from '../types/pagination.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
-export class GetServiceBrokers extends CFStartAction implements PaginationAction {
+export class GetServiceBrokers extends CFStartAction implements PaginatedAction {
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
