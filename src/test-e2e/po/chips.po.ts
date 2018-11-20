@@ -26,7 +26,7 @@ export class ChipsComponent extends Component {
     return expandCollapse.isPresent().then(isPresent => {
       if (isPresent) {
         expandCollapse.click();
-        return expandCollapse.waitUntilNotShown('Waiting for chip list expand button to not be displayed');
+        return Component.waitUntilNotShown(expandCollapse);
       }
     });
   }
