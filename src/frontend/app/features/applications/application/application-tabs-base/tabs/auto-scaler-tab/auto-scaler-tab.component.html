@@ -15,7 +15,7 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile>
+      <app-tile size="1of3">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Limits</mat-card-title>
@@ -31,9 +31,29 @@
         </mat-card>
       </app-tile>
     </app-tile-group>
+
+    <app-tile-group>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Scaling Rules</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="app-metadata">
+              <div class="app-metadata__two-cols">
+                {{policy.scaling_rules.length}}
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
   </app-tile-grid>
 
-  <!-- <div *ngIf="applicationService.appAutoscalerHealth$ | async as health">
+  <div *ngIf="appAutoscalerScalingHistory$ | async as scalingHistory">
+    {{ scalingHistory.total_results}}
+  </div>
+  <div *ngIf="appAutoscalerHealth$ | async as health">
     {{ health.status}}
-  </div> -->
+  </div>
 </div>
