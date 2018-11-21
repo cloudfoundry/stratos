@@ -47,15 +47,15 @@ function clean() {
       DS="${BASH_REMATCH[3]}"
       TS="${BASH_REMATCH[4]}"
       TS="${TS:0:6}"
-      TIMESTAMP=$(echo $TIMESTAMP | awk '{print toupper($0)}')
-      EPOCH=$(date -j -f "%Y%m%d:%H%M%S" "$DS:$TS" "+%s")
-#      if [[ "$unamestr" == 'Darwin' ]]; then
-#        EPOCH=$(date -j -f "%Y-%M-%dT%T" $TIMESTAMP "+%s")
-#      else
-#        EPOCH=$(date -d $TIMESTAMP "+%s")
-#      fi
+      if [[ "$unamestr" == 'Darwin' ]]; then
+        EPOCH=$(date -j -f "%Y%m%d:%H%M%S" "$DS:$TS" "+%s")
+      else
+        TIMESTAMP="$DS ${TS:0:2}:${TS:2:2}:${TS:4:2}"
+        EPOCH=$(date -d "$TIMESTAMP" "+%s")
+      fi
       DIFF=$(($NOW-$EPOCH))
-      if [ $DIFF -gt 43200 ]; then
+      # Delete anything older than 6 hours
+      if [ $DIFF -gt 21600 ]; then
         if [ $DRYRUN == "false" ]; then
           echo "$NAME  [DELETE]"
           cf $CMD $NAME -f
@@ -70,18 +70,18 @@ function clean() {
 }
 
 echo "Cleaning old Orgs"
-ORGS="$(cf orgs | tail -n +5)"
-clean "$ORGS" "acceptance\.e2e\.travis" "delete-org"
+ORGS="$(cf orgs)"
+clean "$ORGS" "acceptance\.e2e\." "delete-org"
 
 cf target -o e2e -s e2e
 
 echo "Cleaning old Applications in e2e org/space"
-APPS="$(cf apps | tail -n +5)"
+APPS="$(cf apps)"
 # clean "$APPS" "acceptance\.e2e\..*\." "delete"
 clean "$APPS" "acceptance\.e2e\." "delete"
 
 echo "Cleaning old Service Instances in e2e org/space"
-SERVICES="$(cf services | tail -n +5)"
+SERVICES="$(cf services)"
 clean "$SERVICES" "acceptance\.e2e\." "delete-service"
 
 echo "Done"
