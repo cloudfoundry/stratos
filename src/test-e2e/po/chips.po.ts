@@ -1,4 +1,4 @@
-import { by, element, ElementFinder, promise, ElementArrayFinder } from 'protractor';
+import { by, element, ElementFinder, promise, ElementArrayFinder, browser } from 'protractor';
 
 import { ChipComponent } from './chip.po';
 import { Component } from './component.po';
@@ -17,15 +17,21 @@ export class ChipsComponent extends Component {
     return this.getChipElements().then((efs: ElementFinder[]) => efs.map((ef: ElementFinder) => new ChipComponent(ef)));
   }
 
-  getExpandCollapseChips() {
+  getExpandCollapseChips(): ElementFinder {
     return this.locator.element(by.css('button.app-chips__limit'));
   }
 
+  getExpandChips(): ElementFinder {
+    return this.getExpandCollapseChips().element(by.cssContainingText('span', '+'));
+  }
+
   expandIfCan(): promise.Promise<any> {
-    const expandCollapse = this.getExpandCollapseChips();
+    const expandCollapse = this.getExpandChips();
     return expandCollapse.isPresent().then(isPresent => {
       if (isPresent) {
-        return expandCollapse.click();
+        Component.scrollIntoView(expandCollapse);
+        expandCollapse.click();
+        return Component.waitUntilNotShown(expandCollapse);
       }
     });
   }

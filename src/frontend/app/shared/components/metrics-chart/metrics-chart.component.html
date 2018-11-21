@@ -7,21 +7,24 @@
     <mat-spinner *ngIf="isRefreshing$ | async" diameter="20" class="metrics-chart__refreshing"></mat-spinner>
     <mat-progress-bar *ngIf="isFetching$ | async" class="metrics-chart__loading" color="primary" mode="indeterminate">
     </mat-progress-bar>
-    <ng-template #other_content>
-      <div class="no-content">No results found
-        <div class="no-content__name" *ngIf="!title">
-          {{ chartConfig.yAxisLabel }}
+    <div class="metrics-chart" *ngIf="!(isFetching$ | async)">
+      <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
+        <div class="metrics-chart" *ngIf="results.length; else other_content">
+          <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="hasMultipleInstances"
+            [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true"
+            [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="chartConfig.autoScale" [yAxisTicks]="chartConfig.yAxisTicks"
+            [yAxisTickFormatting]="chartConfig.yAxisTickFormatting">
+          </ngx-charts-line-chart>
+          <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
         </div>
-      </div>
-    </ng-template>
-    <div class="metrics-chart" *ngIf="results$ | async as results; else other_content">
-      <div class="metrics-chart" *ngIf="results.length; else other_content" [ngSwitch]="chartConfig.chartType">
-        <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="chartConfig.showLegend && hasMultipleInstances"
-          [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true"
-          [xAxis]="true" [yAxis]="true" [autoScale]="chartConfig.autoScale" [yAxisTicks]="chartConfig.yAxisTicks" [yAxisTickFormatting]="chartConfig.yAxisTickFormatting">
-        </ngx-charts-line-chart>
-        <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
       </div>
     </div>
   </div>
 </mat-card>
+<ng-template #other_content>
+  <div class="no-content">No results found
+    <div class="no-content__name" *ngIf="!title">
+      {{ chartConfig.yAxisLabel }}
+    </div>
+  </div>
+</ng-template>

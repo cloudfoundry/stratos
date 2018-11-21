@@ -1,9 +1,17 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { BehaviorSubject, Observable, of as observableOf, OperatorFunction, ReplaySubject, Subscription, combineLatest } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of as observableOf,
+  OperatorFunction,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { publishReplay, refCount, tap, first } from 'rxjs/operators';
+import { first, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
@@ -14,6 +22,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getRowUniqueId, IListDataSource, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { MetricsAction } from '../../../../store/actions/metrics.actions';
 
 
 export class DataFunctionDefinition {
@@ -70,23 +79,22 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public rowsState: Observable<RowsState>;
 
   // ------------- Private
-  private entities$: Observable<T>;
-  private paginationToStringFn: (PaginationEntityState) => string;
   private externalDestroy: () => void;
 
   protected store: Store<AppState>;
-  protected action: PaginatedAction;
+  public action: PaginatedAction;
   protected sourceScheme: schema.Entity;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
   private transformEntity: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
-  public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[];
+  public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[] = [];
 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
+  private metricsAction: MetricsAction;
 
   public refresh: () => void;
 
@@ -131,7 +139,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).subscribe();
 
     const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
-      const validPagesCountChange = this.transformEntity;
       if (
         paginationEntity.totalResults !== entities.length ||
         paginationEntity.clientPagination.totalResults !== entities.length
@@ -177,7 +184,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     return config.refresh ? config.refresh : () => {
-      this.store.dispatch(this.action);
+      this.store.dispatch(this.metricsAction || this.action);
     };
   }
 
@@ -297,5 +304,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
   public setFilterParam(filterParam: string, pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
+  }
+
+  public updateMetricsAction(newAction: MetricsAction) {
+    this.metricsAction = newAction;
+    this.store.dispatch(newAction);
   }
 }

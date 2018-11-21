@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RequestInfoState } from '../../../store/reducers/api-request-reducer/types';
 
-fdescribe('DialogConfirmComponent', () => {
+describe('DialogConfirmComponent', () => {
   let component: DialogConfirmComponent;
   let fixture: ComponentFixture<DialogConfirmComponent>;
 

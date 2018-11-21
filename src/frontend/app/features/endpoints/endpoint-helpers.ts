@@ -1,6 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
+import { Validators } from '@angular/forms';
 
 import { urlValidationExpression } from '../../core/utils.service';
 import { AppState } from '../../store/app-state';
@@ -17,14 +18,14 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
-
-export interface EndpointTypeHelper {
+export interface EndpointTypeConfig {
   value: EndpointType;
   label: string;
   urlValidation?: string;
   allowTokenSharing?: boolean;
   icon?: string;
   iconFont?: string;
+  authTypes?: string[];
 }
 
 export interface EndpointIcon {
@@ -32,7 +33,7 @@ export interface EndpointIcon {
   font: string;
 }
 
-const endpointTypes: EndpointTypeHelper[] = [
+const endpointTypes: EndpointTypeConfig[] = [
   {
     value: 'cf',
     label: 'Cloud Foundry',
@@ -47,11 +48,45 @@ const endpointTypes: EndpointTypeHelper[] = [
   },
 ];
 
+const endpointAuthTypes = [
+  {
+    name: 'Username and Password',
+    value: 'creds',
+    form: {
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('cf', 'metrics')
+  },
+  {
+    name: 'Single Sign-On (SSO)',
+    value: 'sso',
+    form: {},
+    types: new Array<EndpointType>('cf')
+  },
+];
+
 const endpointTypesMap = {};
 
-endpointTypes.forEach(ept => {
-  endpointTypesMap[ept.value] = ept;
-});
+export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
+  epTypes.forEach(epType => {
+    endpointTypes.push(epType);
+
+    if (epType.authTypes) {
+      // Map in the authentication providers
+      epType.authTypes.forEach(authType => {
+        const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
+        if (endpointAuthType) {
+          endpointAuthType.types.push(endpointAuthType.value as EndpointType);
+        }
+      });
+    }
+  });
+
+  endpointTypes.forEach(ept => {
+    endpointTypesMap[ept.value] = ept;
+  });
+}
 
 // Get the name to display for a given Endpoint type
 export function getNameForEndpointType(type: string): string {
@@ -68,7 +103,7 @@ export function getEndpointTypes() {
 
 export function getIconForEndpoint(type: string): EndpointIcon {
   const icon = {
-    name: 'endpoint',
+    name: 'settings_ethernet',
     font: ''
   };
 
@@ -85,4 +120,8 @@ export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>)
     first(),
     map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
   );
+}
+
+export function getEndpointAuthTypes() {
+  return endpointAuthTypes;
 }

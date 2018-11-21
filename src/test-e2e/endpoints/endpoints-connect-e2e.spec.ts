@@ -76,7 +76,7 @@ describe('Endpoints', () => {
       it('should update service instance data on register', () => {
         connectDialog.connect();
         // Wait for snackbar
-        connectDialog.snackBar.waitForMessage('Connected ' + toConnect.name);
+        connectDialog.snackBar.waitForMessage(`Connected endpoint '${toConnect.name}'`);
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();

@@ -2,6 +2,7 @@ import { protractor } from 'protractor';
 
 import { e2e } from '../../e2e';
 import { E2EHelpers } from '../../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../../po/cf-users-list.po';
 import { setUpTestOrgSpaceE2eTest } from '../users-list-e2e.helper';
 import { CfTopLevelPage } from './cf-top-level-page.po';
@@ -29,6 +30,9 @@ describe('Cf Users List -', () => {
       return cfPage.goToUsersTab();
     });
   });
+
+  const timeout = 60000;
+  extendE2ETestTime(timeout);
 
   it('Correct role pills shown, pills removed successfully', () => {
     expect(cfPage.isActivePageOrChildPage()).toBeTruthy();
@@ -68,10 +72,8 @@ describe('Cf Users List -', () => {
     orgUserChip.check(true);
     orgUserChip.remove();
 
-  });
+  }, timeout);
 
 
-  afterAll(() => {
-    return cfHelper.deleteOrgIfExisting(cfGuid, orgName);
-  });
+  afterAll(() => cfHelper.deleteOrgIfExisting(cfGuid, orgName));
 });

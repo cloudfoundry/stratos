@@ -5,7 +5,7 @@ export interface E2ECred {
 
 export interface E2ECreds {
   admin: E2ECred;
-  nonAdmin?: E2ECred;
+  nonAdmin: E2ECred;
 }
 
 export interface E2EEndpointConfig {
@@ -42,7 +42,7 @@ export interface E2EEndpointTypeConfig extends E2EEndpointConfig {
 }
 
 export interface E2EEndpointsConfig {
-  cf?: [
+  cf: [
     E2EConfigCloudFoundry
   ];
 }

@@ -37,6 +37,7 @@ export class DeployApplicationDeployer {
 
   isRedeploy: string;
   connectSub: Subscription;
+  updateSub: Subscription;
   msgSub: Subscription;
   streamTitle = 'Preparing...';
   appData: AppData;
@@ -94,6 +95,9 @@ export class DeployApplicationDeployer {
     if (this.connectSub) {
       this.connectSub.unsubscribe();
     }
+    if (this.updateSub) {
+      this.updateSub.unsubscribe();
+    }
     this.isOpen = false;
     this.currentFileTransfer = undefined;
   }
@@ -150,6 +154,14 @@ export class DeployApplicationDeployer {
             share(),
           );
         this.msgSub = this.messages.subscribe();
+      })
+    ).subscribe();
+
+    // Watch for updates to the app overrides - use case is app overrides beinbg set after source file/folder upload
+    this.updateSub = this.store.select(selectDeployAppState).pipe(
+      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+      tap((appDetail) => {
+        this.applicationOverrides = appDetail.applicationOverrides;
       })
     ).subscribe();
   }
