@@ -18,6 +18,12 @@ else
   fi
 fi
 
+
+echo "Removing old Apps/Services/Orgs from E2E Tests"
+echo "=============================================="
+
+cf api
+
 # Platform name (Linux, Darwin etc)
 unamestr=`uname`
 
@@ -31,14 +37,14 @@ function clean() {
   local ITEMS=$1
   local PREFIX=$2
   local CMD=$3
-  local REGEX="^($PREFIX)(.*)\.([0-9]*)T([0-9]*)[zZ].*"
+  local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
   local NOW=$(date "+%s")
 
   while IFS= read -r line
   do
-    if [[ $line =~ $REGEX ]]; then
+    NAME="${line%% *}"
+    if [[ $NAME =~ $REGEX ]]; then
       DS="${BASH_REMATCH[3]}"
-      NAME="$line"
       TS="${BASH_REMATCH[4]}"
       TS="${TS:0:6}"
       TIMESTAMP=$(echo $TIMESTAMP | awk '{print toupper($0)}')
@@ -63,19 +69,19 @@ function clean() {
   done <<< "$ITEMS"
 }
 
-# echo "Cleaning old Service Instances"
-# SERVICES="$(cf services | tail -n +5)"
-# clean "$SERVICES" "edited-serviceInstance-" "delete-service"
-# clean "$SERVICES" "acceptance\.e2e\..*\." "delete-service"
-# clean "$SERVICES" "e-acceptance\.e2e\..*\." "delete-service"
-
-# echo "Cleaning old Applications"
-# APPS="$(cf apps | tail -n +5)"
-# clean "$APPS" "acceptance\.e2e\..*\." "delete"
-# clean "$APPS" "e2e\.travisci\." "delete"
-
 echo "Cleaning old Orgs"
 ORGS="$(cf orgs | tail -n +5)"
 clean "$ORGS" "acceptance\.e2e\.travis" "delete-org"
+
+cf target -o e2e -s e2e
+
+echo "Cleaning old Applications in e2e org/space"
+APPS="$(cf apps | tail -n +5)"
+# clean "$APPS" "acceptance\.e2e\..*\." "delete"
+clean "$APPS" "acceptance\.e2e\." "delete"
+
+echo "Cleaning old Service Instances in e2e org/space"
+SERVICES="$(cf services | tail -n +5)"
+clean "$SERVICES" "acceptance\.e2e\." "delete-service"
 
 echo "Done"
