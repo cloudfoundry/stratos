@@ -5,7 +5,7 @@ import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser } from 'protractor';
 import { SideNavMenuItem } from '../po/side-nav.po';
 
-fdescribe('Marketplace', () => {
+describe('Marketplace', () => {
   const marketplacePage = new MarketplacePage();
   const secretsHelper = new SecretsHelpers();
   const serviceSearchText = 'app';
