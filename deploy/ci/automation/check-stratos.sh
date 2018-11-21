@@ -42,7 +42,7 @@ echo "    username: $USERNAME" >> ${SECRETS}
 echo "    password: $PASSWORD" >> ${SECRETS}
 echo "endpoints:" >> ${SECRETS}
 echo "  cf:" >> ${SECRETS}
-echo "    name: none:" >> ${SECRETS}
+echo "    name: none" >> ${SECRETS}
 echo "headless: true" >> ${SECRETS}
 
 set +e
