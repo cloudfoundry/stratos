@@ -12,7 +12,7 @@ docker-compose version
 
 echo "Preparing for e2e tests..."
 
-curl -sLk -o ./secrets.yaml https://travis.capbristol.com/yaml
+wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
@@ -23,6 +23,24 @@ export CERTS_PATH=./dev-certs
 
 # Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1
+
+# If suite is set, use it else use default `e2e`
+SUITE=$2
+if [ -z "$SUITE" ]; then
+  SUITE="e2e"
+fi
+
+# Test report folder name override
+TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
+
+export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
+mkdir -p "${E2E_REPORT_FOLDER}"
+
+if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Starting background install of ffmpeg"
+  sudo apt-get install -y ffmpeg > ${E2E_REPORT_FOLDER}/ffmpeg-install.log &
+  FFMPEG_INSTALL_PID=$!
+fi
 
 echo "Using local deployment for e2e tests"
 # Quick deploy locally
@@ -45,15 +63,12 @@ pushd src/jetstream
 ./jetstream > backend.log &
 popd
 
-E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
-
-# Test report folder name override
-TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
-export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
-mkdir -p "${E2E_REPORT_FOLDER}"
+E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Waiting for ffmpeg install to complete..."
+  wait ${FFMPEG_INSTALL_PID}
   echo "Starting video capture"
   ffmpeg -video_size 1366x768 -framerate 25 -f x11grab -draw_mouse 0 -i :99.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 >/dev/null 2>&1 &
   FFMPEG=$!

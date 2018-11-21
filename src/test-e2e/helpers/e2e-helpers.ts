@@ -148,7 +148,7 @@ export class E2EHelpers {
       });
   }
 
-  scrollIntoView(element) {
+  scrollIntoView(element: ElementFinder) {
     return browser.controlFlow().execute(() => {
       browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
     });

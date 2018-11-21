@@ -3,7 +3,7 @@ import { by, ElementFinder, promise } from 'protractor';
 import { Component } from './component.po';
 
 
-export class BooleangIndicatorComponent extends Component {
+export class BooleanIndicatorComponent extends Component {
 
   /**
   * Page Object for the Boolean Indicator component

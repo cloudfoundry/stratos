@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -14,7 +15,7 @@ import {
 } from './add-organization/create-organization-step/create-organization-step.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
@@ -27,6 +28,20 @@ import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
+import {
+  CloudFoundryCellAppsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-apps/cloud-foundry-cell-apps.component';
+import {
+  CloudFoundryCellBaseComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-base/cloud-foundry-cell-base.component';
+import {
+  CloudFoundryCellChartsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-charts/cloud-foundry-cell-charts.component';
+import {
+  CloudFoundryCellSummaryComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
+import { CloudFoundryCellService } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
@@ -38,7 +53,6 @@ import {
 import {
   CloudFoundrySpaceBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component';
-/* tslint:disable:max-line-length */
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
@@ -69,18 +83,26 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { CfRolesService } from './users/manage-users/cf-roles.service';
+import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
 import { UsersRolesModifyComponent } from './users/manage-users/manage-users-modify/manage-users-modify.component';
 import {
   SpaceRolesListWrapperComponent,
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
-import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
-import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
+import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { CustomImportModule } from '../../custom-import.module';
 
 
 @NgModule({
-  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
+  imports: [
+    CoreModule,
+    SharedModule,
+    CloudFoundryRoutingModule,
+    RouterModule,
+    NgxChartsModule,
+    CustomImportModule
+  ],
   declarations: [
     CloudFoundryBaseComponent,
     CloudFoundryTabsBaseComponent,
@@ -90,6 +112,11 @@ import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-co
     CloudFoundryUsersComponent,
     CloudFoundryFirehoseComponent,
     CloudFoundryFeatureFlagsComponent,
+    CloudFoundryCellsComponent,
+    CloudFoundryCellBaseComponent,
+    CloudFoundryCellSummaryComponent,
+    CloudFoundryCellAppsComponent,
+    CloudFoundryCellChartsComponent,
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,
@@ -125,9 +152,14 @@ import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-co
       provide: ActiveRouteCfOrgSpace,
       useValue: {}
     },
+    {
+      provide: ActiveRouteCfCell,
+      useValue: {}
+    },
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
-    CfRolesService
+    CfRolesService,
+    CloudFoundryCellService
   ],
 })
 export class CloudFoundryModule { }

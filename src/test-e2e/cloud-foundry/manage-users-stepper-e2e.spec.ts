@@ -1,13 +1,14 @@
-import { protractor } from 'protractor';
+import { browser, by, element, protractor } from 'protractor';
 
 import { e2e } from '../e2e';
+import { CFHelpers } from '../helpers/cf-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { ManagerUsersPage } from './manage-users-page.po';
-import { setUpTestOrgSpaceE2eTest } from './users-list-e2e.helper';
-import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { CheckboxComponent } from '../po/checkbox.po';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
+import { ManagerUsersPage } from './manage-users-page.po';
+import { setUpTestOrgSpaceE2eTest } from './users-list-e2e.helper';
 
 describe('Manage Users Stepper', () => {
 
@@ -35,6 +36,9 @@ describe('Manage Users Stepper', () => {
       return manageUsersPage.waitForPage();
     });
   });
+
+  const timeout = 100000;
+  extendE2ETestTime(timeout);
 
   it('Check flow + add/remove roles ', () => {
     const stpr = manageUsersPage.stepper;
@@ -146,6 +150,14 @@ describe('Manage Users Stepper', () => {
     stpr.next();
     expect(stpr.getActiveStepName()).toBe('Confirm');
 
+    // Wait until all of the spinners have gone
+    const spinners = element.all(by.tagName('mat-progress-spinner'));
+    browser.wait(function () {
+      return spinners.isPresent().then(function (present) {
+        return !present;
+      });
+    });
+
     // ... action table state after submit
     expect(confirmStep.actionTable.table.getTableData()).toEqual(createActionTableDate(orgTarget, spaceTarget, 'done'));
     expect(stpr.canPrevious()).toBeFalsy();
@@ -155,7 +167,7 @@ describe('Manage Users Stepper', () => {
     stpr.next();
     stpr.waitUntilNotShown();
 
-  });
+  }, timeout);
 
   it('Open stepper with preselected user', () => {
     const cfPage = CfTopLevelPage.forEndpoint(cfGuid);

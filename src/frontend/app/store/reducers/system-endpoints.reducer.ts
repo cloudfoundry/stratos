@@ -7,6 +7,7 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
 } from '../actions/endpoint.actions';
+import { METRIC_API_SUCCESS, MetricAPIQueryTypes, MetricsAPIActionSuccess } from '../actions/metrics-api.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
@@ -28,6 +29,8 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case CONNECT_ENDPOINTS:
     case DISCONNECT_ENDPOINTS:
       return changeEndpointConnectionStatus(state, action, 'checking');
+    case METRIC_API_SUCCESS:
+      return updateMetricsInfo(state, action);
     default:
       return state;
   }
@@ -36,7 +39,7 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
 function fetchingEndpointInfo(state) {
   const fetchingState = { ...state };
   let modified = false;
-  getAllEnpointIds(fetchingState).forEach(guid => {
+  getAllEndpointIds(fetchingState).forEach(guid => {
     // Only set checking flag if we don't have a status
     if (!fetchingState[guid].connectionStatus) {
       modified = true;
@@ -53,7 +56,7 @@ function succeedEndpointInfo(state, action) {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
   Object.keys(payload.endpoints).forEach(type => {
-    getAllEnpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
+    getAllEndpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
       const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
       newState[guid] = {
         ...newState[guid],
@@ -87,6 +90,24 @@ function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointM
   };
 }
 
-function getAllEnpointIds(endpoints = {}, payloadEndpoints = {}) {
+function getAllEndpointIds(endpoints = {}, payloadEndpoints = {}) {
   return new Set(Object.keys(endpoints).concat(Object.keys(payloadEndpoints)));
+}
+
+function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action: MetricsAPIActionSuccess) {
+  if (action.queryType === MetricAPIQueryTypes.TARGETS) {
+    const existingEndpoint = state[action.endpointGuid];
+    return {
+      ...state,
+      [action.endpointGuid]: {
+        ...existingEndpoint,
+        metadata: {
+          ...existingEndpoint.metadata,
+          metrics_targets: action.data.data
+        }
+      },
+    };
+  }
+  return state;
+
 }

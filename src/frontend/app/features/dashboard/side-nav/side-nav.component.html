@@ -2,13 +2,14 @@
   <div class="side-nav__top">
     <div class="side-nav__top-inner">
       <div class="side-nav__logo" (click)="logoClicked.next(true)">
-        <div class="side-nav__logo-text">Stratos</div>
+        <div class="side-nav__logo-text">{{ customizations.logoText || 'Stratos' }}</div>
       </div>
     </div>
   </div>
   <ul class="side-nav__items">
     <li *ngFor="let tab of tabs">
-      <a *ngIf="!tab.hidden || !(tab.hidden | async)" class="side-nav__item" [routerLink]="[tab.link]" [routerLinkActive]="['side-nav__item--active']">
+      <a *ngIf="!tab.hidden || !(tab.hidden | async)" class="side-nav__item" [routerLink]="[tab.link]"
+        [routerLinkActive]="['side-nav__item--active']">
         <mat-icon [fontSet]="tab.matIconFont">{{ tab.matIcon }}</mat-icon> {{ tab.text }}
       </a>
     </li>

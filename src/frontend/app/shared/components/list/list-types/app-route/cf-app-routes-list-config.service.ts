@@ -169,14 +169,15 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    getRoutesAction: GetAppRoutes = null
   ) {
     super();
 
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetAppRoutes(appService.appGuid, appService.cfGuid),
+      getRoutesAction || new GetAppRoutes(appService.appGuid, appService.cfGuid),
       this
     );
   }

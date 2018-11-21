@@ -12,6 +12,8 @@ export interface AppStats {
 }
 
 export interface AppStat {
+  cfGuid: string;
+  guid: string;
   state: string;
   stats: AppInstanceStats;
 }
