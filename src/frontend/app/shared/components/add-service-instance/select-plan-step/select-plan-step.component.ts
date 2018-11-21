@@ -161,7 +161,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   onNext = (): Observable<StepOnNextResult> => {
     this.store.dispatch(new SetCreateServiceInstanceServicePlan(this.stepperForm.controls.servicePlans.value));
-    return this.selectedService$.pipe(
+    return this.selectedPlan$.pipe(
       map(selectedServicePlan => ({
         success: true,
         data: selectedServicePlan.entity

@@ -6,8 +6,7 @@ import { filter, switchMap } from 'rxjs/operators';
 
 import { IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IApp } from '../../../../core/cf-api.types';
-import { pathGet } from '../../../../core/utils.service';
-import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
+import { pathGet, safeUnsubscribe } from '../../../../core/utils.service';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
