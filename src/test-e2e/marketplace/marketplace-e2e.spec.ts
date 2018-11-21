@@ -1,9 +1,10 @@
-import { MarketplacePage } from './marketplace.po';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { e2e } from '../e2e';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser } from 'protractor';
+
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
+import { MarketplacePage } from './marketplace.po';
 
 describe('Marketplace', () => {
   const marketplacePage = new MarketplacePage();
