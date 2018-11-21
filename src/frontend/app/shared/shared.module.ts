@@ -1,3 +1,4 @@
+import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
 /* tslint:disable:max-line-length */
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
@@ -348,7 +349,8 @@ import { DrillDownComponent } from './components/drill-down/drill-down.component
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
-    NoServicePlansComponent
+    NoServicePlansComponent,
+    ...listTableCells
   ],
   providers: [
     ListConfig,
