@@ -103,12 +103,7 @@ export class CloudFoundryEndpointService {
       ]);
   }
 
-  public static fetchAppCount(
-    store: Store<AppState>,
-    pmf: PaginationMonitorFactory,
-    cfGuid: string,
-    orgGuid?: string,
-    spaceGuid?: string)
+  public static fetchAppCount(store: Store<AppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
     : Observable<number> {
     const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
@@ -130,7 +125,6 @@ export class CloudFoundryEndpointService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
     private pmf: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
@@ -154,7 +148,6 @@ export class CloudFoundryEndpointService {
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();
-
   }
 
   private constructCoreObservables() {
@@ -163,7 +156,7 @@ export class CloudFoundryEndpointService {
     this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
       store: this.store,
       action: this.getAllOrgsAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
+      paginationMonitor: this.pmf.create(
         this.getAllOrgsAction.paginationKey,
         entityFactory(organizationSchemaKey)
       )
@@ -208,7 +201,6 @@ export class CloudFoundryEndpointService {
   }
 
   private constructSecondaryObservable() {
-
     this.hasSSHAccess$ = this.info$.pipe(
       map(p => !!(p.entity.entity &&
         p.entity.entity.app_ssh_endpoint &&
@@ -222,12 +214,9 @@ export class CloudFoundryEndpointService {
     );
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
-
   }
 
-  public getAppsInOrg(
-    org: APIResource<IOrganization>
-  ): Observable<APIResource<IApp>[]> {
+  public getAppsInOrg(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
@@ -237,9 +226,7 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  public getAppsInSpace(
-    space: APIResource<ISpace>
-  ): Observable<APIResource<IApp>[]> {
+  public getAppsInSpace(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(apps => {
@@ -248,18 +235,12 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  public getAggregateStat(
-    org: APIResource<IOrganization>,
-    statMetric: string
-  ): Observable<number> {
+  public getAggregateStat(org: APIResource<IOrganization>, statMetric: string): Observable<number> {
     return this.getAppsInOrg(org).pipe(
       map(apps => this.getMetricFromApps(apps, statMetric))
     );
   }
-  public getMetricFromApps(
-    apps: APIResource<IApp>[],
-    statMetric: string
-  ): number {
+  public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
@@ -272,7 +253,7 @@ export class CloudFoundryEndpointService {
       {
         store: this.store,
         action,
-        paginationMonitor: this.paginationMonitorFactory.create(
+        paginationMonitor: this.pmf.create(
           action.paginationKey,
           entityFactory(domainSchemaKey)
         )
