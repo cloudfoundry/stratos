@@ -13,7 +13,7 @@ import {
   spaceSchemaKey,
 } from '../helpers/entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
-import { PaginationAction } from '../types/pagination.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
@@ -29,7 +29,7 @@ export const getServiceInstanceRelations = [
 ];
 
 export class GetServiceInstances
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
@@ -139,7 +139,7 @@ export class UpdateServiceInstance extends CreateServiceInstance {
 }
 
 export class ListServiceBindingsForInstance
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string,
     public serviceInstanceGuid: string,
