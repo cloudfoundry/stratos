@@ -40,7 +40,7 @@ function pushBrokerApp {
   local SERVICE=$1
   local APPNAME=$SERVICE-broker
   local TMP_DIR=$(mktemp -d)
-  git clone https://github.com/irfanhabib/worlds-simplest-service-broker ${TMP_DIR}
+  git clone https://github.com/cf-stratos/worlds-simplest-service-broker ${TMP_DIR}
   pushd ${TMP_DIR}
   cf push $APPNAME --no-start -m 128M -k 256M
   cf set-env $APPNAME BASE_GUID $(uuidgen)

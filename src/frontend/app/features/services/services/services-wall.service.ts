@@ -6,7 +6,7 @@ import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { IService } from '../../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAllServices } from '../../../store/actions/service.actions';
-import { GetServicesForSpace } from '../../../store/actions/space.actions';
+import { GetAllServicesForSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, serviceSchemaKey } from '../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
@@ -56,7 +56,7 @@ export class ServicesWallService {
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetServicesForSpace(spaceGuid, cfGuid, paginationKey),
+        action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           entityFactory(serviceSchemaKey)

@@ -7,7 +7,7 @@ import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
-import { CFStartAction } from './../types/request.types';
+import { CFStartAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';
@@ -179,7 +179,7 @@ export class DeleteApplicationInstance extends CFStartAction
   guid: string;
   constructor(
     public appGuid: string,
-    private index: number,
+    index: number,
     public endpointGuid: string
   ) {
     super();

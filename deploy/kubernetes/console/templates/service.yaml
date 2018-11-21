@@ -10,13 +10,9 @@ metadata:
   name: "{{ .Release.Name }}-ui-ext"
 spec:
   ports:
-{{- if and (not .Values.useLb) (or (not .Values.kube.external_ip) (and .Values.kube.external_ip .Values.kube.external_console_http_port)) }}
+{{- if .Values.kube.console_http_port)) }}
   - name: http
-    {{- if and (or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips) .Values.kube.external_console_http_port }}
-    port: {{ .Values.kube.external_console_http_port }}
-    {{- else }}
-    port: 80
-    {{- end }}
+    port: {{ .Values.kube.console_http_port }}
     protocol: TCP
     targetPort: 80
 {{- end }}
@@ -29,8 +25,8 @@ spec:
     protocol: TCP
     targetPort: 443
   selector:
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/component: "console"
+    app: "{{ .Release.Name }}"
+    component: console
 {{- if or .Values.useLb .Values.services.loadbalanced }}
   type: LoadBalancer
 {{- else }}
@@ -57,6 +53,6 @@ spec:
     port: 3306
     targetPort: mysql
   selector:
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/component: "console-mariadb"
+    app: "{{ .Release.Name }}"
+
 
