@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { MetricsAction } from '../../../../store/actions/metrics.actions';
 
 export interface AppEvent {
   actee_name: string;
@@ -75,6 +76,8 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   getFilterFromParams(pag: PaginationEntityState): string;
   setFilterParam(filter: string, pag: PaginationEntityState);
   refresh();
+
+  updateMetricsAction(newAction: MetricsAction);
 }
 
 export type getRowUniqueId<T> = (T) => string;

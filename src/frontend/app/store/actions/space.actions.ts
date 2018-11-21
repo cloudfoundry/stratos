@@ -241,7 +241,7 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginatedAc
     page: 1,
     'results-per-page': 100,
     'order-direction': 'desc',
-    'order-direction-field': 'label',
+    'order-direction-field': 'creation',
   };
   flattenPagination = true;
 }
@@ -280,34 +280,4 @@ export class GetServiceInstancesForSpace
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);
-}
-
-export class GetServicesForSpace
-  extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
-  constructor(
-    public spaceGuid: string,
-    public endpointGuid: string,
-    public paginationKey: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
-    ],
-    public populateMissing = true
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `spaces/${spaceGuid}/services`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-  }
-  actions = getActions('Space', 'Get all Services');
-  entity = [entityFactory(serviceSchemaKey)];
-  entityKey = serviceSchemaKey;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'creation',
-  };
-  flattenPagination = true;
 }

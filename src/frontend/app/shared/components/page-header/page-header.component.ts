@@ -30,6 +30,7 @@ export class PageHeaderComponent {
 
   @Input()
   tabs: ISubHeaderTabs[];
+
   @Input() showUnderFlow = false;
 
   public userNameFirstLetter$: Observable<string>;
