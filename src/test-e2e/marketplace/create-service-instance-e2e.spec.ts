@@ -1,5 +1,6 @@
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -26,13 +27,17 @@ describe('Create Service Instance', () => {
   it('- should reach create service instance page', () => {
     expect(createServiceInstance.isActivePage()).toBeTruthy();
   });
+  describe('Long running tests - ', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
 
-  it('- should be able to to create a service instance', () => {
+    it('- should be able to to create a service instance', () => {
 
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    servicesWall.waitForPage();
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+      servicesWall.waitForPage();
 
-    servicesWall.serviceInstancesList.cards.waitForCardByTitle(servicesHelperE2E.serviceInstanceName);
+      servicesWall.serviceInstancesList.cards.waitForCardByTitle(servicesHelperE2E.serviceInstanceName);
+    }, timeout);
 
   });
 
@@ -108,9 +113,7 @@ describe('Create Service Instance', () => {
     });
   });
 
-  afterAll((done) => {
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
 });
 
 

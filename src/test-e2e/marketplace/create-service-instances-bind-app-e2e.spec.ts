@@ -2,6 +2,7 @@ import { browser, by, ElementFinder } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -29,20 +30,25 @@ describe('Create Service Instance with binding', () => {
     expect(createServiceInstance.isActivePage()).toBeTruthy();
   });
 
-  it('- should be able to to create a service instance with binding', () => {
+  describe('Long running tests - ', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
 
-    const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;
-    servicesHelperE2E.createService(servicesSecrets.publicService.name, false, servicesSecrets.bindApp);
-    servicesWall.waitForPage();
+    it('- should be able to to create a service instance with binding', () => {
 
-    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName)
-      .then(card => card.getMetaCardItems())
-      .then(metaCardRows => {
-        expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
-        expect(metaCardRows[2].value).toBe('shared');
-        expect(metaCardRows[3].value).toBe('1');
-      });
+      const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;
+      servicesHelperE2E.createService(servicesSecrets.publicService.name, false, servicesSecrets.bindApp);
+      servicesWall.waitForPage();
 
+      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName)
+        .then(card => card.getMetaCardItems())
+        .then(metaCardRows => {
+          expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
+          expect(metaCardRows[2].value).toBe('shared');
+          expect(metaCardRows[3].value).toBe('1');
+        });
+
+    });
   });
 
   it('- should have correct number in list view', () => {
@@ -76,9 +82,5 @@ describe('Create Service Instance with binding', () => {
       });
   });
 
-  afterAll((done) => {
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
 });
-
-
