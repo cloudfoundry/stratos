@@ -187,8 +187,6 @@ describe('Application Deploy -', function () {
         // Wait until app summary button can be pressed
         deployApp.stepper.waitUntilCanNext('Go to App Summary');
 
-        browser.waitForAngularEnabled(true);
-
         e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
       }, 120000);
 
