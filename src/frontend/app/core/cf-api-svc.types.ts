@@ -87,6 +87,14 @@ export interface ServicePlanSchema {
 export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
+  costs: IServicePlanCost[];
+}
+
+export interface IServicePlanCost {
+  amount: {
+    [key: string]: number;
+  };
+  unit: string;
 }
 
 export interface IService {

@@ -21,7 +21,6 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
-
 export function logger(reducer) {
   // default, no options
   return storeLogger()(reducer);
@@ -43,7 +42,7 @@ export const appReducers = {
   routing: routingReducer,
   manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
-  currentUserRoles: currentUserRolesReducer
+  currentUserRoles: currentUserRolesReducer,
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];
