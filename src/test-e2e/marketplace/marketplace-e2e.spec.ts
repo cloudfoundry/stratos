@@ -5,7 +5,7 @@ import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser } from 'protractor';
 import { SideNavMenuItem } from '../po/side-nav.po';
 
-describe('Marketplace', () => {
+fdescribe('Marketplace', () => {
   const marketplacePage = new MarketplacePage();
   const secretsHelper = new SecretsHelpers();
   const serviceSearchText = 'app';
@@ -54,6 +54,7 @@ describe('Marketplace', () => {
 
   it('- should change filter text when an option is selected', () => {
     marketplacePage.servicesList.header.selectFilterOption(0, 1);
+    marketplacePage.servicesList.table.waitUntilNotBusy();
     marketplacePage.servicesList.header.getFilterText().then(text => {
       expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });
