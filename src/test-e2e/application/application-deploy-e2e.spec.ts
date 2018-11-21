@@ -66,12 +66,12 @@ describe('Application Deploy -', function () {
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function() {
+    beforeEach(function () {
       originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
     });
 
-    afterEach(function() {
+    afterEach(function () {
       jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 
@@ -158,7 +158,7 @@ describe('Application Deploy -', function () {
 
         // Press next to get to overrides step
         deployApp.stepper.next();
-        });
+      });
 
       it('Should pass Overrides step', () => {
         e2e.debugLog(`${loggingPrefix} Overrides Step`);
@@ -186,8 +186,6 @@ describe('Application Deploy -', function () {
 
         // Wait until app summary button can be pressed
         deployApp.stepper.waitUntilCanNext('Go to App Summary');
-
-        //browser.waitForAngularEnabled(true);
 
         e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
       }, 120000);

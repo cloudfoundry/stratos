@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 export const urlValidationExpression =
   '^' +
@@ -244,3 +245,11 @@ export function parseHttpPipeError(res): {} {
   }
   return {};
 }
+
+export const safeUnsubscribe = (...subs: Subscription[]) => {
+  subs.forEach(sub => {
+    if (sub) {
+      sub.unsubscribe();
+    }
+  });
+};

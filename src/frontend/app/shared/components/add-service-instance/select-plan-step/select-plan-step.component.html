@@ -7,7 +7,7 @@
       </mat-select>
     </mat-form-field>
   </form>
-  <mat-card class="select-plan__details" *ngIf="selectedService$ | async as selPlan">
+  <mat-card class="select-plan__details" *ngIf="selectedPlan$ | async as selPlan">
     <app-card-status *ngIf="(getPlanAccessibility(selPlan.entity) | async)" [status$]="getPlanAccessibility(selPlan.entity)"></app-card-status>
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>
@@ -15,7 +15,15 @@
       {{ isPublic(selPlan) | titlecase}}
       <span *ngIf="(getPlanAccessibility(selPlan.entity) | async) !== 'ok'"> ({{ getAccessibilityMessage(selPlan.entity) | async }})</span>
     </app-metadata-item>
-    <app-metadata-item label="Free"> {{ isFree(selPlan) | titlecase}} </app-metadata-item>
+    <!-- Show costs if we can, otherwise fall back on `free or not` -->
+    <app-metadata-item *ngIf="!selPlan.entity.entity.free && canShowCosts(selPlan.extra); else showIsFree" label="Cost per unit">
+      <div *ngFor="let cost of selPlan.extra.costs">
+        {{ cost.unit | titlecase }}: {{ getCostValue(cost) | currency:getCostCurrency(cost):'symbol-narrow':'1.2-2':getCurrencyLocale(cost, false) }}
+      </div>
+    </app-metadata-item>
+    <ng-template #showIsFree>
+      <app-metadata-item label="Free"> {{ isFree(selPlan) | titlecase}} </app-metadata-item>
+    </ng-template>
     <app-metadata-item label="Additional Information" *ngIf="hasAdditionalInfo(selPlan)">
       <ul>
         <li *ngFor="let bulletPoint of selPlan.extra.bullets">{{bulletPoint}}</li>

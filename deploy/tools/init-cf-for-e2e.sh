@@ -13,7 +13,7 @@ if [ ! "$1" == "nologin" ]; then
   cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o system -s system
 else
   # Check we are logged in
-  cf apps
+  cf buildpacks
   if [ $? -ne 0 ]; then
     echo "You must use 'cf login' to login to your Cloud Foundry first."
     exit 1
@@ -63,7 +63,7 @@ createOrgSpace "e2e" "e2e"
 "${DIRPATH}/populate-cf/create-services.sh" -n -o e2e -s e2e
 
 # Deploy go-env for binding services
-cloneRepo "irfanhabib" "go-env"
+cloneRepo "cf-stratos" "go-env"
 pushd cfpushtemp/go-env
 cf push
 popd
