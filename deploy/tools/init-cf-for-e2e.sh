@@ -63,7 +63,7 @@ createOrgSpace "e2e" "e2e"
 "${DIRPATH}/populate-cf/create-services.sh" -n
 
 # Deploy go-env for binding services
-cloneRepo "irfanhabib" "go-env"
+cloneRepo "cf-stratos" "go-env"
 pushd cfpushtemp/go-env
 cf push
 popd
