@@ -114,10 +114,10 @@ export class CloudFoundryEndpointService {
       q: []
     };
     if (orgGuid) {
-      action.initialParams.q.push(new QParam(`organization_guid`, orgGuid, ` IN `));
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
     }
     if (spaceGuid) {
-      action.initialParams.q.push(new QParam(`space_guid`, spaceGuid, ` IN `));
+      action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
     }
     return fetchTotalResults(action, store, pmf);
   }

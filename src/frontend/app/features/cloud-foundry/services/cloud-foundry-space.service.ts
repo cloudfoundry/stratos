@@ -188,7 +188,7 @@ export class CloudFoundrySpaceService {
       this.paginationMonitorFactory,
       this.activeRouteCfOrgSpace.cfGuid,
       this.activeRouteCfOrgSpace.orgGuid,
-      this.activeRouteCfOrgSpace.cfGuid
+      this.activeRouteCfOrgSpace.spaceGuid
     );
   }
 }
