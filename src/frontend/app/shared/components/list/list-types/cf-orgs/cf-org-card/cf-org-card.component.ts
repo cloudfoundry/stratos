@@ -11,9 +11,6 @@ import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.h
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -50,7 +47,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   constructor(
     private cfUserService: CfUserService,
-    private cfEndpointService: CloudFoundryEndpointService,
+    public cfEndpointService: CloudFoundryEndpointService,
     private store: Store<AppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,

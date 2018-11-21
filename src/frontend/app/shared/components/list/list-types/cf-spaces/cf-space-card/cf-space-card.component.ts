@@ -54,7 +54,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   constructor(
     private cfUserService: CfUserService,
-    private cfEndpointService: CloudFoundryEndpointService,
+    public cfEndpointService: CloudFoundryEndpointService,
     private store: Store<AppState>,
     private cfOrgService: CloudFoundryOrganizationService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
