@@ -78,7 +78,7 @@ describe('Space Users List -', () => {
     const orgChipList = usersTable.getPermissions(userRowIndex, true);
     expect(orgChipList.getChipElements().count()).toBe(0);
 
-    const spaceChipList = usersTable.getPermissions(userRowIndex, true);
+    const spaceChipList = usersTable.getPermissions(userRowIndex, false);
     expect(spaceChipList.getChipElements().count()).toBe(0);
   }, timeout);
 

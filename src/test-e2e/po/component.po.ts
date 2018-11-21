@@ -1,5 +1,6 @@
 import { ElementFinder, protractor } from 'protractor/built';
 import { browser, promise } from 'protractor';
+import { E2EHelpers } from '../helpers/e2e-helpers';
 
 const until = protractor.ExpectedConditions;
 
@@ -10,6 +11,10 @@ export class Component {
 
   public static waitUntilNotShown(elm): promise.Promise<void> {
     return browser.wait(until.invisibilityOf(elm), 5000);
+  }
+
+  public static scrollIntoView(elm: ElementFinder): promise.Promise<void> {
+    return new E2EHelpers().scrollIntoView(elm);
   }
 
   constructor(protected locator: ElementFinder) { }
@@ -39,6 +44,10 @@ export class Component {
 
   waitUntilNotShown(description = 'Element'): promise.Promise<void> {
     return browser.wait(until.invisibilityOf(this.locator), 20000, description);
+  }
+
+  scrollIntoView(): promise.Promise<void> {
+    return Component.scrollIntoView(this.locator);
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {
