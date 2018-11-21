@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router, RouterStateSnapshot, ActivatedRouteSnapshot, Route } from '@angular/router';
 import { Observable } from 'rxjs';
 import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../store/app-state';
+import { ROUTER_NAVIGATION } from '@ngrx/router-store';
 
 /**
  * This is used to dynamically add an extension's routes - since we can't do this
@@ -19,7 +22,7 @@ import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
 
 @Injectable()
 export class DynamicExtenstionRoutes implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private store: Store<AppState>) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -42,6 +45,13 @@ export class DynamicExtenstionRoutes implements CanActivate {
     // Update the route config and navigate again to the same route that was intercepted
     this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
     this.router.navigateByUrl(state.url);
+
+    // Dispatch action so that the previous state URL is stored correctly
+    this.store.dispatch({
+      type: ROUTER_NAVIGATION,
+      payload: {}
+    });
+
     return false;
   }
 
