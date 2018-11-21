@@ -48,12 +48,12 @@ export class PaginationEntityState {
   maxedResults?: number;
 }
 
-export interface PaginationAction extends Action {
+export interface BasePaginatedAction extends Action {
   entityKey: string;
   paginationKey: string;
 }
 
-export interface PaginatedAction extends PaginationAction, IRequestAction {
+export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   actions: string[];
   flattenPagination?: boolean;
   flattenPaginationMax?: number;

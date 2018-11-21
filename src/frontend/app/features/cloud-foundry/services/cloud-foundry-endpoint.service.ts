@@ -34,8 +34,10 @@ import { getPaginationObservables } from '../../../store/reducers/pagination-red
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
+import { QParam } from '../../../store/types/pagination.types';
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { fetchTotalResults } from '../cf.helpers';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -101,6 +103,28 @@ export class CloudFoundryEndpointService {
       ]);
   }
 
+  public static fetchAppCount(
+    store: Store<AppState>,
+    pmf: PaginationMonitorFactory,
+    cfGuid: string,
+    orgGuid?: string,
+    spaceGuid?: string)
+    : Observable<number> {
+    const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
+    const uniqueKey = spaceGuid || orgGuid || cfGuid;
+    const action = new GetAllApplications(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid);
+    action.initialParams = {
+      q: []
+    };
+    if (orgGuid) {
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+    }
+    if (spaceGuid) {
+      action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+    }
+    return fetchTotalResults(action, store, pmf);
+  }
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -133,7 +157,7 @@ export class CloudFoundryEndpointService {
 
   }
 
-  constructCoreObservables() {
+  private constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
     this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
@@ -183,7 +207,7 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  constructSecondaryObservable() {
+  private constructSecondaryObservable() {
 
     this.hasSSHAccess$ = this.info$.pipe(
       map(p => !!(p.entity.entity &&
@@ -201,7 +225,7 @@ export class CloudFoundryEndpointService {
 
   }
 
-  getAppsInOrg(
+  public getAppsInOrg(
     org: APIResource<IOrganization>
   ): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
@@ -213,7 +237,7 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  getAppsInSpace(
+  public getAppsInSpace(
     space: APIResource<ISpace>
   ): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
@@ -224,7 +248,7 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  getAggregateStat(
+  public getAggregateStat(
     org: APIResource<IOrganization>,
     statMetric: string
   ): Observable<number> {
@@ -242,7 +266,7 @@ export class CloudFoundryEndpointService {
       .reduce((a, t) => a + t, 0) : 0;
   }
 
-  fetchDomains = () => {
+  public fetchDomains = () => {
     const action = new FetchAllDomains(this.cfGuid);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {
@@ -257,7 +281,7 @@ export class CloudFoundryEndpointService {
     ).entities$.subscribe();
   }
 
-  deleteOrg(orgGuid: string, endpointGuid: string) {
+  public deleteOrg(orgGuid: string, endpointGuid: string) {
     this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
   }
 

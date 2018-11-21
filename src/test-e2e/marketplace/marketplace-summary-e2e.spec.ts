@@ -19,25 +19,23 @@ describe('Marketplace Summary', () => {
   });
 
   describe('', () => {
-    beforeAll((done) => {
+    beforeAll(() => {
       const getCfCnsi = servicesHelperE2E.cfRequestHelper.getCfInfo();
-      getCfCnsi.then(endpointModel => {
+      return getCfCnsi.then(endpointModel => {
         cfGuid = endpointModel.guid;
         return servicesHelperE2E.fetchServices(cfGuid);
       }).then(response => {
         const service = response.resources[0];
         serviceGuid = service.metadata.guid;
         marketplaceSummaryPage = new MarketplaceSummaryPage(cfGuid, serviceGuid);
-        done();
       });
-
     });
 
     beforeEach(() => {
       marketplaceSummaryPage.navigateTo();
       marketplaceSummaryPage.waitForPage();
-
     });
+
     it('- should reach marketplace summary page', () => {
       expect(marketplaceSummaryPage.isActivePage()).toBeTruthy();
     });

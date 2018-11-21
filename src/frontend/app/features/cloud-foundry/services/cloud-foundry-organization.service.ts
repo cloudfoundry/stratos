@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -33,7 +32,7 @@ import { getPaginationObservables } from '../../../store/reducers/pagination-red
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfUser, OrgUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { getOrgRolesString, fetchTotalResults } from '../cf.helpers';
+import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 
@@ -63,7 +62,6 @@ export class CloudFoundryOrganizationService {
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
-    private http: Http,
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
@@ -157,9 +155,12 @@ export class CloudFoundryOrganizationService {
   }
 
   private fetchAppCount(): Observable<number> {
-    return fetchTotalResults(this.http, this.activeRouteCfOrgSpace.cfGuid, 'apps', {
-      q: `organization_guid IN ${this.activeRouteCfOrgSpace.orgGuid}`
-    });
+    return CloudFoundryEndpointService.fetchAppCount(
+      this.store,
+      this.paginationMonitorFactory,
+      this.activeRouteCfOrgSpace.cfGuid,
+      this.activeRouteCfOrgSpace.orgGuid
+    );
   }
 
   private initialiseOrgObservables() {

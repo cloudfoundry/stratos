@@ -5,7 +5,7 @@ import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpe
 import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
 import { CFStartAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
@@ -57,14 +57,14 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entity = [applicationEntitySchema];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
-  initialParams = {
+  initialParams: PaginationParam = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
     page: 1,
     'results-per-page': 100,
   };
   flattenPagination = true;
-  flattenPaginationMax = 400;
+  flattenPaginationMax = 500;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
