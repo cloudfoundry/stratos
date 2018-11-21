@@ -11,7 +11,7 @@ if [ ! "$1" == "nologin" ]; then
   cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o system -s system
 else
   # Check we are logged in
-  cf orgs &> /dev/null
+  cf buildpacks &> /dev/null
   if [ $? -ne 0 ]; then
     echo "You must use 'cf login' to login to your Cloud Foundry first."
     exit 1
