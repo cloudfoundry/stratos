@@ -51,8 +51,7 @@ export class ServicesWallComponent implements OnDestroy {
       'all').subscribe();
 
     this.haveConnectedCf$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.connectionStatus === 'connected')),
-      map(connected => connected.reduce((a, v) => a || v, false))
+      !!endpoints.find(endpoint => endpoint.connectionStatus === 'connected'))
     );
   }
 
