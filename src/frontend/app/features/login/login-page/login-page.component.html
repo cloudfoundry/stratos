@@ -13,7 +13,7 @@
           <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
         </form>
       </div>
-      <div class="login__loading">
+      <div id="login__loading" class="login__loading">
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       </div>
     </div>
