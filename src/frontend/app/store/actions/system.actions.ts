@@ -1,6 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import { PaginationAction } from '../types/pagination.types';
 import { SystemInfo } from '../types/system.types';
 import { GetAllEndpoints } from './endpoint.actions';
 

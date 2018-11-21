@@ -6,6 +6,7 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { isJetStreamError } from '../../core/jetstream.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
@@ -30,7 +31,6 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
-import { isJetStreamError } from '../../core/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 const endpointHeader = 'x-cap-cnsi-list';
@@ -224,7 +224,7 @@ export class APIEffect {
         endpoints.forEach(endpoint =>
           this.store.dispatch(
             new SendEventAction(endpointSchemaKey, endpoint, {
-              eventCode: error.status || '500',
+              eventCode: error.status ? error.status + '' : '500',
               severity: InternalEventSeverity.ERROR,
               message: 'Jetstream API request error',
               metadata: {

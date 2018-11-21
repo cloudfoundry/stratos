@@ -140,6 +140,7 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     this.createServiceInstance.stepper.waitForStep('Select Service');
+    this.createServiceInstance.stepper.waitForStepNotBusy();
     this.createServiceInstance.stepper.setService(serviceName, expectFailure);
     if (!expectFailure) {
       expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
@@ -191,9 +192,13 @@ export class ServicesHelperE2E {
         return serviceInstanceNames.findIndex(name => name === serviceInstance.entity.name) >= 0;
       });
       return serviceInstances.length ?
-        promise.all(serviceInstances.map(serviceInstance => this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid))) :
+        promise.all(serviceInstances.map(serviceInstance => this.cleanUpService(cfGuid, serviceInstance.metadata.guid))) :
         promise.fullyResolved(createEmptyCfResponse());
     });
+  }
+
+  private cleanUpService(cfGuid: string, serviceGuid: string): promise.Promise<any> {
+    return this.deleteServiceInstance(cfGuid, serviceGuid).catch(e => e2e.log(`Ignoring failed service instance delete: ${e}`));
   }
 
   getServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true) {
