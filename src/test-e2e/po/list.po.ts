@@ -60,10 +60,10 @@ export class ListTableComponent extends Component {
     });
   }
 
-  selectRow(index: number): promise.Promise<any> {
+  selectRow(index: number, radioButton = true): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
-      return rows[index].element(by.css('.mat-radio-button')).click();
+      return rows[index].element(by.css(radioButton ? '.mat-radio-button' : '.mat-checkbox')).click();
     });
   }
 
@@ -108,6 +108,8 @@ export class ListTableComponent extends Component {
 // Page Object for the List Card View
 export class ListCardComponent extends Component {
 
+  static cardsCss = 'app-card:not(.row-filler)';
+
   constructor(locator: ElementFinder) {
     super(locator);
   }
@@ -120,16 +122,23 @@ export class ListCardComponent extends Component {
   }
 
   getCards(): ElementArrayFinder {
-    return this.locator.all(by.css('app-card:not(.row-filler)'));
+    return this.locator.all(by.css(ListCardComponent.cardsCss));
   }
 
   getCard(index: number, metaType = MetaCardTitleType.CUSTOM): MetaCard {
     return new MetaCard(this.getCards().get(index), metaType);
   }
 
+  waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
+    const cardTitle = this.locator.element(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title));
+    return browser.wait(until.visibilityOf(cardTitle), 10000).then(() => {
+      return this.findCardByTitle(title, metaType);
+    });
+  }
+
   findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    return this.getCards().filter((elem) => {
-      return elem.element(by.cssContainingText('.meta-card__title', title)).isPresent();
+    return this.getCards().filter(elem => {
+      return elem.element(by.cssContainingText(metaType, title)).isPresent();
     }).then(e => {
       expect(e.length).toBe(1);
       return new MetaCard(e[0], metaType);
@@ -200,8 +209,13 @@ export class ListHeaderComponent extends Component {
   getFilterText(index = 0): promise.Promise<string> {
     return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
   }
-  selectFilterOption(index: number): promise.Promise<any> {
-    return this.getFilterOptions().then(options => options[index].click());
+
+  selectFilterOption(index: number, valueIndex): promise.Promise<any> {
+    return this.getFilterOptions(index).then(options => options[valueIndex].click());
+  }
+
+  getMultiFilterForm(): FormComponent {
+    return new FormComponent(this.locator.element(by.className('list-component__header__left--multi-filters')));
   }
 
   getRefreshListButton(): ElementFinder {
@@ -228,6 +242,10 @@ export class ListHeaderComponent extends Component {
     return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
   }
 
+  getIconButton(iconText: string): ElementFinder {
+    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
+  }
+
 }
 
 export class ListPaginationComponent extends Component {
@@ -250,12 +268,13 @@ export class ListPaginationComponent extends Component {
     return this.locator.element(by.css('.mat-paginator-page-size'));
   }
 
-  getPageSize(): promise.Promise<string> {
-    return this.getPageSizeForm().getText('mat-select-1');
+  getPageSize(customCtrlName?: string): promise.Promise<string> {
+    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-1');
   }
 
-  setPageSize(pageSize): promise.Promise<void> {
-    return this.getPageSizeForm().fill({ 'mat-select-1': pageSize });
+  setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
+    const name = customCtrlName || 'mat-select-1';
+    return this.getPageSizeForm().fill({ [name]: pageSize });
   }
 
   getPageSizeForm(): FormComponent {

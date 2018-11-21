@@ -10,7 +10,10 @@ USER_PASS=admin
 # CF API Endpoint
 CF_API_ENDPOINT=https://api.local.pcfdev.io
 
-while getopts ":o:s:u:p:a:" opt ; do
+# Skip login - run against whatever target the cf CLI is configured for
+SKIP_LOGIN=false
+
+while getopts ":o:s:u:p:a:n" opt ; do
     case $opt in
         o)
             DEFAULT_ORG="${OPTARG}"
@@ -26,6 +29,9 @@ while getopts ":o:s:u:p:a:" opt ; do
             ;;
         a)
             CF_API_ENDPOINT="${OPTARG}"
+            ;;
+        n)
+            SKIP_LOGIN="true"
             ;;
     esac
 done
@@ -71,7 +77,10 @@ function addServiceVisibilities {
   cf enable-service-access $SERVICE -o $ORG
 }
 
-cf login  --skip-ssl-validation -a ${CF_API_ENDPOINT} -u ${USER_NAME} -p ${USER_PASS} -o ${DEFAULT_ORG} -s ${DEFAULT_SPACE}
+if [ "${SKIP_LOGIN}" == "false" ]; then
+    cf login  --skip-ssl-validation -a ${CF_API_ENDPOINT} -u ${USER_NAME} -p ${USER_PASS} -o ${DEFAULT_ORG} -s ${DEFAULT_SPACE}
+fi
+
 # Create public service
 pushBrokerApp public-service;
 createService public-service;

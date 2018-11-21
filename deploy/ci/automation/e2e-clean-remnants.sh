@@ -21,28 +21,41 @@ fi
 # Platform name (Linux, Darwin etc)
 unamestr=`uname`
 
+DRYRUN="false"
+if [ "$1" == "-d" -o  "$2" == "-d" ]; then
+  DRYRUN="true"
+  echo "Dry run - will not delete anything"
+fi
+
 function clean() {
   local ITEMS=$1
   local PREFIX=$2
   local CMD=$3
-  local REGEX="^($PREFIX)(.*)\.([0-9][0-9][0-9][zZ])[[:space:]]*.*"
+  local REGEX="^($PREFIX)(.*)\.([0-9]*)T([0-9]*)[zZ].*"
   local NOW=$(date "+%s")
 
   while IFS= read -r line
   do
     if [[ $line =~ $REGEX ]]; then
-      TIMESTAMP="${BASH_REMATCH[2]}"
-      NAME="${BASH_REMATCH[1]}${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+      DS="${BASH_REMATCH[3]}"
+      NAME="$line"
+      TS="${BASH_REMATCH[4]}"
+      TS="${TS:0:6}"
       TIMESTAMP=$(echo $TIMESTAMP | awk '{print toupper($0)}')
-      if [[ "$unamestr" == 'Darwin' ]]; then
-        EPOCH=$(date -j -f "%Y-%M-%dT%T" $TIMESTAMP "+%s")
-      else
-        EPOCH=$(date -d $TIMESTAMP "+%s")
-      fi
+      EPOCH=$(date -j -f "%Y%m%d:%H%M%S" "$DS:$TS" "+%s")
+#      if [[ "$unamestr" == 'Darwin' ]]; then
+#        EPOCH=$(date -j -f "%Y-%M-%dT%T" $TIMESTAMP "+%s")
+#      else
+#        EPOCH=$(date -d $TIMESTAMP "+%s")
+#      fi
       DIFF=$(($NOW-$EPOCH))
       if [ $DIFF -gt 43200 ]; then
-        echo "$NAME  [DELETE]"
-        cf $CMD $NAME -f
+        if [ $DRYRUN == "false" ]; then
+          echo "$NAME  [DELETE]"
+          cf $CMD $NAME -f
+        else
+          echo "$NAME  [DELETE - DRYRUN]"
+        fi
       else
         echo "$NAME  [OK]"
       fi
@@ -50,13 +63,19 @@ function clean() {
   done <<< "$ITEMS"
 }
 
-echo "Cleaning old Service Instances"
-SERVICES="$(cf services | tail -n +5)"
-clean "$SERVICES" "edited-serviceInstance-" "delete-service"
+# echo "Cleaning old Service Instances"
+# SERVICES="$(cf services | tail -n +5)"
+# clean "$SERVICES" "edited-serviceInstance-" "delete-service"
+# clean "$SERVICES" "acceptance\.e2e\..*\." "delete-service"
+# clean "$SERVICES" "e-acceptance\.e2e\..*\." "delete-service"
 
-echo "Cleaning old Applications"
-APPS="$(cf apps | tail -n +5)"
-clean "$APPS" "acceptance\.e2e\..*\." "delete"
-clean "$APPS" "e2e\.travisci\." "delete"
+# echo "Cleaning old Applications"
+# APPS="$(cf apps | tail -n +5)"
+# clean "$APPS" "acceptance\.e2e\..*\." "delete"
+# clean "$APPS" "e2e\.travisci\." "delete"
+
+echo "Cleaning old Orgs"
+ORGS="$(cf orgs | tail -n +5)"
+clean "$ORGS" "acceptance\.e2e\.travis" "delete-org"
 
 echo "Done"

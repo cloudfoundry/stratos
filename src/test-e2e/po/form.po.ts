@@ -1,8 +1,9 @@
-import { by, element, promise } from 'protractor';
+import { by, element, promise, browser } from 'protractor';
 import { ElementArrayFinder, ElementFinder, protractor } from 'protractor/built';
 import { Key } from 'selenium-webdriver';
 
 import { Component } from './component.po';
+import { e2e } from '../e2e';
 
 export interface FormItemMap {
   [k: string]: FormItem;
@@ -168,7 +169,7 @@ export class FormComponent extends Component {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value = fields[field];
-        expect(ctrl).toBeDefined();
+        expect(ctrl).toBeDefined(`Could not find form control with id '${field}'. Found ctrls with ids '${Object.keys(ctrls)}'`);
         if (!ctrl) {
           return;
         }
@@ -181,8 +182,15 @@ export class FormComponent extends Component {
             }
             break;
           case 'mat-select':
+            let strValue = value as string;
+            // Handle spaces in text. (sendKeys sends space bar.. which closes drop down)
+            // Bonus - Sending string without space works... up until last character...which deselects desired option and selects top option
+            const containsSpace = strValue.indexOf(' ');
+            if (containsSpace >= 0) {
+              strValue = strValue.slice(0, containsSpace);
+            }
             ctrl.click();
-            ctrl.sendKeys(value);
+            ctrl.sendKeys(strValue);
             ctrl.sendKeys(Key.RETURN);
             if (!expectFailure) {
               expect(this.getText(field)).toBe(value);

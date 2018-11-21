@@ -20,7 +20,13 @@ import { UAASetupState } from '../../../store/types/uaa-setup.types';
 })
 export class ConsoleUaaWizardComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, private router: Router) { }
+  private clientRedirectURI: string;
+
+  constructor(private store: Store<AppState>, private router: Router) {
+    // Client Redirect URI for SSO
+    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
+    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+  }
 
   uaaForm: FormGroup;
   validateUAAForm: Observable<boolean>;
@@ -36,6 +42,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       skip_ssl_validation: this.uaaForm.get('skipSll').value,
       username: this.uaaForm.get('adminUsername').value,
       console_client_secret: this.uaaForm.get('clientSecret').value,
+      use_sso: this.uaaForm.get('useSSO').value,
     }));
     return this.store.select('uaaSetup').pipe(
       skipWhile((state: UAASetupState) => {
@@ -97,6 +104,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       clientSecret: new FormControl(''),
       adminUsername: new FormControl('', [<any>Validators.required]),
       adminPassword: new FormControl('', [<any>Validators.required]),
+      useSSO: new FormControl(false),
     });
 
     let observer;
