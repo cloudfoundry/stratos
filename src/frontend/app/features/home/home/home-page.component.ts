@@ -36,8 +36,7 @@ export class HomePageComponent implements OnInit {
       title: 'Cloud Foundry',
       getItemName: (endpoint: EndpointModel) => endpoint.name,
       request: {
-        data$: this.paginationMonitorFactory
-          .create<EndpointModel>(CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)).currentPage$
+        data$: this.cloudFoundryService.connectedCFEndpoints$
       },
       getViewLink: (cf: EndpointModel) => {
         return `/cloud-foundry/${cf.guid}`;
@@ -96,6 +95,7 @@ export class HomePageComponent implements OnInit {
           return action;
         },
         getViewLink: (app: APIResource<IApp>, [space, org, cf]: [APIResource<ISpace>, APIResource<IOrganization>, EndpointModel]) => {
+          console.log(space, org, cf)
           return `/applications/${cf.guid}/${app.entity.guid}`;
         }
       })
@@ -110,7 +110,11 @@ export class HomePageComponent implements OnInit {
     });
   }
 
-  constructor(private store: Store<AppState>, private paginationMonitorFactory: PaginationMonitorFactory) { }
+  constructor(
+    private store: Store<AppState>,
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private cloudFoundryService: CloudFoundryService
+  ) { }
 
   ngOnInit() { }
 }
