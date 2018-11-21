@@ -1,16 +1,13 @@
-
-import { distinct, map, combineLatest } from 'rxjs/operators';
-import { Component, HostBinding, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { combineLatest, distinct, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/app-state';
 import { EntityInfo } from '../../../../../../store/types/api.types';
 import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+
 
 @Component({
   selector: 'app-build-tab',
@@ -23,7 +20,7 @@ import { ApplicationData, ApplicationService } from '../../../../application.ser
 export class BuildTabComponent implements OnInit {
 
 
-  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
+  constructor(public applicationService: ApplicationService) { }
 
   cardTwoFetching$: Observable<boolean>;
 
@@ -40,16 +37,16 @@ export class BuildTabComponent implements OnInit {
       ),
       map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
-      }), distinct(), );
+      }), distinct());
 
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
       map(([app, space]) => {
-        if (! space.entity.allow_ssh) {
+        if (!space.entity.allow_ssh) {
           return 'Disabled by the space';
         } else {
           return app.app.entity.enable_ssh ? 'Yes' : 'No';
-       }
+        }
       })
     );
   }

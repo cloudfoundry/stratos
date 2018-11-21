@@ -133,10 +133,13 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
+import { MomentModule } from 'ngx-moment';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { DrillDownComponent } from './components/drill-down/drill-down.component';
-import { TableCellDefaultComponent } from './components/list/list-table/app-table-cell-default/app-table-cell-default.component';
-import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
-import { TableCellEndpointStatusComponent } from './components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 @NgModule({
   imports: [
@@ -148,6 +151,7 @@ import { TableCellEndpointStatusComponent } from './components/list/list-types/e
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -241,6 +245,10 @@ import { TableCellEndpointStatusComponent } from './components/list/list-types/e
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     DrillDownComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -330,7 +338,11 @@ import { TableCellEndpointStatusComponent } from './components/list/list-types/e
     CapitalizeFirstPipe,
     CfEndpointsMissingComponent,
     RoutingIndicatorComponent,
-    DrillDownComponent
+    DrillDownComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -348,7 +360,8 @@ import { TableCellEndpointStatusComponent } from './components/list/list-types/e
     PaginationMonitorFactory,
     CloudFoundryService,
     InternalEventMonitorFactory,
-    ServiceActionHelperService
+    ServiceActionHelperService,
+    MetricsRangeSelectorService
   ]
 })
 export class SharedModule { }

@@ -9,11 +9,17 @@ spec:
   template:
     metadata:
       labels:
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "console"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
-        component: "console"
+        component: console
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         name: ui
         env:
         - name: ENCRYPTION_KEY_VOLUME
@@ -33,6 +39,7 @@ spec:
           name: https
           protocol: TCP
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         name: "postflight"
         env:
         - name: DB_HOST
@@ -83,6 +90,7 @@ spec:
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
         - name: DB_USER
@@ -204,6 +212,10 @@ spec:
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
           value: "{{ .Release.Time }}"
+        - name: SSO_LOGIN
+          value: {{default "false" .Values.console.ssoLogin | quote}}
+        - name: SSO_OPTIONS
+          value: {{default "" .Values.console.ssoOptions | quote}}
         ports:
         - containerPort: 3003
           name: proxy
@@ -236,16 +248,26 @@ kind: Deployment
 metadata:
   name: console-mariadb
   labels:
-    app: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-mariadb"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   template:
     metadata:
       labels:
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "console-mariadb"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
     spec:
       containers:
       - name: mariadb
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         {{- if .Values.mariadb.usePassword }}
         - name: MYSQL_ROOT_PASSWORD

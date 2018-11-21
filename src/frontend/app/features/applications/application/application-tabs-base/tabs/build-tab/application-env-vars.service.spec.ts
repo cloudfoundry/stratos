@@ -1,15 +1,23 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
-import { ApplicationEnvVarsService } from './application-env-vars.service';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 
 describe('ApplicationEnvVarsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ApplicationEnvVarsService]
+      providers: [
+        ApplicationEnvVarsHelper,
+        PaginationMonitorFactory,
+      ],
+      imports: [
+        createBasicStoreModule()
+      ]
     });
   });
 
-  it('should be created', inject([ApplicationEnvVarsService], (service: ApplicationEnvVarsService) => {
+  it('should be created', inject([ApplicationEnvVarsHelper], (service: ApplicationEnvVarsHelper) => {
     expect(service).toBeTruthy();
   }));
 });

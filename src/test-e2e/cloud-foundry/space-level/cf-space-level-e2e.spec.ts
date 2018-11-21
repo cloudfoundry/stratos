@@ -1,30 +1,19 @@
-import { browser } from 'protractor';
-
-import { ApplicationE2eHelper } from '../../application/application-e2e-helpers';
-import { e2e, E2ESetup } from '../../e2e';
+import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
+import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
+import { SideNavMenuItem } from '../../po/side-nav.po';
+import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
+import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
 
 
-describe('CF - Space Level - ', () => {
+describe('CF - Space Level -', () => {
 
   let spacePage: CfSpaceLevelPage;
-  let e2eSetup: E2ESetup;
   let defaultCf: E2EConfigCloudFoundry;
-  let applicationE2eHelper: ApplicationE2eHelper;
-
-  function setup(user: ConsoleUserType) {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.admin)
-      .connectAllEndpoints(ConsoleUserType.user)
-      .loginAs(user)
-      .getInfo();
-    applicationE2eHelper = new ApplicationE2eHelper(e2eSetup);
-  }
-
   function testBreadcrumb() {
     spacePage.breadcrumbs.waitUntilShown();
     spacePage.breadcrumbs.getBreadcrumbs().then(breadcrumbs => {
@@ -44,44 +33,78 @@ describe('CF - Space Level - ', () => {
   }
 
   function navToPage() {
-    defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-    browser.wait(applicationE2eHelper.cfHelper.fetchSpace(endpointGuid, defaultCf.testSpace).then((space => {
-      spacePage = CfSpaceLevelPage.forEndpoint(endpointGuid, space.entity.organization_guid, space.metadata.guid);
-      spacePage.navigateTo();
-      spacePage.waitForPageOrChildPage();
-      spacePage.loadingIndicator.waitUntilNotShown();
-    })));
+    const page = new CFPage();
+    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+    CfTopLevelPage.detect().then(cfPage => {
+      cfPage.waitForPageOrChildPage();
+      cfPage.loadingIndicator.waitUntilNotShown();
+      cfPage.goToOrgTab();
+
+      // Find the Org and click on it
+      const list = new ListComponent();
+      list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
+        expect(card).toBeDefined();
+        card.click();
+      });
+      CfOrgLevelPage.detect().then(orgPage => {
+        orgPage.waitForPageOrChildPage();
+        orgPage.loadingIndicator.waitUntilNotShown();
+        orgPage.goToSpacesTab();
+
+        // Find the Space and click on it
+        const spaceList = new ListComponent();
+        spaceList.cards.findCardByTitle(defaultCf.testSpace, MetaCardTitleType.CUSTOM, true).then(card => {
+          expect(card).toBeDefined();
+          card.click();
+        });
+        CfSpaceLevelPage.detect().then(s => {
+          spacePage = s;
+          spacePage.waitForPageOrChildPage();
+          spacePage.loadingIndicator.waitUntilNotShown();
+        });
+
+      });
+    });
   }
 
-  describe('As Admin', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.admin);
+
+  beforeAll(() => {
+    defaultCf = e2e.secrets.getDefaultCFEndpoint();
+    e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .connectAllEndpoints(ConsoleUserType.user);
+  });
+
+  describe('As Admin -', () => {
+    beforeAll(() => {
+      e2e.setup(ConsoleUserType.admin)
+        .loginAs(ConsoleUserType.admin);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
       beforeEach(navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
-
     });
 
   });
 
-  describe('As User', () => {
-    beforeEach(() => {
-      setup(ConsoleUserType.user);
+  describe('As User -', () => {
+    beforeAll(() => {
+      e2e.setup(ConsoleUserType.admin)
+        .loginAs(ConsoleUserType.admin);
     });
 
-    describe('Basic Tests - ', () => {
+    describe('Basic Tests -', () => {
       beforeEach(navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
-
     });
   });
 

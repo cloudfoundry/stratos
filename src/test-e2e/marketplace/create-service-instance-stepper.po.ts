@@ -9,6 +9,7 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   private spaceFieldName = 'space';
   private serviceFieldName = 'service';
   private serviceNameFieldName = 'name';
+  private bindApp = 'apps';
 
   constructor() {
     super();
@@ -29,12 +30,20 @@ export class CreateServiceInstanceStepper extends StepperComponent {
   setSpace = (spaceName: string) => {
     return this.getStepperForm().fill({ [this.spaceFieldName]: spaceName });
   }
-  setService = (serviceName: string) => {
-    return this.getStepperForm().fill({ [this.serviceFieldName]: serviceName });
+  setService = (serviceName: string, expectFailure = false) => {
+    return this.getStepperForm().fill({ [this.serviceFieldName]: serviceName }, expectFailure);
   }
 
   setServiceName = (serviceInstanceName: string) => {
     return this.getStepperForm().fill({ [this.serviceNameFieldName]: serviceInstanceName });
+  }
+
+  setBindApp = (bindAppName: string) => {
+    return this.getStepperForm().fill({ [this.bindApp]: bindAppName });
+  }
+
+  isBindAppStepDisabled = () => {
+    return this.isStepDisabled('Bind App (Optional)');
   }
 
 }

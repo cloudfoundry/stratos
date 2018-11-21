@@ -17,7 +17,7 @@ const tableColumnSelect = {
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
   class: 'table-column-select',
-  cellFlex: '0 0 75px'
+  cellFlex: '0 0 60px'
 };
 
 const tableColumnAction = {
@@ -40,15 +40,15 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort: MatSort;
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
-  @Input('hideTable') hideTable = false;
-  @Input('addSelect') addSelect = false;
-  @Input('addActions') addActions = false;
-  @Input('dataSource') dataSource: ITableListDataSource<T>;
-  @Input('paginationController') paginationController = null as IListPaginationController<T>;
-  @Input('columns') columns: ITableColumn<T>[];
+  @Input() hideTable = false;
+  @Input() addSelect = false;
+  @Input() addActions = false;
+  @Input() dataSource: ITableListDataSource<T>;
+  @Input() paginationController = null as IListPaginationController<T>;
+  @Input() columns: ITableColumn<T>[];
   public columnNames: string[];
 
-  @Input('fixedRowHeight') fixedRowHeight = false;
+  @Input() fixedRowHeight = false;
 
   ngOnInit() {
     if (this.addSelect || this.addActions) {

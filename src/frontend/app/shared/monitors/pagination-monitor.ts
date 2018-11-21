@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { denormalize, schema } from 'normalizr';
+import { denormalize, schema as normalizrSchema } from 'normalizr';
 import { asapScheduler, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
@@ -19,9 +19,9 @@ import {
   selectEntities,
 } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { AppState } from './../../store/app-state';
-import { ActionState } from './../../store/reducers/api-request-reducer/types';
-import { PaginationEntityState } from './../../store/types/pagination.types';
+import { AppState } from '../../store/app-state';
+import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
 
 export class PaginationMonitor<T = any> {
   /**
@@ -48,7 +48,7 @@ export class PaginationMonitor<T = any> {
   constructor(
     private store: Store<AppState>,
     public paginationKey: string,
-    public schema: schema.Entity,
+    public schema: normalizrSchema.Entity,
   ) {
     this.init(store, paginationKey, schema);
   }
@@ -104,7 +104,7 @@ export class PaginationMonitor<T = any> {
   private init(
     store: Store<AppState>,
     paginationKey: string,
-    schema: schema.Entity,
+    schema: normalizrSchema.Entity,
   ) {
     this.pagination$ = this.createPaginationObservable(
       store,
@@ -130,7 +130,7 @@ export class PaginationMonitor<T = any> {
 
   private createPageObservable(
     pagination$: Observable<PaginationEntityState>,
-    schema: schema.Entity,
+    schema: normalizrSchema.Entity,
   ) {
     const entityObservable$ = this.store
       .select(selectEntities<T>(this.schema.key))

@@ -1,18 +1,21 @@
+import { browser } from 'protractor';
+
+import { IApp } from '../../frontend/app/core/cf-api.types';
+import { APIResource } from '../../frontend/app/store/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationSummary } from './application-summary.po';
-import { CreateApplicationStepper } from './create-application-stepper.po';
-
+import { ApplicationBasePage } from './po/application-page.po';
+import { CreateApplicationStepper } from './po/create-application-stepper.po';
 
 describe('Application Create', function () {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
   let applicationE2eHelper: ApplicationE2eHelper;
-  let cfGuid, app;
+  let cfGuid, app: APIResource<IApp>;
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -21,9 +24,13 @@ describe('Application Create', function () {
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
-      .connectAllEndpoints(ConsoleUserType.admin);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
     applicationE2eHelper = new ApplicationE2eHelper(setup);
   });
+
+  // Fetch the default cf, org and space up front. This saves time later
+  beforeAll(() => applicationE2eHelper.cfHelper.updateDefaultCfOrgSpace());
 
   beforeEach(() => nav.goto(SideNavMenuItem.Applications));
 
@@ -69,19 +76,22 @@ describe('Application Create', function () {
     createAppStepper.waitUntilNotShown();
 
     // Determine the app guid and confirm we're on the app summary page
-    const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfInfo();
-    const fetchApp = getCfCnsi.then(endpointModel => {
-      cfGuid = endpointModel.guid;
-      return applicationE2eHelper.fetchApp(cfGuid, testAppName);
-    });
-    const appFetched = fetchApp.then(response => {
-      expect(response.total_results).toBe(1);
-      app = response.resources[0];
-      const appSummaryPage = new ApplicationSummary(cfGuid, app.metadata.guid, app.entity.name);
+    browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName).then((res) => {
+      expect(res.app).not.toBe(null);
+      app = res.app;
+      cfGuid = res.cfGuid;
+      const appSummaryPage = new ApplicationBasePage(res.cfGuid, app.metadata.guid);
       appSummaryPage.waitForPage();
-    });
+    }));
+
   });
 
-  afterEach(() => applicationE2eHelper.deleteApplication(cfGuid, app));
+  afterAll(() => {
+    expect(cfGuid).toBeDefined();
+    expect(cfGuid).not.toBeNull();
+    expect(app).toBeDefined();
+    expect(app).not.toBeNull();
+    return app ? applicationE2eHelper.deleteApplication({ cfGuid, app }) : null;
+  });
 
 });

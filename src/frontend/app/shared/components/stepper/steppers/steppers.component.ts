@@ -36,8 +36,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
-  @Input('cancel') cancel = null;
-  @Input('nextButtonProgress') nextButtonProgress = true;
+  @Input() cancel = null;
+  @Input() nextButtonProgress = true;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];

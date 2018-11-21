@@ -15,13 +15,17 @@ import { TableCellCustom } from '../../list.types';
 export class TableCellSelectComponent<T> extends TableCellCustom<T> implements OnInit {
 
   disable$: Observable<boolean>;
+  tooltip$: Observable<string>;
 
-  @Input('rowState')
+  @Input()
   rowState: Observable<RowState>;
 
   ngOnInit() {
     this.disable$ = this.rowState.pipe(
       map(state => state.disabled)
+    );
+    this.tooltip$ = this.rowState.pipe(
+      map(state => state.disabled ? state.disabledReason : null)
     );
   }
 }

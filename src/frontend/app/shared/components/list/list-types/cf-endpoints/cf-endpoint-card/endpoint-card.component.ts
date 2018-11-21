@@ -13,13 +13,13 @@ export interface EndpointCardConfig {
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss']
 })
-export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
+export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
   static columns = 2;
 
   public status$ = new ReplaySubject<CardStatus>();
 
-  @Input('row')
+  @Input()
   row: EndpointModel;
 
   @Input('config')
@@ -45,6 +45,11 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
     return getFullEndpointApiUrl(row);
   }
 
+  public getRouterPath(row: EndpointModel) {
+    if (row.cnsi_type === 'cf') {
+      return ['/cloud-foundry', row.guid];
+    }
+  }
 
   private mapStatus(endpoint: EndpointModel) {
     const connectionStatus = endpoint ? endpoint.connectionStatus : '';

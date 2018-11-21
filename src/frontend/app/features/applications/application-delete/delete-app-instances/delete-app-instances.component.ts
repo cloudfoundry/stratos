@@ -19,14 +19,12 @@ import { AppDeleteServiceInstancesListConfigService } from './app-delete-instanc
 })
 export class DeleteAppServiceInstancesComponent implements OnDestroy {
 
-  @Output('selected')
+  @Output()
   public selected = new EventEmitter<APIResource<IServiceInstance>[]>();
 
   private selectedSub: Subscription;
 
   constructor(private config: ListConfig<APIResource>) {
-    const dataSource = this.config.getDataSource();
-
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selected) => {
         this.selected.emit(Array.from(selected.values()));

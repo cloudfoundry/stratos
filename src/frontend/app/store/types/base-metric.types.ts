@@ -1,3 +1,6 @@
+import { MetricQueryConfig } from '../actions/metrics.actions';
+import { MetricQueryType } from '../../shared/services/metrics-range-selector.types';
+
 export enum MetricResultTypes {
   MATRIX = 'matrix',
   VECTOR = 'vector',
@@ -10,9 +13,14 @@ export interface IMetricsResponse<T = any> {
   data: IMetrics<T>;
 }
 
-export interface IMetrics<T = any> {
+export interface IMetricsData<T = any> {
   resultType: string;
   result: [T];
+}
+export interface IMetrics<T = any> {
+  query: MetricQueryConfig;
+  windowValue: string;
+  data: IMetricsData<T>;
 }
 
 interface IVectorResult<T> {
@@ -36,7 +44,9 @@ export type IMetricStringsResult = IMetricSample[];
 export interface ChartSeries<T = any> {
   name: string;
   series: {
-    name: string;
+    name: string | Date;
     value: T;
   }[];
 }
+
+export type MetricsFilterSeries = (chartSeries: ChartSeries[]) => ChartSeries[];

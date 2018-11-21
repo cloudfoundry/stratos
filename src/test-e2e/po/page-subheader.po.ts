@@ -46,12 +46,12 @@ export class PageSubHeaderComponent extends Component {
     return this.getItem(name).click();
   }
 
-  goToItemAndWait(name: string, baseUrl: string, suffix: string) {
+  goToItemAndWait(name: string, baseUrl: string, suffix: string): promise.Promise<any> {
     this.clickItem(name);
     if (!suffix.startsWith('/')) {
       suffix = '/' + suffix;
     }
-    browser.wait(until.urlContains(browser.baseUrl + baseUrl + suffix), 20000);
+    return browser.wait(until.urlContains(browser.baseUrl + baseUrl + suffix), 20000, `Waiting for item '${name}'`);
   }
 
   getItemMap(): promise.Promise<MenuItemMap> {

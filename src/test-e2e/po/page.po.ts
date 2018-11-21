@@ -40,9 +40,7 @@ export abstract class Page {
   }
 
   isActivePage(): promise.Promise<boolean> {
-    return browser.getCurrentUrl().then(url => {
-      return url === this.getUrl();
-    });
+    return browser.getCurrentUrl().then(url => url === this.getUrl());
   }
 
   isActivePageOrChildPage(): promise.Promise<boolean> {
@@ -61,13 +59,13 @@ export abstract class Page {
   }
 
   waitForPage() {
-    expect(this.navLink.startsWith('/')).toBeTruthy();
-    browser.wait(until.urlIs(this.getUrl()), 20000);
+    expect(this.navLink.startsWith('/')).toBeTruthy('navLink should start with a /');
+    browser.wait(until.urlIs(this.getUrl()), 20000, `Failed to wait for page with navlink '${this.navLink}'`);
   }
 
   waitForPageDataLoaded() {
     this.waitForPage();
-    browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
+    return browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
   }
 
   waitForPageOrChildPage() {

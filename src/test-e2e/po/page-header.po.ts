@@ -1,4 +1,4 @@
-import { browser, by, element, ElementFinder, promise, protractor } from 'protractor';
+import { browser, by, element as protractorElement, ElementFinder, promise, protractor } from 'protractor';
 import { ElementArrayFinder } from 'protractor/built';
 
 import { Component } from './component.po';
@@ -10,7 +10,7 @@ import { MenuComponent } from './menu.po';
 export class PageHeader extends Component {
 
   constructor() {
-    super(element(by.tagName('app-page-header')));
+    super(protractorElement(by.tagName('app-page-header')));
   }
   private readonly until = protractor.ExpectedConditions;
   private readonly pageTitleSelector = '.page-header h1';
@@ -44,6 +44,10 @@ export class PageHeader extends Component {
 
   getTitleText(): promise.Promise<string> {
     return this.getTitle().getText();
+  }
+
+  waitForTitleText(text: string) {
+    browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000, `Failed to wait for page header with text ${text}`);
   }
 
   logout(): promise.Promise<any> {

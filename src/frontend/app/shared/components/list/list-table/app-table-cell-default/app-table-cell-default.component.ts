@@ -1,8 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 
+import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
-import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
-import { ICellDefinition } from './../table.types';
+import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
+import { ICellDefinition } from '../table.types';
 
 @Component({
   moduleId: module.id,
@@ -10,7 +12,8 @@ import { ICellDefinition } from './../table.types';
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss']
 })
-export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
+export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
+
   public cellDefinition: ICellDefinition<T>;
 
   private _row: T;
@@ -23,6 +26,8 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
     }
   }
 
+  private asyncSub: Subscription;
+
   public valueContext = { value: null };
   public isLink = false;
   public isExternalLink = false;
@@ -33,18 +38,49 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
   public init() {
     this.setValueGenerator();
     this.setValue(this.row);
-    this.isLink = !!this.cellDefinition.getLink;
-    if (this.isLink) {
-      this.linkValue = this.cellDefinition.getLink(this.row);
-    }
+    this.setSyncLink();
+  }
+
+  private setupLinkDeps() {
     if (this.cellDefinition.newTab) {
       this.linkTarget = '_blank';
     }
     this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
   }
 
+  private setSyncLink() {
+    if (!this.cellDefinition.getLink) {
+      return;
+    }
+    this.isLink = true;
+    this.linkValue = this.cellDefinition.getLink(this.row);
+    this.setupLinkDeps();
+  }
+
+  private setupAsyncLink(value) {
+    if (!this.cellDefinition.getAsyncLink) {
+      return;
+    }
+    this.isLink = true;
+    this.linkValue = this.cellDefinition.getAsyncLink(value);
+    this.setupLinkDeps();
+  }
+
+  private setupAsync(row) {
+    if (this.asyncSub) {
+      return;
+    }
+    const asyncConfig = this.cellDefinition.asyncValue;
+    this.asyncSub = row[asyncConfig.pathToObs].subscribe(value => {
+      this.valueContext.value = pathGet(asyncConfig.pathToValue, value);
+      this.setupAsyncLink(value);
+    });
+  }
+
   private setValue(row: T) {
-    if (this.valueGenerator) {
+    if (this.cellDefinition && this.cellDefinition.asyncValue) {
+      this.setupAsync(row);
+    } else if (this.valueGenerator) {
       this.valueContext.value = this.valueGenerator(row);
     }
   }
@@ -64,6 +100,12 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
       return (row: T) => objectHelper.getPathFromString(row, cellDefinition.valuePath);
     }
     return null;
+  }
+
+  ngOnDestroy() {
+    if (this.asyncSub) {
+      this.asyncSub.unsubscribe();
+    }
   }
 
 }

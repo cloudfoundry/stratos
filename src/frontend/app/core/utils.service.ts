@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 export const urlValidationExpression =
   '^' +
@@ -232,3 +233,23 @@ export function pathSet(path: string, object: any, value: any) {
     object[params[index++]] = value;
   }
 }
+
+export function parseHttpPipeError(res): {} {
+  if (!res.status) {
+    return res;
+  }
+  try {
+    return res.json();
+  } catch (e) {
+    this.logger.warn('Failed to parse response body', e);
+  }
+  return {};
+}
+
+export const safeUnsubscribe = (...subs: Subscription[]) => {
+  subs.forEach(sub => {
+    if (sub) {
+      sub.unsubscribe();
+    }
+  });
+};

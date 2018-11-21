@@ -9,7 +9,7 @@ import { SharedModule } from '../../../../../../shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
-import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { VariablesTabComponent } from './variables-tab.component';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import {
@@ -34,7 +34,7 @@ describe('VariablesTabComponent', () => {
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
       ]
     });
     TestBed.overrideModule(BrowserDynamicTestingModule, {

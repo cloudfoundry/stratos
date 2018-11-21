@@ -1,22 +1,18 @@
-import { ApplicationsPage } from '../applications/applications.po';
-import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { SnackBarComponent } from '../po/snackbar.po';
-import { ServicesPage } from '../services/services.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 import { RegisterDialog } from './register-dialog.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  const applications = new ApplicationsPage();
-  const services = new ServicesPage();
-  const cloudFoundry = new CfTopLevelPage();
   const register = new RegisterDialog();
 
   const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
 
+  // If there is an endpoint named 'selfsignecf' use that for self signed cert test - otherwise use default
+  const selfSignedEndpoint = e2e.secrets.getEndpointByName('selfsignedcf') || validEndpoint;
 
   describe('Register Endpoints -', () => {
 
@@ -134,7 +130,8 @@ describe('Endpoints', () => {
 
           name.clear();
           expect(register.stepper.canNext()).toBeFalsy();
-          expect(name.isInvalid()).toBeFalsy();
+          // input has been touched so 'required' validation kicks in
+          expect(name.isInvalid()).toBeTruthy();
 
           name.set(validEndpoint.name);
           expect(register.stepper.canNext()).toBeTruthy();
@@ -144,8 +141,8 @@ describe('Endpoints', () => {
 
       it('Should hint at SSL errors', () => {
         register.form.fill({
-          name: validEndpoint.name,
-          url: validEndpoint.url,
+          name: selfSignedEndpoint.name,
+          url: selfSignedEndpoint.url,
           skipsll: false
         });
         register.stepper.next();
@@ -153,7 +150,8 @@ describe('Endpoints', () => {
         const snackBar = new SnackBarComponent();
         snackBar.waitUntilShown();
         /* tslint:disable-line:max-line-length*/
-        expect(snackBar.hasMessage(`SSL error - x509: certificate signed by unknown authority. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"`));
+        expect(snackBar.hasMessage(`SSL error - x509: certificate
+         signed by unknown authority. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"`));
       });
 
       it('Successful register', () => {
@@ -162,6 +160,8 @@ describe('Endpoints', () => {
           url: validEndpoint.url,
           skipsll: true
         });
+
+        expect(register.stepper.canNext()).toBeTruthy();
         register.stepper.next();
 
         expect(endpointsPage.isActivePage()).toBeTruthy();
