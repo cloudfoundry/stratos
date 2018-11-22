@@ -195,7 +195,8 @@ describe('Application View -', function () {
       expect(addRoutePage.stepper.canCancel()).toBeTruthy();
       addRoutePage.stepper.cancel();
 
-      appSummary.waitForPage();
+      // Should return back to App Routes
+      appRoutes.waitForPage();
     });
   });
 
