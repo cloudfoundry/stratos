@@ -151,7 +151,15 @@ exports.config = {
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
     jasmine.getEnv().addReporter(new VideoReporter({
-      baseDirectory: E2E_REPORT_FOLDER
+      baseDirectory: E2E_REPORT_FOLDER,
+      singleVideo: false,
+      ffmpegArgs: [
+        '-video_size', '1366x768',
+        '-framerate', '25',
+        '-f', 'x11grab',
+        '-draw_mouse', '0',
+        '-i', ':99.0'
+      ]
     }));
     if (showTimesInReport) {
       browserReporterPlugin.install(jasmine, browser);
