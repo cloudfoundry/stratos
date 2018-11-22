@@ -6,7 +6,6 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { isJetStreamError } from '../../core/jetstream.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
@@ -33,7 +32,7 @@ import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-const endpointHeader = 'x-cap-cnsi-list';
+export const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -190,11 +189,18 @@ export class APIEffect {
               ),
             );
           }
+          const { error, errorCode, guid, url, errorResponse } = errorsCheck[0];
           this.store.dispatch(
             new WrapperRequestActionFailed(
               errorMessage,
-              { ...actionClone, endpointGuid: errorsCheck[0].guid },
-              requestType,
+              { ...actionClone, endpointGuid: guid },
+              requestType, {
+                endpointIds: [guid],
+                url,
+                eventCode: errorCode ? errorCode + '' : '500',
+                message: errorResponse ? errorResponse.description : 'Jetstream CF API request error',
+                error
+              }
             ),
           );
           return [];
@@ -234,7 +240,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+          endpointIds,
+          url: error.url || apiAction.options.url,
+          eventCode: error.status ? error.status + '' : '500',
+          message: 'Jetstream API request error',
+          error
+        });
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,

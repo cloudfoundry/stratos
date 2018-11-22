@@ -55,5 +55,6 @@ type PortalProxy interface {
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
+	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string) (*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 }

@@ -9,6 +9,7 @@ type EndpointPlugin interface {
 	GetType() string
 	Register(echoContext echo.Context) error
 	Connect(echoContext echo.Context, cnsiRecord CNSIRecord, userId string) (*TokenRecord, bool, error)
+	Validate(userGUID string, cnsiRecord CNSIRecord, tokenRecord TokenRecord) error
 	UpdateMetadata(info *Info, userGUID string, echoContext echo.Context)
 }
 
