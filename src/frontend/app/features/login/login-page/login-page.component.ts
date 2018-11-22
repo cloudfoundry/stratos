@@ -152,6 +152,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       } else if (auth.error && auth.errorResponse && auth.errorResponse.status === 401) {
         // User supplied invalid credentials
         this.message = 'Username and password combination incorrect. Please try again.';
+        // Is there a better error message available? e.g. account locked
+        const authError = !!auth.errorResponse.error ? auth.errorResponse.error.error : null;
+        if (!!authError && authError !== 'Bad credentials') {
+          this.message = authError;
+        }
       } else {
         // All other errors
         this.message = `Couldn't log in, please try again.`;
