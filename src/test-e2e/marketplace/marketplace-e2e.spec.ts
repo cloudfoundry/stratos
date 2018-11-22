@@ -54,6 +54,8 @@ describe('Marketplace', () => {
   });
 
   it('- should change filter text when an option is selected', () => {
+    marketplacePage.navigateTo();
+    marketplacePage.waitForPage();
     marketplacePage.servicesList.header.selectFilterOption(0, 1);
     marketplacePage.servicesList.table.waitUntilNotBusy();
     marketplacePage.servicesList.header.getFilterText().then(text => {
