@@ -150,22 +150,20 @@ exports.config = {
       customProcessors: specReporterCustomProcessors
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
-    if (process.env['CAPTURE_VIDEO'] === 'video') {
-      jasmine.getEnv().addReporter(new VideoReporter({
-        baseDirectory: E2E_REPORT_FOLDER,
-        singleVideo: false,
-        singleVideoPath: function (result) {
-          result.uuid + '.mp4';
-        },
-        ffmpegArgs: [
-          '-video_size', '1366x768',
-          '-framerate', '25',
-          '-f', 'x11grab',
-          '-draw_mouse', '0',
-          '-i', ':99.0'
-        ]
-      }));
-    }
+    jasmine.getEnv().addReporter(new VideoReporter({
+      baseDirectory: E2E_REPORT_FOLDER,
+      singleVideo: false,
+      singleVideoPath: function (result) {
+        result.uuid + '.mp4';
+      },
+      ffmpegArgs: [
+        '-video_size', '1366x768',
+        '-framerate', '25',
+        '-f', 'x11grab',
+        '-draw_mouse', '0',
+        '-i', ':99.0'
+      ]
+    }));
     if (showTimesInReport) {
       browserReporterPlugin.install(jasmine, browser);
       jasmine.getEnv().addReporter(browserReporterPlugin.reporter());
