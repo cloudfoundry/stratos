@@ -65,15 +65,6 @@ popd
 
 E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
-# Capture video if configured
-if [ "$CAPTURE_VIDEO" == "video" ]; then
-  echo "Waiting for ffmpeg install to complete..."
-  wait ${FFMPEG_INSTALL_PID}
-  echo "Starting video capture"
-  ffmpeg -video_size 1366x768 -framerate 25 -f x11grab -draw_mouse 0 -i :99.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 >/dev/null 2>&1 &
-  FFMPEG=$!
-fi
-
 set +e
 echo "Running e2e tests"
 npm run ${E2E_TARGET}
@@ -83,11 +74,6 @@ set -e
 # Copy the backend log to the test report folder if the tests failed
 if [ $RESULT -ne 0 ]; then
   cp src/jetstream/backend.log ${E2E_REPORT_FOLDER}/jetstream.log
-fi
-
-if [ "$CAPTURE_VIDEO" == "video" ]; then
-  echo "Stopping video capture"
-  kill -INT $FFMPEG
 fi
 
 # Check environment variable that will ignore E2E failures
