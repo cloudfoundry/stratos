@@ -154,7 +154,7 @@ exports.config = {
       baseDirectory: E2E_REPORT_FOLDER,
       singleVideo: false,
       singleVideoPath: function (result) {
-        result.uuid + '.mp4';
+        return result.uuid + '.mp4';
       },
       ffmpegArgs: [
         '-video_size', '1366x768',
