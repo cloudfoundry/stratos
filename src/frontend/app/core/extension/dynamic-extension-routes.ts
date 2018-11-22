@@ -46,13 +46,7 @@ export class DynamicExtenstionRoutes implements CanActivate {
     this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
     this.router.navigateByUrl(state.url);
 
-    // Dispatch action so that the previous state URL is stored correctly
-    this.store.dispatch({
-      type: ROUTER_NAVIGATION,
-      payload: {}
-    });
-
-    return false;
+       return false;
   }
 
   private getChildRoutes(r: any) {
