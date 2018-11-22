@@ -11,6 +11,7 @@ const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
 const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
+const VideoReporter = require('protractor-video-reporter');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -125,7 +126,7 @@ exports.config = {
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: timeout,
-    print: function () {}
+    print: function () { }
   },
   params: secrets,
   onPrepare() {
@@ -149,6 +150,9 @@ exports.config = {
       customProcessors: specReporterCustomProcessors
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
+    jasmine.getEnv().addReporter(new VideoReporter({
+      baseDirectory: E2E_REPORT_FOLDER
+    }));
     if (showTimesInReport) {
       browserReporterPlugin.install(jasmine, browser);
       jasmine.getEnv().addReporter(browserReporterPlugin.reporter());
