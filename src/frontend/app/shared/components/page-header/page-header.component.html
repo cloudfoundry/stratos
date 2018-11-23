@@ -23,7 +23,10 @@
         <div #ref>
           <ng-content select=".page-header-right"></ng-content>
         </div>
-        <span class="page-header__divider" *ngIf="(extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) || ref.children.length > 0">
+        <span class="page-header__divider" *ngIf="
+          (extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
+          (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)
+        ">
           |
         </span>
         <button *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="menu">
