@@ -2,8 +2,8 @@ import { AfterContentInit, Component, Inject, Input, OnDestroy, OnInit, ViewChil
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, timer as observableTimer, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, take, tap, withLatestFrom, switchMap } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -76,8 +76,15 @@ export class DeployApplicationStep2Component
 
   scm: GitSCM;
 
+  // We don't have any repositories to suggest initially - need user to start typing
+  suggestedRepos$: Observable<string[]>;
+
+  cachedSuggestions = {};
+
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
+
+  lastProjectName: string = null;
 
   @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
@@ -274,6 +281,31 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(setInitialSourceType$.subscribe());
     this.subscriptions.push(setSourceTypeModel$.subscribe());
     this.subscriptions.push(setProjectName.subscribe());
+
+    this.subscriptions.push(this.sourceSelectionForm.valueChanges.subscribe(form => {
+      if (form.projectName !== this.lastProjectName) {
+        // Go and fetch the matching list of repositories and make that the auto-complete list
+        this.suggestedRepos$ = this.updateSuggestedRepositories(form.projectName);
+      }
+      this.lastProjectName = form.projectName;
+    }));
+  }
+
+  updateSuggestedRepositories(name: string): Observable<string[]> {
+    if (!name || name.length < 3) {
+      return observableOf([] as string[]);
+    }
+
+    const cacheName = this.scm.getType() + ':' + name;
+    if (this.cachedSuggestions[cacheName]) {
+      return observableOf(this.cachedSuggestions[cacheName]);
+    }
+
+    return observableTimer(500).pipe(
+      take(1),
+      switchMap(() => this.scm.getMacthingRepositories(name)),
+      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
+    );
   }
 
   setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));

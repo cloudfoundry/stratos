@@ -17,7 +17,12 @@
           <div class="github-project-details">
             <div>
               <mat-form-field>
-                <input matInput [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" [appGithubProjectExists]="sourceType.id" required>
+                <input type="text" matInput [matAutocomplete]="auto" [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" [appGithubProjectExists]="sourceType.id" required>
+                <!-- Repository auto complete helper -->
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                  <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo">{{repo}}</mat-option>
+                </mat-autocomplete>                
+
                 <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
                   Project does not exist
                 </mat-error>

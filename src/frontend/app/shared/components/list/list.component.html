@@ -14,7 +14,7 @@
           <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
-            <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'">
+            <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'" id="list-component__header-filter_{{multiFilterConfig.key}}">
               <mat-select id="{{multiFilterConfig.key}}" matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length" (selectionChange)="multiFilterConfig.select.next($event.value)">
                 <mat-option>All</mat-option>
                 <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
@@ -29,7 +29,7 @@
         <div class="list-component__header__right">
           <!-- Filter by text input -->
           <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async)">
-            <mat-form-field floatLabel="never">
+            <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
             </mat-form-field>
           </div>
