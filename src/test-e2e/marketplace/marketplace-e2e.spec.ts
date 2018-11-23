@@ -1,8 +1,10 @@
-import { MarketplacePage } from './marketplace.po';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { e2e } from '../e2e';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { browser } from 'protractor';
+
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { SideNavMenuItem } from '../po/side-nav.po';
+import { MarketplacePage } from './marketplace.po';
 
 describe('Marketplace', () => {
   const marketplacePage = new MarketplacePage();
@@ -19,8 +21,10 @@ describe('Marketplace', () => {
   });
 
   beforeEach(() => {
-    marketplacePage.navigateTo();
+    marketplacePage.sideNav.goto(SideNavMenuItem.Marketplace);
     marketplacePage.waitForPage();
+    marketplacePage.servicesList.header.clearSearchText();
+    marketplacePage.servicesList.header.selectFilterOption(0, 0);
   });
 
   it('- should reach marketplace page', () => {
@@ -40,6 +44,8 @@ describe('Marketplace', () => {
   it('- should have filters', () => {
     marketplacePage.servicesList.header.getFilterOptions().then(options => {
       expect(options.length).toBeGreaterThan(0);
+      // Select the 'All' option to ensure we close the filter dropdown
+      options[0].click();
     });
     marketplacePage.servicesList.header.getPlaceholderText().then(text => {
       expect(text).toEqual('Cloud Foundry');
@@ -48,7 +54,10 @@ describe('Marketplace', () => {
   });
 
   it('- should change filter text when an option is selected', () => {
+    marketplacePage.navigateTo();
+    marketplacePage.waitForPage();
     marketplacePage.servicesList.header.selectFilterOption(0, 1);
+    marketplacePage.servicesList.table.waitUntilNotBusy();
     marketplacePage.servicesList.header.getFilterText().then(text => {
       expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });

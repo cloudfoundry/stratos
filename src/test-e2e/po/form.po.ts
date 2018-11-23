@@ -1,8 +1,10 @@
-import { by, element, promise } from 'protractor';
+import { browser, by, element, promise } from 'protractor';
 import { ElementArrayFinder, ElementFinder, protractor } from 'protractor/built';
 import { Key } from 'selenium-webdriver';
 
 import { Component } from './component.po';
+
+const until = protractor.ExpectedConditions;
 
 export interface FormItemMap {
   [k: string]: FormItem;
@@ -103,18 +105,22 @@ export class FormComponent extends Component {
 
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
-    const fields = this.getFields().filter((elm => {
-      return promise.all([
+    const fields = this.getFields();
+    const newFields = fields
+      .filter(elm => elm.isDisplayed())
+      .filter(elm => elm.isPresent())
+      .filter(elm => promise.all([
         elm.getAttribute('name'),
         elm.getAttribute('formcontrolname'),
         elm.getAttribute('id')
       ]).then(([name, formcontrolname, id]) => {
         const nameAtt = name || formcontrolname || id;
         return nameAtt.toLowerCase() === ctrlName;
-      });
-    }));
-    expect(fields.count()).toBe(1);
-    return fields.first();
+      }));
+    expect(newFields.count()).toBe(1);
+    const field = newFields.first();
+    browser.wait(until.presenceOf(field));
+    return field;
   }
 
   // Get form field object for the specfied field (see below for FormField)
@@ -192,7 +198,7 @@ export class FormComponent extends Component {
             ctrl.sendKeys(strValue);
             ctrl.sendKeys(Key.RETURN);
             if (!expectFailure) {
-              expect(this.getText(field)).toBe(value);
+              expect(this.getText(field)).toBe(value, `Failed to set field ${field} with ${strValue}`);
             } else {
               expect(this.getText(field)).not.toBe(value);
             }
