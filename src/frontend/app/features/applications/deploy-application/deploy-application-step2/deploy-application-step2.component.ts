@@ -209,7 +209,6 @@ export class DeployApplicationStep2Component
     ).pipe(
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
-        // Only fetch if 
         if (branch && !!projectInfo && branch.projectId ===  projectInfo.full_name) {
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
