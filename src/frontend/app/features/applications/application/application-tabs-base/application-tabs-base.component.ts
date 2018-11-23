@@ -1,4 +1,3 @@
-
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -32,6 +31,8 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../core/extension/extension-service';
+import { GitSCMService, GitSCMType } from './../../../../shared/data-services/scm/scm.service';
+
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -71,7 +72,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    scmService: GitSCMService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -96,9 +98,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         if (
           stratProject &&
           stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
+          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
         ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
+          const scm = scmService.getSCM(gitscm as GitSCMType);
+          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
         }
       });
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {

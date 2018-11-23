@@ -2,9 +2,10 @@ import { Action } from '@ngrx/store';
 
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { GitAppDetails, SourceType, OverrideAppDetails } from '../types/deploy-application.types';
-import { GitBranch, GithubCommit } from '../types/github.types';
+import { GitBranch, GitCommit } from '../types/git.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
+import { GitSCM } from '../../shared/data-services/scm/scm';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -33,7 +34,7 @@ export class SetAppSourceDetails implements Action {
 }
 
 export class CheckProjectExists implements Action {
-  constructor(public projectName: any) { }
+  constructor(public scm: GitSCM, public projectName: any) { }
   type = CHECK_PROJECT_EXISTS;
 }
 
@@ -48,15 +49,12 @@ export class ProjectFetchFail implements Action {
 }
 
 export class ProjectExists implements Action {
-  projectData: any;
-  constructor(public projectName: string, private data: any) {
-    this.projectData = JSON.parse(data._body);
-  }
+  constructor(public projectName: string, public projectData: any) { }
   type = PROJECT_EXISTS;
 }
 
 export class FetchBranchesForProject implements PaginatedAction {
-  constructor(public projectName: string) { }
+  constructor(public scm: GitSCM, public projectName: string) { }
   actions = [
     FETCH_BRANCH_START,
     FETCH_BRANCH_SUCCESS,
@@ -78,14 +76,9 @@ export class SaveAppOverrides implements Action {
 }
 
 export class FetchCommit implements IRequestAction {
-  commit: GithubCommit;
+  commit: GitCommit;
 
-  constructor(public commitSha: string, public projectName: string, private gitHubURL: string) {
-    this.commit = {
-      sha: commitSha,
-      url: `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`
-    };
-  }
+  constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
   type = FETCH_COMMIT;
   entityKey = githubCommitSchemaKey;
 }
@@ -98,7 +91,7 @@ export class FetchCommits implements PaginatedAction {
    * @param {string} sha Branch name, tag, etc
    * @memberof FetchCommits
    */
-  constructor(public projectName: string, public sha: string) {
+  constructor(public scm: GitSCM, public projectName: string, public sha: string) {
     this.paginationKey = projectName + sha;
   }
   actions = [

@@ -8,19 +8,19 @@ import { appReducers } from '../../../../../../store/reducers.module';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
-import { GithubTabComponent } from './github-tab.component';
+import { GitSCMTabComponent } from './gitscm-tab.component';
 import { DatePipe } from '@angular/common';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../../core/github.helpers';
 
 describe('GithubTabComponent', () => {
-  let component: GithubTabComponent;
-  let fixture: ComponentFixture<GithubTabComponent>;
+  let component: GitSCMTabComponent;
+  let fixture: ComponentFixture<GitSCMTabComponent>;
   const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [GithubTabComponent],
+      declarations: [GitSCMTabComponent],
       imports: [
         CoreModule,
         SharedModule,
@@ -43,7 +43,7 @@ describe('GithubTabComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(GithubTabComponent);
+    fixture = TestBed.createComponent(GitSCMTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

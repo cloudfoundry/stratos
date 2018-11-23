@@ -14,7 +14,7 @@ import {
   ViewBuildpackComponent,
 } from './application/application-tabs-base/tabs/build-tab/view-buildpack/view-buildpack.component';
 import { EventsTabComponent } from './application/application-tabs-base/tabs/events-tab/events-tab.component';
-import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
+import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
@@ -54,7 +54,7 @@ import { CustomImportModule } from '../../custom-import.module';
     EditApplicationComponent,
     InstancesTabComponent,
     AddRoutesComponent,
-    GithubTabComponent,
+    GitSCMTabComponent,
     MapRoutesComponent,
     AddRouteStepperComponent,
     CliInfoApplicationComponent,
