@@ -40,7 +40,7 @@ import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
-import { GitBranch, GithubCommit } from './github.types';
+import { GitBranch, GitCommit } from './git.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
 
@@ -55,7 +55,7 @@ export interface IRequestDataState extends IRequestTypeState {
   route: IRequestEntityTypeState<APIResource<IRoute>>;
   event: IRequestEntityTypeState<APIResource>;
   githubBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  githubCommits: IRequestEntityTypeState<APIResource<GithubCommit>>;
+  githubCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
   domain: IRequestEntityTypeState<APIResource<IDomain>>;
   user: IRequestEntityTypeState<APIResource<CfUser>>;
   serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;

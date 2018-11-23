@@ -5,12 +5,13 @@ import { FetchCommits } from '../../../../../store/actions/deploy-applications.a
 import { AppState } from '../../../../../store/app-state';
 import { EntitySchema, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
+import { GitCommit } from '../../../../../store/types/git.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { GitSCM } from '../../../../data-services/scm/scm';
 
 
-export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
+export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
   store: Store<AppState>;
 
   /**
@@ -23,12 +24,13 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
    */
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<APIResource<GithubCommit>>,
+    listConfig: IListConfig<APIResource<GitCommit>>,
+    scm: GitSCM,
     projectName: string,
     sha: string,
     commitSha?: string,
   ) {
-    const action = new FetchCommits(projectName, sha);
+    const action = new FetchCommits(scm, projectName, sha);
     const paginationKey = action.paginationKey;
     const rowsState = observableOf(commitSha ? {
       [commitSha]: {
