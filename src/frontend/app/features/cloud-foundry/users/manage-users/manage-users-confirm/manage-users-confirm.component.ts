@@ -1,5 +1,5 @@
 
-import {combineLatest as observableCombineLatest,  BehaviorSubject ,  Observable } from 'rxjs';
+import { combineLatest as observableCombineLatest, BehaviorSubject, Observable } from 'rxjs';
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -22,7 +22,7 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';
-import { ChangeUserPermission } from '../../../../../store/actions/users.actions';
+import { ChangeUserRole } from '../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   cfUserSchemaKey,
@@ -77,7 +77,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   userSchemaKey = cfUserSchemaKey;
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfAndOrgGuid$: Observable<{ cfGuid: string, orgGuid: string }>;
-  private orgName$ = new BehaviorSubject('');
+  public orgName$ = new BehaviorSubject('');
 
   private updateChanges = new BehaviorSubject(0);
   private nameCache: {
@@ -100,7 +100,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       entityKey: schema.key,
       schema: schema,
       monitorState: AppMonitorComponentTypes.UPDATE,
-      updateKey: ChangeUserPermission.generateUpdatingKey(row.role, row.userGuid),
+      updateKey: ChangeUserRole.generateUpdatingKey(row.role, row.userGuid),
       getId: () => guid
     };
   }

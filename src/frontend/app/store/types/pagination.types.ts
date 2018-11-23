@@ -47,12 +47,12 @@ export class PaginationEntityState {
   seed?: string;
 }
 
-export interface PaginationAction extends Action {
+export interface BasePaginatedAction extends Action {
   entityKey: string;
   paginationKey: string;
 }
 
-export interface PaginatedAction extends PaginationAction, IRequestAction {
+export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   actions: string[];
   flattenPagination?: boolean;
   initialParams?: PaginationParam;
@@ -63,6 +63,7 @@ export interface PaginatedAction extends PaginationAction, IRequestAction {
     },
     method?: RequestMethod | string | null
   };
+  skipValidation?: boolean;
 }
 
 export interface PaginationEntityTypeState {

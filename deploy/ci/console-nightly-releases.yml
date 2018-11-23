@@ -16,14 +16,14 @@ resources:
 - name: stratos
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: ((stratos-branch))
+    uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
+    branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-- name: stratos-master
+- name: helm-repo
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: master
+    uri: git@github.com:((helm-repo-github-organization))/((helm-repo-github-repository))
+    branch: ((helm-repo-branch))
     private_key: ((github-private-key))
 # Docker Images
 - name: jetstream-image
@@ -31,34 +31,34 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-jetstream
+    repository: ((docker-organization))/stratos-jetstream
 - name: postflight-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-postflight-job
+    repository: ((docker-organization))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-mariadb
+    repository: ((docker-organization))/stratos-mariadb
 - name: ui-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-console
+    repository: ((docker-organization))/stratos-console
 
 - name: helm-chart-tarball
   type: s3
   source:
-    bucket: concourse-stratos-ui
-    endpoint: {{minio-server-endpoint}}
+    bucket: ((minio-bucket))
+    endpoint: ((minio-server-endpoint))
     regexp: temp-artifacts/console-helm-chart-(?P<version>.*).tgz
-    access_key_id: {{minio-access-key}}
-    secret_access_key: {{minio-secret-access-key}}
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
 - name: nightly-gh-release
   type: github-release
@@ -67,13 +67,37 @@ resources:
     repository: ((github-repository))
     access_token: ((github-access-token))
     pre_release: true
-
+- name: image-tag
+  type: s3
+  source:
+    bucket: ((minio-bucket))
+    endpoint: ((minio-server-endpoint))
+    regexp: temp-artifacts/release-(.*).tar
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
+    region_name: eu-central-1
 jobs:
-- name: build-images
+- name: generate-tag-files
   plan:
   - get: stratos
   - get: midnight
     trigger: true
+  - do:
+    - task: generate-tag
+      file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+    - put: image-tag
+      params:
+        file: image-tag/*.tar
+        acl: public-read
+- name: build-images
+  plan:
+  - get: stratos
+    passed: [generate-tag-files]
+    trigger: true
+  - get: image-tag
+    passed: [generate-tag-files]
+    params:
+      unpack: true
   - aggregate:
     - do:
       - put: jetstream-image
@@ -82,33 +106,31 @@ jobs:
           build: stratos/
           target_name:  prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
+          build_args_file: image-tag/build-args
       - put: postflight-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk
           build: stratos/
           target_name:  postflight-job
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
       - put: ui-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-          tag_commit: true
+          prebuild_script: build/store-git-metadata.sh
 - name: create-chart
   plan:
   - get: stratos
     passed: [build-images]
     trigger: true
-  - get: stratos-master
+  - get: helm-repo
   - do:
     - task: build
       privileged: true
@@ -117,11 +139,12 @@ jobs:
       params:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
-        GITHUB_ORG: ((github-organization))
-        GITHUB_REPO: ((github-repository))
+        GITHUB_ORG: ((stratos-repository-organization))
+        GITHUB_REPO: ((stratos-repository))
         GIT_PRIVATE_KEY: ((github-private-key))
-        DOCKER_ORG: ((artifact-docker-organization))
-        DOCKER_REGISTRY: ((artifact-docker-registry))
+        HELM_REPO_BRANCH: ((helm-repo-branch))
+        DOCKER_ORG: ((docker-organization))
+        DOCKER_REGISTRY: ((docker-registry))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz

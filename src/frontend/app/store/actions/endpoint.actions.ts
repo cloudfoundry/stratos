@@ -1,8 +1,9 @@
 import { Action } from '@ngrx/store';
 
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { EndpointModel, EndpointType, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { EndpointType, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { CloudFoundryService } from '../../shared/data-services/cloud-foundry.service';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -54,7 +55,7 @@ export interface AuthParamsToken {
 export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 
 export class GetAllEndpoints implements PaginatedAction {
-  public static storeKey = 'endpoint-list';
+  public static storeKey = CloudFoundryService.EndpointList;
   constructor(public login = false) { }
   entityKey = endpointSchemaKey;
   paginationKey = GetAllEndpoints.storeKey;
@@ -88,6 +89,7 @@ export class ConnectEndpoint extends EndpointAction {
     public endpointType: EndpointType,
     public authType: string,
     public authValues: AuthParams,
+    public systemShared: boolean,
     public body: string,
   ) {
     super();
@@ -121,6 +123,9 @@ export class RegisterEndpoint extends EndpointAction {
     public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,
+    public clientID = '',
+    public clientSecret = '',
+    public ssoAllowed: boolean,
   ) {
     super();
   }

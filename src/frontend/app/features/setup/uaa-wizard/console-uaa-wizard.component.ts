@@ -1,13 +1,10 @@
-
-import {take, delay, filter, skipWhile, map} from 'rxjs/operators';
-import { AfterContentInit, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { any } from 'codelyzer/util/function';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { VerifySession } from '../../../store/actions/auth.actions';
 import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
@@ -21,9 +18,15 @@ import { UAASetupState } from '../../../store/types/uaa-setup.types';
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
+export class ConsoleUaaWizardComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, private router: Router) { }
+  private clientRedirectURI: string;
+
+  constructor(private store: Store<AppState>, private router: Router) {
+    // Client Redirect URI for SSO
+    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
+    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+  }
 
   uaaForm: FormGroup;
   validateUAAForm: Observable<boolean>;
@@ -36,19 +39,27 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       uaa_endpoint: this.uaaForm.get('apiUrl').value,
       console_client: this.uaaForm.get('clientId').value,
       password: this.uaaForm.get('adminPassword').value,
-      skip_ssl_validation: true,
+      skip_ssl_validation: this.uaaForm.get('skipSll').value,
       username: this.uaaForm.get('adminUsername').value,
       console_client_secret: this.uaaForm.get('clientSecret').value,
+      use_sso: this.uaaForm.get('useSSO').value,
     }));
     return this.store.select('uaaSetup').pipe(
       skipWhile((state: UAASetupState) => {
         return state.settingUp;
       }),
       map((state: UAASetupState) => {
-        this.uaaScopes = state.payload.scope;
-        this.selectedScope = 'stratos.admin';
+        const success = !state.error;
+        if (success) {
+          this.uaaScopes = state.payload.scope;
+          if (this.uaaScopes.find(scope => scope === 'stratos.admin')) {
+            this.selectedScope = 'stratos.admin';
+          } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
+            this.selectedScope = 'cloud_controller.admin';
+          }
+        }
         return {
-          success: !state.error,
+          success,
           message: state.message
         };
       }), );
@@ -88,10 +99,12 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
   ngOnInit() {
     this.uaaForm = new FormGroup({
       apiUrl: new FormControl('', [<any>Validators.required]),
+      skipSll: new FormControl(false),
       clientId: new FormControl('', [<any>Validators.required]),
       clientSecret: new FormControl(''),
       adminUsername: new FormControl('', [<any>Validators.required]),
       adminPassword: new FormControl('', [<any>Validators.required]),
+      useSSO: new FormControl(false),
     });
 
     let observer;
@@ -104,9 +117,6 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       observer.next(this.uaaForm.valid);
     });
 
-  }
-
-  ngAfterContentInit() {
   }
 
 }

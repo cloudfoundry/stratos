@@ -8,7 +8,7 @@ import { Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBind
 })
 export class TileComponent implements OnInit, AfterContentInit {
 
-  @Input('size') size: string;
+  @Input() size: string;
 
   @HostBinding('class.app-tile-1-3') private isOneThirdFixed = false;
 

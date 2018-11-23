@@ -12,6 +12,7 @@ import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { ISpace } from '../../../../../core/cf-api.types';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
 @Injectable()
 export class CfSpacesListConfigService implements IListConfig<APIResource> {
@@ -43,8 +44,10 @@ export class CfSpacesListConfigService implements IListConfig<APIResource> {
     },
   }];
 
-  constructor(private store: Store<AppState>, private cfOrgService: CloudFoundryOrganizationService) {
-
+  constructor(
+    private store: Store<AppState>,
+    cfOrgService: CloudFoundryOrganizationService,
+  ) {
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 

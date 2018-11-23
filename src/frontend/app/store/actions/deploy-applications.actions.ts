@@ -1,18 +1,19 @@
 import { Action } from '@ngrx/store';
 
-import { GitAppDetails, SourceType } from '../types/deploy-application.types';
+import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
+import { GitAppDetails, SourceType, OverrideAppDetails } from '../types/deploy-application.types';
 import { GitBranch, GithubCommit } from '../types/github.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
-export const SET_APP_SOURCE_SUB_TYPE = '[Deploy App] Set App Source Sub Type';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
 export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
+export const PROJECT_FETCH_FAILED = '[Deploy App] Project Fetch Failed';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';
 export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
 export const SAVE_APP_DETAILS = '[Deploy App] Save app details';
+export const SAVE_APP_OVERRIDE_DETAILS = '[Deploy App] Save app override details';
 export const FETCH_COMMIT = '[Deploy App] Fetch commit';
 export const FETCH_COMMITS = '[Deploy App] Fetch commits';
 export const SET_DEPLOY_CF_SETTINGS = '[Deploy App] Set CF Settings';
@@ -31,11 +32,6 @@ export class SetAppSourceDetails implements Action {
   type = SET_APP_SOURCE_DETAILS;
 }
 
-export class SetAppSourceSubType implements Action {
-  constructor(public subType: SourceType) { }
-  type = SET_APP_SOURCE_SUB_TYPE;
-}
-
 export class CheckProjectExists implements Action {
   constructor(public projectName: any) { }
   type = CHECK_PROJECT_EXISTS;
@@ -44,6 +40,11 @@ export class CheckProjectExists implements Action {
 export class ProjectDoesntExist implements Action {
   constructor(public projectName: string) { }
   type = PROJECT_DOESNT_EXIST;
+}
+
+export class ProjectFetchFail implements Action {
+  constructor(public projectName: string, public error: string) { }
+  type = PROJECT_FETCH_FAILED;
 }
 
 export class ProjectExists implements Action {
@@ -71,13 +72,18 @@ export class SaveAppDetails implements Action {
   type = SAVE_APP_DETAILS;
 }
 
+export class SaveAppOverrides implements Action {
+  constructor(public appOverrideDetails: OverrideAppDetails) { }
+  type = SAVE_APP_OVERRIDE_DETAILS;
+}
+
 export class FetchCommit implements IRequestAction {
   commit: GithubCommit;
 
-  constructor(public commitSha: string, public projectName: string) {
+  constructor(public commitSha: string, public projectName: string, private gitHubURL: string) {
     this.commit = {
       sha: commitSha,
-      url: `https://api.github.com/repos/${projectName}/commits/${commitSha}`
+      url: `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`
     };
   }
   type = FETCH_COMMIT;

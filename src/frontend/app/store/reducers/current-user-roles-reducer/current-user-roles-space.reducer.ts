@@ -1,9 +1,9 @@
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
-import { ISpaceRoleState } from '../../types/current-user-roles.types';
-import { APIResource } from '../../types/api.types';
 import { ISpace } from '../../../core/cf-api.types';
+import { UserRelationTypes } from '../../actions/permissions.actions';
+import { APIResource } from '../../types/api.types';
+import { ISpaceRoleState } from '../../types/current-user-roles.types';
 
-const defaultState = {
+export const defaultUserSpaceRoleState: ISpaceRoleState = {
   orgId: null,
   isManager: false,
   isAuditor: false,
@@ -11,7 +11,7 @@ const defaultState = {
 };
 
 export function currentUserSpaceRoleReducer(
-  state: ISpaceRoleState = defaultState,
+  state: ISpaceRoleState = defaultUserSpaceRoleState,
   relationType: UserRelationTypes,
   userHasRelation: boolean,
   space: APIResource<ISpace>
@@ -28,7 +28,7 @@ export function currentUserSpaceRoleReducer(
 }
 
 function addId(
-  state: ISpaceRoleState = defaultState,
+  state: ISpaceRoleState = defaultUserSpaceRoleState,
   space: APIResource<ISpace>
 ) {
   if (!state.orgId) {

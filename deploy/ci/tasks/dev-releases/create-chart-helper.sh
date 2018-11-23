@@ -12,6 +12,16 @@ patchHelmChart () {
   sed -i -e 's/version: 0.1.0/version: '"${TAG}"'/g' ${CHART_PATH}/Chart.yaml  
 }
 
+patchHelmChartDev () {
+  local TAG=$1
+  local DOCKER_ORG=$2
+  local DOCKER_REG=$3
+  local CHART_PATH=$4
+  patchHelmChart ${TAG} ${DOCKER_ORG} ${DOCKER_REG} ${CHART_PATH}
+
+  sed -i -e 's/imagePullPolicy: IfNotPresent/imagePullPolicy: Always/g' ${CHART_PATH}/values.yaml  
+}
+
 setupAndPushChange() {
   git config --global user.name ${GIT_USER}
   git config --global user.email ${GIT_EMAIL}
@@ -26,8 +36,21 @@ setupAndPushChange() {
   git add index.yaml
   git commit -m "Dev releases Helm repository updated for tag: ${IMAGE_TAG}"
   git config --global push.default simple
-  git push origin HEAD:master
+  git push origin HEAD:${HELM_REPO_BRANCH}
 
+}
+
+updateHelmDependency() {
+  local START_CWD=$(pwd)
+  cd ${STRATOS}/deploy/kubernetes/console
+  # Only do this if there is a requirements.yaml file
+  if [ -f "./requirements.yaml" ]; then
+    # Extract helm repo
+    local HELM_REPO=$(cat requirements.yaml | grep repo | sed -e 's/.*repository:\s\(.*\)/\1/p' | head -1)
+    helm repo add repo ${HELM_REPO}
+    helm dependency update
+  fi
+  cd ${START_CWD}
 }
 
 fetchImageTag() {

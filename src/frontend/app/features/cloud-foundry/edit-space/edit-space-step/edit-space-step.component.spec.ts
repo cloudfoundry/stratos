@@ -1,13 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  generateTestCfEndpointServiceProvider,
   BaseTestModules,
+  generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { EditSpaceStepComponent } from './edit-space-step.component';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('EditSpaceStepComponent', () => {
   let component: EditSpaceStepComponent;
@@ -20,7 +19,6 @@ describe('EditSpaceStepComponent', () => {
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         generateTestCfEndpointServiceProvider(),
-        ActiveRouteCfOrgSpace
       ]
     })
       .compileComponents();

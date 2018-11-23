@@ -1,10 +1,22 @@
-import { NormalizedResponse } from '../../types/api.types';
-import { IRequestAction, SingleEntityAction } from '../../types/request.types';
-import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
-import { getDefaultActionState, defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { IRequestTypeState } from '../../app-state';
 import { pathGet } from '../../../core/utils.service';
+import { IRequestTypeState, AppState } from '../../app-state';
+import { mergeState } from '../../helpers/reducer.helper';
+import { NormalizedResponse } from '../../types/api.types';
+import { IRequestDataState } from '../../types/entity.types';
+import { PaginatedAction } from '../../types/pagination.types';
+import {
+  ICFAction,
+  IRequestAction,
+  SingleEntityAction,
+  StartRequestAction,
+  APISuccessOrFailedAction,
+  WrapperRequestActionSuccess,
+  WrapperRequestActionFailed
+} from '../../types/request.types';
+import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
+import { Store } from '@ngrx/store';
+import { APIResponse } from '../../actions/request.actions';
 
 
 export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {
@@ -37,9 +49,10 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
   Object.keys(entities).forEach(entityKey => {
     Object.keys(entities[entityKey]).forEach(guid => {
       const entState = getEntityRequestState(state, { entityKey, guid } as SingleEntityAction);
-      entState.fetching = false;
-      entState.error = false;
-      entState.deleting = { ...defaultDeletingActionState };
+      entState.fetching = entState.fetching || false;
+      entState.error = entState.error || false;
+      const busy = entState.deleting ? entState.deleting.busy : false;
+      entState.deleting = { ...defaultDeletingActionState, busy };
       newState = setEntityRequestState(newState, entState, { entityKey, guid } as IRequestAction);
     });
   });
@@ -115,7 +128,7 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
 export function generateDefaultState(keys: Array<string>, initialSections?: {
   [key: string]: string[];
 }) {
-  const defaultState = {};
+  const defaultState = {} as IRequestDataState;
 
   keys.forEach(key => {
     defaultState[key] = {};
@@ -126,4 +139,64 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
     }
   });
   return defaultState;
+}
+
+
+export function startApiRequest(
+  store: Store<AppState>,
+  apiAction: ICFAction | PaginatedAction,
+  requestType: ApiRequestTypes = 'fetch'
+) {
+  store.dispatch(new StartRequestAction(apiAction, requestType));
+  store.dispatch(getActionFromString(apiAction.actions[0]));
+}
+
+export function completeApiRequest(
+  store: Store<AppState>,
+  apiAction: ICFAction | PaginatedAction,
+  apiResponse: APIResponse,
+  requestType: ApiRequestTypes = 'fetch',
+) {
+  store.dispatch(new APISuccessOrFailedAction(apiAction.actions[1], apiAction, apiResponse.response));
+  store.dispatch(new WrapperRequestActionSuccess(
+    apiResponse.response,
+    apiAction,
+    requestType,
+    apiResponse.totalResults,
+    apiResponse.totalPages
+  ));
+}
+
+export function failApiRequest(
+  store: Store<AppState>,
+  apiAction: ICFAction | PaginatedAction,
+  error,
+  requestType: ApiRequestTypes = 'fetch',
+) {
+  const actions = getFailApiRequestActions(
+    apiAction,
+    error,
+    requestType
+  );
+  store.dispatch(actions[0]);
+  store.dispatch(actions[1]);
+}
+
+export function getFailApiRequestActions(
+  apiAction: ICFAction | PaginatedAction,
+  error,
+  requestType: ApiRequestTypes = 'fetch',
+) {
+  return [
+    new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
+    new WrapperRequestActionFailed(
+      error.message,
+      apiAction,
+      requestType
+    )
+  ];
+}
+
+export function getActionFromString(type: string) {
+  return { type };
 }

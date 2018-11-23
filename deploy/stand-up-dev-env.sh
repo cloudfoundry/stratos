@@ -18,7 +18,8 @@ DEPLOY_PATH=${STRATOS_UI_PATH}/deploy
 
 NO_UI=false
 CLEAN=false
-
+PACKAGE_JSON_VERSION=$(cat ${STRATOS_UI_PATH}/package.json| grep version | grep -Eo "([0-9]*.[0-9]*.[0-9]*)\",$" | sed 's/.\{2\}$//')
+STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
 function usage {
     echo "usage: $PROG [-c] [-n]"
     echo "       -c    Clean up before building."
@@ -90,7 +91,7 @@ function build {
     # Prevent docker from creating the migration volume as root if it doesn't exist
     mkdir -p ./hsc-upgrade-volume
 
-    docker-compose -f ${DEV_DOCKER_COMPOSE} build
+    docker-compose -f ${DEV_DOCKER_COMPOSE} build --build-arg stratos_version=${STRATOS_VERSION}
     docker-compose -f ${DEV_DOCKER_COMPOSE} up -d
 }
 

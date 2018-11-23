@@ -14,6 +14,7 @@ import { CardStatus } from '../../application-state/application-state.service';
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   @Input() icon: string;
+  @Input() iconFont: string;
   @Input() label: string;
   @Input() labelSingular: string;
   @Input() limit: string;

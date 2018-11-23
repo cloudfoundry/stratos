@@ -42,7 +42,7 @@ export class ResetsHelpers {
   }
 
   /**
-   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * Get all of the registered Endpoints and connect all of them for which credentials
    * have been configured
    */
   connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
@@ -65,6 +65,35 @@ export class ResetsHelpers {
       });
   }
 
+  getInfo(req, setup) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/info' })
+      .then(response => {
+        const info = JSON.parse(response);
+        setup.info = info;
+        return info;
+      });
+  }
+
+  getSSOLoginStatus(req, setup) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/auth/session/verify' })
+      .then(response => {
+        // Look for the header
+        setup.ssoEnabled = this.parseSSOLoginStatus(response);
+        setup.ssoEnabledFetched = true;
+        return setup.sso;
+      }).catch(e => {
+        // 404 when no session
+        setup.ssoEnabled = this.parseSSOLoginStatus(e.response);
+        setup.ssoEnabledFetched = true;
+        return setup.sso;
+      });
+  }
+
+  private parseSSOLoginStatus(response: any): boolean {
+    const sso = response.headers['x-stratos-sso-login'];
+    return !!sso && sso.length > 0;
+  }
+
   /**
    *
    * Ensure we have multiple Cloud Foundries registered
@@ -82,9 +111,11 @@ export class ResetsHelpers {
         fail('You must configure multiple Cloud Foundry endpoints in secrets.yaml');
       }
       endpointsOfType.forEach((ep) => {
-         p.then(() => reqHelpers.sendRequest(
-          req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
-        ));
+        if (!ep.skip) {
+          p.then(() => reqHelpers.sendRequest(
+            req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
+          ));
+        }
       });
     });
     return p;

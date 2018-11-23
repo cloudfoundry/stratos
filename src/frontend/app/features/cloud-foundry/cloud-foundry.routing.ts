@@ -1,14 +1,29 @@
+/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
+import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
+import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
-import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
+import {
+  CloudFoundryCellAppsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-apps/cloud-foundry-cell-apps.component';
+import {
+  CloudFoundryCellBaseComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-base/cloud-foundry-cell-base.component';
+import {
+  CloudFoundryCellChartsComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-charts/cloud-foundry-cell-charts.component';
+import {
+  CloudFoundryCellSummaryComponent,
+} from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
+import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
@@ -20,7 +35,6 @@ import {
 import {
   CloudFoundrySpaceBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component';
-/* tslint:disable:max-line-length */
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
@@ -48,13 +62,15 @@ import {
 import {
   CloudFoundrySecurityGroupsComponent,
 } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
-/* tslint:enable:max-line-length */
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
-import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
-import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
+import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
+import { StratosActionType } from '../../core/extension/extension-service';
 
+/* tslint:enable:max-line-length */
 const usersRoles = [
   {
     path: 'users/manage',
@@ -88,6 +104,7 @@ const cloudFoundry: Routes = [{
       path: 'organizations/:orgId/add-space',
       component: AddSpaceComponent
     },
+    ...usersRoles,
     {
       path: '',
       // Root for attaching CF wide actions (i.e assignments, tabs)
@@ -117,16 +134,16 @@ const cloudFoundry: Routes = [{
         },
         {
           path: '',
-          // Root for Tabs
-          component: CloudFoundryTabsBaseComponent,
           data: {
-            uiFullView: true
+            uiFullView: true,
+            extensionsActionsKey: StratosActionType.Application
           },
+          component: CloudFoundryTabsBaseComponent,
           children: [
             {
               path: '',
               redirectTo: 'summary',
-              pathMatch: 'full'
+              pathMatch: 'full',
             },
             {
               path: 'summary',
@@ -137,8 +154,80 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryOrganizationsComponent,
             },
             {
+              path: 'users',
+              component: CloudFoundryUsersComponent
+            },
+            {
+              path: 'cells',
+              component: CloudFoundryCellsComponent
+            },
+            {
+              path: 'firehose',
+              component: CloudFoundryFirehoseComponent
+            },
+            {
+              path: 'feature-flags',
+              component: CloudFoundryFeatureFlagsComponent
+            },
+            {
+              path: 'build-packs',
+              component: CloudFoundryBuildPacksComponent
+            },
+            {
+              path: 'stacks',
+              component: CloudFoundryStacksComponent
+            },
+            {
+              path: 'security-groups',
+              component: CloudFoundrySecurityGroupsComponent
+            },
+            {
+              path: '**',
+              component: PageNotFoundComponentComponent,
+              canActivate: [DynamicExtenstionRoutes],
+              data: {
+                stratosRouteGroup: 'cfTabs'
+              }
+            }
+          ]
+        },
+        {
+          path: '',
+          // Root for Tabs
+          children: [
+            {
+              path: 'cells/:cellId',
+              component: CloudFoundryCellBaseComponent,
+              data: {
+                uiFullView: true
+              },
+              children: [
+                {
+                  path: '',
+                  redirectTo: 'summary',
+                  pathMatch: 'full'
+                },
+                {
+                  path: 'summary',
+                  component: CloudFoundryCellSummaryComponent
+                },
+                {
+                  path: 'charts',
+                  component: CloudFoundryCellChartsComponent
+                },
+                {
+                  path: 'apps',
+                  component: CloudFoundryCellAppsComponent
+                }
+              ]
+            },
+            {
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,
+              data: {
+                uiFullView: true,
+                extensionsActionsKey: StratosActionType.CloudFoundryOrg
+              },
               children: [
                 {
                   path: '',
@@ -156,10 +245,23 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundryOrganizationUsersComponent
-                }]
+                },
+                {
+                  path: '**',
+                  component: PageNotFoundComponentComponent,
+                  canActivate: [DynamicExtenstionRoutes],
+                  data: {
+                    stratosRouteGroup: 'cfOrgTabs'
+                  }
+                }
+              ]
             },
             {
               path: 'organizations/:orgId/spaces/:spaceId',
+              data: {
+                uiFullView: true,
+                extensionsActionsKey: StratosActionType.CloudFoundrySpace
+              },
               component: CloudFoundrySpaceBaseComponent,
               children: [
                 {
@@ -186,37 +288,28 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundrySpaceUsersComponent
+                },
+                {
+                  path: '**',
+                  component: PageNotFoundComponentComponent,
+                  canActivate: [DynamicExtenstionRoutes],
+                  data: {
+                    stratosRouteGroup: 'cfSpaceTabs'
+                  }
                 }
               ]
             },
-            {
-              path: 'users',
-              component: CloudFoundryUsersComponent
-            },
-            {
-              path: 'firehose',
-              component: CloudFoundryFirehoseComponent
-            },
-            {
-              path: 'feature-flags',
-              component: CloudFoundryFeatureFlagsComponent
-            },
-            {
-              path: 'build-packs',
-              component: CloudFoundryBuildPacksComponent
-            },
-            {
-              path: 'stacks',
-              component: CloudFoundryStacksComponent
-            },
-            {
-              path: 'security-groups',
-              component: CloudFoundrySecurityGroupsComponent
-            }
           ]
         }]
     },
-    ...usersRoles
+    {
+      path: '**',
+      component: PageNotFoundComponentComponent,
+      canActivate: [DynamicExtenstionRoutes],
+      data: {
+        stratosRouteGroup: StratosActionType.CloudFoundry
+      }
+    }
   ]
 }];
 

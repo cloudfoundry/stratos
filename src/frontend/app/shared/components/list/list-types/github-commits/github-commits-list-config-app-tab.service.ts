@@ -46,9 +46,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       // Set Source type
       this.store.dispatch(
         new SetAppSourceDetails({
-          name: 'Git',
-          id: 'git',
-          subType: 'github'
+          name: 'GitHub',
+          id: 'github'
         })
       );
       // Set branch
@@ -134,7 +133,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         new FetchBranchesForProject(this.projectName),
         false
       );
-      gitBranchEntityService.entityObs$.pipe(
+      gitBranchEntityService.waitForEntity$.pipe(
         first(),
       ).subscribe(branch => {
         this.branchName = branch.entity.entity.name;

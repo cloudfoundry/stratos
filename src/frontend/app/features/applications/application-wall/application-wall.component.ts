@@ -34,7 +34,8 @@ import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
     provide: ListConfig,
     useClass: CfAppConfigService
   },
-    CfOrgSpaceDataService]
+    CfOrgSpaceDataService
+  ]
 })
 export class ApplicationWallComponent implements OnDestroy {
 
@@ -42,6 +43,8 @@ export class ApplicationWallComponent implements OnDestroy {
   private initCfOrgSpaceService: Subscription;
 
   public canCreateApplication: string;
+
+  public haveConnectedCf$: Observable<boolean>;
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
@@ -52,6 +55,10 @@ export class ApplicationWallComponent implements OnDestroy {
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
     this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
+
+    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
+      map(endpoints => !!endpoints && endpoints.length > 0)
+    );
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,

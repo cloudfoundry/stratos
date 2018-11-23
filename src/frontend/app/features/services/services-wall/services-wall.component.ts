@@ -1,18 +1,17 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import {
   ServiceInstancesWallListConfigService,
 } from '../../../shared/components/list/list-types/services-wall/service-instances-wall-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-services-wall',
@@ -27,6 +26,10 @@ import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/da
   ]
 })
 export class ServicesWallComponent implements OnDestroy {
+
+  public haveConnectedCf$: Observable<boolean>;
+
+  canCreateServiceInstance: CurrentUserPermissions;
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
 
@@ -34,14 +37,22 @@ export class ServicesWallComponent implements OnDestroy {
     public store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService) {
 
+    this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+      map(endpoints => endpoints
+        .filter(endpoint => endpoint.connectionStatus === 'connected')
+        .map(endpoint => endpoint.guid)
+      )
     );
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,
       serviceInstancesSchemaKey,
       'all').subscribe();
+
+    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
+      map(endpoints => !!endpoints && endpoints.length > 0)
+    );
   }
 
   ngOnDestroy(): void {

@@ -1,7 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject ,  Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 
 import {
@@ -37,7 +36,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig<APIResource>,
+    listConfig: ListConfig<APIResource>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;

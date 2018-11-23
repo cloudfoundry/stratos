@@ -48,6 +48,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
+            "aot": true,
             "sslCert": "dev-ssl/server.crt",
             "proxyConfig": "proxy.conf.js",
             "ssl": true,
@@ -69,7 +70,8 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-	    "sourceMap": false,
+            "preserveSymlinks": true,
+            "sourceMap": false,
             "main": "src/frontend/test.ts",
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/frontend/polyfills.ts",
@@ -117,7 +119,7 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "e2e/frontend/test-e2e/tsconfig.e2e.json"
+              "src/test-e2e/tsconfig.e2e.json"
             ],
             "exclude": [
               "**/node_modules/**"

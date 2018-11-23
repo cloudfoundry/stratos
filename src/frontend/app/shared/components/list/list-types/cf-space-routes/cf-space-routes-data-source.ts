@@ -6,15 +6,15 @@ import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
+  domainSchemaKey,
   entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
-  domainSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../store/helpers/entity-relations.types';
+} from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
@@ -34,7 +34,7 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
     const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-    ]);
+    ], true, false);
     action.initialParams['order-direction-field'] = 'creation';
     const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
       store,

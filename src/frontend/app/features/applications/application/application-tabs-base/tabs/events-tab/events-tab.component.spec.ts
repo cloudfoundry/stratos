@@ -10,7 +10,7 @@ import { appReducers } from '../../../../../../store/reducers.module';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { ApplicationsModule } from '../../../../applications.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -55,7 +55,7 @@ describe('EventsTabComponent', () => {
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsHelper,
       ],
       imports: [
         MDAppModule,

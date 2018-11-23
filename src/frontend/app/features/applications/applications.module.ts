@@ -8,7 +8,7 @@ import { ApplicationWallComponent } from './application-wall/application-wall.co
 import { ApplicationService } from './application.service';
 import { ApplicationBaseComponent } from './application/application-base.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
-import { ApplicationEnvVarsService } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
 import {
   ViewBuildpackComponent,
@@ -31,12 +31,14 @@ import { CliInfoApplicationComponent } from './cli-info-application/cli-info-app
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
 import { DeleteAppServiceInstancesComponent } from './application-delete/delete-app-instances/delete-app-instances.component';
+import { CustomImportModule } from '../../custom-import.module';
 
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
-    ApplicationsRoutingModule
+    ApplicationsRoutingModule,
+    CustomImportModule
   ],
   declarations: [
     ApplicationWallComponent,
@@ -64,7 +66,7 @@ import { DeleteAppServiceInstancesComponent } from './application-delete/delete-
   ],
   providers: [
     ApplicationService,
-    ApplicationEnvVarsService,
+    ApplicationEnvVarsHelper,
     ApplicationMonitorService,
     DatePipe
   ]

@@ -1,8 +1,10 @@
-import { ElementArrayFinder, browser, by, element } from 'protractor';
+import { browser, by, element as protractorElement, ElementArrayFinder } from 'protractor';
 import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
+
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
+
 
 export enum ConsoleUserType {
   admin = 1,
@@ -11,9 +13,16 @@ export enum ConsoleUserType {
 
 export class E2EHelpers {
 
+  static e2eItemPrefix = 'acceptance.e2e.';
+  static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
+
   secrets = new SecretsHelpers();
 
   constructor() { }
+
+  // This makes identification of acceptance test apps easier in case they leak
+  static createCustomName = (prefix: string, isoTime?: string) =>
+    prefix + '.' + (isoTime || (new Date()).toISOString().replace(/[-:.]+/g, ''))
 
   getHost(): string {
     return browser.baseUrl;
@@ -32,6 +41,11 @@ export class E2EHelpers {
 
     browser.get('/').then(() => {
       browser.executeScript('window.sessionStorage.setItem("STRATOS_DISABLE_ANIMATIONS", true);');
+      // Allow GitHub API Url to be overridden
+      const gitHubUrl = this.secrets.getStratosGitHubApiUrl();
+      if (gitHubUrl) {
+        browser.executeScript('window.sessionStorage.setItem("STRATOS_GITHUB_API_URL", "' + gitHubUrl + '");');
+      }
     });
 
     if (loginUser) {
@@ -70,7 +84,7 @@ export class E2EHelpers {
    * Form helpers
    */
   getForm(formName): ElementFinder {
-    return element(by.css('form[name="' + formName + '"]'));
+    return protractorElement(by.css('form[name="' + formName + '"]'));
   }
 
   getFormFields(formName): ElementArrayFinder {
@@ -134,7 +148,7 @@ export class E2EHelpers {
       });
   }
 
-  scrollIntoView(element) {
+  scrollIntoView(element: ElementFinder) {
     return browser.controlFlow().execute(() => {
       browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
     });
@@ -144,6 +158,29 @@ export class E2EHelpers {
     const until = protractor.ExpectedConditions;
     browser.wait(until.presenceOf(element), 10000);
     return element.click();
+  }
+
+  // Cloud Foundry
+  getCustomerOrgSpaceLabel(isoTime, orgSpace) {
+    return E2EHelpers.customOrgSpaceLabel + '.' + orgSpace + '.' + (isoTime || (new Date()).toISOString());
+  }
+
+  getEndpointGuid(info, name: string): string {
+    expect(info).toBeDefined();
+    expect(info.endpoints).toBeDefined();
+
+    let endpointGuid = null;
+    Object.keys(info.endpoints).forEach((type) => {
+      const endpoints = info.endpoints[type];
+      Object.keys(endpoints).forEach((guid) => {
+        const endpoint = endpoints[guid];
+        if (endpoint.name === name && !endpointGuid) {
+          endpointGuid = guid;
+        }
+      });
+    });
+
+    return endpointGuid;
   }
 
 }

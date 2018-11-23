@@ -1,4 +1,4 @@
-<app-meta-card class="org-card" [clickAction]="goToSummary" [actionMenu]="cardMenu">
+<app-meta-card class="org-card" [clickAction]="goToSummary" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
   <app-meta-card-title class="org-card__title">
     <div class="org-card__title-link">{{ row.entity.name }}</div>
   </app-meta-card-title>
@@ -15,7 +15,7 @@
     <app-meta-card-value>{{instancesCount }} / {{ instancesLimit | infinityPipe }}</app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
-    <app-meta-card-key>Memory Info</app-meta-card-key>
+    <app-meta-card-key>Memory</app-meta-card-key>
     <app-meta-card-value>{{ this.memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}
     </app-meta-card-value>
     <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>

@@ -2,9 +2,10 @@ import { Component, OnInit, Input } from '@angular/core';
 import { MetricsLineChartConfig } from '../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsConfig } from '../../../../shared/components/metrics-chart/metrics-chart.component';
 import { IMetricMatrixResult } from '../../../../store/types/base-metric.types';
-import { FetchApplicationMetricsAction } from '../../../../store/actions/metrics.actions';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../store/actions/metrics.actions';
 import { MetricsChartHelpers } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IMetricApplication } from '../../../../store/types/metric.types';
+import { MetricQueryType } from '../../../../shared/services/metrics-range-selector.types';
 
 @Component({
   selector: 'app-application-instance-chart',
@@ -13,23 +14,27 @@ import { IMetricApplication } from '../../../../store/types/metric.types';
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
-  @Input('appGuid')
+  @Input()
   private appGuid: string;
 
-  @Input('endpointGuid')
+  @Input()
   private endpointGuid: string;
 
-  @Input('yAxisLabel')
+  @Input()
   private yAxisLabel: string;
 
-  @Input('metricName')
-  private metricName: string;
+  // Prometheus query string
+  @Input()
+  private queryString: string;
 
-  @Input('seriesTranslation')
+  @Input()
   private seriesTranslation: string;
 
-  @Input('title')
-  private title: string;
+  @Input()
+  private queryRange = false;
+
+  @Input()
+  public title: string;
 
   public instanceChartConfig: MetricsLineChartConfig;
 
@@ -37,32 +42,26 @@ export class ApplicationInstanceChartComponent implements OnInit {
 
   constructor() { }
 
-  private buildChartConfig() {
-    const lineChartConfig = new MetricsLineChartConfig();
-    lineChartConfig.xAxisLabel = 'Time';
-    lineChartConfig.yAxisLabel = this.yAxisLabel;
-    return lineChartConfig;
-  }
-
   ngOnInit() {
-    this.instanceChartConfig = this.buildChartConfig();
+    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
-      mapSeriesItemValue: this.getmapSeriesItemValue(),
+      mapSeriesItemValue: this.mapSeriesItemValue(),
       metricsAction: new FetchApplicationMetricsAction(
         this.appGuid,
         this.endpointGuid,
-        this.metricName,
+        new MetricQueryConfig(this.queryString),
+        this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY
       ),
     };
   }
 
-  private getmapSeriesItemValue() {
+  private mapSeriesItemValue() {
     switch (this.seriesTranslation) {
       case 'mb':
-        return (bytes) => bytes / 1000000;
+        return (bytes) => (bytes / 1000000).toFixed(2);
       default:
         return undefined;
     }

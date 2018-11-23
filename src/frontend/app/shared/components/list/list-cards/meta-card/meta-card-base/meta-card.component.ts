@@ -1,12 +1,13 @@
 
-import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
-
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { IPermissionConfigs } from '../../../../../../core/current-user-permissions.config';
-import { map, tap } from 'rxjs/operators';
+
 
 export interface MetaCardMenuItem {
   icon?: string;
@@ -28,8 +29,22 @@ export class MetaCardComponent {
   @ContentChild(MetaCardTitleComponent)
   title: MetaCardTitleComponent;
 
-  @Input('status$')
+  @Input()
   status$: Observable<CardStatus>;
+
+  @Input()
+  set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
+    if (entityConfig) {
+      const entityMonitor = this.entityMonitorFactory.create(
+        entityConfig.guid,
+        entityConfig.schema.key,
+        entityConfig.schema
+      );
+      this.isDeleting$ = entityMonitor.isDeletingEntity$;
+    }
+  }
+
+  public isDeleting$: Observable<boolean> = observableOf(false);
 
   @Input('actionMenu')
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
@@ -47,10 +62,10 @@ export class MetaCardComponent {
   public _actionMenu: MetaCardMenuItem[];
   public showMenu$: Observable<boolean>;
 
-  @Input('clickAction')
+  @Input()
   clickAction: Function = null;
 
-  constructor() {
+  constructor(private entityMonitorFactory: EntityMonitorFactory) {
     if (this.actionMenu) {
       this.actionMenu = this.actionMenu.map(element => {
         if (!element.disabled) {

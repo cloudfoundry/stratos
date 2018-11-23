@@ -3,7 +3,7 @@ platform: linux
 inputs:
 - name: stratos
 - name: image-tag
-- name: stratos-master
+- name: helm-repo
 outputs:
 - name: helm-chart
 image_resource:
@@ -23,22 +23,25 @@ run:
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
-      STRATOS_MASTER=${ROOT_DIR}/stratos-master
+      HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
+      VERSION=$(cat image-tag/v2-version)
+      # Required for setupAndPushChange commit message
+      IMAGE_TAG=${GIT_TAG}
       cd ${STRATOS}/deploy/kubernetes/
       patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
-
       # Generate Helm package
+      updateHelmDependency
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
-      if [ -f ${STRATOS_MASTER}/index.yaml ]; then
-        cp ${STRATOS_MASTER}/index.yaml ${ROOT_DIR}/helm-chart/
+      if [ -f ${HELM_REPO}/index.yaml ]; then
+        cp ${HELM_REPO}/index.yaml ${ROOT_DIR}/helm-chart/
         MERGE_INDEX="--merge index.yaml"
       fi
 
       # Update Helm Repository
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
-      cp index.yaml ${STRATOS_MASTER}
-      cd ${STRATOS_MASTER}
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${VERSION}/
+      cp index.yaml ${HELM_REPO}
+      cd ${HELM_REPO}
       setupAndPushChange

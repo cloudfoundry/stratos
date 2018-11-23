@@ -41,7 +41,6 @@ export interface IRequestAction extends RequestAction {
   /**
    * For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
-   *
    */
   removeEntityOnDelete?: boolean;
 }
@@ -101,10 +100,11 @@ export class UpdateCfAction extends RequestUpdateAction implements IUpdateReques
 export interface ICFAction extends IRequestAction {
   options: RequestOptions;
   actions: string[];
+  skipValidation?: boolean;
 }
 
-export class APISuccessOrFailedAction implements Action {
-  constructor(public type, public apiAction: ICFAction | PaginatedAction) { }
+export class APISuccessOrFailedAction<T = any> implements Action {
+  constructor(public type, public apiAction: ICFAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartCFAction extends CFStartAction implements IStartRequestAction {

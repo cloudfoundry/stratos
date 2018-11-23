@@ -35,10 +35,11 @@ import { appStatsReducer } from './app-stats-request.reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
-import { routeReducer } from './routes.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { userReducer, userSpaceOrgReducer } from './users.reducer';
+import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
+import { applicationAddRemoveReducer } from './application-add-remove-reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -124,21 +125,23 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
-    [cfUserSchemaKey]: [userReducer],
+    [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
     [routeSchemaKey]: [routeReducer],
     [serviceInstancesSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
+    [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
     [applicationSchemaKey]: [
       updateApplicationRoutesReducer(),
-      endpointDisconnectApplicationReducer('application')
+      endpointDisconnectApplicationReducer()
     ],
     [spaceSchemaKey]: [
-      endpointDisconnectApplicationReducer('space'),
+      endpointDisconnectApplicationReducer(),
+      applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
     [organizationSchemaKey]: [
       updateOrganizationSpaceReducer(),
-      endpointDisconnectApplicationReducer('organization'),
+      endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)
     ]
   };

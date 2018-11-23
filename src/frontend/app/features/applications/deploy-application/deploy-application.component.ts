@@ -1,7 +1,6 @@
 
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, map, tap } from 'rxjs/operators';
@@ -15,12 +14,17 @@ import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { DeployApplicationSource } from '../../../store/types/deploy-application.types';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 
 @Component({
   selector: 'app-deploy-application',
   templateUrl: './deploy-application.component.html',
   styleUrls: ['./deploy-application.component.scss'],
-  providers: [CfOrgSpaceDataService]
+  providers: [
+    CfOrgSpaceDataService,
+    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+  ],
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 
@@ -28,6 +32,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   initCfOrgSpaceService: Subscription[] = [];
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);
+  isRedeploy: boolean;
 
   constructor(
     private store: Store<AppState>,
@@ -35,18 +40,19 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute
   ) {
     this.appGuid = this.activatedRoute.snapshot.queryParams['appGuid'];
+    this.isRedeploy = !!this.appGuid;
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {
-        if (appSource && appSource.type && appSource.type) {
-          return appSource.type.id === 'git' && appSource.type.subType === 'giturl';
+        if (appSource && appSource.type) {
+          return appSource.type.id === 'giturl';
         }
         return false;
       })
     );
   }
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new StoreCFSettings({
       cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
       org: this.cfOrgSpaceService.org.select.getValue(),

@@ -1,20 +1,3 @@
-
-import { of as observableOf, BehaviorSubject, Observable, combineLatest as observableCombineLatest, Subscription } from 'rxjs';
-
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  pairwise,
-  publishReplay,
-  refCount,
-  startWith,
-  takeWhile,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
@@ -25,16 +8,45 @@ import {
   OnInit,
   TemplateRef,
   ViewChild,
+  Optional,
+  OnChanges,
+  SimpleChanges,
+  Injector,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { schema as normalizrSchema } from 'normalizr';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  pairwise,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  takeWhile,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
+import { entityFactory } from '../../../store/helpers/entity-factory';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
+import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ListView } from './../../../store/actions/list.actions';
-import { IListDataSource } from './data-sources-controllers/list-data-source-types';
+import { getDefaultRowState, IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
@@ -45,9 +57,9 @@ import {
   IListConfig,
   IListMultiFilterConfig,
   IMultiListAction,
+  IOptionalAction,
   ListConfig,
   ListViewTypes,
-  IOptionalAction,
 } from './list.component.types';
 
 
@@ -72,14 +84,17 @@ import {
     ])
   ]
 })
-export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
+export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  @Input('addForm') addForm: NgForm;
+  @Input() addForm: NgForm;
 
   @Input() noEntries: TemplateRef<any>;
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
+
+  // List config when supplied as an attribute rather than a dependency
+  @Input() listConfig: ListConfig<T>;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator) {
@@ -104,17 +119,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  @ViewChild('filter') set setFilter(filter: NgModel) {
-    if (!filter) {
+  @ViewChild('filter') set setFilter(filterValue: NgModel) {
+    if (!filterValue) {
       return;
     }
-    this.filterWidgetToStore = filter.valueChanges.pipe(
+    this.filterWidgetToStore = filterValue.valueChanges.pipe(
       debounceTime(this.dataSource.isLocal ? 150 : 250),
       distinctUntilChanged(),
       map(value => value as string),
       tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      }), ).subscribe();
+      })).subscribe();
   }
 
   private initialPageEvent: PageEvent;
@@ -186,23 +201,44 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private store: Store<AppState>,
     private cd: ChangeDetectorRef,
-    public config: ListConfig<T>
+    @Optional() public config: ListConfig<T>
   ) { }
 
   ngOnInit() {
-    if (this.config.getInitialised) {
-      this.initialised$ = this.config.getInitialised().pipe(
-        filter(initialised => initialised),
-        first(),
-        tap(() => this.initialise()),
-        publishReplay(1), refCount()
-      );
-    } else {
-      this.initialise();
-      this.initialised$ = observableOf(true);
+    // null list means we have list bound but no value available yet
+    if (this.listConfig === null) {
+      // We will watch for changes to the list value
+      return;
+    } else if (this.listConfig) {
+      // A value for the list is already available
+      this.config = this.listConfig;
+    }
+
+    // Otherwise, do we have a value from the config?
+    if (this.config) {
+      if (this.config.getInitialised) {
+        this.initialised$ = this.config.getInitialised().pipe(
+          filter(initialised => initialised),
+          first(),
+          tap(() => this.initialise()),
+          publishReplay(1), refCount()
+        );
+      } else {
+        this.initialise();
+        this.initialised$ = observableOf(true);
+      }
     }
   }
 
+  // If the list changes, update to use the new value
+  ngOnChanges(changes: SimpleChanges) {
+    const listChanges = changes.list;
+    if (!!listChanges && listChanges.currentValue) {
+      this.ngOnDestroy();
+      // ngOnInit will pick up the new value and use it
+      this.ngOnInit();
+    }
+  }
 
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
@@ -214,6 +250,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.singleActions = this.config.getSingleActions();
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
+    if (this.dataSource.rowsState) {
+      this.dataSource.getRowState = this.getRowStateFromRowsState;
+    } else if (!this.dataSource.getRowState) {
+      const schema = entityFactory(this.dataSource.entityKey);
+      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
+    }
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
     // Create convenience observables that make the html clearer
@@ -308,9 +350,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.headerSort.direction = sort.direction;
     }));
 
-    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((filter: ListFilter) => {
-      this.filterString = filter.string;
-      this.multiFilters = { ...filter.items };
+    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
+      this.filterString = paginationFilter.string;
+      this.multiFilters = { ...paginationFilter.items };
     }));
 
     // Multi filters (e.g. cf/org/space)
@@ -336,9 +378,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     ).subscribe();
 
     this.isFiltering$ = this.paginationController.filter$.pipe(
-      map((filter: ListFilter) => {
-        const isFilteringByString = filter.string ? !!filter.string.length : false;
-        const isFilteringByItems = Object.values(filter.items).filter(value => !!value).length > 0;
+      map((f: ListFilter) => {
+        const isFilteringByString = f.string ? !!f.string.length : false;
+        const isFilteringByItems = Object.values(f.items).filter(value => !!value).length > 0;
         return isFilteringByString || isFilteringByItems;
       })
     );
@@ -423,8 +465,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
       distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      withLatestFrom(this.dataSource.pagination$),
-      map(([loading, page]) => page),
+      switchMap(() => this.dataSource.pagination$),
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
@@ -531,4 +572,25 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     }
     return actions;
   }
+
+  private getRowStateGeneratorFromEntityMonitor(entitySchema: normalizrSchema.Entity, dataSource: IListDataSource<T>) {
+    return (row) => {
+      if (!entitySchema || !row) {
+        return observableOf(getDefaultRowState());
+      }
+      const entityMonitor = new EntityMonitor(this.store, dataSource.getRowUniqueId(row), dataSource.entityKey, entitySchema);
+      return entityMonitor.entityRequest$.pipe(
+        distinctUntilChanged(),
+        map(requestInfo => ({
+          deleting: requestInfo.deleting.busy,
+          error: requestInfo.deleting.error,
+          message: requestInfo.deleting.error ? `Sorry, deletion failed` : null
+        }))
+      );
+    };
+  }
+
+  private getRowStateFromRowsState = (row: T): Observable<RowState> =>
+    this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
+
 }

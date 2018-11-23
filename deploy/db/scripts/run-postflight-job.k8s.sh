@@ -1,7 +1,22 @@
 #!/bin/bash
-set -e
+echo "=== Stratos Postlight Job ==="
 echo "Running postflight job"
-MYSQL_CMD="mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e"
+
+# mysql commands will timeout after 5 seconds
+MYSQL_CMD="mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD --connect_timeout 5 -e"
+
+echo "Checking if DB Server is ready"
+dbServerVersion=$(${MYSQL_CMD} "SELECT VERSION();" --skip-column-names)
+if [ $? -eq 1 ]; then
+  echo "Failed to connect to database server - it is not ready yet .. bailing for now..."
+  exit 1
+fi
+
+echo "Database Server is ready"
+echo $dbServerVersion
+
+set -e
+
 echo "Checking if DB exists..."
 stratosDbExists=$(${MYSQL_CMD}  "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$DB_DATABASE_NAME';")
 DBCONF_KEY=mariadb-k8s
@@ -25,23 +40,23 @@ echo "DBCONFIG: $DBCONF_KEY"
 echo "Connection string: $DB_USER:********@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
-portal-proxy --env=$DBCONF_KEY dbversion
+jetstream --env=$DBCONF_KEY dbversion
 
 # Check the status
 echo "Checking database status."
-portal-proxy --env=$DBCONF_KEY status
+jetstream --env=$DBCONF_KEY status
 
 # Run migrations
 echo "Attempting database migrations."
-portal-proxy --env=$DBCONF_KEY up
+jetstream --env=$DBCONF_KEY up
 
 # CHeck the status
 echo "Checking database status."
-portal-proxy --env=$DBCONF_KEY status
+jetstream --env=$DBCONF_KEY status
 
 # Check the version
 echo "Checking database version."
-portal-proxy --env=$DBCONF_KEY dbversion
+jetstream --env=$DBCONF_KEY dbversion
 
 echo "Database operation(s) complete."
 

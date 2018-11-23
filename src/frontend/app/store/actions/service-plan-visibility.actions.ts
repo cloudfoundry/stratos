@@ -7,12 +7,12 @@ import {
   servicePlanVisibilitySchemaKey,
   spaceSchemaKey,
 } from '../helpers/entity-factory';
-import { createEntityRelationKey } from '../helpers/entity-relations.types';
-import { PaginationAction } from '../types/pagination.types';
+import { createEntityRelationKey } from '../helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
-export class GetServicePlanVisibilities extends CFStartAction implements PaginationAction {
+export class GetServicePlanVisibilities extends CFStartAction implements PaginatedAction {
   constructor(
     public endpointGuid: string,
     public paginationKey: string,

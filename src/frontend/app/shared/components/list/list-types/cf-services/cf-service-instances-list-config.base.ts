@@ -1,9 +1,9 @@
-
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -13,25 +13,31 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { defaultPaginationPageSizeOptionsTable, IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import {
-  TableCellServiceInstanceAppsAttachedComponent
+  TableCellServiceInstanceAppsAttachedComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import {
-  TableCellServiceInstanceTagsComponent
+  TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceNameComponent } from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import { TableCellServicePlanComponent } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-
+import {
+  TableCellServiceNameComponent,
+} from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
+import {
+  TableCellServicePlanComponent,
+} from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import {
+  TableCellSpaceNameComponent,
+} from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
 }
 
 @Injectable()
-export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
-  implements IListConfig<APIResource<IServiceInstance>>  {
+export class CfServiceInstancesListConfigBase implements IListConfig<APIResource<IServiceInstance>> {
   viewType = ListViewTypes.TABLE_ONLY;
+  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource>;
   defaultView = 'table' as ListView;
   text = {
@@ -51,6 +57,12 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
         getValue: (row) => `${row.entity.name}`
       },
       cellFlex: '2'
+    },
+    {
+      columnId: 'space',
+      headerCell: () => 'Space',
+      cellComponent: TableCellSpaceNameComponent,
+      cellFlex: '1'
     },
     {
       columnId: 'service',
@@ -104,9 +116,22 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
-    label: 'Detach',
-    description: 'Detach Service Instance',
-    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length === 1)),
+    label: 'Unbind',
+    description: 'Unbind Service Instance',
+    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
+    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+      row$.pipe(
+        switchMap(
+          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+        )
+      )
+  };
+
+  private listActionEdit: IListAction<APIResource> = {
+    action: (item: APIResource<IServiceInstance>) =>
+      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
+    label: 'Edit',
+    description: 'Edit Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
@@ -130,22 +155,19 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService
   ) {
-    super();
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.serviceActionHelperService.deleteServiceInstance(serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
+    this.serviceActionHelperService.deleteServiceInstance(
+      serviceInstance.metadata.guid,
+      serviceInstance.entity.name,
+      serviceInstance.entity.cfGuid
+    )
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
-
-    /**
-     * If only one binding exists, carry out the action otherwise
-     * take user to a form to select which app binding they want to remove
-    **/
-    const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
     this.serviceActionHelperService.detachServiceBinding(
-      serviceBindingGuid,
+      serviceInstance.entity.service_bindings,
       serviceInstance.metadata.guid,
       serviceInstance.entity.cfGuid
     );
@@ -153,7 +175,9 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
   getGlobalActions = () => [];
   getMultiActions = () => [];
-  getSingleActions = () => [this.listActionDetach, this.listActionDelete];
+  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
+  getColumns = () => this.serviceInstanceColumns;
+  getDataSource = () => null;
 
 }

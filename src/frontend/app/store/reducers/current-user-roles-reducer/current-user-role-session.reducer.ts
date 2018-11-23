@@ -1,16 +1,15 @@
+import { ScopeStrings } from '../../../core/current-user-permissions.config';
 import { VerifiedSession } from '../../actions/auth.actions';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
+import { SessionUser } from '../../types/auth.types';
 import {
-  ICurrentUserRolesState,
+  getDefaultEndpointRoles,
   IAllCfRolesState,
   ICfRolesState,
-  getDefaultEndpointRoles,
-  IStratosRolesState,
-  IGlobalRolesState
+  ICurrentUserRolesState,
+  IGlobalRolesState,
 } from '../../types/current-user-roles.types';
-import { SessionData, SessionDataEndpoint, SessionEndpoints, SessionUser, SessionEndpoint } from '../../types/auth.types';
-import { ScopeStrings } from '../../../core/current-user-permissions.config';
-import { EndpointActionComplete } from '../../actions/endpoint.actions';
-import { EndpointModel, INewlyConnectedEndpointInfo, EndpointUser } from '../../types/endpoint.types';
+import { EndpointUser, INewlyConnectedEndpointInfo } from '../../types/endpoint.types';
 
 interface PartialEndpoint {
   user: EndpointUser | SessionUser;
@@ -23,7 +22,7 @@ export function roleInfoFromSessionReducer(
 ): ICurrentUserRolesState {
   const { user, endpoints } = action.sessionData;
   const cfRoles = propagateEndpointsAdminPermissions(state.cf, Object.values(endpoints.cf));
-  return finishCfRoles(state, cfRoles, user);
+  return applyInternalScopes(state, cfRoles, user);
 }
 
 export function updateNewlyConnectedEndpoint(
@@ -38,15 +37,18 @@ export function updateNewlyConnectedEndpoint(
     user: endpoint.user,
     guid: action.guid
   }]);
-  return finishCfRoles(state, cfRoles, action.endpoint.user);
+  return {
+    ...state,
+    cf: cfRoles
+  };
 }
 
-function finishCfRoles(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
+function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
-    const isAdmin = internalRoles.scopes.includes(ScopeStrings.STRATOS_ADMIN);
-    internalRoles.isAdmin = isAdmin;
+    // The admin scope is configurable - so look at the flag provided by the backend
+    internalRoles.isAdmin = user.admin;
   }
 
   return {

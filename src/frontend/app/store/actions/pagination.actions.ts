@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { PaginationAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
+import { BasePaginatedAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
@@ -18,12 +18,9 @@ export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
 
-export function getPaginationKey(entityKey, endpointGuid, guid = null) {
-  if (guid) {
-    return `${entityKey}:${endpointGuid}:${guid}`;
-  } else {
-    return `${entityKey}:${endpointGuid}`;
-  }
+export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
+  const key = `${type}-${id}`;
+  return endpointGuid ? `${endpointGuid}:${key}` : key;
 }
 
 export class ClearPaginationOfType implements Action {
@@ -38,13 +35,13 @@ export class ClearPaginationOfEntity implements Action {
   type = CLEAR_PAGINATION_OF_ENTITY;
 }
 
-export class ResetPagination implements PaginationAction {
+export class ResetPagination implements BasePaginatedAction {
   constructor(public entityKey: string, public paginationKey: string) {
   }
   type = RESET_PAGINATION;
 }
 
-export class CreatePagination implements PaginationAction {
+export class CreatePagination implements BasePaginatedAction {
   /**
    * @param entityKey
    * @param paginationKey
@@ -56,13 +53,13 @@ export class CreatePagination implements PaginationAction {
 }
 
 
-export class ClearPages implements PaginationAction {
+export class ClearPages implements BasePaginatedAction {
   constructor(public entityKey: string, public paginationKey: string) {
   }
   type = CLEAR_PAGES;
 }
 
-export class SetPage implements PaginationAction {
+export class SetPage implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -73,7 +70,7 @@ export class SetPage implements PaginationAction {
   type = SET_PAGE;
 }
 
-export class SetResultCount implements PaginationAction {
+export class SetResultCount implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -83,7 +80,7 @@ export class SetResultCount implements PaginationAction {
   type = SET_RESULT_COUNT;
 }
 
-export class SetClientPageSize implements PaginationAction {
+export class SetClientPageSize implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -93,7 +90,7 @@ export class SetClientPageSize implements PaginationAction {
   type = SET_CLIENT_PAGE_SIZE;
 }
 
-export class SetClientPage implements PaginationAction {
+export class SetClientPage implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -103,7 +100,7 @@ export class SetClientPage implements PaginationAction {
   type = SET_CLIENT_PAGE;
 }
 
-export class SetClientFilter implements PaginationAction {
+export class SetClientFilter implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -113,7 +110,7 @@ export class SetClientFilter implements PaginationAction {
   type = SET_CLIENT_FILTER;
 }
 
-export class SetParams implements PaginationAction {
+export class SetParams implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -137,7 +134,7 @@ export class SetInitialParams implements SetParams {
   type = SET_INITIAL_PARAMS;
 }
 
-export class AddParams implements PaginationAction {
+export class AddParams implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
@@ -148,7 +145,7 @@ export class AddParams implements PaginationAction {
   type = ADD_PARAMS;
 }
 
-export class RemoveParams implements PaginationAction {
+export class RemoveParams implements BasePaginatedAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,

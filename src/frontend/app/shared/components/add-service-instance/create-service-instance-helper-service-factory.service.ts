@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
-import { CreateServiceInstanceHelperService, CreateServiceInstanceMode } from './create-service-instance-helper.service';
+import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
 import { AppState } from '../../../store/app-state';
 import { isMarketplaceMode, isAppServicesMode, isServicesWallMode } from '../../../features/service-catalog/services-helper';
 
@@ -12,7 +12,7 @@ import { isMarketplaceMode, isAppServicesMode, isServicesWallMode } from '../../
 export class CreateServiceInstanceHelperServiceFactory {
 
   private serviceInstanceCache: {
-    [key: string]: CreateServiceInstanceHelperService
+    [key: string]: CreateServiceInstanceHelper
   } = {};
   constructor(
     private store: Store<AppState>,
@@ -25,22 +25,12 @@ export class CreateServiceInstanceHelperServiceFactory {
     cfGuid: string,
     serviceGuid: string,
   ) {
-    let mode;
-    if (isMarketplaceMode(this.activatedRoute)) {
-      mode = CreateServiceInstanceMode.MARKETPLACE_MODE;
-    } else if (isAppServicesMode(this.activatedRoute)) {
-      mode = CreateServiceInstanceMode.APP_SERVICES_MODE;
-    } else if (isServicesWallMode(this.activatedRoute)) {
-      mode = CreateServiceInstanceMode.SERVICES_WALL_MODE;
-    }
-
     const key = `${cfGuid}-${serviceGuid}`;
     if (!this.serviceInstanceCache[key]) {
-      const instance = new CreateServiceInstanceHelperService(
+      const instance = new CreateServiceInstanceHelper(
         this.store,
         serviceGuid,
         cfGuid,
-        mode,
         this.entityServiceFactory,
         this.paginationMonitorFactory
       );

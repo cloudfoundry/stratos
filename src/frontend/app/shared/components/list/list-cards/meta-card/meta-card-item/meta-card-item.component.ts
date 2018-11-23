@@ -15,7 +15,8 @@ export class MetaCardItemComponent implements OnInit {
     'row': 'meta-card-item-row',
     'row-top': 'meta-card-item-row-top',
     'column': 'meta-card-item-column',
-    'long-text': 'meta-card-item-long-text'
+    'long-text': 'meta-card-item-long-text',
+    'long-text-fixed': 'meta-card-item-long-text-fixed',
   };
   itemStyle = 'meta-card-item-row';
   @ContentChild(MetaCardKeyComponent)
@@ -26,7 +27,7 @@ export class MetaCardItemComponent implements OnInit {
 
   @ViewChild('content') content: TemplateRef<any>;
 
-  @Input('customStyle') customStyle = 'row';
+  @Input() customStyle = 'row';
 
   constructor() {
   }

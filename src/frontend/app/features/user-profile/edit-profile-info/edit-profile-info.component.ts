@@ -1,10 +1,15 @@
-
-import {map, take,  first } from 'rxjs/operators';
-
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, MatSnackBar, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import {
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher,
+} from '@angular/material';
 import { Subscription } from 'rxjs';
+import { first, map, take } from 'rxjs/operators';
+
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
 
@@ -24,7 +29,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   constructor(
     private userProfileService: UserProfileService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.editProfileForm = this.fb.group({
       givenName: '',
@@ -38,8 +43,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   private sub: Subscription;
 
-  private error = false;
-
   private profile: UserProfileInfo;
 
   private lastRequired = false;
@@ -47,12 +50,11 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   private emailAddress: string;
 
-  private errorSnack;
 
-  // Wire up to permissions and only allow password change if user has the 'password.write' group
-  private canChangePassword = true;
+  // Only allow password change if user has the 'password.write' group
+  public canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
 
-  private passwordRequired = false;
+  public passwordRequired = false;
 
   ngOnInit() {
     this.userProfileService.fetchUserProfile();
@@ -73,9 +75,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub.unsubscribe();
-    if (this.errorSnack) {
-      this.snackBar.dismiss();
-    }
   }
 
   onChanges() {
@@ -106,7 +105,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   }
 
   // Declared this way to ensure bound to this correctly
-  updateProfile = () => {
+  updateProfile: StepOnNextFunction = () => {
     const updates: UserProfileInfoUpdates = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editProfileForm.value)) {
@@ -115,17 +114,16 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       }
     }
     const obs$ = this.userProfileService.updateProfile(this.profile, updates);
-    return obs$.pipe(take(1), map(([profileErr, passwordErr]) => {
-      const okay = !profileErr && !passwordErr;
-      this.error = !okay;
-      if (!okay) {
-        const msg = 'An error occured updating your profie';
-        this.errorSnack = this.snackBar.open(msg, 'Dismiss');
-      }
-      return {
-        success: okay,
-        redirect: okay
-      };
-    }), );
+    return obs$.pipe(
+      take(1),
+      map(([profileResult, passwordResult]) => {
+        const okay = !profileResult.error && !passwordResult.error;
+        const message = `${profileResult.message || ''}${passwordResult.message || ''}`;
+        return {
+          success: okay,
+          redirect: okay,
+          message: okay ? '' : `An error occurred whilst updating your profile: ${message}`
+        };
+      }), );
   }
 }

@@ -3,10 +3,14 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
-import { CustomModule } from './custom.module';
+import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
+import { ExtensionService } from './core/extension/extension-service';
+import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
+import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
@@ -18,7 +22,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
-
+import { XSRFModule } from './xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -48,6 +52,11 @@ export class CustomRouterStateSerializer
   }
 }
 
+
+/**
+ * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
+ */
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -68,12 +77,20 @@ export class CustomRouterStateSerializer
     ServiceCatalogModule,
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
-    CustomModule,
+    CustomImportModule,
+    XSRFModule,
   ],
   providers: [
     LoggedInService,
+    ExtensionService,
+    DynamicExtenstionRoutes,
+    { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private ext: ExtensionService) {
+    ext.init();
+  }
+}

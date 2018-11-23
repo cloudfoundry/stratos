@@ -1,25 +1,19 @@
-import { Injectable } from '@angular/core';
-import { Store, compose } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators/tag';
-import { interval ,  Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, tap, withLatestFrom } from 'rxjs/operators';
+import { compose, Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
 import {
-  ActionState,
   RequestInfoState,
   RequestSectionKeys,
   TRequestTypeKeys,
   UpdatingSection,
 } from '../store/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
-import { APIResource, EntityInfo } from '../store/types/api.types';
+import { EntityInfo } from '../store/types/api.types';
 import { ICFAction, IRequestAction } from '../store/types/request.types';
-import { composeFn } from './../store/helpers/reducer.helper';
-
-type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -35,7 +29,6 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
 /**
  * Designed to be used in a service factory provider
  */
-@Injectable()
 export class EntityService<T = any> {
 
   constructor(
@@ -67,22 +60,18 @@ export class EntityService<T = any> {
     ).pipe(
       publishReplay(1),
       refCount(),
-      filter(entityInfo => !entityInfo || entityInfo.entity),
       tap((entityInfo: EntityInfo) => {
-        if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo)) {
-          return;
+        if (!entityInfo || entityInfo.entity) {
+          if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
+            return;
+          }
+          validated = true;
+          store.dispatch(new ValidateEntitiesStart(
+            action as ICFAction,
+            [entityInfo.entity.metadata.guid],
+            false
+          ));
         }
-        // If we're not an 'official' object, go forth and fetch again. This will populate all the required '<entity>__guid' fields.
-        if (!entityInfo.entity.metadata) {
-          this.actionDispatch();
-          return;
-        }
-        validated = true;
-        store.dispatch(new ValidateEntitiesStart(
-          action as ICFAction,
-          [entityInfo.entity.metadata.guid],
-          false
-        ));
       })
     );
 
@@ -91,7 +80,8 @@ export class EntityService<T = any> {
         const { entityRequestInfo, entity } = ent;
         return this.isEntityAvailable(entity, entityRequestInfo);
       }),
-      publishReplay(1), refCount()
+      publishReplay(1),
+      refCount()
     );
   }
 
@@ -110,11 +100,11 @@ export class EntityService<T = any> {
   waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
-
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: Function
   ): Observable<EntityInfo> => {
+    const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
       tap(([entityRequestInfo, entity]) => {
@@ -122,15 +112,24 @@ export class EntityService<T = any> {
           actionDispatch();
         }
       }),
-      filter((entityRequestInfo) => {
+      first(),
+      switchMap(() => cleanEntityInfo$)
+    );
+  }
+
+  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
+    return combineLatest(
+      entityMonitor.entityRequest$,
+      entityMonitor.entity$
+    ).pipe(
+      filter(([entityRequestInfo]) => {
         return !!entityRequestInfo;
       }),
-      map(([entityRequestInfo, entity]) => {
-        return {
-          entityRequestInfo,
-          entity: entity ? entity : null
-        };
-      }), );
+      map(([entityRequestInfo, entity]) => ({
+        entityRequestInfo,
+        entity
+      }))
+    );
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {

@@ -1,22 +1,28 @@
+# Docker build for all-in-one Stratos
 FROM splatform/stratos-aio-base:opensuse
 
-COPY *.json ./
-COPY gulpfile.js ./
-COPY src ./src
-COPY build ./build/
-COPY deploy/tools/generate_cert.sh generate_cert.sh
-COPY deploy/db deploy/db
-COPY deploy/all-in-one/config.all-in-one.properties config.properties
+COPY --chown=stratos:users *.json ./
+COPY --chown=stratos:users gulpfile.js ./
+COPY --chown=stratos:users Gopkg.* ./
+COPY --chown=stratos:users src ./src
+COPY --chown=stratos:users build ./build/
+COPY --chown=stratos:users deploy/tools/generate_cert.sh generate_cert.sh
+COPY --chown=stratos:users deploy/db deploy/db
+COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
 RUN npm install \
     && npm run build \
     && npm run build-backend \
-    && npm run deploy-cf
+    && cp src/jetstream/jetstream . \
+    && mv dist ui
 
 # Generate dev-certs
-RUN CERTS_PATH=/go/dev-certs ./generate_cert.sh \
-    && chmod +x portal-proxy
+RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
+    && chmod +x jetstream
 
 EXPOSE 443
 
-ENTRYPOINT ["./portal-proxy"]
+# Need to be root to bind to port 443
+USER root
+
+ENTRYPOINT ["./jetstream"]

@@ -1,14 +1,13 @@
-import { CardStatus } from './../../application-state/application-state.service';
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { map, first, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
-import { AppState } from '../../../../store/app-state';
-import { ConfirmationDialogService } from '../../confirmation-dialog.service';
-import { map } from 'rxjs/operators';
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { CardStatus } from './../../application-state/application-state.service';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
@@ -21,37 +20,38 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   // Should the card show the actions to scale/down the number of instances?
-  @Input('showActions') showActions = false;
+  @Input() showActions = false;
 
-  @Input('busy') busy: any;
+  @Input() busy: any;
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
   status$: Observable<CardStatus>;
 
   constructor(
-    private store: Store<AppState>,
     public appService: ApplicationService,
     private renderer: Renderer,
-    private confirmDialog: ConfirmationDialogService) {
+    private confirmDialog: ConfirmationDialogService,
+    private snackBar: MatSnackBar) {
     this.status$ = this.appService.applicationState$.pipe(
       map(state => state.indicator)
     );
   }
 
   private currentCount: 0;
-  private editCount: 0;
+  public editCount: 0;
 
   private sub: Subscription;
 
-  private isEditing = false;
+  public isEditing = false;
 
-  private editValue: any;
+  public editValue: any;
 
   // Observable on the running instances count for the application
-  private runningInstances$: Observable<number>;
+  public runningInstances$: Observable<number>;
 
   private app: any;
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
   ngOnInit() {
     this.sub = this.appService.application$.subscribe(app => {
@@ -64,6 +64,9 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+    if (this.snackBarRef) {
+      this.snackBarRef.dismiss();
+    }
   }
 
   scaleUp(current: number) {
@@ -95,7 +98,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     if (value === 0) {
       this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
     } else {
-      doUpdate();
+      doUpdate().pipe(
+        first(),
+      ).subscribe(actionState => {
+        if (actionState.error) {
+          this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${actionState.message}`, 'Dismiss');
+        }
+      });
     }
   }
 }

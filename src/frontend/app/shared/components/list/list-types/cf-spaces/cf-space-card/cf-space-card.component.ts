@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
+import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
@@ -15,12 +16,16 @@ import {
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
+import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+
 
 @Component({
   selector: 'app-cf-space-card',
@@ -33,7 +38,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   serviceInstancesCount: number;
   appInstancesCount: number;
   serviceInstancesLimit: number;
-  appIntancesLimit: number;
+  appInstancesLimit: number;
   orgGuid: string;
   normalisedMemoryUsage: number;
   memoryLimit: number;
@@ -44,20 +49,22 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   appCount: number;
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
+  entityConfig: ComponentEntityMonitorConfig;
 
   constructor(
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService,
-    private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private cfOrgService: CloudFoundryOrganizationService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     super();
   }
 
   ngOnInit() {
     this.spaceGuid = this.row.metadata.guid;
+    this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
     this.orgGuid = this.cfOrgService.orgGuid;
     this.cardMenu = [
       {
@@ -102,16 +109,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   setCounts = () => {
     this.appCount = this.row.entity.apps ? this.row.entity.apps.length : 0;
-    let count = 0;
-    if (this.appCount > 0) {
-      this.row.entity.apps.forEach(a => {
-        count += a.entity.instances;
-      });
-    } else {
-      count = 0;
-    }
-
-    this.appInstancesCount = count;
+    this.appInstancesCount = getStartedAppInstanceCount(this.row.entity.apps);
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
@@ -134,7 +132,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         metadata: null
       };
     }
-    this.appIntancesLimit = quotaDefinition.entity.app_instance_limit;
+    this.appInstancesLimit = quotaDefinition.entity.app_instance_limit;
     this.serviceInstancesLimit = quotaDefinition.entity.total_services;
     this.memoryLimit = quotaDefinition.entity.memory_limit;
     this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
@@ -154,11 +152,21 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   }
 
   delete = () => {
-    this.cfOrgService.deleteSpace(
-      this.spaceGuid,
-      this.orgGuid,
-      this.cfEndpointService.cfGuid
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Space',
+      {
+        textToMatch: this.row.entity.name
+      },
+      'Delete',
+      true
     );
+    this.confirmDialog.open(confirmation, () => {
+      this.cfOrgService.deleteSpace(
+        this.spaceGuid,
+        this.orgGuid,
+        this.cfEndpointService.cfGuid
+      );
+    });
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({

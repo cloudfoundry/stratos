@@ -1,9 +1,11 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { browser, promise } from 'protractor';
-import * as request from 'request-promise-native';
+
 import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from './e2e-helpers';
+
+import * as request from 'request-promise-native';
 
 // This helper is used internaly - tests should not need to use this class
 
@@ -28,10 +30,10 @@ export class RequestHelpers {
     if (skipSSLValidation) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     } else if (browser.params.caCert) {
-      let caCertFile = path.join(__dirname, '..', 'dev-ssl');
-      caCertFile = path.join(caCertFile, browser.params.caCert);
-      if (fs.existsSync(caCertFile)) {
-        ca = fs.readFileSync(caCertFile);
+      let caCertFile = join(__dirname, '..', 'dev-ssl');
+      caCertFile = join(caCertFile, browser.params.caCert);
+      if (existsSync(caCertFile)) {
+        ca = readFileSync(caCertFile);
       }
     }
 
@@ -40,6 +42,7 @@ export class RequestHelpers {
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
+      resolveWithFullResponse: true,
       agentOptions: {
         ca: ca
       },
@@ -58,6 +61,7 @@ export class RequestHelpers {
   sendRequest(req, options, body?, formData?): promise.Promise<any> {
 
     const p = promise.defer<any>();
+    const reqObj = req || this.newRequest();
 
     options.url = this.getHost() + '/' + options.url;
     if (body) {
@@ -66,14 +70,25 @@ export class RequestHelpers {
       options.formData = formData;
     }
 
+    if (reqObj._xsrfToken) {
+      options.headers = options.headers || {};
+      options.headers['x-xsrf-token'] = reqObj._xsrfToken;
+    }
+
     E2E.debugLog('REQ: ' + options.method + ' ' + options.url);
     E2E.debugLog('   > ' + JSON.stringify(options));
 
-    req(options).then((response) => {
+    reqObj(options).then((response) => {
       E2E.debugLog('OK');
-      p.fulfill(response);
+
+      // Get XSRF Token
+      if (response.headers['x-xsrf-token'] ) {
+        reqObj._xsrfToken = response.headers['x-xsrf-token'];
+      }
+      p.fulfill(response.body);
     }).catch((e) => {
       E2E.debugLog('ERROR');
+      E2E.debugLog(e);
       E2E.debugLog(e.statusCode + ' : ' + e.message);
       p.reject(e);
     });

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-meta-card-title',
@@ -6,14 +6,11 @@ import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild } fr
   styleUrls: ['./meta-card-title.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetaCardTitleComponent implements OnInit {
+export class MetaCardTitleComponent {
 
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
 
-  constructor() { }
-
-  ngOnInit() {
-  }
+  @Input() noMargin;
 
 }

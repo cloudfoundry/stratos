@@ -2,11 +2,13 @@
 
 ## Deployment Steps
 
-The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
+The quickest way to install Stratos is to deploy it as a Cloud Foundry application. To do so, clone the `stratos` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
 
 ```
 git clone https://github.com/cloudfoundry-incubator/stratos
 cd stratos
+git checkout tags/stable -b stable
+./build/store-git-metadata.sh
 cf push
 ```
 
@@ -30,8 +32,52 @@ Note:
 3. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
 4. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
+### Pre-building the UI
+
+Due to the memory usage of the Angular compiler (see below), when deployed to Cloud Foundry via `cf push`, Stratos does not use AOT (Ahead-of-Time) complilation.
+
+If you wish to enable AOT or reduce the push time, you can pre-build the UI before pushing.
+
+This can be done with:
+
+```
+git clone https://github.com/cloudfoundry-incubator/stratos
+cd stratos
+npm install
+npm run prebuild-ui
+cf push
+```
+
+You will need a recent version of Node installed locally to do this.
+
+The `prebuild-ui` npm script performs a build of the front-end UI and then zips up the resulting folder into a package named `stratos-frontend-prebuild.zip`. The Stratos buildpack will unpack this zip file and use its contents instead of building the UI during staging, when this file is present.
+
+
+### Memory Usage
+
+The Stratos Cloud Foundry `manifest.yml` states that the application requires
+`1512MB` of memory. This is required during the build process of the
+application since building an angular2 app is a memory intensive process. The
+memory limit can be scaled down after the app has been pushed, using the cf CLI.
+
 ## Associate Cloud Foundry database service
 Follow instructions [here](db-migration/README.md).
+
+## Use SSO Login
+
+By default Stratos will present its own login UI and only supports username and password authentication with your UAA. You can configure Stratos to use UAA's login UI by specifying the  the `SSO_LOGIN` environment variable in the manifest, for example:
+
+```
+applications:
+- name: console
+  ... memory, disk settings here
+  env:
+    SSO_LOGIN: true
+```
+
+When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
+
+For more information - see [Single-Sign On](../../docs/sso.md).
 
 ## Troubleshooting
 
@@ -45,15 +91,49 @@ To create a log file of recent console output
 ```
 cf logs console --recent | tee cfconsole.log
 ```
->**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement 
+>**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement
+
+### Turning on backend debugging logs
+
+The `LOG_LEVEL` environment variable controls the backend logs 
+
+```
+cf set-env console LOG_LEVEL debug 
+cf restart console
+cf logs console
+```
+
+would output more debugging output such as
+
+```
+  2018-10-24T14:47:36.91+0200 [RTR/1] OUT console.my.domain - [2018-10-24T12:47:36.850+0000] "GET /pp/v1/-o1F0L956QhAIK7R56Uc1lMh5L4/apps/3ddc0bc6-a645-4449-9d1b-6fe86146cf61/ssh/0 HTTP/1.1" 500 0 0 "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0" "10.228.194.8:42182" "192.168.35.91:61044" x_forwarded_for:"10.228.194.8" x_forwarded_proto:"https" vcap_request_id:"182dddeb-d877-4d58-45f7-0bd886d1caf6" response_time:0.066925325 app_id:"0ba408ef-d0e6-4ab8-96bb-0bc078b8d8fb" app_index:"0" x_b3_traceid:"d166622a0d612fea" x_b3_spanid:"d166622a0d612fea" x_b3_parentspanid:"-"
+   2018-10-24T14:47:36.91+0200 [RTR/1] OUT 
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] sessionCleanupMiddleware                     
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] errorLoggingMiddleware                       
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT INFO[Wed Oct 24 12:47:36 UTC 2018] Not redirecting this request                 
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] getSession                                   
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] getSessionValue                              
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] getSession                                   
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] setStaticContentHeadersMiddleware            
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] urlCheckMiddleware                           
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] sessionMiddleware                            
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] getSessionValue                              
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] getSession                                   
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] xsrfMiddleware                               
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] GetCNSIRecord                                
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] Find                                         
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] decryptToken                                 
+   2018-10-24T14:47:36.85+0200 [APP/PROC/WEB/0] OUT DEBU[Wed Oct 24 12:47:36 UTC 2018] Decrypt                                      
+   [...]
+```
 
 ### Application Security Groups
 
-If you have problems when deploying Stratos UI as a CLoud Foundry application, check that the Application Security Group you have will allow the Stratos UI to communicate with the Cloud Foundry API.
+If you have problems when deploying Stratos UI as a Cloud Foundry application, check that the Application Security Group you have will allow Stratos to communicate with the Cloud Foundry API.
 
 For information on the default ASGs, see [here](https://docs.cloudfoundry.org/concepts/asg.html#default-asg).
 
-To configure a new ASG for the organization and space that are using for the Stratos UI, first create a new ASG definition, for example:
+To configure a new ASG for the organization and space that are using Stratos, first create a new ASG definition, for example:
 
 ```
 [
@@ -86,19 +166,20 @@ Bind this ASG to your `ORG` and `SPACE` with:
 cf bind-security-group NAME ORG SPACE
 ```
 
+
 ### Console fails to start
 
-The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.  
-To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`. 
+The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.
+To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`.
 
 ```
 $ cf env console
 Getting env variables for app console in org SUSE / space dev as admin...
 OK
- 
+
 System-Provided:
- 
- 
+
+
  {
   "VCAP_APPLICATION": {
    "application_id": ...,
@@ -108,7 +189,7 @@ System-Provided:
    "cf_api": "http://api.cf-dev.io",
    ...
  }
- 
+
  No user-defined env variables have been set
  ...
 ```
@@ -152,3 +233,4 @@ applications:
   env:
     CF_API_FORCE_SECURE: true
 ```
+

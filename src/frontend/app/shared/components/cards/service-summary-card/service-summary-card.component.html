@@ -8,7 +8,9 @@
   <app-meta-card-item customStyle="long-text">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
-      {{ servicesService.getServiceDescription() | async }}
+      <span class="service-summary__description">
+        {{ servicesService.getServiceDescription() | async }}
+      </span>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
@@ -39,6 +41,12 @@
       <a [href]="supportUrl" target="_blank" appClickStopPropagation>
         <mat-icon>launch</mat-icon>
       </a>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="servicesService.getServiceProviderName() | async as providerName">
+    <app-meta-card-key>Provider</app-meta-card-key>
+    <app-meta-card-value>
+        {{ servicesService.getServiceProviderName() | async }}
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item customStyle="column">

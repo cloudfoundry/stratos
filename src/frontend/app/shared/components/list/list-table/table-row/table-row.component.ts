@@ -16,27 +16,35 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 })
 export class TableRowComponent extends CdkRow implements OnInit {
 
-  @Input('rowState')
+  @Input()
   rowState: Observable<RowState>;
 
-  private inErrorState$: Observable<boolean>;
-  private errorMessage$: Observable<string>;
-  private isBlocked$: Observable<boolean>;
-  private isHighlighted$: Observable<boolean>;
+  public inErrorState$: Observable<boolean>;
+  public inWarningState$: Observable<boolean>;
+  public errorMessage$: Observable<string>;
+  public isBlocked$: Observable<boolean>;
+  public isHighlighted$: Observable<boolean>;
+  public isDeleting$: Observable<boolean>;
 
   ngOnInit() {
     if (this.rowState) {
       this.inErrorState$ = this.rowState.pipe(
         map(state => state.error)
       );
+      this.inWarningState$ = this.rowState.pipe(
+        map(state => state.warning)
+      );
       this.errorMessage$ = this.rowState.pipe(
         map(state => state.message)
       );
       this.isBlocked$ = this.rowState.pipe(
-        map(state => state.blocked)
+        map(state => state.blocked || state.deleting)
       );
       this.isHighlighted$ = this.rowState.pipe(
         map(state => state.highlighted)
+      );
+      this.isDeleting$ = this.rowState.pipe(
+        map(state => state.deleting)
       );
     }
   }

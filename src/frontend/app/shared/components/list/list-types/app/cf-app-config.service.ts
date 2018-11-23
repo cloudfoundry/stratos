@@ -13,10 +13,13 @@ import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '
 import { createListFilterConfig } from '../../list.helper';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
+import {
+  TableCellAppCfOrgSpaceHeaderComponent,
+} from './table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/table-cell-app-cforgspace.component';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
-
 
 @Injectable()
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
@@ -28,7 +31,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     private store: Store<AppState>,
     private utilsService: UtilsService,
     private appStateService: ApplicationStateService,
-    private cfOrgSpaceService: CfOrgSpaceDataService
+    private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     super();
     this.appsDataSource = new CfAppsDataSource(this.store, this);
@@ -81,6 +84,11 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         orderKey: 'memory',
         field: 'entity.memory'
       }
+    },
+    {
+      columnId: 'cfOrgSpace',
+      headerCellComponent: TableCellAppCfOrgSpaceHeaderComponent,
+      cellComponent: TableCellAppCfOrgSpaceComponent,
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',

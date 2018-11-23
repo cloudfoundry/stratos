@@ -1,9 +1,9 @@
-
-import {catchError,  mergeMap } from 'rxjs/operators';
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { PaginatedAction } from './../types/pagination.types';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, mergeMap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -15,6 +15,7 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
+  EndpointActionComplete,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -24,7 +25,6 @@ import {
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
-  EndpointActionComplete,
 } from '../actions/endpoint.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
@@ -38,6 +38,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+
 
 @Injectable()
 export class EndpointsEffect {
@@ -88,12 +89,23 @@ export class EndpointsEffect {
   @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS).pipe(
     mergeMap(action => {
       const actionType = 'update';
+
+      // Special-case SSO login - redirect to the back-end
+      if (action.authType === 'sso') {
+        const loc = window.location.protocol + '//' + window.location.hostname +
+          (window.location.port ? ':' + window.location.port : '');
+        const ssoUrl = '/pp/v1/auth/login/cnsi?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
+        window.location.assign(ssoUrl);
+        return [];
+      }
+
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           ...<any>action.authValues,
           'cnsi_guid': action.guid,
           'connect_type': action.authType,
+          'system_shared': action.systemShared,
         },
         // Fix for #angular/18261
         encoder: new BrowserStandardEncoder()
@@ -159,6 +171,9 @@ export class EndpointsEffect {
           'cnsi_name': action.name,
           'api_endpoint': action.endpoint,
           'skip_ssl_validation': action.skipSslValidation ? 'true' : 'false',
+          'cnsi_client_id': action.clientID,
+          'cnsi_client_secret': action.clientSecret,
+          'sso_allowed': action.ssoAllowed ? 'true' : 'false',
         }
       });
 
@@ -200,7 +215,7 @@ export class EndpointsEffect {
   }
 
   private doEndpointAction(
-    apiAction: IRequestAction,
+    apiAction: IRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',

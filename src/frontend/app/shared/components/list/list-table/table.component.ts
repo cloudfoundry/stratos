@@ -1,26 +1,23 @@
-
-import {combineLatest as observableCombineLatest,  Observable ,  Subscription } from 'rxjs';
-
-import {tap} from 'rxjs/operators';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material';
-import { Store } from '@ngrx/store';
+import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import { ListSort } from '../../../../store/actions/list.actions';
-import { AppState } from '../../../../store/app-state';
-import { IListDataSource, ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
+import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { ITableColumn } from './table.types';
 
+
 const tableColumnSelect = {
   columnId: 'select',
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
   class: 'table-column-select',
-  cellFlex: '0 0 75px'
+  cellFlex: '0 0 60px'
 };
 
 const tableColumnAction = {
@@ -43,20 +40,15 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort: MatSort;
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
-  @Input('hideTable') hideTable = false;
-  @Input('addSelect') addSelect = false;
-  @Input('addActions') addActions = false;
-  @Input('dataSource') dataSource: ITableListDataSource<T>;
-  @Input('paginationController') paginationController = null as IListPaginationController<T>;
-  @Input('columns') columns: ITableColumn<T>[];
-  private columnNames: string[];
+  @Input() hideTable = false;
+  @Input() addSelect = false;
+  @Input() addActions = false;
+  @Input() dataSource: ITableListDataSource<T>;
+  @Input() paginationController = null as IListPaginationController<T>;
+  @Input() columns: ITableColumn<T>[];
+  public columnNames: string[];
 
-  @Input('fixedRowHeight') fixedRowHeight = false;
-
-  constructor(
-    private _store: Store<AppState>,
-  ) {
-  }
+  @Input() fixedRowHeight = false;
 
   ngOnInit() {
     if (this.addSelect || this.addActions) {
@@ -77,22 +69,26 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   initWidgetStore() {
-    const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
-      if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
-        this.sort.sort({
-          id: sort.field,
-          start: sort.direction as 'asc' | 'desc',
-          disableClear: true
-        });
-      }
-    }));
+    const sortStoreToWidget = this.paginationController.sort$.pipe(
+      tap((sort: ListSort) => {
+        if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
+          this.sort.sort({
+            id: sort.field,
+            start: sort.direction as 'asc' | 'desc',
+            disableClear: true
+          });
+        }
+      })
+    );
 
-    const sortWidgetToStore = this.sort.sortChange.pipe(tap((sort: Sort) => {
-      this.paginationController.sort({
-        field: sort.active,
-        direction: sort.direction,
-      });
-    }));
+    const sortWidgetToStore = this.sort.sortChange.pipe(
+      tap((sort: Sort) => {
+        this.paginationController.sort({
+          field: sort.active,
+          direction: sort.direction,
+        });
+      })
+    );
 
     this.uberSub = observableCombineLatest(
       sortStoreToWidget,

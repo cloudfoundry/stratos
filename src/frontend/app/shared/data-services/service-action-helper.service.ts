@@ -6,6 +6,9 @@ import { ConfirmationDialogService } from '../components/confirmation-dialog.ser
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { DeleteServiceBinding } from '../../store/actions/service-bindings.actions';
 import { DeleteServiceInstance } from '../../store/actions/service-instances.actions';
+import { IServiceBinding } from '../../core/cf-api-svc.types';
+import { APIResource } from '../../store/types/api.types';
+import { RouterNav, RouterQueryParams } from '../../store/actions/router.actions';
 
 @Injectable()
 export class ServiceActionHelperService {
@@ -17,29 +20,44 @@ export class ServiceActionHelperService {
   ) { }
 
   detachServiceBinding = (
-    serviceBindingGuid: string,
+    serviceBindings: APIResource<IServiceBinding>[],
     serviceInstanceGuid: string,
-    endpointGuid: string
+    endpointGuid: string,
+    noConfirm = false
   ) => {
-    const confirmation = new ConfirmationDialogConfig(
-      'Detach Service Instance',
-      'Are you sure you want to detach the application from the service?',
-      'Detach',
-      true
-    );
-    this.confirmDialog.open(confirmation, () =>
-      this.store.dispatch(new DeleteServiceBinding(endpointGuid, serviceBindingGuid, serviceInstanceGuid))
-    );
-  }
 
+    if (serviceBindings.length > 1) {
+      this.store.dispatch(new RouterNav({
+        path: ['/services', endpointGuid, serviceInstanceGuid, 'detach']
+      }));
+      return;
+    }
+    if (!noConfirm) {
+
+      const confirmation = new ConfirmationDialogConfig(
+        'Detach Service Instance',
+        'Are you sure you want to detach the application from the service?',
+        'Detach',
+        true
+      );
+      this.confirmDialog.open(confirmation, () =>
+        this.store.dispatch(new DeleteServiceBinding(endpointGuid, serviceBindings[0].metadata.guid, serviceInstanceGuid))
+      );
+    } else {
+      this.store.dispatch(new DeleteServiceBinding(endpointGuid, serviceBindings[0].metadata.guid, serviceInstanceGuid));
+    }
+  }
 
   deleteServiceInstance = (
     serviceInstanceGuid: string,
+    serviceInstanceName: string,
     endpointGuid: string
   ) => {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
-      'Are you sure you want to delete the service instance?',
+      {
+        textToMatch: serviceInstanceName
+      },
       'Delete',
       true
     );
@@ -48,4 +66,7 @@ export class ServiceActionHelperService {
     );
   }
 
+
+  editServiceBinding = (guid: string, endpointGuid: string, query: RouterQueryParams = {}) =>
+    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'], query: query }))
 }

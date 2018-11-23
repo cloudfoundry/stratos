@@ -7,14 +7,15 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class NoContentMessageComponent implements OnInit {
 
-  @Input('icon') icon: string;
-  @Input('firstLine') firstLine: string;
-  @Input('secondLine') secondLine: {
+  @Input() icon: string;
+  @Input() iconFont: string;
+  @Input() firstLine: string;
+  @Input() secondLine: {
     link?: string;
     linkText?: string;
     text: string;
   };
-  @Input('toolbarLink') toolbarLink: {
+  @Input() toolbarLink: {
     text: string;
   };
 

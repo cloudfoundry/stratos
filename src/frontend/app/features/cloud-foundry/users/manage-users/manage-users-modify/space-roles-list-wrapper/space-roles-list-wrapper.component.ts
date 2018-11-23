@@ -7,6 +7,7 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 
 @Component({
   selector: 'app-space-roles-list-wrapper',
@@ -17,10 +18,11 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
       provide: ListConfig,
       useFactory: (
         store: Store<AppState>,
-        activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) => {
-        return new CfUsersSpaceRolesListConfigService(store, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.spaceGuid);
+        activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+        userPerms: CurrentUserPermissionsService) => {
+        return new CfUsersSpaceRolesListConfigService(store, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.spaceGuid, userPerms);
       },
-      deps: [Store, ActiveRouteCfOrgSpace]
+      deps: [Store, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
     }
   ]
 })

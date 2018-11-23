@@ -1,5 +1,5 @@
 import { APIResource } from '../store/types/api.types';
-import { IApp, IOrganization } from './cf-api.types';
+import { IApp, IOrganization, ISpace } from './cf-api.types';
 import { StringLiteral } from 'typescript';
 
 export interface ILastOperation {
@@ -41,6 +41,7 @@ export interface IServiceInstance {
   tags?: string[];
   service_guid: string;
   space_url?: string;
+  space?: APIResource<ISpace>;
   service_plan_url: string;
   service_plan?: APIResource<IServicePlan>;
   service_bindings_url: string;
@@ -71,6 +72,14 @@ export interface IServicePlan {
 export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
+  costs: IServicePlanCost[];
+}
+
+export interface IServicePlanCost {
+  amount: {
+    [key: string]: number;
+  };
+  unit: string;
 }
 export interface IService {
   label: string;

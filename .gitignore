@@ -9,7 +9,7 @@
 /node_modules
 
 # IDEs and editors
-/.idea
+.idea
 .project
 .classpath
 .c9/
@@ -35,7 +35,6 @@ testem.log
 yarn-error.log
 
 # e2e
-src/test-e2e/*.js
 src/test-e2e/*.map
 src/test-e2e/e2e.secrets.ts
 
@@ -60,7 +59,6 @@ dev-certs/*
 vendor/
 **/vendor
 **/*.so
-.glide
 tools/ssl
 build/secrets.json
 deploy/data/
@@ -77,19 +75,20 @@ deploy/stratos-ui-release/.blobs
 deploy/stratos-ui-release/dev_releases/
 output/fissile
 deploy/ci/travis/temp/
-deploy/glide-cache/
 
 .dist/
 deploy/uaa/tmp/
-src/backend/app-core/plugins
-src/backend/app-core/debug
 src/backend/*/vendor/
-src/backend/app-core/load_plugins.go
 .v8flags*
 
 *.bak
 secrets.yaml
 build/dev_config.json
+e2e-reports/
+.stratos-git-metadata.json
+src/jetstream/jetstream
+src/jetstream/console-database.db
+src/jetstream/config.properties
 
 # Customisations
 
@@ -98,7 +97,12 @@ src/frontend/sass/custom.scss
 src/frontend/assets/eula.html
 src/frontend/assets/logo.png
 src/frontend/assets/login-bg.jpg
-src/frontend/app/custom.module.ts
+src/frontend/app/custom-import.module.ts
 src/frontend/app/custom
 src/frontend/assets/custom
 src/frontend/sass/custom
+src/frontend/index.html
+
+# Prebuild package
+
+stratos-frontend-prebuild.zip

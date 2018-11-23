@@ -60,6 +60,27 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
   };
 }
 
+/**
+ * Standard sort function for sorting integer field
+ */
+export function getIntegerFieldSortFunction(field: string): DataFunction<any> {
+  const fieldArray = field.split('.');
+  return (entities, paginationState) => {
+    const orderDirection = paginationState.params['order-direction'] || 'asc';
+    return entities.sort((a, b) => {
+      const valueA = parseInt(getValue(a, fieldArray), 10);
+      const valueB = parseInt(getValue(b, fieldArray), 10);
+      if (valueA > valueB) {
+        return orderDirection === 'desc' ? 1 : -1;
+      }
+      if (valueA < valueB) {
+        return orderDirection === 'desc' ? -1 : 1;
+      }
+      return 0;
+    });
+  };
+}
+
 function checkAndUpperCase(value: any) {
   if (typeof value.toUpperCase === 'function') {
     value = value.toUpperCase();
@@ -74,7 +95,7 @@ function getValue(obj, fieldArray: string[], index = 0, castToString = false): s
     }
     return obj;
   }
-  if (typeof obj[field] === 'undefined') {
+  if (!obj[field]) {
     return '';
   }
   return getValue(obj[field], fieldArray, ++index);

@@ -4,21 +4,26 @@ export enum CurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',
   APPLICATION_EDIT = 'edit.application',
   APPLICATION_CREATE = 'create.application',
+  APPLICATION_MANAGE = 'manage.application',
   SPACE_VIEW = 'view.space',
   SPACE_CREATE = 'create.space',
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
+  SPACE_CHANGE_ROLES = 'change-roles.space',
   ROUTE_CREATE = 'create.route',
   // ROUTE_BINDING_CREATE = 'create.binding.route',
   ORGANIZATION_CREATE = 'create.org',
   ORGANIZATION_DELETE = 'delete.org',
   ORGANIZATION_EDIT = 'edit.org',
   ORGANIZATION_SUSPEND = 'suspend.org',
+  ORGANIZATION_CHANGE_ROLES = 'change-roles.org',
   SERVICE_INSTANCE_DELETE = 'delete.service-instance',
+  SERVICE_INSTANCE_CREATE = 'create.service-instance',
   SERVICE_BINDING_EDIT = 'edit.service-binding',
   FIREHOSE_VIEW = 'view-firehose',
   ENDPOINT_REGISTER = 'register.endpoint',
-  PASSWORD_CHANGE = 'change-password'
+  PASSWORD_CHANGE = 'change-password',
+  SERVICE_INSTANCE_EDIT = 'edit.service-instance',
 }
 export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {
@@ -44,7 +49,6 @@ export enum ScopeStrings {
   CF_WRITE_SCOPE = 'cloud_controller.write',
   CF_READ_SCOPE = 'cloud_controller.write',
   STRATOS_CHANGE_PASSWORD = 'password.write',
-  STRATOS_ADMIN = 'stratos.admin',
   SCIM_READ = 'scim.read'
 }
 
@@ -82,6 +86,7 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
   ],
   [CurrentUserPermissions.APPLICATION_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.APPLICATION_MANAGE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.APPLICATION_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.SPACE_VIEW]: [
     // See #2186
@@ -98,6 +103,7 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   ],
+  [CurrentUserPermissions.SPACE_CHANGE_ROLES]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   [CurrentUserPermissions.ROUTE_CREATE]: [
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
@@ -115,7 +121,10 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
   [CurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
+  [CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
   [CurrentUserPermissions.SERVICE_INSTANCE_DELETE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_INSTANCE_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_INSTANCE_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.SERVICE_BINDING_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.FIREHOSE_VIEW]: [
     new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP)

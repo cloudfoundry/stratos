@@ -1,22 +1,19 @@
 import { schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 
-
-
-
 export interface AppSummary {
   guid: string;
   running_instances: number;
   service: any[];
 }
 
-
-
 export interface AppStats {
   [key: string]: AppStat;
 }
 
 export interface AppStat {
+  cfGuid: string;
+  guid: string;
   state: string;
   stats: AppInstanceStats;
 }

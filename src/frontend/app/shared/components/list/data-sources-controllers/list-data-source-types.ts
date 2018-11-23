@@ -1,9 +1,10 @@
+import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
-import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
-import { DataSource } from '@angular/cdk/table';
+import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { MetricsAction } from '../../../../store/actions/metrics.actions';
 
 export interface AppEvent {
   actee_name: string;
@@ -33,7 +34,7 @@ export class ListActionConfig<T> {
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-  getRowState?(row: T): Observable<RowsState>;
+  getRowState?(row: T): Observable<RowState>;
   trackBy(index: number, item: T);
 }
 
@@ -65,7 +66,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
   selectClear();
 
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
@@ -75,6 +76,8 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   getFilterFromParams(pag: PaginationEntityState): string;
   setFilterParam(filter: string, pag: PaginationEntityState);
   refresh();
+
+  updateMetricsAction(newAction: MetricsAction);
 }
 
 export type getRowUniqueId<T> = (T) => string;
@@ -88,6 +91,9 @@ export interface RowState {
   message?: string;
   blocked?: boolean;
   highlighted?: boolean;
+  deleting?: boolean;
+  warning?: boolean;
+  disabled?: boolean;
   [customState: string]: any;
 }
 
@@ -95,5 +101,6 @@ export const getDefaultRowState = (): RowState => ({
   busy: false,
   error: false,
   blocked: false,
+  deleting: false,
   message: null
 });

@@ -1,20 +1,19 @@
-import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-
 import { ISpace } from '../../../../../core/cf-api.types';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { selectUsersRolesRoles } from '../../../../../store/selectors/users-roles.selector';
 import { APIResource } from '../../../../../store/types/api.types';
+import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
-import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 
-@Injectable()
+
 export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResource<ISpace>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfUsersSpaceRolesDataSourceService;
@@ -71,11 +70,11 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   }];
   initialised = new BehaviorSubject<boolean>(false);
 
-  constructor(private store: Store<AppState>, private cfGuid: string, private spaceGuid: string) {
+  constructor(private store: Store<AppState>, private cfGuid: string, private spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectUsersRolesRoles).pipe(
       first()
     ).subscribe(newRoles => {
-      this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles.orgGuid, spaceGuid, this.store, this);
+      this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles.orgGuid, spaceGuid, this.store, userPerms, this);
       this.initialised.next(true);
     });
   }

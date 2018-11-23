@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
+import { StoreModule, ActionReducerMap } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { ActionReducerMap } from '@ngrx/store/src/models';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
 
@@ -21,7 +20,6 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
-
 
 export function logger(reducer) {
   // default, no options
@@ -44,7 +42,7 @@ export const appReducers = {
   routing: routingReducer,
   manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
-  currentUserRoles: currentUserRolesReducer
+  currentUserRoles: currentUserRolesReducer,
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];
@@ -54,23 +52,21 @@ if (!environment.production) {
     metaReducers.push(logger);
   }
 }
-
-const imports = [
-  StoreModule.forRoot(
-    appReducers,
-    {
-      metaReducers
-    }
-  )
-];
-
-if (!environment.production) {
-  imports.push(
+const store = StoreModule.forRoot(
+  appReducers,
+  {
+    metaReducers
+  }
+);
+const imports = environment.production ? [
+  store
+] : [
+    store,
     StoreDevtoolsModule.instrument({
       maxAge: 100,
+      logOnly: !environment.production
     })
-  );
-}
+  ];
 
 @NgModule({
   imports

@@ -2,12 +2,12 @@ import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IApp } from '../../core/cf-api.types';
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
-import { EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
-import { CFStartAction } from './../types/request.types';
+import { CFStartAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';
@@ -37,6 +37,10 @@ export const DELETE_FAILED = '[Application] Delete failed';
 export const DELETE_INSTANCE = '[Application Instance] Delete';
 export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
 export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
+
+export const RESTAGE = '[Application] Restage';
+export const RESTAGE_SUCCESS = '[Application] Restage success';
+export const RESTAGE_FAILED = '[Application] Restage failed';
 
 const applicationEntitySchema = entityFactory(applicationSchemaKey);
 
@@ -161,6 +165,7 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     const endpointPassthroughHeader = 'x-cap-passthrough';
     this.options.headers.set(endpointPassthroughHeader, 'true');
     this.options.params = new URLSearchParams();
+    // Delete the service instance and route bindings, but not the service instance and route themselves
     this.options.params.set('recursive', 'true');
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
@@ -174,7 +179,7 @@ export class DeleteApplicationInstance extends CFStartAction
   guid: string;
   constructor(
     public appGuid: string,
-    private index: number,
+    index: number,
     public endpointGuid: string
   ) {
     super();
@@ -191,4 +196,21 @@ export class DeleteApplicationInstance extends CFStartAction
   entityKey = appStatsSchemaKey;
   removeEntityOnDelete = true;
   options: RequestOptions;
+}
+
+export class RestageApplication extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}/restage`;
+    this.options.method = 'post';
+    this.options.headers = new Headers();
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
+  }
+  actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
+  options: RequestOptions;
+  updatingKey = 'restaging';
 }

@@ -1,50 +1,54 @@
-<app-meta-card class="service-card" [clickAction]="goToServiceInstances">
-  <app-meta-card-title>
+<app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null" *ngIf="!!serviceEntity">
+  <app-meta-card-title noMargin="true">
     <div class="service-card__title">
       <div class="service-card__title__link">{{ getDisplayName() }}</div>
-      <app-service-icon [service]="row"></app-service-icon>
+      <app-service-icon [service]="serviceEntity"></app-service-icon>
     </div>
   </app-meta-card-title>
-  <app-meta-card-item customStyle="long-text">
+  <app-meta-card-item customStyle="long-text-fixed">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
-      {{ row.entity.description}}
+      {{ serviceEntity.entity.description}}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Plans</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceEntity.entity.service_plans.length }}
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Active</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="row.entity.active" type="yes-no">
+      <app-boolean-indicator [isTrue]="serviceEntity.entity.active" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Bindable</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="row.entity.bindable" type="yes-no">
+      <app-boolean-indicator [isTrue]="serviceEntity.entity.bindable" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="hasDocumentationUrl()">
-    <app-meta-card-key>Documentation Link</app-meta-card-key>
-    <app-meta-card-value>
-      <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
-        <mat-icon>launch</mat-icon>
-      </a>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item *ngIf="hasSupportUrl()">
-    <app-meta-card-key>Support Link</app-meta-card-key>
-    <app-meta-card-value>
-      <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
-        <mat-icon>launch</mat-icon>
-      </a>
-    </app-meta-card-value>
-  </app-meta-card-item>
   <app-meta-card-item>
-    <app-meta-card-key>Service Plans</app-meta-card-key>
+    <app-meta-card-key>References</app-meta-card-key>
     <app-meta-card-value>
-      {{ row.entity.service_plans.length }}
+      <div class="service-card__links">
+        <div class="service-card__link" *ngIf="hasDocumentationUrl()">
+          <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
+            <mat-icon>launch</mat-icon>
+          </a>
+          <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>Docs</a>
+        </div>
+        <div class="service-card__link" *ngIf="hasSupportUrl()">
+          <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
+            <mat-icon>launch</mat-icon>
+          </a>
+          <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>Support</a>
+        </div>
+      </div>
+      <div *ngIf="!hasDocumentationUrl() && !hasSupportUrl()">-</div>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item customStyle="column">

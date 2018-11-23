@@ -1,4 +1,7 @@
 import {
+  TableCellEndpointIsAdminComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+import {
   Component,
   ComponentFactoryResolver,
   Input,
@@ -32,6 +35,12 @@ import { TableCellTCPRouteComponent } from '../../list-types/app-route/table-cel
 import {
   TableCellEditVariableComponent,
 } from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
+import {
+  TableCellAppCfOrgSpaceComponent,
+} from '../../list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component';
+import {
+  TableCellAppCfOrgSpaceHeaderComponent,
+} from '../../list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
 import {
   TableCellAppInstancesComponent,
 } from '../../list-types/app/table-cell-app-instances/table-cell-app-instances.component';
@@ -93,6 +102,9 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+import { TableCellSpaceNameComponent } from '../../list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
+import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
+import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 
 
 /* tslint:enable:max-line-length */
@@ -112,6 +124,8 @@ export const listTableCells = [
   TableCellEndpointNameComponent,
   TableCellAppStatusComponent,
   TableCellUsageComponent,
+  TableCellCfCellComponent,
+  TableCellBooleanIndicatorComponent,
   TableCellRouteComponent,
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,
@@ -131,7 +145,11 @@ export const listTableCells = [
   TableCellRoleOrgSpaceComponent,
   TableCellSelectOrgComponent,
   TableCellCommitAuthorComponent,
-  TableCellRequestMonitorIconComponent
+  TableCellRequestMonitorIconComponent,
+  TableCellSpaceNameComponent,
+  TableCellAppCfOrgSpaceHeaderComponent,
+  TableCellAppCfOrgSpaceComponent,
+  TableCellEndpointIsAdminComponent
 ];
 
 @Component({
@@ -147,13 +165,13 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;
 
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input() dataSource = null as IListDataSource<T>;
 
-  @Input('component') component: Type<{}>;
-  @Input('cellDefinition') cellDefinition: ICellDefinition<T>;
-  @Input('func') func: () => string;
-  @Input('row') row: T;
-  @Input('config') config: any;
+  @Input() component: Type<{}>;
+  @Input() cellDefinition: ICellDefinition<T>;
+  @Input() func: () => string;
+  @Input() row: T;
+  @Input() config: any;
 
   private cellComponent: TableCellCustom<T>;
 

@@ -1,13 +1,13 @@
-
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
+import { EndpointsService } from '../../../core/endpoints.service';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 import { AppState } from '../../../store/app-state';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
@@ -15,7 +15,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
+
 
 @Component({
   selector: 'app-dashboard-base',
@@ -33,6 +33,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
+    private endpointsService: EndpointsService,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
@@ -42,7 +43,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private openCloseSub: Subscription;
   private closeSub: Subscription;
 
-  private fullView: boolean;
+  public fullView: boolean;
 
   private routeChangeSubscription: Subscription;
 
@@ -50,40 +51,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
-  sideNavTabs: SideNavItem[] = [
-    {
-      text: 'Dashboard',
-      matIcon: 'assessment',
-      link: '/dashboard',
-      // Experimental - only show in development
-      hidden: observableOf(environment.production),
-    },
-    {
-      text: 'Applications',
-      matIcon: 'apps',
-      link: '/applications'
-    },
-    {
-      text: 'Marketplace',
-      matIcon: 'store',
-      link: '/marketplace'
-    },
-    {
-      text: 'Services',
-      matIcon: 'library_books',
-      link: '/services'
-    },
-    {
-      text: 'Cloud Foundry',
-      matIcon: 'cloud',
-      link: '/cloud-foundry'
-    },
-    {
-      text: 'Endpoints',
-      matIcon: 'settings_ethernet',
-      link: '/endpoints'
-    },
-  ];
+  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
   sideNaveMode = 'side';
   dispatchRelations() {
@@ -153,5 +121,42 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private disableMobileNav() {
     this.store.dispatch(new OpenSideNav());
     this.store.dispatch(new ChangeSideNavMode('side'));
+  }
+
+  private getNavigationRoutes(): SideNavItem[] {
+    let navItems = this.collectNavigationRoutes('', this.router.config);
+
+    // Sort by name
+    navItems = navItems.sort((a: any, b: any) => a.text.localeCompare(b.text));
+
+    // Sort by position
+    navItems = navItems.sort((a: any, b: any) => {
+      const posA = a.position ? a.position : 99;
+      const posB = b.position ? b.position : 99;
+      return posA - posB;
+    });
+
+    return navItems;
+  }
+
+  private collectNavigationRoutes(path: string, routes: Route[]): SideNavItem[] {
+    if (!routes) {
+      return [];
+    }
+    return routes.reduce((nav, route) => {
+      if (route.data && route.data.stratosNavigation) {
+        const item = {
+          ...route.data.stratosNavigation,
+          link: path + '/' + route.path
+        };
+        if (item.requiresEndpointType) {
+          item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+        }
+        nav.push(item);
+      }
+
+      const navs = this.collectNavigationRoutes(route.path, route.children);
+      return nav.concat(navs);
+    }, []);
   }
 }

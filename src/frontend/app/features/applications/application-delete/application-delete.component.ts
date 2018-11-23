@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable ,  combineLatest ,  ReplaySubject } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
@@ -49,7 +49,7 @@ import {
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
 
@@ -73,7 +73,7 @@ export class ApplicationDeleteComponent<T> {
       cellDefinition: {
         getValue: row => row.entity.service_instance.entity.name
       },
-      cellFlex: '0 0 200px'
+      cellFlex: '1 0'
     },
     {
       columnId: 'service',
@@ -102,12 +102,13 @@ export class ApplicationDeleteComponent<T> {
       headerCell: () => 'Host',
       columnId: 'host',
       cellComponent: TableCellRouteComponent,
-      cellFlex: '0 0 200px'
+      cellFlex: '1 0'
     },
     {
       columnId: 'tcproute',
       headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
+      cellFlex: '1'
     }
   ];
   public appDeleteColumns: ITableColumn<APIResource<IApp>>[] = [
@@ -119,24 +120,27 @@ export class ApplicationDeleteComponent<T> {
         getLink: row => `/applications/${row.metadata.guid}`,
         newTab: true,
       },
-      cellFlex: '0 0 200px'
+      cellFlex: '1 0'
     },
     {
       columnId: 'status',
       headerCell: () => 'Status',
       cellComponent: TableCellAppStatusComponent,
+      cellFlex: '1'
     },
     {
       columnId: 'instances',
       headerCell: () => 'Instances',
-      cellComponent: TableCellAppInstancesComponent
+      cellComponent: TableCellAppInstancesComponent,
+      cellFlex: '1'
     },
     {
       columnId: 'creation',
       headerCell: () => 'Creation Date',
       cellDefinition: {
         getValue: (row: APIResource) => this.datePipe.transform(row.metadata.created_at, 'medium')
-      }
+      },
+      cellFlex: '1'
     }
   ];
 
@@ -146,7 +150,6 @@ export class ApplicationDeleteComponent<T> {
   public selectedApplication$: Observable<APIResource<IApp>[]>;
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
-  private appWallFetchAction: GetAllApplications;
   public fetchingApplicationData$: Observable<boolean>;
 
   public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
@@ -168,7 +171,7 @@ export class ApplicationDeleteComponent<T> {
     private datePipe: DatePipe
   ) {
     this.setupAppMonitor();
-    this.cancelUrl = `/application/${applicationService.cfGuid}/${applicationService.appGuid}`;
+    this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
     const { fetch, monitors } = this.buildRelatedEntitiesActionMonitors();
     const { instanceMonitor, routeMonitor } = monitors;
     this.instanceMonitor = instanceMonitor;
@@ -221,7 +224,6 @@ export class ApplicationDeleteComponent<T> {
    * Builds the related entities actions and monitors to monitor the state of the entities.
    */
   public buildRelatedEntitiesActionMonitors() {
-    const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
     const routesAction = new GetAppRoutes(appGuid, cfGuid);
@@ -297,7 +299,7 @@ export class ApplicationDeleteComponent<T> {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
             this.selectedRoutes.forEach(route => {
-              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid));
             });
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {

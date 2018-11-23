@@ -1,19 +1,18 @@
-
-import {of as observableOf,  Observable } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CreateSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
+import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
-import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+
 
 @Component({
   selector: 'app-create-space-step',
@@ -30,10 +29,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     store: Store<AppState>,
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
-    snackBar: MatSnackBar,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    super(store, activatedRoute, paginationMonitorFactory, snackBar, activeRouteCfOrgSpace);
+    super(store, activatedRoute, paginationMonitorFactory, activeRouteCfOrgSpace);
   }
 
   ngOnInit() {
@@ -42,28 +40,24 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     });
   }
 
-  validate = (spaceName: string = null) =>
+  validateNameTaken = (spaceName: string = null) =>
     this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true
+
+  validate = () => !!this.createSpaceForm && this.createSpaceForm.valid;
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.validate(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
+      !this.validateNameTaken(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
   }
 
-  submit = () => {
+  submit: StepOnNextFunction = () => {
     const spaceName = this.createSpaceForm.value['spaceName'];
     this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
 
-    this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
-      filter(o => {
-        return !!o && !o.fetching && !o.creating;
-      }),
-      this.map(
-        ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces'],
-        'Failed to create space! Please select a different name and try again!'
-      )
-    ).subscribe();
-    return observableOf({ success: true });
+    return this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
+      filter(o => !!o && !o.fetching && !o.creating),
+      this.map('Failed to create space: ')
+    );
   }
 
   ngOnDestroy() {

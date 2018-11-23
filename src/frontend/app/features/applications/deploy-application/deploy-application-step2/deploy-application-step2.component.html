@@ -10,80 +10,75 @@
       </mat-select>
     </mat-form-field>
     <div *ngIf="(sourceType$ | async)?.id as sourceType">
-      <app-deploy-application-fs #fsChooser *ngIf="sourceType === 'fs'" required name="fsLocalSource" [(ngModel)]="fsSourceData">
+      <app-deploy-application-fs #fsChooser *ngIf="sourceType === 'file' || sourceType === 'folder'" [sourceType]="sourceType" required name="fsLocalSource" [(ngModel)]="fsSourceData">
       </app-deploy-application-fs>
-      <div *ngIf="sourceType === 'git'">
-      <div>
-        <mat-radio-group [disabled]="isRedeploy" [(ngModel)]="sourceSubType" name="sourceSubType" (change)="setSourceSubType($event.value)" class="deploy-step2-form__radio" required>
-          <mat-radio-button *ngFor="let type of sourceSubTypes" name="sourceSubType" [value]="type">
-            {{ type.name }}
-          </mat-radio-button>
-        </mat-radio-group>
-      </div>
-      <div *ngIf="(sourceSubType$ | async) === 'github'">
-        <div class="github-project-details">
-          <div>
-            <mat-form-field>
-              <input matInput [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
-              <mat-error *ngIf="sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')">
-                Project doesn't exist
-              </mat-error>
-            </mat-form-field>
-          </div>
-          <div *ngIf="projectInfo$| async as projectInfo" class="deploy-step2-form__project-info-group">
+      <div *ngIf="sourceType === 'github' || sourceType === 'giturl'">
+        <div *ngIf="sourceType === 'github'">
+          <div class="github-project-details">
             <div>
-              <img src="{{projectInfo.owner.avatar_url}}">
+              <mat-form-field>
+                <input matInput [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
+                <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
+                  Project does not exist
+                </mat-error>
+                <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
+                  {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div *ngIf="projectInfo$| async as projectInfo" class="deploy-step2-form__project-info-group">
+              <div>
+                <img src="{{projectInfo.owner.avatar_url}}">
+              </div>
+              <div src="description">
+                <div>
+                  <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
+                </div>
+                <div class="centered">
+                  {{projectInfo.description}}
+                </div>
+              </div>
+            </div>
+          </div>
+          <mat-form-field>
+            <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)"
+              required>
+              <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
+                {{ branch.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div *ngIf="isRedeploy && commitInfo" class="deploy-step2-form__project-info-group">
+            <div>
+              <img src="{{commitInfo.author.avatar_url}}">
             </div>
             <div src="description">
               <div>
-                <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
+                <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
               </div>
-              <div class="centered">
-                {{projectInfo.description}}
+              <div>
+                {{commitInfo.commit.message}}
+              </div>
+              <div class="author-info">
+                <div>
+                  {{commitInfo.commit.author.name}}
+                </div>
+                <div>
+                  {{commitInfo.commit.author.date | date: 'medium'}}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <mat-form-field>
-          <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)"
-            required>
-            <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
-              {{ branch.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <div *ngIf="isRedeploy && commitInfo" class="deploy-step2-form__project-info-group">
-          <div>
-            <img src="{{commitInfo.author.avatar_url}}">
-          </div>
-          <div src="description">
-            <div>
-              <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
-            </div>
-            <div>
-              {{commitInfo.commit.message}}
-            </div>
-            <div class="author-info">
-              <div>
-                {{commitInfo.commit.author.name}}
-              </div>
-              <div>
-                {{commitInfo.commit.author.date | date: 'medium'}}
-              </div>
-            </div>
-          </div>
+        <div *ngIf="sourceType === 'giturl'">
+          <mat-form-field>
+            <input matInput [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="Git URL" name="gitUrl" required>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput [(ngModel)]="gitUrlBranchName" placeholder="Branch or Tag" name="urlBranchName" required>
+          </mat-form-field>
         </div>
-      </div>
-      <div *ngIf="(sourceSubType$ | async) === 'giturl'">
-        <mat-form-field>
-          <input matInput [disabled]="isRedeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" required>
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>
-        </mat-form-field>
       </div>
     </div>
-  </div>
-    
   </div>
 </form>

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
@@ -37,7 +38,8 @@ describe('CfAppEventsConfigService', () => {
         CoreModule,
         SharedModule,
         ApplicationsModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        RouterTestingModule
       ]
     });
   });

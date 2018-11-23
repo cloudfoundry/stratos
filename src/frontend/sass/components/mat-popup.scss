@@ -1,0 +1,4 @@
+// Remove inner focus border on Firefox
+.mat-menu-item::-moz-focus-inner {
+  border: 0;
+}

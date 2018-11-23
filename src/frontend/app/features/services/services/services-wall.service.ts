@@ -4,13 +4,12 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IService } from '../../../core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAllServices } from '../../../store/actions/service.actions';
-import { GetServicesForSpace } from '../../../store/actions/space.actions';
+import { GetAllServicesForSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, serviceSchemaKey } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../store/types/api.types';
 
@@ -20,14 +19,13 @@ export class ServicesWallService {
 
   constructor(
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.services$ = this.initServicesObservable();
   }
 
   initServicesObservable = () => {
-    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, 'all');
+    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
@@ -49,12 +47,16 @@ export class ServicesWallService {
     refCount()
   )
 
+  getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
+    return createEntityRelationPaginationKey(serviceSchemaKey, `${cfGuid}-${spaceGuid}`);
+  }
+
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
-    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, `${cfGuid}-${spaceGuid}`);
+    const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetServicesForSpace(spaceGuid, cfGuid, paginationKey),
+        action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           entityFactory(serviceSchemaKey)

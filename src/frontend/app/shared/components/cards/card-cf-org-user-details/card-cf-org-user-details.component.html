@@ -11,6 +11,6 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Org Status</app-meta-card-key>
-    <app-meta-card-value>{{ (cfOrgService.org$ | async)?.entity?.entity?.status }}</app-meta-card-value>
+    <app-meta-card-value>{{ ((cfOrgService.org$ | async)?.entity?.entity?.status) | capitalizeFirst}}</app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

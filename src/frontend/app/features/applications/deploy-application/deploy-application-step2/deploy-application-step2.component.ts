@@ -1,19 +1,19 @@
-
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, take, tap ,  withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { GITHUB_API_URL } from '../../../../core/github.helpers';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   FetchBranchesForProject,
   FetchCommit,
   SaveAppDetails,
   SetAppSourceDetails,
-  SetAppSourceSubType,
   SetBranch,
   SetDeployBranch,
 } from '../../../../store/actions/deploy-applications.actions';
@@ -25,11 +25,10 @@ import {
   selectNewProjectCommit,
   selectPEProjectName,
   selectProjectExists,
-  selectSourceSubType,
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { SourceType } from '../../../../store/types/deploy-application.types';
+import { GitAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 
@@ -41,32 +40,36 @@ import { PaginatedAction } from '../../../../store/types/pagination.types';
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
 
-  @Input('isRedeploy') isRedeploy = false;
+  @Input() isRedeploy = false;
 
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
   sourceTypes: SourceType[] = [
-    { name: 'Git', id: 'git' },
-    { name: 'File or folder', id: 'fs' },
+    { name: 'Public Github', id: 'github' },
+    { name: 'Public Git URL', id: 'giturl' },
+    { name: 'Application Archive File', id: 'file' },
+    { name: 'Application Folder', id: 'folder' },
   ];
   sourceType$: Observable<SourceType>;
-  GIT_SOURCE_TYPE = 1;
-  GITHUB_SUB_SOURCE_TYPE = 0;
-  sourceSubTypes: SourceType[] = [
-    { id: 'github', name: 'Public Github' },
-    { id: 'giturl', name: 'Public Git URL' }
-  ];
-  sourceSubType$: Observable<string>;
+  INITIAL_SOURCE_TYPE = 0; // GitHub by default
   repositoryBranches$: Observable<any>;
   validate: Observable<boolean>;
   projectInfo$: Observable<GithubRepo>;
   commitSubscription: Subscription;
+
   // ngModel Properties
   sourceType: SourceType;
-  sourceSubType: SourceType;
   repositoryBranch: GitBranch = { name: null, commit: null };
   repository: string;
   stepperText = 'Please specify the source';
+
+  // Git URL
+  gitUrl: string;
+  gitUrlBranchName: string;
+
+  // Observables for source types
+  sourceTypeGithub$: Observable<boolean>;
+  sourceTypeNeedsUpload$: Observable<boolean>;
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
@@ -90,16 +93,28 @@ export class DeployApplicationStep2Component
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
-  onNext = () => {
-    this.store.dispatch(
-      new SaveAppDetails({
+  onNext: StepOnNextFunction = () => {
+    // Set the details based on which source type is selected
+    let details: GitAppDetails;
+    if (this.sourceType.id === 'github') {
+      details = {
         projectName: this.repository,
         branch: this.repositoryBranch
-      })
-    );
+      };
+    } else if (this.sourceType.id === 'giturl') {
+      details = {
+        projectName: this.gitUrl,
+        branch: {
+          name: this.gitUrlBranchName
+        }
+      };
+    }
+
+    this.store.dispatch(new SaveAppDetails(details));
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
@@ -109,23 +124,32 @@ export class DeployApplicationStep2Component
     }
 
     this.sourceType$ = this.store.select(selectSourceType);
-    this.sourceSubType$ = this.store.select(selectSourceSubType);
+
+    this.sourceTypeGithub$ = this.sourceType$.pipe(
+      filter(type => type && !!type.id),
+      map(type => type.id === 'github')
+    );
+
+    this.sourceTypeNeedsUpload$ = this.sourceType$.pipe(
+      filter(type => type && !!type.id),
+      map(type => type.id === 'folder' || type.id === 'file')
+    );
 
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-        filter(state => state && !state.checking && state.exists),
-        tap(p => {
+        filter(state => state && !state.checking && !state.error && state.exists),
+        tap(state => {
           if (this.branchesSubscription) {
             this.branchesSubscription.unsubscribe();
           }
-          const action = new FetchBranchesForProject(p.name);
+          const fetchBranchesAction = new FetchBranchesForProject(state.name);
           this.branchesSubscription = getPaginationObservables<APIResource>(
             {
               store: this.store,
-              action,
+              action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
-                action.paginationKey,
+                fetchBranchesAction.paginationKey,
                 entityFactory(githubBranchesSchemaKey)
               )
             },
@@ -137,14 +161,12 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(fetchBranches);
 
-    const action = {
+    const paginationAction = {
       entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
-      filter(p => {
-        return p && !!p.data;
-      }),
+      filter(p => p && !!p.exists && !!p.data),
       map(p => p.data),
       tap(p => {
         if (!this.isRedeploy) {
@@ -157,7 +179,7 @@ export class DeployApplicationStep2Component
     const deployCommit$ = this.store.select(selectNewProjectCommit);
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
-      action.paginationKey,
+      paginationAction.paginationKey,
       entityFactory(githubBranchesSchemaKey)
     );
 
@@ -190,7 +212,7 @@ export class DeployApplicationStep2Component
             githubCommitSchemaKey,
             entityFactory(githubCommitSchemaKey),
             entityKey,
-            new FetchCommit(commitSha, projectInfo.full_name),
+            new FetchCommit(commitSha, projectInfo.full_name, this.gitHubURL),
           );
 
           if (this.commitSubscription) {
@@ -198,11 +220,8 @@ export class DeployApplicationStep2Component
           }
           this.commitSubscription = commitEntityService.waitForEntity$.pipe(
             map(p => p.entity.entity),
-            tap(p => {
-              this.commitInfo = p;
-            })
-          )
-            .subscribe();
+            tap(p => this.commitInfo = p)
+          ).subscribe();
         }
       })
     );
@@ -213,8 +232,7 @@ export class DeployApplicationStep2Component
       filter(p => !p),
       take(1),
       tap(p => {
-        this.setSourceType(this.sourceTypes[this.GIT_SOURCE_TYPE]);
-        this.setSourceSubType(this.sourceSubTypes[this.GITHUB_SUB_SOURCE_TYPE]);
+        this.setSourceType(this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
       })
     );
 
@@ -222,7 +240,6 @@ export class DeployApplicationStep2Component
       filter(p => !!p),
       tap(p => {
         this.sourceType = this.sourceTypes.find(s => s.id === p.id);
-        this.sourceSubType = this.sourceSubTypes.find(s => s.id === p.subType);
       })
     );
 
@@ -240,9 +257,6 @@ export class DeployApplicationStep2Component
   }
 
   setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));
-
-  setSourceSubType = event =>
-    this.store.dispatch(new SetAppSourceSubType(event))
 
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));

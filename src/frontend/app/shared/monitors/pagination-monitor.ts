@@ -1,26 +1,40 @@
 import { Store } from '@ngrx/store';
-import { denormalize, schema } from 'normalizr';
-import { Observable ,  combineLatest } from 'rxjs';
-import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish ,  withLatestFrom } from 'rxjs/operators';
+import { denormalize, schema as normalizrSchema } from 'normalizr';
+import { asapScheduler, Observable } from 'rxjs';
+import { tag } from 'rxjs-spy/operators';
+import {
+  combineLatest as combineLatestOperator,
+  distinctUntilChanged,
+  filter,
+  map,
+  observeOn,
+  publishReplay,
+  refCount,
+  withLatestFrom,
+  tap,
+} from 'rxjs/operators';
 
-import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
+import {
+  getAPIRequestDataState,
+  selectEntities,
+} from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { AppState } from './../../store/app-state';
-import { ActionState } from './../../store/reducers/api-request-reducer/types';
-import { PaginationEntityState } from './../../store/types/pagination.types';
+import { AppState } from '../../store/app-state';
+import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
 
 export class PaginationMonitor<T = any> {
   /**
-  * Emits the current page of entities.
-  */
+   * Emits the current page of entities.
+   */
   public currentPage$: Observable<T[]>;
   /**
-  * Emits a boolean stating if the current page is fetching or not.
-  */
+   * Emits a boolean stating if the current page is fetching or not.
+   */
   public fetchingCurrentPage$: Observable<boolean>;
   /**
-  * Emits a boolean stating if the current page has errored or not.
-  */
+   * Emits a boolean stating if the current page has errored or not.
+   */
   public currentPageError$: Observable<boolean>;
   /**
    * All the information about the current pagination selection.
@@ -30,13 +44,9 @@ export class PaginationMonitor<T = any> {
   constructor(
     private store: Store<AppState>,
     public paginationKey: string,
-    public schema: schema.Entity
+    public schema: normalizrSchema.Entity,
   ) {
-    this.init(
-      store,
-      paginationKey,
-      schema
-    );
+    this.init(store, paginationKey, schema);
   }
 
   /**
@@ -44,7 +54,15 @@ export class PaginationMonitor<T = any> {
    * @param pagination
    */
   private hasPage(pagination: PaginationEntityState) {
-    const hasPage = pagination && pagination.ids[pagination.currentPage];
+    if (!pagination) {
+      return false;
+    }
+    const currentPage = pagination.ids[pagination.currentPage];
+    const hasPageIds = !!currentPage;
+    const requestInfo =
+      pagination.pageRequests[pagination.clientPagination.currentPage];
+    const hasPageRequestInfo = !!requestInfo;
+    const hasPage = hasPageIds && (!hasPageRequestInfo || !requestInfo.busy);
     return hasPage;
   }
 
@@ -60,12 +78,18 @@ export class PaginationMonitor<T = any> {
    * Gets the request info for the current page.
    * @param pagination
    */
-  private getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
-    if (!pagination || !pagination.pageRequests || !pagination.pageRequests[pagination.currentPage]) {
+  private getCurrentPageRequestInfo(
+    pagination: PaginationEntityState,
+  ): ActionState {
+    if (
+      !pagination ||
+      !pagination.pageRequests ||
+      !pagination.pageRequests[pagination.currentPage]
+    ) {
       return {
         busy: false,
         error: false,
-        message: ''
+        message: '',
       };
     } else {
       return pagination.pageRequests[pagination.currentPage];
@@ -76,18 +100,14 @@ export class PaginationMonitor<T = any> {
   private init(
     store: Store<AppState>,
     paginationKey: string,
-    schema: schema.Entity
+    schema: normalizrSchema.Entity,
   ) {
     this.pagination$ = this.createPaginationObservable(
       store,
       schema.key,
-      paginationKey
+      paginationKey,
     );
-    this.currentPage$ = this.createPageObservable(
-      store,
-      this.pagination$,
-      schema
-    );
+    this.currentPage$ = this.createPageObservable(this.pagination$, schema);
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
     this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
   }
@@ -95,49 +115,81 @@ export class PaginationMonitor<T = any> {
   private createPaginationObservable(
     store: Store<AppState>,
     entityKey: string,
-    paginationKey: string
+    paginationKey: string,
   ) {
-    return store.select(selectPaginationState(entityKey, paginationKey))
-      .pipe(distinctUntilChanged(), filter(pag => !!pag));
-  }
-
-  private createPageObservable(
-    store: Store<AppState>,
-    pagination$: Observable<PaginationEntityState>,
-    schema: schema.Entity
-  ) {
-    return combineLatest(
-      pagination$,
-      this.store.select(selectEntities<T>(this.schema.key)),
-    ).pipe(
-      filter(([pagination, entities]) => this.hasPage(pagination)),
-      withLatestFrom(this.store.select(getAPIRequestDataState)),
-      map(([[pagination, entities], allEntities]) => {
-        const page = pagination.ids[pagination.currentPage] || [];
-        return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
-      })
+    return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+      distinctUntilChanged(),
+      filter(pag => !!pag),
     );
   }
 
-  private createErrorObservable(pagination$: Observable<PaginationEntityState>) {
+  private createPageObservable(
+    pagination$: Observable<PaginationEntityState>,
+    schema: normalizrSchema.Entity,
+  ) {
+    const entityObservable$ = this.store
+      .select(selectEntities<T>(this.schema.key))
+      .pipe(distinctUntilChanged());
+    const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
+    return pagination$.pipe(
+      // Improve efficiency
+      observeOn(asapScheduler),
+      filter(pagination => this.hasPage(pagination)),
+      distinctUntilChanged(this.isPageSameIsh),
+      combineLatestOperator(entityObservable$),
+      withLatestFrom(allEntitiesObservable$),
+      map(([[pagination], allEntities]) => {
+        const page = pagination.ids[pagination.currentPage] || [];
+        return page.length
+          ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
+          : [];
+      }),
+      tag('de-norming ' + schema.key),
+      publishReplay(1),
+      refCount(),
+    );
+  }
+
+  private isPageSameIsh(x: PaginationEntityState, y: PaginationEntityState) {
+    const samePage = x.currentPage === y.currentPage;
+    // It's possible that we need to compare the whole page request object but busy will do for now.
+    const samePageBusyState =
+      samePage &&
+      (
+        x.pageRequests[x.currentPage]
+        &&
+        x.pageRequests[x.currentPage].busy
+      ) === (
+        y.pageRequests[y.currentPage]
+        &&
+        y.pageRequests[y.currentPage].busy
+      );
+    const samePageIdList =
+      samePage && x.ids[x.currentPage] === y.ids[y.currentPage];
+    return samePageIdList && samePageBusyState;
+  }
+
+  private createErrorObservable(
+    pagination$: Observable<PaginationEntityState>,
+  ) {
     return pagination$.pipe(
       map(pagination => {
         const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
         return !currentPageRequest.busy && currentPageRequest.error;
-      })
+      }),
     );
   }
 
-  private createFetchingObservable(pagination$: Observable<PaginationEntityState>) {
+  private createFetchingObservable(
+    pagination$: Observable<PaginationEntityState>,
+  ) {
     return pagination$.pipe(
       map(pagination => {
         const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
         return currentPageRequest.busy;
       }),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     );
   }
   // ### Initialization methods end.
-
 }
-

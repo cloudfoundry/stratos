@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { OperatorFunction ,  Observable } from 'rxjs';
+import { OperatorFunction, Observable } from 'rxjs';
 
 import { AppState } from '../../../../store/app-state';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
-import { getRowUniqueId, RowsState } from './list-data-source-types';
+import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
 import { IListConfig } from '../list.component.types';
 
 export interface IListDataSourceConfig<A, T> {
@@ -22,13 +22,13 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * A function which will return a unique id for the given row/entity
    */
-  getRowUniqueId: getRowUniqueId<T>;
+  getRowUniqueId: getRowUniqueId<A>;
   /**
    * The key used to uniquely identify this instance of the data in the pagination section of the store
    */
   paginationKey: string;
   /**
-   * The state of each row/entity
+   * An observable containing each row's state
    */
   rowsState?: Observable<RowsState>;
   /**
@@ -60,4 +60,9 @@ export interface IListDataSourceConfig<A, T> {
   destroy?: () => void;
 
   refresh?: () => void;
+  /**
+   * A function which fetches an observable containing a specific row's state
+   *
+   */
+  getRowState?(row: T): Observable<RowState>;
 }

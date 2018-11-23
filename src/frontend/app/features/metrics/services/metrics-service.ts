@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../store/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
@@ -25,11 +24,10 @@ export class MetricsService {
   haveNoConnectedMetricsEndpoints$: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.endpointsMonitor = this.paginationMonitorFactory.create(
-      'endpoint-list',
+      CloudFoundryService.EndpointList,
       entityFactory(endpointSchemaKey)
     );
 

@@ -1,11 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { Action } from '@ngrx/store';
-
-import { EntityInfo } from '../types/api.types';
+import { entityFactory, routeSchemaKey } from '../helpers/entity-factory';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { entityFactory } from '../helpers/entity-factory';
-import { routeSchemaKey } from '../helpers/entity-factory';
-import { schema } from 'normalizr';
+import { Route } from '../types/route.types';
+
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -28,6 +25,8 @@ export interface NewRoute {
   domain_guid: string;
   space_guid: string;
   host?: string;
+  port?: number;
+  path?: string;
 }
 
 export abstract class BaseRouteAction extends CFStartAction implements ICFAction {
@@ -47,9 +46,14 @@ export class CreateRoute extends BaseRouteAction {
     this.options.url = 'routes';
     this.options.method = 'post';
     this.options.body = {
-      generate_port: true,
       ...route
     };
+    const isTCP = !route.host && route.port;
+    if (isTCP && route.port === -1) {
+      this.options.params = new URLSearchParams();
+      this.options.params.set('generate_port', 'true');
+      delete this.options.body.port;
+    }
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
 }
@@ -58,9 +62,10 @@ export class DeleteRoute extends BaseRouteAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
+    appGuid?: string,
+    public appGuids?: string[],
     public async: boolean = false,
-    public recursive: boolean = true,
-    appGuid?: string
+    public recursive: boolean = true
   ) {
     super(guid, endpointGuid, appGuid);
     this.options = new RequestOptions();
@@ -77,7 +82,6 @@ export class DeleteRoute extends BaseRouteAction {
   ];
   removeEntityOnDelete = true;
 }
-
 export class UnmapRoute extends BaseRouteAction {
   constructor(
     public routeGuid: string,

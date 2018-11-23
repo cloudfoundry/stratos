@@ -1,3 +1,4 @@
+
 ---
 platform: linux
 inputs:
@@ -16,14 +17,28 @@ run:
     - -exc
     - |
       cd stratos
-      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | grep 'alpha' | tail -1)
-      ALPHA_RELEASE_NUMBER=$(echo $LATEST_ALPHA_TAG | grep -o '...$')
-      if [ -z "$ALPHA_RELEASE_NUMBER" ]; then
-        ALPHA_RELEASE_NUMBER='000'
+
+      VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
+      LATEST_TAG=$VERSION-$(git log -1 --format="%h")
+
+      if [ ! -z ${TAG_SUFFIX} ]; then
+        if [ "${TAG_SUFFIX}" != "null" ]; then
+          LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+        fi
       fi
-      let ALPHA_RELEASE_NUMBER++
-      ALPHA_RELEASE_NUMBER=$(printf "%03d" $ALPHA_RELEASE_NUMBER)
-      FILENAME="2.0.0-${ALPHA_RELEASE_NUMBER}"
+
+      ./build/store-git-metadata.sh
+      cat .stratos-git-metadata.json | tr -d '\n' > ../image-tag/ui-build-args
+
       cd ../image-tag
-      echo "2.0.0-alpha-$ALPHA_RELEASE_NUMBER" > v2-alpha-tag
-      tar -cf v${FILENAME}.tar v2-alpha-tag
+      echo "$LATEST_TAG" > v2-alpha-tag
+      echo "$VERSION" > v2-version
+      FILENAME="release-${LATEST_TAG}"
+      cat > build-args << EOF
+      { "stratos_version": "${LATEST_TAG}" }
+      EOF
+
+      cat build-args
+      cat ui-build-args
+
+      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args

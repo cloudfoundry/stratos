@@ -3,6 +3,8 @@ import { ConnectionBackend, Http, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientModule } from '@angular/common/http';
 
 import { CoreModule } from '../../../core/core.module';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
@@ -16,7 +18,7 @@ import {
 import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { ApplicationService } from '../application.service';
-import { ApplicationEnvVarsService } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
@@ -35,7 +37,9 @@ describe('EditApplicationComponent', () => {
         SharedModule,
         createBasicStoreModule(),
         RouterTestingModule,
-        HttpModule,
+        HttpClientModule,
+        HttpClientTestingModule,
+        HttpModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
@@ -46,12 +50,7 @@ describe('EditApplicationComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService,
-        {
-          provide: ConnectionBackend,
-          useClass: MockBackend
-        },
-        Http
+        ApplicationEnvVarsHelper,
       ]
     })
       .compileComponents();

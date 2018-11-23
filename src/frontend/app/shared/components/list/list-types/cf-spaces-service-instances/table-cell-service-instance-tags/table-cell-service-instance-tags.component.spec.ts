@@ -1,8 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { AppChipsComponent } from '../../../../chips/chips.component';
+import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
 
 describe('TableCellServiceInstanceTagsComponent', () => {
   let component: TableCellServiceInstanceTagsComponent<any>;
@@ -11,13 +12,14 @@ describe('TableCellServiceInstanceTagsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellServiceInstanceTagsComponent, AppChipsComponent],
-      imports: [...BaseTestModulesNoShared]
+      imports: [...BaseTestModulesNoShared],
+      providers: [EntityMonitorFactory]
 
     })
       .compileComponents();
   }));
 
-  beforeEach(() => {
+  beforeEach(async(() => {
     fixture = TestBed.createComponent(TableCellServiceInstanceTagsComponent);
     component = fixture.componentInstance;
     component.row = {
@@ -39,12 +41,17 @@ describe('TableCellServiceInstanceTagsComponent', () => {
           }
         }
       },
-      metadata: null
+      metadata: {
+        created_at: '',
+        guid: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
-  });
+  }));
 
-  it('should create', () => {
+  it('should create', async(() => {
     expect(component).toBeTruthy();
-  });
+  }));
 });

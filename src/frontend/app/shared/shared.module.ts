@@ -5,12 +5,21 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import {
+  AddServiceInstanceComponent,
+} from './components/add-service-instance/add-service-instance/add-service-instance.component';
+import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
+import { NoServicePlansComponent } from './components/add-service-instance/no-service-plans/no-service-plans.component';
+import { SelectPlanStepComponent } from './components/add-service-instance/select-plan-step/select-plan-step.component';
+import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
+import {
+  SpecifyDetailsStepComponent,
+} from './components/add-service-instance/specify-details-step/specify-details-step.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -51,6 +60,9 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import {
+  CreateApplicationStep1Component,
+} from './components/create-application/create-application-step1/create-application-step1.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
@@ -118,13 +130,16 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
-import { SpecifyDetailsStepComponent } from './components/add-service-instance/specify-details-step/specify-details-step.component';
-import { NoServicePlansComponent } from './components/add-service-instance/no-service-plans/no-service-plans.component';
-import { AddServiceInstanceComponent } from './components/add-service-instance/add-service-instance/add-service-instance.component';
-import { SelectPlanStepComponent } from './components/add-service-instance/select-plan-step/select-plan-step.component';
-import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
-import { CreateApplicationStep1Component } from './components/create-application/create-application-step1/create-application-step1.component';
-import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
+import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
+import { MomentModule } from 'ngx-moment';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 
 @NgModule({
   imports: [
@@ -133,10 +148,10 @@ import { BindAppsStepComponent } from './components/add-service-instance/bind-ap
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    VirtualScrollModule,
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -225,8 +240,14 @@ import { BindAppsStepComponent } from './components/add-service-instance/bind-ap
     SelectServiceComponent,
     NoServicePlansComponent,
     CreateApplicationStep1Component,
-    BindAppsStepComponent
-
+    BindAppsStepComponent,
+    CfEndpointsMissingComponent,
+    CapitalizeFirstPipe,
+    RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -312,7 +333,14 @@ import { BindAppsStepComponent } from './components/add-service-instance/bind-ap
     SelectPlanStepComponent,
     SelectServiceComponent,
     CreateApplicationStep1Component,
-    BindAppsStepComponent
+    BindAppsStepComponent,
+    CapitalizeFirstPipe,
+    CfEndpointsMissingComponent,
+    RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -330,7 +358,8 @@ import { BindAppsStepComponent } from './components/add-service-instance/bind-ap
     PaginationMonitorFactory,
     CloudFoundryService,
     InternalEventMonitorFactory,
-    ServiceActionHelperService
+    ServiceActionHelperService,
+    MetricsRangeSelectorService
   ]
 })
 export class SharedModule { }

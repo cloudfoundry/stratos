@@ -1,15 +1,15 @@
 # abort script on any command that exits with a non zero value
 set -e -x
 
-cd ${BUILD_DIR}/stratos-ui
+cd ${BUILD_DIR}/stratos
 
 npm install
+npm run customize
 export PATH=$PATH:$PWD/node_modules/.bin
-bower install --allow-root
 npm run build
 
 # remove things we don't need
-find ../stratos-ui -type d ! -path '*/dist*' ! -path '../stratos-ui' -maxdepth 1 |  xargs rm -rf
+find ../stratos -type d ! -path '*/dist*' ! -path '../stratos' -maxdepth 1 |  xargs rm -rf
 # Delete top level files
 rm -f *.*
 # Move dist to top level

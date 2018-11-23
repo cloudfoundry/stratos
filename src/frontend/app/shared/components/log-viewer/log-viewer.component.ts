@@ -22,11 +22,15 @@ import {
   switchMap,
   tap,
   throttle,
-  timeInterval
+  timeInterval,
+  catchError
 } from 'rxjs/operators';
 import { AnsiColors } from './ansi-colors';
 
-
+interface LogStreamMessage {
+  message: string;
+  isError?: boolean;
+}
 
 @Component({
   selector: 'app-log-viewer',
@@ -36,11 +40,11 @@ import { AnsiColors } from './ansi-colors';
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input('filter') filter: Function;
+  @Input() filter: Function;
 
-  @Input('status') status: Observable<number>;
+  @Input() status: Observable<number>;
 
-  @Input('logStream') logStream: Observable<any>;
+  @Input() logStream: Observable<any>;
 
   @ViewChild('container') container: ElementRef;
 
@@ -62,7 +66,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public maxLogLines = 1000;
   public isHighThroughput$: Observable<boolean>;
   public isLocked$: Observable<boolean>;
-  public message: string;
+  public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
 
   public ngOnInit() {
     const contentElement = this.content.nativeElement;
@@ -152,16 +156,21 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           containerElement.scrollTop = contentElement.clientHeight;
         }
       }))
-      .subscribe();
+      .subscribe(undefined, e => {
+        this.statusMessage$.next({
+          message: 'An error occurred connecting to the log stream websocket',
+          isError: true
+        });
+      });
 
     if (this.status) {
       this.statusSub = this.status.subscribe((wsStatus => {
         switch (wsStatus) {
           case 0:
-            this.message = 'Connecting....';
+            this.statusMessage$.next({ message: 'Connecting....' });
             break;
           default:
-            this.message = undefined;
+            this.statusMessage$.next({ message: '' });
             break;
         }
       }));

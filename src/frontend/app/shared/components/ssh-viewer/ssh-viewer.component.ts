@@ -1,5 +1,3 @@
-import 'xterm/dist/addons/fit/fit.js';
-
 import {
   AfterViewChecked,
   ChangeDetectorRef,
@@ -11,7 +9,9 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import * as Terminal from 'xterm/dist/xterm.js';
+import { Terminal } from 'xterm';
+import { fit } from 'xterm/lib/addons/fit/fit';
+
 import { Observable, Subject, Subscription } from 'rxjs';
 
 // Import Xterm
@@ -22,16 +22,16 @@ import { Observable, Subject, Subscription } from 'rxjs';
 })
 export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
 
-  @Input('errorMessage')
+  @Input()
   errorMessage: string;
 
-  @Input('sshStream')
+  @Input()
   sshStream: Observable<any>;
 
-  @Input('sshInput')
+  @Input()
   sshInput: Subject<string>;
 
-  @Input('connectionStatus')
+  @Input()
   public connectionStatus: Observable<number>;
 
   public isConnected = false;
@@ -70,7 +70,7 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
       rows: 40
     });
 
-    this.xterm.open(this.container.nativeElement, false);
+    this.xterm.open(this.container.nativeElement);
     this.xterm.on('data', this.onTermSendData);
     this.xterm.on('resize', this.onTermResize);
 
@@ -79,7 +79,7 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngAfterViewChecked() {
     if (this.xterm) {
-      this.xterm.fit();
+      fit(this.xterm);
     }
   }
 

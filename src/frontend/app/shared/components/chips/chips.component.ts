@@ -2,20 +2,24 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface IAppChip<T = string> {
-  key: T;
-  value: string;
-  clearAction?: (chip: IAppChip) => void;
-  hideClearButton?: boolean;
-  busy?: Observable<boolean>;
-  color?: string;
-}
-export class AppChip<T = string> {
   key?: T;
   value: string;
   clearAction?: (chip: IAppChip<T>) => void;
-  hideClearButton?: boolean;
+  hideClearButton$?: Observable<boolean>;
   busy?: Observable<boolean>;
   color?: string;
+}
+export class AppChip<T = string> implements IAppChip<T> {
+  key?: T;
+  value: string;
+  clearAction?: (chip: IAppChip<T>) => void;
+  hideClearButton$?: Observable<boolean>;
+  busy?: Observable<boolean>;
+  color?: string;
+  url?: {
+    link: string,
+    queryParams: { [paramName: string]: string }
+  };
 }
 
 @Component({
@@ -29,19 +33,19 @@ export class AppChipsComponent implements OnInit {
 
   public atLowerLimit = true;
 
-  @Input('chips')
+  @Input()
   public chips: AppChip[] = [];
 
-  @Input('stacked')
+  @Input()
   stacked = false;
 
-  @Input('orientation')
+  @Input()
   orientation: 'rtl' | 'ltr' = 'ltr';
 
-  @Input('lowerLimit')
+  @Input()
   lowerLimit = 3;
 
-  @Input('displayProperty')
+  @Input()
   displayProperty = 'value';
 
   public limit;

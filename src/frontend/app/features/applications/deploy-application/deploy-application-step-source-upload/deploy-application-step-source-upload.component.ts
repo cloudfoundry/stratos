@@ -1,5 +1,5 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
@@ -8,6 +8,7 @@ import { Store } from '@ngrx/store';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { HttpClient } from '@angular/common/http';
 import { map, filter } from 'rxjs/operators';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application-step-source-upload',
@@ -16,15 +17,14 @@ import { map, filter } from 'rxjs/operators';
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
-  private deployer: DeployApplicationDeployer;
+  public deployer: DeployApplicationDeployer;
 
   public valid$: Observable<boolean>;
 
-  constructor(private store: Store<AppState>,
+  constructor(store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private http: HttpClient,
   ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, http);
+    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
     this.valid$ = this.deployer.fileTransferStatus$.pipe(
       filter(status => !!status),
       map((status: FileTransferStatus) => status.filesSent === status.totalFiles),
@@ -36,7 +36,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
     if (!isNext) {
       this.deployer.close();
     }
-   }
+  }
 
   onEnter = (data: FileScannerInfo) => {
     // Previous step is expected to pass us the file info for the files to be uploaded
@@ -47,7 +47,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   }
 
   // Make the deployer available to the next step
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     return observableOf({ success: true, data: this.deployer });
   }
 

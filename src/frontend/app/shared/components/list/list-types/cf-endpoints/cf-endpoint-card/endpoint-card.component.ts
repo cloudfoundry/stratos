@@ -1,23 +1,23 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-
+import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
-import { TableCellCustom, CardCell } from '../../../list.types';
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
+import { CardCell } from '../../../list.types';
+
 
 @Component({
   selector: 'app-endpoint-card',
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss']
 })
-export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
+export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
   static columns = 2;
 
-  private status$ = new ReplaySubject<CardStatus>();
+  public status$ = new ReplaySubject<CardStatus>();
 
-  @Input('row')
+  @Input()
   row: EndpointModel;
 
   constructor() {
@@ -33,10 +33,15 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
     this.status$.next(this.mapStatus(row));
   }
 
-  private getEndpointUrl(row: EndpointModel) {
+  public getEndpointUrl(row: EndpointModel) {
     return getFullEndpointApiUrl(row);
   }
 
+  public getRouterPath(row: EndpointModel) {
+    if (row.cnsi_type === 'cf') {
+      return ['/cloud-foundry', row.guid];
+    }
+  }
 
   private mapStatus(endpoint: EndpointModel) {
     const connectionStatus = endpoint ? endpoint.connectionStatus : '';
