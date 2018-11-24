@@ -1,0 +1,34 @@
+:host {
+  display: flex;
+}
+
+.app-multiline-title {
+  /* autoprefixer: ignore next */
+  -webkit-box-orient: vertical;    
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  max-height: 2.4em;    
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
+  width: 100;
+  word-break: break-all;
+}
+
+// Firefox does not support multi-line text ellipsis
+// So fade out the end of the last line in the div
+@-moz-document url-prefix() {
+  .app-multiline-title {
+    // Fade
+    &:after {
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), white 70%);
+      bottom: 0;
+      content: "";
+      height: 1.2em;
+      position: absolute;
+      right: 0;
+      text-align: right;
+      width: 48px;
+    }
+  }
+}
