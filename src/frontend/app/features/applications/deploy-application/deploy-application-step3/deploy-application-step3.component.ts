@@ -1,3 +1,4 @@
+import { BackgroundTaskService } from './../../../../core/background-task.service';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -8,7 +9,7 @@ import {
   of as observableOf,
   Subscription,
 } from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+import { filter, first, map, startWith, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
@@ -50,6 +51,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
+    private bgTaskService: BackgroundTaskService
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
@@ -96,9 +98,31 @@ export class DeployApplicationStep3Component implements OnDestroy {
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
     this.destroyDeployer();
-    if (this.deployer) {
+    if (this.deployer && !this.deployer.deploying) {
       this.deployer.close();
+    } else {
+      this.setupCompetionNofication();
     }
+  }
+
+  private setupCompetionNofication() {
+    this.deployer.status$.pipe(
+      tap(status => {
+        if (!status.deploying) {
+          if (status.error) {
+            this.snackBar.open(status.errorMsg, 'Dismiss');
+          } else {
+            const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
+            ref.onAction().subscribe(() => { this.goToAppSummary(); });
+          }
+        }
+      }),
+      map((status: any) => status.deploying),
+      filter(deploying => !deploying),
+      first()
+    ).subscribe(() => {
+      this.deployer.close();
+    });
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
@@ -122,14 +146,18 @@ export class DeployApplicationStep3Component implements OnDestroy {
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
+    this.goToAppSummary();
+    return observableOf({ success: true });
+  }
+
+  goToAppSummary() {
     // Take user to applications
     const { cfGuid } = this.deployer;
-    this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     if (this.appGuid) {
       this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
       // Ensure the application package_state is correct
       this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
+      this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }
-    return observableOf({ success: true });
   }
 }
