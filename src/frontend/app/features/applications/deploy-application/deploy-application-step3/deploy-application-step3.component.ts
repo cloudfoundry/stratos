@@ -49,8 +49,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    private bgTaskService: BackgroundTaskService
+    public cfOrgSpaceService: CfOrgSpaceDataService
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
