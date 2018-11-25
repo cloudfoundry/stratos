@@ -15,8 +15,6 @@ export class TableCellEndpointNameComponent<T> extends TableCellCustom<T> {
         return '/cloud-foundry/' + row.guid;
       case 'metrics':
         return '/endpoints/metrics/' + row.guid;
-      case 'k8s':
-        return '/kubernetes/' + row.guid;
       default:
         return '';
     }

@@ -1,6 +1,5 @@
 import { Validators } from '@angular/forms';
 
-import { StratosEndpointMetadata } from '../../core/extension/extension-service';
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 
@@ -54,45 +53,10 @@ const endpointAuthTypes = [
     types: new Array<EndpointType>('cf', 'metrics')
   },
   {
-    name: 'CAASP (OIDC)',
-    value: 'kubeconfig',
-    form: {
-      kubeconfig: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
     name: 'Single Sign-On (SSO)',
     value: 'sso',
     form: {},
     types: new Array<EndpointType>('cf')
-  },
-  {
-    name: 'Azure AKS',
-    value: 'kubeconfig-az',
-    form: {
-      kubeconfig: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
-    name: 'AWS IAM (EKS)',
-    value: 'aws-iam',
-    form: {
-      cluster: ['', Validators.required],
-      access_key: ['', Validators.required],
-      secret_key: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
-    name: 'Kubernetes Cert Auth',
-    value: 'kube-cert-auth',
-    form: {
-      cert: ['', Validators.required],
-      certKey: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
   },
 ];
 
@@ -107,14 +71,11 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
       epType.authTypes.forEach(authType => {
         const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
         if (endpointAuthType) {
-          // endpointAuthType.types.push(epType.type);
-          endpointAuthType.types.push(endpointAuthType.value); // TODO: RC Check this change
+          endpointAuthType.types.push(endpointAuthType.value as EndpointType);
         }
       });
     }
   });
-
-  // TODO: Sort alphabetically
 
   endpointTypes.forEach(ept => {
     endpointTypesMap[ept.value] = ept;
