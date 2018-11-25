@@ -1,4 +1,3 @@
-import { BackgroundTaskService } from './../../../../core/background-task.service';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
