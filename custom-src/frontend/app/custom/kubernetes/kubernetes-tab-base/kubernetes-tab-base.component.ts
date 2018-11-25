@@ -14,7 +14,7 @@ import { KubernetesService } from '../services/kubernetes.service';
       provide: BaseKubeGuid,
       useFactory: (activatedRoute: ActivatedRoute) => {
         return {
-          guid: activatedRoute.snapshot.params.kubeId
+          guid: activatedRoute.snapshot.params.endpointId
         };
       },
       deps: [

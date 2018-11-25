@@ -1,23 +1,18 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, share, tap, first } from 'rxjs/operators';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, share } from 'rxjs/operators';
 
+import { kubernetesServicesSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
-import {
-  entityFactory,
-  kubernetesAppsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-} from '../../../store/helpers/entity-factory';
+import { entityFactory, kubernetesAppsSchemaKey } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { KubernetesApp, KubernetesDeployment, KubernetesStatefuleSet, KubernetesPod, KubeService } from '../store/kube.types';
-import { GeKubernetesDeployments, GetKubernetesApps, GetKubernetesStatefulSets, GetKubernetesServices } from '../store/kubernetes.actions';
+import { KubernetesApp, KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
+import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
-import { kubernetesServicesSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 
 @Injectable()
 export class HelmReleaseService {
@@ -25,8 +20,8 @@ export class HelmReleaseService {
   helmReleaseName: string;
   helmRelease$: Observable<KubernetesApp>;
   deployments$: Observable<KubernetesDeployment[]>;
-  statefulSets$: Observable<KubernetesStatefuleSet[]>;
-  services$:  Observable<KubeService[]>;
+  statefulSets$: Observable<KubernetesStatefulSet[]>;
+  services$: Observable<KubeService[]>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,

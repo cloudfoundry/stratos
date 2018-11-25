@@ -1,71 +1,38 @@
 import { Injectable } from '@angular/core';
-import {
-  Headers,
-  Http,
-  Request,
-  RequestOptions,
-  URLSearchParams,
-} from '@angular/http';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store, Action } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
-import { map, mergeMap, withLatestFrom, catchError } from 'rxjs/operators';
+import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
+import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
+import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
 import {
-  EntityInlineParentAction,
-  isEntityInlineParentAction,
-} from '../helpers/entity-relations/entity-relations.types';
-import {
-  CfAPIFlattener,
-  flattenPagination,
-} from '../helpers/paginated-request-helpers';
-import { getRequestTypeFromMethod, startApiRequest, getFailApiRequestActions } from '../reducers/api-request-reducer/request-helpers';
+  getFailApiRequestActions,
+  getRequestTypeFromMethod,
+  startApiRequest,
+} from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  resultPerPageParam,
-  resultPerPageParamDefault,
-} from '../reducers/pagination-reducer/pagination-reducer.types';
+import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { InternalEventSeverity } from '../types/internal-events.types';
-import {
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
-} from '../types/pagination.types';
-import {
-  APISuccessOrFailedAction,
-  ICFAction,
-  IRequestAction,
-  RequestEntityLocation,
-} from '../types/request.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
+import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { environment } from './../../../environments/environment';
-import {
-  ApiActionTypes,
-  ValidateEntitiesStart,
-} from './../actions/request.actions';
+import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import {
-  APIResource,
-  instanceOfAPIResource,
-  NormalizedResponse,
-} from './../types/api.types';
-import {
-  StartRequestAction,
-  WrapperRequestActionFailed,
-} from './../types/request.types';
-import {
-  RecursiveDelete,
-  RecursiveDeleteComplete,
-  RecursiveDeleteFailed,
-} from './recursive-entity-delete.effect';
+import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
+import { WrapperRequestActionFailed } from './../types/request.types';
+import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-const endpointHeader = 'x-cap-cnsi-list';
+export const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -106,7 +73,7 @@ export class APIEffect {
       mergeMap(([action, state]) => {
         return this.doApiRequest(action, state);
       }),
-  );
+    );
 
   private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
@@ -230,11 +197,18 @@ export class APIEffect {
               ),
             );
           }
+          const { error, errorCode, guid, url, errorResponse } = errorsCheck[0];
           this.store.dispatch(
             new WrapperRequestActionFailed(
               errorMessage,
-              { ...actionClone, endpointGuid: errorsCheck[0].guid },
-              requestType,
+              { ...actionClone, endpointGuid: guid },
+              requestType, {
+                endpointIds: [guid],
+                url,
+                eventCode: errorCode ? errorCode + '' : '500',
+                message: errorResponse ? errorResponse.description : 'Jetstream CF API request error',
+                error
+              }
             ),
           );
           return [];
@@ -260,27 +234,20 @@ export class APIEffect {
       }),
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
-        const endpoints: string[] = endpointString.split(',');
-        endpoints.forEach(endpoint =>
-          this.store.dispatch(
-            new SendEventAction(endpointSchemaKey, endpoint, {
-              eventCode: error.status || '500',
-              severity: InternalEventSeverity.ERROR,
-              message: 'Jetstream API request error',
-              metadata: {
-                error,
-                url: error.url || apiAction.options.url,
-              },
-            }),
-          ),
-        );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        const endpointIds: string[] = endpointString.split(',');
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+          endpointIds,
+          url: error.url || apiAction.options.url,
+          eventCode: error.status ? error.status + '' : '500',
+          message: 'Jetstream API request error',
+          error
+        });
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
             entityFactory(apiAction.entityKey),
-          ), );
+          ));
         }
         return errorActions;
       }),
@@ -414,7 +381,7 @@ export class APIEffect {
           data[guid] !== null &&
           errorCheck.findIndex(error => error.guid === guid && !error.error) >=
           0,
-    )
+      )
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {

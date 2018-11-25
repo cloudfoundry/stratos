@@ -27,7 +27,7 @@ import { PaginationEntityState, PaginationState } from '../../types/pagination.t
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
-import { clearEndpointEntities, paginationClearType } from './pagination-reducer-clear-pagination-type';
+import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
@@ -139,7 +139,7 @@ function paginate(action, state, updatePagination) {
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearEntityType = action.entityKey || 'application';
-    return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
+    return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 
   if (action.type === CLEAR_PAGINATION_OF_ENTITY) {

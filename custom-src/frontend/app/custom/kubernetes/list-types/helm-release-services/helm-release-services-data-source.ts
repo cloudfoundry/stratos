@@ -29,7 +29,8 @@ export class HelmReleaseServicesDataSource extends ListDataSource<KubeService, a
       transformEntity: map((pods: KubeService[]) =>
         pods.filter(p => p.metadata.labels && p.metadata.labels.release === helmReleaseService.helmReleaseName)),
       isLocal: true,
-      listConfig
+      listConfig,
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
     });
   }
 

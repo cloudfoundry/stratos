@@ -35,7 +35,7 @@ import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kuberne
       provide: BaseKubeGuid,
       useFactory: (activatedRoute: ActivatedRoute) => {
         return {
-          guid: activatedRoute.snapshot.params.kubeId
+          guid: activatedRoute.snapshot.params.endpointId
         };
       },
       deps: [
@@ -68,8 +68,9 @@ export class PodMetricsComponent {
     this.podName = activatedRoute.snapshot.params['podName'];
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
-    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
-    const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Container ${result.metric.container_name}`);
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `${result.metric.container_name}`);
+    const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
+    (result => !!result.metric.cpu ? `${result.metric.container_name}:${result.metric.cpu}` : `${result.metric.container_name}`);
     const networkChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
       (result => `Network Interface: ${result.metric.interface}`);
     this.instanceMetricConfigs = [
@@ -94,7 +95,7 @@ export class PodMetricsComponent {
         'CPU Usage',
         null,
         (series: ChartSeries[]) => {
-          return series.filter(s => !s.name.endsWith('POD'));
+          return series.filter(s => s.name.indexOf('POD') === -1);
         },
         (tick: string) => {
           const duration = moment.duration(parseFloat(tick) * 1000);

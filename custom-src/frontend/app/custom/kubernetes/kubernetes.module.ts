@@ -156,7 +156,5 @@ import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-co
     NodePodCountComponent,
   ]
 })
-export class KubernetesModule {
-
-}
+export class KubernetesModule { }
 
