@@ -33,8 +33,6 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private listActionRedeploy: IListAction<APIResource<GitCommit>> = {
     action: (commitEntity) => {
-      console.log(commitEntity);
-      console.log(this.scm);
       // set CF data
       this.store.dispatch(
         new StoreCFSettings({
