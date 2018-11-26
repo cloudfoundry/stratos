@@ -3,7 +3,8 @@
 }
 
 .app-multiline-title {
-  // autoprefixer: ignore next
+  // Have to use the * comment format otherwise it does not work
+  /* autoprefixer: ignore next */
   -webkit-box-orient: vertical;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -17,7 +18,8 @@
 
 // Firefox does not support multi-line text ellipsis
 // So fade out the end of the last line in the div
-@-moz-document url-prefix() {
+// Firefox only
+@media screen and (min--moz-device-pixel-ratio:0) {
   .app-multiline-title {
     // Fade
     &::after {

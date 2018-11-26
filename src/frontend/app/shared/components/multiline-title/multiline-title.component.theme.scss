@@ -1,7 +1,8 @@
 @import '~@angular/material/theming';
 
-@-moz-document url-prefix() {
-  @mixin app-multiline-title-theme($theme, $app-theme) {
+@mixin app-multiline-title-theme($theme, $app-theme) {
+  // Firefox only
+  @media screen and (min--moz-device-pixel-ratio:0) {
     $primary: map-get($theme, primary);
     $background: mat-color($primary, 500);
 
