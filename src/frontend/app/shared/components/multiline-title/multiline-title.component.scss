@@ -3,11 +3,11 @@
 }
 
 .app-multiline-title {
-  /* autoprefixer: ignore next */
-  -webkit-box-orient: vertical;    
-  -webkit-line-clamp: 2;
+  // autoprefixer: ignore next
+  -webkit-box-orient: vertical;
   display: -webkit-box;
-  max-height: 2.4em;    
+  -webkit-line-clamp: 2;
+  max-height: 2.4em;
   overflow: hidden;
   position: relative;
   text-overflow: ellipsis;
@@ -20,10 +20,10 @@
 @-moz-document url-prefix() {
   .app-multiline-title {
     // Fade
-    &:after {
+    &::after {
       background: linear-gradient(to right, rgba(255, 255, 255, 0), white 70%);
       bottom: 0;
-      content: "";
+      content: '';
       height: 1.2em;
       position: absolute;
       right: 0;

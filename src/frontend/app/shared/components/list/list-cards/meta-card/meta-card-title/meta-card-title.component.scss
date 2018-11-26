@@ -3,11 +3,11 @@
     flex: 1;
     font-weight: 500;
     margin-bottom: 16px;
-    width: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
     &.meta-card__title-nomargin {
       margin-bottom: 0;
     }
+    width: 100%;
   }
 }

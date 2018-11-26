@@ -1,0 +1,15 @@
+@import '~@angular/material/theming';
+
+@-moz-document url-prefix() {
+  @mixin app-multiline-title-theme($theme, $app-theme) {
+    $primary: map-get($theme, primary);
+    $background: mat-color($primary, 500);
+
+    .app-multiline-title {
+      // Fade
+      &::after {
+        background: linear-gradient(to right, rgba(255, 255, 255, 0), $background 70%);
+      }
+    }
+  }
+}
