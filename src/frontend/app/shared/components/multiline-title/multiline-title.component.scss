@@ -21,7 +21,6 @@
   .app-multiline-title {
     // Fade
     &::after {
-      background: linear-gradient(to right, rgba(255, 255, 255, 0), white 70%);
       bottom: 0;
       content: '';
       height: 1.2em;
