@@ -1,13 +1,3 @@
-import {
-  kubernetesSchemaKey,
-  kubernetesNodesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesNamespacesSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
-  kubernetesAppsSchemaKey
-} from './../../helpers/entity-factory';
 import { EndpointAction } from '../../actions/endpoint.actions';
 import {
   applicationSchemaKey,
@@ -49,22 +39,6 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
         serviceSchemaKey,
         cfUserSchemaKey,
         serviceInstancesSchemaKey,
-      ],
-      defaultPaginationEntityState
-    );
-  }
-  if (action.endpointType === 'k8s') {
-    return paginationClearAllTypes(
-      state,
-      [
-        kubernetesSchemaKey,
-        kubernetesNodesSchemaKey,
-        kubernetesPodsSchemaKey,
-        kubernetesNamespacesSchemaKey,
-        kubernetesServicesSchemaKey,
-        kubernetesStatefulSetsSchemaKey,
-        kubernetesDeploymentsSchemaKey,
-        kubernetesAppsSchemaKey,
       ],
       defaultPaginationEntityState
     );

@@ -30,6 +30,7 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { isJetStreamError } from '../../core/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -226,8 +227,8 @@ export class APIEffect {
       }),
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
-        const endpoints: string[] = endpointString.split(',');
-        endpoints.forEach(endpoint =>
+        const endpointIds: string[] = endpointString.split(',');
+        endpointIds.forEach(endpoint =>
           this.store.dispatch(
             new SendEventAction(endpointSchemaKey, endpoint, {
               eventCode: error.status ? error.status + '' : '500',
