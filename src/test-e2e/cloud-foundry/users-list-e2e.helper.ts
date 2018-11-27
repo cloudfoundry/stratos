@@ -32,7 +32,7 @@ export function setUpTestOrgSpaceE2eTest(
       spaceName,
       userName,
       new CFHelpers(e2eSetup),
-      dropBillingManager));
+      dropBillingManager), 25000, 'Did not complete "setUpTestOrgSpaceUserRoles" within 25 seconds');
   });
 }
 
@@ -121,7 +121,7 @@ export function setupCfUserTableTests(cfLevel = true, navToUserTableFn: (cfGuid,
       return usersTable.expandSpaceChips(userRowIndex);
     });
 
-    it('Check org user pill is present and cannot be remove', () => {
+    it('Check org user pill is present and cannot be removed', () => {
       expect(orgUserChip.isPresent()).toBeTruthy();
       orgUserChip.check(false);
     });
