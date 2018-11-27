@@ -3,7 +3,6 @@ import { Action } from '@ngrx/store';
 export class BaseUserFavoritesAction implements Action {
   constructor(
     actionType: string,
-    public favoriteType?: string
   ) {
     this.type = actionType;
   }

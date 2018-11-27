@@ -18,6 +18,9 @@ import {
 } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { SaveUserFavoriteAction } from '../../../../../../store/actions/user-favourites-actions/save-user-favorite-action';
+import { UserFavoritesEffect, userFavoritesPaginationKey } from '../../../../../../store/effects/user-favoutites-effect';
+import { isFavorite } from '../../../../../../store/selectors/favorite.selectors';
 
 @Component({
   selector: 'app-card-app',
@@ -34,11 +37,23 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   multipleConnectedEndpoints$: Observable<boolean>;
   entityConfig: ComponentEntityMonitorConfig;
 
+  public isFavorite$: Observable<boolean>;
+
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService
   ) {
     super();
+  }
+
+
+  public favorite() {
+    this.store.dispatch(new SaveUserFavoriteAction(
+      this.row.entity.guid,
+      this.row.entity.cfGuid,
+      applicationSchemaKey,
+      'cf'
+    ));
   }
 
   ngOnInit() {
@@ -47,6 +62,22 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
     this.endpointName$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.row.entity.cfGuid)).pipe(
       map(endpoint => endpoint ? endpoint.name : '')
+    );
+
+    this.isFavorite$ = this.store.select(
+      isFavorite(
+        {
+          entityId: this.row.entity.guid,
+          endpointId: this.row.entity.cfGuid,
+          /*
+            entityType should correspond to a type in the requestData part of the store.
+          */
+          entityType: applicationSchemaKey,
+          endpointType: 'cf',
+        },
+        applicationSchemaKey,
+        userFavoritesPaginationKey
+      )
     );
 
     const initState = this.appStateService.get(this.row.entity, null);
