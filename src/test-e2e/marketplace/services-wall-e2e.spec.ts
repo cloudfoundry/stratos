@@ -1,8 +1,10 @@
-import { browser, protractor } from 'protractor';
+import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -11,15 +13,28 @@ describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
   const secretsHelper = new SecretsHelpers();
   let servicesHelperE2E: ServicesHelperE2E;
+  let e2eSetup;
+
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
+  });
 
-    // Ensure setup executes before creating the instance, or adding to exec stack
-    protractor.promise.controlFlow().execute(() => {
+  beforeEach(() => {
+    servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
+    servicesWallPage.waitForPage();
+    servicesWallPage.serviceInstancesList.header.clearSearchText();
+    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 0);
+  });
+
+  describe('', () => {
+    const timeout = 60000;
+    extendE2ETestTime(timeout);
+
+    it('- should create service instance all tests depend on', () => {
       // Create service instance
       const createServiceInstance = new CreateServiceInstance();
       servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
@@ -29,11 +44,6 @@ describe('Service Instances Wall', () => {
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
 
-  });
-
-  beforeEach(() => {
-    servicesWallPage.navigateTo();
-    servicesWallPage.waitForPage();
   });
 
   it('- should reach service instances wall page', () => {
@@ -53,6 +63,8 @@ describe('Service Instances Wall', () => {
   it('- should have filters', () => {
     servicesWallPage.serviceInstancesList.header.getFilterOptions(0).then(options => {
       expect(options.length).toBeGreaterThan(0);
+      // Select the 'All' option to ensure we close the filter dropdown
+      options[0].click();
     });
     // Commenting out tests due to Issue #2720
     // servicesWallPage.serviceInstancesList.header.getPlaceholderText(0).then(text => {
