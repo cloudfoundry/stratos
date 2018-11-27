@@ -22,8 +22,8 @@ export interface APIResourceMetadata {
   url: string;
 }
 
-export interface NormalizedResponse {
-  entities: IRequestEntityTypeState<any>;
+export interface NormalizedResponse<T = any> {
+  entities: IRequestEntityTypeState<{ [entityKey: string]: T }>;
   result: string[];
 }
 

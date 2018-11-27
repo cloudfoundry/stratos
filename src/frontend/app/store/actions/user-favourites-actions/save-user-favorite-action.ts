@@ -5,8 +5,7 @@ export class SaveUserFavoriteAction extends BaseUserFavoritesAction {
   constructor(type: string) {
     super(
       SaveUserFavoriteAction.ACTION_TYPE,
-      type,
-      'put'
+      type
     );
   }
 }

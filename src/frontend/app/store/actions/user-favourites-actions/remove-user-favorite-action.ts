@@ -5,8 +5,7 @@ export class RemoveUserFavoriteAction extends BaseUserFavoritesAction {
   constructor(type: string) {
     super(
       RemoveUserFavoriteAction.ACTION_TYPE,
-      type,
-      'delete'
+      type
     );
   }
 }

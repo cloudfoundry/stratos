@@ -29,6 +29,7 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { UsersEffects } from './effects/users.effects';
 import { AppReducersModule } from './reducers.module';
+import { UserFavoritesEffect } from './effects/user-favoutites-effect';
 
 @NgModule({
   imports: [
@@ -62,6 +63,7 @@ import { AppReducersModule } from './reducers.module';
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
+      UserFavoritesEffect
     ])
   ]
 })

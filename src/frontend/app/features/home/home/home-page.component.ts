@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../store/app-state';
+import { GetUserFavoritesAction } from '../../../store/actions/user-favourites-actions/get-user-favorites-action';
 
 @Component({
   selector: 'app-home-page',
@@ -7,6 +10,7 @@ import { Component } from '@angular/core';
 })
 export class HomePageComponent {
 
-  constructor() {
+  constructor(store: Store<AppState>) {
+    store.dispatch(new GetUserFavoritesAction());
   }
 }
