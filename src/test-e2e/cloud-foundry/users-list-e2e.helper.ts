@@ -32,7 +32,7 @@ export function setUpTestOrgSpaceE2eTest(
       spaceName,
       userName,
       new CFHelpers(e2eSetup),
-      dropBillingManager));
+      dropBillingManager), 25000, 'Did not complete "setUpTestOrgSpaceUserRoles" within 25 seconds');
   });
 }
 
