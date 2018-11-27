@@ -1,11 +1,11 @@
+import { CfUserService } from './../../../../shared/data-services/cf-user.service';
 
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith, switchMap } from 'rxjs/operators';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -32,6 +32,7 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../core/extension/extension-service';
+import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -110,9 +111,28 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Listen for the response to the env vars API call - if it errors then we hide the variables tab
+    // This is simpler than the code to check permissions since we make the env vars request anyway
+    const appDoesNotHaveEnvVars$ = this.applicationService.getApplicationEnvVarsMonitor().entityRequest$.pipe(
+      filter(resp => resp.error || resp.response),
+      first(),
+      map(resp => resp.error)
+    );
+
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'instances', label: 'Instances' },
+      { link: 'routes', label: 'Routes' },
+      { link: 'log-stream', label: 'Log Stream' },
+      { link: 'services', label: 'Services' },
+      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events' }
+    ];
+
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
   }
+
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
@@ -125,15 +145,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   ));
 
-  tabLinks: ISubHeaderTabs[] = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'instances', label: 'Instances' },
-    { link: 'routes', label: 'Routes' },
-    { link: 'log-stream', label: 'Log Stream' },
-    { link: 'services', label: 'Services' },
-    { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
-  ];
+  tabLinks: ISubHeaderTabs[];
 
   private getBreadcrumbs(
     application: IApp,
