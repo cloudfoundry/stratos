@@ -56,9 +56,8 @@ export class ApplicationWallComponent implements OnDestroy {
     );
     this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
 
-    this.haveConnectedCf$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.connectionStatus === 'connected')),
-      map(connected => connected.reduce((a, v) => a || v, false))
+    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
+      map(endpoints => !!endpoints && endpoints.length > 0)
     );
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
