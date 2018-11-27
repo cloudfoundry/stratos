@@ -121,7 +121,7 @@ export function setupCfUserTableTests(cfLevel = true, navToUserTableFn: (cfGuid,
       return usersTable.expandSpaceChips(userRowIndex);
     });
 
-    it('Check org user pill is present and cannot be remove', () => {
+    it('Check org user pill is present and cannot be removed', () => {
       expect(orgUserChip.isPresent()).toBeTruthy();
       orgUserChip.check(false);
     });
