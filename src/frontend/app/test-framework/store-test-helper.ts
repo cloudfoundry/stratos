@@ -282,6 +282,7 @@ export function getInitialTestStoreState(): AppState {
       },
       stack: {},
       space: {},
+      userFavorites: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
