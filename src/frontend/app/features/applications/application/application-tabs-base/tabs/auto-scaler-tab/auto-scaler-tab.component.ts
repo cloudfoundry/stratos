@@ -34,6 +34,10 @@ export class AutoScalerTabComponent implements OnInit {
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
 
+  scalingRuleColumns: string[] = ['metric', 'condition', 'action']
+  specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max']
+  recurringScheduleColumns: string[] = ['effect', 'repeat', 'from', 'to', 'init', 'min', 'max']
+
   constructor(
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory,

@@ -1,6 +1,5 @@
 .app-auto-scaler {
   display: flex;
-  height: 100%;
   position: relative;
   width: 100%;
 }
@@ -13,5 +12,32 @@
     app-metadata-item:first-child {
       margin-top: 0;
     }
+  }
+}
+
+app-tile-grid {
+  width: 100%
+}
+
+table {
+  width: 100%
+}
+
+.app-auto-scaler-policy-left {
+  flex: 0 0 40%;
+}
+
+.app-auto-scaler-tile-1of2 {
+  flex: 0 0 50%;
+}
+
+.app-auto-scaler-tile-1of6 {
+  flex: 0 0 16.78%;
+}
+
+.app-auto-scaler-limit {
+  display: inherit;
+  mat-card {
+    width: 50%
   }
 }
