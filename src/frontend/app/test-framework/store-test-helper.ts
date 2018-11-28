@@ -3881,6 +3881,7 @@ export function getInitialTestStoreState(): AppState {
       space_quota_definition: {},
     },
     requestData: {
+      userFavorites: {},
       servicePlanVisibility: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
