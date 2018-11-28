@@ -633,6 +633,7 @@ export function getInitialTestStoreState(): AppState {
       featureFlag: {},
       securityRule: {},
       buildpack: {},
+      userFavorites: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,

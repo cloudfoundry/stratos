@@ -4,7 +4,6 @@ import { PaginationEntityTypeState } from '../types/pagination.types';
 import { PaginationEntityState, PaginationState } from './../types/pagination.types';
 
 export function isIdInPagination(entityId: string, entityKey: string, paginationKey: string) {
-  console.log(entityKey, paginationKey);
   return compose(
     checkPagesForId(entityId),
     selectPaginationState(entityKey, paginationKey)
@@ -12,11 +11,12 @@ export function isIdInPagination(entityId: string, entityKey: string, pagination
 }
 
 export function selectPaginationState(entityKey: string, paginationKey: string) {
-  return compose(
+  const state = compose(
     getPaginationKeyState(paginationKey),
     getPaginationEntityState(entityKey),
     getPaginationState
   );
+  return state;
 }
 
 export function checkPagesForId(entityId: string) {
@@ -24,7 +24,7 @@ export function checkPagesForId(entityId: string) {
     if (!paginationState) {
       return false;
     }
-    return Object.keys(paginationState.ids).reduce((flatPages, pageId) => {
+    return !!Object.keys(paginationState.ids).reduce((flatPages, pageId) => {
       const page = paginationState.ids[pageId];
       if (page && Array.isArray(page)) {
         return [
@@ -38,7 +38,7 @@ export function checkPagesForId(entityId: string) {
   };
 }
 
-export function getPaginationKeyState<t = any>(paginationKey: string) {
+export function getPaginationKeyState(paginationKey: string) {
   return (state: PaginationEntityTypeState) => {
     return state[paginationKey];
   };

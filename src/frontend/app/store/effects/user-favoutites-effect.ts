@@ -55,7 +55,7 @@ export class UserFavoritesEffect {
         [userFavoritesSchemaKey]: {
           ...favorites.reduce((favObj, favoriteFromArray) => ({
             ...favObj,
-            [favoriteFromArray.guid]: favoriteFromArray
+            [UserFavoritesEffect.buildFavoriteStoreEntityGuid(favoriteFromArray)]: favoriteFromArray
           }), {}),
           [storeGuid]: favorite
         }
@@ -63,7 +63,8 @@ export class UserFavoritesEffect {
 
       const mappedData = {
         entities,
-        result: Object.keys(entities[userFavoritesSchemaKey])
+        result: Object.keys(entities[userFavoritesSchemaKey]),
+        totalPages: 1
       } as NormalizedResponse<IUserFavorite>;
 
       const pagintionAction = {
@@ -94,15 +95,11 @@ export class UserFavoritesEffect {
               endpointId: 'awFKEYNjCbviKGH4Q1bFdgvCCq0',
               entityType: 'application',
               endpointType: 'cf'
-            },
-            '1234': {
-              guid: '123331',
-              entityId: 'awFKEYNjCbviKGH4Q1bFdgvCCq0',
-              endpointType: 'cf'
             }
           }
         },
-        result: ['1', '1234']
+        result: ['1', '1234'],
+        totalPages: 1
       } as NormalizedResponse<IUserFavorite>;
       return [
         new WrapperRequestActionSuccess(mappedData, apiAction),
