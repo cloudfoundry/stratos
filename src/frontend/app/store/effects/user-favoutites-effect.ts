@@ -89,7 +89,7 @@ export class UserFavoritesEffect {
       const mappedData = {
         entities: {
           [userFavoritesSchemaKey]: {
-            '1': {
+            'cf-awFKEYNjCbviKGH4Q1bFdgvCCq0-application-5f0c3b47-2d83-46ba-b70e-bbf7931a8d6e': {
               guid: '1',
               entityId: '5f0c3b47-2d83-46ba-b70e-bbf7931a8d6e',
               endpointId: 'awFKEYNjCbviKGH4Q1bFdgvCCq0',
@@ -98,7 +98,7 @@ export class UserFavoritesEffect {
             }
           }
         },
-        result: ['1', '1234'],
+        result: ['cf-awFKEYNjCbviKGH4Q1bFdgvCCq0-application-5f0c3b47-2d83-46ba-b70e-bbf7931a8d6e'],
         totalPages: 1
       } as NormalizedResponse<IUserFavorite>;
       return [

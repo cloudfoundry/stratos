@@ -3,6 +3,8 @@ import { IUserFavorite } from './../store/types/user-favorites.types';
 import { AppState } from '../store/app-state';
 import { Store } from '@ngrx/store';
 import { entityFactory } from '../store/helpers/entity-factory';
+import { EntityService } from './entity-service';
+import { IRequestAction } from '../store/types/request.types';
 export class UserFavoriteHydrator {
   constructor(private store: Store<AppState>) { }
 
@@ -19,9 +21,14 @@ export class UserFavoriteHydrator {
     };
   }
 
-  public hydrate(favorite: IUserFavorite) {
+  public hydrate(favorite: IUserFavorite, action: IRequestAction) {
     const { type, id } = this.getTypeAndID(favorite);
     const entityMonitor = new EntityMonitor(this.store, id, type, entityFactory(type));
-    return entityMonitor.entity$;
+    const entityService = new EntityService(
+      this.store,
+      entityMonitor,
+      action
+    );
+    return entityService.entityObs$;
   }
 }

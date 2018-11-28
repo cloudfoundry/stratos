@@ -8,6 +8,7 @@ import { userFavoritesPaginationKey } from '../../../store/effects/user-favoutit
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
 import { IUserFavorite } from '../../../store/types/user-favorites.types';
 import { combineLatest } from 'rxjs';
+import { createGetApplicationAction } from '../../applications/application.service';
 
 @Component({
   selector: 'app-home-page',
@@ -25,7 +26,15 @@ export class HomePageComponent implements OnInit {
       entityFactory(userFavoritesSchemaKey)
     ).currentPage$.pipe(
       mergeMap(list => {
-        return combineLatest(list.map(fav => hydrator.hydrate(fav).pipe(map(e => e ? e.entity.name : null))));
+        return combineLatest(
+          list.map(fav => hydrator.hydrate(
+            fav,
+            createGetApplicationAction(fav.entityId, fav.endpointId)
+          ).pipe(
+            map(e => e.entity),
+            map(entity => entity ? entity.entity.name : null)
+          ))
+        );
       })
     );
   }
