@@ -15,6 +15,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { GetUserFavoritesAction } from '../../../store/actions/user-favourites-actions/get-user-favorites-action';
 
 
 @Component({
@@ -59,6 +60,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
   ngOnInit() {
     this.dispatchRelations();
+    this.store.dispatch(new GetUserFavoritesAction());
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(
