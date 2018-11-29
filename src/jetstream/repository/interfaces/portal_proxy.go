@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 
@@ -56,4 +57,7 @@ type PortalProxy interface {
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
+
+	// Database Connection
+	GetDatabaseConnection() *sql.DB
 }
