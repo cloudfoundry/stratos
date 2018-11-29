@@ -53,17 +53,17 @@
           </mat-card-header>
           <mat-card-content>
             <div class="app-metadata">
-              <div class="app-metadata__two-cols">
-                <app-metadata-item label="memoryused">58 MB</app-metadata-item>
+              <div class="app-metadata__two-cols" *ngIf="appAutoscalerAppMetricMemoryused$ | async as appAutoscalerAppMetricMemoryused">
+                <app-metadata-item label="memoryused">{{appAutoscalerAppMetricMemoryused[0].entity.value}} MB</app-metadata-item>
               </div>
-              <div class="app-metadata__two-cols">
-                <app-metadata-item label="memoryutil">45 %</app-metadata-item>
+              <div class="app-metadata__two-cols" *ngIf="appAutoscalerAppMetricMemoryutil$ | async as appAutoscalerAppMetricMemoryutil">
+                <app-metadata-item label="memoryutil">{{appAutoscalerAppMetricMemoryutil[0].entity.value}} %</app-metadata-item>
               </div>
-              <div class="app-metadata__two-cols">
-                <app-metadata-item label="responsetime">NaN</app-metadata-item>
+              <div class="app-metadata__two-cols" *ngIf="appAutoscalerAppMetricResponsetime$ | async as appAutoscalerAppMetricResponsetime">
+                <app-metadata-item label="responsetime">{{appAutoscalerAppMetricResponsetime[0].entity.value}} ms</app-metadata-item>
               </div>
-              <div class="app-metadata__two-cols">
-                <app-metadata-item label="throughput">0 rps</app-metadata-item>
+              <div class="app-metadata__two-cols" *ngIf="appAutoscalerAppMetricThroughput$ | async as appAutoscalerAppMetricThroughput">
+                <app-metadata-item label="throughput">{{appAutoscalerAppMetricThroughput[0].entity.value}} rps</app-metadata-item>
               </div>
             </div>
           </mat-card-content>
