@@ -159,6 +159,10 @@
   animation-play-state: running;
 }
 
+.multi-action {
+  box-shadow: inset -1px 0 0 rgba(100, 121, 143, .122);
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
