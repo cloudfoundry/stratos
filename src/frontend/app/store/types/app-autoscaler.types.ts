@@ -12,3 +12,6 @@ export interface AppAutoscalerHealth {
 
 export interface AppAutoscalerScalingHistory {
 }
+
+export interface AppAutoscalerAppMetric {
+}
