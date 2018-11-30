@@ -17,6 +17,7 @@ import { UserFavorite } from '../../../../../../store/types/user-favorites.types
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService, CardStatus } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
+import { UserFavoriteManager } from '../../../../../../core/user-favorite-hydrator';
 
 @Component({
   selector: 'app-card-app',
@@ -35,37 +36,21 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
   public isFavorite$: Observable<boolean>;
   private favoriteObject: UserFavorite;
+  userFavoriteManager: UserFavoriteManager;
 
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService
   ) {
     super();
+    this.userFavoriteManager = new UserFavoriteManager(store);
   }
 
-  public favorite() {
-    this.getFavoriteObservable().pipe(
-      first(),
-      tap(isFav => {
-        if (isFav) {
-          this.store.dispatch(new RemoveUserFavoriteAction(this.favoriteObject.guid));
-        } else {
-          this.store.dispatch(new SaveUserFavoriteAction(
-            this.row.entity.guid,
-            this.row.entity.cfGuid,
-            applicationSchemaKey,
-            'cf'
-          ));
-        }
-      })
-    ).subscribe();
+  public toggleFavorite() {
+    this.userFavoriteManager.toggleFavorite(this.favoriteObject);
   }
 
-  private getFavoriteObservable() {
-    return this.store.select(
-      isFavorite(this.favoriteObject)
-    );
-  }
+  private getFavoriteObservable = () => this.userFavoriteManager.getIsFavoriteObservable(this.favoriteObject);
 
   ngOnInit() {
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(applicationSchemaKey));

@@ -14,11 +14,6 @@ export class UserFavorite {
   */
     public entityType?: string,
   ) {
-    this.guid = UserFavoritesEffect.buildFavoriteStoreEntityGuid({
-      endpointId,
-      endpointType,
-      entityId,
-      entityType
-    });
+    this.guid = UserFavoritesEffect.buildFavoriteStoreEntityGuid(this);
   }
 }

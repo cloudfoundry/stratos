@@ -14,7 +14,9 @@ import { IRequestAction, StartRequestAction, WrapperRequestActionSuccess } from 
 import { environment } from '../../../environments/environment';
 import { RemoveUserFavoriteAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
 import { UserFavorite } from '../types/user-favorites.types';
+
 export const userFavoritesPaginationKey = 'userFavorites';
+
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 @Injectable()
@@ -43,7 +45,7 @@ export class UserFavoritesEffect {
         endpointId,
         entityType,
         endpointType
-      } = action;
+      } = action.favorite;
 
       const favorite = {
         entityId,

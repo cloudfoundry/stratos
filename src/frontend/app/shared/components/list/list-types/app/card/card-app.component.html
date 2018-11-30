@@ -1,4 +1,4 @@
-<button (click)="favorite()">Fav ({{isFavorite$ | async}})</button>
+<button (click)="toggleFavorite()">Fav ({{isFavorite$ | async}})</button>
 <app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$"
   [entityConfig]="entityConfig">
   <app-meta-card-title>{{ row.entity.name }}</app-meta-card-title>
