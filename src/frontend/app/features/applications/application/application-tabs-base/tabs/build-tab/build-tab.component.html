@@ -76,7 +76,7 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile *ngIf="(deploySource$ | async) as deploySource; else notDeployedFromStratos">
+      <app-tile *ngIf="(deploySource$ | async) as deploySource; else notDeployedFromStratos" id="app-build-tab-gitscm-info">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Deployment Info</mat-card-title>
