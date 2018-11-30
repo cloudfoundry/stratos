@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"net/http"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
 func (uf *UserFavorites) getAll(c echo.Context) error {
@@ -60,32 +63,49 @@ func (uf *UserFavorites) create(c echo.Context) error {
 
 	store, err := NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return err
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable to connect to User Favorite store",
+			"Unable to connect to User Favorite store")
 	}
 
 	userGUID := c.Get("user_id").(string)
 
-	var favorite UserFavoriteRecord
 	req := c.Request()
 	body, _ := ioutil.ReadAll(req.Body())
 
+	favorite := UserFavoriteRecord{}
 	err = json.Unmarshal(body, &favorite)
 	if err != nil {
-		return errors.New("Unable to parse User Favorite from request body")
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable to parse User Favorite from request body",
+			"Unable to parse User Favorite from request body")
 	}
-	log.Info("Parsed favorite")
+
+	if len(favorite.EndpointID) == 0 || len(favorite.EndpointType) == 0 {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Invalid request - must provide EndpointID and EndpointType",
+			"Invalid request - must provide EndpointID and EndpointType")
+	}
+
 	favorite.GUID = buildFavoriteStoreEntityGuid(favorite)
 	favorite.UserGUID = userGUID
 	updatedFavorite, err := store.Save(favorite)
 	if err != nil {
-		log.Info("Failed to save favorite to db")
-		return err
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to save favorite to db",
+			"Failed to save favorite to db")
 	}
 
 	jsonString, err := json.Marshal(updatedFavorite)
 	if err != nil {
-		log.Info("Failed to Marshal favorite from db")
-		return err
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to Marshal favorite from db",
+			"Failed to Marshal favorite from db")
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
