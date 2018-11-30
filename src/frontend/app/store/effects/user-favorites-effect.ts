@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { mergeMap, switchMap, withLatestFrom, map } from 'rxjs/operators';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { SaveUserFavoriteAction } from '../actions/user-favourites-actions/save-user-favorite-action';
@@ -15,6 +15,7 @@ import { IUserFavorite } from '../types/user-favorites.types';
 import { environment } from '../../../environments/environment';
 export const userFavoritesPaginationKey = 'userFavorites';
 const { proxyAPIVersion } = environment;
+const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 @Injectable()
 export class UserFavoritesEffect {
 
@@ -50,7 +51,7 @@ export class UserFavoritesEffect {
         endpointType
       } as IUserFavorite;
 
-      return this.http.post<IUserFavorite>(`/pp/${proxyAPIVersion}/favorites`, favorite).pipe(
+      return this.http.post<IUserFavorite>(favoriteUrlPath, favorite).pipe(
         mergeMap(newFavorite => {
           const entities = {
             [userFavoritesSchemaKey]: {
@@ -91,24 +92,19 @@ export class UserFavoritesEffect {
         paginationKey: 'userFavorites'
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      const mappedData = {
-        entities: {
-          [userFavoritesSchemaKey]: {
-            'cf-awFKEYNjCbviKGH4Q1bFdgvCCq0-application-5f0c3b47-2d83-46ba-b70e-bbf7931a8d6e': {
-              guid: '1',
-              entityId: '5f0c3b47-2d83-46ba-b70e-bbf7931a8d6e',
-              endpointId: 'awFKEYNjCbviKGH4Q1bFdgvCCq0',
-              entityType: 'application',
-              endpointType: 'cf'
+      return this.http.get<IUserFavorite[]>(favoriteUrlPath).pipe(
+        map(favorites => {
+          return favorites.reduce<NormalizedResponse<IUserFavorite>>((mappedData, favorite) => {
+            const { guid } = favorite;
+            if (guid) {
+              mappedData.entities[userFavoritesSchemaKey][guid] = favorite;
+              mappedData.result.push(guid);
             }
-          }
-        },
-        result: ['cf-awFKEYNjCbviKGH4Q1bFdgvCCq0-application-5f0c3b47-2d83-46ba-b70e-bbf7931a8d6e'],
-        totalPages: 1
-      } as NormalizedResponse<IUserFavorite>;
-      return [
-        new WrapperRequestActionSuccess(mappedData, apiAction),
-      ];
+            return mappedData;
+          }, { entities: { [userFavoritesSchemaKey]: {} }, result: [] });
+        }),
+        map(mappedData => new WrapperRequestActionSuccess(mappedData, apiAction))
+      );
     })
   );
   static buildFavoriteStoreEntityGuid(favorite: Partial<IUserFavorite>) {

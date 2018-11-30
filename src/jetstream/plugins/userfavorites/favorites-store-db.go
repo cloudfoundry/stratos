@@ -37,7 +37,7 @@ func NewFavoritesDBStore(dcp *sql.DB) (FavoritesStore, error) {
 // List - Returns a list of all user favorites
 func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) {
 	log.Debug("List")
-	rows, err := p.db.Query(getFavorites)
+	rows, err := p.db.Query(getFavorites, userGUID)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve User Favorite records: %v", err)
 	}

@@ -18,18 +18,27 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 
 	store, err := NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return err
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable to get favorites store",
+			"Unable to get favorites store")
 	}
-
 	userGUID := c.Get("user_id").(string)
 	list, err := store.List(userGUID)
 	if err != nil {
-		return err
+		log.Info(err)
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable to get favorites from favorites store",
+			"Unable to get favorites from favorites store")
 	}
 
 	jsonString, err := json.Marshal(list)
 	if err != nil {
-		return err
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable Marshal favorites from favorites json",
+			"Unable Marshal favorites from favorites json")
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
