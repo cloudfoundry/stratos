@@ -119,10 +119,10 @@ export class UserFavoritesEffect {
       endpointType,
     } = favorite;
     return [
-      endpointType,
+      entityId,
       endpointId,
       entityType,
-      entityId,
+      endpointType,
     ]
       .reduce((newArray, value) => {
         if (value) {

@@ -92,6 +92,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 
 	favorite.GUID = buildFavoriteStoreEntityGuid(favorite)
 	favorite.UserGUID = userGUID
+	log.Info(favorite)
 	updatedFavorite, err := store.Save(favorite)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
