@@ -7,7 +7,7 @@ import { IApp } from '../../../../../../core/cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/app-state';
-import { endpointSchemaKey, entityFactory, applicationSchemaKey, userFavoritesSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
@@ -19,7 +19,7 @@ import {
 import { CardCell } from '../../../list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { SaveUserFavoriteAction } from '../../../../../../store/actions/user-favourites-actions/save-user-favorite-action';
-import { userFavoritesPaginationKey } from '../../../../../../store/effects/user-favoutites-effect';
+import { userFavoritesPaginationKey } from '../../../../../../store/effects/user-favorites-effect';
 import { isFavorite } from '../../../../../../store/selectors/favorite.selectors';
 
 @Component({

@@ -4,7 +4,7 @@ import { mergeMap, map } from 'rxjs/operators';
 import { UserFavoriteHydrator } from '../../../core/user-favorite-hydrator';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AppState } from '../../../store/app-state';
-import { userFavoritesPaginationKey } from '../../../store/effects/user-favoutites-effect';
+import { userFavoritesPaginationKey } from '../../../store/effects/user-favorites-effect';
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
 import { IUserFavorite } from '../../../store/types/user-favorites.types';
 import { combineLatest } from 'rxjs';

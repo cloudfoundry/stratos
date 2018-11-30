@@ -12,8 +12,9 @@ import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction, StartRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { IUserFavorite } from '../types/user-favorites.types';
+import { environment } from '../../../environments/environment';
 export const userFavoritesPaginationKey = 'userFavorites';
-
+const { proxyAPIVersion } = environment;
 @Injectable()
 export class UserFavoritesEffect {
 
@@ -49,32 +50,36 @@ export class UserFavoritesEffect {
         endpointType
       } as IUserFavorite;
 
-      const storeGuid = UserFavoritesEffect.buildFavoriteStoreEntityGuid(favorite);
+      return this.http.post<IUserFavorite>(`/pp/${proxyAPIVersion}/favorites`, favorite).pipe(
+        mergeMap(newFavorite => {
+          const entities = {
+            [userFavoritesSchemaKey]: {
+              ...favorites.reduce((favObj, favoriteFromArray) => ({
+                ...favObj,
+                [UserFavoritesEffect.buildFavoriteStoreEntityGuid(favoriteFromArray)]: favoriteFromArray
+              }), {}),
+              [newFavorite.guid]: newFavorite
+            }
+          };
 
-      const entities = {
-        [userFavoritesSchemaKey]: {
-          ...favorites.reduce((favObj, favoriteFromArray) => ({
-            ...favObj,
-            [UserFavoritesEffect.buildFavoriteStoreEntityGuid(favoriteFromArray)]: favoriteFromArray
-          }), {}),
-          [storeGuid]: favorite
-        }
-      };
+          const mappedData = {
+            entities,
+            result: Object.keys(entities[userFavoritesSchemaKey]),
+            totalPages: 1
+          } as NormalizedResponse<IUserFavorite>;
 
-      const mappedData = {
-        entities,
-        result: Object.keys(entities[userFavoritesSchemaKey]),
-        totalPages: 1
-      } as NormalizedResponse<IUserFavorite>;
+          const pagintionAction = {
+            ...apiAction,
+            paginationKey: 'userFavorites'
+          } as PaginatedAction;
 
-      const pagintionAction = {
-        ...apiAction,
-        paginationKey: 'userFavorites'
-      } as PaginatedAction;
+          return [
+            new WrapperRequestActionSuccess(mappedData, pagintionAction),
+          ];
+        })
+      );
 
-      return [
-        new WrapperRequestActionSuccess(mappedData, pagintionAction),
-      ];
+
     })
   );
 

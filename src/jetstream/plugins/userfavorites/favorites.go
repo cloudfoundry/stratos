@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/labstack/echo"
 )
 
@@ -71,16 +73,18 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	if err != nil {
 		return errors.New("Unable to parse User Favorite from request body")
 	}
-
+	log.Info("Parsed favorite")
 	favorite.GUID = buildFavoriteStoreEntityGuid(favorite)
 	favorite.UserGUID = userGUID
 	updatedFavorite, err := store.Save(favorite)
 	if err != nil {
+		log.Info("Failed to save favorite to db")
 		return err
 	}
 
 	jsonString, err := json.Marshal(updatedFavorite)
 	if err != nil {
+		log.Info("Failed to Marshal favorite from db")
 		return err
 	}
 
