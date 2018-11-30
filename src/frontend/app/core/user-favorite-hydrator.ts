@@ -1,5 +1,5 @@
 import { EntityMonitor } from './../shared/monitors/entity-monitor';
-import { IUserFavorite } from './../store/types/user-favorites.types';
+import { UserFavorite } from './../store/types/user-favorites.types';
 import { AppState } from '../store/app-state';
 import { Store } from '@ngrx/store';
 import { entityFactory } from '../store/helpers/entity-factory';
@@ -8,7 +8,7 @@ import { IRequestAction } from '../store/types/request.types';
 export class UserFavoriteHydrator {
   constructor(private store: Store<AppState>) { }
 
-  private getTypeAndID(favorite: IUserFavorite) {
+  private getTypeAndID(favorite: UserFavorite) {
     if (favorite.entityId) {
       return {
         type: favorite.entityType,
@@ -21,7 +21,7 @@ export class UserFavoriteHydrator {
     };
   }
 
-  public hydrate(favorite: IUserFavorite, action: IRequestAction) {
+  public hydrate(favorite: UserFavorite, action: IRequestAction) {
     const { type, id } = this.getTypeAndID(favorite);
     const entityMonitor = new EntityMonitor(this.store, id, type, entityFactory(type));
     const entityService = new EntityService(

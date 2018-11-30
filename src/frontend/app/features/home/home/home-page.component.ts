@@ -6,9 +6,9 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AppState } from '../../../store/app-state';
 import { userFavoritesPaginationKey } from '../../../store/effects/user-favorites-effect';
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
-import { IUserFavorite } from '../../../store/types/user-favorites.types';
 import { combineLatest } from 'rxjs';
 import { createGetApplicationAction } from '../../applications/application.service';
+import { UserFavorite } from '../../../store/types/user-favorites.types';
 
 @Component({
   selector: 'app-home-page',
@@ -20,7 +20,7 @@ export class HomePageComponent implements OnInit {
   ngOnInit() {
     const hydrator = new UserFavoriteHydrator(this.store);
 
-    this.favs$ = new PaginationMonitor<IUserFavorite>(
+    this.favs$ = new PaginationMonitor<UserFavorite>(
       this.store,
       userFavoritesPaginationKey,
       entityFactory(userFavoritesSchemaKey)

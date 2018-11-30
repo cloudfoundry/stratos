@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -26,7 +24,6 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 	userGUID := c.Get("user_id").(string)
 	list, err := store.List(userGUID)
 	if err != nil {
-		log.Info(err)
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Unable to get favorites from favorites store",
@@ -63,8 +60,8 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	c.Response().Write([]byte("User Favorite deleted okay"))
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
 	return nil
 }
 
@@ -101,7 +98,6 @@ func (uf *UserFavorites) create(c echo.Context) error {
 
 	favorite.GUID = buildFavoriteStoreEntityGuid(favorite)
 	favorite.UserGUID = userGUID
-	log.Info(favorite)
 	updatedFavorite, err := store.Save(favorite)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
