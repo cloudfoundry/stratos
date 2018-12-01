@@ -9,7 +9,7 @@ export class CardAppDeployInfo extends MetaCard {
   github: MetaDataItemComponent;
 
   constructor(
-    locator: ElementFinder = element(by.id('app-build-tab-gitscm-info'))
+    locator: ElementFinder = element(by.id('app-build-tab-deployment-info'))
   ) {
     super(locator, MetaCardTitleType.MAT_CARD);
     this.github = MetaDataItemComponent.withDynamicLabel(locator, 'GitHub');
