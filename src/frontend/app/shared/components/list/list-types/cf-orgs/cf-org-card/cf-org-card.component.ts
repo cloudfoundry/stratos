@@ -25,6 +25,7 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell } from '../../../list.types';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
+import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
 
 
 @Component({
@@ -46,8 +47,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
-  private userFavoriteManager: UserFavoriteManager;
-  private favoriteObject: UserFavorite;
+  public favorite: UserFavorite;
 
   constructor(
     private cfUserService: CfUserService,
@@ -57,8 +57,6 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private confirmDialog: ConfirmationDialogService
   ) {
     super();
-
-    this.userFavoriteManager = new UserFavoriteManager(store);
 
     this.cardMenu = [
       {
@@ -75,12 +73,6 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   }
 
-  public isFavorite$: Observable<boolean>;
-
-  public toggleFavorite() {
-    this.userFavoriteManager.toggleFavorite(this.favoriteObject);
-  }
-
   ngOnInit() {
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
@@ -93,14 +85,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       map(u => getOrgRolesString(u)),
     );
 
-    this.favoriteObject = new UserFavorite(
-      this.row.entity.cfGuid,
-      'cf',
-      this.row.entity.guid,
-      organizationSchemaKey,
-    );
-
-    this.isFavorite$ = this.userFavoriteManager.getIsFavoriteObservable(this.favoriteObject);
+    this.favorite = getFavoriteFromEntity(this.row, organizationSchemaKey);
 
     const fetchData$ = observableCombineLatest(
       userRole$,

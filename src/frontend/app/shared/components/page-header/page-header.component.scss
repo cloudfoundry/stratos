@@ -90,6 +90,10 @@ $bottom-index: $top-index - 1;
     max-width: 400px;
     min-width: 200px;
   }
+  &__favorite {
+    margin-bottom: -2px;
+    margin-left: 10px;
+  }
 }
 
 .mat-toolbar-row,

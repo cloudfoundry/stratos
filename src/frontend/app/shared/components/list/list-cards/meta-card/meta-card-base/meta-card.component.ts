@@ -2,7 +2,7 @@ import { AppState } from './../../../../../../store/app-state';
 
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, first, tap } from 'rxjs/operators';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
@@ -11,6 +11,7 @@ import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.compo
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { Store } from '@ngrx/store';
 import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
+import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
 
 
 export interface MetaCardMenuItem {
@@ -50,7 +51,14 @@ export class MetaCardComponent {
         entityConfig.schema
       );
       this.isDeleting$ = entityMonitor.isDeletingEntity$;
+      if (!this.favorite) {
+        entityMonitor.entity$.pipe(
+          first(),
+          tap(entity => this.favorite = getFavoriteFromEntity(entity, entityConfig.schema.key))
+        ).subscribe();
+      }
     }
+
   }
 
   public isDeleting$: Observable<boolean> = observableOf(false);

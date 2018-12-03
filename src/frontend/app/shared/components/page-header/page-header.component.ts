@@ -1,3 +1,4 @@
+import { UserFavorite } from './../../../store/types/user-favorites.types';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -32,6 +33,8 @@ export class PageHeaderComponent {
   tabs: ISubHeaderTabs[];
 
   @Input() showUnderFlow = false;
+
+  @Input() favorite: UserFavorite;
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;

@@ -22,6 +22,7 @@ import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
+import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
 
 
 @NgModule({
@@ -42,7 +43,8 @@ import { PageNotFoundComponentComponent } from './page-not-found-component/page-
     ClickStopPropagationDirective,
     DotContentComponent,
     ButtonBlurOnClickDirective,
-    PageNotFoundComponentComponent
+    PageNotFoundComponentComponent,
+    EntityFavoriteStarComponent
   ],
   providers: [
     AuthGuardService,
@@ -67,7 +69,8 @@ import { PageNotFoundComponentComponent } from './page-not-found-component/page-
     ClickStopPropagationDirective,
     DotContentComponent,
     ButtonBlurOnClickDirective,
-    PageNotFoundComponentComponent
+    PageNotFoundComponentComponent,
+    EntityFavoriteStarComponent
   ],
   entryComponents: [
     LogOutDialogComponent

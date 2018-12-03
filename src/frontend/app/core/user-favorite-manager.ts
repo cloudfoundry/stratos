@@ -1,14 +1,12 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-import { createGetApplicationAction } from '../features/applications/application.service';
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
 import { AppState } from '../store/app-state';
-import { applicationSchemaKey, entityFactory, organizationSchemaKey } from '../store/helpers/entity-factory';
+import { entityFactory } from '../store/helpers/entity-factory';
 import { isFavorite } from '../store/selectors/favorite.selectors';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { GetOrganization } from '../store/actions/organization.actions';
 import { UserFavorite } from '../store/types/user-favorites.types';
 import { EntityService } from './entity-service';
 import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';

@@ -9,7 +9,7 @@ import { ExtensionButtonsComponent } from '../extension-buttons/extension-button
 
 @NgModule({
   imports: [
-    CoreModule
+    CoreModule,
   ],
   declarations: [
     ExtensionButtonsComponent,

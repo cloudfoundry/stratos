@@ -1,3 +1,4 @@
+import { UserFavorite } from './../../../../store/types/user-favorites.types';
 
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -59,6 +60,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   public appState$: Observable<ApplicationStateData>;
+
+  public favorite = new UserFavorite(
+    this.applicationService.cfGuid,
+    'cf',
+    this.applicationService.appGuid,
+    applicationSchemaKey
+  );
+
   isBusyUpdating$: Observable<{ updating: boolean }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);

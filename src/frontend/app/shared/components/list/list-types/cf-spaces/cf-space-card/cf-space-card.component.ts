@@ -25,6 +25,8 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 
 
 @Component({
@@ -50,6 +52,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
+  favorite: UserFavorite;
 
   constructor(
     private cfUserService: CfUserService,
@@ -66,6 +69,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
     this.orgGuid = this.cfOrgService.orgGuid;
+    this.favorite = getFavoriteFromEntity(this.row, spaceSchemaKey);
     this.cardMenu = [
       {
         label: 'Edit',

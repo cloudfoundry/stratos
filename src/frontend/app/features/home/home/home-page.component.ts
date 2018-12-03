@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { mergeMap, map } from 'rxjs/operators';
-import { UserFavoriteManager } from '../../../core/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../core/user-favorite-manager';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AppState } from '../../../store/app-state';
 import { userFavoritesPaginationKey } from '../../../store/effects/user-favorites-effect';
@@ -28,7 +28,7 @@ export class HomePageComponent implements OnInit {
       mergeMap(list => {
         return combineLatest(
           list.map(fav => hydrator.hydrateFavorite(fav).pipe(
-            map(e => e.entity),
+            map(e => e ? e.entity : null),
             map(entity => entity ? `${entity.entity.name}-${fav.entityType}` : null)
           ))
         );
