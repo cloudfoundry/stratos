@@ -5,14 +5,13 @@ import {
   Component,
   Input,
   NgZone,
+  OnChanges,
   OnDestroy,
   OnInit,
+  Optional,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
-  Optional,
-  OnChanges,
-  SimpleChanges,
-  Injector,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';

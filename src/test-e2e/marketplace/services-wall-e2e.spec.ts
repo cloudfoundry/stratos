@@ -4,6 +4,7 @@ import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -23,8 +24,10 @@ describe('Service Instances Wall', () => {
   });
 
   beforeEach(() => {
-    servicesWallPage.navigateTo();
+    servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
     servicesWallPage.waitForPage();
+    servicesWallPage.serviceInstancesList.header.clearSearchText();
+    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 0);
   });
 
   describe('', () => {
@@ -40,6 +43,7 @@ describe('Service Instances Wall', () => {
       createServiceInstance.waitForPage();
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
+
   });
 
   it('- should reach service instances wall page', () => {
@@ -59,6 +63,8 @@ describe('Service Instances Wall', () => {
   it('- should have filters', () => {
     servicesWallPage.serviceInstancesList.header.getFilterOptions(0).then(options => {
       expect(options.length).toBeGreaterThan(0);
+      // Select the 'All' option to ensure we close the filter dropdown
+      options[0].click();
     });
     // Commenting out tests due to Issue #2720
     // servicesWallPage.serviceInstancesList.header.getPlaceholderText(0).then(text => {
