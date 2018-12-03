@@ -26,6 +26,9 @@ import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory
   ]
 })
 export class ServicesWallComponent implements OnDestroy {
+
+  public haveConnectedCf$: Observable<boolean>;
+
   canCreateServiceInstance: CurrentUserPermissions;
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
@@ -46,6 +49,10 @@ export class ServicesWallComponent implements OnDestroy {
       this.cfOrgSpaceService,
       serviceInstancesSchemaKey,
       'all').subscribe();
+
+    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
+      map(endpoints => !!endpoints && endpoints.length > 0)
+    );
   }
 
   ngOnDestroy(): void {

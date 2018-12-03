@@ -6,6 +6,7 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { isJetStreamError } from '../../core/jetstream.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
@@ -40,14 +41,6 @@ interface APIErrorCheck {
   guid: string;
   url: string;
   errorResponse?: JetStreamCFErrorResponse;
-}
-
-interface JetStreamError {
-  error: {
-    status: string;
-    statusCode: number;
-  };
-  errorResponse: JetStreamCFErrorResponse;
 }
 
 interface JetStreamCFErrorResponse {
@@ -321,19 +314,19 @@ export class APIEffect {
     }
     return Object.keys(resData).map(cfGuid => {
       // Return list of guid+error objects for those endpoints with errors
-      const endpoint = resData ? (resData[cfGuid] as JetStreamError) : null;
-      const succeeded = !endpoint || !endpoint.error;
+      const jetStreamError = isJetStreamError(resData ? resData[cfGuid] : null);
+      const succeeded = !jetStreamError || !jetStreamError.error;
       const errorCode =
-        endpoint && endpoint.error
-          ? endpoint.error.statusCode.toString()
+        jetStreamError && jetStreamError.error
+          ? jetStreamError.error.statusCode.toString()
           : '500';
       let errorResponse = null;
       if (!succeeded) {
         errorResponse =
-          endpoint &&
-            (!!endpoint.errorResponse &&
-              typeof endpoint.errorResponse !== 'string')
-            ? endpoint.errorResponse
+          jetStreamError &&
+            (!!jetStreamError.errorResponse &&
+              typeof jetStreamError.errorResponse !== 'string')
+            ? jetStreamError.errorResponse
             : ({} as JetStreamCFErrorResponse);
         // Use defaults if values are not provided
         errorResponse.code = errorResponse.code || 0;
@@ -576,4 +569,5 @@ export class APIEffect {
   private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
     return requestType === 'delete' && !apiAction.updatingKey;
   }
+
 }
