@@ -234,7 +234,7 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 
 	if shouldPassthrough {
 		if len(cnsiList) > 1 {
-			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported.")
+			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported")
 			return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 	}
@@ -366,13 +366,11 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	// Copy original headers through, except custom portal-proxy Headers
 	fwdCNSIStandardHeaders(cnsiRequest, req)
 
-	// Mkae the request using the appropriate auth helper
-	switch tokenRec.AuthType {
-	case interfaces.AuthTypeHttpBasic:
-		res, err = p.doHttpBasicFlowRequest(cnsiRequest, req)
-	case interfaces.AuthTypeOIDC:
-		res, err = p.doOidcFlowRequest(cnsiRequest, req)
-	default:
+	// Find the auth provider for the auth type - default ot oauthflow
+	authHandler := p.GetAuthProvider(tokenRec.AuthType)
+	if authHandler.Handler != nil {
+		res, err = authHandler.Handler(cnsiRequest, req)
+	} else {
 		res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}
 

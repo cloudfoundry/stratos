@@ -12,7 +12,18 @@ export class SecretsHelpers {
 
   secrets = browser.params as E2EConfig;
 
-  constructor() { }
+  constructor() {
+    this.validate(this.secrets);
+  }
+
+  private validate(secrets: E2EConfig) {
+    if (!secrets ||
+      !secrets.consoleUsers || !secrets.consoleUsers.admin || !secrets.consoleUsers.nonAdmin ||
+      !secrets.endpoints || !secrets.endpoints.cf
+    ) {
+      throw new Error(`Failed to validate secrets`);
+    }
+  }
 
   haveMultipleCloudFoundryEndpoints = () => {
     return Object.keys(this.getCloudFoundryEndpoints()).length > 1;
@@ -42,13 +53,17 @@ export class SecretsHelpers {
     return this.secrets.endpoints.cf;
   }
 
+  getStratosGitHubApiUrl(): string {
+    return this.secrets.stratosGitHubApiUrl;
+  }
+
   getConsoleCredentials(userType: ConsoleUserType): E2ECred {
     const isAdmin = userType === ConsoleUserType.admin;
     return isAdmin ? this.secrets.consoleUsers.admin : this.secrets.consoleUsers.nonAdmin;
   }
 
   getEndpoints(): E2EEndpointsConfig {
-    return this.secrets.endpoints || {};
+    return this.secrets.endpoints;
   }
 
   // Get the configuration for the default CF Endpoint

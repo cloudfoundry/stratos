@@ -1,7 +1,5 @@
 import { NewAppCFDetails } from './create-application.types';
-import { schema } from 'normalizr';
-import { GithubCommit, GitBranch } from './github.types';
-
+import { GitBranch, GithubCommit } from './github.types';
 
 export interface SourceType {
   name: string;
@@ -43,7 +41,9 @@ export enum SocketEventTypes {
   SOURCE_FILE_DATA = 30004,
   SOURCE_FILE_ACK = 30005,
   SOURCE_GITURL = 30006,
-  SOURCE_WAIT_ACK = 30007
+  SOURCE_WAIT_ACK = 30007,
+  OVERRIDES_REQUIRED = 50000,
+  OVERRIDES_SUPPLIED = 50001
 }
 
 export interface DeployApplicationSource {
@@ -59,15 +59,35 @@ export interface GitAppDetails {
   branch: GitBranch;
 }
 
+export interface OverrideAppDetails {
+  name: string;
+  buildpack: string;
+  instances: number;
+  diskQuota: string;
+  memQuota: string;
+  doNotStart: boolean;
+  noRoute: boolean;
+  randomRoute: boolean;
+  host: string;
+  domain: string;
+  path: string;
+  startCmd: string;
+  healthCheckType: string;
+  stack: string;
+  time: number;
+}
+
 export interface ProjectExists {
   checking: boolean;
   exists: boolean;
+  error: boolean;
   name: string;
   data?: any;
 }
 export interface DeployApplicationState {
   cloudFoundryDetails: NewAppCFDetails;
   applicationSource?: DeployApplicationSource;
+  applicationOverrides?: OverrideAppDetails;
   projectExists?: ProjectExists;
 }
 

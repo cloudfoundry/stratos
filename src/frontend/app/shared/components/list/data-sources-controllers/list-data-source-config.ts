@@ -22,7 +22,7 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * A function which will return a unique id for the given row/entity
    */
-  getRowUniqueId: getRowUniqueId<T>;
+  getRowUniqueId: getRowUniqueId<A>;
   /**
    * The key used to uniquely identify this instance of the data in the pagination section of the store
    */

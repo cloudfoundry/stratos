@@ -1,18 +1,28 @@
-.metrics-url {
-  font-size: 14px;
-}
-
-.metrics-info {
-  align-items: center;
-  display: flex;
-  mat-icon {
-    font-size: 48px;
-    height: 48px;
-    margin-right: 8px;
-    width: 48px;
+.metrics {
+  &-url {
+    font-size: 14px;
   }
-}
-
-.metrics-detail {
-  margin-left: 56px;
+  &-endpoint {
+    padding-bottom: 24px;
+  }
+  &-info {
+    display: flex;
+    mat-icon {
+      font-size: 48px;
+      height: 48px;
+      margin-right: 8px;
+      width: 48px;
+    }
+  }
+  &-metadata {
+    div {
+      padding: 4px 0;
+    }
+    .metrics-extra {
+      padding: 0;
+    }
+  }
+  &-provision {
+    margin-top: 24px;
+  }
 }

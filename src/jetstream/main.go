@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
+	"github.com/cf-stratos/mysqlstore"
 	"github.com/gorilla/sessions"
-	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -151,6 +151,11 @@ func main() {
 	}()
 	log.Info("Database connection pool created.")
 
+	// Wait for Database Schema to be initialized (or exit if this times out)
+	if err = datastore.WaitForMigrations(databaseConnectionPool); err != nil {
+		log.Fatal(err)
+	}
+
 	// Initialize session store for Gorilla sessions
 	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
 	if err != nil {
@@ -188,6 +193,8 @@ func main() {
 		log.Infof("Failed to initialise console config due to: %s", err)
 		return
 	}
+
+	showSSOConfig(portalProxy)
 
 	// Initialise Plugins
 	portalProxy.loadPlugins()
@@ -235,6 +242,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 		} else {
 			showStratosConfig(consoleConfig)
 			portalProxy.Config.ConsoleConfig = consoleConfig
+			setSSOFromConfig(portalProxy, consoleConfig)
 		}
 
 	} else if err == nil && isInitialised {
@@ -244,9 +252,17 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 		}
 		showStratosConfig(consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
+		setSSOFromConfig(portalProxy, consoleConfig)
 	}
 
 	return addSetupMiddleware, nil
+}
+
+func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
+	// For SSO, override the value loaded from the config file, so that this is what we use
+	if !config.IsSet("SSO_LOGIN") {
+		portalProxy.Config.SSOLogin = configuration.UseSSO
+	}
 }
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
@@ -256,6 +272,14 @@ func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
 	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
+	log.Infof("... Use SSO Login       : %t", config.UseSSO)
+}
+
+func showSSOConfig(portalProxy *portalProxy) {
+	// Show SSO Configuration
+	log.Infof("SSO Configuration:")
+	log.Infof("... SSO Enabled         : %t", portalProxy.Config.SSOLogin)
+	log.Infof("... SSO Options         : %s", portalProxy.Config.SSOOptions)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
@@ -269,6 +293,11 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 		}
 
 		return key32bytes, nil
+	}
+
+	// Check we have volume and filename
+	if len(pc.EncryptionKeyVolume) == 0 && len(pc.EncryptionKeyFilename) == 0 {
+		return nil, errors.New("You must configure either an Encryption key or the Encryption key filename")
 	}
 
 	// Read the key from the shared volume
@@ -371,7 +400,11 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	config.LoadConfigFile("./config.properties")
+	// Load config.properties if it exists, otherwise look for default.config.properties
+	err := config.LoadConfigFile("./config.properties")
+	if os.IsNotExist(err) {
+		config.LoadConfigFile("./default.config.properties")
+	}
 
 	if err := config.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
@@ -472,7 +505,21 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionStoreOptions:    sessionStoreOptions,
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
+		AuthProviders:          make(map[string]interfaces.AuthProvider),
 	}
+
+	// Initialize built-in auth providers
+
+	// Basic Auth
+	pp.AddAuthProvider(interfaces.AuthTypeHttpBasic, interfaces.AuthProvider{
+		Handler:  pp.doHttpBasicFlowRequest,
+		UserInfo: pp.GetCNSIUserFromBasicToken,
+	})
+
+	// OIDC
+	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
+		Handler: pp.doOidcFlowRequest,
+	})
 
 	return pp
 }
@@ -634,14 +681,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.EchoMiddleware)
 	}
 
-	// Allow the backend to run under /pp if running combined
-	var pp *echo.Group
-	staticDir, err := getStaticFiles()
-	if err == nil {
-		pp = e.Group("/pp")
-	} else {
-		pp = e.Group("")
-	}
+	staticDir, staticDirErr := getStaticFiles()
+
+	// Always serve the backend API from /pp
+	pp := e.Group("/pp")
 
 	pp.Use(p.setSecureCacheContentMiddleware)
 
@@ -656,8 +699,12 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
 	pp.POST("/v1/auth/logout", p.logout)
 
+	// SSO Routes will only respond if SSO is enabled
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-	pp.GET("/v1/auth/sso_login_callback", p.loginToUAA)
+	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
+
+	// Callback is use dby both login to Stratos and login to an Endpoint
+	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
@@ -676,10 +723,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
-	// Connect to CF cluster
+	// Connect to endpoint
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
-	// Disconnect CF cluster
+	// Connect to Enpoint (SSO)
+	sessionGroup.GET("/auth/login/cnsi", p.ssoLoginToCNSI)
+
+	// Disconnect endpoint
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
 	// Verify Session
@@ -724,23 +774,20 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		if err == nil {
 			routePlugin.AddAdminGroupRoutes(adminGroup)
 		}
-
 	}
 
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	// Serve up static resources
-	if err == nil {
+	if staticDirErr == nil {
 		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
-		e.Use(middleware.Gzip())
-		e.Static("/", staticDir)
+		e.Group("", middleware.Gzip()).Static("/", staticDir)
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
 	}
-
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
@@ -762,12 +809,18 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 }
 
 func getStaticFiles() (string, error) {
-	dir, err := filepath.Abs(".")
+
+	uiFolder, _ := config.GetValue("UI_PATH")
+	if len(uiFolder) == 0 {
+		uiFolder = "./ui"
+	}
+
+	dir, err := filepath.Abs(uiFolder)
 	if err == nil {
-		// Look for a folder named 'ui'
-		_, err := os.Stat(dir + "/ui")
+		// Check if folder exists
+		_, err := os.Stat(dir)
 		if err == nil || !os.IsNotExist(err) {
-			return dir + "/ui", nil
+			return dir, nil
 		}
 	}
 	return "", errors.New("UI folder not found")

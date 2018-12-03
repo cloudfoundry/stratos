@@ -8,6 +8,18 @@ import (
 	"github.com/labstack/echo"
 )
 
+type AuthHandlerFunc func(tokenRec TokenRecord, cnsi CNSIRecord) (*http.Response, error)
+type RefreshOAuthTokenFunc func(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
+
+type GetUserInfoFromToken func(cnsiGUID string, cfTokenRecord *TokenRecord) (*ConnectedUser, bool)
+
+type AuthFlowHandlerFunc func(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+
+type AuthProvider struct {
+	Handler  AuthFlowHandlerFunc
+	UserInfo GetUserInfoFromToken
+}
+
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
 	TokenEndpoint            string `json:"token_endpoint"`
@@ -31,6 +43,7 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
+	SSOAllowed             bool     `json:"sso_allowed"`
 }
 
 // ConnectedEndpoint
@@ -42,6 +55,7 @@ type ConnectedEndpoint struct {
 	Account                string   `json:"account"`
 	TokenExpiry            int64    `json:"token_expiry"`
 	DopplerLoggingEndpoint string   `json:"-"`
+	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
 }
@@ -50,6 +64,7 @@ const (
 	AuthTypeOAuth2    = "OAuth2"
 	AuthTypeOIDC      = "OIDC"
 	AuthTypeHttpBasic = "HttpBasic"
+	AuthTypeAKS       = "AKS"
 )
 
 const (
@@ -65,15 +80,19 @@ type EndpointTokenRecord struct {
 	LoggingEndpoint string
 }
 
-//TODO this could be moved back to tokens subpackage, and extensions could import it?
+// TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
-	AuthToken    string
-	RefreshToken string
-	TokenExpiry  int64
-	Disconnected bool
-	AuthType     string
-	Metadata     string
-	SystemShared bool
+	TokenGUID      string
+	AuthToken      string
+	RefreshToken   string
+	TokenExpiry    int64
+	Disconnected   bool
+	AuthType       string
+	Metadata       string
+	SystemShared   bool
+	LinkedGUID     string // Indicates the GUID of the token that this token is linked to (if any)
+	Certificate    string
+	CertificateKey string
 }
 
 type CFInfo struct {
@@ -187,6 +206,7 @@ type ConsoleConfig struct {
 	ConsoleClientSecret string   `json:"console_client_secret"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
+	UseSSO              bool     `json:"use_sso"`
 }
 
 // CNSIRequest
@@ -224,7 +244,9 @@ type PortalConfig struct {
 	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
+	SSOOptions                      string   `configName:"SSO_OPTIONS"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                        string   `configName:"LOG_LEVEL"`
 	CFAdminIdentifier               string

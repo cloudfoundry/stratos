@@ -14,7 +14,7 @@ import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/enti
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl, EndpointTypeConfig } from '../../endpoint-helpers';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
@@ -37,12 +37,21 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
+  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
+
+  // Optional Client ID and Client Secret
+  @ViewChild('clientIDField') clientIDField: NgModel;
+  @ViewChild('clientSecretField') clientSecretField: NgModel;
 
   typeValue: any;
 
   endpointTypes = getEndpointTypes();
   urlValidation: string;
 
+  showAdvancedFields = false;
+  clientRedirectURI: string;
+
+  endpointTypeSupportsSSO = false;
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
@@ -66,6 +75,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.typeValue = defaultType[0].value;
       this.setUrlValidation(this.typeValue);
     }
+
+    // Client Redirect URI for SSO
+    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
+      (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
   }
 
   onNext: StepOnNextFunction = () => {
@@ -73,7 +86,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.typeField.value,
       this.nameField.value,
       this.urlField.value,
-      !!this.skipSllField.value
+      !!this.skipSllField.value,
+      this.clientIDField ? this.clientIDField.value : '',
+      this.clientSecretField ? this.clientSecretField.value : '',
+      this.ssoAllowedField ? !!this.ssoAllowedField.value : false,
     );
 
     this.store.dispatch(action);
@@ -110,5 +126,14 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   setUrlValidation(endpointValue: string) {
     const endpoint = this.endpointTypes.find(e => e.value === endpointValue);
     this.urlValidation = endpoint ? endpoint.urlValidation : '';
+    this.setAdvancedFields(endpoint);
+  }
+
+  // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
+  setAdvancedFields(endpoint: EndpointTypeConfig) {
+    this.showAdvancedFields = endpoint.value === 'cf';
+
+    // Only allow SSL if the endpoint type isCloud Foundry
+    this.endpointTypeSupportsSSO = endpoint.value === 'cf';
   }
 }

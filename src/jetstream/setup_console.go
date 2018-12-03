@@ -51,6 +51,11 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Skip SSL Validation value")
 	}
 	consoleConfig.SkipSSLValidation = skipSSLValidation
+	ssoLogin, err := strconv.ParseBool(c.FormValue("use_sso"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Use SSO value")
+	}
+	consoleConfig.UseSSO = ssoLogin
 
 	if err != nil {
 		return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
@@ -102,8 +107,10 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			"Failed to store Console configuration data",
 			"Console configuration data storage failed due to %s", err)
 	}
+
+	setSSOFromConfig(p, consoleConfig)
+
 	c.JSON(http.StatusOK, userTokenInfo)
-	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
 	return nil
 }
 
@@ -137,7 +144,7 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 			"Console configuration data storage failed due to %s", err)
 	}
 	c.NoContent(http.StatusOK)
-	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
+	log.Infof("Updated Stratos setup")
 	return nil
 }
 
@@ -203,7 +210,6 @@ func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig,
 		consoleRepo = consoleRepoInterface.(console_config.Repository)
 	}
 
-	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
 	err := consoleRepo.SaveConsoleConfig(consoleConfig)
 	if err != nil {
 		log.Printf("Failed to store Console Config: %+v", err)
@@ -215,6 +221,8 @@ func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig,
 		log.Printf("Failed to store Console Config: %+v", err)
 		return fmt.Errorf("Failed to store Console Config: %+v", err)
 	}
+
+	log.Info("Stratos setup has been stored")
 	return nil
 }
 

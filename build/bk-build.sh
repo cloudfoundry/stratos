@@ -7,6 +7,7 @@
 DEV=${STRATOS_BACKEND_DEV:-false}
 ACTION=${1:-build}
 NO_DEP=${STRATOS_USE_VENDOR_AS_IS:-false}
+VERSION=${stratos_version:-dev}
 
 set -euo pipefail
 
@@ -14,29 +15,25 @@ set -euo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 STRATOS="`cd "${DIR}/..";pwd`"
 
-pushd ${STRATOS} > /dev/null
-
-# Make outputs folder
-OUTPUTS=$STRATOS/outputs
-mkdir -p ${OUTPUTS}
+pushd "${STRATOS}" > /dev/null
 
 STRATOS_GOBASE=tmp/go/src/github.com/cloudfoundry-incubator/stratos
 mkdir -p ${STRATOS_GOBASE}/src
 
 # Remove the temporary source folder if it is already there
-rm -rf ${STRATOS_GOBASE}/src/jetstream
+rm -rf "${STRATOS_GOBASE}/src/jetstream"
 
 # Copy vendor folder if needed
 if [ ! -d "${STRATOS_GOBASE}/vendor" ] && [ -d "${STRATOS}/vendor" ]; then
-  cp -R ${STRATOS}/vendor ${STRATOS_GOBASE}
+  cp -R "${STRATOS}/vendor" ${STRATOS_GOBASE}
 fi
 
 # Set go path
-export GOPATH=${STRATOS}/tmp/go
+export GOPATH="${STRATOS}/tmp/go"
 
 # Link in the backend source
 pushd ${STRATOS_GOBASE}/src > /dev/null
-ln -s ${STRATOS}/src/jetstream jetstream
+ln -s "${STRATOS}/src/jetstream" jetstream
 popd > /dev/null
 
 # Copy dep files
@@ -62,19 +59,22 @@ else
   echo "Using vendor folder as is"
 fi
 
+# Determine the build version from the package file if not already set
+if [ "${VERSION}" == "dev" ]; then
+  PACKAGE_VERSION=$(cat package.json | grep "version")
+  REGEX="\"version\": \"([0-9\.]*)\""
+  if [[ $PACKAGE_VERSION =~ $REGEX ]]; then
+    VERSION=${BASH_REMATCH[1]}
+  fi
+fi
+
 # Build backend or run tests
 pushd ${STRATOS_GOBASE}/src/jetstream > /dev/null
 
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
-  go build
-  # Legacy name for now - will rename later
-  cp jetstream $OUTPUTS/portal-proxy
-
-  # Legacy - we will remove the need for this shortly
-  # if [ "$DEV" == "true" ]; then
-  #  echo "Copying files to simplify running backend in dev ..."
-  # fi
+  echo "Building version: ${VERSION}"
+  go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
 else
   echo "Running backend tests ..."

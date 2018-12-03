@@ -4,8 +4,9 @@ import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
+import { ssoHelper } from './helpers/sso-helper';
 
-/* tslint:disable */
+
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
  */
@@ -25,7 +26,9 @@ export class E2E {
 
   static debugLog(log) {
     if (E2E.DEBUG_LOGGING) {
+      /* tslint:disable:no-console*/
       console.log(log);
+      /* tslint:disable */
     }
   }
 
@@ -47,8 +50,20 @@ export class E2E {
    * Log message in the control flow
    */
   log(log: string) {
+    /* tslint:disable:no-console*/
     protractor.promise.controlFlow().execute(() => console.log(log));
+    /* tslint:disable */
   }
+
+
+  /**
+   * Log message in the control flow if debug logging is set
+   */
+  debugLog(log: string) {
+    /* tslint:disable:no-console*/
+    protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
+    /* tslint:disable */
+  }  
 }
 
 /**
@@ -76,6 +91,12 @@ export class E2ESetup {
     // Create requests in case we need to make any API requests as admin and/or user
     this.adminReq = this.reqHelper.newRequest();
     this.userReq = this.reqHelper.newRequest();
+
+    // Get the SSO login Status if needed
+    if (!ssoHelper.ssoEnabledFetched) {
+      this.getSSOLoginStatus();
+    }
+
     // The setup sequence won't be executed until the appropriate stage in the control flow
     protractor.promise.controlFlow().execute(() => this.doSetup());
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
@@ -101,6 +122,11 @@ export class E2ESetup {
   // Ensure that an admin session is created, even if it is not needed by the setup process
   requireAdminSession() {
     this.needAdminSession = true;
+  }
+
+  private getSSOLoginStatus() {
+    return this.addSetupOp(this.resetsHelper.getSSOLoginStatus.bind(this.resetsHelper, null, ssoHelper),
+      'Check SSO Login Status');
   }
 
   /**
@@ -211,6 +237,3 @@ export class E2ESetup {
 
 // This is the 'e2e' global that you should import into your spec files
 export const e2e = new E2E();
-
-
-/* tslint:enable */

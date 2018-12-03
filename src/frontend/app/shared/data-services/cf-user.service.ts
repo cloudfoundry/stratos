@@ -16,6 +16,7 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions,
+  filterEntitiesByGuid,
 } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllOrgUsers } from '../../store/actions/organization.actions';
 import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
@@ -39,7 +40,7 @@ import {
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -185,21 +186,28 @@ export class CfUserService {
   hasRolesInOrg(user: CfUser, orgGuid: string, excludeOrgUser = true): boolean {
 
     // Check org roles
-    if (this.populatedArray(user.audited_organizations) ||
-      this.populatedArray(user.billing_managed_organizations) ||
-      this.populatedArray(user.managed_organizations) ||
-      (!excludeOrgUser && this.populatedArray(user.organizations))) {
+    if (this.populatedArray(filterEntitiesByGuid(orgGuid, user.audited_organizations)) ||
+      this.populatedArray(filterEntitiesByGuid(orgGuid, user.billing_managed_organizations)) ||
+      this.populatedArray(filterEntitiesByGuid(orgGuid, user.managed_organizations)) ||
+      (!excludeOrgUser && this.populatedArray(filterEntitiesByGuid(orgGuid, user.organizations)))) {
       return true;
     }
 
     // Check space roles
-    if (this.populatedArray(user.audited_spaces) ||
-      this.populatedArray(user.managed_spaces) ||
-      this.populatedArray(user.spaces)) {
-      return true;
-    }
+    return this.hasSpaceRolesInOrg(user, orgGuid);
+  }
 
-    return false;
+  private filterByOrg(orgGuid: string, array?: Array<APIResource<ISpace>>): Array<APIResource<ISpace>> {
+    return array ? array.filter(space => space.entity.organization_guid === orgGuid) : null;
+  }
+
+  /**
+   * Helper to determine if user has space roles in an organization
+   */
+  hasSpaceRolesInOrg(user: CfUser, orgGuid: string): boolean {
+    return this.populatedArray(this.filterByOrg(orgGuid, user.audited_spaces)) ||
+      this.populatedArray(this.filterByOrg(orgGuid, user.managed_spaces)) ||
+      this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
   getUserRoleInOrg = (
@@ -324,7 +332,7 @@ export class CfUserService {
       }));
   }
 
-  public isConnectedUserAdmin = (store, cfGuid: string): Observable<boolean> =>
+  public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
     this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
       filter(state => !!state),
       map(state => state.isAdmin),

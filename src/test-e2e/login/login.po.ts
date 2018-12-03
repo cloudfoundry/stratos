@@ -1,5 +1,9 @@
 import { browser, by, element, promise, protractor } from 'protractor';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
+import { ssoHelper } from '../helpers/sso-helper';
+import { Component } from '../po/component.po';
+import { SSOLoginPage } from './sso-login.po';
 
 const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
 const until = protractor.ExpectedConditions;
@@ -33,10 +37,19 @@ export class LoginPage {
   }
 
   getLoginError() {
-    return element(by.css('.login-message.login-message--show.login-message-error')).getText();
+    return element(by.id('login-error-message')).getText();
   }
 
   login(username: string, password: string) {
+    if (ssoHelper.ssoEnabled) {
+      const ssoLoginPage = new SSOLoginPage();
+      return ssoLoginPage.login(username, password);
+    } else {
+      return this.nonSSOLogin(username, password);
+    }
+  }
+
+  nonSSOLogin(username: string, password: string) {
     this.navigateTo();
     this.enterLogin(username, password);
     this.loginButton().click();
@@ -71,11 +84,15 @@ export class LoginPage {
   }
 
   waitForLogin() {
-    return browser.wait(until.presenceOf(element(by.tagName('app-login-page'))), 10000);
+    return browser.wait(until.presenceOf(element(by.id('app-login-page'))), 10000);
   }
 
   waitForNoEndpoints() {
     return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
+  }
+
+  waitForLoading() {
+    return Component.waitUntilNotShown(element(by.id('login__loading')));
   }
 
 }

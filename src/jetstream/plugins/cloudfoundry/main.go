@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// CloudFoundrySpecification - Plugin to support Cloud Foundry endpoint type
 type CloudFoundrySpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
@@ -25,18 +26,22 @@ const (
 	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
+// Init creates a new CloudFoundrySpecification
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &CloudFoundrySpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
+// GetEndpointPlugin gets the endpoint plugin for this plugin
 func (c *CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return c, nil
 }
 
+// GetRoutePlugin gets the route plugin for this plugin
 func (c *CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return c, nil
 }
 
+// GetMiddlewarePlugin gets the middleware plugin for this plugin
 func (c *CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
@@ -93,12 +98,18 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 	// CF auto reg cnsi entry missing, attempt to register
 	if cfCnsi.CNSIType == "" {
-		log.Infof("Auto-registering cloud foundry endpoint %s", cfAPI)
-
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
+		// Allow the auto-registration name to be configured
+		autoRegName := c.portalProxy.GetConfig().AutoRegisterCFName
+		if len(autoRegName) == 0 {
+			autoRegName = "Cloud Foundry"
+		}
+
+		log.Infof("Auto-registering cloud foundry endpoint %s as \"%s\"", cfAPI, autoRegName)
+
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, false, cfEndpointSpec.Info)
 		if err != nil {
 			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
 			return nil
@@ -157,16 +168,21 @@ func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, interfa
 	return cfAPI, cfCnsi, err
 }
 
+// AddAdminGroupRoutes adds the admin routes for this plugin to the Echo server
 func (c *CloudFoundrySpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 	// no-op
 }
 
+// AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Firehose Stream
 	echoGroup.GET("/:cnsiGuid/firehose", c.firehose)
 
 	// Applications Log Streams
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
+
+	// Application Stream
+	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
 }
 
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

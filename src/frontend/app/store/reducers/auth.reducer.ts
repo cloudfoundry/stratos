@@ -12,7 +12,7 @@ import {
   SESSION_INVALID,
   SESSION_VERIFIED,
   VERIFY_SESSION,
-} from './../actions/auth.actions';
+} from '../actions/auth.actions';
 import { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {
@@ -73,7 +73,7 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
         ...state,
         sessionData: {
           valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
-          domainMismatch: action.domainMismatch, isSSOLogin: action.isSSOLogin, sessionExpiresOn: null
+          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null
         },
         verifying: false
       };
