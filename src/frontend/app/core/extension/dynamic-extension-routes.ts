@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, RouterStateSnapshot, ActivatedRouteSnapshot, Route } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
+
 import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { ROUTER_NAVIGATION } from '@ngrx/router-store';
 
 /**
  * This is used to dynamically add an extension's routes - since we can't do this
@@ -21,13 +19,13 @@ import { ROUTER_NAVIGATION } from '@ngrx/router-store';
  */
 
 @Injectable()
-export class DynamicExtenstionRoutes implements CanActivate {
-  constructor(private router: Router, private store: Store<AppState>) {}
+export class DynamicExtensionRoutes implements CanActivate {
+  constructor(private router: Router) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean>|Promise<boolean>|boolean {
+  ): Observable<boolean> | Promise<boolean> | boolean {
     const childRoutes = this.getChildRoutes(route.parent.routeConfig);
     // Remove the last route (which is us, the '**' route)
     let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
@@ -46,7 +44,7 @@ export class DynamicExtenstionRoutes implements CanActivate {
     this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
     this.router.navigateByUrl(state.url);
 
-       return false;
+    return false;
   }
 
   private getChildRoutes(r: any) {
