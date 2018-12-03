@@ -23,7 +23,7 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { UserFavoriteManager } from '../../../../../../core/user-favorite-hydrator';
+import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 
 

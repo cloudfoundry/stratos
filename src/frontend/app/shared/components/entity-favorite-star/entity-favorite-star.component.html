@@ -1,0 +1,4 @@
+<div [ngSwitch]="isFavorite$ | async" (click)="toggleFavorite($event)">
+  <mat-icon *ngSwitchCase="true" matTooltip="Set as favorite" aria-label="Set as Favorite">favorite</mat-icon>
+  <mat-icon *ngSwitchCase="false" matTooltip="Unset as favorite" aria-label="Unset as Favorite">favorite_border</mat-icon>
+</div>

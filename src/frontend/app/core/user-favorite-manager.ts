@@ -7,10 +7,12 @@ import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions
 import { AppState } from '../store/app-state';
 import { applicationSchemaKey, entityFactory, organizationSchemaKey } from '../store/helpers/entity-factory';
 import { isFavorite } from '../store/selectors/favorite.selectors';
-import { EntityMonitor } from './../shared/monitors/entity-monitor';
-import { GetOrganization } from './../store/actions/organization.actions';
-import { UserFavorite } from './../store/types/user-favorites.types';
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { GetOrganization } from '../store/actions/organization.actions';
+import { UserFavorite } from '../store/types/user-favorites.types';
 import { EntityService } from './entity-service';
+import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';
+
 export class UserFavoriteManager {
   constructor(private store: Store<AppState>) { }
 
@@ -27,20 +29,9 @@ export class UserFavoriteManager {
     };
   }
 
-  private getActionGeneratorFromFavoriteType(favorite: UserFavorite) {
-    const type = favorite.entityType || favorite.endpointType;
-    switch (type) {
-      case applicationSchemaKey:
-        return createGetApplicationAction(favorite.entityId, favorite.endpointId);
-      case organizationSchemaKey:
-        return new GetOrganization(favorite.entityId, favorite.endpointId);
-    }
-
-  }
-
   public hydrateFavorite(favorite: UserFavorite) {
     const { type, id } = this.getTypeAndID(favorite);
-    const action = this.getActionGeneratorFromFavoriteType(favorite);
+    const action = getActionGeneratorFromFavoriteType(favorite);
     if (action) {
       const entityMonitor = new EntityMonitor(this.store, id, type, entityFactory(type));
       const entityService = new EntityService(

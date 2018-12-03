@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { mergeMap, map } from 'rxjs/operators';
-import { UserFavoriteManager } from '../../../core/user-favorite-hydrator';
+import { UserFavoriteManager } from '../../../core/user-favorite-helpers';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AppState } from '../../../store/app-state';
 import { userFavoritesPaginationKey } from '../../../store/effects/user-favorites-effect';

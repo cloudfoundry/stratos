@@ -1,3 +1,4 @@
+import { AppState } from './../../../../../../store/app-state';
 
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -7,6 +8,9 @@ import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
+import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
+import { Store } from '@ngrx/store';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 
 
 export interface MetaCardMenuItem {
@@ -31,6 +35,11 @@ export class MetaCardComponent {
 
   @Input()
   status$: Observable<CardStatus>;
+
+  @Input()
+  public favorite: UserFavorite;
+
+  userFavoriteManager: UserFavoriteManager;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
@@ -65,7 +74,10 @@ export class MetaCardComponent {
   @Input()
   clickAction: Function = null;
 
-  constructor(private entityMonitorFactory: EntityMonitorFactory) {
+  constructor(
+    private entityMonitorFactory: EntityMonitorFactory,
+    store: Store<AppState>
+  ) {
     if (this.actionMenu) {
       this.actionMenu = this.actionMenu.map(element => {
         if (!element.disabled) {
@@ -74,6 +86,7 @@ export class MetaCardComponent {
         return element;
       });
     }
+    this.userFavoriteManager = new UserFavoriteManager(store);
   }
 
   cancelPropagation = (event) => {

@@ -15,14 +15,17 @@
       </button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu">
         <ng-container *ngFor="let menuItem of _actionMenu">
-          <button class="meta-card__header__popup__btn" [disabled]="menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async" (click)="menuItem.action()">
+          <button class="meta-card__header__popup__btn" [disabled]="menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async"
+            (click)="menuItem.action()">
             <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
             <span>{{menuItem.label}}</span>
           </button>
         </ng-container>
       </mat-menu>
     </div>
-    <app-application-state-icon *ngIf="status$" [status]="status$ | async"></app-application-state-icon>
+    <app-entity-favorite-star class="meta-card__favorite" *ngIf="favorite" [favorite]="favorite">
+    </app-entity-favorite-star>
+    <app-application-state-icon *ngIf="!favorite && status$" [status]="status$ | async"></app-application-state-icon>
   </mat-card-header>
   <mat-card-content>
     <div *ngFor="let metaItem of metaItems">
