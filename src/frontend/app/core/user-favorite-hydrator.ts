@@ -1,17 +1,16 @@
-import { GetOrganization } from './../store/actions/organization.actions';
-import { EntityMonitor } from './../shared/monitors/entity-monitor';
-import { UserFavorite } from './../store/types/user-favorites.types';
-import { AppState } from '../store/app-state';
 import { Store } from '@ngrx/store';
-import { entityFactory, applicationSchemaKey, organizationSchemaKey } from '../store/helpers/entity-factory';
-import { EntityService } from './entity-service';
-import { IRequestAction } from '../store/types/request.types';
-import { isFavorite } from '../store/selectors/favorite.selectors';
+import { of as observableOf } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
+import { createGetApplicationAction } from '../features/applications/application.service';
 import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
-import { createGetApplicationAction } from '../features/applications/application.service';
-import { of as observableOf } from 'rxjs';
+import { AppState } from '../store/app-state';
+import { applicationSchemaKey, entityFactory, organizationSchemaKey } from '../store/helpers/entity-factory';
+import { isFavorite } from '../store/selectors/favorite.selectors';
+import { EntityMonitor } from './../shared/monitors/entity-monitor';
+import { GetOrganization } from './../store/actions/organization.actions';
+import { UserFavorite } from './../store/types/user-favorites.types';
+import { EntityService } from './entity-service';
 export class UserFavoriteManager {
   constructor(private store: Store<AppState>) { }
 
