@@ -109,7 +109,6 @@ export class CfAPIFlattener extends BaseHttpFetcher implements IPaginationFlatte
     Object.keys(res).forEach(endpointKey => {
       const endpoint = res[endpointKey];
       endpoint.total_pages = 1;
-      endpoint.total_results = allResults;
     });
     return observableOf(res);
   }

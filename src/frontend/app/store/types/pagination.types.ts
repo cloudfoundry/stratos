@@ -56,6 +56,9 @@ export interface BasePaginatedAction extends Action {
 export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   actions: string[];
   flattenPagination?: boolean;
+  /*
+   * Should be equal or higher than the page size
+   */
   flattenPaginationMax?: number;
   initialParams?: PaginationParam;
   pageNumber?: number;
