@@ -6,10 +6,12 @@ import { SharedModule } from '../shared/shared.module';
 import { AcmeLoginComponent } from './acme-login/acme-login.component';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
 import { AppActionExtensionComponent } from './app-action-extension/app-action-extension.component';
+import { AcmeSupportInfoComponent } from './acme-support-info/acme-support-info.component';
 
 const AcmeCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2018 ACME Corp',
   hasEula: true,
+  supportInfoComponent: AcmeSupportInfoComponent,
 };
 
 @NgModule({
@@ -21,13 +23,15 @@ const AcmeCustomizations: CustomizationsMetadata = {
   declarations: [
     AcmeLoginComponent,
     AppTabExtensionComponent,
-    AppActionExtensionComponent
+    AppActionExtensionComponent,
+    AcmeSupportInfoComponent
   ],
   entryComponents: [
     AcmeLoginComponent,
     // You must specify the tab and action as an entry components
     AppTabExtensionComponent,
-    AppActionExtensionComponent
+    AppActionExtensionComponent,
+    AcmeSupportInfoComponent
   ],
   providers: [
     { provide: Customizations, useValue: AcmeCustomizations }
