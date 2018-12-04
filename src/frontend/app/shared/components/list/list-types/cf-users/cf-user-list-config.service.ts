@@ -1,15 +1,17 @@
-import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, map, switchMap, tap, first } from 'rxjs/operators';
+import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
+import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
+import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
+import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
@@ -24,13 +26,19 @@ import {
 } from './../../list.component.types';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
-import { CfUserDataSourceService, UserListUsersVisible, userListUserVisibleKey, userHasRole } from './cf-user-data-source.service';
-import { cfUserSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
-import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
+import { CfUserDataSourceService } from './cf-user-data-source.service';
+import { userHasRole, UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
 
-@Injectable()
+const defaultUserHasRoles: (user: CfUser) => boolean = (user: CfUser): boolean => {
+  return userHasRole(user, 'organizations') ||
+    userHasRole(user, 'spaces') ||
+    userHasRole(user, 'managed_organizations') ||
+    userHasRole(user, 'managed_spaces') ||
+    userHasRole(user, 'audited_organizations') ||
+    userHasRole(user, 'audited_spaces') ||
+    userHasRole(user, 'billing_managed_organizations');
+};
+
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   isLocal = true;
   viewType = ListViewTypes.TABLE_ONLY;
@@ -115,15 +123,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
-    userHasRoles: (user: CfUser) => boolean = (user: CfUser): boolean => {
-      return userHasRole(user, 'organizations') ||
-        userHasRole(user, 'spaces') ||
-        userHasRole(user, 'managed_organizations') ||
-        userHasRole(user, 'managed_spaces') ||
-        userHasRole(user, 'audited_organizations') ||
-        userHasRole(user, 'audited_spaces') ||
-        userHasRole(user, 'billing_managed_organizations');
-    },
+    userHasRoles: (user: CfUser) => boolean = defaultUserHasRoles,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {

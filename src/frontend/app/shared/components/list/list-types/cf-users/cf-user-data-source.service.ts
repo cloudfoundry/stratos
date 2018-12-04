@@ -8,32 +8,7 @@ import { ListConfig } from '../../list.component.types';
 import { AppState } from './../../../../../store/app-state';
 import { APIResource } from './../../../../../store/types/api.types';
 import { CfUser } from './../../../../../store/types/user.types';
-
-export const userListUserVisibleKey = 'showUsers';
-// TODO: RC location
-export enum UserListUsersVisible {
-  ALL = 'all',
-  WITH_ROLE = 'withRole',
-  NO_ROLE = 'noRole'
-}
-
-// export const userHas(): boolean {
-//   return false;
-// }
-
-export const userHasRole = (user: CfUser, roleProperty: string): boolean => {
-  return !!user[roleProperty] && !!user[roleProperty].length;
-};
-
-// const userHasAnyRole = (user: CfUser): boolean => {
-//   return userHasRole(user, 'organizations') ||
-//     userHasRole(user, 'spaces') ||
-//     userHasRole(user, 'managed_organizations') ||
-//     userHasRole(user, 'managed_spaces') ||
-//     userHasRole(user, 'audited_organizations') ||
-//     userHasRole(user, 'audited_spaces') ||
-//     userHasRole(user, 'billing_managed_organizations');
-// };
+import { UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
 
 function createUserVisibilityFilter(userHasRoles: (user: CfUser) => boolean):
   (entities: APIResource<CfUser>[], paginationState: PaginationEntityState) => APIResource<CfUser>[] {
