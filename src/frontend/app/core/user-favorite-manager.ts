@@ -1,3 +1,4 @@
+import { endpointSchemaKey } from './../store/helpers/entity-factory';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, switchMap, tap, mergeMap, startWith } from 'rxjs/operators';
@@ -10,9 +11,9 @@ import { userFavoritesPaginationKey } from '../store/effects/user-favorites-effe
 import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
 import { isFavorite } from '../store/selectors/favorite.selectors';
 import { PaginationEntityState } from '../store/types/pagination.types';
-import { UserFavorite } from '../store/types/user-favorites.types';
+import { UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
 import { EntityService } from './entity-service';
-import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';
+import { getActionGeneratorFromFavoriteType, getFavoriteFromEntity } from './user-favorite-helpers';
 import { EntityInfo } from '../store/types/api.types';
 import { ActionState } from '../store/reducers/api-request-reducer/types';
 
@@ -61,7 +62,9 @@ export class UserFavoriteManager {
         }
       }),
       filter(({ busy }) => busy === false),
-      switchMap(() => paginationMonitor.currentPage$),
+      switchMap(() => paginationMonitor.currentPage$.pipe(
+        map(this.addEndpointsToHydrateList)
+      )),
       mergeMap(list => combineLatest(
         list.map(
           fav => this.hydrateFavorite(fav).pipe(
@@ -92,6 +95,30 @@ export class UserFavoriteManager {
         entities: null
       })
     );
+  }
+
+  public addEndpointsToHydrateList = (favorites: UserFavorite[]) => {
+    return favorites.reduce((newFavorites: UserFavorite[], favorite) => {
+      const hasEndpoint = this.hasEndpointAsFavorite(newFavorites, favorite);
+      if (!hasEndpoint) {
+        const endpointFavorite = new UserFavoriteEndpoint(
+          favorite.endpointId
+        );
+        newFavorites.push(endpointFavorite);
+      }
+      return newFavorites;
+    }, favorites);
+  }
+
+  public hasEndpointAsFavorite(allFavorites: UserFavorite[], favoriteToFindEndpoint: UserFavorite) {
+    if (this.isEndpointType(favoriteToFindEndpoint)) {
+      return true;
+    }
+    return !!allFavorites.find(favorite => this.isEndpointType(favorite) && favorite.endpointId === favoriteToFindEndpoint.endpointId);
+  }
+
+  private isEndpointType(favorite: UserFavorite) {
+    return !(favorite.entityId || favorite.entityType);
   }
 
   public hydrateFavorite(favorite: UserFavorite): Observable<EntityInfo> {
