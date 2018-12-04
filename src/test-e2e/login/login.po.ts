@@ -92,7 +92,7 @@ export class LoginPage {
   }
 
   waitForLoading() {
-    return Component.waitUntilNotShown(element(by.css('.login__loading')));
+    return Component.waitUntilNotShown(element(by.id('login__loading')));
   }
 
 }

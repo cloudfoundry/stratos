@@ -12,6 +12,7 @@ import { ApplicationPageInstancesTab } from './po/application-page-instances.po'
 import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
+import { CreateRoutesPage } from './po/routes-create-page.po';
 
 describe('Application View -', function () {
   let cfHelper: CFHelpers;
@@ -182,6 +183,21 @@ describe('Application View -', function () {
       expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
     });
 
+    it('Should be able to cancel from Add Route', () => {
+      expect(appRoutes.list.header.getAdd().isDisplayed()).toBeTruthy();
+      appRoutes.list.header.getAdd().click();
+
+      const addRoutePage = new CreateRoutesPage(CFHelpers.cachedDefaultCfGuid, app.metadata.guid, app.entity.space_guid);
+      expect(addRoutePage.isActivePage()).toBeTruthy();
+      expect(addRoutePage.header.getTitleText()).toBe('Create Route');
+      expect(addRoutePage.type.getSelected().getText()).toBe('Create and map new route');
+
+      expect(addRoutePage.stepper.canCancel()).toBeTruthy();
+      addRoutePage.stepper.cancel();
+
+      // Should return back to App Routes
+      appRoutes.waitForPage();
+    });
   });
 
   describe('Variables Tab -', () => {
