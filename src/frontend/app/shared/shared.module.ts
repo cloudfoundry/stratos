@@ -140,6 +140,29 @@ import { MetricsRangeSelectorComponent } from './components/metrics-range-select
 import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 
+import { CardAppComponent } from './components/list/list-types/app/card/card-app.component';
+import { EndpointCardComponent } from './components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
+import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import { CfSpaceCardComponent } from './components/list/list-types/cf-spaces/cf-space-card/cf-space-card.component';
+import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
+import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
+import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
+import { CfServiceCardComponent } from './components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
+import { AppServiceBindingCardComponent } from './components/list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
+import { ServiceInstanceCardComponent } from './components/list/list-types/services-wall/service-instance-card/service-instance-card.component';
+
+export const listCards = [
+  CardAppComponent,
+  EndpointCardComponent,
+  CfOrgCardComponent,
+  CfSpaceCardComponent,
+  CfBuildpackCardComponent,
+  CfSecurityGroupsCardComponent,
+  CfStacksCardComponent,
+  CfServiceCardComponent,
+  AppServiceBindingCardComponent,
+  ServiceInstanceCardComponent
+];
 @NgModule({
   imports: [
     CommonModule,
@@ -190,6 +213,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     DialogConfirmComponent,
     CardAppUptimeComponent,
     ListComponent,
+    ...listCards,
     ...listCardComponents,
     ...listTableComponents,
     CardCfUsageComponent,
@@ -339,13 +363,15 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
-    MetricsParentRangeSelectorComponent
+    MetricsParentRangeSelectorComponent,
+    ...listCards
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
-    NoServicePlansComponent
+    NoServicePlansComponent,
+    ...listCards
   ],
   providers: [
     ListConfig,
@@ -358,7 +384,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
-    MetricsRangeSelectorService
+    MetricsRangeSelectorService,
   ]
 })
 export class SharedModule { }

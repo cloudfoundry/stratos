@@ -1,5 +1,14 @@
 <app-page-header>
   <h1>Dashboard</h1>
 </app-page-header>
-
-{{ favs$ | async | json }}
+<div *ngIf="(favs$ | async) as favorites">
+  <div *ngIf="favorites.error && !favorites.fetching">Could not fetch favorites</div>
+  <mat-progress-spinner *ngIf="!favorites.error && favorites.fetching" diameter="20" mode="indeterminate"></mat-progress-spinner>
+  <div *ngIf="!favorites.error && !favorites.fetching">
+    <div *ngFor="let fav of favorites.entities" [ngSwitch]="fav.type">
+      <app-card-app [row]="fav.entity" *ngSwitchCase="'application'"></app-card-app>
+      <app-endpoint-card [row]="fav.entity" *ngSwitchCase="'endpoint'"></app-endpoint-card>
+      <app-cf-space-card [row]="fav.entity" *ngSwitchCase="'space'"></app-cf-space-card>
+    </div>
+  </div>
+</div>
