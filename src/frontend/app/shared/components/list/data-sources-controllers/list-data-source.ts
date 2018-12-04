@@ -147,7 +147,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
       // Update result count after local filtering so it matches the size of the filtered entities collection
       // (except if we've maxed out results where the totalResults is miss-matched with entities collection)
-      const newLength = paginationEntity.maxedResults && entities.length === paginationEntity.params['results-per-page'] ?
+      const newLength = paginationEntity.maxedResults && entities.length >= paginationEntity.params['results-per-page'] ?
         paginationEntity.maxedResults : entities.length;
       if (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength) {
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));

@@ -13,7 +13,7 @@
     "build": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --prod",
     "build-cf": "node --max_old_space_size=1128 --optimize_for_size --gc_interval=100 node_modules/@angular/cli/bin/ng build --prod --aot=false --build-optimizer=false",
     "build-dev": "ng build --dev",
-    "prebuild-ui": "npm run build && gulp package-prebuild",
+    "prebuild-ui": "npm run customize && npm run build && gulp package-prebuild",
     "ng": "ng",
     "start": "npm run customize && ng serve",
     "start-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
