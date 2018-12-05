@@ -59,6 +59,9 @@ jobs:
     - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - npm run test-backend
+  - name: Helm Chart Unit Tests
+    script:
+    - "./deploy/ci/travis/helm-chart-unit-tests.sh"
   - name: E2E Tests - Long Suite
     before_script:
     - "./deploy/ci/travis/job-e2e-before_script.sh"
