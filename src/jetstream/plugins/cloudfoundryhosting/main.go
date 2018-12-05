@@ -161,7 +161,7 @@ func (ch *CFHosting) Init() error {
 		skipSsl, err := config.GetValue("SKIP_SSL_VALIDATION")
 		if err != nil {
 			// Not set in the environment and failed to read from the Secrets file
-			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = true
+			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
 		}
 
 		skipSslBool, err := strconv.ParseBool(skipSsl)
