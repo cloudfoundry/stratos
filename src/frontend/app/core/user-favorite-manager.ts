@@ -1,3 +1,4 @@
+import { element } from 'protractor';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, switchMap, tap, mergeMap, startWith } from 'rxjs/operators';
@@ -14,6 +15,19 @@ import { UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorite
 import { EntityService } from './entity-service';
 import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';
 import { EntityInfo } from '../store/types/api.types';
+import { EndpointModel } from '../store/types/endpoint.types';
+interface IntermediateFavoritesGroup {
+  [endpointId: string]: UserFavorite[];
+}
+
+export interface IGroupedFavorites {
+  endpoint: IEndpointFavoriteEntity;
+  entities: IFavoriteEntity[];
+}
+
+export interface IEndpointFavoriteEntity extends IFavoriteEntity {
+  entity: EndpointModel;
+}
 
 export interface IFavoriteEntity {
   type: string;
@@ -22,11 +36,48 @@ export interface IFavoriteEntity {
 export interface IAllFavorites {
   fetching: boolean;
   error: boolean;
-  entities: IFavoriteEntity[];
+  entityGroups: IGroupedFavorites[];
 }
 
 export class UserFavoriteManager {
   constructor(private store: Store<AppState>) { }
+
+  private groupIntermediateFavorites = (favorites: UserFavorite[]): UserFavorite[][] => {
+    const intermediateFavoritesGroup = favorites.reduce((intermediate: IntermediateFavoritesGroup, favorite: UserFavorite) => {
+      const { endpointId } = favorite;
+      if (!intermediate[endpointId]) {
+        intermediate[endpointId] = [];
+      }
+      const isEndpoint = this.isEndpointType(favorite);
+      if (isEndpoint) {
+        intermediate[endpointId].unshift(favorite);
+      } else {
+        intermediate[endpointId].push(favorite);
+      }
+      return intermediate;
+    }, {} as IntermediateFavoritesGroup);
+
+    return Object.values(intermediateFavoritesGroup).reduce((favsArray, favs) => {
+      favsArray.push(favs);
+      return favsArray;
+    }, [] as UserFavorite[][]);
+  }
+
+  private groupFavoriteEntities(intermediateEntitiesGroup: IFavoriteEntity[][]): IGroupedFavorites[] {
+    return Object.values(intermediateEntitiesGroup).reduce((group: IGroupedFavorites[], userFavorites: IFavoriteEntity[]) => {
+      const [
+        endpoint,
+        ...entities
+      ] = userFavorites;
+      group.push({
+        endpoint,
+        entities
+      });
+      return group;
+    }, [] as IGroupedFavorites[]);
+  }
+
+
 
   private getTypeAndID(favorite: UserFavorite) {
     if (favorite.entityId) {
@@ -51,7 +102,8 @@ export class UserFavoriteManager {
       userFavoritesPaginationKey,
       entityFactory(userFavoritesSchemaKey)
     );
-    return paginationMonitor.pagination$.pipe(
+
+    const waitForFavorites$ = paginationMonitor.pagination$.pipe(
       map(this.getCurrentPagePagination),
       filter(pageRequest => !!pageRequest),
       tap(({ error }) => {
@@ -60,37 +112,43 @@ export class UserFavoriteManager {
         }
       }),
       filter(({ busy }) => busy === false),
+    );
+
+    return waitForFavorites$.pipe(
       switchMap(() => paginationMonitor.currentPage$.pipe(
         map(this.addEndpointsToHydrateList)
       )),
+      map(this.groupIntermediateFavorites),
       mergeMap(list => combineLatest(
         list.map(
-          fav => this.hydrateFavorite(fav).pipe(
+          favGroup => combineLatest(favGroup.map(fav => this.hydrateFavorite(fav).pipe(
             filter(entityInfo => entityInfo.entityRequestInfo.fetching === false),
             map(entityInfo => ({
               entityInfo,
               type: this.getTypeAndID(fav).type
-            }))
-          )
+            })))
+          ))
         ))
       ),
       map((entityRequests) => ({
-        error: entityRequests.findIndex(entityRequest => entityRequest.entityInfo.entityRequestInfo.error === true) > -1,
+        error: !entityRequests.findIndex(entityRequest => {
+          return entityRequest.findIndex((request) => request.entityInfo.entityRequestInfo.error === true) > -1;
+        }),
         fetching: false,
-        entities: entityRequests.map(entityRequest => ({
-          type: entityRequest.type,
-          entity: entityRequest.entityInfo.entity
-        }))
+        entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
+          type: request.type,
+          entity: request.entityInfo.entity
+        }))))
       })),
-      catchError(() => observableOf({
+      catchError((e) => observableOf({
         error: true,
         fetching: false,
-        entities: null
+        entityGroups: null
       })),
       startWith({
         error: false,
         fetching: true,
-        entities: null
+        entityGroups: null
       })
     );
   }
