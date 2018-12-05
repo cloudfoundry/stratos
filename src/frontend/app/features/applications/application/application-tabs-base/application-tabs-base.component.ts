@@ -20,7 +20,7 @@ import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../..
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService, ApplicationData } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
 import { RestageApplication } from '../../../../store/actions/application.actions';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
@@ -48,6 +48,11 @@ const appRestartConfirmation = new ConfirmationDialogConfig(
   'Restart Application',
   'Are you sure you want to restart this Application?',
   'Restart'
+);
+const appRestageConfirmation = new ConfirmationDialogConfig(
+  'Restage Application',
+  'Are you sure you want to restage this Application?',
+  'Restage'
 );
 
 @Component({
@@ -202,13 +207,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ];
   }
 
-  private startStopApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
+  private confirmAndPollForState(
+    confirmConfig: ConfirmationDialogConfig,
+    onConfirm: (appData: ApplicationData) => void,
+    updateKey: string,
+    requiredAppState: string,
+    onSuccess: () => void) {
     this.applicationService.application$.pipe(
       first(),
       tap(appData => {
         this.confirmDialog.open(confirmConfig, () => {
-          // Once the state changes always make a request to app stats via [AppMetadataTypes.STATS] below
-          this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity);
+          onConfirm(appData);
           this.pollEntityService(updateKey, requiredAppState).pipe(
             first(),
           ).subscribe(onSuccess);
@@ -217,8 +226,18 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ).subscribe();
   }
 
+  private updateApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
+    this.confirmAndPollForState(
+      confirmConfig,
+      appData => this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity),
+      updateKey,
+      requiredAppState,
+      onSuccess
+    );
+  }
+
   stopApplication() {
-    this.startStopApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
+    this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
       // On app reaching the 'STOPPED' state clear the app's stats pagination section
       const { cfGuid, appGuid } = this.applicationService;
       this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
@@ -227,7 +246,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   restageApplication() {
     const { cfGuid, appGuid } = this.applicationService;
-    this.store.dispatch(new RestageApplication(appGuid, cfGuid));
+    this.confirmAndPollForState(
+      appRestageConfirmation,
+      () => this.store.dispatch(new RestageApplication(appGuid, cfGuid)),
+      'starting',
+      'STARTED',
+      () => { }
+    );
   }
 
   pollEntityService(state, stateString): Observable<any> {
@@ -241,7 +266,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   startApplication() {
-    this.startStopApp(appStartConfirmation, 'starting', 'STARTED', () => { });
+    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => { });
   }
 
   private dispatchAppStats = () => {
