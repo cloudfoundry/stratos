@@ -4,7 +4,12 @@ import { endpointSchemaKey } from '../helpers/entity-factory';
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */
 
-export class UserFavorite {
+export interface IFavoriteTypeInfo {
+  endpointType: string;
+  entityType?: string;
+}
+
+export class UserFavorite implements IFavoriteTypeInfo {
   public guid: string;
   constructor(
     public endpointId: string,

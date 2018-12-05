@@ -150,6 +150,8 @@ import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf
 import { CfServiceCardComponent } from './components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { AppServiceBindingCardComponent } from './components/list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { ServiceInstanceCardComponent } from './components/list/list-types/services-wall/service-instance-card/service-instance-card.component';
+import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
+import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 
 export const listCards = [
   CardAppComponent,
@@ -271,6 +273,8 @@ export const listCards = [
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
+    FavoritesGlobalListComponent,
+    FavoritesMetaCardComponent,
   ],
   exports: [
     FormsModule,

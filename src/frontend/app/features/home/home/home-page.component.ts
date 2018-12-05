@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { IAllFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
 import { AppState } from '../../../store/app-state';
-import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home-page',

@@ -77,8 +77,6 @@ export class UserFavoriteManager {
     }, [] as IGroupedFavorites[]);
   }
 
-
-
   private getTypeAndID(favorite: UserFavorite) {
     if (favorite.entityId) {
       return {
@@ -140,7 +138,7 @@ export class UserFavoriteManager {
           entity: request.entityInfo.entity
         }))))
       })),
-      catchError((e) => observableOf({
+      catchError(() => observableOf({
         error: true,
         fetching: false,
         entityGroups: null

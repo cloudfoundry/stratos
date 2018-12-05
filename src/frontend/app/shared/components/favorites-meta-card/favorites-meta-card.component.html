@@ -1,0 +1,12 @@
+<app-meta-card class="app-service-card" [status$]="config.status$">
+  <app-meta-card-title>
+    <div class="app-service-card__title">
+      <small>{{ config.prettyType }}</small>
+      {{ config.name }}
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item *ngFor="let line of config.lines">
+    <app-meta-card-key>{{ line.label }}</app-meta-card-key>
+    <app-meta-card-value>{{ line.value }} </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>
