@@ -10,11 +10,10 @@ curl https://raw.githubusercontent.com/helm/helm/master/scripts/get > get_helm.s
 chmod 700 get_helm.sh
 ./get_helm.sh
 
-echo "Helm Init"
-# Helm init will fail as there is no cluser - we just want to use it client-side
-set +e
-helm init
-set -e
+echo "Helm Init (Client)"
+helm init --client-only
+
+helm version --client
 
 echo "Install Helm unit test plugin"
 helm plugin install https://github.com/lrills/helm-unittest
