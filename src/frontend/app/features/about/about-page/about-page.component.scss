@@ -17,10 +17,6 @@
     margin-bottom: 24px;
     text-align: center;
   }
-  &__card {
-    margin-bottom: 24px;
-    z-index: 1;
-  }
   &__eula {
     align-items: center;
     display: flex;
@@ -45,4 +41,10 @@
   &__warning-icon {
     margin-right: 8px;
   }
+}
+
+// Cards on the about page should have spacing below each card
+.mat-card {
+  margin-bottom: 24px;
+  z-index: 1;
 }
