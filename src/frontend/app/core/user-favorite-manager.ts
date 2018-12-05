@@ -1,4 +1,3 @@
-import { endpointSchemaKey } from './../store/helpers/entity-factory';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, switchMap, tap, mergeMap, startWith } from 'rxjs/operators';
@@ -13,9 +12,8 @@ import { isFavorite } from '../store/selectors/favorite.selectors';
 import { PaginationEntityState } from '../store/types/pagination.types';
 import { UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
 import { EntityService } from './entity-service';
-import { getActionGeneratorFromFavoriteType, getFavoriteFromEntity } from './user-favorite-helpers';
+import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';
 import { EntityInfo } from '../store/types/api.types';
-import { ActionState } from '../store/reducers/api-request-reducer/types';
 
 export interface IFavoriteEntity {
   type: string;
