@@ -8,7 +8,7 @@ import {
   of as observableOf,
   Subscription,
 } from 'rxjs';
-import { filter, first, map, startWith, tap } from 'rxjs/operators';
+import { filter, first, map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
@@ -99,26 +99,21 @@ export class DeployApplicationStep3Component implements OnDestroy {
     if (this.deployer && !this.deployer.deploying) {
       this.deployer.close();
     } else {
-      this.setupCompetionNofication();
+      this.setupCompletionNotification();
     }
   }
 
-  private setupCompetionNofication() {
+  private setupCompletionNotification() {
     this.deployer.status$.pipe(
-      tap(status => {
-        if (!status.deploying) {
-          if (status.error) {
-            this.snackBar.open(status.errorMsg, 'Dismiss');
-          } else {
-            const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
-            ref.onAction().subscribe(() => { this.goToAppSummary(); });
-          }
-        }
-      }),
-      map((status: any) => status.deploying),
-      filter(deploying => !deploying),
+      filter(status => !status.deploying),
       first()
-    ).subscribe(() => {
+    ).subscribe(status => {
+      if (status.error) {
+        this.snackBar.open(status.errorMsg, 'Dismiss');
+      } else {
+        const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
+        ref.onAction().subscribe(() => { this.goToAppSummary(); });
+      }
       this.deployer.close();
     });
   }
