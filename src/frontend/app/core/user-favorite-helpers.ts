@@ -14,8 +14,8 @@ const generators = {
 };
 
 export function getActionGeneratorFromFavoriteType(favorite: UserFavorite) {
-  const type = favorite.entityType || favorite.endpointType;
-  const generator = generators[type];
+  const { entityType } = favorite;
+  const generator = generators[entityType];
   if (generator) {
     return generator(favorite);
   }
@@ -37,8 +37,8 @@ function getFavoriteFromCfEntity(entity: CfAPIResource, entityKey: string) {
   return new UserFavorite(
     entity.entity.cfGuid,
     'cf',
+    entityKey,
     entity.metadata.guid,
-    entityKey
   );
 }
 

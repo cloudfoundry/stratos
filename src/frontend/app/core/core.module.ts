@@ -23,8 +23,6 @@ import { WindowRef } from './window-ref/window-ref.service';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
-import { favoritesToCardConfigMapper } from '../shared/components/favorites-meta-card/favorite-to-card-config-mapper';
-import { EndpointModel } from '../store/types/endpoint.types';
 
 
 @NgModule({
@@ -78,13 +76,4 @@ import { EndpointModel } from '../store/types/endpoint.types';
     LogOutDialogComponent
   ],
 })
-export class CoreModule {
-  constructor() {
-    favoritesToCardConfigMapper.registerMapper({
-      endpointType: 'cf',
-      entityType: 'endpoint'
-    }, (endpoint: EndpointModel) => {
-
-    })
-  }
-}
+export class CoreModule { }

@@ -215,7 +215,6 @@ export const listCards = [
     DialogConfirmComponent,
     CardAppUptimeComponent,
     ListComponent,
-    ...listCards,
     ...listCardComponents,
     ...listTableComponents,
     CardCfUsageComponent,
@@ -368,14 +367,14 @@ export const listCards = [
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
-    ...listCards
+    FavoritesMetaCardComponent,
+    FavoritesGlobalListComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
     NoServicePlansComponent,
-    ...listCards
   ],
   providers: [
     ListConfig,

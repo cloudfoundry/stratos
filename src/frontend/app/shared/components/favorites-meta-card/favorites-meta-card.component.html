@@ -8,6 +8,6 @@
   </app-meta-card-title>
   <app-meta-card-item *ngFor="let line of config.lines">
     <app-meta-card-key>{{ line[0] }}</app-meta-card-key>
-    <app-meta-card-value>{{ line[1] }} </app-meta-card-value>
+    <app-meta-card-value>{{ line[1] | async }} </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

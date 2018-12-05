@@ -16,6 +16,10 @@ import { EntityService } from './entity-service';
 import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';
 import { EntityInfo } from '../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
+import {
+  favoritesToCardConfigMapper,
+  TFavoriteMapperFunction
+} from '../shared/components/favorites-meta-card/favorite-to-card-config-mapper';
 interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite[];
 }
@@ -31,6 +35,7 @@ export interface IEndpointFavoriteEntity extends IFavoriteEntity {
 
 export interface IFavoriteEntity {
   type: string;
+  cardMapper: TFavoriteMapperFunction;
   entity: any;
 }
 export interface IAllFavorites {
@@ -78,15 +83,10 @@ export class UserFavoriteManager {
   }
 
   private getTypeAndID(favorite: UserFavorite) {
-    if (favorite.entityId) {
-      return {
-        type: favorite.entityType,
-        id: favorite.entityId
-      };
-    }
+    const type = favorite.entityType;
     return {
-      type: favorite.endpointType,
-      id: favorite.endpointId
+      type,
+      id: favorite.entityId || favorite.endpointId
     };
   }
 
@@ -123,7 +123,8 @@ export class UserFavoriteManager {
             filter(entityInfo => entityInfo.entityRequestInfo.fetching === false),
             map(entityInfo => ({
               entityInfo,
-              type: this.getTypeAndID(fav).type
+              type: this.getTypeAndID(fav).type,
+              cardMapper: favoritesToCardConfigMapper.getMapperFunction(fav)
             })))
           ))
         ))
@@ -135,14 +136,18 @@ export class UserFavoriteManager {
         fetching: false,
         entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
           type: request.type,
+          cardMapper: request.cardMapper,
           entity: request.entityInfo.entity
         }))))
       })),
-      catchError(() => observableOf({
-        error: true,
-        fetching: false,
-        entityGroups: null
-      })),
+      catchError(e => {
+        console.log(e)
+        return observableOf({
+          error: true,
+          fetching: false,
+          entityGroups: null
+        })
+      }),
       startWith({
         error: false,
         fetching: true,
@@ -156,7 +161,8 @@ export class UserFavoriteManager {
       const hasEndpoint = this.hasEndpointAsFavorite(newFavorites, favorite);
       if (!hasEndpoint) {
         const endpointFavorite = new UserFavoriteEndpoint(
-          favorite.endpointId
+          favorite.endpointId,
+          favorite.endpointType
         );
         newFavorites.push(endpointFavorite);
       }
@@ -172,7 +178,7 @@ export class UserFavoriteManager {
   }
 
   private isEndpointType(favorite: UserFavorite) {
-    return !(favorite.entityId || favorite.entityType);
+    return !favorite.entityId;
   }
 
   public hydrateFavorite(favorite: UserFavorite): Observable<EntityInfo> {
@@ -181,7 +187,7 @@ export class UserFavoriteManager {
     if (action) {
       const entityMonitor = new EntityMonitor(this.store, id, type, entityFactory(type));
 
-      if (favorite.endpointType === 'endpoint') {
+      if (favorite.entityType === 'endpoint') {
         return combineLatest(entityMonitor.entity$, entityMonitor.entityRequest$).pipe(
           map(([entity, entityRequestInfo]) => ({ entity, entityRequestInfo }))
         );
@@ -215,6 +221,4 @@ export class UserFavoriteManager {
       })
     ).subscribe();
   }
-
-
 }

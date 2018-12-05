@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { IFavoritesMetaCardConfig } from './favorite-to-card-config-mapper';
-import { Observable } from 'rxjs';
+import { Observable, isObservable, of as observableOf } from 'rxjs';
 import { CardStatus } from '../application-state/application-state.service';
 
 
@@ -29,7 +29,20 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   ngOnInit() {
     const { cardMapper, entity } = this.favoriteEntity;
-    this.config = cardMapper && entity ? cardMapper(entity) : null;
+    const config = cardMapper && entity ? cardMapper(entity) : null;
+    if (config) {
+      config.lines = config.lines.map(line => {
+        const [label, value] = line;
+        if (!isObservable(value)) {
+          return [
+            label,
+            observableOf(value)
+          ] as [string, Observable<string>];
+        }
+        return line;
+      });
+    }
+    this.config = config;
     if (this.config && this.config.getStatus) {
       this.status$ = this.config.getStatus(entity);
     }

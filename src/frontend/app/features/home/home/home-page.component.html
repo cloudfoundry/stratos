@@ -1,16 +1,4 @@
 <app-page-header>
   <h1>Dashboard</h1>
 </app-page-header>
-<div *ngIf="(favs$ | async) as favorites">
-  <div *ngIf="favorites.error && !favorites.fetching">Could not fetch favorites</div>
-  <mat-progress-spinner *ngIf="!favorites.error && favorites.fetching" diameter="20" mode="indeterminate"></mat-progress-spinner>
-  <div *ngIf="!favorites.error && !favorites.fetching">
-    <div *ngFor="let favGroup of favorites.entityGroups">
-      <div>{{ favGroup.endpoint | json }}</div>
-      <div *ngFor="let fav of favGroup.entities" [ngSwitch]="fav.type">
-        <div *ngSwitchCase="'application'">application</div>
-        <div *ngSwitchCase="'space'">space</div>
-      </div>
-    </div>
-  </div>
-</div>
+<app-favorites-global-list class="favorites-list"></app-favorites-global-list>

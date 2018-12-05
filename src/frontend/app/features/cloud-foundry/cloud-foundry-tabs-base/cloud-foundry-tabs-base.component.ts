@@ -18,7 +18,7 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../core/extension/extension-service';
-import { UserFavorite } from '../../../store/types/user-favorites.types';
+import { UserFavorite, UserFavoriteEndpoint } from '../../../store/types/user-favorites.types';
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
@@ -41,7 +41,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  public favorite: UserFavorite;
+  public favorite: UserFavoriteEndpoint;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -49,9 +49,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     endpointsService: EndpointsService
   ) {
 
-    this.favorite = new UserFavorite(
+    this.favorite = new UserFavoriteEndpoint(
       this.cfEndpointService.cfGuid,
-      'endpoint'
+      'cf',
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService

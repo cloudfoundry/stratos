@@ -6,7 +6,7 @@ import { CardStatus } from '../application-state/application-state.service';
 /**
  * [label, value]
  */
-export type TFavoritesMetaCardLine = [string, string];
+export type TFavoritesMetaCardLine = [string, string | Observable<string>];
 
 export interface IFavoritesMetaCardConfig {
   prettyType: string;

@@ -14,11 +14,11 @@ export class UserFavorite implements IFavoriteTypeInfo {
   constructor(
     public endpointId: string,
     public endpointType: string,
-    public entityId?: string,
     /*
     entityType should correspond to a type in the requestData part of the store.
-  */
-    public entityType?: string,
+    */
+    public entityType: string,
+    public entityId?: string,
   ) {
     this.guid = UserFavoritesEffect.buildFavoriteStoreEntityGuid(this);
   }
@@ -26,10 +26,12 @@ export class UserFavorite implements IFavoriteTypeInfo {
 
 export class UserFavoriteEndpoint extends UserFavorite {
   constructor(
-    public endpointId: string
+    public endpointId: string,
+    public endpointType: string
   ) {
     super(
       endpointId,
+      endpointType,
       endpointSchemaKey
     );
   }
