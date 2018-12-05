@@ -1,0 +1,115 @@
+suite: test stratos external service
+templates:
+  - service.yaml
+
+tests:
+  - it: should be a Service
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: kind
+          value: Service
+  - it: should have default nodePort configuration
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: spec.type
+          value: NodePort
+      - contains:
+          path: spec.ports
+          content:
+            name: https
+            port: 8443
+            protocol: TCP
+            targetPort: 443
+  - it: should allow nodePort configuration port override
+    set:
+      console.https_port: 12345
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+      - contains:
+          path: spec.ports
+          content:
+            name: https
+            port: 12345
+            protocol: TCP
+            targetPort: 443
+  - it: should allow nodePort configuration port override (legacy)
+    set:
+      console.port: 12345
+      console.https_port: 23456
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+      - contains:
+          path: spec.ports
+          content:
+            name: https
+            port: 12345
+            protocol: TCP
+            targetPort: 443
+  - it: should allow nodePort configuration port override (legacy)
+    set:
+      kube.external_console_https_port: 12345
+      console.https_port: 23456
+      console.port: 34567
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+      - contains:
+          path: spec.ports
+          content:
+            name: https
+            port: 12345
+            protocol: TCP
+            targetPort: 443
+  - it: should allow nodePort configuration http
+    set:
+      console.http_port: 18080
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+      - contains:
+          path: spec.ports
+          content:
+            name: http
+            port: 108080
+            protocol: TCP
+            targetPort: 80
+            name: https
+            port: 8443
+            protocol: TCP
+            targetPort: 443
+  - it: should have LoadBalancer configuration
+    set:
+      useLb: true
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+  - it: should allow clusterIP configuration http
+    set:
+      console.https_port:
+    asserts:
+      - isNull:
+          path: spec.type
+      - contains:
+          path: spec.ports
+          content:
+            name: http
+            port: 80
+            protocol: TCP
+            targetPort: 80
+            name: https
+            port: 443
+            protocol: TCP
+            targetPort: 443

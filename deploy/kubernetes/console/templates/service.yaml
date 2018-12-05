@@ -9,31 +9,64 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
   name: "{{ .Release.Name }}-ui-ext"
 spec:
+# Note: HTTP Port is always optional - HTTPS port always included
+{{- if or .Values.useLb .Values.services.loadbalanced }}
+# Load Balancer configuration
+  type: LoadBalancer
   ports:
-{{- if .Values.kube.console_http_port)) }}
+{{- if .Values.console.http_port }}
   - name: http
-    port: {{ .Values.kube.console_http_port }}
+    port: {{ .Values.console.http_port }}
     protocol: TCP
     targetPort: 80
 {{- end }}
   - name: https
-{{- if and (or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips) .Values.kube.external_console_https_port }}
-    port: {{ .Values.kube.external_console_https_port }}
-{{- else }}
-    port: {{ .Values.console.port }}
-{{- end }}
+    port: {{ template "service.https_port" . }}
     protocol: TCP
     targetPort: 443
-  selector:
-    app: "{{ .Release.Name }}"
-    component: console
-{{- if or .Values.useLb .Values.services.loadbalanced }}
-  type: LoadBalancer
 {{- else }}
-  type: NodePort
+{{- if or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips }}
+# External IP(s) configured
+  ports:
+{{- if .Values.console.http_port }}
+  - name: http
+    port: {{ .Values.console.http_port }}
+    protocol: TCP
+    targetPort: 80
 {{- end }}
-{{- if or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips  }}
+  - name: https
+    port: {{ template "service.https_port" . }}
+    protocol: TCP
+    targetPort: 443
   externalIPs: {{ template "service.externalIPs" . }}
+{{- else }} # Not External IP
+{{- if or .Values.console.https_port .Values.console.port .Values.kube.external_console_https_port }}
+# NodePort configured
+  type: NodePort
+  ports:
+{{- if .Values.console.http_port }}
+  - name: http
+    port: {{ .Values.console.http_port }}
+    protocol: TCP
+    targetPort: 80
+{{- end }}
+  - name: https
+    port: {{ template "service.https_port" . }}
+    protocol: TCP
+    targetPort: 443
+{{- else }}
+# ClusterIP
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+{{- end }}
+{{- end }}
 {{- end }}
 ---
 apiVersion: v1

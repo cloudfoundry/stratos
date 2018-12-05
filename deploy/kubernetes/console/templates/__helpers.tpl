@@ -35,3 +35,18 @@ Get SCf UAA Endpoint
 {{- printf "https://scf.%s:%v" .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
 {{- end -}}
 {{- end -}}
+
+
+{{/*
+Determine https port:
+*/}}
+{{- define "service.https_port" -}}
+{{- if .Values.kube.external_console_https_port -}}
+{{ printf "%v" .Values.kube.external_console_https_port -}}
+{{- else if .Values.console.port -}}
+{{- printf "%v" .Values.console.port -}}
+{{- else -}}
+{{ printf "%v" .Values.console.https_port -}}
+{{- end -}}
+{{- end -}}
+

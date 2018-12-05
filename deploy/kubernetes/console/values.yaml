@@ -13,7 +13,8 @@ dbProvider: mysql
 imagePullPolicy: IfNotPresent
 useLb: false
 console:
-  port: 443
+  https_port: 8443
+  http_port:
   cookieDomain:
 # externalIP: 127.0.0.1
   backendLogLevel: info
@@ -70,7 +71,7 @@ env:
   UAA_HOST: 
   UAA_PORT: 2793
 kube:
-  external_console_https_port: 8443
+  external_console_https_port:
   storage_class:
     persistent:
   organization: splatform
