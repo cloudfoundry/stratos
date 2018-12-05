@@ -1,3 +1,12 @@
 .favorites-list {
-  width: 50%;
+  flex: 60%;
+}
+
+.stats-panel {
+  flex: 40%;
+  margin-left: 10px;
+}
+
+.home-page {
+  display: flex;
 }
