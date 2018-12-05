@@ -9,5 +9,8 @@
     &___copied-icon {
       color: mat-color($primary);
     }
+    &__copied-div {
+      background-color: mat-color($foreground-colors, text);
+    }
   }
 }
