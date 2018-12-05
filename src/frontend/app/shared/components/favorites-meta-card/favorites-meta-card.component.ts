@@ -1,19 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { IFavoriteEntity } from '../../../core/user-favorite-manager';
+import { IFavoritesMetaCardConfig } from './favorite-to-card-config-mapper';
 import { Observable } from 'rxjs';
 import { CardStatus } from '../application-state/application-state.service';
 
-export interface IFavoritesMetaCardLine {
-  label: string;
-  value: string;
-}
 
-export interface IFavoritesMetaCardConfig {
-  prettyType: string;
-  type: string;
-  lines: [IFavoritesMetaCardLine, IFavoritesMetaCardLine, IFavoritesMetaCardLine];
-  name: string;
-  status$?: Observable<CardStatus>;
-}
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -23,11 +14,25 @@ export interface IFavoritesMetaCardConfig {
 export class FavoritesMetaCardComponent implements OnInit {
 
   @Input()
+  public favoriteEntity: IFavoriteEntity;
+
+  @Input()
+  public compact = false;
+
   public config: IFavoritesMetaCardConfig;
 
-  constructor() { }
+  public status$: Observable<CardStatus>;
+
+  constructor() {
+
+  }
 
   ngOnInit() {
+    const { cardMapper, entity } = this.favoriteEntity;
+    this.config = cardMapper && entity ? cardMapper(entity) : null;
+    if (this.config && this.config.getStatus) {
+      this.status$ = this.config.getStatus(entity);
+    }
   }
 
 }

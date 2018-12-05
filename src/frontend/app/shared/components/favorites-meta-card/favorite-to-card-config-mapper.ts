@@ -1,8 +1,22 @@
 import { TFavoriteMapperFunction } from './favorite-to-card-config-mapper';
-import { IFavoritesMetaCardConfig } from './favorites-meta-card.component';
 import { IFavoriteTypeInfo } from '../../../store/types/user-favorites.types';
+import { Observable } from 'rxjs';
+import { CardStatus } from '../application-state/application-state.service';
 
-export type TFavoriteMapperFunction = () => IFavoritesMetaCardConfig;
+/**
+ * [label, value]
+ */
+export type TFavoritesMetaCardLine = [string, string];
+
+export interface IFavoritesMetaCardConfig {
+  prettyType: string;
+  type: string;
+  lines: TFavoritesMetaCardLine[];
+  name: string;
+  getStatus?: (entity) => Observable<CardStatus>;
+}
+
+export type TFavoriteMapperFunction<> = (entity?) => IFavoritesMetaCardConfig;
 
 interface IFavoriteMappers {
   [key: string]: TFavoriteMapperFunction;

@@ -1,0 +1,14 @@
+.favorite-list {
+  &__endpoint-card {
+    margin-bottom: 10px;
+  }
+  &__entity-cards {
+    display: grid;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    grid-template-columns: auto auto auto;
+    margin: 10px 0;
+  }
+  &__entity-card {
+  }
+}
