@@ -106,6 +106,7 @@ import {
   MetricsParentRangeSelectorComponent,
 } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
@@ -253,6 +254,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
+    MultilineTitleComponent,
   ],
   exports: [
     FormsModule,
