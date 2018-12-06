@@ -50,7 +50,7 @@ const applicationsRoutes: Routes = [
         }
       },
       {
-        path: ':cfId/:id',
+        path: ':endpointId/:id',
         component: ApplicationBaseComponent,
         children: [
           {

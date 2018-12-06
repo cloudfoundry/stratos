@@ -94,7 +94,7 @@ const cloudFoundry: Routes = [{
   component: CloudFoundryComponent
 },
 {
-  path: ':cfId',
+  path: ':endpointId',
   children: [
     {
       path: 'add-org',
