@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, of as observableOf, combineLatest as observableCombineLatest, } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { ISpace, IApp } from '../../../../../../core/cf-api.types';
+import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
@@ -14,20 +14,21 @@ import {
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { createSpaceStateObs } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-helper';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { CardStatus } from '../../../../cards/card-status/card-status.component';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { CloudFoundrySpaceService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-
 
 @Component({
   selector: 'app-cf-space-card',
@@ -51,6 +52,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
+  spaceStatus$: Observable<CardStatus>;
 
   constructor(
     private cfUserService: CfUserService,
@@ -60,6 +62,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private emf: EntityMonitorFactory
   ) {
     super();
   }
@@ -124,6 +127,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
     this.subscriptions.push(fetchData$.subscribe());
 
+    this.spaceStatus$ = createSpaceStateObs(this.spaceGuid, this.cfEndpointService, this.emf);
   }
 
   setAppsDependentCounts = (apps: APIResource<IApp>[]) => {
@@ -156,10 +160,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
-  ngOnDestroy = () => this.
-    subscriptions.forEach(p =>
-      p.unsubscribe())
-
+  ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
 
   edit = () => {
     this.store.dispatch(

@@ -3,8 +3,7 @@ import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
 import { IApp, IOrganization } from '../../../core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
-import { truthyIncludingZero } from '../../../core/utils.service';
-import { determineCardStatus } from '../../../shared/components/cards/card-number-metric/card-number-metric.component';
+import { truthyIncludingZero, determineCardStatus } from '../../../core/utils.service';
 import { CardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { entityFactory, organizationSchemaKey } from '../../../store/helpers/entity-factory';
@@ -36,8 +35,7 @@ function createOrgStateObs(
         handleStatus(cfEndpointService.getMetricFromApps(apps, 'memory'), orgQuota.entity.memory_limit) ?
         CardStatus.WARNING :
         CardStatus.NONE;
-    }),
-    startWith(CardStatus.TENTATIVE)
+    })
   );
 }
 
@@ -66,7 +64,7 @@ export function createOrganizationStateObs(
   orgGuid: string,
   cfEndpointService: CloudFoundryEndpointService,
   emf: EntityMonitorFactory): Observable<CardStatus> {
-  // It can be expensive to iterate over apps to determine usage, so cut out early if theres no quotas or we can't determine all apps
+  // It can be expensive to iterate over apps to determine usage, so cut out early if there's no quotas or we can't determine all apps
   const org$ = emf.create<APIResource<IOrganization>>(
     orgGuid,
     organizationSchemaKey,

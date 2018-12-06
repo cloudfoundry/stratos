@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import { CardStatus } from '../shared/components/cards/card-status/card-status.component';
+
 export const urlValidationExpression =
   '^' +
   // protocol identifier
@@ -255,3 +257,18 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 };
 
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
+
+export function determineCardStatus(value: number, limit: number): CardStatus {
+  if ((limit !== 0 && !limit) || limit === -1) {
+    return CardStatus.NONE;
+  }
+
+  const usage = value / limit;
+  // Limit can be zero, which results in infinity
+  if (usage > 0.9 || usage === Infinity) {
+    return CardStatus.ERROR;
+  } else if (usage > 0.8) {
+    return CardStatus.WARNING;
+  }
+  return CardStatus.NONE;
+}
