@@ -5,8 +5,12 @@ generateReleaseTitle() {
   local GIT_TAG=${1}
   IFS='-' read -ra REL_PARTS <<< "$GIT_TAG"
 
+  PRE_RELEASE_ARG="--pre-release"
+
   if [ "${REL_PARTS[1]}" == "" ]; then
+    # This is the actual release
     RELEASE_TITLE=""
+    PRE_RELEASE_ARG=""
   else
     IFS='.' read -ra REL_TYPES <<< "${REL_PARTS[1]}"
     REL_TYPE="${REL_TYPES[0]}"
@@ -22,5 +26,5 @@ generateReleaseTitle() {
     fi
   fi
   RELEASE_TITLE="${REL_PARTS[0]} $RELEASE_TITLE"
-  echo "$RELEASE_TITLE"
+
 }
