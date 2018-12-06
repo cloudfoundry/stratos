@@ -1,0 +1,28 @@
+.favorite-entity-list {
+  $bottom-space: 30px;
+  border-bottom: 1px solid rgba(0, 0, 0, .2);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding-bottom: $bottom-space;
+  &__cards {
+    display: grid;
+    grid-column-gap: $bottom-space;
+    grid-row-gap: $bottom-space;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: $bottom-space;
+    min-height: 0;
+    min-width: 0;
+  }
+  &__card {
+    min-width: 0;
+  }
+  &__expand-button {
+    height: $bottom-space;
+    line-height: $bottom-space;
+    margin: auto;
+    margin-bottom: -($bottom-space - 10px);
+    margin-top: 10px;
+    width: $bottom-space;
+  }
+}

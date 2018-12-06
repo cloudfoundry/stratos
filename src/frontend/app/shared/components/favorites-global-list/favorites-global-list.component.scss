@@ -2,13 +2,7 @@
   &__endpoint-card {
     margin-bottom: 10px;
   }
-  &__entity-cards {
-    display: grid;
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
-    grid-template-columns: repeat(3, 1fr);
-    margin: 10px 0;
-  }
-  &__entity-card {
+  &__entities {
+    width: 100%;
   }
 }

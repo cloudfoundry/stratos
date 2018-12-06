@@ -1,8 +1,13 @@
 .fav-meta-card {
   min-height: 160px;
+  &__header-text {
+    margin-top: 0;
+  }
   &__type {
+    $type-height: 11px;
     font-size: 10px;
-    margin-bottom: -15px;
+    line-height: $type-height;
+    margin-top: -($type-height + 4px);
     opacity: .6;
   }
   &__unfound {
@@ -24,5 +29,8 @@
   }
   &__clickable {
     cursor: pointer;
+  }
+  &__header {
+    white-space: nowrap;
   }
 }

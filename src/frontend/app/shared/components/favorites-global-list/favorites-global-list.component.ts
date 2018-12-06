@@ -1,3 +1,4 @@
+import { map, filter } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IAllFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
@@ -15,6 +16,23 @@ export class FavoritesGlobalListComponent implements OnInit {
 
   ngOnInit() {
     const manager = new UserFavoriteManager(this.store);
-    this.favs$ = manager.hydrateAllFavorites();
+    this.favs$ = manager.hydrateAllFavorites().pipe(
+      filter(favs => !!favs),
+      map(favs => ({
+        ...favs,
+        entityGroups: favs.entityGroups ? favs.entityGroups.map(group => {
+          group.entities = group.entities.sort((entityA, entityB) => {
+            if (entityA.favorite.entityType < entityB.favorite.entityType) {
+              return -1;
+            }
+            if (entityA.favorite.entityType > entityB.favorite.entityType) {
+              return 1;
+            }
+            return 0;
+          });
+          return group;
+        }) : favs.entityGroups
+      }))
+    );
   }
 }

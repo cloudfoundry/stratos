@@ -152,6 +152,7 @@ import { AppServiceBindingCardComponent } from './components/list/list-types/app
 import { ServiceInstanceCardComponent } from './components/list/list-types/services-wall/service-instance-card/service-instance-card.component';
 import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
 import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
+import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
 
 export const listCards = [
   CardAppComponent,
@@ -274,6 +275,7 @@ export const listCards = [
     MetricsParentRangeSelectorComponent,
     FavoritesGlobalListComponent,
     FavoritesMetaCardComponent,
+    FavoritesEntityListComponent,
   ],
   exports: [
     FormsModule,

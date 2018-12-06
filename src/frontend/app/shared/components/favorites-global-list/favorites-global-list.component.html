@@ -4,10 +4,7 @@
   <div *ngIf="!favorites.error && !favorites.fetching">
     <div *ngFor="let favGroup of favorites.entityGroups">
       <app-favorites-meta-card class="favorite-list__endpoint-card" [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
-      <div class="favorite-list__entity-cards">
-        <app-favorites-meta-card *ngFor="let fav of favGroup.entities" class="favorite-list__entity-card"
-          [favoriteEntity]="fav" [compact]="true"></app-favorites-meta-card>
-      </div>
+      <app-favorites-entity-list class="favorite-list_entities" [entities]="favGroup.entities"></app-favorites-entity-list>
     </div>
   </div>
 </div>
