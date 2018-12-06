@@ -12,7 +12,8 @@ import {
   StartRequestAction,
   APISuccessOrFailedAction,
   WrapperRequestActionSuccess,
-  WrapperRequestActionFailed
+  WrapperRequestActionFailed,
+  InternalEndpointError
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { Store } from '@ngrx/store';
@@ -172,11 +173,13 @@ export function failApiRequest(
   apiAction: ICFAction | PaginatedAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
+  internalEndpointError?: InternalEndpointError
 ) {
   const actions = getFailApiRequestActions(
     apiAction,
     error,
-    requestType
+    requestType,
+    internalEndpointError
   );
   store.dispatch(actions[0]);
   store.dispatch(actions[1]);
@@ -186,13 +189,15 @@ export function getFailApiRequestActions(
   apiAction: ICFAction | PaginatedAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
+  internalEndpointError?: InternalEndpointError
 ) {
   return [
     new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,
-      requestType
+      requestType,
+      internalEndpointError
     )
   ];
 }
