@@ -64,8 +64,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public favorite = new UserFavorite(
     this.applicationService.cfGuid,
     'cf',
+    applicationSchemaKey,
     this.applicationService.appGuid,
-    applicationSchemaKey
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;
