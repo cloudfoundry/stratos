@@ -193,7 +193,7 @@ describe('Application Wall Tests -', () => {
       });
 
       it('sort by name', () => {
-        testSortBy('Application Name');
+        testSortBy('Name');
       });
 
       it('sort by creation', () => {

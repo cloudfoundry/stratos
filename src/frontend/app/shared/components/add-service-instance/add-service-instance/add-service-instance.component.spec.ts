@@ -33,6 +33,7 @@ import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.co
 import { SelectServiceComponent } from '../select-service/select-service.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -60,7 +61,8 @@ describe('AddServiceInstanceComponent', () => {
         BooleanIndicatorComponent,
         AppChipsComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        MultilineTitleComponent
       ],
       imports: [
         PageHeaderModule,
