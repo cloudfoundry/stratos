@@ -1,6 +1,6 @@
 <app-meta-card class="org-card" [clickAction]="goToSummary" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
   <app-meta-card-title class="org-card__title">
-    <div class="org-card__title-link">{{ row.entity.name }}</div>
+    <app-multiline-title class="org-card__title-link">{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Role</app-meta-card-key>

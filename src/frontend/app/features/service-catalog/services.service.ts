@@ -72,7 +72,7 @@ export class ServicesService {
 
   ) {
 
-    this.cfGuid = getIdFromRoute(activatedRoute, 'cfId');
+    this.cfGuid = getIdFromRoute(activatedRoute, 'endpointId');
     this.serviceGuid = getIdFromRoute(activatedRoute, 'serviceId');
 
     this.serviceEntityService = this.entityServiceFactory.create(
