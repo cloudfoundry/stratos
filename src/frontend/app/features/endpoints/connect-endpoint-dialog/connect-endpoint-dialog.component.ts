@@ -1,20 +1,21 @@
-import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { SystemEffects } from '../../../store/effects/system.effects';
-import { systemStoreNames } from '../../../store/types/system.types';
-import { endpointStoreNames, EndpointModel } from '../../../store/types/endpoint.types';
-import { ActionState, RequestSectionKeys } from '../../../store/reducers/api-request-reducer/types';
-import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { Observable } from 'rxjs/Rx';
-import { FormBuilder, Validators } from '@angular/forms';
-import { ConnectEndpoint, EndpointSchema } from '../../../store/actions/endpoint.actions';
+import { Component, Inject, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
-import { AppState } from '../../../store/app-state';
-import { FormControl } from '@angular/forms';
-import { Subscription } from 'rxjs/Subscription';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+
+import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
+import { GetSystemInfo } from '../../../store/actions/system.actions';
+import { AppState } from '../../../store/app-state';
+import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
+import { SystemEffects } from '../../../store/effects/system.effects';
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
+import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
+
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -35,11 +36,23 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
-  });
+  public endpointForm: FormGroup;
 
+  private bodyContent = '';
+
+  private hasAttemptedConnect: boolean;
+  public authTypesForEndpoint = [];
+  public upload = true;
+  private kubeconfig = '';
+  private cert = '';
+  private certKey = '';
+  public canShareEndpointToken = false;
+  private cachedAuthTypeFormFields: string[] = [];
+
+  // We need a delay to ensure the BE has finished registering the endpoint.
+  // If we don't do this and if we're quick enough, we can navigate to the application page
+  // and end up with an empty list where we should have results.
+  public connectDelay = 1000;
 
   constructor(
     public store: Store<AppState>,
@@ -48,16 +61,63 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     public snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
-      guid: string
+      guid: string,
+      type: EndpointType,
+      ssoAllowed: boolean,
     }
   ) {
+    // Populate the valid auth types for the endpoint that we want to connect to
+    getEndpointAuthTypes().forEach(authType => {
+      if (authType.types.find(t => t === this.data.type)) {
+        this.authTypesForEndpoint.push(authType);
+      }
+    });
+
+    // Remove SSO if not allowed on this endpoint
+    this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || data.ssoAllowed);
+
+    // Not all endpoint types might allow token sharing - typically types like metrics do
+    this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
+
+    // Create the endpoint form
+    let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    this.cachedAuthTypeFormFields = Object.keys(autoSelected.form || {});
+
+    // Auto-select SSO if it is available
+    const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
+    if (ssoIndex >= 0) {
+      autoSelected = this.authTypesForEndpoint[ssoIndex];
+    }
+
+    this.endpointForm = this.fb.group({
+      authType: [autoSelected.value || '', Validators.required],
+      authValues: this.fb.group(autoSelected.form || {}),
+      systemShared: false
+    });
+
     this.setupObservables();
     this.setupSubscriptions();
   }
 
+  authChanged() {
+    const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
+    const authTypeFormFields = Object.keys(authType.form);
+    if (!this.sameAuthTypeFormFields(this.cachedAuthTypeFormFields, authTypeFormFields)) {
+      // Don't remove and re-add the same control, this helps with form validation
+      this.cachedAuthTypeFormFields = authTypeFormFields;
+      this.endpointForm.removeControl('authValues');
+      this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    }
+    this.bodyContent = '';
+  }
+
+  private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
+    return a.length === b.length && a.filter(item => b.indexOf(item) < 0).length === 0;
+  }
+
   setupSubscriptions() {
-    this.fetchSub = this.update$
-      .pairwise()
+    this.fetchSub = this.update$.pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
           // Has finished fetching
@@ -65,54 +125,86 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         }
       });
 
-    this.connectingSub = this.endpointConnected$
-      .filter(connected => connected)
+    this.connectingSub = this.endpointConnected$.pipe(
+      filter(connected => connected),
+      delay(this.connectDelay))
       .subscribe(() => {
-        this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
+        this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
         this.dialogRef.close();
       });
+  }
+
+  dealWithFile($event, fileName: string) {
+    const file = $event;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.updateFileState(fileName, reader.result);
+    };
+    reader.onerror = () => {
+      // Clear the form and thus make it invalid on error
+      this.updateFileState(fileName, null);
+    };
+    reader.readAsText(file);
+  }
+
+  private updateFileState(fileName: string, value: string | ArrayBuffer) {
+    this[fileName] = value;
+    const authValues: FormGroup = this.endpointForm.controls.authValues as FormGroup;
+    authValues.controls[fileName].setValue(value);
   }
 
   setupObservables() {
     this.update$ = this.store.select(
       this.getUpdateSelector()
-    ).filter(update => !!update);
+    ).pipe(filter(update => !!update));
 
     this.fetchingInfo$ = this.store.select(
       this.getRequestSelector()
-    )
-      .filter(request => !!request)
-      .map(request => request.fetching);
+    ).pipe(
+      filter(request => !!request),
+      map(request => request.fetching));
 
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
-    )
-      .map(request => !!(request && request.api_endpoint && request.user));
+    ).pipe(
+      map(request => !!(request && request.api_endpoint && request.user)));
+    const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
+    this.connecting$ = busy$.pipe(
+      pairwise(),
+      switchMap(([oldBusy, newBusy]) => {
+        if (oldBusy === true && newBusy === false) {
+          return busy$.pipe(
+            delay(this.connectDelay),
+            startWith(true)
+          );
+        }
+        return observableOf(newBusy);
+      })
+    );
+    this.connectingError$ = this.update$.pipe(
+      filter(() => this.hasAttemptedConnect),
+      map(update => update.error)
+    );
 
-    this.connecting$ =
-      this.update$
-        .map(update => update.busy);
-    this.connectingError$ = this.update$.map(update => update.error);
-
-    this.valid$ = this.endpointForm.valueChanges
-      .map(() => this.endpointForm.valid);
+    this.valid$ = this.endpointForm.valueChanges.pipe(map(() => this.endpointForm.valid));
 
     this.setupCombinedObservables();
   }
 
   setupCombinedObservables() {
-    this.isBusy$ = Observable.combineLatest(
-      this.connecting$.startWith(false),
-      this.fetchingInfo$.startWith(false)
-    )
-      .map(([connecting, fetchingInfo]) => connecting || fetchingInfo);
+    this.isBusy$ = observableCombineLatest(
+      this.connecting$.pipe(startWith(false)),
+      this.fetchingInfo$.pipe(startWith(false))
+    ).pipe(
+      map(([connecting, fetchingInfo]) => connecting || fetchingInfo));
 
-    this.canSubmit$ = Observable.combineLatest(
-      this.connecting$.startWith(false),
-      this.fetchingInfo$.startWith(false),
-      this.valid$.startWith(false)
-    )
-      .map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid);
+    this.canSubmit$ = observableCombineLatest(
+      this.connecting$.pipe(startWith(false)),
+      this.fetchingInfo$.pipe(startWith(false)),
+      this.valid$.pipe(startWith(this.endpointForm.valid))
+    ).pipe(
+      map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid)
+    );
   }
 
   private getUpdateSelector() {
@@ -137,12 +229,33 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
-  submit(event) {
-    const { guid, username, password } = this.endpointForm.value;
+  toggleAccept() {
+    this.upload = !this.upload;
+  }
+
+  submit() {
+    this.hasAttemptedConnect = true;
+    const { authType, authValues, systemShared } = this.endpointForm.value;
+    const authVal = authValues;
+    if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
+      this.bodyContent = this.kubeconfig;
+    }
+    if (this.endpointForm.value.authType === 'kube-cert-auth') {
+      /** Body content is in the following encoding:
+       * base64encoded:base64encoded
+       */
+      const certBase64 = btoa(this.cert);
+      const certKeyBase64 = btoa(this.certKey);
+      this.bodyContent = `${certBase64}:${certKeyBase64}`;
+    }
+
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
-      username,
-      password
+      this.data.type,
+      authType,
+      authVal,
+      systemShared,
+      this.bodyContent,
     ));
   }
 

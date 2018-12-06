@@ -10,7 +10,7 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Instances</app-meta-card-key>
-    <app-meta-card-value>{{ (cfOrganizationService.serivceInstances$ | async)?.length }} / {{ (cfOrganizationService.quotaDefinition$ | async)?.total_services | infinityPipe }}</app-meta-card-value>
+    <app-meta-card-value>{{ (cfOrganizationService.serviceInstances$ | async)?.length }} / {{ (cfOrganizationService.quotaDefinition$ | async)?.total_services | infinityPipe }}</app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Routes</app-meta-card-key>

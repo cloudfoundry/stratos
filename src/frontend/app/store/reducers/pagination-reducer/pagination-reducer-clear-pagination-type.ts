@@ -1,4 +1,14 @@
+import { EndpointAction } from '../../actions/endpoint.actions';
+import {
+  applicationSchemaKey,
+  cfUserSchemaKey,
+  organizationSchemaKey,
+  serviceSchemaKey,
+  spaceSchemaKey,
+  serviceInstancesSchemaKey,
+} from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
+
 export function paginationClearType(state: PaginationState, entityKey, defaultPaginationEntityState) {
   if (state[entityKey]) {
     const clearState = { ...state };
@@ -13,10 +23,15 @@ export function paginationClearType(state: PaginationState, entityKey, defaultPa
   return state;
 }
 
-export function clearEndpointEntities(state: PaginationState, defaultPaginationEntityState) {
-  let newState = {};
-  newState = paginationClearType(state, 'application', defaultPaginationEntityState);
-  newState = paginationClearType(newState, 'space', defaultPaginationEntityState);
-  newState = paginationClearType(newState, 'organization', defaultPaginationEntityState);
-  return newState;
+export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState) {
+  if (action.endpointType === 'cf') {
+    let newState = paginationClearType(state, applicationSchemaKey, defaultPaginationEntityState);
+    newState = paginationClearType(newState, spaceSchemaKey, defaultPaginationEntityState);
+    newState = paginationClearType(newState, organizationSchemaKey, defaultPaginationEntityState);
+    newState = paginationClearType(newState, serviceSchemaKey, defaultPaginationEntityState);
+    newState = paginationClearType(newState, cfUserSchemaKey, defaultPaginationEntityState);
+    newState = paginationClearType(newState, serviceInstancesSchemaKey, defaultPaginationEntityState);
+    return newState;
+  }
+  return state;
 }

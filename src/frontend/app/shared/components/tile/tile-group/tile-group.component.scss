@@ -22,6 +22,10 @@ app-tile-group {
     flex: 0 0 100%;
   }
 
+  &.tile-group-6-cols > app-tile {
+    flex: 0 0 100%;
+  }
+
   &.tile-group-gutters {
     margin-left: -$tile-grid-gutter;
 
@@ -36,6 +40,9 @@ app-tile-group {
   app-tile-group {
     &.tile-group-4-cols > app-tile {
       flex: 0 0 calc(50% - #{$tile-grid-gutter});
+    }
+    &.tile-group-6-cols > app-tile {
+      flex: 0 0 calc(33% - #{$tile-grid-gutter});
     }
   }
 }
@@ -52,6 +59,10 @@ app-tile-group {
     }
 
     &.tile-group-4-cols > app-tile {
+      flex: 1;
+    }
+
+    &.tile-group-6-cols > app-tile {
       flex: 1;
     }
   }

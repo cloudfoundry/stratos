@@ -1,33 +1,28 @@
-import { isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import {
-  DeleteRoute,
-  GetSpaceRoutes,
-  UnmapRoute
-} from '../../../../../store/actions/route.actions';
+import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { ITableColumn } from '../../list-table/table.types';
 import {
-  IMultiListAction,
-  ListViewTypes,
-  IListConfig,
-  defaultPaginationPageSizeOptionsTable
-} from '../../list.component.types';
+  applicationSchemaKey,
+  domainSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../store/helpers/entity-relations/entity-relations.types';
+import { APIResource } from '../../../../../store/types/api.types';
+import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService implements IListConfig<APIResource> {
@@ -38,6 +33,13 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
       columnId: 'radio',
       headerCell: () => '',
       cellComponent: TableCellRadioComponent,
+      cellConfig: {
+        isDisabled: (row): boolean => {
+          return row && row.entity && row.entity.apps && row.entity.apps.find(
+            a => a.metadata.guid === this.appService.appGuid
+          );
+        }
+      },
       class: 'table-column-select',
       cellFlex: '1'
     },
@@ -78,25 +80,10 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
 
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Available Routes'
+    title: 'Available Routes',
+    noEntries: 'There are no routes'
   };
   isLocal = true;
-
-  dispatchDeleteAction(route) {
-    return this.store.dispatch(
-      new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
-    );
-  }
-
-  dispatchUnmapAction(route) {
-    return this.store.dispatch(
-      new UnmapRoute(
-        route.entity.guid,
-        this.routesDataSource.appGuid,
-        this.routesDataSource.cfGuid
-      )
-    );
-  }
 
   getGlobalActions = () => [];
   getMultiActions = () => [];
@@ -108,17 +95,18 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private confirmDialog: ConfirmationDialogService,
-    private activatedRoute: ActivatedRoute,
-    private snackBar: MatSnackBar
+    activatedRoute: ActivatedRoute,
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
+    const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+    ]);
+    action.initialParams['order-direction-field'] = 'route';
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetSpaceRoutes(spaceGuid, appService.cfGuid),
-      getPaginationKey('route', appService.cfGuid, spaceGuid),
-      true,
+      action,
       this
     );
   }

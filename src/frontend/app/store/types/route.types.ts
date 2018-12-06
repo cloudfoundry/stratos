@@ -1,5 +1,5 @@
+import { IApp } from '../../core/cf-api.types';
 import { APIResource } from './api.types';
-import { CfApplication } from './application.types';
 
 export class Route {
   constructor(
@@ -8,13 +8,13 @@ export class Route {
     public host?: string,
     public path?: string,
     public port?: number,
-    public isTCP: boolean = false
   ) { }
 }
 
 export interface RouteMode {
   id: string;
   label: string;
+  submitLabel: string;
 }
 
 
@@ -24,5 +24,5 @@ export class CfRoute {
   path?: string;
   host?: string;
   port?: number;
-  apps?: APIResource<CfApplication>[];
+  apps?: APIResource<IApp>[];
 }

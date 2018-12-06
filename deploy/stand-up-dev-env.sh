@@ -18,7 +18,8 @@ DEPLOY_PATH=${STRATOS_UI_PATH}/deploy
 
 NO_UI=false
 CLEAN=false
-
+PACKAGE_JSON_VERSION=$(cat ${STRATOS_UI_PATH}/package.json| grep version | grep -Eo "([0-9]*.[0-9]*.[0-9]*)\",$" | sed 's/.\{2\}$//')
+STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
 function usage {
     echo "usage: $PROG [-c] [-n]"
     echo "       -c    Clean up before building."
@@ -79,16 +80,6 @@ function dev_certs {
 }
 
 function build {
-    echo "===== Building the portal proxy"
-    export USER_ID=$(id -u)
-    export GROUP_ID=$(id -g)
-    export USER_NAME=$(id -nu)
-    echo "==== User set to ${USER_NAME} with IDs ${USER_ID}:${GROUP_ID}"
-
-    pushd ${PROXY_PATH}/deploy/
-    ./build_portal_proxy.sh
-    popd
-
     if [ "$NO_UI" = true ]; then
         echo "===== Standing up the Stratos UI Console without the UI"
     else
@@ -100,7 +91,7 @@ function build {
     # Prevent docker from creating the migration volume as root if it doesn't exist
     mkdir -p ./hsc-upgrade-volume
 
-    docker-compose -f ${DEV_DOCKER_COMPOSE} build
+    docker-compose -f ${DEV_DOCKER_COMPOSE} build --build-arg stratos_version=${STRATOS_VERSION}
     docker-compose -f ${DEV_DOCKER_COMPOSE} up -d
 }
 
@@ -130,7 +121,7 @@ fi
 
 mkdir -p ${STRATOS_UI_PATH}/.dist
 # Copy in the page to tell the user that the UI is being built
-cp ./docker-compose/index.html ${STRATOS_UI_PATH}/.dist
+cp ./docker-compose/building.html ${STRATOS_UI_PATH}/.dist
 
 pushd "$PROG_DIR"
 env_vars

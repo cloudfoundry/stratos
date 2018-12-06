@@ -8,24 +8,45 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfOrgCardComponent } from './cf-org-card/cf-org-card.component';
 import { CfOrgsDataSourceService } from './cf-orgs-data-source.service';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { BaseCF } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { IOrganization } from '../../../../../core/cf-api.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { ITableColumn } from '../../list-table/table.types';
 
 @Injectable()
-export class CfOrgsListConfigService implements IListConfig<APIResource> {
-  isLocal?: boolean;
-  viewType = ListViewTypes.CARD_ONLY;
-  enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
+export class CfOrgsListConfigService extends BaseCfListConfig<APIResource<IOrganization>> {
   dataSource: CfOrgsDataSourceService;
-  pageSizeOptions = [9, 45, 90];
   cardComponent = CfOrgCardComponent;
-  defaultView = 'cards' as ListView;
-  getColumns = () => [];
+  enableTextFilter = true;
+  text = {
+    title: null,
+    filter: 'Search by name',
+    noEntries: 'There are no organizations'
+  };
+  columns: ITableColumn<APIResource<IOrganization>>[] = [{
+    columnId: 'name',
+    headerCell: () => 'Name',
+    sort: {
+      type: 'sort',
+      orderKey: 'name',
+      field: 'entity.name'
+    }
+  }, {
+    columnId: 'createdAt',
+    headerCell: () => 'Creation',
+    sort: {
+      type: 'sort',
+      orderKey: 'createdAt',
+      field: 'metadata.created_at'
+    },
+  }];
 
-  constructor(private store: Store<AppState>, private baseCF: BaseCF) {
-    this.dataSource = new CfOrgsDataSourceService(this.store, baseCF.guid, this);
+  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+    super();
+    this.dataSource = new CfOrgsDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }
 
+  getColumns = () => this.columns;
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];

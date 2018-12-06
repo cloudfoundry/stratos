@@ -10,8 +10,8 @@ OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
-STRATOS_BOWER=""
-while getopts ":ho:r:t:Tclb:Ou:" opt; do
+NO_PUSH="false"
+while getopts ":ho:r:t:Tclb:O" opt; do
   case $opt in
     h)
       echo
@@ -46,9 +46,6 @@ while getopts ":ho:r:t:Tclb:Ou:" opt; do
     l)
       TAG_LATEST="true"
       ;;
-    u)
-      STRATOS_BOWER="${OPTARG}"
-      ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
       exit 1
@@ -72,103 +69,18 @@ echo "Starting build"
 
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_UI_PATH=${__DIRNAME}/../../
+STRATOS_PATH=${__DIRNAME}/../../
+source ${STRATOS_PATH}/deploy/common-build.sh
 
-# Proxy support
-BUILD_ARGS=""
-RUN_ARGS=""
-if [ -n "${http_proxy:-}" -o -n "${HTTP_PROXY:-}" ]; then
-  BUILD_ARGS="${BUILD_ARGS} --build-arg http_proxy=${http_proxy:-${HTTP_PROXY}}"
-  RUN_ARGS="${RUN_ARGS} -e http_proxy=${http_proxy:-${HTTP_PROXY}}"
-fi
-if [ -n "${https_proxy:-}" -o -n "${HTTPS_PROXY:-}" ]; then
-  BUILD_ARGS="${BUILD_ARGS} --build-arg https_proxy=${https_proxy:-${HTTPS_PROXY}}"
-  RUN_ARGS="${RUN_ARGS} -e https_proxy=${https_proxy:-${HTTPS_PROXY}}"
-fi
-
-# Trim leading/trailing whitespace
-BUILD_ARGS="$(echo -e "${BUILD_ARGS}" | sed -r -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
-RUN_ARGS="$(echo -e "${RUN_ARGS}" | sed -r -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
-
-if [ -n "${BUILD_ARGS}" ]; then
-  echo "Web Proxy detected from environment. Running Docker with:"
-  echo -e "- BUILD_ARGS:\t'${BUILD_ARGS}'"
-  echo -e "- RUN_ARGS:\t'${RUN_ARGS}'"
-fi
-
-function buildAndPublishImage {
+function patchAndPushImage {
   NAME=${1}
   DOCKER_FILE=${2}
   FOLDER=${3}
+  TARGET=${4:-none}
 
-  if [ ! -d "${FOLDER}" ]; then
-    echo "Project ${FOLDER} hasn't been checked out";
-    exit 1
-  fi
-
-  # Patch Dockerfile
   patchDockerfile ${DOCKER_FILE} ${FOLDER}
-  IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
-  echo Building Docker Image for ${NAME}
-
-  pushd ${FOLDER} > /dev/null 2>&1
-  pwd
-  docker build ${BUILD_ARGS} -t $NAME -f $DOCKER_FILE .
-
-  docker tag ${NAME} ${IMAGE_URL}
-
-  echo Pushing Docker Image ${IMAGE_URL}
-  docker push  ${IMAGE_URL}
-
-  if [ "${TAG_LATEST}" = "true" ]; then
-    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
-    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
-  fi
+  buildAndPublishImage ${NAME} ${DOCKER_FILE} ${FOLDER} ${TARGET}
   unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
-
-  popd > /dev/null 2>&1
-}
-
-function cleanup {
-  # Cleanup the SDL/instance defs
-  echo
-  echo "-- Cleaning up older values.yaml"
-  rm -f values.yaml
-  # Cleanup prior to generating the UI container
-  echo
-  echo "-- Cleaning up ${STRATOS_UI_PATH}"
-  rm -rf ${STRATOS_UI_PATH}/dist
-  rm -rf ${STRATOS_UI_PATH}/node_modules
-  rm -rf ${STRATOS_UI_PATH}/bower_components
-  echo
-  echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
-  rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
-
-}
-
-function preloadImage {
-  docker pull ${DOCKER_REGISTRY}/$1
-  docker tag ${DOCKER_REGISTRY}/$1 $1
-}
-
-function updateTagForRelease {
-  # Reset the TAG variable for a release to be of the form:
-  #   <version>-<commit#>-<prefix><hash>
-  #   where:
-  #     <version> = semantic, in the form major#.minor#.patch#
-  #     <commit#> = number of commits since tag - always 0
-  #     <prefix> = git commit prefix - always 'g'
-  #     <hash> = git commit hash for the current branch
-  # Reference: See the examples section here -> https://git-scm.com/docs/git-describe
-  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
-  GIT_HASH=$(git rev-parse --short HEAD)
-  echo "GIT_HASH: ${GIT_HASH}"
-  TAG="${TAG}-g${GIT_HASH}"
-  if [ "${ADD_OFFICIAL_TAG}" = "true" ]; then
-  TAG=${OFFICIAL_TAG}-${TAG}
-  fi
-  echo "New TAG: ${TAG}"
-  popd > /dev/null 2>&1
 }
 
 function pushGitTag {
@@ -181,7 +93,6 @@ function pushGitTag {
   git push origin "${TAG}"
   popd > /dev/null 2>&1
 }
-
 
 function patchDockerfile {
   DOCKER_FILE=${1}
@@ -209,100 +120,42 @@ function unPatchDockerfile {
 
 }
 
-
-function buildProxy {
-  # Use the existing build container to compile the proxy executable, and leave
-  # it on the local filesystem.
+function buildJetstream {
   echo
   echo "-- Building the Stratos Backend"
 
   echo
-  echo "-- Run the build container to build the Stratos backend"
-
-  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
-  pushd $(git rev-parse --show-toplevel) > /dev/null 2>&1
-
-  docker run -e "APP_VERSION=${TAG}" \
-             ${RUN_ARGS} \
-             -it \
-             --rm \
-             -e USER_NAME=$(id -nu) \
-             -e USER_ID=$(id -u)  \
-             -e GROUP_ID=$(id -g) \
-             --name stratos-jetstream-builder \
-             --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:${BASE_IMAGE_TAG}
-  popd > /dev/null 2>&1
-  popd > /dev/null 2>&1
-
-  # Copy the previously compiled executable into the container and
-  # publish the container image for the portal proxy
-  echo
-  echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.k8s ${STRATOS_UI_PATH}
+  echo "-- Build & publish the runtime container image for the Console jetstream"
+  patchAndPushImage stratos-jetstream deploy/Dockerfile.bk ${STRATOS_PATH} prod-build
 }
 
 function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
-  docker run \
-             ${RUN_ARGS} \
-             -it \
-             --rm \
-             -e USER_NAME=$(id -nu) \
-             -e USER_ID=$(id -u)  \
-             -e GROUP_ID=$(id -g) \
-             --name stratos-jetstream-builder \
-             --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:${BASE_IMAGE_TAG}
-  buildAndPublishImage stratos-postflight-job deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
-  popd > /dev/null 2>&1
-
+  patchAndPushImage stratos-postflight-job deploy/Dockerfile.bk ${STRATOS_PATH}  postflight-job
 }
 
 function buildMariaDb {
   echo
   echo "-- Building/publishing MariaDB"
   # Download and retag image to save bandwidth
-  buildAndPublishImage stratos-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
+  patchAndPushImage stratos-mariadb Dockerfile.mariadb ${STRATOS_PATH}/deploy/db
 }
 
 function buildUI {
-  # Prepare the nginx server
-  CURRENT_USER=$
-  echo
-  echo "-- Provision the UI"
-  docker run --rm \
-    ${RUN_ARGS} \
-    -v ${STRATOS_UI_PATH}:/usr/src/app \
-    -e CREATE_USER="true"  \
-    -e USER_NAME=$(id -nu) \
-    -e USER_ID=$(id -u)  \
-    -e GROUP_ID=$(id -g) \
-    -e STRATOS_BOWER="${STRATOS_BOWER}" \
-    -w /usr/src/app \
-    ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-ui-build-base:${BASE_IMAGE_TAG} \
-    /bin/bash ./deploy/provision.sh
-
-  # Copy the artifacts from the above to the nginx container
-  echo
-  echo "-- Copying the Console UI artifacts to the web server (nginx) container"
-  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
-
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
   # Download and retag image to save bandwidth
-  buildAndPublishImage stratos-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
+  patchAndPushImage stratos-console deploy/Dockerfile.ui ${STRATOS_PATH} prod-build
 }
 
 # MAIN ------------------------------------------------------
 #
 
-# Set the path to the portal proxy
-STRATOS_UI_PATH=${STRATOS_UI_PATH}
+# Set the path to the portal jetstream
+STRATOS_PATH=${STRATOS_PATH}
 
 # cleanup output, intermediate artifacts
 cleanup
@@ -310,10 +163,13 @@ cleanup
 updateTagForRelease
 
 # Build all of the components that make up the Console
-buildProxy
+buildJetstream
 buildPostflightJob
 buildMariaDb
 buildUI
+
+# Fetch subcharts
+helm dependency update
 
 if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   # Patch Values.yaml file

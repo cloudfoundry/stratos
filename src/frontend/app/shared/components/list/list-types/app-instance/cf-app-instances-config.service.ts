@@ -1,22 +1,44 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
+import { EndpointsService } from '../../../../../core/endpoints.service';
+import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { AppState } from '../../../../../store/app-state';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';
-import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
-import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { entityFactory, metricSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { IMetricMatrixResult, IMetrics } from '../../../../../store/types/base-metric.types';
+import { IMetricApplication } from '../../../../../store/types/metric.types';
+import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { getIntegerFieldSortFunction } from '../../data-sources-controllers/local-filtering-sorting';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { ListAppInstance } from './app-instance-types';
+import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
+import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
+import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+
+export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
+  return new FetchApplicationMetricsAction(
+    appGuid,
+    cfGuid,
+    new MetricQueryConfig('firehose_container_metric_cpu_percentage'),
+    MetricQueryType.QUERY
+  );
+}
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
 
   instancesSource: CfAppInstancesDataSource;
+  metricResults$: Observable<IMetricMatrixResult<IMetricApplication>[]>;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
       columnId: 'index',
@@ -24,11 +46,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       cellDefinition: {
         getValue: (row) => `${row.index}`
       },
-      sort: {
-        type: 'sort',
-        orderKey: 'index',
-        field: 'index',
-      }, cellFlex: '1'
+      sort: getIntegerFieldSortFunction('index'),
+      cellFlex: '1'
     },
     {
       columnId: 'state',
@@ -56,7 +75,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         type: 'sort',
         orderKey: 'memory',
         field: 'usage.mem'
-      }, cellFlex: '3'
+      }, cellFlex: '2'
     },
     {
       columnId: 'disk', headerCell: () => 'Disk',
@@ -71,7 +90,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         type: 'sort',
         orderKey: 'disk',
         field: 'usage.disk'
-      }, cellFlex: '3'
+      }, cellFlex: '2'
     },
     {
       columnId: 'cpu', headerCell: () => 'CPU',
@@ -95,10 +114,27 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         type: 'sort',
         orderKey: 'uptime',
         field: 'value.stats.uptime'
-      }, cellFlex: '5'
+      }, cellFlex: '3'
     }
   ];
+  cfCellColumn: ITableColumn<ListAppInstance> = {
+    columnId: 'cell',
+    headerCell: () => 'Cell',
+    cellConfig: {
+      metricResults$: null
+    },
+    cellComponent: TableCellCfCellComponent,
+    cellFlex: '2'
+  };
+
   viewType = ListViewTypes.TABLE_ONLY;
+  enableTextFilter = true;
+  text = {
+    title: null,
+    filter: 'Search by state',
+    noEntries: 'There are no application instances'
+  };
+  private initialised$: Observable<boolean>;
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
@@ -113,11 +149,9 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
       );
     },
-    icon: 'delete',
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-    visible: row => true,
-    enabled: row => true,
+
   };
 
   private listActionSsh: IListAction<any> = {
@@ -128,11 +162,20 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       );
       this.router.navigate([sshRoute]);
     },
-    icon: 'computer',
     label: 'SSH',
     description: ``, // Description depends on console user permission
-    visible: row => true,
-    enabled: row => !!(row.value && row.value.state === 'RUNNING'),
+    createEnabled: row$ =>
+      row$.pipe(switchMap(row => {
+        return this.appService.app$.pipe(
+          combineLatest(this.appService.appSpace$),
+          map(([app, space]) => {
+            return row.value &&
+              row.value.state === 'RUNNING' &&
+              app.entity.entity.enable_ssh &&
+              space.entity.allow_ssh;
+          })
+        );
+      }))
   };
 
   private singleActions = [
@@ -146,7 +189,23 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private utilsService: UtilsService,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
+    private endpointsService: EndpointsService,
+    entityServiceFactory: EntityServiceFactory
   ) {
+
+    this.initialised$ = this.endpointsService.hasMetrics(appService.cfGuid).pipe(
+      map(hasMetrics => {
+        if (hasMetrics) {
+          this.columns.splice(1, 0, this.cfCellColumn);
+          this.cfCellColumn.cellConfig = {
+            metricEntityService: this.createMetricsResults(entityServiceFactory),
+            cfGuid: this.appService.cfGuid
+          };
+        }
+        return true;
+      })
+    );
+
     this.instancesSource = new CfAppInstancesDataSource(
       this.store,
       this.appService.cfGuid,
@@ -161,5 +220,16 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   getColumns = () => this.columns;
   getDataSource = () => this.instancesSource;
   getMultiFiltersConfigs = () => [];
+  getInitialised = () => this.initialised$;
 
+  private createMetricsResults(entityServiceFactory: EntityServiceFactory) {
+    const metricsAction = createAppInstancesMetricAction(this.appService.appGuid, this.appService.cfGuid);
+    return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
+      metricSchemaKey,
+      entityFactory(metricSchemaKey),
+      metricsAction.guid,
+      metricsAction,
+      false
+    );
+  }
 }

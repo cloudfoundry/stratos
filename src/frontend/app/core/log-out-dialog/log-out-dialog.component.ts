@@ -3,9 +3,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { Logout } from '../../store/actions/auth.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { interval } from 'rxjs/observable/interval';
-import { tap } from 'rxjs/operators/tap';
-import { Subscription } from 'rxjs/Subscription';
+import { interval ,  Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-log-out-dialog',

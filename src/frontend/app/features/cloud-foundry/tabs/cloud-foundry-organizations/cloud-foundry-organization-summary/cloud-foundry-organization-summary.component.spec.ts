@@ -2,10 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules,
+  BaseTestModules,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganisationServiceMock } from '../../../../../test-framework/cloud-foundry-organisation.service.mock';
-import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSummaryComponent } from './cloud-foundry-organization-summary.component';
 
 describe('CloudFoundryOrganizationSummaryComponent', () => {
@@ -15,9 +15,9 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationSummaryComponent],
-      imports: [...getBaseTestModules],
+      imports: [...BaseTestModules],
       providers: [
-        { provide: CloudFoundryOrganisationService, useClass: CloudFoundryOrganisationServiceMock },
+        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
         generateTestCfEndpointServiceProvider()
       ]
     })

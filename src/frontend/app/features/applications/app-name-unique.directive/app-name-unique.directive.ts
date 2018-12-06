@@ -1,15 +1,15 @@
-import { Directive, forwardRef, Input, OnInit } from '@angular/core';
-import { AbstractControl, NG_ASYNC_VALIDATORS, Validator, AsyncValidatorFn, AsyncValidator } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
-import { IsNewAppNameFree } from '../../../store/actions/create-applications-page.actions';
+import { throwError as observableThrowError, timer as observableTimer, of as observableOf, Observable } from 'rxjs';
+
+import { take, combineLatest, switchMap, map, catchError } from 'rxjs/operators';
+import { Directive, forwardRef, Input, OnInit } from '@angular/core';
+import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
+import { Store } from '@ngrx/store';
+
+import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
-import { Headers, Http, Request, RequestOptions, QueryEncoder, URLSearchParams } from '@angular/http';
-import { ApplicationService } from '../application.service';
-import { selectEntity } from '../../../store/selectors/api.selectors';
-import { environment } from '../../../../environments/environment';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -32,6 +32,8 @@ export class AppNameUniqueChecking {
 
     if (this.busy) {
       this.status = 'busy';
+    } else if (this.taken === undefined) {
+      this.status = '';
     } else {
       this.status = this.taken ? 'error' : 'done';
     }
@@ -44,7 +46,7 @@ export class AppNameUniqueChecking {
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
-  @Input('appApplicationNameUnique') appApplicationNameUnique: AppNameUniqueChecking;
+  @Input() appApplicationNameUnique: AppNameUniqueChecking;
 
   constructor(
     private store: Store<AppState>,
@@ -56,35 +58,35 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   }
 
   ngOnInit(): void {
-    this.appApplicationNameUnique.set(false, false);
+    this.appApplicationNameUnique.set(false);
   }
 
   public validate(control: AbstractControl): Observable<{ appNameTaken: boolean } | null> {
     if (!control.dirty) {
-      return Observable.of(null);
+      return observableOf(null);
     }
     this.appApplicationNameUnique.set(true);
-    return Observable.timer(500).take(1)
-    .combineLatest(this.store.select(selectNewAppState).take(1))
-    .switchMap((v) => {
-      const cfGuid = v[1].cloudFoundryDetails.cloudFoundry;
-      const spaceGuid = v[1].cloudFoundryDetails.space;
-      const currentName = v[1].name;
-      return this.checkAppName(cfGuid, spaceGuid, currentName, control.value);
-    })
-    .map(v => {
-      this.appApplicationNameUnique.set(false, !v);
-      return v ? null : {appNameTaken: true};
-    })
-    .catch(err => {
-      this.appApplicationNameUnique.set(false, false);
-      return Observable.throw(err);
-    });
+    return observableTimer(500).pipe(take(1),
+      combineLatest(this.store.select(selectNewAppState).pipe(take(1))),
+      switchMap(newAppState => {
+        const cfGuid = newAppState[1].cloudFoundryDetails.cloudFoundry;
+        const spaceGuid = newAppState[1].cloudFoundryDetails.space;
+        const currentName = newAppState[1].name;
+        return this.appNameTaken(cfGuid, spaceGuid, currentName, control.value);
+      }),
+      map(appNameTaken => {
+        this.appApplicationNameUnique.set(false, appNameTaken);
+        return appNameTaken ? { appNameTaken } : null;
+      }),
+      catchError(err => {
+        this.appApplicationNameUnique.set(false);
+        return observableThrowError(err);
+      }), );
   }
 
-  private checkAppName(cfGuid, spaceGuid, currentName, name): Observable<any> {
-    if (name === currentName || name.length === 0) {
-      return Observable.of(true);
+  private appNameTaken(cfGuid, spaceGuid, currentName, name): Observable<any> {
+    if (name.length === 0) {
+      return observableOf(undefined);
     }
     const options = new RequestOptions();
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/apps`;
@@ -95,15 +97,15 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     options.headers = new Headers();
     options.headers.set('x-cap-cnsi-list', cfGuid);
     options.headers.set('x-cap-passthrough', 'true');
-    return this.http.request(new Request(options))
-    .map(response => {
-      let resData;
-      try {
-        resData = response.json();
-      } catch (e) {
-        resData = {};
-      }
-      return resData.total_results === 0;
-    });
+    return this.http.request(new Request(options)).pipe(
+      map(response => {
+        let resData;
+        try {
+          resData = response.json();
+        } catch (e) {
+          resData = {};
+        }
+        return resData.total_results > 0;
+      }));
   }
 }

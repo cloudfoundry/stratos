@@ -1,14 +1,15 @@
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
+import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam, PaginationClientPagination } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
@@ -120,9 +121,13 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
+  let lastValidationFootprint: string;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+    // publishReplay(1),
+    // refCount()
+  );
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -132,10 +137,14 @@ function getObservables<T = any>(
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        store.dispatch(action);
+        populatePaginationFromParent(store, action).pipe(
+          first(),
+          tap(newAction => {
+            store.dispatch(newAction || action);
+          })
+        ).subscribe();
       }
-    }),
-    shareReplay(1)
+    })
   );
 
   const entities$: Observable<T[]> =
@@ -145,15 +154,30 @@ function getObservables<T = any>(
     )
       .pipe(
         filter(([ent, pagination]) => {
-          return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+          return !!pagination && isPageReady(pagination);
         }),
-        switchMap(() => paginationMonitor.currentPage$),
-        shareReplay(1)
+        publishReplay(1), refCount(),
+        tap(([ent, pagination]) => {
+          const newValidationFootprint = getPaginationCompareString(pagination);
+          if (lastValidationFootprint !== newValidationFootprint) {
+            lastValidationFootprint = newValidationFootprint;
+            store.dispatch(new ValidateEntitiesStart(
+              action,
+              pagination.ids[pagination.currentPage],
+              false
+            ));
+          }
+        }),
+        switchMap(() => paginationMonitor.currentPage$)
       );
 
   return {
-    pagination$,
-    entities$
+    pagination$: pagination$.pipe(
+      distinctUntilChanged()
+    ),
+    entities$: entities$.pipe(
+      distinctUntilChanged()
+    )
   };
 }
 
@@ -170,10 +194,19 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
 }
 
 export function isPageReady(pagination: PaginationEntityState) {
-  return !!pagination && !!pagination.ids[pagination.currentPage];
+  return !!pagination && !!pagination.ids[pagination.currentPage] && !isFetchingPage(pagination);
 }
 
-export function hasValidOrGettingPage(pagination: PaginationEntityState) {
+export function isFetchingPage(pagination: PaginationEntityState): boolean {
+  if (pagination) {
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return currentPageRequest.busy;
+  } else {
+    return false;
+  }
+}
+
+export function hasValidOrGettingPage(pagination: PaginationEntityState): boolean {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
     const currentPageRequest = getCurrentPageRequestInfo(pagination);
@@ -183,7 +216,7 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   }
 }
 
-export function hasError(pagination: PaginationEntityState) {
+export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 
@@ -192,5 +225,17 @@ export function getCurrentPageRequestInfo(pagination: PaginationEntityState): Ac
     busy: false,
     error: false,
     message: ''
+  };
+}
+
+export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {
+  return {
+    ...pag,
+    filter: {
+      ...pag.filter,
+      items: {
+        ...pag.filter.items
+      }
+    }
   };
 }

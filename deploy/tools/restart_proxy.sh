@@ -19,23 +19,16 @@ pushd "${DEPLOYDIR}"
 ls
 env_vars
 
+PACKAGE_JSON_VERSION=$(cat ${DEPLOYDIR}/../package.json | grep version | grep -Po "([0-9\.]?)*")
+STRATOS_VERSION=${PACKAGE_JSON_VERSION}-$(git log -1 --format="%h")
+BUILD_ARG=" --build-arg stratos_version=${STRATOS_VERSION}"
 docker-compose -f docker-compose.development.yml stop nginx
-docker-compose -f docker-compose.development.yml stop proxy
+docker-compose -f docker-compose.development.yml  stop proxy
 docker-compose -f docker-compose.development.yml rm -f proxy
 
-./build_portal_proxy.sh
-ret=$?
-cd ../
-docker build . -f deploy/Dockerfile.bk.dev -t deploy_proxy
-cd ${DEPLOYDIR}
-ls
+docker-compose -f docker-compose.development.yml build  ${BUILD_ARG} proxy
 
-if [ ${ret} -eq 0 ]; then
-    # nginx also restarts the proxy
-    docker-compose -f docker-compose.development.yml up -d nginx
-else
-    echo -e "\033[0;31mOoops Build failed! Not restarting portal-proxy container until you fix the build!\033[0m"
-fi
+docker-compose -f docker-compose.development.yml up -d nginx
 
 popd
 

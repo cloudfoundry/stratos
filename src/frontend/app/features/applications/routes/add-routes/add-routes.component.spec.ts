@@ -19,7 +19,7 @@ describe('AddRoutesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddRoutesComponent, MapRoutesComponent ],
+      declarations: [AddRoutesComponent, MapRoutesComponent],
       imports: [
         CoreModule,
         SharedModule,
@@ -36,7 +36,7 @@ describe('AddRoutesComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

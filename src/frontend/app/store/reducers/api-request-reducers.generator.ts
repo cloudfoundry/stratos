@@ -1,29 +1,46 @@
-import { RequestTypes } from './../actions/request.actions';
-import { ApiActionTypes } from '../actions/request.actions';
-import { RequestSectionKeys, IRequestArray } from './api-request-reducer/types';
-import { OtherEntityStateNames } from '../types/other-entity.types';
+import {
+  appEnvVarsSchemaKey,
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  buildpackSchemaKey,
+  cfInfoSchemaKey,
+  cfUserSchemaKey,
+  featureFlagSchemaKey,
+  githubBranchesSchemaKey,
+  githubCommitSchemaKey,
+  githubRepoSchemaKey,
+  metricSchemaKey,
+  organizationSchemaKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  securityGroupSchemaKey,
+  serviceBindingSchemaKey,
+  serviceBrokerSchemaKey,
+  serviceInstancesSchemaKey,
+  servicePlanSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  serviceSchemaKey,
+  spaceQuotaSchemaKey,
+  spaceSchemaKey,
+  userProfileSchemaKey,
+} from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
-import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
+import { RequestTypes } from './../actions/request.actions';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
+import { IRequestArray } from './api-request-reducer/types';
+import { appStatsReducer } from './app-stats-request.reducer';
+import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
-import {
-  AppEnvVarSchema,
-  AppStatsSchema,
-  AppSummarySchema,
-  AppStatSchema
-} from '../types/app-metadata.types';
-import {
-  GITHUB_BRANCHES_ENTITY_KEY,
-  GITHUB_COMMIT_ENTITY_KEY
-} from '../types/deploy-application.types';
-import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
-import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
-import { UserSchema } from '../types/user.types';
-import { userReducer } from './users.reducer';
-import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
-import { routeReducer } from './routes.reducer';
+import { updateOrganizationSpaceReducer } from './organization-space.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
+import { serviceInstanceReducer } from './service-instance.reducer';
+import { systemEndpointsReducer } from './system-endpoints.reducer';
+import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
+import { applicationAddRemoveReducer } from './application-add-remove-reducer';
+
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -32,7 +49,8 @@ import { routeReducer } from './routes.reducer';
 const requestActions = [
   RequestTypes.START,
   RequestTypes.SUCCESS,
-  RequestTypes.FAILED
+  RequestTypes.FAILED,
+  RequestTypes.UPDATE
 ] as IRequestArray;
 
 function chainReducers(baseReducer, extraReducers) {
@@ -60,8 +78,8 @@ const entities = [
   'application',
   'stack',
   'space',
-  'organization',
-  RouteSchema.key,
+  organizationSchemaKey,
+  routeSchemaKey,
   'event',
   endpointStoreNames.type,
   'domain',
@@ -69,31 +87,63 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
-  UserSchema.key,
-  CF_INFO_ENTITY_KEY,
-  GITHUB_REPO_ENTITY_KEY,
-  GITHUB_BRANCHES_ENTITY_KEY,
-  GITHUB_COMMIT_ENTITY_KEY,
-  AppEnvVarSchema.key,
-  AppStatSchema.key,
-  AppSummarySchema.key
+  'user',
+  cfInfoSchemaKey,
+  githubRepoSchemaKey,
+  githubBranchesSchemaKey,
+  githubCommitSchemaKey,
+  appEnvVarsSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  quotaDefinitionSchemaKey,
+  buildpackSchemaKey,
+  securityGroupSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  featureFlagSchemaKey,
+  privateDomainsSchemaKey,
+  spaceQuotaSchemaKey,
+  metricSchemaKey,
+  userProfileSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  serviceBrokerSchemaKey,
 ];
-const _requestReducer = requestReducerFactory(entities, requestActions);
+
+
 
 export function requestReducer(state, action) {
-  return _requestReducer(state, action);
+  const baseRequestReducer = requestReducerFactory(entities, requestActions);
+  const extraReducers = {
+    [appStatsSchemaKey]: [appStatsReducer]
+  };
+  return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
 export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
-    [UserSchema.key]: [userReducer],
-    [RouteSchema.key]: [routeReducer],
+    [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
+    [routeSchemaKey]: [routeReducer],
+    [serviceInstancesSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
-    application: [endpointDisconnectApplicationReducer('application')],
-    space: [endpointDisconnectApplicationReducer('space')],
-    organization: [endpointDisconnectApplicationReducer('organization')]
+    [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
+    [applicationSchemaKey]: [
+      updateApplicationRoutesReducer(),
+      endpointDisconnectApplicationReducer()
+    ],
+    [spaceSchemaKey]: [
+      endpointDisconnectApplicationReducer(),
+      applicationAddRemoveReducer(),
+      userSpaceOrgReducer(true)
+    ],
+    [organizationSchemaKey]: [
+      updateOrganizationSpaceReducer(),
+      endpointDisconnectApplicationReducer(),
+      userSpaceOrgReducer(false)
+    ]
   };
 
   return chainReducers(baseDataReducer, extraReducers)(state, action);

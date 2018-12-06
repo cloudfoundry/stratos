@@ -1,41 +1,35 @@
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { filter, map, take, tap } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
-import { Subscription } from 'rxjs/Subscription';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { GITHUB_API_URL } from '../../../../core/github.helpers';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   FetchBranchesForProject,
   FetchCommit,
   SaveAppDetails,
   SetAppSourceDetails,
-  SetAppSourceSubType,
   SetBranch,
   SetDeployBranch,
 } from '../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../store/app-state';
+import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
+  selectNewProjectCommit,
   selectPEProjectName,
   selectProjectExists,
-  selectSourceSubType,
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { BranchSchema, GITHUB_BRANCHES_ENTITY_KEY, SourceType } from '../../../../store/types/deploy-application.types';
-import {
-  GitBranch,
-  GithubBranchSchema,
-  GithubCommit,
-  GithubCommitSchema,
-  GithubRepo,
-} from '../../../../store/types/github.types';
+import { GitAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
+import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 
 @Component({
@@ -45,17 +39,19 @@ import { PaginatedAction } from '../../../../store/types/pagination.types';
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
+
+  @Input() isRedeploy = false;
+
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
-  sourceTypes: SourceType[] = [{ name: 'Git', id: 'git' }];
-  sourceType$: Observable<SourceType>;
-  GIT_SOURCE_TYPE = 0;
-  GITHUB_SUB_SOURCE_TYPE = 0;
-  sourceSubTypes: SourceType[] = [
-    { id: 'github', name: 'Public Github' },
-    { id: 'giturl', name: 'Public Git URL' }
+  sourceTypes: SourceType[] = [
+    { name: 'Public Github', id: 'github' },
+    { name: 'Public Git URL', id: 'giturl' },
+    { name: 'Application Archive File', id: 'file' },
+    { name: 'Application Folder', id: 'folder' },
   ];
-  sourceSubType$: Observable<string>;
+  sourceType$: Observable<SourceType>;
+  INITIAL_SOURCE_TYPE = 0; // GitHub by default
   repositoryBranches$: Observable<any>;
   validate: Observable<boolean>;
   projectInfo$: Observable<GithubRepo>;
@@ -63,13 +59,25 @@ export class DeployApplicationStep2Component
 
   // ngModel Properties
   sourceType: SourceType;
-  sourceSubType: SourceType;
   repositoryBranch: GitBranch = { name: null, commit: null };
   repository: string;
+  stepperText = 'Please specify the source';
+
+  // Git URL
+  gitUrl: string;
+  gitUrlBranchName: string;
+
+  // Observables for source types
+  sourceTypeGithub$: Observable<boolean>;
+  sourceTypeNeedsUpload$: Observable<boolean>;
+
+  // Local FS data when file or folder upload
+  // @Input('fsSourceData') fsSourceData;
 
   @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
-  isReDeploy = false;
+
+  @ViewChild('fsChooser') fsChooser;
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -85,72 +93,94 @@ export class DeployApplicationStep2Component
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
-  onNext = () => {
-    this.store.dispatch(
-      new SaveAppDetails({
+  onNext: StepOnNextFunction = () => {
+    // Set the details based on which source type is selected
+    let details: GitAppDetails;
+    if (this.sourceType.id === 'github') {
+      details = {
         projectName: this.repository,
         branch: this.repositoryBranch
-      })
-    );
-    return Observable.of({ success: true });
+      };
+    } else if (this.sourceType.id === 'giturl') {
+      details = {
+        projectName: this.gitUrl,
+        branch: {
+          name: this.gitUrlBranchName
+        }
+      };
+    }
+
+    this.store.dispatch(new SaveAppDetails(details));
+    return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
   ngOnInit() {
-    this.isReDeploy = this.route.snapshot.queryParams['redeploy'];
+    if (this.isRedeploy) {
+      this.stepperText = 'Review source details';
+    }
 
     this.sourceType$ = this.store.select(selectSourceType);
-    this.sourceSubType$ = this.store.select(selectSourceSubType);
+
+    this.sourceTypeGithub$ = this.sourceType$.pipe(
+      filter(type => type && !!type.id),
+      map(type => type.id === 'github')
+    );
+
+    this.sourceTypeNeedsUpload$ = this.sourceType$.pipe(
+      filter(type => type && !!type.id),
+      map(type => type.id === 'folder' || type.id === 'file')
+    );
 
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-      filter(state => state && !state.checking && state.exists),
-      tap(p => {
-        if (this.branchesSubscription) {
-          this.branchesSubscription.unsubscribe();
-        }
-        const action = new FetchBranchesForProject(p.name);
-        this.branchesSubscription = getPaginationObservables<APIResource>(
-          {
-            store: this.store,
-            action,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              action.paginationKey,
-              GithubBranchSchema
-            )
-          },
-          true
-        ).entities$.subscribe();
-      })
+        filter(state => state && !state.checking && !state.error && state.exists),
+        tap(state => {
+          if (this.branchesSubscription) {
+            this.branchesSubscription.unsubscribe();
+          }
+          const fetchBranchesAction = new FetchBranchesForProject(state.name);
+          this.branchesSubscription = getPaginationObservables<APIResource>(
+            {
+              store: this.store,
+              action: fetchBranchesAction,
+              paginationMonitor: this.paginationMonitorFactory.create(
+                fetchBranchesAction.paginationKey,
+                entityFactory(githubBranchesSchemaKey)
+              )
+            },
+            true
+          ).entities$.subscribe();
+        })
       )
       .subscribe();
 
     this.subscriptions.push(fetchBranches);
 
-    const action = {
-      entityKey: GITHUB_BRANCHES_ENTITY_KEY,
+    const paginationAction = {
+      entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
-      filter(p => {
-        return p && !!p.data;
-      }),
+      filter(p => p && !!p.exists && !!p.data),
       map(p => p.data),
       tap(p => {
-        if (!this.isReDeploy) {
+        if (!this.isRedeploy) {
           this.store.dispatch(new SetDeployBranch(p.default_branch));
         }
       })
     );
 
     const deployBranchName$ = this.store.select(selectDeployBranchName);
+    const deployCommit$ = this.store.select(selectNewProjectCommit);
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
-      action.paginationKey,
-      BranchSchema
+      paginationAction.paginationKey,
+      entityFactory(githubBranchesSchemaKey)
     );
 
     this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
@@ -165,37 +195,36 @@ export class DeployApplicationStep2Component
       map(([p, q]) => p)
     );
 
-    const updateBranchAndCommit = Observable.combineLatest(
+    const updateBranchAndCommit = observableCombineLatest(
       this.repositoryBranches$,
       deployBranchName$,
-      this.projectInfo$
+      this.projectInfo$,
+      deployCommit$
     ).pipe(
-      tap(([branches, name, projectInfo]) => {
+      tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
         if (branch) {
           this.store.dispatch(new SetBranch(branch));
 
+          const commitSha = commit || branch.commit.sha;
+          const entityKey = projectInfo.full_name + '-' + commitSha;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
-            GithubCommitSchema.key,
-            GithubCommitSchema,
-            branch.commit.sha,
-            new FetchCommit(branch.commit.sha, projectInfo.full_name)
+            githubCommitSchemaKey,
+            entityFactory(githubCommitSchemaKey),
+            entityKey,
+            new FetchCommit(commitSha, projectInfo.full_name, this.gitHubURL),
           );
 
           if (this.commitSubscription) {
             this.commitSubscription.unsubscribe();
           }
-          this.commitSubscription = commitEntityService.waitForEntity$
-            .pipe(
+          this.commitSubscription = commitEntityService.waitForEntity$.pipe(
             map(p => p.entity.entity),
-            tap(p => {
-              this.commitInfo = p;
-            })
-            )
-            .subscribe();
+            tap(p => this.commitInfo = p)
+          ).subscribe();
         }
       })
-      );
+    );
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 
@@ -203,8 +232,7 @@ export class DeployApplicationStep2Component
       filter(p => !p),
       take(1),
       tap(p => {
-        this.setSourceType(this.sourceTypes[this.GIT_SOURCE_TYPE]);
-        this.setSourceSubType(this.sourceSubTypes[this.GITHUB_SUB_SOURCE_TYPE]);
+        this.setSourceType(this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
       })
     );
 
@@ -212,7 +240,6 @@ export class DeployApplicationStep2Component
       filter(p => !!p),
       tap(p => {
         this.sourceType = this.sourceTypes.find(s => s.id === p.id);
-        this.sourceSubType = this.sourceSubTypes.find(s => s.id === p.subType);
       })
     );
 
@@ -231,16 +258,13 @@ export class DeployApplicationStep2Component
 
   setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));
 
-  setSourceSubType = event =>
-    this.store.dispatch(new SetAppSourceSubType(event))
-
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));
   }
 
   ngAfterContentInit() {
-    this.validate = this.sourceSelectionForm.statusChanges.map(() => {
-      return this.sourceSelectionForm.valid || this.isReDeploy;
-    });
+    this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
+      return this.sourceSelectionForm.valid || this.isRedeploy;
+    }));
   }
 }

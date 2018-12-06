@@ -1,10 +1,8 @@
 @import '../../../../sass/colors';
-
 $app-header-height: 56px;
-
 .dashboard {
-  height: 100vh;
   background-color: transparent;
+  height: 100vh;
   &__inner {
     display: flex;
     height: 100%;
@@ -17,6 +15,13 @@ $app-header-height: 56px;
     width: 100%;
   }
   &___subHeader {
-    margin-top: $app-header-height * 2;
+    margin-top: 102px;
   }
+}
+
+.routing-indicator {
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: 999;
 }

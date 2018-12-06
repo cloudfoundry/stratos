@@ -1,19 +1,25 @@
-import { endpointEntitiesSelector, endpointStatusSelector } from '../store/selectors/endpoint.selectors';
-import { Observable } from 'rxjs/Rx';
+
 import { Injectable } from '@angular/core';
-import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { UserService } from './user.service';
-import { AuthState } from '../store/reducers/auth.reducer';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 import { RouterNav } from '../store/actions/router.actions';
+import { AppState, IRequestEntityTypeState } from '../store/app-state';
+import { AuthState } from '../store/reducers/auth.reducer';
+import {
+  endpointEntitiesSelector,
+  endpointsEntityRequestDataSelector,
+  endpointStatusSelector
+} from '../store/selectors/endpoint.selectors';
+import { EndpointModel, EndpointState } from '../store/types/endpoint.types';
+import { UserService } from './user.service';
 
 
 @Injectable()
 export class EndpointsService implements CanActivate {
 
-  endpoints$: any;
+  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
 
@@ -22,26 +28,26 @@ export class EndpointsService implements CanActivate {
     private userService: UserService
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
-    this.haveRegistered$ = this.endpoints$.map(endpoints => !!Object.keys(endpoints).length);
-    this.haveConnected$ = this.endpoints$.map(endpoints =>
-      Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking'));
+    this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
+    this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
+      !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
     // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
-    return Observable.combineLatest(
+    return observableCombineLatest(
       this.store.select('auth'),
       this.store.select(endpointStatusSelector)
-    )
-      .skipWhile(([state, endpointState]: [AuthState, EndpointState]) => {
+    ).pipe(
+      skipWhile(([state, endpointState]: [AuthState, EndpointState]) => {
         return !state.loggedIn || endpointState.loading;
-      })
-      .withLatestFrom(
-      this.haveRegistered$,
-      this.haveConnected$,
-      this.userService.isAdmin$,
-    )
-      .map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
+      }),
+      withLatestFrom(
+        this.haveRegistered$,
+        this.haveConnected$,
+        this.userService.isAdmin$,
+      ),
+      map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
         const [authState] = state;
         if (authState.sessionData.valid) {
           // Redirect to endpoints if there's no connected endpoints
@@ -61,6 +67,23 @@ export class EndpointsService implements CanActivate {
         }
 
         return false;
-      });
+      }));
+  }
+
+  hasMetrics(endpointId: string) {
+    return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
+      filter(endpoint => !!endpoint),
+      map(endpoint => endpoint.metricsAvailable),
+      first()
+    );
+  }
+
+  doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
+    return this.endpoints$.pipe(
+      map(endpoints => {
+        const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
+        return !haveAtLeastOne;
+      })
+    );
   }
 }

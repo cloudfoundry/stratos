@@ -3,19 +3,20 @@ set -ex
 export GOPATH=${PWD}/go
 mkdir -p $GOPATH/bin
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-cd ${BUILD_DIR}/stratos-ui
+cd ${BUILD_DIR}/stratos
 
-# Install Glide
-build/tools/get-glide.sh
+# Install dep
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # Build backend
 npm install
+npm run customize
 export PATH=$PATH:$PWD/node_modules/.bin
 npm run bosh-build-backend
 
-find ../stratos-ui/deploy -type d   ! -path '../stratos-ui/deploy' ! -path '*/db' -maxdepth 1 |  xargs rm -rf
+find ../stratos/deploy -type d   ! -path '../stratos/deploy' ! -path '*/db' -maxdepth 1 |  xargs rm -rf
 
-find ../stratos-ui -type d ! -path '*/outputs*' ! -path '*/deploy'  ! -path '../stratos-ui' -maxdepth 1 |  xargs rm -rf
+find ../stratos -type d ! -path '*/outputs*' ! -path '*/deploy'  ! -path '../stratos' -maxdepth 1 |  xargs rm -rf
 # Delete top level files
 rm -f *.*
 mv outputs/* .

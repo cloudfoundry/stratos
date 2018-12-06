@@ -1,0 +1,20 @@
+.stratos-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 24px;
+  &__logo {
+    align-self: center;
+    padding: 12px 0 16px;
+    width: 240px;
+  }
+  &__header {
+    display: none;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin: 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
+}

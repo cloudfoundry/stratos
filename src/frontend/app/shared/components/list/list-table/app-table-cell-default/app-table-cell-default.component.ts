@@ -1,7 +1,10 @@
-import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
-import { ICellDefinition } from './../table.types';
-import { Component, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { TableCellCustom } from '../table-cell/table-cell-custom';
+import { Component, Input, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
+
+import { pathGet } from '../../../../../core/utils.service';
+import { TableCellCustom } from '../../list.types';
+import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
+import { ICellDefinition } from '../table.types';
 
 @Component({
   moduleId: module.id,
@@ -9,25 +12,76 @@ import { TableCellCustom } from '../table-cell/table-cell-custom';
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss']
 })
-export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnChanges {
+export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
+
   public cellDefinition: ICellDefinition<T>;
-  public row: T;
+
+  private _row: T;
+  @Input('row')
+  get row() { return this._row; }
+  set row(row: T) {
+    this._row = row;
+    if (row) {
+      this.setValue(row);
+    }
+  }
+
+  private asyncSub: Subscription;
+
   public valueContext = { value: null };
   public isLink = false;
   public isExternalLink = false;
   public linkValue: string;
+  public linkTarget = '_self';
   public valueGenerator: (row: T) => string;
 
   public init() {
     this.setValueGenerator();
     this.setValue(this.row);
-    this.isLink = !!this.cellDefinition.getLink;
+    this.setSyncLink();
+  }
+
+  private setupLinkDeps() {
+    if (this.cellDefinition.newTab) {
+      this.linkTarget = '_blank';
+    }
     this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
   }
 
+  private setSyncLink() {
+    if (!this.cellDefinition.getLink) {
+      return;
+    }
+    this.isLink = true;
+    this.linkValue = this.cellDefinition.getLink(this.row);
+    this.setupLinkDeps();
+  }
+
+  private setupAsyncLink(value) {
+    if (!this.cellDefinition.getAsyncLink) {
+      return;
+    }
+    this.isLink = true;
+    this.linkValue = this.cellDefinition.getAsyncLink(value);
+    this.setupLinkDeps();
+  }
+
+  private setupAsync(row) {
+    if (this.asyncSub) {
+      return;
+    }
+    const asyncConfig = this.cellDefinition.asyncValue;
+    this.asyncSub = row[asyncConfig.pathToObs].subscribe(value => {
+      this.valueContext.value = pathGet(asyncConfig.pathToValue, value);
+      this.setupAsyncLink(value);
+    });
+  }
+
   private setValue(row: T) {
-    if (this.valueGenerator) {
-      this.valueContext.value = this.valueGenerator(this.row);
+    if (this.cellDefinition && this.cellDefinition.asyncValue) {
+      this.setupAsync(row);
+    } else if (this.valueGenerator) {
+      this.valueContext.value = this.valueGenerator(row);
     }
   }
 
@@ -48,10 +102,10 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     return null;
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.row;
-    if (row) {
-      this.setValue(row.currentValue);
+  ngOnDestroy() {
+    if (this.asyncSub) {
+      this.asyncSub.unsubscribe();
     }
   }
+
 }

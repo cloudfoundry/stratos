@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
@@ -12,7 +12,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 })
 export class CardAppUptimeComponent implements OnInit {
 
-  constructor(private appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
+  constructor(public appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
 
   appData$: Observable<{
     maxUptime: number,

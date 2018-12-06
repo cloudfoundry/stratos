@@ -1,17 +1,17 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { inject, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
-import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
+import { CoreModule } from '../../../../../core/core.module';
+import { ApplicationsModule } from '../../../../../features/applications/applications.module';
+import { GetApplication } from '../../../../../store/actions/application.actions';
+import { applicationSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../shared.module';
-import { ApplicationSchema, GetApplication } from '../../../../../store/actions/application.actions';
-import { CommonModule } from '@angular/common';
-import { CoreModule } from '../../../../../core/core.module';
-import { ApplicationsModule } from '../../../../../features/applications/applications.module';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
 
 describe('CfAppInstancesConfigService', () => {
 
@@ -25,7 +25,7 @@ describe('CfAppInstancesConfigService', () => {
         CfAppInstancesConfigService,
         generateTestEntityServiceProvider(
           appGuid,
-          ApplicationSchema,
+          entityFactory(applicationSchemaKey),
           new GetApplication(appGuid, cfGuid)
         ),
         generateTestApplicationServiceProvider(appGuid, cfGuid)

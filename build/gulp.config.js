@@ -4,7 +4,6 @@
   // This stores all the configuration information for Gulp
   var paths = {
     dist: './dist/',
-    backendOutput: './outputs/',
     ui: './ui'
   };
 

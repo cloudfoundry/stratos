@@ -1,33 +1,42 @@
 .app-code-block {
+  padding: 10px 20px;
   position: relative;
-  min-height: 20px;
-  padding: 20px;
-  pre {
-    margin: 0;
-    white-space: pre-line;
-    word-wrap: break-word;
+  &__content {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    justify-content: center;
+    margin-right: 20px; // Prevent text overlapping copy button
   }
-  &___copied-div,
-  &___copy-icon {
+  &__pre {
+   // For wrapped PRE, vertical padding is already on the PRE element, so remove it here
+    padding: 0 20px;
+  }
+  &__copied-div,
+  &__copy-icon {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    right: 10px;
+    top: 6px;
     transition: opacity 250ms linear;
   }
-  &___copied-div {
-    opacity: 0;
-    display: flex;
+  &__copied-div {
     align-items: center;
+    display: flex;
+    opacity: 0;
     span {
       margin-right: 5px;
     }
   }
-  &___success {
+  &__copy-icon {
+    cursor: pointer;
+  }
+  &__success {
     .app-code-block {
-      &___copied-div {
+      &__copied-div {
         opacity: 1;
       }
-      &___copy-icon {
+      &__copy-icon {
         opacity: 0;
       }
     }

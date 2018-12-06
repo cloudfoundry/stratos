@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   generateTestCfEndpointService,
-  getBaseTestModulesNoShared,
+  BaseTestModulesNoShared,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { CardCfUsageComponent } from './card-cf-usage.component';
@@ -15,7 +15,7 @@ describe('CardCfUsageComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CardCfUsageComponent, MetadataItemComponent],
-        imports: [...getBaseTestModulesNoShared],
+        imports: [...BaseTestModulesNoShared],
         providers: [generateTestCfEndpointService()]
       }).compileComponents();
     })

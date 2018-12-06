@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-usage',
@@ -8,12 +9,12 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 })
 export class TableCellUsageComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  private value: string;
-  private label: string;
+  public value: (row: T) => string;
+  public label: (row: T) => string;
 
   ngOnInit() {
-    this.value = this.config ? this.config.value : row => 0;
-    this.label = this.config ? this.config.label : row => '-';
+    this.value = this.config ? this.config.value : () => '0';
+    this.label = this.config ? this.config.label : () => '-';
   }
 
 }

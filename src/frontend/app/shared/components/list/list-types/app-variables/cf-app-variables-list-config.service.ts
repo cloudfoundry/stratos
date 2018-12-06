@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -6,13 +8,7 @@ import { AppVariablesDelete } from '../../../../../store/actions/app-variables.a
 import { AppState } from '../../../../../store/app-state';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsTable,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
+import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
@@ -23,23 +19,21 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
     action: (items: ListAppEnvVar[]) => {
       this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
+      return true;
     },
     icon: 'delete',
     label: 'Delete',
-    description: '',
-    visible: (row: ListAppEnvVar) => true,
-    enabled: (row: ListAppEnvVar) => true,
+    description: ''
   };
 
   private listActionDelete: IListAction<ListAppEnvVar> = {
     action: (item: ListAppEnvVar) => {
       this.dispatchDeleteAction([item]);
     },
-    icon: 'delete',
     label: 'Delete',
     description: '',
-    visible: (row: ListAppEnvVar) => true,
-    enabled: (row: ListAppEnvVar) => true,
+    createVisible: () => observableOf(true),
+    createEnabled: () => observableOf(true)
   };
 
   columns: Array<ITableColumn<ListAppEnvVar>> = [
@@ -69,7 +63,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Environment Variables', filter: 'Search by name'
+    title: 'Environment Variables', filter: 'Search by name', noEntries: 'There are no variables'
   };
   enableTextFilter = true;
 

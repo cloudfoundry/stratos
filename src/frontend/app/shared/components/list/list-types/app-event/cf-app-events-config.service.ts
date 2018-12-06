@@ -32,7 +32,8 @@ export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements 
   ];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Events',
+    title: null,
+    noEntries: 'There are no events'
   };
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {

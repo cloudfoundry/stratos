@@ -1,3 +1,5 @@
+
+import {pairwise} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -8,25 +10,21 @@ import { EndpointModel, endpointStoreNames } from '../../../../../store/types/en
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';
 import { EndpointsListConfigService, endpointColumns } from '../endpoint/endpoints-list-config.service';
-import { CFEndpointsDataSource } from './cf-endpoints-data-source';
+import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 import { TableCellEndpointStatusComponent } from '../endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { EndpointCardComponent } from '../../list-cards/custom-cards/endpoint-card/endpoint-card.component';
-
-
-function getEndpointTypeString(endpoint: EndpointModel): string {
-  return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
-}
+import { EndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
-  dataSource: CFEndpointsDataSource;
+  dataSource: BaseEndpointsDataSource;
   viewType = ListViewTypes.CARD_ONLY;
   cardComponent = EndpointCardComponent;
   text = {
     title: '',
-    filter: 'Filter Endpoints'
+    filter: 'Filter Endpoints',
+    noEntries: 'There are no endpoints'
   };
   enableTextFilter = true;
   tableFixedRowHeight = true;
@@ -36,8 +34,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
       endpointStoreNames.type,
       item.guid,
       effectKey,
-    ))
-      .pairwise()
+    )).pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
           handleChange([oldVal, newVal]);
@@ -53,7 +51,7 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
     this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';
     });
-    this.dataSource = new CFEndpointsDataSource(this.store, this);
+    this.dataSource = new BaseEndpointsDataSource(this.store, this, 'cf');
   }
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];
@@ -61,6 +59,4 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
   public getDataSource = () => this.dataSource;
-
-
 }

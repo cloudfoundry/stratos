@@ -1,27 +1,15 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
-import { AppStat, AppStatSchema } from '../../../../../store/types/app-metadata.types';
+import { AppStat } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-
-export interface ListAppInstanceUsage {
-  mem: number;
-  disk: number;
-  cpu: number;
-  hasStats: boolean;
-}
-
-export interface ListAppInstance {
-  index: number;
-  value: AppStat;
-  usage: ListAppInstanceUsage;
-}
+import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
 
@@ -31,16 +19,17 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
     _appGuid: string,
     listConfig: IListConfig<ListAppInstance>
   ) {
-    const paginationKey = getPaginationKey(AppStatSchema.key, _cfGuid, _appGuid);
+    const paginationKey = createEntityRelationPaginationKey(applicationSchemaKey, _appGuid);
     const action = new GetAppStatsAction(_appGuid, _cfGuid);
 
     super(
       {
         store,
         action,
-        schema: AppStatSchema,
+        schema: entityFactory(appStatsSchemaKey),
         getRowUniqueId: (row: ListAppInstance) => row.index.toString(),
         paginationKey,
+        transformEntities: [{ type: 'filter', field: 'value.state' }],
         transformEntity: map(instances => {
           if (!instances || instances.length === 0) {
             return [];

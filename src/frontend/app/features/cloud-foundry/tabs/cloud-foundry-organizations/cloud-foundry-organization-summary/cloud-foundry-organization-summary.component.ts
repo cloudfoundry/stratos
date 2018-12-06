@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 
-import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
+import { AppState } from '../../../../../store/app-state';
+import { goToAppWall } from '../../../cf.helpers';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -8,15 +11,12 @@ import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry
   styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
 
 })
-export class CloudFoundryOrganizationSummaryComponent implements OnInit {
+export class CloudFoundryOrganizationSummaryComponent {
+  appLink: Function;
 
-
-  constructor(private cfOrgService: CloudFoundryOrganisationService) {
-
+  constructor(private store: Store<AppState>, public cfOrgService: CloudFoundryOrganizationService) {
+    this.appLink = () => {
+      goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
+    };
   }
-
-  ngOnInit() {
-
-  }
-
 }

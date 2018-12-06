@@ -1,8 +1,8 @@
-import { concat } from 'rxjs/observable/concat';
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { delay, map, startWith, tap } from 'rxjs/operators';
+
 import { UserService } from '../../../core/user.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 
@@ -11,71 +11,54 @@ import { EndpointsService } from '../../../core/endpoints.service';
   templateUrl: './endpoints-missing.component.html',
   styleUrls: ['./endpoints-missing.component.scss']
 })
-export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
 
-  @Input('showSnackForNoneConnected') showSnackForNoneConnected = false;
-
-  @Input('showToolbarHint') showToolbarHint = false;
-
-  firstLine;
-  secondLine;
-  toolbarLink;
-  hide = true;
-
+  noContent$: Observable<{ firstLine: string; secondLine: { text: string; }; }>;
   snackBarText = {
-    message: `To access your cloud native workloads and other related third party services, connect with
-    your personal credentials to the corresponding registered services.`,
+    message: `There are no connected endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
   };
 
   noneRegisteredText = {
-    firstLineText: 'There are no registered endpoints',
+    firstLine: 'There are no registered endpoints',
     toolbarLink: {
       text: 'Register an endpoint'
     },
-    secondLineText: {
+    secondLine: {
       text: 'Use the Endpoints view to register'
     },
   };
 
   noneConnectedText = {
-    firstLineText: 'There are no connected endpoints',
-    secondLineText: {
+    firstLine: 'There are no connected endpoints',
+    secondLine: {
       text: 'Use the Endpoints view to connect'
     },
   };
 
-  subscription: Subscription;
-
   private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private userService: UserService, private snackBar: MatSnackBar, public endpointService: EndpointsService) { }
-
-  ngOnInit() {
-
-  }
+  constructor(private snackBar: MatSnackBar, public endpointsService: EndpointsService) { }
 
   ngAfterViewInit() {
-    this.subscription = Observable.combineLatest(
-      this.endpointService.haveRegistered$,
-      this.endpointService.haveConnected$
-    ).subscribe(([haveRegistered, haveConnected]) => {
-      const showNoneRegistered = !haveRegistered;
-      const showNoneConnected = !this.showSnackForNoneConnected && haveRegistered && !haveConnected;
-
-      setTimeout(() => {
-        this.firstLine = showNoneConnected ? this.noneConnectedText.firstLineText : this.noneRegisteredText.firstLineText;
-        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText :
-          this.showToolbarHint ? {} : this.noneRegisteredText.secondLineText;
-        this.toolbarLink = showNoneConnected ? {} : this.showToolbarHint ? this.noneRegisteredText.toolbarLink : {};
-        this.hide = !showNoneRegistered && !showNoneConnected;
-        this.showSnackBar(this.showSnackForNoneConnected && haveRegistered && !haveConnected);
-      });
-    });
+    this.noContent$ = observableCombineLatest(
+      this.endpointsService.haveRegistered$,
+      this.endpointsService.haveConnected$
+    ).pipe(
+      delay(1),
+      tap(([hasRegistered, hasConnected]) => {
+        this.showSnackBar(hasRegistered && !hasConnected);
+      }),
+      map(([hasRegistered, hasConnected]) => {
+        if (!hasRegistered) {
+          return this.noneRegisteredText;
+        }
+        return null;
+      })
+    ).pipe(startWith(null));
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
     this.showSnackBar(false);
   }
 

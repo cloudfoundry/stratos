@@ -1,0 +1,30 @@
+.service-instance-card {
+  &__link {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    &:not(:first-child) {
+      margin-left: 6px;
+    }
+    mat-icon {
+      font-size: 16px;
+      height: 16px;
+      margin-right: 2px;
+      text-decoration: none;
+      width: 16px;
+      &:focus,
+      &:active {
+        text-decoration: none;
+      }
+    }
+  }
+  &__icon-link {
+    align-items: center;
+    display: flex;
+    text-decoration: none;
+  }
+  &__title {
+    // Title should not overlap with 3-dot menu
+    margin-right: 16px;
+  }
+}

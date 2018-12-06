@@ -1,10 +1,13 @@
+
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+
+import { startWith, map, share } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { map, share } from 'rxjs/operators';
 
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardStatus } from '../../application-state/application-state.service';
+import { pathGet } from '../../../../core/utils.service';
 
 @Component({
   selector: 'app-card-app-usage',
@@ -19,18 +22,19 @@ export class CardAppUsageComponent implements OnInit {
   status$: Observable<CardStatus>;
 
   ngOnInit() {
-    this.appData$ = Observable.combineLatest(
-      this.appMonitor.appMonitor$,
-      this.appService.application$.map(data => data.app.entity.state === 'STARTED'),
-      (monitor, isRunning) => ({ monitor: monitor, isRunning: isRunning, status: !isRunning ? 'tentative' : monitor.status.usage })
+    this.appData$ = observableCombineLatest(
+      this.appMonitor.appMonitor$.pipe(startWith(null)),
+      this.appService.applicationRunning$,
     ).pipe(
+      map(([monitor, isRunning]) => ({
+        monitor: monitor,
+        isRunning: isRunning,
+        status: !isRunning ? 'tentative' : pathGet('status.usage', monitor)
+      })),
       share()
-      );
+    );
     this.status$ = this.appData$.pipe(
       map(data => data.status)
     );
   }
-
 }
-
-

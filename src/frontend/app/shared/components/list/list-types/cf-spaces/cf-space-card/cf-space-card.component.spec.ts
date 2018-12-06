@@ -2,36 +2,27 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import {
+  BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-  getBaseTestModulesNoShared,
-  getMetadataCardComponents,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../application-state/application-state-icon/application-state-icon.component';
-import { ApplicationStateIconPipe } from '../../../../application-state/application-state-icon/application-state-icon.pipe';
-import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
-import { MetaCardComponent } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from '../../cf-orgs/cf-org-card/cf-org-card.component';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
-describe('CfOrgCardComponent', () => {
+describe('CfSpaceCardComponent', () => {
   let component: CfOrgCardComponent;
   let fixture: ComponentFixture<CfOrgCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, ...getMetadataCardComponents],
-      imports: [...getBaseTestModulesNoShared],
+      declarations: [CfOrgCardComponent, ...MetadataCardTestComponents],
+      imports: [...BaseTestModulesNoShared],
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
-        CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
+        CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory, ConfirmationDialogService]
     })
       .compileComponents();
   }));
@@ -56,7 +47,12 @@ describe('CfOrgCardComponent', () => {
           metadata: null
         }
       },
-      metadata: null
+      metadata: {
+        guid: '',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
   });

@@ -1,47 +1,54 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { IApp } from '../../../../../core/cf-api.types';
+import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { IListConfig, ListViewTypes } from '../../list.component.types';
-import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
-import { CfApplication } from '../../../../../store/types/application.types';
 import { ITableColumn } from '../../list-table/table.types';
+import { defaultPaginationPageSizeOptionsTable, IListConfig, ListViewTypes } from '../../list.component.types';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
-import { DatePipe } from '@angular/common';
-import { TableCellAppInstancesComponent } from '../app/table-cell-app-instances/table-cell-app-instances.component';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
 
 @Injectable()
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
-  isLocal?: boolean;
+  isLocal = false;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
   dataSource: CfSpaceAppsDataSource;
-  pageSizeOptions = [9, 45, 90];
   defaultView = 'table' as ListView;
-  getColumns = (): ITableColumn<APIResource<CfApplication>>[] => [
+  text = {
+    title: null,
+    noEntries: 'There are no applications'
+  };
+  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
+
+  getColumns = (): ITableColumn<APIResource<IApp>>[] => [
     {
       columnId: 'apps', headerCell: () => 'Applications',
       cellComponent: TableCellAppNameComponent,
       cellFlex: '1',
-      sort: {
-        type: 'sort',
-        orderKey: 'apps',
-        field: 'entity.name'
-      }
     },
     {
-      columnId: 'status', headerCell: () => 'Status',
+      columnId: 'status',
+      headerCell: () => 'Status',
       cellFlex: '2',
       cellConfig: {
         hideIcon: true,
         initialStateOnly: true
       },
       cellComponent: TableCellAppStatusComponent
+    },
+    {
+      columnId: 'instances',
+      headerCell: () => 'Instances',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${row.entity.instances}`
+      },
+      cellFlex: '1'
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
@@ -55,19 +62,6 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       },
       cellFlex: '2'
     },
-    {
-      columnId: 'instances',
-      headerCell: () => 'Instances',
-      cellDefinition: {
-        getValue: (row: APIResource) => `${row.entity.instances}`
-      },
-      cellFlex: '1', sort: {
-        type: 'sort',
-        orderKey: 'instances',
-        field: 'entity.instances'
-      }
-    },
-
   ]
 
   constructor(

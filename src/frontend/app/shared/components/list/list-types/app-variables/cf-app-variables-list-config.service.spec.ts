@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { ApplicationsModule } from '../../../../../features/applications/applications.module';
-import { ApplicationSchema, GetApplication } from '../../../../../store/actions/application.actions';
+import { GetApplication } from '../../../../../store/actions/application.actions';
+import { applicationSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
@@ -24,7 +26,7 @@ describe('CfAppVariablesListConfigService', () => {
         CfAppVariablesListConfigService,
         generateTestEntityServiceProvider(
           appGuid,
-          ApplicationSchema,
+          entityFactory(applicationSchemaKey),
           new GetApplication(appGuid, cfGuid)
         ),
         generateTestApplicationServiceProvider(appGuid, cfGuid)
@@ -34,7 +36,8 @@ describe('CfAppVariablesListConfigService', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
-        ApplicationsModule
+        ApplicationsModule,
+        RouterTestingModule
       ]
     });
   });

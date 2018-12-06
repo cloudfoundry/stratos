@@ -1,4 +1,4 @@
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 import { Component, OnInit, Input } from '@angular/core';
 import { isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 
@@ -9,7 +9,7 @@ import { isTCPRoute } from '../../../../../../features/applications/routes/route
 })
 export class TableCellTCPRouteComponent<T> extends TableCellCustom<T> {
 
-  @Input('row') row;
+  @Input() row;
   constructor() {
     super();
   }

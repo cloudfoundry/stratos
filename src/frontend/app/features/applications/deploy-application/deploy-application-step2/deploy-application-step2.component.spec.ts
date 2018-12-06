@@ -9,6 +9,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
+import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../core/github.helpers';
 
 describe('DeployApplicationStep2Component', () => {
   let component: DeployApplicationStep2Component;
@@ -16,13 +18,19 @@ describe('DeployApplicationStep2Component', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeployApplicationStep2Component ],
+      declarations: [
+        DeployApplicationStep2Component,
+        DeployApplicationFsComponent
+      ],
       imports: [
         CoreModule,
         SharedModule,
         RouterTestingModule,
         createBasicStoreModule(),
         BrowserAnimationsModule
+      ],
+      providers: [
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
     })
     .compileComponents();

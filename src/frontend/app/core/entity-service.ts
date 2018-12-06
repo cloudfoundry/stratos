@@ -1,44 +1,42 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { denormalize, Schema } from 'normalizr';
-import { tag } from 'rxjs-spy/operators/tag';
-import { interval } from 'rxjs/observable/interval';
-import { filter, map, shareReplay, tap, withLatestFrom, share } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { compose, Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { ValidateEntitiesStart } from '../store/actions/request.actions';
 import { AppState } from '../store/app-state';
 import {
-  ActionState,
   RequestInfoState,
   RequestSectionKeys,
   TRequestTypeKeys,
   UpdatingSection,
 } from '../store/reducers/api-request-reducer/types';
-import {
-  getAPIRequestDataState,
-  getEntityUpdateSections,
-  getUpdateSectionById,
-  selectEntity,
-  selectRequestInfo,
-} from '../store/selectors/api.selectors';
-import { APIResource, EntityInfo } from '../store/types/api.types';
-import { IRequestAction } from '../store/types/request.types';
-import { composeFn } from './../store/helpers/reducer.helper';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { combineLatest } from 'rxjs/operators/combineLatest';
+import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
+import { EntityInfo } from '../store/types/api.types';
+import { ICFAction, IRequestAction } from '../store/types/request.types';
 
-type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
+export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
+  if (!entityRequestInfo) {
+    return false;
+  }
+  return entityRequestInfo.fetching ||
+    entityRequestInfo.error ||
+    entityRequestInfo.deleting.busy ||
+    entityRequestInfo.deleting.deleted ||
+    entityRequestInfo.updating._root_.busy;
+}
+
 /**
  * Designed to be used in a service factory provider
  */
-@Injectable()
 export class EntityService<T = any> {
 
   constructor(
     private store: Store<AppState>,
     public entityMonitor: EntityMonitor<T>,
     public action: IRequestAction,
-    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF
+    public validateRelations = true,
+    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
     this.actionDispatch = (updatingKey) => {
       if (updatingKey) {
@@ -51,26 +49,39 @@ export class EntityService<T = any> {
       this.actionDispatch(this.refreshKey);
     };
 
+    let validated = false;
+
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
     this.entityObs$ = this.getEntityObservable(
       entityMonitor,
-      this.actionDispatch
+      this.actionDispatch,
+    ).pipe(
+      publishReplay(1),
+      refCount(),
+      tap((entityInfo: EntityInfo) => {
+        if (!entityInfo || entityInfo.entity) {
+          if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
+            return;
+          }
+          validated = true;
+          store.dispatch(new ValidateEntitiesStart(
+            action as ICFAction,
+            [entityInfo.entity.metadata.guid],
+            false
+          ));
+        }
+      })
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
         const { entityRequestInfo, entity } = ent;
-        const available = !!entity &&
-          !entityRequestInfo.deleting.busy &&
-          !entityRequestInfo.deleting.deleted &&
-          !entityRequestInfo.error;
-        return (
-          available
-        );
+        return this.isEntityAvailable(entity, entityRequestInfo);
       }),
-      shareReplay(1)
+      publishReplay(1),
+      refCount()
     );
   }
 
@@ -89,69 +100,55 @@ export class EntityService<T = any> {
   waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
-
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: Function
   ): Observable<EntityInfo> => {
-    return entityMonitor.entityRequest$
-      .withLatestFrom(entityMonitor.entity$)
-      .do(([entityRequestInfo, entity]) => {
+    const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
+    return entityMonitor.entityRequest$.pipe(
+      withLatestFrom(entityMonitor.entity$),
+      tap(([entityRequestInfo, entity]) => {
         if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
           actionDispatch();
         }
-      })
-      .filter((entityRequestInfo) => {
+      }),
+      first(),
+      switchMap(() => cleanEntityInfo$)
+    );
+  }
+
+  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
+    return combineLatest(
+      entityMonitor.entityRequest$,
+      entityMonitor.entity$
+    ).pipe(
+      filter(([entityRequestInfo]) => {
         return !!entityRequestInfo;
-      })
-      .map(([entityRequestInfo, entity]) => {
-        return {
-          entityRequestInfo,
-          entity: entity ? entity : null
-        };
-      });
+      }),
+      map(([entityRequestInfo, entity]) => ({
+        entityRequestInfo,
+        entity
+      }))
+    );
+  }
+
+  private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
+    return entity && !isEntityBlocked(entityRequestInfo);
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
-    return !entityRequestInfo ||
-      !entity &&
-      !entityRequestInfo.fetching &&
-      !entityRequestInfo.error &&
-      !entityRequestInfo.deleting.busy &&
-      !entityRequestInfo.deleting.deleted;
-
+    return !entityRequestInfo || (!entity && !isEntityBlocked(entityRequestInfo));
   }
 
   /**
    * @param interval - The polling interval in ms.
-   * @param key - The store updating key for the poll
+   * @param updateKey - The store updating key for the poll
    */
-  poll(interval = 10000, key = this.refreshKey) {
-    return Observable.interval(interval)
-      .pipe(
-      tag('poll'),
-      withLatestFrom(
-        this.entityMonitor.entity$,
-        this.entityMonitor.entityRequest$
-      ),
-      map(a => ({
-        resource: a[1],
-        updatingSection: composeFn(
-          getUpdateSectionById(key),
-          getEntityUpdateSections,
-          () => a[2]
-        )
-      })),
-      tap(({ resource, updatingSection }) => {
-        if (!updatingSection || !updatingSection.busy) {
-          this.actionDispatch(key);
-        }
-      }),
-      filter(({ resource, updatingSection }) => {
-        return !!updatingSection;
-      }),
-      share(),
-    );
+  poll(interval = 10000, updateKey = this.refreshKey) {
+    return this.entityMonitor.poll(interval, () => this.actionDispatch(updateKey), compose(
+      getUpdateSectionById(updateKey),
+      getEntityUpdateSections
+    ));
   }
 
 }

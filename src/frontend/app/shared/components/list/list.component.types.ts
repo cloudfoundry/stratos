@@ -1,11 +1,11 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
-import { IListDataSource } from './data-sources-controllers/list-data-source-types';
-import { ITableColumn, ITableText } from './list-table/table.types';
-import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ListDataSource } from './data-sources-controllers/list-data-source';
+import { IListDataSource } from './data-sources-controllers/list-data-source-types';
+import { ITableColumn, ITableText } from './list-table/table.types';
+
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -37,19 +37,19 @@ export interface IListConfig<T> {
   getDataSource: () => IListDataSource<T>;
   /**
    * Collection of configuration objects to support multiple drops downs for filtering local lists. For example the application wall filters
-   * by cloud foundry, organisation and space. This mechanism supports only the showing and storing of such filters. An additional function
+   * by cloud foundry, organization and space. This mechanism supports only the showing and storing of such filters. An additional function
    * to the data sources transformEntities collection should be used to apply these custom settings to the data.
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
-   * Local lists expect ALL entries to be fetched by the data sources action. This allows custom sorting and filtering. Non-local lists
-   * must sort and filter via their supporting api requests.
+   * Fetch an observable that will emit once the underlying config components have been created. For instance if the data source requires
+   * something from the store which requires an async call
    */
-  isLocal?: boolean;
+  getInitialised?: () => Observable<boolean>;
   /**
    * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
-  pageSizeOptions?: Number[];
+  pageSizeOptions?: number[];
   /**
    * What different views the user can select (table/cards)
    */
@@ -71,9 +71,22 @@ export interface IListConfig<T> {
    */
   tableFixedRowHeight?: boolean;
   /**
+   * Set the align-self of each cell in the row
+   */
+  tableRowAlignSelf?: string;
+  /**
    * The card component used in card view
    */
   cardComponent?: any;
+  hideRefresh?: boolean;
+  /**
+   * Allow selection regardless of number or visibility of multi actions
+   */
+  allowSelection?: boolean;
+  /**
+   * For metrics based data show a metrics range selector
+   */
+  showMetricsRange?: boolean;
 }
 
 export interface IListMultiFilterConfig {
@@ -99,33 +112,44 @@ export class ListConfig<T> implements IListConfig<T> {
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;
-  tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
+  allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = () => null;
+  getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getInitialised = () => observableOf(true);
 }
 
 export interface IBaseListAction<T> {
-  icon: string;
+  icon?: string;
   label: string;
   description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
+  createVisible?: (row$: Observable<T>) => Observable<boolean>;
+  createEnabled?: (row$: Observable<T>) => Observable<boolean>;
 }
 
-export interface IMultiListAction<T> extends IBaseListAction<T> {
-  action: (items: T[]) => void;
+export interface IOptionalAction<T> extends IBaseListAction<T> {
+  visible$?: Observable<boolean>;
+  enabled$?: Observable<boolean>;
 }
 
-export interface IGlobalListAction<T> extends IBaseListAction<T> {
+export interface IMultiListAction<T> extends IOptionalAction<T> {
+  /**
+   * Return true if the selection should be cleared
+   *
+   * @memberof IMultiListAction
+   */
+  action: (items: T[]) => boolean;
+}
+
+export interface IGlobalListAction<T> extends IOptionalAction<T> {
   action: () => void;
 }

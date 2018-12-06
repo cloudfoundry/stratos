@@ -1,20 +1,23 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfSpaceRoutesListConfigService } from './cf-space-routes-list-config.service';
-import { getBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
+import { DatePipe } from '@angular/common';
 
 describe('CfSpaceRoutesListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfSpaceRoutesListConfigService,
+      providers: [
+        CfSpaceRoutesListConfigService,
         {
           provide: CloudFoundrySpaceService,
           useClass: CloudFoundrySpaceServiceMock
-        }
+        },
+        DatePipe
       ],
-      imports: [...getBaseTestModules],
+      imports: [...BaseTestModules],
     });
   });
 

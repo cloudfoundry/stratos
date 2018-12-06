@@ -20,9 +20,12 @@ export function failRequest(state, action: IFailedRequestAction) {
         }
       );
     } else if (action.requestType === 'delete') {
-      requestFailedState.deleting.busy = false;
-      requestFailedState.deleting.deleted = false;
-      requestFailedState.deleting.error = true;
+      requestFailedState.deleting = {
+        ...requestFailedState.deleting,
+        busy: false,
+        deleted: false,
+        error: true,
+      };
       requestFailedState.message = action.message;
     } else {
       requestFailedState.fetching = false;

@@ -1,6 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { StratosActionType, StratosTabType } from '../../core/extension/extension-service';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
+import {
+  AddServiceInstanceComponent,
+} from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
+import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
 import { ApplicationBaseComponent } from './application/application-base.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
@@ -9,8 +16,11 @@ import { EventsTabComponent } from './application/application-tabs-base/tabs/eve
 import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
+import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
+import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
+import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
 import { CreateApplicationModule } from './create-application/create-application.module';
 import { DeployApplicationComponent } from './deploy-application/deploy-application.component';
@@ -18,9 +28,8 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
-import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 
-const appplicationsRoutes: Routes = [
+const applicationsRoutes: Routes = [
   {
     path: 'new',
     component: CreateApplicationComponent,
@@ -36,11 +45,18 @@ const appplicationsRoutes: Routes = [
         path: '',
         component: ApplicationWallComponent,
         pathMatch: 'full',
+        data: {
+          extensionsActionsKey: StratosActionType.Applications
+        }
       },
       {
         path: ':cfId/:id',
         component: ApplicationBaseComponent,
         children: [
+          {
+            path: 'delete',
+            component: ApplicationDeleteComponent
+          },
           {
             path: 'edit',
             component: EditApplicationComponent,
@@ -50,29 +66,64 @@ const appplicationsRoutes: Routes = [
             component: SshApplicationComponent,
           },
           {
+            path: 'cli',
+            component: CliInfoApplicationComponent,
+          },
+          {
+            path: 'bind',
+            component: AddServiceInstanceComponent
+          },
+          {
             path: '',
             component: ApplicationTabsBaseComponent,
             data: {
-              uiFullView: true
+              uiFullView: true,
+              extensionsActionsKey: StratosActionType.Application
             },
             children: [
               { path: '', redirectTo: 'summary', pathMatch: 'full' },
               { path: 'summary', component: BuildTabComponent },
               { path: 'instances', component: InstancesTabComponent },
+              { path: 'routes', component: RoutesTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },
               { path: 'events', component: EventsTabComponent },
               { path: 'github', component: GithubTabComponent },
+              { path: 'metrics', component: MetricsTabComponent },
+              {
+                path: '**',
+                component: PageNotFoundComponentComponent,
+                canActivate: [DynamicExtensionRoutes],
+                data: {
+                  stratosRouteGroup: StratosTabType.Application
+                }
+              }
             ]
           },
           {
             path: 'add-route',
             component: AddRouteStepperComponent,
+          },
+          {
+            path: '**',
+            component: PageNotFoundComponentComponent,
+            canActivate: [DynamicExtensionRoutes],
+            data: {
+              stratosRouteGroup: StratosActionType.Application
+            }
           }
         ]
       }
     ]
+  },
+  {
+    path: '**',
+    component: PageNotFoundComponentComponent,
+    canActivate: [DynamicExtensionRoutes],
+    data: {
+      stratosRouteGroup: StratosActionType.Applications
+    }
   }
 ];
 
@@ -80,7 +131,7 @@ const appplicationsRoutes: Routes = [
   imports: [
     CreateApplicationModule,
     DeployApplicationModule,
-    RouterModule.forChild(appplicationsRoutes)
+    RouterModule.forChild(applicationsRoutes)
 
   ]
 })

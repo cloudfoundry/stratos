@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules,
+  BaseTestModules,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganizationBaseComponent } from './cloud-foundry-organization-base.component';
 
@@ -13,7 +13,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationBaseComponent],
-      imports: [...getBaseTestModules],
+      imports: [...BaseTestModules],
       providers: [...generateTestCfEndpointServiceProvider()]
     })
       .compileComponents();

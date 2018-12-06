@@ -1,19 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 
-import { Observable } from 'rxjs/Observable';
+import {never as observableNever,  Observable, Subject ,  Subscription } from 'rxjs';
+
+import {catchError,  first, map } from 'rxjs/operators';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription, Subject } from 'rxjs/Rx';
 import websocketConnect from 'rxjs-websockets';
 
-import { ApplicationService } from '../application.service';
-import { QueueingSubject } from 'queueing-subject';
-import { LoggerService } from '../../../core/logger.service';
+import { IApp } from '../../../core/cf-api.types';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
-import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 import { AppState } from '../../../store/app-state';
-import { EntityService } from '../../../core/entity-service';
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-ssh-application',
@@ -26,7 +24,7 @@ export class SshApplicationComponent implements OnInit {
 
   public connectionStatus: Observable<number>;
 
-  public sshInput: QueueingSubject<string>;
+  public sshInput: Subject<string>;
 
   public errorMessage: string;
 
@@ -40,7 +38,22 @@ export class SshApplicationComponent implements OnInit {
 
   public instanceId: string;
 
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+
   @ViewChild('sshViewer') sshViewer: SshViewerComponent;
+
+  private getBreadcrumbs(
+    application: IApp,
+  ) {
+    return [
+      {
+        breadcrumbs: [
+          { value: 'Applications', routerLink: '/applications' },
+          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.guid}/instances` }
+        ]
+      },
+    ];
+  }
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -59,29 +72,34 @@ export class SshApplicationComponent implements OnInit {
     );
 
     if (!cfGuid || !appGuid || !this.instanceId) {
-      this.messages = Observable.never();
-      this.connectionStatus = Observable.never();
+      this.messages = observableNever();
+      this.connectionStatus = observableNever();
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const streamUrl = (
         `${protocol}://${host}/pp/v1/${cfGuid}/apps/${appGuid}/ssh/${this.instanceId}`
       );
-      this.sshInput = new QueueingSubject<string>();
+      this.sshInput = new Subject<string>();
       const connection = websocketConnect(
         streamUrl,
         this.sshInput
       );
 
-      this.messages = connection.messages
-        .catch(e => {
+      this.messages = connection.messages.pipe(
+        catchError(e => {
           if (e.type === 'error') {
             this.errorMessage = 'Error connecting to web socket';
           }
           return [];
-        });
+        }));
 
       this.connectionStatus = connection.connectionStatus;
+
+      this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
+        map(app => this.getBreadcrumbs(app.entity.entity)),
+        first()
+      );
     }
   }
 }

@@ -1,50 +1,59 @@
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
-import { ApplicationService } from '../application.service';
-import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
-import { EntityService } from '../../../core/entity-service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { Store } from '@ngrx/store';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
+import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { AppState } from '../../../store/app-state';
+import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { ApplicationService, createGetApplicationAction } from '../application.service';
+import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 
-function applicationServiceFactory(
+
+export function applicationServiceFactory(
+  cfId: string,
+  id: string,
   store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
+  entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
-  appEnvVarsService: ApplicationEnvVarsService,
+  appEnvVarsService: ApplicationEnvVarsHelper,
   paginationMonitorFactory: PaginationMonitorFactory
 ) {
-  const { id, cfId } = activatedRoute.snapshot.params;
   return new ApplicationService(
     cfId,
     id,
     store,
-    entityServiceFactory,
+    entityServiceFactoryInstance,
     appStateService,
     appEnvVarsService,
     paginationMonitorFactory
   );
 }
 
-function entityServiceFactory(
+export function entityServiceFactory(
+  cfId: string,
+  id: string,
   _entityServiceFactory: EntityServiceFactory,
-  activatedRoute: ActivatedRoute
 ) {
-  const { id, cfId } = activatedRoute.snapshot.params;
-  // const entityMonitor = new en
   return _entityServiceFactory.create(
-    ApplicationSchema.key,
-    ApplicationSchema,
+    applicationSchemaKey,
+    entityFactory(applicationSchemaKey),
     id,
-    new GetApplication(id, cfId)
+    createGetApplicationAction(id, cfId),
+    true
   );
+}
+
+export function getGuids(type?: string) {
+  return (activatedRoute: ActivatedRoute) => {
+    const { id, cfId } = activatedRoute.snapshot.params;
+    if (type) {
+      return cfId;
+    }
+    return id;
+  };
 }
 
 @Component({
@@ -54,25 +63,27 @@ function entityServiceFactory(
   providers: [
     ApplicationService,
     {
-      provide: ApplicationService,
-      useFactory: applicationServiceFactory,
-      deps: [Store, ActivatedRoute, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService, PaginationMonitorFactory]
+      provide: CF_GUID,
+      useFactory: getGuids('cf'),
+      deps: [ActivatedRoute]
     },
     {
-      provide: EntityService,
+      provide: APP_GUID,
+      useFactory: getGuids(),
+      deps: [ActivatedRoute]
+    },
+    {
+      provide: ApplicationService,
+      useFactory: applicationServiceFactory,
+      deps: [CF_GUID, APP_GUID, Store, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsHelper, PaginationMonitorFactory]
+    },
+    {
+      provide: ENTITY_SERVICE,
       useFactory: entityServiceFactory,
-      deps: [EntityServiceFactory, ActivatedRoute]
-    }
+      deps: [CF_GUID, APP_GUID, EntityServiceFactory]
+    },
+
   ]
 })
-export class ApplicationBaseComponent implements OnInit, OnDestroy {
-
-  constructor(
-  ) { }
-
-  ngOnInit(): void {
-  }
-
-  ngOnDestroy(): void {
-  }
+export class ApplicationBaseComponent {
 }

@@ -10,10 +10,9 @@ import { ApplicationService } from '../../../../application.service';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { AppStoreModule } from '../../../../../../store/store.module';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
-import { endpointStoreNames } from '../../../../../../store/types/endpoint.types';
 
 describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;
@@ -39,19 +38,17 @@ describe('InstancesTabComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         AppStoreModule,
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsHelper
       ]
     })
       .compileComponents();
   }));
 
-  beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
-    const appGuid = Object.keys(initialState.requestData.application)[0];
+  beforeEach(() => {
     fixture = TestBed.createComponent(InstancesTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterContentInit, HostBinding, ContentChildren, QueryList, ViewEncapsulation } from '@angular/core';
 
 import { TileComponent} from '../tile/tile.component';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tile-group',
@@ -15,6 +15,8 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
 
   @HostBinding('class.tile-group-gutters') private hasGutters = true;
 
+  @HostBinding('class.tile-group-6-cols') private isSixColumn = false;
+  @HostBinding('class.tile-group-4-cols') private isFourColumn = false;
   @HostBinding('class.tile-group-3-cols') private isThreeColumn = false;
   @HostBinding('class.tile-group-2-cols') private isTwoColumn = false;
   @HostBinding('class.tile-group-1-cols') private isOneColumn = false;
@@ -24,6 +26,8 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
   ngOnInit() {}
 
   ngAfterContentInit() {
+    this.isSixColumn = (this.tiles.length === 6);
+    this.isFourColumn = (this.tiles.length === 5);
     this.isThreeColumn = (this.tiles.length === 3);
     this.isTwoColumn = (this.tiles.length === 2);
     this.isOneColumn = (this.tiles.length === 1);

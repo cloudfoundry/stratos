@@ -1,12 +1,9 @@
 import { NewAppCFDetails } from './create-application.types';
-import { schema } from 'normalizr';
-import { GithubCommit, GitBranch } from './github.types';
-
+import { GitBranch, GithubCommit } from './github.types';
 
 export interface SourceType {
   name: string;
   id: string;
-  subType?: string;
 }
 
 export enum DeployState {
@@ -23,6 +20,7 @@ export enum SocketEventTypes {
   DATA = 20000,
   MANIFEST = 20001,
   CLOSE_SUCCESS = 20002,
+  APP_GUID_NOTIFY = 20003,
   CLOSE_PUSH_ERROR = 40000,
   CLOSE_NO_MANIFEST = 40001,
   CLOSE_INVALID_MANIFEST = 40002,
@@ -42,7 +40,10 @@ export enum SocketEventTypes {
   SOURCE_FILE = 30003,
   SOURCE_FILE_DATA = 30004,
   SOURCE_FILE_ACK = 30005,
-  SOURCE_GITURL = 30006
+  SOURCE_GITURL = 30006,
+  SOURCE_WAIT_ACK = 30007,
+  OVERRIDES_REQUIRED = 50000,
+  OVERRIDES_SUPPLIED = 50001
 }
 
 export interface DeployApplicationSource {
@@ -58,15 +59,35 @@ export interface GitAppDetails {
   branch: GitBranch;
 }
 
+export interface OverrideAppDetails {
+  name: string;
+  buildpack: string;
+  instances: number;
+  diskQuota: string;
+  memQuota: string;
+  doNotStart: boolean;
+  noRoute: boolean;
+  randomRoute: boolean;
+  host: string;
+  domain: string;
+  path: string;
+  startCmd: string;
+  healthCheckType: string;
+  stack: string;
+  time: number;
+}
+
 export interface ProjectExists {
   checking: boolean;
   exists: boolean;
+  error: boolean;
   name: string;
   data?: any;
 }
 export interface DeployApplicationState {
   cloudFoundryDetails: NewAppCFDetails;
   applicationSource?: DeployApplicationSource;
+  applicationOverrides?: OverrideAppDetails;
   projectExists?: ProjectExists;
 }
 
@@ -76,9 +97,3 @@ export interface AppData {
   org: string;
   space: string;
 }
-
-export const GITHUB_BRANCHES_ENTITY_KEY = 'githubBranches';
-export const GITHUB_COMMIT_ENTITY_KEY = 'githubCommits';
-
-export const BranchSchema = new schema.Entity(GITHUB_BRANCHES_ENTITY_KEY, {}, { idAttribute: 'entityId' });
-export const BranchesSchema = new schema.Array(BranchSchema);

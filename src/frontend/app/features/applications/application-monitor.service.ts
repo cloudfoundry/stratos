@@ -1,6 +1,8 @@
+
+import {share, map} from 'rxjs/operators';
 import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export class AppMonitorState {
 
@@ -69,7 +71,7 @@ export class ApplicationMonitorService {
     private applicationService: ApplicationService,
   ) {
     // Do we need share()? Or should this be on the app stats observable?
-    this.appMonitor$ = this.applicationService.appStats$.map(stats => {
+    this.appMonitor$ = this.applicationService.appStats$.pipe(map(stats => {
       const res = new AppMonitorState();
       if (!stats) {
         return res;
@@ -100,9 +102,9 @@ export class ApplicationMonitorService {
       });
 
       // Average
-      res.avg.disk = this.roundTwoPlaces(res.avg.disk / validStatsCount);
-      res.avg.mem = this.roundTwoPlaces(res.avg.mem / validStatsCount);
-      res.avg.cpu = this.roundTwoPlaces(res.avg.cpu / validStatsCount);
+      res.avg.disk = this.roundFourPlaces(res.avg.disk / validStatsCount);
+      res.avg.mem = this.roundFourPlaces(res.avg.mem / validStatsCount);
+      res.avg.cpu = this.roundFourPlaces(res.avg.cpu / validStatsCount);
       res.avg.uptime = Math.round(res.avg.uptime / validStatsCount);
 
       res.updateStatuses();
@@ -111,10 +113,10 @@ export class ApplicationMonitorService {
       res.status.instance = res.running === statsCount ? 'ok' : 'warning';
 
       return res;
-    }).share();
+    }), share(), );
   }
 
-  roundTwoPlaces(num: number): number {
-    return Math.round(num * 100) / 100;
+  roundFourPlaces(num: number): number {
+    return Math.round(num * 10000) / 10000;
   }
 }

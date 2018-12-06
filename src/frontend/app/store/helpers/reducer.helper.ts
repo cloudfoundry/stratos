@@ -37,11 +37,15 @@ export const deepMergeState = (state, newState) => {
   return baseState;
 };
 
-function mergeEntity(baseEntity, newEntity) {
-  if (baseEntity && baseEntity.entity && baseEntity.metadata) {
+export function mergeEntity(baseEntity, newEntity) {
+  if (baseEntity && baseEntity.entity) {
     return {
       entity: merge(baseEntity.entity, newEntity.entity),
-      metadata: merge(baseEntity.metadata, newEntity.metadata)
+      // Always apply the metadata regardless of whether it exists in the baseEntity or not
+      // (for cases where we fetch missing inline data of an entity before the entity exists, for example fetch orgs and their spaces..
+      // .. one org has over 50 spaces.. we fetch that list of spaces and apply it to a new org entity without metadata BEFORE we apply the
+      // main org and mark it as fetched)
+      metadata: baseEntity.metadata ? merge(baseEntity.metadata, newEntity.metadata) : newEntity.metadata
     };
   } else {
     return merge(baseEntity, newEntity);
@@ -59,8 +63,11 @@ function shouldMerge(newState, baseState, entityKey) {
   return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
 }
 
-export const pick = <O, K extends keyof O>(o: O, keys: [K]): Pick<O, K> => {
+export const pick = <O, K extends keyof O>(o: O, keys: string[]): Pick<O, K> => {
   const copy: any = {};
+  if (!o) {
+    return null;
+  }
   keys.forEach(k => {
     copy[k] = o[k];
   });

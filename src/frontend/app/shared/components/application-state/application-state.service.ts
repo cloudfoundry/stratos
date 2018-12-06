@@ -10,6 +10,7 @@ export interface ApplicationStateData {
 }
 
 export enum CardStatus {
+  NONE = 'none',
   OK = 'ok',
   WARNING = 'warning',
   TENTATIVE = 'tentative',
@@ -39,7 +40,7 @@ export class ApplicationStateService {
       FAILED: {
         label: 'Staging Failed',
         indicator: CardStatus.ERROR,
-        actions: 'delete'
+        actions: 'delete,restage'
       }
     },
     PENDING: {
@@ -64,12 +65,12 @@ export class ApplicationStateService {
       STAGED: {
         label: 'Offline',
         indicator: CardStatus.WARNING,
-        actions: 'start,delete,cli'
+        actions: 'start,delete,cli,restage'
       },
       '*NONE*': {
         label: 'Incomplete',
         indicator: CardStatus.INCOMPLETE,
-        actions: 'delete,cli'
+        actions: 'delete,cli,restage'
       }
     },
     STARTED: {
@@ -77,7 +78,7 @@ export class ApplicationStateService {
         label: 'Deployed',
         subLabel: 'No Instances',
         indicator: CardStatus.OK,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       PENDING: {
         label: 'Staging App',
@@ -87,7 +88,7 @@ export class ApplicationStateService {
       'STAGED(?,?,?)': {
         label: 'Deployed',
         indicator: CardStatus.TENTATIVE,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(0,0,0)': {
         label: 'Deployed',
@@ -97,6 +98,12 @@ export class ApplicationStateService {
       },
       'STAGED(N,0,0,N)': {
         label: 'Deployed',
+        subLabel: 'Scaling App',
+        indicator: CardStatus.OK,
+        actions: 'stop,restart,launch,cli'
+      },
+      'STAGED(0,0,0,N)': {
+        label: 'Deployed',
         subLabel: 'Starting App',
         indicator: CardStatus.BUSY,
         actions: 'stop,restart,cli'
@@ -105,13 +112,13 @@ export class ApplicationStateService {
         label: 'Deployed',
         subLabel: 'Online',
         indicator: CardStatus.OK,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
       },
       'STAGED(0,N,0)': {
         label: 'Deployed',
         subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(0,0,N)': {
         label: 'Deployed',
@@ -121,21 +128,39 @@ export class ApplicationStateService {
       },
       'STAGED(0,N,N)': {
         label: 'Deployed',
-        subLabel: 'Crashing',
+        subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
-        actions: 'stop,restart,cli'
+        actions: 'stop,restart,cli,restage'
+      },
+      'STAGED(0,N,N,N)': {
+        label: 'Deployed',
+        subLabel: 'Crashed',
+        indicator: CardStatus.ERROR,
+        actions: 'stop,restart,cli,restage'
+      },
+      'CRASHING': {
+        label: 'Deployed',
+        subLabel: 'Crashing',
+        indicator: CardStatus.WARNING,
+        actions: 'stop,restart,cli,restage'
       },
       'STAGED(N,N,0)': {
         label: 'Deployed',
-        subLabel: 'Partially Online',
+        subLabel: 'Crashing',
         indicator: CardStatus.WARNING,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
+      },
+      'STAGED(N,N,N)': {
+        label: 'Deployed',
+        subLabel: 'Crashing',
+        indicator: CardStatus.WARNING,
+        actions: 'stop,restart,launch,cli,restage'
       },
       'STAGED(N,0,N)': {
         label: 'Deployed',
         subLabel: 'Partially Online',
         indicator: CardStatus.WARNING,
-        actions: 'stop,restart,launch,cli'
+        actions: 'stop,restart,launch,cli,restage'
       }
     }
   };
@@ -193,7 +218,7 @@ export class ApplicationStateService {
           return appStateMatch['?'];
         } else {
 
-          // Special case for when the desired app instance counf is 0
+          // Special case for when the desired app instance count is 0
           if (summary && summary.instances === 0) {
             return appStateMatch.NO_INSTANCES;
           }
@@ -202,10 +227,9 @@ export class ApplicationStateService {
           // Do the best we can if we do not have app instance metadata
           if (appInstances) {
             const counts = this.getCounts(summary, appInstances);
-
-            // Special case: App instances only in running and starting state
-            if (counts.starting > 0 && counts.okay === summary.instances) {
-              extState = pkgState + '(N,0,0,N)';
+            const scExtState = this.checkSpecialCases(pkgState, counts);
+            if (scExtState) {
+              extState = scExtState;
             } else {
               extState = pkgState + '(' +
                 this.formatCount(counts.running) + ',' +
@@ -230,6 +254,17 @@ export class ApplicationStateService {
     };
   }
 
+  private checkSpecialCases(pkgState: string, counts) {
+    // Special case: App instances only in running and starting state
+    if (counts.starting > 0 && counts.running > 0 && counts.okay === counts.expected) {
+      return pkgState + '(N,0,0,N)';
+    } else if (counts.starting > 0 && counts.okay === counts.expected) {
+      return pkgState + '(0,0,0,N)';
+    } else if (counts.starting > 0 && counts.running > 0 && counts.crashed > 0) {
+      return 'CRASHING';
+    }
+    return undefined;
+  }
 
   /**
  * @description Gets the package state based on the application summary metadata
@@ -259,16 +294,19 @@ export class ApplicationStateService {
     counts.running = this.getCount(undefined, appInstances, 'RUNNING');
     counts.starting = this.getCount(undefined, appInstances, 'STARTING');
     counts.okay = counts.running + counts.starting;
+    // Note: We may have less app instance metadata than indicated by the app's desired instance count
+    // So base decisions on the app instance metadata and ignore the app's count
+    counts.expected = appInstances.length;
 
     // If we know how many aer running and this is the same as the total # instances then
     // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
-    if (counts.running === summary.instances) {
+    if (counts.running === counts.expected) {
       counts.crashed = 0;
       counts.flapping = 0;
     } else {
       counts.crashed = this.getCount(undefined, appInstances, 'CRASHED');
       if (counts.crashed >= 0) {
-        counts.flapping = summary.instances - counts.crashed - counts.running;
+        counts.flapping = counts.expected - counts.crashed - counts.running;
       } else {
         // If we couldn't determine #crashed, then we can't calculate #flapping
         counts.flapping = -1;

@@ -24,6 +24,13 @@ export interface PaginationClientFilter {
   };
 }
 
+export interface PaginationClientPagination {
+  pageSize: number;
+  currentPage: number;
+  filter: PaginationClientFilter;
+  totalResults: number;
+}
+
 export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0;
@@ -33,24 +40,19 @@ export class PaginationEntityState {
   pageRequests: {
     [pageNumber: string]: ActionState
   };
-  clientPagination?: {
-    pageSize: number,
-    currentPage: number,
-    filter: PaginationClientFilter,
-    totalResults: number
-  };
+  clientPagination?: PaginationClientPagination;
   /**
    * The pagination key from where we share our values.
    */
   seed?: string;
 }
 
-export interface PaginationAction extends Action {
+export interface BasePaginatedAction extends Action {
   entityKey: string;
   paginationKey: string;
 }
 
-export interface PaginatedAction extends PaginationAction, IRequestAction {
+export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   actions: string[];
   flattenPagination?: boolean;
   initialParams?: PaginationParam;
@@ -61,6 +63,7 @@ export interface PaginatedAction extends PaginationAction, IRequestAction {
     },
     method?: RequestMethod | string | null
   };
+  skipValidation?: boolean;
 }
 
 export interface PaginationEntityTypeState {

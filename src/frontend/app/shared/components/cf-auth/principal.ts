@@ -2,7 +2,7 @@ import { CFAuthCheckerUser } from './checkers/users-assign-access';
 import { CFAuthCheckerSpace } from './checkers/space-access';
 import { CFAuthCheckerServiceInstance } from './checkers/service-instance-access';
 import { CFAuthCheckerRoute } from './checkers/route-access';
-import { CFAuthCheckerOrganisation } from './checkers/organization-access';
+import { CFAuthCheckerOrganization } from './checkers/organization-access';
 import { CFAuthCheckerApplication } from './checkers/application-access';
 import { SessionData } from '../../../store/types/auth.types';
 import { CfAuthUserSummaryMapped, CFFeatureFlags, CFAuthResource, CFAuthAction, CFAuthChecker, CFFeatureFlagTypes } from './cf-auth.types';
@@ -60,7 +60,7 @@ export class CfAuthPrinciple {
     const checkers = [];
 
     checkers.push(new CFAuthCheckerApplication(this));
-    checkers.push(new CFAuthCheckerOrganisation(this));
+    checkers.push(new CFAuthCheckerOrganization(this));
     checkers.push(new CFAuthCheckerRoute(this));
     checkers.push(new CFAuthCheckerServiceInstance(this));
     checkers.push(new CFAuthCheckerSpace(this));

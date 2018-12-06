@@ -22,6 +22,8 @@ The following guide details how to deploy Stratos in Kubernetes.
     + [Create a default Storage Class](#create-a-default-storage-class)
   * [Deploying Stratos with your own TLS certificates](#deploying-stratos-with-your-own-tls-certificates)
   * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
+  * [Installing Nightly Release](#installing-a-nightly-release)
+  * [Configuring Stratos to use an Ingress controller](./ingress)
 <!-- /TOC -->
 
 ## Requirements
@@ -321,3 +323,60 @@ Deploy the chart with the provided parameters:
 ```
 helm install -f docker-registry-secrets.yaml stratos/console
 ```
+
+### Installing a Nightly Release
+Nightly releases are pushed with a `dev` tag. These are strictly for development purposes and should be considered unstable and may contain bugs.
+
+To install the nightly release: 
+
+Update your Helm repositories to ensure you have the latest nightly release information:
+
+```
+helm repo update
+```
+
+List all versions of the console, to determine the tag.
+```
+helm search console -l
+NAME                 CHART VERSION           DESCRIPTION                       
+stratos/console      2.0.0-dev-9a5611dc      A Helm chart for deploying Stratos UI Consoles
+stratos/console      1.0.2                   A Helm chart for deploying Stratos UI Console
+stratos/console      1.0.0                   A Helm chart for deploying Stratos UI Console
+stratos/console      0.9.9                   A Helm chart for deploying Stratos UI Console
+stratos/console      0.9.8                   A Helm chart for deploying Stratos UI Console
+
+```
+Install
+
+```
+helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
+```
+
+### Enabled Metrics
+
+[Stratos Metrics](https://github.com/suse/stratos-metrics) can be deployed as part of the Stratos helm chart. The following override file will configure the Metrics component to fetch metrics from a PCF Dev instance.
+
+Save the following to a file called `values.yaml`
+```
+consoleVersion: 2.0.0
+metrics:
+    enabled: true
+    env:
+        CLUSTER_ADMIN_PASSWORD: admin
+        UAA_CF_IDENTITY_ZONE: uaa
+        DOMAIN: local.pcfdev.io
+        UAA_ADMIN_CLIENT_SECRET: admin-client-secret
+        UAA_HOST: uaa.local.pcfdev.io
+        UAA_PORT: 443
+        DOPPLER_PORT: 443
+    firehoseExporter:
+        noIdentityZone: true
+```
+
+Deploy Stratos with Metrics enabled
+```
+$ helm install ./console -f values.yaml --name console --namespace stratos
+
+```
+
+The metrics endpoint will be available as `https://console-metrics-nginx`. This can registered as an endpoint in Stratos as a `Metrics` type.

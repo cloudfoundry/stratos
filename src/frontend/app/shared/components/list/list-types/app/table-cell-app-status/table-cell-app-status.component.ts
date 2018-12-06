@@ -1,13 +1,13 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { AppState } from '../../../../../../store/app-state';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -16,7 +16,7 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 })
 export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  @Input('row') row;
+  @Input() row;
   applicationState: ApplicationStateData;
   @Input('config')
   set config(value: { hideIcon: boolean, initialStateOnly: boolean }) {
@@ -45,7 +45,7 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
       this.store,
       this.appStateService,
       this.row.entity,
-      this.row.entity.guid,
+      this.row.metadata.guid,
       this.row.entity.cfGuid)
       .pipe(
         startWith(applicationState)

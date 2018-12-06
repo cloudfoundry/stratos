@@ -1,12 +1,13 @@
+import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
-import { BaseCF } from '../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { CloudFoundryService } from '../features/cloud-foundry/services/cloud-foundry.service';
+import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
 import {
   ApplicationStateIconComponent,
 } from '../shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -27,11 +28,15 @@ import {
 } from '../shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgSpaceDataService } from '../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../shared/data-services/cf-user.service';
+import { CloudFoundryService } from '../shared/data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
+import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
+import { CfUserServiceTestProvider } from './user-service-helper';
+import { MultilineTitleComponent } from '../shared/components/multiline-title/multiline-title.component';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -41,14 +46,22 @@ export const cfEndpointServiceProviderDeps = [
   EntityMonitorFactory
 ];
 class BaseCFMock {
-  constructor(public guid = '1234') { }
+  orgGuid: string;
+  spaceGuid: string;
+  cfGuid: string;
+  constructor(public guid = '1234') {
+    this.cfGuid = guid;
+    this.spaceGuid = guid;
+    this.orgGuid = guid;
+  }
 }
 export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
   return [
     {
-      provide: BaseCF,
+      provide: ActiveRouteCfOrgSpace,
       useFactory: () => new BaseCFMock(guid)
     },
+    CfUserServiceTestProvider,
     CloudFoundryEndpointService
   ];
 }
@@ -65,12 +78,18 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
     provide: CfUserService,
     useFactory: (
       store: Store<AppState>,
-      paginationMonitorFactory: PaginationMonitorFactory
+      paginationMonitorFactory: PaginationMonitorFactory,
+      entityServiceFactory: EntityServiceFactory,
+      http: Http
     ) => {
-      const cfUserService = new CfUserService(store, paginationMonitorFactory, { guid });
-      return cfUserService;
+      return new CfUserService(
+        store,
+        paginationMonitorFactory,
+        { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
+        entityServiceFactory,
+        http);
     },
-    deps: [Store, PaginationMonitorFactory]
+    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
   };
 }
 
@@ -91,16 +110,22 @@ export function generateTestCfServiceProvider() {
   };
 }
 
-export const getBaseTestModulesNoShared = [
+export const BaseTestModulesNoShared = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
-  NoopAnimationsModule
+  NoopAnimationsModule,
+  HttpModule
 ];
-export const getBaseTestModules = [...getBaseTestModulesNoShared, SharedModule];
+export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 
 export const getBaseProviders = [createBasicStoreModule()];
 
-export const getMetadataCardComponents = [MetaCardComponent, MetaCardItemComponent,
+export const getCfSpaceServiceMock = {
+  provide: CloudFoundrySpaceService,
+  useClass: CloudFoundrySpaceServiceMock
+};
+
+export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
-  MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent];
+  MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];

@@ -2,7 +2,6 @@ import { IRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } fr
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
-  mergeInnerObject,
   mergeUpdatingState,
   setEntityRequestState,
   mergeObject,
@@ -14,7 +13,6 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
   if (action.apiAction.guid) {
     const apiAction = action.apiAction as IRequestAction;
     const successAction = action as WrapperRequestActionSuccess;
-
     const requestSuccessState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {
       requestSuccessState.updating = mergeUpdatingState(

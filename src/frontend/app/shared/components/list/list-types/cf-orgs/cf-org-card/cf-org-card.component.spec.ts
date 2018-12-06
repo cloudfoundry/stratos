@@ -1,12 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { ISpace } from '../../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfSpace } from '../../../../../../store/types/org-and-space.types';
 import {
+  BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-  getBaseTestModulesNoShared,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
@@ -23,6 +24,7 @@ import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-ke
 import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from './cf-org-card.component';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;
@@ -30,12 +32,17 @@ describe('CfOrgCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, MetaCardComponent, MetaCardItemComponent,
-        MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
-        MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent],
-      imports: [...getBaseTestModulesNoShared],
-      providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
-        CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
+      declarations: [CfOrgCardComponent, MetadataCardTestComponents],
+      imports: [...BaseTestModulesNoShared],
+      providers: [
+        PaginationMonitorFactory,
+        EntityMonitorFactory,
+        generateTestCfUserServiceProvider(),
+        CfOrgSpaceDataService,
+        generateTestCfEndpointServiceProvider(),
+        EntityServiceFactory,
+        ConfirmationDialogService
+      ]
     })
       .compileComponents();
   }));
@@ -45,7 +52,7 @@ describe('CfOrgCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        spaces: Object.values(getInitialTestStoreState().requestData.space) as APIResource<CfSpace>[],
+        spaces: Object.values(getInitialTestStoreState().requestData.space) as APIResource<ISpace>[],
         guid: '',
         cfGuid: '',
         name: 'test0',
@@ -66,13 +73,17 @@ describe('CfOrgCardComponent', () => {
           metadata: null
         }
       },
-      metadata: null
+      metadata: {
+        guid: '',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
   });
 
   it('should create', () => {
-
     expect(component).toBeTruthy();
   });
 });

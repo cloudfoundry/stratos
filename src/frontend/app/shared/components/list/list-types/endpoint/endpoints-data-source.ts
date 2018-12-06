@@ -1,19 +1,19 @@
 import { Store } from '@ngrx/store';
+import { pairwise, tap } from 'rxjs/operators';
 
-import { EndpointSchema, GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
+import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
+import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
-import { ListDataSource, DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { map, mergeMap } from 'rxjs/operators';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
-import { tap } from 'rxjs/operators/tap';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { ListRowSateHelper } from './endpoint-data-source.helpers';
+import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
+import { IListConfig } from '../../list.component.types';
+import { ListRowSateHelper } from '../../list.helper';
+import { EndpointRowStateSetUpManager } from './endpoint-data-source.helpers';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -23,21 +23,29 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     store: Store<AppState>,
     listConfig: IListConfig<EndpointModel>,
     paginationMonitorFactory: PaginationMonitorFactory,
-    entityMonitorFactory: EntityMonitorFactory
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory
   ) {
     const action = new GetAllEndpoints();
-    const rowStatehelper = new ListRowSateHelper();
-    const { rowStateManager, sub } = rowStatehelper.getRowStateManager(
+    const rowStateHelper = new ListRowSateHelper();
+    const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
-      GetAllEndpoints.storeKey
+      GetAllEndpoints.storeKey,
+      endpointSchemaKey,
+      EndpointRowStateSetUpManager
     );
+    const eventSub = EndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager);
     const config = EndpointsDataSource.getEndpointConfig(
       store,
       action,
       listConfig,
       rowStateManager.observable,
-      () => sub.unsubscribe()
+      () => {
+        eventSub.unsubscribe();
+        sub.unsubscribe();
+      },
+      () => this.store.dispatch(new GetSystemInfo())
     );
     super(config);
   }
@@ -46,15 +54,19 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     action,
     listConfig,
     rowsState,
-    destroy
+    destroy,
+    refresh
   ) {
     return {
       store,
       action,
-      schema: EndpointSchema,
+      schema: entityFactory(endpointSchemaKey),
       getRowUniqueId: object => object.guid,
       getEmptyType: () => ({
-        name: ''
+        name: '',
+        system_shared_token: false,
+        metricsAvailable: false,
+        sso_allowed: false,
       }),
       paginationKey: GetAllEndpoints.storeKey,
       isLocal: true,
@@ -66,7 +78,26 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       ] as DataFunctionDefinition[],
       listConfig,
       rowsState,
-      destroy
+      destroy,
+      refresh
     };
+  }
+  static monitorEvents(internalEventMonitorFactory: InternalEventMonitorFactory, rowStateManager: TableRowStateManager) {
+    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
+    return eventMonitor.hasErroredOverTime().pipe(
+      tap(errored => errored.forEach(id => rowStateManager.updateRowState(id, {
+        error: true,
+        message: `We've been having trouble communicating with this endpoint`
+      }))),
+      pairwise(),
+      tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
+        if (!newErrored.find(newId => newId === oldId)) {
+          rowStateManager.updateRowState(oldId, {
+            error: false,
+            message: ''
+          });
+        }
+      })),
+    ).subscribe();
   }
 }

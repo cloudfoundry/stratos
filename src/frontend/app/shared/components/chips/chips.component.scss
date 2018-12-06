@@ -17,13 +17,29 @@
   margin: 5px 0;
   &__limit {
     cursor: pointer;
-    padding-left: 5px;
+    font-weight: 300;
+    min-width: 0;
+    padding: 0 5px;
   }
 }
 
-// Overriding mat-chips overly specific styles.
-mat-chip.app-chip,
-mat-chip.app-chip + mat-chip.app-chip {
+.mat-chip-list {
   $chip-padding: 5px;
-  margin: $chip-padding $chip-padding $chip-padding 0;
+  mat-chip {
+    // Overriding mat-chips overly specific styles.
+    &.app-chip,
+    &.app-chip + &.app-chip {
+      margin: $chip-padding;
+    }
+  }
+  &__stacked,
+  &__rtl {
+    // Overriding mat-chips overly specific styles.
+    mat-chip {
+      &.app-chip,
+      &.app-chip + &.app-chip {
+        margin: $chip-padding;
+      }
+    }
+  }
 }

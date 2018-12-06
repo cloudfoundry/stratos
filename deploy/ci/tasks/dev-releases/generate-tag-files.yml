@@ -1,0 +1,44 @@
+
+---
+platform: linux
+inputs:
+- name: stratos
+outputs:
+- name: image-tag
+image_resource:
+  type: docker-image
+  source:
+   repository:  splatform/ci-stratos-concourse
+   tag: "latest"
+
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      cd stratos
+
+      VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
+      LATEST_TAG=$VERSION-$(git log -1 --format="%h")
+
+      if [ ! -z ${TAG_SUFFIX} ]; then
+        if [ "${TAG_SUFFIX}" != "null" ]; then
+          LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+        fi
+      fi
+
+      ./build/store-git-metadata.sh
+      cat .stratos-git-metadata.json | tr -d '\n' > ../image-tag/ui-build-args
+
+      cd ../image-tag
+      echo "$LATEST_TAG" > v2-alpha-tag
+      echo "$VERSION" > v2-version
+      FILENAME="release-${LATEST_TAG}"
+      cat > build-args << EOF
+      { "stratos_version": "${LATEST_TAG}" }
+      EOF
+
+      cat build-args
+      cat ui-build-args
+
+      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args

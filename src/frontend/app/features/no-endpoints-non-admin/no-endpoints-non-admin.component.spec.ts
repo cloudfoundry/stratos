@@ -1,11 +1,10 @@
-import { SharedModule } from '../../shared/shared.module';
-import { CoreModule } from '../../core/core.module';
-import { NoContentMessageComponent } from '../../shared/components/no-content-message/no-content-message.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
-import { NoEndpointsNonAdminComponent } from './no-endpoints-non-admin.component';
+import { CoreModule } from '../../core/core.module';
+import { SharedModule } from '../../shared/shared.module';
 import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { NoEndpointsNonAdminComponent } from './no-endpoints-non-admin.component';
 
 describe('NoEndpointsNonAdminComponent', () => {
   let component: NoEndpointsNonAdminComponent;
@@ -16,6 +15,7 @@ describe('NoEndpointsNonAdminComponent', () => {
       declarations: [NoEndpointsNonAdminComponent],
       imports: [
         CoreModule,
+        RouterTestingModule,
         SharedModule,
         createBasicStoreModule(),
       ]

@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules,
+  BaseTestModules,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.component';
 
@@ -13,7 +13,7 @@ describe('CloudFoundrySummaryTabComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundrySummaryTabComponent],
-        imports: [...getBaseTestModules],
+        imports: [...BaseTestModules],
         providers: [...generateTestCfEndpointServiceProvider()]
       }).compileComponents();
     })

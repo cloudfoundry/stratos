@@ -1,6 +1,6 @@
 import { LoggerService } from '../../../core/logger.service';
 import { Component, OnInit, Input, Inject, ElementRef, ViewChild } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-code-block',
@@ -10,11 +10,12 @@ import { DOCUMENT } from '@angular/platform-browser';
 export class CodeBlockComponent implements OnInit {
   private _document: Document;
 
-  constructor( @Inject(DOCUMENT) document: Document, private logService: LoggerService) {
+  constructor(@Inject(DOCUMENT) document: Document, private logService: LoggerService) {
     this._document = document;
   }
 
   @Input() hideCopy: boolean;
+  @Input() codeBlockStyle: string;
   _canCopy = false;
   _copySuccessfull = false;
   _copySuccessWait = false;

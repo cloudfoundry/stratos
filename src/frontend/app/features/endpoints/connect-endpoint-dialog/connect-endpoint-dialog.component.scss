@@ -1,5 +1,6 @@
 .connection-dialog {
   $dialog-padding: 24px;
+  width: 300px;
   &__content {
     display: flex;
     flex-direction: column;
@@ -17,6 +18,13 @@
   }
   &__actions {
     justify-content: flex-end;
+  }
+  &__auth {
+    display: flex;
+    flex-direction: column;
+  }
+  &__shared {
+    padding-bottom: 24px;
   }
 }
 
