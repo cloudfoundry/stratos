@@ -12,6 +12,7 @@ export interface IFavoritesMetaCardConfig {
   prettyType: string;
   type: string;
   lines: TFavoritesMetaCardLine[];
+  routerLink?: string;
   name: string;
   getStatus?: (entity) => Observable<CardStatus>;
 }

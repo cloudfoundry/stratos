@@ -7,6 +7,8 @@ import { UserFavorite } from '../../../store/types/user-favorites.types';
 import { AppState } from '../../../store/app-state';
 import { Store } from '@ngrx/store';
 import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
+import { ComponentEntityMonitorConfig } from '../../shared.types';
+import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -27,11 +29,14 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public favorite: UserFavorite;
 
+  public entityConfig: ComponentEntityMonitorConfig;
+
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     const { cardMapper, entity, favorite } = this.favoriteEntity;
     this.favorite = favorite;
+    this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
     const config = cardMapper && entity ? cardMapper(entity) : null;
     if (config) {
       config.lines = config.lines.map(line => {

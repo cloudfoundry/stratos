@@ -114,6 +114,7 @@ export class AppModule {
     }, (endpoint: EndpointModel) => ({
       prettyType: 'Cloud Foundry',
       type: endpointType,
+      routerLink: `/cloud-foundry/${endpoint.guid}`,
       lines: [
         ['Address', endpoint.api_endpoint.Host],
         ['User', endpoint.user.name],
@@ -143,6 +144,7 @@ export class AppModule {
           map(state => state.indicator)
         ),
         type: applicationSchemaKey,
+        routerLink: `/applications/${app.entity.cfGuid}/${app.entity.guid}/summary`,
         lines: [
           ['State', appState$.pipe(map(state => state.label))]
         ],
@@ -153,13 +155,17 @@ export class AppModule {
     favoritesToCardConfigMapper.registerMapper({
       endpointType,
       entityType: spaceSchemaKey
-    }, (app: APIResource<ISpace>) => ({
-      prettyType: 'Space',
-      type: spaceSchemaKey,
-      lines: [
-      ],
-      name: app.entity.name
-    }));
+    }, (space: APIResource<ISpace>) => {
+      const orgGuid = space.entity.organization_guid || space.entity.organization.entity.guid;
+      return {
+        prettyType: 'Space',
+        type: spaceSchemaKey,
+        routerLink: `/cloud-foundry/${space.entity.cfGuid}/organizations/${orgGuid}/${space.entity.guid}`,
+        lines: [
+        ],
+        name: space.entity.name
+      };
+    });
 
     favoritesToCardConfigMapper.registerMapper({
       endpointType,
@@ -167,6 +173,7 @@ export class AppModule {
     }, (org: APIResource<IOrganization>) => ({
       prettyType: 'Organization',
       type: organizationSchemaKey,
+      routerLink: `/cloud-foundry/${org.entity.cfGuid}/organizations/${org.entity.guid}`,
       lines: [
       ],
       name: org.entity.name

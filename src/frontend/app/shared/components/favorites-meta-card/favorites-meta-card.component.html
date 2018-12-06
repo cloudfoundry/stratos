@@ -1,4 +1,5 @@
-<app-meta-card class="fav-meta-card" *ngIf="config" [status$]="status$">
+<app-meta-card [ngClass]="{'fav-meta-card__clickable': !!config.routerLink}" [routerLink]="config.routerLink" class="fav-meta-card"
+  *ngIf="config" [status$]="status$" [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div>
       <div class="fav-meta-card__type">{{ config.prettyType }}</div>

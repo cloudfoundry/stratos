@@ -122,7 +122,6 @@ export class UserFavoriteManager {
       mergeMap(list => combineLatest(
         list.map(
           favGroup => combineLatest(favGroup.map(favorite => this.hydrateFavorite(favorite).pipe(
-            tap(console.log),
             filter(entityInfo => !entityInfo || entityInfo.entityRequestInfo.fetching === false),
             map(entityInfo => ({
               entityInfo,
@@ -135,7 +134,7 @@ export class UserFavoriteManager {
       ),
       map((entityRequests) => ({
         error: !!entityRequests.findIndex(entityRequest => {
-          return entityRequest.findIndex((request) => request.entityInfo.entityRequestInfo.error === true) > -1;
+          return entityRequest.findIndex((request) => request.entityInfo.entityRequestInfo.error === false) > -1;
         }),
         fetching: false,
         entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
@@ -146,6 +145,7 @@ export class UserFavoriteManager {
         }))))
       })),
       catchError(e => {
+        console.log(e);
         return observableOf({
           error: true,
           fetching: false,
@@ -209,7 +209,7 @@ export class UserFavoriteManager {
     }
     return observableOf({
       entity: null,
-      entityRequestInfo: getDefaultRequestState();
+      entityRequestInfo: getDefaultRequestState()
     });
   }
 
