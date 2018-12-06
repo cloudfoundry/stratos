@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { CardStatus } from '../../application-state/application-state.service';
+import { Observable } from 'rxjs';
 
+export enum CardStatus {
+  NONE = 'none',
+  OK = 'ok',
+  WARNING = 'warning',
+  TENTATIVE = 'tentative',
+  INCOMPLETE = 'incomplete',
+  ERROR = 'error',
+  BUSY = 'busy'
+}
 
 @Component({
   selector: 'app-card-status',

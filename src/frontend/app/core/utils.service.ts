@@ -253,3 +253,5 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
     }
   });
 };
+
+export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;

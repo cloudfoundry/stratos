@@ -240,6 +240,7 @@ export interface IQuotaDefinition {
   total_services?: number;
   total_routes?: number;
   total_private_domains?: number;
+  non_basic_services_allowed?: boolean;
 }
 
 export interface IUpdateSpace {

@@ -1,8 +1,9 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
+
 import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
-import { CardStatus } from '../../../../application-state/application-state.service';
+import { CardStatus } from '../../../../cards/card-status/card-status.component';
 import { CardCell } from '../../../list.types';
 
 

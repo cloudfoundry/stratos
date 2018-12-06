@@ -14,10 +14,10 @@ import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import {
   ApplicationStateData,
   ApplicationStateService,
-  CardStatus,
 } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { CardStatus } from '../../../../cards/card-status/card-status.component';
 
 @Component({
   selector: 'app-card-app',

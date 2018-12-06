@@ -11,6 +11,9 @@ import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.h
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import {
+  createOrganizationStateObs,
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-helper';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -18,8 +21,10 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { CardStatus } from '../../../../cards/card-status/card-status.component';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -44,6 +49,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
+  public orgStatus$: Observable<CardStatus>;
 
   constructor(
     private cfUserService: CfUserService,
@@ -52,6 +58,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private emf: EntityMonitorFactory
   ) {
     super();
 
@@ -67,7 +74,6 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
         can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
-
   }
 
   ngOnInit() {
@@ -107,6 +113,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
+
+    this.orgStatus$ = createOrganizationStateObs(this.orgGuid, this.cfEndpointService, this.emf);
   }
 
   setAppsDependentCounts = (apps: APIResource<IApp>[]) => {

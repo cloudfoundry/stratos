@@ -4,9 +4,9 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { CardStatus } from '../../../../application-state/application-state.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
+import { CardStatus } from '../../../../cards/card-status/card-status.component';
 
 
 export interface MetaCardMenuItem {
@@ -16,6 +16,19 @@ export interface MetaCardMenuItem {
   can?: Observable<boolean>;
   disabled?: Observable<boolean>;
 }
+
+export interface MetaCardComponentConfig {
+  statusIcon?: boolean;
+  statusIconByTitle?: boolean;
+  statusIconTooltip?: string;
+}
+
+const defaultConfig = {
+  statusIcon: true,
+  statusIconByTitle: false,
+  statusIconTooltip: null,
+};
+
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
@@ -31,6 +44,18 @@ export class MetaCardComponent {
 
   @Input()
   status$: Observable<CardStatus>;
+
+  _config: MetaCardComponentConfig = { ...defaultConfig };
+  @Input()
+  set config(config: MetaCardComponentConfig) {
+    this._config = {
+      ...this._config,
+      ...config
+    };
+  }
+  get config(): MetaCardComponentConfig {
+    return this._config;
+  }
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {

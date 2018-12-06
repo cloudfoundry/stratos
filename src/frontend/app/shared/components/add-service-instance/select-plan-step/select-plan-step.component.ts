@@ -40,13 +40,13 @@ import {
 import { AppState } from '../../../../store/app-state';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { CardStatus } from '../../application-state/application-state.service';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 import { safeUnsubscribe } from '../../../../core/utils.service';
+import { CardStatus } from '../../cards/card-status/card-status.component';
 
 
 interface ServicePlan {

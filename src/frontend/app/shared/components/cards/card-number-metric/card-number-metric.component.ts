@@ -1,10 +1,26 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs';
+
 import { UtilsService } from '../../../../core/utils.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
-import { CardStatus } from '../../application-state/application-state.service';
+import { CardStatus } from '../card-status/card-status.component';
+
+export function determineCardStatus(value: number, limit: number): CardStatus {
+  if ((limit !== 0 && !limit) || limit === -1) {
+    return CardStatus.NONE;
+  }
+
+  const usage = value / limit;
+  // Limit can be zero, which results in infinity
+  if (usage > 0.9 || usage === Infinity) {
+    return CardStatus.ERROR;
+  } else if (usage > 0.8) {
+    return CardStatus.WARNING;
+  }
+  return CardStatus.NONE;
+}
 
 @Component({
   selector: 'app-card-number-metric',
@@ -54,27 +70,23 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   handleValue() {
     this.formattedValue = this.formatForUnits(this.value);
+
     if (!this.limit) {
       return;
     }
-    let res;
+
+    const status = determineCardStatus(parseInt(this.value, 10), parseInt(this.limit, 10));
+    this.status$.next(status);
+
     const limit = parseInt(this.limit, 10);
     if (limit === -1) {
-      res = '∞';
+      this.formattedLimit = '∞';
       this.usage = '';
-      this.status$.next(CardStatus.NONE);
     } else {
       const value = parseInt(this.value, 10);
-      res = this.formatForUnits(this.limit);
+      this.formattedLimit = this.formatForUnits(this.limit);
       this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
-      const usage = value / limit;
-      if (usage > 0.9) {
-        this.status$.next(CardStatus.ERROR);
-      } else if (usage > 0.8) {
-        this.status$.next(CardStatus.WARNING);
-      }
     }
-    this.formattedLimit = res;
   }
 
   formatForUnits(v: string): string {

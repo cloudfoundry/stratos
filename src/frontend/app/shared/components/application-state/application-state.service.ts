@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 
+import { CardStatus } from '../cards/card-status/card-status.component';
+
 export interface ApplicationStateData {
   label: string;
   subLabel?: string;
@@ -7,16 +9,6 @@ export interface ApplicationStateData {
   actions: {
     [key: string]: boolean
   };
-}
-
-export enum CardStatus {
-  NONE = 'none',
-  OK = 'ok',
-  WARNING = 'warning',
-  TENTATIVE = 'tentative',
-  INCOMPLETE = 'incomplete',
-  ERROR = 'error',
-  BUSY = 'busy'
 }
 
 @Injectable()

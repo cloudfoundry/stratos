@@ -41,7 +41,7 @@ export class CfOrgsListConfigService extends BaseCfListConfig<APIResource<IOrgan
     },
   }];
 
-  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(private store: Store<AppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfOrgsDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }
