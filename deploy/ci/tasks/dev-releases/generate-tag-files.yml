@@ -18,6 +18,9 @@ run:
     - |
       cd stratos
 
+      echo "GIT TAG"
+      cat .git/ref
+
       VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
       LATEST_TAG=$VERSION-$(git log -1 --format="%h")
 
