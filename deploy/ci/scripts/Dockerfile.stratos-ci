@@ -1,0 +1,18 @@
+# Publihsed as splatform/stratos-ci-concourse
+
+# Default Image used to run tasks - contains Helm
+
+FROM opensuse/leap:latest
+
+# Base tools
+RUN zypper in -y curl tar git openssh wget gzip which
+
+# Helm
+RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get > get_helm.sh && \
+    chmod 700 get_helm.sh && \
+    ./get_helm.sh
+
+# SSH configuration
+RUN mkdir ~/.ssh && \
+    touch ~/.ssh/config && \
+    echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
