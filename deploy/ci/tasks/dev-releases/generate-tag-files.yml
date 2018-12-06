@@ -8,7 +8,7 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  splatform/ci-stratos-concourse
+   repository: splatform/ci-stratos-concourse
    tag: "latest"
 
 run:
@@ -18,9 +18,8 @@ run:
     - |
       cd stratos
 
-      echo "GIT TAG"
-      cat .git/ref
-
+      # RELEASE_TAG is the full tag that started the pipleinee, e.g. '2.0.0-rc.1' 
+      RELEASE_TAG=$(cat .git/ref)
       VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
       LATEST_TAG=$VERSION-$(git log -1 --format="%h")
 
@@ -36,6 +35,7 @@ run:
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
       echo "$VERSION" > v2-version
+      echo "$RELEASE_TAG" > v2-tag
       FILENAME="release-${LATEST_TAG}"
       cat > build-args << EOF
       { "stratos_version": "${LATEST_TAG}" }
@@ -44,4 +44,4 @@ run:
       cat build-args
       cat ui-build-args
 
-      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args
+      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version v2-tag build-args ui-build-args
