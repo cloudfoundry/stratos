@@ -36,6 +36,8 @@
 @import '../app/shared/components/start-end-date/start-end-date.component.theme';
 @import '../app/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../app/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
+@import '../app/features/applications/application-wall/application-wall.component.theme';
+@import '../app/shared/components/multiline-title/multiline-title.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -47,6 +49,7 @@ $side-nav-light-text: #fff;
 $side-nav-light-bg: #333;
 $side-nav-light-hover: #555;
 $side-nav-light-active: #484848;
+
 // Creates the app theme and applies it to the application
 // $theme = Angular Material Theme
 // $nav-theme - Colors for the Side Nav (optional)
@@ -61,18 +64,23 @@ $side-nav-light-active: #484848;
   $accent: map-get($theme, accent);
   $warn: map-get($theme, warn);
   $subdued: mat-contrast($primary, 50);
+
   @if $is-dark==true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
     $subdued: darken($subdued, 50);
   }
+
   @else {
     $app-background-color: darken(mat-color($background-colors, background), 2%);
     $subdued: lighten($subdued, 50);
   }
+
   html {
     background-color: $app-background-color;
-  } // App Theme defines a set of colors used by stratos components
-  $app-theme: ( app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65), side-nav: app-generate-nav-theme($theme, $nav-theme), status: app-generate-status-theme($theme, $status-theme), subdued-color: $subdued, ansi-colors: $ansi-color-palette); // Pass the Material theme and the App Theme to components that need to be themed
+  }
+
+  // App Theme defines a set of colors used by stratos components
+  $app-theme: (app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65), side-nav: app-generate-nav-theme($theme, $nav-theme), status: app-generate-status-theme($theme, $status-theme), subdued-color: $subdued, ansi-colors: $ansi-color-palette); // Pass the Material theme and the App Theme to components that need to be themed
   @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
@@ -111,15 +119,17 @@ $side-nav-light-active: #484848;
   @include start-end-theme($theme, $app-theme);
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
+  @include app-multiline-title-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
   @if ($nav-theme) {
     @return $nav-theme;
   }
+
   @else {
     // Use default palette for side navigation
-    @return ( background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
+    @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
   }
 }
 
@@ -127,10 +137,11 @@ $side-nav-light-active: #484848;
   @if ($status-theme) {
     @return $status-theme;
   }
+
   @else {
     $warn: map-get($theme, warn);
     $primary: map-get($theme, primary);
     $white: #fff; // Use default palette for status
-    @return ( success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, );
+    @return (success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, );
   }
 }

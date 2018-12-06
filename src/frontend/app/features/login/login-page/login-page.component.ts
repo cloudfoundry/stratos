@@ -1,17 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
+import { queryParamMap } from '../../../core/auth-guard.service';
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { RouterRedirect } from '../../../store/reducers/routing.reducer';
-import { EndpointState } from '../../../store/types/endpoint.types';
-import { NgForm } from '@angular/forms';
-import { queryParamMap } from '../../../core/auth-guard.service';
 
 @Component({
   selector: 'app-login-page',
@@ -21,8 +19,7 @@ import { queryParamMap } from '../../../core/auth-guard.service';
 export class LoginPageComponent implements OnInit, OnDestroy {
 
   constructor(
-    private store: Store<AppState>,
-    private router: Router
+    private store: Store<AppState>
   ) { }
 
   loginForm: NgForm;
@@ -60,16 +57,16 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.subscription =
       auth$
         .pipe(
-          tap(({ auth, endpoints }) => {
+          tap(({ auth }) => {
             this.redirect = auth.redirect;
-            this.handleOther(auth, endpoints);
+            this.handleOther(auth);
           }),
-          takeWhile(({ auth, endpoints }) => {
+          takeWhile(({ auth }) => {
             const loggedIn = !auth.loggingIn && auth.loggedIn;
             const validSession = auth.sessionData && auth.sessionData.valid;
             return !(loggedIn && validSession);
           }),
-      )
+        )
         .subscribe(null, null, () => this.handleSuccess());
   }
 
@@ -78,12 +75,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   formSSOredirectURL() {
-      const queryKeys = this.redirect ? Object.keys(this.redirect.queryParams) : undefined;
-      return window.location.protocol + '//' + window.location.hostname +
+    const queryKeys = this.redirect ? Object.keys(this.redirect.queryParams) : undefined;
+    return window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') +
       (this.redirect ?
-          this.redirect.path +
-          (queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + this.redirect.queryParams[k]).join('&') : '') : '/');
+        this.redirect.path +
+        (queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + this.redirect.queryParams[k]).join('&') : '') : '/');
   }
 
   login() {
@@ -105,7 +102,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private handleOther(auth: AuthState, endpoints: EndpointState) {
+  private handleOther(auth: AuthState) {
     this.loggedIn = auth.loggedIn;
     this.loggingIn = auth.loggingIn;
     this.verifying = auth.verifying;
@@ -146,20 +143,32 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid) && !this.ssoLogin;
 
     if (this.error) {
-      if (auth.error && auth.errorResponse && auth.errorResponse === 'Invalid session') {
-        // Invalid session (redirected after attempting to access a protected page). Don't show any error
-        this.message = '';
-      } else if (auth.error && auth.errorResponse && auth.errorResponse.status === 401) {
-        // User supplied invalid credentials
-        this.message = 'Username and password combination incorrect. Please try again.';
-      } else {
-        // All other errors
-        this.message = `Couldn't log in, please try again.`;
-      }
+      this.setErrorMessage(auth);
     }
 
     if (!!ssoMessage) {
       this.message = ssoMessage;
+    }
+  }
+
+  private setErrorMessage(auth: AuthState) {
+    // Default error message
+    this.message = `Couldn't log in, please try again.`;
+    if (auth.error && auth.errorResponse) {
+      if (auth.errorResponse === 'Invalid session') {
+        // Invalid session (redirected after attempting to access a protected page). Don't show any error
+        this.message = '';
+      } else if (auth.errorResponse.status === 401) {
+        // User supplied invalid credentials
+        this.message = 'Username and password combination incorrect. Please try again.';
+        // Is there a better error message available? e.g. account locked
+        const authError = !!auth.errorResponse.error ? auth.errorResponse.error.error : null;
+        if (!!authError && authError !== 'Bad credentials') {
+          this.message = authError;
+        }
+      } else if (auth.errorResponse.status >= 500 && auth.errorResponse.status < 600) {
+        this.message = `Couldn't check credentials, please try again. If the problem persists please contact an administrator`;
+      }
     }
   }
 
@@ -169,7 +178,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   private doSSOLogin() {
     const returnUrl = encodeURIComponent(this.formSSOredirectURL());
-    window.open('/pp/v1/auth/sso_login?state=' + returnUrl , '_self');
+    window.open('/pp/v1/auth/sso_login?state=' + returnUrl, '_self');
     this.busy$ = new Observable<boolean>((observer) => {
       observer.next(true);
       observer.complete();
