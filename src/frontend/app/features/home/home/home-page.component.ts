@@ -9,12 +9,7 @@ import { AppState } from '../../../store/app-state';
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss']
 })
-export class HomePageComponent implements OnInit {
-  favs$: Observable<IAllFavorites>;
-  ngOnInit() {
-    const manager = new UserFavoriteManager(this.store);
-    this.favs$ = manager.hydrateAllFavorites();
-  }
+export class HomePageComponent {
 
   constructor(private store: Store<AppState>) { }
 }

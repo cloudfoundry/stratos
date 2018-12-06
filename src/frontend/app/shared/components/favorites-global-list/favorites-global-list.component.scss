@@ -6,7 +6,7 @@
     display: grid;
     grid-column-gap: 10px;
     grid-row-gap: 10px;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: repeat(3, 1fr);
     margin: 10px 0;
   }
   &__entity-card {

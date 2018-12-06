@@ -1,6 +1,6 @@
-<app-meta-card class="app-service-card" *ngIf="config" class="app-service-card" [status$]="status$">
+<app-meta-card class="fav-meta-card" *ngIf="config" [status$]="status$">
   <app-meta-card-title>
-    <div class="app-service-card__title">
+    <div>
       <div class="fav-meta-card__type">{{ config.prettyType }}</div>
       <h2 *ngIf="!compact">{{ config.name }}</h2>
       <h3 *ngIf="compact">{{ config.name }}</h3>
@@ -11,3 +11,9 @@
     <app-meta-card-value>{{ line[1] | async }} </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>
+
+<div class="fav-meta-card__unfound fav-meta-card" *ngIf="!config">
+  <div class="fav-meta-card__unfound-text">Favorite not found</div>
+  <small class="fav-meta-card__unfound-small-text">No matching {{favorite.entityType}}</small>
+  <button mat-flat-button color="primary" (click)="removeFavorite()">Remove favorite</button>
+</div>

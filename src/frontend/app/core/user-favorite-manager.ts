@@ -20,6 +20,7 @@ import {
   favoritesToCardConfigMapper,
   TFavoriteMapperFunction
 } from '../shared/components/favorites-meta-card/favorite-to-card-config-mapper';
+import { getDefaultRequestState } from '../store/reducers/api-request-reducer/types';
 interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite[];
 }
@@ -37,6 +38,7 @@ export interface IFavoriteEntity {
   type: string;
   cardMapper: TFavoriteMapperFunction;
   entity: any;
+  favorite: UserFavorite;
 }
 export interface IAllFavorites {
   fetching: boolean;
@@ -119,34 +121,36 @@ export class UserFavoriteManager {
       map(this.groupIntermediateFavorites),
       mergeMap(list => combineLatest(
         list.map(
-          favGroup => combineLatest(favGroup.map(fav => this.hydrateFavorite(fav).pipe(
-            filter(entityInfo => entityInfo.entityRequestInfo.fetching === false),
+          favGroup => combineLatest(favGroup.map(favorite => this.hydrateFavorite(favorite).pipe(
+            tap(console.log),
+            filter(entityInfo => !entityInfo || entityInfo.entityRequestInfo.fetching === false),
             map(entityInfo => ({
               entityInfo,
-              type: this.getTypeAndID(fav).type,
-              cardMapper: favoritesToCardConfigMapper.getMapperFunction(fav)
+              type: this.getTypeAndID(favorite).type,
+              cardMapper: favoritesToCardConfigMapper.getMapperFunction(favorite),
+              favorite
             })))
           ))
         ))
       ),
       map((entityRequests) => ({
-        error: !entityRequests.findIndex(entityRequest => {
+        error: !!entityRequests.findIndex(entityRequest => {
           return entityRequest.findIndex((request) => request.entityInfo.entityRequestInfo.error === true) > -1;
         }),
         fetching: false,
         entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
           type: request.type,
           cardMapper: request.cardMapper,
-          entity: request.entityInfo.entity
+          entity: request.entityInfo.entity,
+          favorite: request.favorite
         }))))
       })),
       catchError(e => {
-        console.log(e)
         return observableOf({
           error: true,
           fetching: false,
           entityGroups: null
-        })
+        });
       }),
       startWith({
         error: false,
@@ -160,6 +164,9 @@ export class UserFavoriteManager {
     return favorites.reduce((newFavorites: UserFavorite[], favorite) => {
       const hasEndpoint = this.hasEndpointAsFavorite(newFavorites, favorite);
       if (!hasEndpoint) {
+        // Bug with faved entities that have been removed still being in the favorite list
+        // causing a cf to be added
+        // Should some how not do this
         const endpointFavorite = new UserFavoriteEndpoint(
           favorite.endpointId,
           favorite.endpointType
@@ -200,7 +207,10 @@ export class UserFavoriteManager {
       );
       return entityService.entityObs$;
     }
-    return observableOf(null);
+    return observableOf({
+      entity: null,
+      entityRequestInfo: getDefaultRequestState();
+    });
   }
 
   public getIsFavoriteObservable(favorite: UserFavorite) {

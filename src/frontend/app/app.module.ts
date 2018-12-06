@@ -136,7 +136,6 @@ export class AppModule {
         app.entity.cfGuid
       ).pipe(
         startWith(initState)
-
       );
       return {
         prettyType: 'Application',

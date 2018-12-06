@@ -3,8 +3,10 @@ import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { IFavoritesMetaCardConfig } from './favorite-to-card-config-mapper';
 import { Observable, isObservable, of as observableOf } from 'rxjs';
 import { CardStatus } from '../application-state/application-state.service';
-
-
+import { UserFavorite } from '../../../store/types/user-favorites.types';
+import { AppState } from '../../../store/app-state';
+import { Store } from '@ngrx/store';
+import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -23,12 +25,13 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public status$: Observable<CardStatus>;
 
-  constructor() {
+  public favorite: UserFavorite;
 
-  }
+  constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
-    const { cardMapper, entity } = this.favoriteEntity;
+    const { cardMapper, entity, favorite } = this.favoriteEntity;
+    this.favorite = favorite;
     const config = cardMapper && entity ? cardMapper(entity) : null;
     if (config) {
       config.lines = config.lines.map(line => {
@@ -46,6 +49,10 @@ export class FavoritesMetaCardComponent implements OnInit {
     if (this.config && this.config.getStatus) {
       this.status$ = this.config.getStatus(entity);
     }
+  }
+
+  public removeFavorite() {
+    this.store.dispatch(new RemoveUserFavoriteAction(this.favorite.guid));
   }
 
 }
