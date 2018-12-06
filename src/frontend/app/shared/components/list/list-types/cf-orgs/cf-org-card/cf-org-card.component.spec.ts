@@ -7,6 +7,7 @@ import {
   BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
@@ -31,9 +32,7 @@ describe('CfOrgCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, MetaCardComponent, MetaCardItemComponent,
-        MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
-        MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent],
+      declarations: [CfOrgCardComponent, MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
       providers: [
         PaginationMonitorFactory,
