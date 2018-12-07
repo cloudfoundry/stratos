@@ -1,0 +1,45 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: image-tag
+- name: helm-repo
+image_resource:
+  type: docker-image
+  source:
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
+   tag: "latest"
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Initialize Helm for client-side use
+      helm init --client-only
+      ROOT_DIR=$PWD
+      STRATOS=${ROOT_DIR}/stratos
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
+      HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
+      GIT_TAG=$(cat image-tag/v2-alpha-tag)
+      VERSION=$(cat image-tag/v2-version)
+      RELEASE_VERSION=$(cat image-tag/v2-tag)
+      COMMIT=$(cat image-tag/v2-commit)
+
+      # $VERSION is version number - e.g. 2.3.0
+      # Find the last tag created for this release tag
+      LAST_TAG=$(git tag --sort=creatordate | grep "$VERSION-" | tail -r -n 1)
+      echo "Last tag: $LAST_TAG"
+
+      # Get the commit has for this tag
+      c=$(git rev-list --abbrev-commit -n 1 ${LAST_TAG})
+
+      if [ "$COMMIT" != "$LAST_TAG" ]; then
+        echo "Can not make release - no release candidate published"
+        exit 1
+      fi
+
+      echo "$COMMIT"
+
+      # Create a tag for the release and push the tag
+
