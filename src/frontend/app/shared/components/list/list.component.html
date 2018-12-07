@@ -29,13 +29,13 @@
         <div class="list-component__header__right">
           <!-- Filter by text input -->
           <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async)">
-            <mat-form-field floatLabel="never">
+            <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
             </mat-form-field>
           </div>
           <!-- Sort Button & Drop down -->
           <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
-            <mat-form-field>
+            <mat-form-field class="list-component__header__right-sort">
               <mat-select name="sort-field" matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
                 <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                   {{column.headerCell()}}

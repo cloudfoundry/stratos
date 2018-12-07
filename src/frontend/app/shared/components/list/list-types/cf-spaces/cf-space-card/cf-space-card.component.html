@@ -1,7 +1,7 @@
 <app-meta-card class="space-card" [clickAction]="goToSummary" [entityConfig]="entityConfig" [actionMenu]="cardMenu"
   [favorite]="favorite">
   <app-meta-card-title class="space-card__title">
-    <div class="space-card__title-link">{{ row.entity.name }}</div>
+    <app-multiline-title class="space-card__title-link">{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Role</app-meta-card-key>

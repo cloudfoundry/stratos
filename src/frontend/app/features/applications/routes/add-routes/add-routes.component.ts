@@ -61,8 +61,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   appUrl: string;
   isRouteSelected$ = new BehaviorSubject<boolean>(false);
   addRouteModes: RouteMode[] = [
-    { id: 'create', label: 'Create and map new route' },
-    { id: 'map', label: 'Map existing route' }
+    { id: 'create', label: 'Create and map new route', submitLabel: 'Create' },
+    { id: 'map', label: 'Map existing route', submitLabel: 'Map' }
   ];
   addRouteMode: RouteMode;
   useRandomPort = false;
@@ -76,12 +76,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
-  }
-
-  appService = this.applicationService;
-
-  ngOnInit() {
-
+    this.addRouteMode = this.addRouteModes[0];
     this.domainFormGroup = new FormGroup({
       domain: new FormControl('', [<any>Validators.required])
     });
@@ -90,7 +85,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern)]),
       path: new FormControl('', [Validators.pattern(pathPattern)])
     });
-    this.addRouteMode = this.addRouteModes[0];
 
     this.addTCPRoute = new FormGroup({
       port: new FormControl('', [
@@ -99,7 +93,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       ]),
       useRandomPort: new FormControl(false)
     });
+  }
 
+  appService = this.applicationService;
+
+  ngOnInit() {
     this.subscriptions.push(this.addTCPRoute.valueChanges.subscribe(val => {
       const useRandomPort = val['useRandomPort'];
       if (useRandomPort !== this.useRandomPort) {

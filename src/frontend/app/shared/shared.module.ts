@@ -139,6 +139,7 @@ import { MomentModule } from 'ngx-moment';
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 
 import { CardAppComponent } from './components/list/list-types/app/card/card-app.component';
 import { EndpointCardComponent } from './components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
@@ -276,6 +277,7 @@ export const listCards = [
     FavoritesGlobalListComponent,
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
+    MultilineTitleComponent,
   ],
   exports: [
     FormsModule,

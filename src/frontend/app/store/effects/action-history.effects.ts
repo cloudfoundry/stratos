@@ -1,5 +1,5 @@
 
-import {take, map} from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';

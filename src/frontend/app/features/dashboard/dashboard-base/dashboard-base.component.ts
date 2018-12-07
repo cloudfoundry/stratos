@@ -16,6 +16,8 @@ import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/a
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { GetUserFavoritesAction } from '../../../store/actions/user-favourites-actions/get-user-favorites-action';
+import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
+import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 
 
 @Component({
@@ -59,6 +61,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     this.store.dispatch(new GetCurrentUsersRelations());
   }
   ngOnInit() {
+    this.endpointsService.registerHealthCheck(
+      new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
+    );
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());
     const dashboardState$ = this.store.select('dashboard');
