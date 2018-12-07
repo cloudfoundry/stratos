@@ -17,7 +17,7 @@ PRs:
 - Add link to dashboard in service instance table [\#3267](https://github.com/cloudfoundry-incubator/stratos/pull/3267)
 - Add Org and Space status bar to Org/Space Cards [\#3265](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
 - Helm port configuration improvements and unit tests [\#3264](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
-- Add confirmation dialog to `Restage` app [\#3263](https://github.com/cloudfoundry-incubator/stratos/pull/3263]
+- Add confirmation dialog to `Restage` app [\#3263](https://github.com/cloudfoundry-incubator/stratos/pull/3263)
 - Remove global manage apps link [\#3259](https://github.com/cloudfoundry-incubator/stratos/pull/3259)
 - Add user has roles filter to users tables [\#3258](https://github.com/cloudfoundry-incubator/stratos/pull/3258)
 
