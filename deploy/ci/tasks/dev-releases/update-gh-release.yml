@@ -20,7 +20,7 @@ run:
       ROOT_DIR=${PWD}
       VERSION=$(cat image-tag/v2-version)
       FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
-      GIT_TAG=$(cat image-tag/v2tag) 
+      GIT_TAG=$(cat image-tag/v2-tag) 
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
 
