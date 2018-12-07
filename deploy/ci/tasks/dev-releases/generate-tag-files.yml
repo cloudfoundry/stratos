@@ -18,8 +18,14 @@ run:
     - |
       cd stratos
 
+      if [ ! -f .git/ref ]; then
+        echo "GIT REF FILE DOES NOT EXIST"
+        RELEASE_TAG="2.3.0-rc.0"
+      else
+        RELEASE_TAG=$(cat .git/ref)
+      fi
+
       # RELEASE_TAG is the full tag that started the pipleinee, e.g. '2.0.0-rc.1' 
-      RELEASE_TAG=$(cat .git/ref)
       VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
       LATEST_TAG=$VERSION-$(git log -1 --format="%h")
 
