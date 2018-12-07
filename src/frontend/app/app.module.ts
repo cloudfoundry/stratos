@@ -25,14 +25,17 @@ import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
-import { favoritesToCardConfigMapper } from './shared/components/favorites-meta-card/favorite-to-card-config-mapper';
+import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-to-card-config-mapper';
 import { EndpointModel } from './store/types/endpoint.types';
 import { applicationSchemaKey, endpointSchemaKey, spaceSchemaKey, organizationSchemaKey } from './store/helpers/entity-factory';
 import { IApp, ISpace, IOrganization } from './core/cf-api.types';
 import { startWith, map } from 'rxjs/operators';
 import { ApplicationStateService } from './shared/components/application-state/application-state.service';
-import { ApplicationService } from './features/applications/application.service';
+import { ApplicationService, createGetApplicationAction } from './features/applications/application.service';
 import { Store } from '@ngrx/store';
+import { GetAllEndpoints } from './store/actions/endpoint.actions';
+import { GetSpace } from './store/actions/space.actions';
+import { GetOrganization } from './store/actions/organization.actions';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -108,7 +111,7 @@ export class AppModule {
     ext.init();
     const endpointType = 'cf';
 
-    favoritesToCardConfigMapper.registerMapper({
+    favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: endpointSchemaKey
     },
@@ -122,9 +125,11 @@ export class AppModule {
           ['Admin', endpoint.user.admin ? 'Yes' : 'No']
         ],
         name: endpoint.name
-      }));
+      }),
+      () => new GetAllEndpoints(false)
+    );
 
-    favoritesToCardConfigMapper.registerMapper({
+    favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: applicationSchemaKey
     },
@@ -151,9 +156,11 @@ export class AppModule {
           ],
           name: app.entity.name
         };
-      });
+      },
+      favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId)
+    );
 
-    favoritesToCardConfigMapper.registerMapper({
+    favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: spaceSchemaKey
     },
@@ -167,9 +174,11 @@ export class AppModule {
           ],
           name: space.entity.name
         };
-      });
+      },
+      favorite => new GetSpace(favorite.entityId, favorite.endpointId)
+    );
 
-    favoritesToCardConfigMapper.registerMapper({
+    favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: organizationSchemaKey
     },
@@ -180,7 +189,9 @@ export class AppModule {
         lines: [
         ],
         name: org.entity.name
-      }));
+      }),
+      favorite => new GetOrganization(favorite.entityId, favorite.endpointId)
+    );
 
   }
 }

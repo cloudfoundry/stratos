@@ -14,7 +14,7 @@ import { UserFavorite } from '../../../../../../store/types/user-favorites.types
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService, CardStatus } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
-import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 
 @Component({
   selector: 'app-card-app',
@@ -48,7 +48,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
       map(endpoint => endpoint ? endpoint.name : '')
     );
 
-    this.favorite = getFavoriteFromEntity(this.row, applicationSchemaKey);
+    this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey);
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(

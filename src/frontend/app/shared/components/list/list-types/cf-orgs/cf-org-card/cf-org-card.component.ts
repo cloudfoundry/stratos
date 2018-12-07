@@ -25,7 +25,7 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell } from '../../../list.types';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 
 
 @Component({
@@ -85,7 +85,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       map(u => getOrgRolesString(u)),
     );
 
-    this.favorite = getFavoriteFromEntity(this.row, organizationSchemaKey);
+    this.favorite = getFavoriteFromCfEntity(this.row, organizationSchemaKey);
 
     const fetchData$ = observableCombineLatest(
       userRole$,

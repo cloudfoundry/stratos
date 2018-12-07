@@ -11,7 +11,7 @@ import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.compo
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { Store } from '@ngrx/store';
 import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 
 
 export interface MetaCardMenuItem {
@@ -54,7 +54,7 @@ export class MetaCardComponent {
       if (!this.favorite) {
         entityMonitor.entity$.pipe(
           first(),
-          tap(entity => this.favorite = getFavoriteFromEntity(entity, entityConfig.schema.key))
+          tap(entity => this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.key))
         ).subscribe();
       }
     }

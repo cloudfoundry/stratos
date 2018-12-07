@@ -1,4 +1,3 @@
-import { element } from 'protractor';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, switchMap, tap, mergeMap, startWith } from 'rxjs/operators';
@@ -13,12 +12,10 @@ import { isFavorite } from '../store/selectors/favorite.selectors';
 import { PaginationEntityState } from '../store/types/pagination.types';
 import { UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
 import { EntityService } from './entity-service';
-import { getActionGeneratorFromFavoriteType } from './user-favorite-helpers';
 import { EntityInfo } from '../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
 import {
-  favoritesToCardConfigMapper,
-  TFavoriteMapperFunction
+  favoritesConfigMapper, TFavoriteMapperFunction
 } from '../shared/components/favorites-meta-card/favorite-to-card-config-mapper';
 import { getDefaultRequestState } from '../store/reducers/api-request-reducer/types';
 interface IntermediateFavoritesGroup {
@@ -127,8 +124,8 @@ export class UserFavoriteManager {
             map(entityInfo => ({
               entityInfo,
               type: this.getTypeAndID(favorite).type,
-              cardMapper: favoritesToCardConfigMapper.getMapperFunction(favorite),
-              prettyName: favoritesToCardConfigMapper.getPrettyName(favorite),
+              cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
+              prettyName: favoritesConfigMapper.getPrettyName(favorite),
               favorite
             })))
           ))
@@ -193,7 +190,7 @@ export class UserFavoriteManager {
 
   public hydrateFavorite(favorite: UserFavorite): Observable<EntityInfo> {
     const { type, id } = this.getTypeAndID(favorite);
-    const action = getActionGeneratorFromFavoriteType(favorite);
+    const action = favoritesConfigMapper.getActionFromFavorite(favorite);
     if (action) {
       const entityMonitor = new EntityMonitor(this.store, id, type, entityFactory(type));
 
