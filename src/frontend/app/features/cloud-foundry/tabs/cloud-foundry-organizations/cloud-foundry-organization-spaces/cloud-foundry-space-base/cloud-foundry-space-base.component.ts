@@ -24,6 +24,8 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../../../core/extension/extension-service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -79,6 +81,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   private deleteRedirectSub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
+  public favorite: UserFavorite;
+
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -92,6 +96,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       map(space => space.entityRequestInfo.fetching)
     );
     this.name$ = cfSpaceService.space$.pipe(
+      tap(space => this.favorite = getFavoriteFromCfEntity(space.entity, spaceSchemaKey)),
       map(space => space.entity.entity.name),
       first()
     );

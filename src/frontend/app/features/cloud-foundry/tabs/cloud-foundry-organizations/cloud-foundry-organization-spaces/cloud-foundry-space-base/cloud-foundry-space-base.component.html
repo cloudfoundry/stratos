@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" [favorite]="favorite">
   <h1> {{ name$ | async }}</h1>
   <div class="page-header-right">
     <button mat-icon-button name="rename" *appUserPermission="permsSpaceEdit;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;spaceGuid:cfSpaceService.spaceGuid"

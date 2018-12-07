@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, tap } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
@@ -20,6 +20,8 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../../core/extension/extension-service';
+import { getFavoriteFromCfEntity } from '../../../../../core/user-favorite-helpers';
+import { UserFavorite } from '../../../../../store/types/user-favorites.types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -63,6 +65,8 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
+  public favorite: UserFavorite;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
@@ -71,6 +75,7 @@ export class CloudFoundryOrganizationBaseComponent {
     this.schema = entityFactory(organizationSchemaKey);
 
     this.name$ = cfOrgService.org$.pipe(
+      tap(org => this.favorite = getFavoriteFromCfEntity(org.entity, organizationSchemaKey)),
       map(org => org.entity.entity.name),
       filter(name => !!name),
       first()
