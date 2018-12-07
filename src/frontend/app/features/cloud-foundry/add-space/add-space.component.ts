@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
@@ -13,18 +13,15 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   ]
 
 })
-export class AddSpaceComponent implements OnInit {
+export class AddSpaceComponent {
 
   ogrSpacesUrl: string;
   constructor(
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     const cfId = activeRouteCfOrgSpace.cfGuid;
     const orgId = activeRouteCfOrgSpace.orgGuid;
     this.ogrSpacesUrl = `/cloud-foundry/${cfId}/organizations/${orgId}/spaces`;
-  }
-
-  ngOnInit() {
   }
 
 }

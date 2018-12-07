@@ -63,7 +63,12 @@ export class MetricsEffect {
           new WrapperRequestActionFailed(
             errObservable.message,
             action,
-            'fetch'
+            'fetch', {
+              endpointIds: [action.endpointGuid],
+              url: errObservable.url || fullUrl,
+              eventCode: errObservable.status ? errObservable.status + '' : '500',
+              message: 'Metric request error',
+            }
           )
         ];
       }));
