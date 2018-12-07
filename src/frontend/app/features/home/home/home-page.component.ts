@@ -11,5 +11,9 @@ import { AppState } from '../../../store/app-state';
 })
 export class HomePageComponent {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>) {
+    // this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
+    //   map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))
+    // );
+  }
 }

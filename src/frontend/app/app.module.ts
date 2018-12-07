@@ -111,73 +111,76 @@ export class AppModule {
     favoritesToCardConfigMapper.registerMapper({
       endpointType,
       entityType: endpointSchemaKey
-    }, (endpoint: EndpointModel) => ({
-      prettyType: 'Cloud Foundry',
-      type: endpointType,
-      routerLink: `/cloud-foundry/${endpoint.guid}`,
-      lines: [
-        ['Address', endpoint.api_endpoint.Host],
-        ['User', endpoint.user.name],
-        ['Admin', endpoint.user.admin ? 'Yes' : 'No']
-      ],
-      name: endpoint.name
-    }));
+    },
+      'Cloud Foundry',
+      (endpoint: EndpointModel) => ({
+        type: endpointType,
+        routerLink: `/cloud-foundry/${endpoint.guid}`,
+        lines: [
+          ['Address', endpoint.api_endpoint.Host],
+          ['User', endpoint.user.name],
+          ['Admin', endpoint.user.admin ? 'Yes' : 'No']
+        ],
+        name: endpoint.name
+      }));
 
     favoritesToCardConfigMapper.registerMapper({
       endpointType,
       entityType: applicationSchemaKey
-    }, (app: APIResource<IApp>) => {
-
-      const initState = this.appStateService.get(app.entity, null);
-      const appState$ = ApplicationService.getApplicationState(
-        this.store,
-        this.appStateService,
-        app.entity,
-        app.metadata.guid,
-        app.entity.cfGuid
-      ).pipe(
-        startWith(initState)
-      );
-      return {
-        prettyType: 'Application',
-        getStatus: () => appState$.pipe(
-          map(state => state.indicator)
-        ),
-        type: applicationSchemaKey,
-        routerLink: `/applications/${app.entity.cfGuid}/${app.entity.guid}/summary`,
-        lines: [
-          ['State', appState$.pipe(map(state => state.label))]
-        ],
-        name: app.entity.name
-      };
-    });
+    },
+      'Application',
+      (app: APIResource<IApp>) => {
+        const initState = this.appStateService.get(app.entity, null);
+        const appState$ = ApplicationService.getApplicationState(
+          this.store,
+          this.appStateService,
+          app.entity,
+          app.metadata.guid,
+          app.entity.cfGuid
+        ).pipe(
+          startWith(initState)
+        );
+        return {
+          getStatus: () => appState$.pipe(
+            map(state => state.indicator)
+          ),
+          type: applicationSchemaKey,
+          routerLink: `/applications/${app.entity.cfGuid}/${app.entity.guid}/summary`,
+          lines: [
+            ['State', appState$.pipe(map(state => state.label))]
+          ],
+          name: app.entity.name
+        };
+      });
 
     favoritesToCardConfigMapper.registerMapper({
       endpointType,
       entityType: spaceSchemaKey
-    }, (space: APIResource<ISpace>) => {
-      const orgGuid = space.entity.organization_guid || space.entity.organization.entity.guid;
-      return {
-        prettyType: 'Space',
-        type: spaceSchemaKey,
-        routerLink: `/cloud-foundry/${space.entity.cfGuid}/organizations/${orgGuid}/${space.entity.guid}`,
-        lines: [
-        ],
-        name: space.entity.name
-      };
-    });
+    },
+      'Space',
+      (space: APIResource<ISpace>) => {
+        const orgGuid = space.entity.organization_guid || space.entity.organization.entity.guid;
+        return {
+          type: spaceSchemaKey,
+          routerLink: `/cloud-foundry/${space.entity.cfGuid}/organizations/${orgGuid}/${space.entity.guid}`,
+          lines: [
+          ],
+          name: space.entity.name
+        };
+      });
 
     favoritesToCardConfigMapper.registerMapper({
       endpointType,
       entityType: organizationSchemaKey
-    }, (org: APIResource<IOrganization>) => ({
-      prettyType: 'Organization',
-      type: organizationSchemaKey,
-      routerLink: `/cloud-foundry/${org.entity.cfGuid}/organizations/${org.entity.guid}`,
-      lines: [
-      ],
-      name: org.entity.name
-    }));
+    },
+      'Organization',
+      (org: APIResource<IOrganization>) => ({
+        type: organizationSchemaKey,
+        routerLink: `/cloud-foundry/${org.entity.cfGuid}/organizations/${org.entity.guid}`,
+        lines: [
+        ],
+        name: org.entity.name
+      }));
 
   }
 }

@@ -36,6 +36,7 @@ export interface IEndpointFavoriteEntity extends IFavoriteEntity {
 
 export interface IFavoriteEntity {
   type: string;
+  prettyName: string;
   cardMapper: TFavoriteMapperFunction;
   entity: any;
   favorite: UserFavorite;
@@ -127,6 +128,7 @@ export class UserFavoriteManager {
               entityInfo,
               type: this.getTypeAndID(favorite).type,
               cardMapper: favoritesToCardConfigMapper.getMapperFunction(favorite),
+              prettyName: favoritesToCardConfigMapper.getPrettyName(favorite),
               favorite
             })))
           ))
@@ -140,6 +142,7 @@ export class UserFavoriteManager {
         entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
           type: request.type,
           cardMapper: request.cardMapper,
+          prettyName: request.prettyName,
           entity: request.entityInfo.entity,
           favorite: request.favorite
         }))))

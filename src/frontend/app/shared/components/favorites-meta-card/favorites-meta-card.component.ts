@@ -31,11 +31,16 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public entityConfig: ComponentEntityMonitorConfig;
 
+  public showMore: boolean;
+
+  public prettyName: string;
+
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
-    const { cardMapper, entity, favorite } = this.favoriteEntity;
+    const { cardMapper, entity, favorite, prettyName } = this.favoriteEntity;
     this.favorite = favorite;
+    this.prettyName = prettyName;
     this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
     const config = cardMapper && entity ? cardMapper(entity) : null;
     if (config) {
@@ -58,6 +63,10 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public removeFavorite() {
     this.store.dispatch(new RemoveUserFavoriteAction(this.favorite.guid));
+  }
+
+  public toggleMoreError() {
+    this.showMore = !this.showMore;
   }
 
 }

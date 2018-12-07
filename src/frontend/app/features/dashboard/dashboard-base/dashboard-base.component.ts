@@ -31,11 +31,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   constructor(
     public pageHeaderService: PageHeaderService,
     private store: Store<AppState>,
-    private eventWatcherService: EventWatcherService,
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private metricsService: MetricsService,
     private endpointsService: EndpointsService,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {

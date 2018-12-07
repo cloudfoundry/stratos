@@ -9,7 +9,6 @@ import { CardStatus } from '../application-state/application-state.service';
 export type TFavoritesMetaCardLine = [string, string | Observable<string>];
 
 export interface IFavoritesMetaCardConfig {
-  prettyType: string;
   type: string;
   lines: TFavoritesMetaCardLine[];
   routerLink?: string;
@@ -20,7 +19,10 @@ export interface IFavoritesMetaCardConfig {
 export type TFavoriteMapperFunction<> = (entity?) => IFavoritesMetaCardConfig;
 
 interface IFavoriteMappers {
-  [key: string]: TFavoriteMapperFunction;
+  [key: string]: {
+    mapper: TFavoriteMapperFunction,
+    prettyName: string
+  };
 }
 
 class FavoritesToCardConfigMapper {
@@ -31,14 +33,22 @@ class FavoritesToCardConfigMapper {
     return [endpointType, entityType].join(this.mapperKeySeparator);
   }
 
-  public registerMapper(favoriteInfo: IFavoriteTypeInfo, mapperFunction: TFavoriteMapperFunction) {
+  public registerMapper(favoriteInfo: IFavoriteTypeInfo, prettyName: string, mapper: TFavoriteMapperFunction, ) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favoriteInfo);
-    this.mappers[mapperKey] = mapperFunction;
+    this.mappers[mapperKey] = {
+      mapper,
+      prettyName
+    };
   }
 
   public getMapperFunction(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
-    return this.mappers[mapperKey] || null;
+    return this.mappers[mapperKey] ? this.mappers[mapperKey].mapper : null;
+  }
+
+  public getPrettyName(favorite: IFavoriteTypeInfo) {
+    const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
+    return this.mappers[mapperKey] ? this.mappers[mapperKey].prettyName : null;
   }
 }
 

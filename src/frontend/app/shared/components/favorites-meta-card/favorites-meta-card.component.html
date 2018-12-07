@@ -4,7 +4,7 @@
     <div class="fav-meta-card__header">
       <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ config.name }}</h2>
       <h3 class="fav-meta-card__header-text" *ngIf="compact">{{ config.name }}</h3>
-      <div class="fav-meta-card__type">{{ config.prettyType }}</div>
+      <div class="fav-meta-card__type">{{ prettyName }}</div>
     </div>
   </app-meta-card-title>
   <app-meta-card-item *ngFor="let line of config.lines">
@@ -13,8 +13,16 @@
   </app-meta-card-item>
 </app-meta-card>
 
-<div class="fav-meta-card__unfound fav-meta-card" *ngIf="!config">
-  <div class="fav-meta-card__unfound-text">Favorite not found</div>
-  <small class="fav-meta-card__unfound-small-text">No matching {{favorite.entityType}}</small>
-  <button mat-flat-button color="primary" (click)="removeFavorite()">Remove favorite</button>
-</div>
+<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config">
+  <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
+  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore">Could not fetch {{ prettyName |
+    lowercase }}</small>
+  <div class="error-details" *ngIf="showMore">
+    <div class="error-details__label subtle-text">Type</div>
+    <div class="error-details__value">{{ prettyName }}</div>
+    <div class="error-details__label subtle-text">ID</div>
+    <div class="error-details__value">{{favorite.entityId}}</div>
+    <button mat-button color="warn" (click)="removeFavorite()">Remove favorite</button>
+  </div>
+  <button *ngIf="!showMore" (click)="toggleMoreError()" mat-button color="primary">Show details</button>
+</mat-card>
