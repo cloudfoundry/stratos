@@ -7,7 +7,7 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
-import { DynamicExtenstionRoutes } from './core/extension/dynamic-extension-routes';
+import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CustomImportModule } from './custom-import.module';
@@ -84,7 +84,7 @@ export class CustomRouterStateSerializer
   providers: [
     LoggedInService,
     ExtensionService,
-    DynamicExtenstionRoutes,
+    DynamicExtensionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],

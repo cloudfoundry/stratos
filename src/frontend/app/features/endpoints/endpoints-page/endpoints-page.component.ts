@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -26,13 +26,30 @@ import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } fr
 
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState>) { }
+  private healthCheckTimeout: number;
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) { }
 
   sub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
-  ngOnInit(): void {
+  private startEndpointHealthCheckPulse() {
+    this.endpointsService.checkAllEndpoints();
+    this.ngZone.runOutsideAngular(() => {
+      this.healthCheckTimeout = window.setInterval(() => {
+        this.ngZone.run(() => {
+          this.endpointsService.checkAllEndpoints();
+        });
+      }, 30000);
+    });
+  }
+
+  private stopEndpointHealthCheckPulse() {
+    clearInterval(this.healthCheckTimeout);
+  }
+
+  ngOnInit() {
+    this.startEndpointHealthCheckPulse();
     const params = queryParamMap();
     if (params['cnsi_guid']) {
       const guid = params['cnsi_guid'];
@@ -54,6 +71,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy() {
+    this.stopEndpointHealthCheckPulse();
     if (this.sub) {
       this.sub.unsubscribe();
     }

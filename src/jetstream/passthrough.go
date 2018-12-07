@@ -296,6 +296,31 @@ func (p *portalProxy) DoProxyRequest(requests []interfaces.ProxyRequestInfo) (ma
 	return responses, nil
 }
 
+// Convenience helper for a single request
+func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string) (*interfaces.CNSIRequest, error) {
+	requests := make([]interfaces.ProxyRequestInfo, 0)
+
+	proxyURL, err := url.Parse(requestUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req := interfaces.ProxyRequestInfo{}
+	req.UserGUID = userGUID
+	req.ResultGUID = "REQ_" + cnsiGUID
+	req.EndpointGUID = cnsiGUID
+	req.Method = method
+	req.URI = proxyURL
+	requests = append(requests, req)
+
+	responses, err := p.DoProxyRequest(requests)
+	if err != nil {
+		return nil, err
+	}
+
+	return responses[req.ResultGUID], err
+}
+
 func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*interfaces.CNSIRequest) error {
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cap-passthrough")
 
@@ -366,13 +391,11 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	// Copy original headers through, except custom portal-proxy Headers
 	fwdCNSIStandardHeaders(cnsiRequest, req)
 
-	// Mkae the request using the appropriate auth helper
-	switch tokenRec.AuthType {
-	case interfaces.AuthTypeHttpBasic:
-		res, err = p.doHttpBasicFlowRequest(cnsiRequest, req)
-	case interfaces.AuthTypeOIDC:
-		res, err = p.doOidcFlowRequest(cnsiRequest, req)
-	default:
+	// Find the auth provider for the auth type - default ot oauthflow
+	authHandler := p.GetAuthProvider(tokenRec.AuthType)
+	if authHandler.Handler != nil {
+		res, err = authHandler.Handler(cnsiRequest, req)
+	} else {
 		res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}
 

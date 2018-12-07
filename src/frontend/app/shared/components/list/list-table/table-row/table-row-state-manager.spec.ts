@@ -1,6 +1,6 @@
 import { tap, skip } from 'rxjs/operators';
 import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
-import { Observable ,  Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { async } from '@angular/core/testing';
 import { TableRowStateManager } from './table-row-state-manager';
 
@@ -44,7 +44,6 @@ describe('TableRowStateManager', () => {
     obs = stateManager.observable;
 
     sub = obs.pipe(
-      skip(2),
       tap(state => {
         checkState(stateManager, state, initState);
       })
@@ -84,7 +83,7 @@ describe('TableRowStateManager', () => {
     stateManager = new TableRowStateManager(initState);
     obs = stateManager.observable;
     sub = obs.pipe(
-      skip(2),
+      skip(1),
       tap(state => {
         checkState(stateManager, state, expectedState);
       })
@@ -126,7 +125,7 @@ describe('TableRowStateManager', () => {
     stateManager = new TableRowStateManager(initState);
     obs = stateManager.observable;
     sub = obs.pipe(
-      skip(2),
+      skip(1),
       tap(state => {
         checkState(stateManager, state, expectedState);
       }),
@@ -158,7 +157,7 @@ describe('TableRowStateManager', () => {
     stateManager = new TableRowStateManager(initState);
     obs = stateManager.observable;
     sub = obs.pipe(
-      skip(2),
+      skip(1),
       tap(state => {
         checkState(stateManager, state, setState);
       }),
@@ -197,7 +196,7 @@ describe('TableRowStateManager', () => {
     stateManager = new TableRowStateManager(initState);
     obs = stateManager.observable;
     sub = obs.pipe(
-      skip(2),
+      skip(1),
       tap(state => {
         checkState(stateManager, state, expectedState);
       }),

@@ -1,6 +1,12 @@
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 
 import { urlValidationExpression } from '../../core/utils.service';
+import { AppState } from '../../store/app-state';
+import { endpointSchemaKey } from '../../store/helpers/entity-factory';
+import { selectEntities } from '../../store/selectors/api.selectors';
 import { EndpointModel } from './../../store/types/endpoint.types';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
@@ -118,6 +124,13 @@ export function getIconForEndpoint(type: string): EndpointIcon {
     icon.font = ep.iconFont;
   }
   return icon;
+}
+
+export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
+  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+    first(),
+    map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
+  );
 }
 
 export function getEndpointAuthTypes() {

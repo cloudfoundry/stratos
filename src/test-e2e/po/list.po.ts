@@ -110,7 +110,7 @@ export class ListCardComponent extends Component {
 
   static cardsCss = 'app-card:not(.row-filler)';
 
-  constructor(locator: ElementFinder) {
+  constructor(locator: ElementFinder, private header: ListHeaderComponent) {
     super(locator);
   }
 
@@ -129,19 +129,33 @@ export class ListCardComponent extends Component {
     return new MetaCard(this.getCards().get(index), metaType);
   }
 
+  private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
+    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+      elem.getText().then(text => text === title)
+    ).first();
+    browser.wait(until.presenceOf(card));
+    return card.element(by.xpath('ancestor::app-card'));
+  }
+
   waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    const cardTitle = this.locator.element(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title));
-    return browser.wait(until.visibilityOf(cardTitle), 10000).then(() => {
-      return this.findCardByTitle(title, metaType);
+    const cardElement = this.findCardElementByTitle(title, metaType);
+    return browser.wait(until.visibilityOf(cardElement), 10000).then(() => {
+      // We've found the title, now get the actual element
+      return new MetaCard(cardElement, metaType);
     });
   }
 
-  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    return this.getCards().filter(elem => {
-      return elem.element(by.cssContainingText(metaType, title)).isPresent();
-    }).then(e => {
-      expect(e.length).toBe(1);
-      return new MetaCard(e[0], metaType);
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM, filter = false): promise.Promise<MetaCard> {
+    if (filter) {
+      this.header.waitUntilShown();
+      this.header.setSearchText(title);
+      return this.waitForCardByTitle(title, metaType);
+    }
+
+    const cardElement = this.findCardElementByTitle(title, metaType);
+    return cardElement.isPresent().then(isPresent => {
+      expect(isPresent).toBeTruthy();
+      return Promise.resolve(new MetaCard(cardElement, metaType));
     });
   }
 
@@ -334,8 +348,8 @@ export class ListComponent extends Component {
   constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
-    this.cards = new ListCardComponent(locator);
     this.header = new ListHeaderComponent(locator);
+    this.cards = new ListCardComponent(locator, this.header);
     this.pagination = new ListPaginationComponent(locator);
     this.empty = new ListEmptyComponent(locator);
   }
@@ -356,7 +370,7 @@ export class ListComponent extends Component {
     return browser.wait(until.invisibilityOf(refreshIcon), 10000);
   }
 
-  getTotalResults() {
+  getTotalResults(): promise.Promise<number> {
     // const paginator = new PaginatorComponent();
     return this.pagination.isDisplayed().then(havePaginator => {
       if (havePaginator) {
