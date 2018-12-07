@@ -169,7 +169,7 @@ export class AppModule {
         const orgGuid = space.entity.organization_guid || space.entity.organization.entity.guid;
         return {
           type: spaceSchemaKey,
-          routerLink: `/cloud-foundry/${space.entity.cfGuid}/organizations/${orgGuid}/${space.entity.guid}`,
+          routerLink: `/cloud-foundry/${space.entity.cfGuid}/organizations/${orgGuid}/spaces/${space.entity.guid}/summary`,
           lines: [
           ],
           name: space.entity.name
