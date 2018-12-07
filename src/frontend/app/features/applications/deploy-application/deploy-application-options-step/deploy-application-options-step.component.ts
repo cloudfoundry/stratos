@@ -38,6 +38,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   deployOptionsForm: FormGroup;
   subs: Subscription[] = [];
   appGuid: string;
+  stepOpts: any;
+
   public healthCheckTypes = ['http', 'port', 'process'];
 
   constructor(
@@ -222,10 +224,14 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.time.setValue(overrides.time);
   }
 
+  onEnter = (opts: any) => {
+    this.stepOpts = opts;
+  }
+
   onNext: StepOnNextFunction = () => {
     this.store.dispatch(new SaveAppOverrides(this.formToObj(this.deployOptionsForm.controls)));
     return observableOf({
-      success: true
+      success: true, data: this.stepOpts
     });
   }
 }

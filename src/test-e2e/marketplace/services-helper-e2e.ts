@@ -140,6 +140,7 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     this.createServiceInstance.stepper.waitForStep('Select Service');
+    this.createServiceInstance.stepper.waitForStepNotBusy();
     this.createServiceInstance.stepper.setService(serviceName, expectFailure);
     if (!expectFailure) {
       expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();

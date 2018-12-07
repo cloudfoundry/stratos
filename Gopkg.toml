@@ -20,10 +20,6 @@
   name = "github.com/kat-co/vala"
   revision = "43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b"
 
-[[constraint]]
-  name = "github.com/kubernetes-sigs/aws-iam-authenticator"
-  branch = "master"
-
 # code.cloudfoundry.org/cli requires moby master, which isn't compatible with current code.cloudfoundry.org/cli
 [[override]]
   name = "github.com/moby/moby"
@@ -37,7 +33,3 @@
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "github.com/aws/aws-sdk-go"
-  version = "1.15.49"

@@ -74,6 +74,11 @@ export class StepperComponent extends Component {
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
+  // Wait until step is not busy
+  waitForStepNotBusy() {
+    return browser.wait(until.not(until.presenceOf(this.locator.element(by.css('.steppers__header--busy')))));
+  }
+
   isStepDisabled(stepName: string): promise.Promise<boolean> {
     return this.getStep(stepName).element(by.css('app-dot-content span.disabled')).isPresent();
   }

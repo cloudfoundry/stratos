@@ -34,6 +34,12 @@ type UAAResponse struct {
 	IDToken      string `json:"id_token"`
 }
 
+// UAAErrorResponse is the error response returned by Cloud Foundry UAA Service
+type UAAErrorResponse struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
 // LoginHookFunc - function that can be hooked into a successful user login
 type LoginHookFunc func(c echo.Context) error
 
@@ -227,10 +233,20 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 	log.Debug("loginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
+		// Check the Error
+		errMessage := "Access Denied"
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			// Try and parse the Response into UAA error structure
+			authError := &UAAErrorResponse{}
+			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
+				errMessage = authError.ErrorDescription
+			}
+		}
+
 		err = interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
-			"Access Denied",
-			"Access Denied: %v", err)
+			errMessage,
+			"UAA Login failed: %s: %v", errMessage, err)
 		return nil, err
 	}
 
@@ -442,7 +458,6 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				Admin:       isAdmin,
 			}
 
-			// TODO: Only do this for OAuth token types
 			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
 			if ok {
 				// If this is a system shared endpoint, then remove some metadata that should be send back to other users

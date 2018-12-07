@@ -269,7 +269,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       authVal,
       systemShared,
       this.bodyContent,
-    )); { }
+    ));
   }
 
   ngOnDestroy() {

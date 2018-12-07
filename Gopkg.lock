@@ -148,43 +148,6 @@
   version = "1.0.0"
 
 [[projects]]
-  digest = "1:cf3cf8dea338e58afb8339c2d3bca505bdc165fa9744a7a23ea86b1cc185dffa"
-  name = "github.com/aws/aws-sdk-go"
-  packages = [
-    "aws",
-    "aws/arn",
-    "aws/awserr",
-    "aws/awsutil",
-    "aws/client",
-    "aws/client/metadata",
-    "aws/corehandlers",
-    "aws/credentials",
-    "aws/credentials/ec2rolecreds",
-    "aws/credentials/endpointcreds",
-    "aws/credentials/stscreds",
-    "aws/csm",
-    "aws/defaults",
-    "aws/ec2metadata",
-    "aws/endpoints",
-    "aws/request",
-    "aws/session",
-    "aws/signer/v4",
-    "internal/sdkio",
-    "internal/sdkrand",
-    "internal/sdkuri",
-    "internal/shareddefaults",
-    "private/protocol",
-    "private/protocol/query",
-    "private/protocol/query/queryutil",
-    "private/protocol/rest",
-    "private/protocol/xml/xmlutil",
-    "service/sts",
-  ]
-  pruneopts = "UT"
-  revision = "59124d90523f4c0491f997f9a36aef265fe3502c"
-  version = "v1.15.49"
-
-[[projects]]
   digest = "1:705c40022f5c03bf96ffeb6477858d88565064485a513abcd0f11a0911546cb6"
   name = "github.com/blang/semver"
   packages = ["."]
@@ -313,14 +276,6 @@
   revision = "3f9d52f7176a6927daacff70a3e8d1dc2025c53e"
 
 [[projects]]
-  digest = "1:b98e7574fc27ec166fb31195ec72c3bd0bffd73926d3612eb4c929bc5236f75b"
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "7b294651033cd7d9e7f0d9ffa1b75ed1e198e737"
-  version = "v1.38.3"
-
-[[projects]]
   digest = "1:adea5a94903eb4384abef30f3d878dc9ff6b6b5b0722da25b82e5169216dfb61"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
@@ -329,25 +284,16 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:db238461f652ddb7c7057bc6fc503f6003a29987b1485ecbb96d92287db65bc9"
+  digest = "1:bfc758d5a03d57d97226fac6934551c01bd76612adb119c177395b057a0a46db"
   name = "github.com/gogo/protobuf"
   packages = [
     "gogoproto",
     "proto",
     "protoc-gen-gogo/descriptor",
-    "sortkeys",
   ]
   pruneopts = "UT"
   revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
   version = "v1.1.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
   branch = "master"
@@ -364,14 +310,6 @@
   packages = ["query"]
   pruneopts = "UT"
   revision = "44c6ddd0a2342c386950e880b658017258da92fc"
-
-[[projects]]
-  branch = "master"
-  digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
-  name = "github.com/google/gofuzz"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
   branch = "master"
@@ -416,7 +354,7 @@
 [[projects]]
   branch = "master"
   digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
-  name = "github.com/irfanhabib/mysqlstore"
+  name = "github.com/cf-stratos/mysqlstore"
   packages = ["."]
   pruneopts = "UT"
   revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
@@ -429,13 +367,6 @@
   revision = "dac4e0ac4cd75079a03e408685a6140ef57a6aa3"
   source = "github.com/nwmac/go-flags"
   version = "1.1"
-
-[[projects]]
-  digest = "1:e22af8c7518e1eab6f2eab2b7d7558927f816262586cd6ed9f349c97a6c285c4"
-  name = "github.com/jmespath/go-jmespath"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "0b12d6b5"
 
 [[projects]]
   digest = "1:1e15f4e455f94aeaedfcf9c75b3e1c449b5acba1551c58446b4b45be507c707b"
@@ -459,17 +390,6 @@
   pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:3bd7d8488868b045c9f2ba350fded19c8166c2b3fc31564129a443235a074f91"
-  name = "github.com/kubernetes-sigs/aws-iam-authenticator"
-  packages = [
-    "pkg/arn",
-    "pkg/token",
-  ]
-  pruneopts = "UT"
-  revision = "cbf62ed25eeb7d93f626e391e513366de52bd109"
 
 [[projects]]
   branch = "master"
@@ -732,14 +652,10 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d544ee134992a590c0eb4111cf349035918ca831bed28d3c79d750cce3a7eb07"
+  digest = "1:290b8002a96a5f5c1bd8316884f6e2414f5fb1e46a22bbd5a1ff0d45dc944cb3"
   name = "golang.org/x/net"
   packages = [
     "context",
-    "http/httpguts",
-    "http2",
-    "http2/hpack",
-    "idna",
     "websocket",
   ]
   pruneopts = "UT"
@@ -758,25 +674,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ac28c92ecf872cdaf70d467d78c8182616f47136a438e5bff7d6ad7ae631a568"
+  digest = "1:842253589ac2f6acca70a602ecc9f25af131a97faf6d34e82356cf8ef8188f0f"
   name = "golang.org/x/text"
   packages = [
-    "collate",
-    "collate/build",
-    "internal/colltab",
     "internal/gen",
     "internal/language",
     "internal/language/compact",
     "internal/tag",
-    "internal/triegen",
-    "internal/ucd",
     "language",
-    "secure/bidirule",
-    "transform",
-    "unicode/bidi",
     "unicode/cldr",
-    "unicode/norm",
-    "unicode/rangetable",
   ]
   pruneopts = "UT"
   revision = "4d1c5fb19474adfe9562c9847ba425e7da817e81"
@@ -806,61 +712,12 @@
   version = "v1.0.26"
 
 [[projects]]
-  digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
-  name = "gopkg.in/inf.v0"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
-  version = "v0.9.1"
-
-[[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
   version = "v2.2.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:9aa2896ebbcb723e5af118278085a14fb6406c7c4630c4d62fd4c4fb08b1ee63"
-  name = "k8s.io/apimachinery"
-  packages = [
-    "pkg/api/resource",
-    "pkg/apis/meta/v1",
-    "pkg/conversion",
-    "pkg/conversion/queryparams",
-    "pkg/fields",
-    "pkg/labels",
-    "pkg/runtime",
-    "pkg/runtime/schema",
-    "pkg/selection",
-    "pkg/types",
-    "pkg/util/errors",
-    "pkg/util/intstr",
-    "pkg/util/json",
-    "pkg/util/naming",
-    "pkg/util/net",
-    "pkg/util/runtime",
-    "pkg/util/sets",
-    "pkg/util/validation",
-    "pkg/util/validation/field",
-    "pkg/watch",
-    "third_party/forked/golang/reflect",
-  ]
-  pruneopts = "UT"
-  revision = "e65edc4ced47a9ae9b5ae9c1c193dba1a5827b62"
-
-[[projects]]
-  digest = "1:744c3de0c3a2875cd33b352110fe76275dc2d363a49952fe2f813a1e4bfc6c6c"
-  name = "k8s.io/client-go"
-  packages = [
-    "pkg/apis/clientauthentication",
-    "pkg/apis/clientauthentication/v1alpha1",
-  ]
-  pruneopts = "UT"
-  revision = "1638f8970cefaa404ff3a62950f88b08292b2696"
-  version = "v9.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -889,12 +746,7 @@
     "code.cloudfoundry.org/cli/cf/trace",
     "code.cloudfoundry.org/cli/util",
     "code.cloudfoundry.org/cli/util/randomword",
-    "github.com/SermoDigital/jose/jws",
     "github.com/antonlindstrom/pgstore",
-    "github.com/aws/aws-sdk-go/aws",
-    "github.com/aws/aws-sdk-go/aws/credentials",
-    "github.com/aws/aws-sdk-go/aws/session",
-    "github.com/aws/aws-sdk-go/service/sts",
     "github.com/cloudfoundry/noaa",
     "github.com/cloudfoundry/noaa/consumer",
     "github.com/cloudfoundry/noaa/errors",
@@ -904,9 +756,8 @@
     "github.com/gorilla/securecookie",
     "github.com/gorilla/sessions",
     "github.com/gorilla/websocket",
-    "github.com/irfanhabib/mysqlstore",
+    "github.com/cf-stratos/mysqlstore",
     "github.com/kat-co/vala",
-    "github.com/kubernetes-sigs/aws-iam-authenticator/pkg/token",
     "github.com/labstack/echo",
     "github.com/labstack/echo/engine",
     "github.com/labstack/echo/engine/standard",
