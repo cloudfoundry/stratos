@@ -8,7 +8,7 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository: splatform/stratos-ci-concourse
+   repository: splatform/ci-stratos-concourse
    tag: "latest"
 
 run:
