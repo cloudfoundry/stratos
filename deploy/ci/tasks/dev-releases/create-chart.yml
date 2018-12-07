@@ -27,6 +27,8 @@ run:
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
       VERSION=$(cat image-tag/v2-version)
       RELEASE_VERSION=$(cat image-tag/v2-tag)
+      COMMIT=$(cat image-tag/v2-commit)
+
       # Required for setupAndPushChange commit message
       IMAGE_TAG=${GIT_TAG}
       cd ${STRATOS}/deploy/kubernetes/
@@ -34,7 +36,7 @@ run:
       # Generate Helm package
       updateHelmDependency
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${RELEASE_VERSION}-${GIT_TAG}.tgz
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${RELEASE_VERSION}-${COMMIT}.tgz
       cd ${ROOT_DIR}/helm-chart/
       if [ -f ${HELM_REPO}/index.yaml ]; then
         cp ${HELM_REPO}/index.yaml ${ROOT_DIR}/helm-chart/
