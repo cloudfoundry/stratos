@@ -165,10 +165,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
-  multiFilterConfigsLoading$: Observable<boolean>;
 
   paginationController: IListPaginationController<T>;
-  multiFilterWidgetObservables = new Array<Subscription>();
+  private multiFilterWidgetObservables = new Array<Subscription>();
 
   view$: Observable<ListView>;
 
@@ -362,18 +361,30 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     filterStoreToWidget.pipe(
       first(),
       tap(() => {
-        const multiFiltersLoading = [];
-        Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
-          filterConfig.select.next(this.multiFilters[filterConfig.key]);
+        Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig, index: number) => {
+          // Pipe initial store value to the widget
+          if (this.multiFilters[filterConfig.key]) {
+            filterConfig.select.next(this.multiFilters[filterConfig.key]);
+          }
+
+          // The first filter will be hidden if there's only one filter option.
+          // To ensure subsequent filters behave correctly automatically select it
+          if (index === 0 && this.multiFilterConfigs.length > 1) {
+            filterConfig.list$.pipe(
+              first()
+            ).subscribe(list => {
+              if (list && list.length === 1) {
+                filterConfig.select.next(list[0].value);
+              }
+            });
+          }
+
+          // Pipe changes in the widgets to the store
           const sub = filterConfig.select.asObservable().pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterConfig, filterItem);
           }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
-          multiFiltersLoading.push(filterConfig.loading$);
         });
-        this.multiFilterConfigsLoading$ = observableCombineLatest(multiFiltersLoading).pipe(
-          map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
-        );
       })
     ).subscribe();
 
