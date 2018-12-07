@@ -28,6 +28,10 @@ export class ServiceTabsBaseComponent {
     {
       link: 'instances',
       label: 'Instances'
+    },
+    {
+      link: 'plans',
+      label: 'Plans'
     }
   ];
   breadcrumbs: IHeaderBreadcrumb[] = [

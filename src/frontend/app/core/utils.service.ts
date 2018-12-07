@@ -253,3 +253,10 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
     }
   });
 };
+
+export const safeJsonParse = <T>(input: string): T => {
+  try {
+    return JSON.parse(input) as T;
+  } catch (e) { }
+  return null;
+};

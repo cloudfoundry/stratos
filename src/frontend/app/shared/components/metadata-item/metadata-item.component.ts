@@ -1,11 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-metadata-item',
   templateUrl: './metadata-item.component.html',
   styleUrls: ['./metadata-item.component.scss']
 })
-export class MetadataItemComponent implements OnInit {
+export class MetadataItemComponent {
 
   constructor() { }
 
@@ -19,8 +19,5 @@ export class MetadataItemComponent implements OnInit {
 
   // Are we editing?
   @Input() public edit: boolean;
-
-  ngOnInit() {
-  }
 
 }

@@ -48,6 +48,10 @@ const serviceCatalog: Routes = [
             path: 'instances',
             component: ServiceInstancesComponent
           },
+          {
+            path: 'plans',
+            component: ServicePlansComponent
+          }
         ]
       }
     ]

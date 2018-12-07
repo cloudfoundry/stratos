@@ -19,7 +19,6 @@ import {
   tap
 } from 'rxjs/operators';
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
 import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -40,6 +39,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { safeJsonParse } from '../../../../core/utils.service';
 
 
 const enum FormMode {
@@ -391,7 +391,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
+    const params = safeJsonParse(this.createNewInstanceForm.controls.params.value);
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
@@ -429,10 +429,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
 
-  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
+  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: string) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    params = getServiceJsonParams(params);
+    params = safeJsonParse(params);
 
     this.store.dispatch(new CreateServiceBinding(
       cfGuid,
