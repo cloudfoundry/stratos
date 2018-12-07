@@ -1,5 +1,0 @@
-FROM billyteves/ubuntu-dind:16.04
-
-RUN apt install -y git
-RUN mkdir -p /root/.ssh
-ADD config /root/.ssh/config

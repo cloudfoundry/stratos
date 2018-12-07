@@ -7,7 +7,8 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository: splatform/ci-stratos-github-release
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
    tag: "latest"
 
 run:

@@ -1,3 +1,4 @@
+# Nightly image build
 ---
 resource_types:
 - name: docker-image

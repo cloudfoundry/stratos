@@ -5,11 +5,14 @@ patchHelmChart () {
   local DOCKER_ORG=$2
   local DOCKER_REG=$3
   local CHART_PATH=$4
+  local CHART_VERSION=$5
+  local VERSION=$6
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REG}"'/g' ${CHART_PATH}/values.yaml
 
-  sed -i -e 's/version: 0.1.0/version: '"${TAG}"'/g' ${CHART_PATH}/Chart.yaml  
+  sed -i -e 's/version: 0.1.0/version: '"${CHART_VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
+  sed -i -e 's/appVersion: 0.1.0/version: '"${VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
 }
 
 patchHelmChartDev () {
