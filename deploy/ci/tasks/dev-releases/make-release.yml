@@ -20,6 +20,8 @@ run:
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
+
       HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
       VERSION=$(cat image-tag/v2-version)
@@ -28,7 +30,7 @@ run:
 
       # $VERSION is version number - e.g. 2.3.0
       # Find the last tag created for this release tag
-      LAST_TAG=$(git tag --sort=creatordate | grep "$VERSION-" | tail -r -n 1)
+      LAST_TAG=$(git tag --sort=creatordate | grep "$VERSION-" | awk '{a[i++]=$0} END {for (j=i-1; j>=0;) print a[j--] }' | head -n 1)
       echo "Last tag: $LAST_TAG"
 
       # Get the commit has for this tag
@@ -41,5 +43,33 @@ run:
 
       echo "$COMMIT"
 
+      # Create tag for the release
+      git tag -f -a ${VERSION} -m "${VERSION}"
+      git push -f origin ${VERSION}
+
       # Create a tag for the release and push the tag
+      # Check that the release exists
+      set +e
+      github-release info -t ${VERSION}
+      RETVAL=$?
+      set -e
+
+      # Delete the release if it already exists
+      if [ $RETVAL -eq 0 ]; then
+        github-release delete -t ${VERSION}
+      fi
+
+      # Generate title for the release, based on the tag
+      # Sets RELEASE_TITLE and PRE_RELEASE_ARG
+      generateReleaseTitle ${VERSION}
+
+      echo "Release Title - ${RELEASE_TITLE}"
+      echo "Release Arg   - ${PRE_RELEASE_ARG}"
+
+      # Create new release
+      github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG}
+
+      # Upload Helm chart to release
+      #github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "${CHART_PACKAGE}"
+
 
