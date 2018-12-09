@@ -1,11 +1,13 @@
+# Nightly image-build pipeline
+# This pipeline builds the images for Helm and generates a nightly Helm chart
 ---
 resource_types:
 - name: docker-image
   type: docker-image
   privileged: true
   source:
-    repository: ((docker-image-resource))
-    tag: ((docker-image-resource-tag))
+    repository: ((docker-resource-image))
+    tag: ((docker-resource-image-tag))
 
 resources:
 - name: midnight
@@ -25,7 +27,7 @@ resources:
     uri: git@github.com:((helm-repo-github-organization))/((helm-repo-github-repository))
     branch: ((helm-repo-branch))
     private_key: ((github-private-key))
-# Docker Images
+# Images
 - name: jetstream-image
   type: docker-image
   source:

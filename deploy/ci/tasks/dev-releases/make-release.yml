@@ -28,6 +28,8 @@ run:
       RELEASE_VERSION=$(cat image-tag/v2-tag)
       COMMIT=$(cat image-tag/v2-commit)
 
+      cd stratos
+
       # $VERSION is version number - e.g. 2.3.0
       # Find the last tag created for this release tag
       LAST_TAG=$(git tag --sort=creatordate | grep "$VERSION-" | awk '{a[i++]=$0} END {for (j=i-1; j>=0;) print a[j--] }' | head -n 1)
