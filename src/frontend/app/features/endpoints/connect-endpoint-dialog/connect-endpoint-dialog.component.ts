@@ -100,7 +100,6 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
 
     // Create the endpoint form
     this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
-    this.cachedAuthTypeFormFields = Object.keys(this.autoSelected.form || {});
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
@@ -108,6 +107,7 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
       this.autoSelected = this.authTypesForEndpoint[ssoIndex];
     }
 
+    this.cachedAuthTypeFormFields = Object.keys(this.autoSelected.form || {});
     this.endpointForm = this.fb.group({
       authType: [this.autoSelected.value || '', Validators.required],
       authValues: this.fb.group(this.autoSelected.form || {}),
