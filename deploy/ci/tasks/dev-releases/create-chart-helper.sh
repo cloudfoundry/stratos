@@ -26,12 +26,7 @@ patchHelmChartDev () {
 }
 
 setupAndPushChange() {
-  git config --global user.name ${GIT_USER}
-  git config --global user.email ${GIT_EMAIL}
-
-  mkdir -p /root/.ssh/
-  echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
-  chmod 600 /root/.ssh/id_rsa
+  setupGitConfig()
   git stash
   git pull --rebase
   git stash pop
@@ -41,6 +36,15 @@ setupAndPushChange() {
   git config --global push.default simple
   git push origin HEAD:${HELM_REPO_BRANCH}
 
+}
+
+setupGitConfig() {
+  git config --global user.name ${GIT_USER}
+  git config --global user.email ${GIT_EMAIL}
+
+  mkdir -p /root/.ssh/
+  echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
+  chmod 600 /root/.ssh/id_rsa
 }
 
 updateHelmDependency() {
