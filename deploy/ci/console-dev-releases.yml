@@ -6,17 +6,10 @@ resource_types:
   source:
     repository: ((docker-resource-image))
     tag: ((docker-resource-image-tag))
-# Custom git resource - latest version supports triggering when am existing tag is updated
-- name: stratos-git-resource
-  type: docker-image
-  source:
-    repository: splatform/stratos-git-resource
-    tag: "latest"
-
 resources:
 # Stratos Git Repository
 - name: stratos
-  type: stratos-git-resource
+  type: git
   source:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
@@ -35,25 +28,25 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-jetstream
+    repository: ((docker-repository))/stratos-jetstream
 - name: postflight-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-postflight-job
+    repository: ((docker-repository))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-mariadb
+    repository: ((docker-repository))/stratos-mariadb
 - name: ui-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-console
+    repository: ((docker-repository))/stratos-console
 
 # Artifacts
 - name: image-tag

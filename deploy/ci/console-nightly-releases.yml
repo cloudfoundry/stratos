@@ -65,8 +65,8 @@ resources:
 - name: nightly-gh-release
   type: github-release
   source:
-    owner: ((github-organization))
-    repository: ((github-repository))
+    owner: ((github-artifact-organization))
+    repository: ((github-artifact-repository))
     access_token: ((github-access-token))
     pre_release: true
 - name: image-tag
