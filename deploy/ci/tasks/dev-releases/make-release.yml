@@ -21,7 +21,7 @@ run:
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
       source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
-
+      
       HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
       VERSION=$(cat image-tag/v2-version)
@@ -45,6 +45,9 @@ run:
       fi
 
       echo "Making release"
+
+      # Set git username and password so that we can push changes
+      setupAndPushChange
 
       # Create tag for the release
       git tag -f -a ${VERSION} -m "${VERSION}"
