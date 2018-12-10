@@ -40,7 +40,7 @@ run:
 
       if [ "$COMMIT" != "$LAST_TAG_COMMIT" ]; then
         echo "Can not make release - no release candidate published"
-        echo "The commit for the \"stable\" tag does not match that of the tag \"$LAST_TAG\"""
+        echo "The commit for the \"stable\" tag does not match that of the tag \"$LAST_TAG\""
         #exit 1
       fi
 
