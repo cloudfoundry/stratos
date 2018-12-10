@@ -9,6 +9,8 @@ import { Store } from '@ngrx/store';
 import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { ComponentEntityMonitorConfig } from '../../shared.types';
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
+import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../confirmation-dialog.service';
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -35,14 +37,20 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public prettyName: string;
 
-  constructor(private store: Store<AppState>) { }
+  public confirmation: ConfirmationDialogConfig;
+
+  constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
 
   ngOnInit() {
     const { cardMapper, entity, favorite, prettyName } = this.favoriteEntity;
     this.favorite = favorite;
     this.prettyName = prettyName;
     this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
+
+    this.setConfirmation(prettyName, favorite);
+
     const config = cardMapper && entity ? cardMapper(entity) : null;
+
     if (config) {
       config.lines = config.lines.map(line => {
         const [label, value] = line;
@@ -61,7 +69,20 @@ export class FavoritesMetaCardComponent implements OnInit {
     }
   }
 
-  public removeFavorite() {
+  public setConfirmation(prettyName: string, favorite: UserFavorite) {
+    this.confirmation = new ConfirmationDialogConfig(
+      `Unfavorite ${prettyName}`,
+      `Are you sure you would you like to unfavorite this ${prettyName.toLocaleLowerCase()} with the id ${favorite.entityId}?`,
+      'Yes',
+      true
+    );
+  }
+
+  public confirmFavoriteRemoval() {
+    this.confirmDialog.open(this.confirmation, this.removeFavorite);
+  }
+
+  private removeFavorite = () => {
     this.store.dispatch(new RemoveUserFavoriteAction(this.favorite.guid));
   }
 

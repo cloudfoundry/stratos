@@ -21,8 +21,8 @@
     <div class="error-details__label subtle-text">Type</div>
     <div class="error-details__value">{{ prettyName }}</div>
     <div class="error-details__label subtle-text">ID</div>
-    <div class="error-details__value">{{favorite.entityId}}</div>
-    <button mat-button color="warn" (click)="removeFavorite()">Remove favorite</button>
+    <div class="error-details__value">{{ favorite.entityId }}</div>
+    <button mat-button color="warn" (click)="confirmFavoriteRemoval()">Unfavorite</button>
   </div>
   <button *ngIf="!showMore" (click)="toggleMoreError()" mat-button color="primary">Show details</button>
 </mat-card>
