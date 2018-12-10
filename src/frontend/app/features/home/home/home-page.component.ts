@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { IAllFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AppState } from '../../../store/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { endpointListKey } from '../../../store/types/endpoint.types';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-home-page',
@@ -10,10 +12,10 @@ import { AppState } from '../../../store/app-state';
   styleUrls: ['./home-page.component.scss']
 })
 export class HomePageComponent {
+  public allEndpointIds$: Observable<string>;
 
-  constructor(private store: Store<AppState>) {
-    // this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
-    //   map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))
-    // );
+  constructor(store: Store<AppState>) {
+    this.allEndpointIds$ = new PaginationMonitor(store, endpointListKey, entityFactory(endpointSchemaKey)).currentPageIds$;
   }
 }
+

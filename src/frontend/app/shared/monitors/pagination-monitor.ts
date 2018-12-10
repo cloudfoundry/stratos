@@ -41,6 +41,9 @@ export class PaginationMonitor<T = any> {
    */
   public pagination$: Observable<PaginationEntityState>;
 
+
+  public currentPageIds$: Observable<string>;
+
   constructor(
     private store: Store<AppState>,
     public paginationKey: string,
@@ -107,6 +110,7 @@ export class PaginationMonitor<T = any> {
       schema.key,
       paginationKey,
     );
+    this.currentPageIds$ = this.createPagIdObservable(this.pagination$);
     this.currentPage$ = this.createPageObservable(this.pagination$, schema);
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
     this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
@@ -120,6 +124,15 @@ export class PaginationMonitor<T = any> {
     return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
       distinctUntilChanged(),
       filter(pag => !!pag),
+    );
+  }
+
+  private createPagIdObservable(
+    pagination$: Observable<PaginationEntityState>
+  ) {
+    return pagination$.pipe(
+      distinctUntilChanged(this.isPageSameIsh),
+      map(pagination => pagination.ids[pagination.currentPage] || [])
     );
   }
 
