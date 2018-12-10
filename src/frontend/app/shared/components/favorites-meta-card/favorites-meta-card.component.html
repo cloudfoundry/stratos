@@ -13,7 +13,7 @@
   </app-meta-card-item>
 </app-meta-card>
 
-<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config">
+<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder">
   <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
   <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore">Could not fetch {{ prettyName |
     lowercase }}</small>
@@ -25,4 +25,7 @@
     <button mat-button color="warn" (click)="confirmFavoriteRemoval()">Unfavorite</button>
   </div>
   <button *ngIf="!showMore" (click)="toggleMoreError()" mat-button color="primary">Show details</button>
+</mat-card>
+
+<mat-card class="fav-meta-card__placeholder fav-meta-card" *ngIf="placeholder">
 </mat-card>

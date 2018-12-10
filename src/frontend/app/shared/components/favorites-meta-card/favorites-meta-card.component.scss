@@ -1,5 +1,25 @@
+@keyframes pulse
+{
+  0% {
+    background-color: #e0e0e0;
+  }
+  50% {
+    background-color: #bfbfbf;
+  }
+  100% {
+    background-color: #e0e0e0;
+  }
+}
+
 .fav-meta-card {
   min-height: 160px;
+  &__placeholder {
+    align-items: center;
+    animation: pulse 3s infinite;
+    animation-timing-function: ease-out;
+    display: flex;
+    justify-content: center;
+  }
   &__header-text {
     margin-top: 0;
   }

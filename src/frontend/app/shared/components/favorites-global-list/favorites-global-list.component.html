@@ -1,10 +1,21 @@
-<div class="favorite-list" *ngIf="(favs$ | async) as favorites">
+<h2>Favorites</h2>
+<div *ngIf="(favs$ | async) as favorites">
+  <div class="favorites-list__empty-text" *ngIf="(!favorites.fetching && !favorites.error && !favorites.entityGroups)">
+    <div>It looks like you don't have any favorites, why don't you start by adding your favorite <a>endpoint</a>?</div>
+  </div>
   <div *ngIf="favorites.error && !favorites.fetching">Could not fetch favorites</div>
-  <mat-progress-spinner *ngIf="!favorites.error && favorites.fetching" diameter="20" mode="indeterminate"></mat-progress-spinner>
-  <div *ngIf="!favorites.error && !favorites.fetching">
-    <div *ngFor="let favGroup of favorites.entityGroups">
-      <app-favorites-meta-card class="favorite-list__endpoint-card" [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
-      <app-favorites-entity-list class="favorite-list_entities" [entities]="favGroup.entities"></app-favorites-entity-list>
+  <div class="favorite-list" *ngIf="!favorites.fetching && favorites.entityGroups">
+    <div *ngIf="!favorites.error && !favorites.fetching">
+      <div *ngFor="let favGroup of favorites.entityGroups">
+        <app-favorites-meta-card class="favorite-list__endpoint-card" [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
+        <app-favorites-entity-list class="favorite-list_entities" [entities]="favGroup.entities"></app-favorites-entity-list>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="favorites.fetching || (!favorites.error && !favorites.entityGroups)">
+    <div class="favorite-list favorite-list-placeholder">
+      <app-favorites-meta-card class="favorite-list__endpoint-card" [placeholder]="true"></app-favorites-meta-card>
+      <app-favorites-entity-list class="favorite-list_entities" [placeholder]="true"></app-favorites-entity-list>
     </div>
   </div>
 </div>

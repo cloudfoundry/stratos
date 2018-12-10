@@ -13,6 +13,9 @@ export class FavoritesEntityListComponent {
     this.limitEntities(e, this.limit);
   }
 
+  @Input()
+  public placeholder = false;
+
   public _entities: IFavoriteEntity[];
 
   public limitedEntities: IFavoriteEntity[];

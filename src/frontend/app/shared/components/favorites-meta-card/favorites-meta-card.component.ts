@@ -25,6 +25,9 @@ export class FavoritesMetaCardComponent implements OnInit {
   @Input()
   public compact = false;
 
+  @Input()
+  public placeholder = false;
+
   public config: IFavoritesMetaCardConfig;
 
   public status$: Observable<CardStatus>;
@@ -42,30 +45,32 @@ export class FavoritesMetaCardComponent implements OnInit {
   constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
 
   ngOnInit() {
-    const { cardMapper, entity, favorite, prettyName } = this.favoriteEntity;
-    this.favorite = favorite;
-    this.prettyName = prettyName;
-    this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
+    if (!this.placeholder && this.favoriteEntity) {
+      const { cardMapper, entity, favorite, prettyName } = this.favoriteEntity;
+      this.favorite = favorite;
+      this.prettyName = prettyName;
+      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
 
-    this.setConfirmation(prettyName, favorite);
+      this.setConfirmation(prettyName, favorite);
 
-    const config = cardMapper && entity ? cardMapper(entity) : null;
+      const config = cardMapper && entity ? cardMapper(entity) : null;
 
-    if (config) {
-      config.lines = config.lines.map(line => {
-        const [label, value] = line;
-        if (!isObservable(value)) {
-          return [
-            label,
-            observableOf(value)
-          ] as [string, Observable<string>];
-        }
-        return line;
-      });
-    }
-    this.config = config;
-    if (this.config && this.config.getStatus) {
-      this.status$ = this.config.getStatus(entity);
+      if (config) {
+        config.lines = config.lines.map(line => {
+          const [label, value] = line;
+          if (!isObservable(value)) {
+            return [
+              label,
+              observableOf(value)
+            ] as [string, Observable<string>];
+          }
+          return line;
+        });
+      }
+      this.config = config;
+      if (this.config && this.config.getStatus) {
+        this.status$ = this.config.getStatus(entity);
+      }
     }
   }
 
