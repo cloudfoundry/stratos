@@ -121,8 +121,8 @@ export class AppModule {
         routerLink: `/cloud-foundry/${endpoint.guid}`,
         lines: [
           ['Address', endpoint.api_endpoint.Host],
-          ['User', endpoint.user.name],
-          ['Admin', endpoint.user.admin ? 'Yes' : 'No']
+          ['User', endpoint.user ? endpoint.user.name : 'Not connected'],
+          ['Admin', endpoint.user && endpoint.user.admin ? 'Yes' : 'No']
         ],
         name: endpoint.name
       }),
