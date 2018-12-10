@@ -25,7 +25,7 @@ import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
-import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-to-card-config-mapper';
+import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { EndpointModel } from './store/types/endpoint.types';
 import { applicationSchemaKey, endpointSchemaKey, spaceSchemaKey, organizationSchemaKey } from './store/helpers/entity-factory';
 import { IApp, ISpace, IOrganization } from './core/cf-api.types';

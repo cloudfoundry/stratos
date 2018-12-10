@@ -1,4 +1,4 @@
-import { UserFavorite } from './../../../store/types/user-favorites.types';
+import { UserFavorite } from '../../../store/types/user-favorites.types';
 import { IFavoriteTypeInfo } from '../../../store/types/user-favorites.types';
 import { Observable } from 'rxjs';
 import { CardStatus } from '../application-state/application-state.service';

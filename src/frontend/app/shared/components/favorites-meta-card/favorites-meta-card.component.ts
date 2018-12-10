@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { IFavoritesMetaCardConfig } from './favorite-to-card-config-mapper';
+import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 import { Observable, isObservable, of as observableOf } from 'rxjs';
 import { CardStatus } from '../application-state/application-state.service';
 import { UserFavorite } from '../../../store/types/user-favorites.types';

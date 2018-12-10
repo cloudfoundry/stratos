@@ -16,7 +16,7 @@ import { EntityInfo } from '../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
 import {
   favoritesConfigMapper, TFavoriteMapperFunction
-} from '../shared/components/favorites-meta-card/favorite-to-card-config-mapper';
+} from '../shared/components/favorites-meta-card/favorite-config-mapper';
 import { getDefaultRequestState } from '../store/reducers/api-request-reducer/types';
 interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite[];
