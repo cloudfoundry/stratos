@@ -161,7 +161,7 @@ export class E2EHelpers {
   }
 
   // Cloud Foundry
-  getCustomerOrgSpaceLabel(isoTime, orgSpace) {
+  getCustomOrgSpaceLabel(isoTime, orgSpace) {
     return E2EHelpers.customOrgSpaceLabel + '.' + orgSpace + '.' + (isoTime || (new Date()).toISOString());
   }
 

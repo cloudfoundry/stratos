@@ -12,9 +12,9 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
-  const testOrgName = e2e.helper.getCustomerOrgSpaceLabel(null, 'org');
-  const testOrg2Name = e2e.helper.getCustomerOrgSpaceLabel(null, 'org2');
-  const testSpaceName = e2e.helper.getCustomerOrgSpaceLabel(null, 'space');
+  const testOrgName = e2e.helper.getCustomOrgSpaceLabel(null, 'org');
+  const testOrg2Name = e2e.helper.getCustomOrgSpaceLabel(null, 'org2');
+  const testSpaceName = e2e.helper.getCustomOrgSpaceLabel(null, 'space');
   let endpointGuid;
 
   let cloudFoundry: CfTopLevelPage;
