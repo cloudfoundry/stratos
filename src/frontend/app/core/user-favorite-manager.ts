@@ -145,7 +145,6 @@ export class UserFavoriteManager {
         }))))
       })),
       catchError(e => {
-        console.log(e);
         return observableOf({
           error: true,
           fetching: false,
