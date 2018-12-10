@@ -26,7 +26,7 @@ patchHelmChartDev () {
 }
 
 setupAndPushChange() {
-  setupGitConfig()
+  setupGitConfig
   git stash
   git pull --rebase
   git stash pop
