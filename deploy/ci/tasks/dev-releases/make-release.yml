@@ -36,14 +36,15 @@ run:
       echo "Last tag: $LAST_TAG"
 
       # Get the commit has for this tag
-      c=$(git rev-list --abbrev-commit -n 1 ${LAST_TAG})
+      LAST_TAG_COMMIT=$(git rev-list --abbrev-commit -n 1 ${LAST_TAG})
 
-      if [ "$COMMIT" != "$LAST_TAG" ]; then
+      if [ "$COMMIT" != "$LAST_TAG_COMMIT" ]; then
         echo "Can not make release - no release candidate published"
-        exit 1
+        echo "The commit for the \"stable\" tag does not match that of the tag \"$LAST_TAG\"""
+        #exit 1
       fi
 
-      echo "$COMMIT"
+      echo "Making release"
 
       # Create tag for the release
       git tag -f -a ${VERSION} -m "${VERSION}"
