@@ -35,7 +35,7 @@ run:
       LAST_TAG=$(git tag --sort=creatordate | grep "$VERSION-" | awk '{a[i++]=$0} END {for (j=i-1; j>=0;) print a[j--] }' | head -n 1)
       echo "Last tag: $LAST_TAG"
 
-      # Get the commit has for this tag
+      # Get the commit hash for this tag
       LAST_TAG_COMMIT=$(git rev-list --abbrev-commit -n 1 ${LAST_TAG})
 
       if [ "$COMMIT" != "$LAST_TAG_COMMIT" ]; then
@@ -49,8 +49,7 @@ run:
       # Need to create the Helm chart
 
       # Download the Helm chart form the last RC/Beta/Alpha - we'll modify it
-      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY}/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${COMMIT}.tgz
-
+      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY}/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
       echo $HELM_CHART_URL
 
       mkdir tmp
