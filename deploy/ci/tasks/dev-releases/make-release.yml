@@ -28,6 +28,8 @@ run:
       RELEASE_VERSION=$(cat image-tag/v2-tag)
       COMMIT=$(cat image-tag/v2-commit)
 
+      HELM_REPOSITORY=${GITHUB_USER}/${GITHUB_ORG}
+
       cd stratos
 
       # $VERSION is version number - e.g. 2.3.0
