@@ -1,7 +1,6 @@
-<h2>Favorites</h2>
 <div *ngIf="(favs$ | async) as favorites">
   <div class="favorites-list__empty-text" *ngIf="(!favorites.fetching && !favorites.error && !favorites.entityGroups)">
-    <div>It looks like you don't have any favorites, why don't you start by adding your favorite <a>endpoint</a>?</div>
+    It looks like you don't have any favorites, why don't you start by adding your favorite <a [routerLink]="['/endpoints']">endpoint</a>?
   </div>
   <div *ngIf="favorites.error && !favorites.fetching">Could not fetch favorites</div>
   <div class="favorite-list" *ngIf="!favorites.fetching && favorites.entityGroups">
@@ -12,7 +11,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="favorites.fetching || (!favorites.error && !favorites.entityGroups)">
+  <div *ngIf="favorites.fetching">
     <div class="favorite-list favorite-list-placeholder">
       <app-favorites-meta-card class="favorite-list__endpoint-card" [placeholder]="true"></app-favorites-meta-card>
       <app-favorites-entity-list class="favorite-list_entities" [placeholder]="true"></app-favorites-entity-list>

@@ -10,4 +10,7 @@
 
 .home-page {
   display: flex;
+  &__header {
+    margin-top: 0;
+  }
 }
