@@ -9,7 +9,7 @@ generateReleaseTitle() {
 
   if [ "${REL_PARTS[1]}" == "" ]; then
     # This is the actual release
-    RELEASE_TITLE=""
+    RELEASE_TITLE="${REL_PARTS[0]}"
     PRE_RELEASE_ARG=""
   else
     IFS='.' read -ra REL_TYPES <<< "${REL_PARTS[1]}"
@@ -24,7 +24,6 @@ generateReleaseTitle() {
     elif [ "$REL_TYPE" == "rc" ]; then
       RELEASE_TITLE="Release Candidate ${REL_VER}"
     fi
+    RELEASE_TITLE="${REL_PARTS[0]} $RELEASE_TITLE"
   fi
-  RELEASE_TITLE="${REL_PARTS[0]} $RELEASE_TITLE"
-
 }
