@@ -46,6 +46,28 @@ run:
 
       echo "Making release"
 
+      # Need to create the Helm chart
+
+      # Download the Helm chart form the last RC/Beta/Alpha - we'll modify it
+      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY|/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${COMMIT}.tgz
+
+      mkdir tmp
+      cd tmp
+      curl ${HELM_CHART_URL} | tar xvz
+
+      if [ $? -ne 0 ]; then
+        echo "Failed to download Helm Chart"
+        exit 1 
+      fi
+
+      cat console/Chart.yaml
+      
+      sed -i -e 's/version: '"${LAST_TAG}"'/version: '"${VERSION}"'/g' console/Chart.yaml  
+      cat console/Chart.yaml
+
+      cd ..
+
+
       # Set git username and password so that we can push changes
       setupGitConfig
 
@@ -73,7 +95,7 @@ run:
       echo "Release Arg   - ${PRE_RELEASE_ARG}"
 
       # Create new release
-      github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG}
+      github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
 
       # Upload Helm chart to release
       #github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "${CHART_PACKAGE}"
