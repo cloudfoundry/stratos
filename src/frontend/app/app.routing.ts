@@ -28,7 +28,7 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'dashboard', component: HomePageComponent,
+        path: 'home', component: HomePageComponent,
         data: {
           stratosNavigation: {
             text: 'Home',
