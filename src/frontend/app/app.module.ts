@@ -36,6 +36,9 @@ import { Store } from '@ngrx/store';
 import { GetAllEndpoints } from './store/actions/endpoint.actions';
 import { GetSpace } from './store/actions/space.actions';
 import { GetOrganization } from './store/actions/organization.actions';
+import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
+import { CurrentUserPermissions } from './core/current-user-permissions.config';
+import { RouterNav } from './store/actions/router.actions';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -105,8 +108,9 @@ export class CustomRouterStateSerializer
 export class AppModule {
   constructor(
     ext: ExtensionService,
+    permissionService: CurrentUserPermissionsService;
     private appStateService: ApplicationStateService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
   ) {
     ext.init();
     const endpointType = 'cf';
@@ -124,9 +128,16 @@ export class AppModule {
           ['User', endpoint.user ? endpoint.user.name : 'Not connected'],
           ['Admin', endpoint.user && endpoint.user.admin ? 'Yes' : 'No']
         ],
-        name: endpoint.name
+        name: endpoint.name,
+        menuItems: [
+          {
+            label: 'Deploy application',
+            action: () => this.store.dispatch(new RouterNav({ path: ['applications/deploy'] })),
+            can: permissionService.can(CurrentUserPermissions.APPLICATION_CREATE)
+          }
+        ]
       }),
-      () => new GetAllEndpoints(false)
+      () => new GetAllEndpoints(false),
     );
 
     favoritesConfigMapper.registerMapper({

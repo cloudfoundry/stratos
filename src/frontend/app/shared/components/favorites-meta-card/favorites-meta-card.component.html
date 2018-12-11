@@ -1,5 +1,5 @@
-<app-meta-card [ngClass]="{'fav-meta-card__clickable': !!config.routerLink}" [routerLink]="config.routerLink" class="fav-meta-card"
-  *ngIf="config" [status$]="status$" [entityConfig]="entityConfig">
+<app-meta-card [ngClass]="{'fav-meta-card__clickable': !!config.routerLink}" [actionMenu]="config.menuItems"
+  [routerLink]="config.routerLink" class="fav-meta-card" *ngIf="config" [status$]="status$" [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div class="fav-meta-card__header">
       <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ config.name }}</h2>

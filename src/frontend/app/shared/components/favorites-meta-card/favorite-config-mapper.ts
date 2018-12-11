@@ -3,6 +3,7 @@ import { IFavoriteTypeInfo } from '../../../store/types/user-favorites.types';
 import { Observable } from 'rxjs';
 import { CardStatus } from '../application-state/application-state.service';
 import { IRequestAction } from '../../../store/types/request.types';
+import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 
 /**
  * [label, value]
@@ -15,6 +16,7 @@ export interface IFavoritesMetaCardConfig {
   routerLink?: string;
   name: string;
   getStatus?: (entity) => Observable<CardStatus>;
+  menuItems?: MetaCardMenuItem[];
 }
 
 export type TFavoriteMapperFunction = (entity?) => IFavoritesMetaCardConfig;
