@@ -44,6 +44,14 @@ export interface IAllFavorites {
   entityGroups: IGroupedFavorites[];
 }
 
+export interface IHydrationResults {
+  entityInfo: EntityInfo<any>;
+  type: string;
+  cardMapper: TFavoriteMapperFunction;
+  prettyName: string;
+  favorite: UserFavorite;
+}
+
 export class UserFavoriteManager {
   constructor(private store: Store<AppState>) { }
 
@@ -117,33 +125,8 @@ export class UserFavoriteManager {
         map(this.addEndpointsToHydrateList)
       )),
       map(this.groupIntermediateFavorites),
-      mergeMap(list => combineLatest(
-        list.map(
-          favGroup => combineLatest(favGroup.map(favorite => this.hydrateFavorite(favorite).pipe(
-            filter(entityInfo => !entityInfo || entityInfo.entityRequestInfo.fetching === false),
-            map(entityInfo => ({
-              entityInfo,
-              type: this.getTypeAndID(favorite).type,
-              cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
-              prettyName: favoritesConfigMapper.getPrettyName(favorite),
-              favorite
-            })))
-          ))
-        ))
-      ),
-      map((entityRequests) => ({
-        error: !!entityRequests.findIndex(entityRequest => {
-          return entityRequest.findIndex((request) => request.entityInfo.entityRequestInfo.error === false) > -1;
-        }),
-        fetching: false,
-        entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
-          type: request.type,
-          cardMapper: request.cardMapper,
-          prettyName: request.prettyName,
-          entity: request.entityInfo.entity,
-          favorite: request.favorite
-        }))))
-      })),
+      mergeMap(this.getHydratedGroups),
+      map(this.reduceGroupedRequests),
       catchError(e => {
         return observableOf({
           error: true,
@@ -157,6 +140,47 @@ export class UserFavoriteManager {
         entityGroups: null
       })
     );
+  }
+
+  private reduceGroupedRequests = (entityRequests: IHydrationResults[][]): IAllFavorites => {
+    if (!entityRequests) {
+      return {
+        error: false,
+        fetching: false,
+        entityGroups: null
+      };
+    }
+    return {
+      error: !!entityRequests.findIndex(entityRequest => {
+        return entityRequest.findIndex((request) => request.entityInfo.entityRequestInfo.error === false) > -1;
+      }),
+      fetching: false,
+      entityGroups: this.groupFavoriteEntities(entityRequests.map(entityRequest => entityRequest.map(request => ({
+        type: request.type,
+        cardMapper: request.cardMapper,
+        prettyName: request.prettyName,
+        entity: request.entityInfo.entity,
+        favorite: request.favorite
+      }))))
+    };
+  }
+
+  private getHydratedGroups = (list: UserFavorite[][]) => {
+    if (!list || !list.length) {
+      return observableOf(null);
+    }
+    return combineLatest(list.map(
+      favGroup => combineLatest(favGroup.map(favorite => this.hydrateFavorite(favorite).pipe(
+        filter(entityInfo => !entityInfo || entityInfo.entityRequestInfo.fetching === false),
+        map(entityInfo => ({
+          entityInfo,
+          type: this.getTypeAndID(favorite).type,
+          cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
+          prettyName: favoritesConfigMapper.getPrettyName(favorite),
+          favorite
+        })))
+      ))
+    ));
   }
 
   public addEndpointsToHydrateList = (favorites: UserFavorite[]) => {
