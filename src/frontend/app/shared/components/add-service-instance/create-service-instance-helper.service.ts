@@ -11,7 +11,7 @@ import {
   IServicePlanVisibility,
 } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { getService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
+import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
 import { GetServiceInstances } from '../../../store/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
 import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
@@ -48,7 +48,7 @@ export class CreateServiceInstanceHelper {
 
   initBaseObservables = () => {
 
-    const serviceEntityService = getService(this.serviceGuid, this.cfGuid, this.entityServiceFactory);
+    const serviceEntityService = getCfService(this.serviceGuid, this.cfGuid, this.entityServiceFactory);
 
     this.service$ = serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.service_plans),

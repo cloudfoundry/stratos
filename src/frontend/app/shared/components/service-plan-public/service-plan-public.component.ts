@@ -5,7 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { IServiceBroker, IServicePlan } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
-  getService,
+  getCfService,
   getServiceBroker,
   getServicePlanAccessibilityCardStatus,
 } from '../../../features/service-catalog/services-helper';
@@ -32,7 +32,6 @@ export class ServicePlanPublicComponent {
     if (!servicePlan) {
       return;
     }
-    // TODO: RC test
     this.planAccessibility$ = getServicePlanAccessibilityCardStatus(
       servicePlan,
       this.servicesService.getServicePlanVisibilities(),
@@ -56,7 +55,7 @@ export class ServicePlanPublicComponent {
   }
 
   private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {
-    return getService(serviceGuid, cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
+    return getCfService(serviceGuid, cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
       map(service => getServiceBroker(service.entity.entity.service_broker_guid, cfGuid, this.entityServiceFactory)),
       switchMap(serviceService => serviceService.waitForEntity$),
       map(entity => entity.entity)

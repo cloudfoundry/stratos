@@ -5,7 +5,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { getService } from '../../../../../../features/service-catalog/services-helper';
+import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 import { AppState } from '../../../../../../store/app-state';
 import { TableCellCustom } from '../../../list.types';
 
@@ -23,7 +23,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
   }
 
   ngOnInit() {
-    this.serviceName$ = getService(this.row.entity.service_guid, this.row.entity.cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
+    this.serviceName$ = getCfService(this.row.entity.service_guid, this.row.entity.cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
       filter(s => !!s),
       map(s => {
         let serviceLabel = s.entity.entity.label;

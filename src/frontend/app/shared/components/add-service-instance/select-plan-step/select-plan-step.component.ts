@@ -37,6 +37,7 @@ import {
   canShowServicePlanCosts,
   getServicePlanAccessibilityCardStatus,
   getServicePlanName,
+  populateServicePlanExtraTyped,
 } from '../../../../features/service-catalog/services-helper';
 import {
   SetCreateServiceInstanceCFDetails,
@@ -113,7 +114,7 @@ export class SelectPlanStepComponent implements OnDestroy {
           this.clearNoPlans();
         }
       }),
-      map(o => this.mapToServicePlan(o)),
+      map(visiblePlans => visiblePlans.map(populateServicePlanExtraTyped)),
       publishReplay(1),
       refCount(),
     );
@@ -138,17 +139,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   }
 
-  mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): APIResource<IServicePlan>[] => visiblePlans.map(p => ({
-    ...p,
-    entity: {
-      ...p.entity,
-      extraTyped: p.entity.extra ? JSON.parse(p.entity.extra) : null
-    }
-  }))
-
-  getDisplayName(selectedPlan: APIResource<IServicePlan>) {
-    return getServicePlanName(selectedPlan.entity);
-  }
+  getDisplayName = (selectedPlan: APIResource<IServicePlan>) => getServicePlanName(selectedPlan.entity);
 
   onEnter = () => {
     this.subscription = this.servicePlans$.pipe(

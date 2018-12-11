@@ -30,7 +30,7 @@ import { createEntityRelationPaginationKey } from '../../store/helpers/entity-re
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getService, getServiceInstancesInCf, getServicePlans } from './services-helper';
+import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -73,7 +73,7 @@ export class ServicesService {
     this.cfGuid = getIdFromRoute(activatedRoute, 'endpointId');
     this.serviceGuid = getIdFromRoute(activatedRoute, 'serviceId');
 
-    this.serviceEntityService = getService(this.serviceGuid, this.cfGuid, this.entityServiceFactory);
+    this.serviceEntityService = getCfService(this.serviceGuid, this.cfGuid, this.entityServiceFactory);
     this.service$ = this.serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),
       map(o => o.entity),

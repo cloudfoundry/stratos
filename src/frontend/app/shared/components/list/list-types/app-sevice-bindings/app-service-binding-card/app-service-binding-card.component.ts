@@ -9,7 +9,7 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { getService } from '../../../../../../features/service-catalog/services-helper';
+import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import {
   entityFactory,
@@ -89,7 +89,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     ).waitForEntity$;
 
     this.service$ = this.serviceInstance$.pipe(
-      switchMap(o => getService(o.entity.entity.service_guid, this.appService.cfGuid, this.entityServiceFactory).waitForEntity$),
+      switchMap(o => getCfService(o.entity.entity.service_guid, this.appService.cfGuid, this.entityServiceFactory).waitForEntity$),
       filter(service => !!service)
     );
 

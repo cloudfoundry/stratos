@@ -118,14 +118,14 @@ export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePl
 export const getServicePlanAccessibility = (
   servicePlan: APIResource<IServicePlan>,
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>,
-  serviceBroker$?: Observable<APIResource<IServiceBroker>>): Observable<ServicePlanAccessibility> => {
+  serviceBroker$: Observable<APIResource<IServiceBroker>>): Observable<ServicePlanAccessibility> => {
   if (servicePlan.entity.public) {
     return observableOf({
       isPublic: true,
       guid: servicePlan.metadata.guid
     });
   }
-  const safeServiceBroker$ = serviceBroker$ ? serviceBroker$.pipe(filter(sb => !!sb)) : observableOf(null);
+  const safeServiceBroker$ = serviceBroker$.pipe(filter(sb => !!sb));
   const safeServicePlanVisibilities$ = servicePlanVisibilities$.pipe(filter(spv => !!spv));
   return safeServiceBroker$.pipe(
     combineLatest(safeServicePlanVisibilities$),
@@ -136,7 +136,7 @@ export const getServicePlanAccessibility = (
 export const getServicePlanAccessibilityCardStatus = (
   servicePlan: APIResource<IServicePlan>,
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>,
-  serviceBroker$?: Observable<APIResource<IServiceBroker>>): Observable<CardStatus> => {
+  serviceBroker$: Observable<APIResource<IServiceBroker>>): Observable<CardStatus> => {
   return getServicePlanAccessibility(servicePlan, servicePlanVisibilities$, serviceBroker$).pipe(
     map((servicePlanAccessibility: ServicePlanAccessibility) => {
       if (servicePlanAccessibility.isPublic) {
@@ -188,7 +188,7 @@ export const getServiceBroker = (
   );
 };
 
-export const getService = (
+export const getCfService = (
   serviceGuid: string,
   cfGuid: string,
   entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IService>> => {
