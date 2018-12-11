@@ -49,7 +49,9 @@ run:
       # Need to create the Helm chart
 
       # Download the Helm chart form the last RC/Beta/Alpha - we'll modify it
-      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY|/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${COMMIT}.tgz
+      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY}/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${COMMIT}.tgz
+
+      echo $HELM_CHART_URL
 
       mkdir tmp
       cd tmp
