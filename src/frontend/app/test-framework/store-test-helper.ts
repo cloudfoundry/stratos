@@ -583,7 +583,8 @@ export function getInitialTestStoreState(): AppState {
       service: {},
       githubCommits: {},
       domain: {},
-      metrics: {}
+      metrics: {},
+      servicePlan: {}
     },
     dashboard: {
       sidenavOpen: true,

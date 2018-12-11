@@ -3,13 +3,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../application-state/application-state-icon/application-state-icon.component';
-import { ApplicationStateIconPipe } from '../../../../application-state/application-state-icon/application-state-icon.pipe';
-import { ApplicationStateComponent } from '../../../../application-state/application-state.component';
-import { ApplicationStateService } from '../../../../application-state/application-state.service';
+import { ServicePlanPriceComponent } from '../../../../service-plan-price/service-plan-price.component';
 import { TableCellAServicePlanPriceComponent } from './table-cell-service-plan-price.component';
 
 describe('TableCellAServicePlanPriceComponent', () => {
@@ -20,6 +14,7 @@ describe('TableCellAServicePlanPriceComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellAServicePlanPriceComponent,
+        ServicePlanPriceComponent
       ],
       imports: [
         StoreModule,
@@ -27,8 +22,6 @@ describe('TableCellAServicePlanPriceComponent', () => {
         createBasicStoreModule()
       ],
       providers: [
-        ApplicationStateService,
-        PaginationMonitorFactory
       ]
     })
       .compileComponents();
@@ -37,7 +30,6 @@ describe('TableCellAServicePlanPriceComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAServicePlanPriceComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {}, metadata: {} };
     fixture.detectChanges();
   });
 

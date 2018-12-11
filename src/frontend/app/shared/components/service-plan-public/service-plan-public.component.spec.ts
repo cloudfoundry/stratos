@@ -1,8 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { MDAppModule } from '../../../core/md.module';
+import { ServicesService } from '../../../features/service-catalog/services.service';
+import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
+import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
 
 describe('ServicePlanPublicComponent', () => {
@@ -13,10 +14,11 @@ describe('ServicePlanPublicComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ServicePlanPublicComponent],
       imports: [
-        FormsModule,
-        ReactiveFormsModule,
-        MDAppModule,
-        NoopAnimationsModule
+        ...BaseTestModulesNoShared
+      ],
+      providers: [
+        EntityMonitorFactory,
+        { provide: ServicesService, useClass: ServicesServiceMock },
       ]
     })
       .compileComponents();

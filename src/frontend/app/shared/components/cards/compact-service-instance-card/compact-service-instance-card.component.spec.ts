@@ -1,9 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CompactServiceInstanceCardComponent } from './compact-service-instance-card.component';
-import { AppChipsComponent } from '../../chips/chips.component';
 import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { AppChipsComponent } from '../../chips/chips.component';
+import { CompactServiceInstanceCardComponent } from './compact-service-instance-card.component';
 
 describe('CompactServiceInstanceCardComponent', () => {
   let component: CompactServiceInstanceCardComponent;

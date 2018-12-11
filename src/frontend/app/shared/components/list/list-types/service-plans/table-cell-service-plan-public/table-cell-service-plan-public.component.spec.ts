@@ -2,9 +2,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
+import { ServicesService } from '../../../../../../features/service-catalog/services.service';
+import { ServicesServiceMock } from '../../../../../../features/service-catalog/services.service.mock';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { ApplicationStateService } from '../../../../application-state/application-state.service';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { ServicePlanPublicComponent } from '../../../../service-plan-public/service-plan-public.component';
 import { TableCellAServicePlanPublicComponent } from './table-cell-service-plan-public.component';
 
 describe('TableCellAServicePlanPublicComponent', () => {
@@ -15,6 +17,7 @@ describe('TableCellAServicePlanPublicComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellAServicePlanPublicComponent,
+        ServicePlanPublicComponent
       ],
       imports: [
         StoreModule,
@@ -22,8 +25,8 @@ describe('TableCellAServicePlanPublicComponent', () => {
         createBasicStoreModule()
       ],
       providers: [
-        ApplicationStateService,
-        PaginationMonitorFactory
+        EntityMonitorFactory,
+        { provide: ServicesService, useClass: ServicesServiceMock },
       ]
     })
       .compileComponents();
@@ -32,7 +35,6 @@ describe('TableCellAServicePlanPublicComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAServicePlanPublicComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {}, metadata: {} };
     fixture.detectChanges();
   });
 

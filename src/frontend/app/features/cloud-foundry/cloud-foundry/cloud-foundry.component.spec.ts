@@ -1,15 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CloudFoundryComponent } from './cloud-foundry.component';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import {
   BaseTestModules,
-  getBaseProviders,
-  generateTestCfServiceProvider
+  generateTestCfServiceProvider,
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CloudFoundryComponent } from './cloud-foundry.component';
 
 describe('CloudFoundryComponent', () => {
   let component: CloudFoundryComponent;
