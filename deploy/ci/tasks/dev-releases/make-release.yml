@@ -28,7 +28,7 @@ run:
       RELEASE_VERSION=$(cat image-tag/v2-tag)
       COMMIT=$(cat image-tag/v2-commit)
 
-      HELM_REPOSITORY=${GITHUB_USER}/${GITHUB_ORG}
+      HELM_REPOSITORY=${GITHUB_ORG}/${GITHUB_REPO}
 
       cd stratos
 
