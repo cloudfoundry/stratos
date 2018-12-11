@@ -84,7 +84,7 @@ export class UserFavoriteManager {
       ] = userFavorites;
       group.push({
         endpoint,
-        entities
+        entities: entities && entities.length ? entities : null
       });
       return group;
     }, [] as IGroupedFavorites[]);

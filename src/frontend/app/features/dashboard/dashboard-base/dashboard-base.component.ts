@@ -5,19 +5,17 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } 
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
-
+import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
+import { GetUserFavoritesAction } from '../../../store/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../store/app-state';
-import { MetricsService } from '../../metrics/services/metrics-service';
-import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetUserFavoritesAction } from '../../../store/actions/user-favourites-actions/get-user-favorites-action';
-import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
-import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
+
 
 
 @Component({

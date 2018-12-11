@@ -28,6 +28,12 @@ export class FavoritesMetaCardComponent implements OnInit {
   @Input()
   public placeholder = false;
 
+  @Input()
+  public endpoint = false;
+
+  @Input()
+  public endpointHasEntities = false;
+
   public config: IFavoritesMetaCardConfig;
 
   public status$: Observable<CardStatus>;

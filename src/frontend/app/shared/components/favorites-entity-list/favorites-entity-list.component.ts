@@ -9,7 +9,7 @@ import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 export class FavoritesEntityListComponent {
   @Input()
   set entities(e: IFavoriteEntity[]) {
-    this._entities = [...e];
+    this._entities = e ? [...e] : e;
     this.limitEntities(e, this.limit);
   }
 

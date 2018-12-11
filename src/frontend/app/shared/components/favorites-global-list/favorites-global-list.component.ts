@@ -21,15 +21,17 @@ export class FavoritesGlobalListComponent implements OnInit {
       map(favs => ({
         ...favs,
         entityGroups: favs.entityGroups ? favs.entityGroups.map(group => {
-          group.entities = group.entities.sort((entityA, entityB) => {
-            if (entityA.favorite.entityType < entityB.favorite.entityType) {
-              return -1;
-            }
-            if (entityA.favorite.entityType > entityB.favorite.entityType) {
-              return 1;
-            }
-            return 0;
-          });
+          if (group.entities) {
+            group.entities = group.entities.sort((entityA, entityB) => {
+              if (entityA.favorite.entityType < entityB.favorite.entityType) {
+                return -1;
+              }
+              if (entityA.favorite.entityType > entityB.favorite.entityType) {
+                return 1;
+              }
+              return 0;
+            });
+          }
           return group;
         }) : favs.entityGroups
       }))

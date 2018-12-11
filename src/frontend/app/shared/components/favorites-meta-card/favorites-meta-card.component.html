@@ -13,7 +13,7 @@
   </app-meta-card-item>
 </app-meta-card>
 
-<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder">
+<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && !endpoint">
   <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
   <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore">Could not fetch {{ prettyName |
     lowercase }}</small>
@@ -25,6 +25,18 @@
     <button mat-button color="warn" (click)="confirmFavoriteRemoval()">Unfavorite</button>
   </div>
   <button *ngIf="!showMore" (click)="toggleMoreError()" mat-button color="primary">Show details</button>
+</mat-card>
+
+<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && endpoint">
+  <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite endpoint is not registered</div>
+  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="endpointHasEntities">
+    To unfavorite this endpoint, please unfavorite all child entities first.
+  </small>
+  <div class="error-details">
+    <div class="error-details__label subtle-text">ID</div>
+    <div class="error-details__value">{{ favorite.endpointId }}</div>
+  </div>
+  <button mat-button color="warn" *ngIf="!endpointHasEntities" (click)="confirmFavoriteRemoval()">Unfavorite</button>
 </mat-card>
 
 <mat-card class="fav-meta-card__placeholder fav-meta-card" *ngIf="placeholder">
