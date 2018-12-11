@@ -37,4 +37,10 @@ export class ServiceSummaryComponent {
     }));
   }
 
+  servicePlansLink = () => {
+    this.store.dispatch(new RouterNav({
+      path: ['marketplace', this.servicesService.cfGuid, this.servicesService.serviceGuid, 'plans']
+    }));
+  }
+
 }
