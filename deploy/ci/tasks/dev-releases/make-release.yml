@@ -56,20 +56,13 @@ run:
 
       mkdir tmp
       cd tmp
-      curl ${HELM_CHART_URL} | tar xvz
-
-      if [ $? -ne 0 ]; then
-        echo "Failed to download Helm Chart"
-        exit 1 
-      fi
-
+      wget -O console.tar.gz ${HELM_CHART_URL}
+      tar -xvf console.tar.gz
       cat console/Chart.yaml
       
       sed -i -e 's/version: '"${LAST_TAG}"'/version: '"${VERSION}"'/g' console/Chart.yaml  
       cat console/Chart.yaml
-
       cd ..
-
 
       # Set git username and password so that we can push changes
       setupGitConfig
