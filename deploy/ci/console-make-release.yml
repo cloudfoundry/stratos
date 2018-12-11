@@ -3,8 +3,8 @@ resource_types:
 - name: stratos-git-resource
   type: docker-image
   source:
-    repository: concourse/git-resource
-    tag: "dev"
+    repository: splatform/stratos-git-tag-resource
+    tag: "latest"
 resources:
 # Stratos Git Repository
 - name: stratos
@@ -63,11 +63,14 @@ jobs:
       params:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
+        GITHUB_USER: ((helm-repo-github-organization))
         GITHUB_ORG: ((helm-repo-github-organization))
         GITHUB_REPO: ((helm-repo-github-repository))
+        GITHUB_TOKEN: ((github-access-token))
         GIT_PRIVATE_KEY: ((github-private-key))
         GITHUB_TOKEN: ((github-access-token))
         DOCKER_ORG: ((docker-organization))
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
+
