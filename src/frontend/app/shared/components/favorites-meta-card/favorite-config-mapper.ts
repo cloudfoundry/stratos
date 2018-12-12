@@ -34,7 +34,9 @@ export type TFavoriteActionGenerator = (favorite: UserFavorite) => IRequestActio
 export interface IFavoriteActionGenerators {
   [key: string]: TFavoriteActionGenerator;
 }
-
+/**
+ * Stores the config used to hydrator and render favorites.
+ */
 class FavoritesConfigMapper {
   private mapperKeySeparator = '-';
   private mappers: IFavoriteMappers = {};
@@ -43,7 +45,14 @@ class FavoritesConfigMapper {
     return [endpointType, entityType].join(this.mapperKeySeparator);
   }
 
-  public registerMapper(
+  /**
+   * Register config used to manage a given favorite type
+   * @param favoriteInfo Base id information about the favorite this mapper will match
+   * @param prettyName The human readable name for the entity type
+   * @param mapper Takes an entity and maps it to favorite meta card config
+   * @param actionGenerator Takes a favorite and returns an action that can be used to hydrate the favorite
+   */
+  public registerFavoriteConfig(
     favoriteInfo: IFavoriteTypeInfo,
     prettyName: string,
     mapper: TFavoriteMapperFunction,
@@ -56,17 +65,28 @@ class FavoritesConfigMapper {
       actionGenerator
     };
   }
-
+  /**
+   * For a given favorite, return the corresponding favorite meta card mapper
+   * @param favorite
+   */
   public getMapperFunction(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].mapper : null;
   }
 
+  /**
+  * For a given favorite, return the corresponding human readable type name
+  * @param favorite
+  */
   public getPrettyName(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].prettyName : null;
   }
 
+  /**
+   * For a given favorite, return the corresponding hydration action
+   * @param favorite
+   */
   public getActionFromFavorite(favorite: UserFavorite) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].actionGenerator(favorite) : null;
