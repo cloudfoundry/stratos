@@ -77,6 +77,17 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       cellFlex: '1'
     },
     {
+      columnId: 'dashboard',
+      headerCell: () => 'Dashboard',
+      cellDefinition: {
+        externalLink: true,
+        getLink: (row: APIResource<IServiceInstance>) => row.entity.dashboard_url,
+        newTab: true,
+        showShortLink: true
+      },
+      cellFlex: '1'
+    },
+    {
       columnId: 'tags',
       headerCell: () => 'Tags',
       cellComponent: TableCellServiceInstanceTagsComponent,
