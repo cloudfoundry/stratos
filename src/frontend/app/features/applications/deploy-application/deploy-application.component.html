@@ -15,7 +15,7 @@
   <app-step [hidden]="isRedeploy || !(step2.sourceTypeNeedsUpload$ | async)" title="Source Upload" [valid]="step2_2.valid$ | async" [skip]="step2_2.skip$ | async" [onLeave]="step2_2.onLeave" [onEnter]="step2_2.onEnter" [onNext]="step2_2.onNext">
     <app-deploy-application-step-source-upload #step2_2></app-deploy-application-step-source-upload>
   </app-step>
-  <app-step [title]="'Overrides (Optional)'" [valid]="step4.valid$ | async" [onNext]="step4.onNext" [nextButtonText]="deployButtonText">
+  <app-step [title]="'Overrides (Optional)'" [valid]="step4.valid$ | async" [onEnter]="step4.onEnter" [onNext]="step4.onNext" [nextButtonText]="deployButtonText">
     <app-deploy-application-options-step #step4></app-deploy-application-options-step>
   </app-step>
   <app-step [title]="deployButtonText" [valid]="step3.valid$ | async" [canClose]="step3.closeable$ | async" disablePrevious=true cancelButtonText="Close" [onEnter]="step3.onEnter" [onNext]="step3.onNext" finishButtonText="Go to App Summary">

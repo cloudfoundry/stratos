@@ -94,7 +94,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
 
   // List config when supplied as an attribute rather than a dependency
-  @Input() list: ListConfig<T>;
+  @Input() listConfig: ListConfig<T>;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator) {
@@ -204,14 +204,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     @Optional() public config: ListConfig<T>
   ) { }
 
-ngOnInit() {
+  ngOnInit() {
     // null list means we have list bound but no value available yet
-    if (this.list === null) {
+    if (this.listConfig === null) {
       // We will watch for changes to the list value
       return;
-    } else if (this.list) {
+    } else if (this.listConfig) {
       // A value for the list is already available
-      this.config = this.list;
+      this.config = this.listConfig;
     }
 
     // Otherwise, do we have a value from the config?

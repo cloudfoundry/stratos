@@ -41,8 +41,6 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   return svcAvailability;
 };
 
-export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };
-
 export const getServiceJsonParams = (params: any): {} => {
   let prms = params;
   try {
