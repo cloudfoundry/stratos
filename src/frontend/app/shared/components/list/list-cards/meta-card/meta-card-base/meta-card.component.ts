@@ -65,15 +65,17 @@ export class MetaCardComponent {
 
   @Input('actionMenu')
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
-    this._actionMenu = actionMenu.map(menuItem => {
-      if (!menuItem.can) {
-        menuItem.can = observableOf(true);
-      }
-      return menuItem;
-    });
-    this.showMenu$ = combineLatest(actionMenu.map(menuItem => menuItem.can)).pipe(
-      map(cans => cans.some(can => can))
-    );
+    if (actionMenu) {
+      this._actionMenu = actionMenu.map(menuItem => {
+        if (!menuItem.can) {
+          menuItem.can = observableOf(true);
+        }
+        return menuItem;
+      });
+      this.showMenu$ = combineLatest(actionMenu.map(menuItem => menuItem.can)).pipe(
+        map(cans => cans.some(can => can))
+      );
+    }
   }
 
   public _actionMenu: MetaCardMenuItem[];
