@@ -17,7 +17,7 @@ import { EndpointModel } from '../store/types/endpoint.types';
 import {
   favoritesConfigMapper, TFavoriteMapperFunction
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { getDefaultRequestState } from '../store/reducers/api-request-reducer/types';
+import { getDefaultRequestState, ActionState } from '../store/reducers/api-request-reducer/types';
 interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite[];
 }
@@ -109,17 +109,12 @@ export class UserFavoriteManager {
       entityFactory(userFavoritesSchemaKey)
     );
 
-    const waitForFavorites$ = paginationMonitor.pagination$.pipe(
-      map(this.getCurrentPagePagination),
-      filter(pageRequest => !!pageRequest),
-      tap(({ error }) => {
-        if (error) {
-          throw new Error('Could not fetch favorites');
-        }
-      }),
-      filter(({ busy }) => busy === false),
-    );
+    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
 
+    return this.getHydrateObservable(waitForFavorites$, paginationMonitor);
+  }
+
+  private getHydrateObservable(waitForFavorites$: Observable<ActionState>, paginationMonitor: PaginationMonitor) {
     return waitForFavorites$.pipe(
       switchMap(() => paginationMonitor.currentPage$.pipe(
         map(this.addEndpointsToHydrateList)
@@ -139,6 +134,19 @@ export class UserFavoriteManager {
         fetching: true,
         entityGroups: null
       })
+    );
+  }
+
+  private getWaitForFavoritesObservable(paginationMonitor: PaginationMonitor<UserFavorite>) {
+    return paginationMonitor.pagination$.pipe(
+      map(this.getCurrentPagePagination),
+      filter(pageRequest => !!pageRequest),
+      tap(({ error }) => {
+        if (error) {
+          throw new Error('Could not fetch favorites');
+        }
+      }),
+      filter(({ busy }) => busy === false),
     );
   }
 

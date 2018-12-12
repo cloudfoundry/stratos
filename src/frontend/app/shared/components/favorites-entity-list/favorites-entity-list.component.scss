@@ -8,15 +8,15 @@
   margin-bottom: 20px;
   padding-bottom: $bottom-space;
   &__cards {
-    display: grid;
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
-    grid-template-columns: 1fr;
     @include breakpoint(tablet) {
       grid-column-gap: $bottom-space;
       grid-row-gap: $bottom-space;
       grid-template-columns: repeat(3, 1fr);
     }
+    display: grid;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    grid-template-columns: 1fr;    
     margin-top: $bottom-space;
     min-height: 0;
     min-width: 0;

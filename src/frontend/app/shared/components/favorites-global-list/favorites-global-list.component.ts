@@ -1,7 +1,7 @@
 import { map, filter } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { IAllFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
+import { IAllFavorites, UserFavoriteManager, IGroupedFavorites } from '../../../core/user-favorite-manager';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 
@@ -20,21 +20,30 @@ export class FavoritesGlobalListComponent implements OnInit {
       filter(favs => !!favs),
       map(favs => ({
         ...favs,
-        entityGroups: favs.entityGroups ? favs.entityGroups.map(group => {
-          if (group.entities) {
-            group.entities = group.entities.sort((entityA, entityB) => {
-              if (entityA.favorite.entityType < entityB.favorite.entityType) {
-                return -1;
-              }
-              if (entityA.favorite.entityType > entityB.favorite.entityType) {
-                return 1;
-              }
-              return 0;
-            });
-          }
-          return group;
-        }) : favs.entityGroups
+        entityGroups: this.sortFavoriteGroups(favs.entityGroups)
       }))
     );
+  }
+  private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {
+    if (!entityGroups) {
+      return entityGroups;
+    }
+
+    return entityGroups.map(group => {
+      if (group.entities) {
+        group.entities = group.entities.sort(this.sortFavoriteGroup);
+      }
+      return group;
+    });
+  }
+
+  private sortFavoriteGroup(entityA, entityB) {
+    if (entityA.favorite.entityType < entityB.favorite.entityType) {
+      return -1;
+    }
+    if (entityA.favorite.entityType > entityB.favorite.entityType) {
+      return 1;
+    }
+    return 0;
   }
 }

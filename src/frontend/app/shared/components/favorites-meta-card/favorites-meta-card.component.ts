@@ -62,16 +62,7 @@ export class FavoritesMetaCardComponent implements OnInit {
       const config = cardMapper && entity ? cardMapper(entity) : null;
 
       if (config) {
-        config.lines = config.lines.map(line => {
-          const [label, value] = line;
-          if (!isObservable(value)) {
-            return [
-              label,
-              observableOf(value)
-            ] as [string, Observable<string>];
-          }
-          return line;
-        });
+        config.lines = this.mapLinesToObservables(config.lines);
       }
       this.config = config;
       if (this.config && this.config.getStatus) {
@@ -99,6 +90,19 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public toggleMoreError() {
     this.showMore = !this.showMore;
+  }
+
+  private mapLinesToObservables(lines: [string, string | Observable<string>][]) {
+    return lines.map(line => {
+      const [label, value] = line;
+      if (!isObservable(value)) {
+        return [
+          label,
+          observableOf(value)
+        ] as [string, Observable<string>];
+      }
+      return line;
+    });
   }
 
 }

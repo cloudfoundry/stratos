@@ -70,7 +70,7 @@ export class CloudFoundryOrganizationBaseComponent {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.schema = entityFactory(organizationSchemaKey);
 
@@ -80,7 +80,24 @@ export class CloudFoundryOrganizationBaseComponent {
       filter(name => !!name),
       first()
     );
-    this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.getBreadcrumbs();
+
+    this.canUpdateRoles$ = this.getUpdatePermissionsObservable();
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
+  }
+
+  private getUpdatePermissionsObservable() {
+    return canUpdateOrgSpaceRoles(
+      this.currentUserPermissionsService,
+      this.cfOrgService.cfGuid,
+      this.cfOrgService.orgGuid,
+      CurrentUserPermissionsChecker.ALL_SPACES);
+  }
+
+  private getBreadcrumbs() {
+    return this.cfEndpointService.endpoint$.pipe(
       map(endpoint => ([
         {
           breadcrumbs: [
@@ -93,15 +110,5 @@ export class CloudFoundryOrganizationBaseComponent {
       ])),
       first()
     );
-
-    this.canUpdateRoles$ = canUpdateOrgSpaceRoles(
-      currentUserPermissionsService,
-      cfOrgService.cfGuid,
-      cfOrgService.orgGuid,
-      CurrentUserPermissionsChecker.ALL_SPACES);
-
-    // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
   }
-
 }
