@@ -39,6 +39,7 @@ import { GetOrganization } from './store/actions/organization.actions';
 import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
 import { CurrentUserPermissions } from './core/current-user-permissions.config';
 import { RouterNav } from './store/actions/router.actions';
+import { initEndpointExtensions } from './features/endpoints/endpoint-helpers';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -113,6 +114,8 @@ export class AppModule {
     private store: Store<AppState>,
   ) {
     ext.init();
+    // Init Auth Types and Endpoint Types provided by extensions
+    initEndpointExtensions(ext);
     // Once the CF modules become an extension point, these should be moved to a CF specific module
     this.registerCfFavoriteMappers();
   }
@@ -126,7 +129,7 @@ export class AppModule {
     this.registerCfOrgMapper(endpointType);
   }
   private registerCfEndpointMapper(endpointType: string) {
-    favoritesConfigMapper.registerMapper({
+    favoritesConfigMapper.registerFavoriteConfig({
       endpointType,
       entityType: endpointSchemaKey
     },
@@ -152,7 +155,7 @@ export class AppModule {
     );
   }
   private registerCfApplicationMapper(endpointType: string) {
-    favoritesConfigMapper.registerMapper({
+    favoritesConfigMapper.registerFavoriteConfig({
       endpointType,
       entityType: applicationSchemaKey
     },
@@ -184,7 +187,7 @@ export class AppModule {
     );
   }
   private registerCfSpaceMapper(endpointType: string) {
-    favoritesConfigMapper.registerMapper({
+    favoritesConfigMapper.registerFavoriteConfig({
       endpointType,
       entityType: spaceSchemaKey
     },
@@ -204,7 +207,7 @@ export class AppModule {
 
   }
   private registerCfOrgMapper(endpointType: string) {
-    favoritesConfigMapper.registerMapper({
+    favoritesConfigMapper.registerFavoriteConfig({
       endpointType,
       entityType: organizationSchemaKey
     },
