@@ -16,6 +16,10 @@ export interface ServiceInstance {
 
 export class ServicesWallPage extends Page {
 
+  static FilterIds = {
+    cf: 'cf'
+  };
+
   serviceInstancesList = new ListComponent();
   constructor() {
     super('/services');

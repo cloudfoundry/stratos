@@ -6,6 +6,12 @@ import { ListComponent } from '../po/list.po';
 
 export class ApplicationsPage extends CFPage {
 
+  static FilterIds = {
+    cf: 'cf',
+    org: 'org',
+    space: 'space'
+  };
+
   appList = new ListComponent();
 
   constructor() {

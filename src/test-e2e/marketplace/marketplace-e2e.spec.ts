@@ -12,6 +12,9 @@ describe('Marketplace', () => {
   const serviceSearchText = 'app';
 
   const navigateToServiceSummary = () => marketplacePage.servicesList.cards.getCards().first().click();
+  // When there's only one CF connected no filter is shown, hence we can't test the filter.
+  // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
+  const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
 
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
@@ -24,7 +27,9 @@ describe('Marketplace', () => {
     marketplacePage.sideNav.goto(SideNavMenuItem.Marketplace);
     marketplacePage.waitForPage();
     marketplacePage.servicesList.header.clearSearchText();
-    marketplacePage.servicesList.header.selectFilterOption(0, 0);
+    if (hasCfFilter) {
+      marketplacePage.servicesList.header.selectFilterOption(MarketplacePage.FilterIds.cf, 0, false);
+    }
   });
 
   it('- should reach marketplace page', () => {
@@ -41,27 +46,28 @@ describe('Marketplace', () => {
     });
   });
 
-  it('- should have filters', () => {
-    marketplacePage.servicesList.header.getFilterOptions().then(options => {
-      expect(options.length).toBeGreaterThan(0);
-      // Select the 'All' option to ensure we close the filter dropdown
-      options[0].click();
-    });
-    marketplacePage.servicesList.header.getPlaceholderText().then(text => {
-      expect(text).toEqual('Cloud Foundry');
+  if (hasCfFilter) {
+    it('- should have filters', () => {
+      marketplacePage.servicesList.header.getFilterOptions(MarketplacePage.FilterIds.cf).then(options => {
+        expect(options.length).toBeGreaterThan(0);
+        // Select the 'All' option to ensure we close the filter dropdown
+        options[0].click();
+      });
+      marketplacePage.servicesList.header.getPlaceHolderText(MarketplacePage.FilterIds.cf).then(text => {
+        expect(text).toEqual('Cloud Foundry');
+      });
     });
 
-  });
-
-  it('- should change filter text when an option is selected', () => {
-    marketplacePage.navigateTo();
-    marketplacePage.waitForPage();
-    marketplacePage.servicesList.header.selectFilterOption(0, 1);
-    marketplacePage.servicesList.table.waitUntilNotBusy();
-    marketplacePage.servicesList.header.getFilterText().then(text => {
-      expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
+    it('- should change filter text when an option is selected', () => {
+      marketplacePage.navigateTo();
+      marketplacePage.waitForPage();
+      marketplacePage.servicesList.header.selectFilterOption(MarketplacePage.FilterIds.cf, 1);
+      marketplacePage.servicesList.table.waitUntilNotBusy();
+      marketplacePage.servicesList.header.getFilterText(MarketplacePage.FilterIds.cf).then(text => {
+        expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
+      });
     });
-  });
+  }
 
   it('- should have a search box', () => {
     expect(marketplacePage.servicesList.header.getSearchInputField()).toBeDefined();
