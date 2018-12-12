@@ -18,9 +18,8 @@ export class SuseLoginComponent extends LoginPageComponent {
 
   constructor(
     store: Store<AppState>,
-    router: Router,
     @Inject(Customizations) public config: CustomizationsMetadata
   ) {
-    super(store, router);
+    super(store);
   }
 }
