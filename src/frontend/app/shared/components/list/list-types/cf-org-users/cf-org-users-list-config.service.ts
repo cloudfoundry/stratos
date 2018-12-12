@@ -8,6 +8,7 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { AppState } from '../../../../../store/app-state';
+import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
 
@@ -21,7 +22,14 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
-    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfOrgService.org$);
+    super(
+      store,
+      cfUserService,
+      router,
+      activeRouteCfOrgSpace,
+      userPerms,
+      (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
+      cfOrgService.org$
+    );
   }
-
 }
