@@ -11,7 +11,7 @@ import {
 
 
 
-export function newNonnAngularInterval(ngZone: NgZone, intervalTime: number) {
+export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {
     let intervalTimer;
     let counter = 0;
@@ -71,7 +71,7 @@ export class InternalEventMonitor {
 
 
   public hasErroredOverTime(minutes = 5) {
-    const interval$ = newNonnAngularInterval(this.ngZone, 30000).pipe(
+    const interval$ = newNonAngularInterval(this.ngZone, 30000).pipe(
       startWith(-1)
     );
     return combineLatest(this.events$, interval$).pipe(
