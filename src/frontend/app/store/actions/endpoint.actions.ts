@@ -1,9 +1,10 @@
 import { Action } from '@ngrx/store';
 
 import { endpointSchemaKey } from '../helpers/entity-factory';
-import { EndpointModel, EndpointType, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CloudFoundryService } from '../../shared/data-services/cloud-foundry.service';
+import { EndpointType } from '../../core/extension/extension-types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
