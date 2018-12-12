@@ -63,8 +63,6 @@ run:
       sed -i -e 's/version: '"${LAST_TAG}"'/version: '"${VERSION}"'/g' console/Chart.yaml  
       cat console/Chart.yaml
 
-      cd ..
-
       # Package modified Helm chart
       HELM_FILE=console-helm-chart-${VERSION}-${COMMIT}.tgz
       tar -cvzf ${HELM_FILE} ./console
