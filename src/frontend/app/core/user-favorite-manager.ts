@@ -22,6 +22,14 @@ interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite[];
 }
 
+export interface IFavoriteEntity {
+  type: string;
+  prettyName: string;
+  cardMapper: TFavoriteMapperFunction;
+  entity: any;
+  favorite: UserFavorite;
+}
+
 export interface IGroupedFavorites {
   endpoint: IEndpointFavoriteEntity;
   entities: IFavoriteEntity[];
@@ -31,13 +39,6 @@ export interface IEndpointFavoriteEntity extends IFavoriteEntity {
   entity: EndpointModel;
 }
 
-export interface IFavoriteEntity {
-  type: string;
-  prettyName: string;
-  cardMapper: TFavoriteMapperFunction;
-  entity: any;
-  favorite: UserFavorite;
-}
 export interface IAllFavorites {
   fetching: boolean;
   error: boolean;
