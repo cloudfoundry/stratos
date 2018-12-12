@@ -198,11 +198,19 @@ export class AppModule {
         type: organizationSchemaKey,
         routerLink: `/cloud-foundry/${org.entity.cfGuid}/organizations/${org.entity.guid}`,
         lines: [
+          ['Status', this.getOrgStatus(org)]
         ],
         name: org.entity.name
       }),
       favorite => new GetOrganization(favorite.entityId, favorite.endpointId)
     );
 
+  }
+
+  private getOrgStatus(org: APIResource<IOrganization>) {
+    if (!org || !org.entity || !org.entity.status) {
+      return 'Unknown';
+    }
+    return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
   }
 }
