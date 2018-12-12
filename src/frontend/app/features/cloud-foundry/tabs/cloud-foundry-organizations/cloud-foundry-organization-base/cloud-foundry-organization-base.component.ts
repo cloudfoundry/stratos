@@ -65,7 +65,7 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
-  public favorite: UserFavorite;
+  public favorite$: Observable<UserFavorite>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -73,9 +73,11 @@ export class CloudFoundryOrganizationBaseComponent {
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.schema = entityFactory(organizationSchemaKey);
-
+    this.favorite$ = cfOrgService.org$.pipe(
+      first(),
+      map(org => getFavoriteFromCfEntity(org.entity, organizationSchemaKey))
+    );
     this.name$ = cfOrgService.org$.pipe(
-      tap(org => this.favorite = getFavoriteFromCfEntity(org.entity, organizationSchemaKey)),
       map(org => org.entity.entity.name),
       filter(name => !!name),
       first()
