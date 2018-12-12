@@ -62,7 +62,12 @@ run:
       
       sed -i -e 's/version: '"${LAST_TAG}"'/version: '"${VERSION}"'/g' console/Chart.yaml  
       cat console/Chart.yaml
+
       cd ..
+
+      # Package modified Helm chart
+      HELM_FILE=console-helm-chart-${VERSION}-${COMMIT}.tgz
+      tar -cvzf ${HELM_FILE} ./console
 
       # Set git username and password so that we can push changes
       setupGitConfig
@@ -94,6 +99,17 @@ run:
       github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
 
       # Upload Helm chart to release
-      #github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "${CHART_PACKAGE}"
+      github-release upload -t ${GIT_TAG} --file ${HELM_FILE} --name "${HELM_FILE}"
+
+      set +e
+
+      echo "RELEASE COMPLETE"
+      echo "Version      : ${VERSION}"
+      echo "Base Version : ${LAST_TAG}"
+      echo ""
+      #echo "Release created on GitHub: https://github.com/$"
+      echo "Helm Chart filename : ${HELM_FILE}"
+      echo "Helm Chart URL      : https://github.com/${HELM_REPOSITORY}/releases/download/${VERSION}/${HELM_FILE}"
+
 
 
