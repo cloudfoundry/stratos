@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FavoritesGlobalListComponent } from './favorites-global-list.component';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('FavoritesGlobalListComponent', () => {
   let component: FavoritesGlobalListComponent;
@@ -8,9 +9,9 @@ describe('FavoritesGlobalListComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FavoritesGlobalListComponent ]
+      imports: [...BaseTestModules],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

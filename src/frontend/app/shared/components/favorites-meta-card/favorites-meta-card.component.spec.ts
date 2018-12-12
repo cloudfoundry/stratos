@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FavoritesMetaCardComponent } from './favorites-meta-card.component';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('FavoritesMetaCardComponent', () => {
   let component: FavoritesMetaCardComponent;
@@ -8,9 +9,9 @@ describe('FavoritesMetaCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FavoritesMetaCardComponent ]
+      imports: [...BaseTestModules],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

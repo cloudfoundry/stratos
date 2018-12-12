@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
+import { BaseTestModulesNoShared } from '../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('EntityFavoriteStarComponent', () => {
   let component: EntityFavoriteStarComponent;
@@ -8,9 +9,11 @@ describe('EntityFavoriteStarComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EntityFavoriteStarComponent ]
+      declarations: [
+      ],
+      imports: [...BaseTestModulesNoShared],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
