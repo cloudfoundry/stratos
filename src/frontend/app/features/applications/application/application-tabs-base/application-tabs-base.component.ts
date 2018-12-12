@@ -173,6 +173,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         ]
       },
       {
+        key: 'space-routes',
+        breadcrumbs: [
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/routes` }
+        ]
+      },
+      {
         key: 'marketplace-services',
         breadcrumbs: [
           { value: 'Marketplace', routerLink: `/marketplace` }

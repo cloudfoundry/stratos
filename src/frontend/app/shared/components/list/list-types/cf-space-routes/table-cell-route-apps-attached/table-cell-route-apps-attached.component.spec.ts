@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CloudFoundrySpaceService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { AppChipsComponent } from '../../../../chips/chips.component';
 import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached.component';
 
 describe('TableCellRouteAppsAttachedComponent', () => {
@@ -11,7 +12,10 @@ describe('TableCellRouteAppsAttachedComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellRouteAppsAttachedComponent],
+      declarations: [
+        TableCellRouteAppsAttachedComponent,
+        AppChipsComponent
+      ],
       imports: [...BaseTestModulesNoShared],
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
