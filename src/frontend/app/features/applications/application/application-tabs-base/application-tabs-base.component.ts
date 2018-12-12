@@ -33,6 +33,7 @@ import {
   StratosActionType
 } from '../../../../core/extension/extension-service';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -72,7 +73,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -111,12 +113,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Listen for the response to the env vars API call - if it errors then we hide the variables tab
-    // This is simpler than the code to check permissions since we make the env vars request anyway
-    const appDoesNotHaveEnvVars$ = this.applicationService.getApplicationEnvVarsMonitor().entityRequest$.pipe(
-      filter(resp => resp.error || resp.response),
-      first(),
-      map(resp => resp.error)
+    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid, space.metadata.guid)
+      ),
+      map(can => !can)
     );
 
     this.tabLinks = [
