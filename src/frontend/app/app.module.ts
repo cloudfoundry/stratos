@@ -108,7 +108,7 @@ export class CustomRouterStateSerializer
 export class AppModule {
   constructor(
     ext: ExtensionService,
-    permissionService: CurrentUserPermissionsService;
+    permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
     private store: Store<AppState>,
   ) {
