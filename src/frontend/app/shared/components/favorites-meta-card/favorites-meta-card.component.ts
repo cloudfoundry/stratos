@@ -63,10 +63,10 @@ export class FavoritesMetaCardComponent implements OnInit {
 
       if (config) {
         config.lines = this.mapLinesToObservables(config.lines);
-      }
-      this.config = config;
-      if (this.config && this.config.getStatus) {
-        this.status$ = this.config.getStatus(entity);
+        this.config = config;
+        if (this.config.getStatus) {
+          this.status$ = this.config.getStatus(entity);
+        }
       }
     }
   }
