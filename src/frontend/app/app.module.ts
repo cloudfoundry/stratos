@@ -108,13 +108,24 @@ export class CustomRouterStateSerializer
 export class AppModule {
   constructor(
     ext: ExtensionService,
-    permissionService: CurrentUserPermissionsService,
+    private permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
     private store: Store<AppState>,
   ) {
     ext.init();
+    // Once the CF modules become an extension point, these should be moved to a CF specific module
+    this.registerCfFavoriteMappers();
+  }
+
+  private registerCfFavoriteMappers() {
     const endpointType = 'cf';
 
+    this.registerCfEndpointMapper(endpointType);
+    this.registerCfApplicationMapper(endpointType);
+    this.registerCfSpaceMapper(endpointType);
+    this.registerCfOrgMapper(endpointType);
+  }
+  private registerCfEndpointMapper(endpointType: string) {
     favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: endpointSchemaKey
@@ -133,13 +144,14 @@ export class AppModule {
           {
             label: 'Deploy application',
             action: () => this.store.dispatch(new RouterNav({ path: ['applications/deploy'] })),
-            can: permissionService.can(CurrentUserPermissions.APPLICATION_CREATE)
+            can: this.permissionService.can(CurrentUserPermissions.APPLICATION_CREATE)
           }
         ]
       }),
       () => new GetAllEndpoints(false),
     );
-
+  }
+  private registerCfApplicationMapper(endpointType: string) {
     favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: applicationSchemaKey
@@ -170,7 +182,8 @@ export class AppModule {
       },
       favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId)
     );
-
+  }
+  private registerCfSpaceMapper(endpointType: string) {
     favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: spaceSchemaKey
@@ -189,6 +202,8 @@ export class AppModule {
       favorite => new GetSpace(favorite.entityId, favorite.endpointId)
     );
 
+  }
+  private registerCfOrgMapper(endpointType: string) {
     favoritesConfigMapper.registerMapper({
       endpointType,
       entityType: organizationSchemaKey
@@ -204,9 +219,7 @@ export class AppModule {
       }),
       favorite => new GetOrganization(favorite.entityId, favorite.endpointId)
     );
-
   }
-
   private getOrgStatus(org: APIResource<IOrganization>) {
     if (!org || !org.entity || !org.entity.status) {
       return 'Unknown';
