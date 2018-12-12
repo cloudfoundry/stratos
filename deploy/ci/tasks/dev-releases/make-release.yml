@@ -86,6 +86,8 @@ run:
         github-release delete -t ${VERSION}
       fi
 
+      cd ..
+
       # Generate title for the release, based on the tag
       # Sets RELEASE_TITLE and PRE_RELEASE_ARG
       generateReleaseTitle ${VERSION}
@@ -97,7 +99,7 @@ run:
       github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
 
       # Upload Helm chart to release
-      github-release upload -t ${GIT_TAG} --file ${HELM_FILE} --name "${HELM_FILE}"
+      github-release upload -t ${VERSION} --file ./tmp/${HELM_FILE} --name "${HELM_FILE}"
 
       set +e
 
