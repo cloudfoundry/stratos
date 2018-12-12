@@ -1,6 +1,6 @@
-import { Injectable, OnDestroy, Optional } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription, of as observableOf } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
@@ -17,6 +17,21 @@ import { selectPaginationState } from '../../store/selectors/pagination.selector
 import { APIResource } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+
+export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
+  return {
+    key: key,
+    label: label,
+    ...cfOrgSpaceItem,
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+      return entities.map(entity => ({
+        label: entity.name,
+        item: entity,
+        value: entity.guid
+      }));
+    })),
+  };
+}
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
