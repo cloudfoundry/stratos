@@ -1,0 +1,8 @@
+<div [formGroup]="formGroup" class="kube-config-auth">
+  <div formGroupName="authValues" class="kube-config-auth__form">
+    <span>Specify `kubeconfig` file:</span>
+    <app-file-input placeholder="kubeconfig" fileFormControlName="kubeconfig">
+    </app-file-input>
+    <input matInput formControlName="kubeconfig" hidden=true>
+  </div>
+</div>
