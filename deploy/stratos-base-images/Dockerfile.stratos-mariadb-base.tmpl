@@ -1,4 +1,10 @@
 FROM {{BASE_IMAGE}}
+
+{{#IS_SLE}}
+RUN zypper addrepo  -G -c '{{SMT_INTERNAL}}' smt_internal
+RUN zypper ref
+{{/IS_SLE}}
+
 # Default password for root of mariadb
 ENV MYSQL_ROOT_PASSWORD mysecretpassword
 
@@ -12,5 +18,9 @@ RUN rm -rf /var/lib/mysql \
   && mkdir -p /var/log/mysql \
   && touch /var/log/mysql/mysqld.log \
   && chown -R mysql:mysql /var/log/mysql
+
+{{#IS_SLE}}
+RUN zypper rr  smt_internal
+{{/IS_SLE}}
 
 VOLUME ["/var/lib/mysql"]
