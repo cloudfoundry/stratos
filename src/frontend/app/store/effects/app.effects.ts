@@ -35,7 +35,7 @@ export class AppEffects {
       // Note - If this happens within the metrics update time period (60 seconds) the stale one is returned again, unfortunately there's
       // no way to work around this.
       const updateAction: UpdateExistingApplication = action.apiAction as UpdateExistingApplication;
-      if (updateAction.newApplication.instances > updateAction.existingApplication.instances) {
+      if (!!updateAction.existingApplication && updateAction.newApplication.instances > updateAction.existingApplication.instances) {
         // First check that we have a metrics endpoint associated with this cf
         endpointHasMetrics(updateAction.endpointGuid, this.store).pipe(first()).subscribe(hasMetrics => {
           if (hasMetrics) {

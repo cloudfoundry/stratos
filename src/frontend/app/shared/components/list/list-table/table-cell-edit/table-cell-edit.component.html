@@ -2,10 +2,10 @@
   <button mat-icon-button *ngIf="row.name !== dataSource.editRow?.name" (click)="dataSource.startEdit(row)" [disabled]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
     <mat-icon>edit</mat-icon>
   </button>
-  <button mat-icon-button *ngIf="row.name === dataSource.editRow?.name" (click)="dataSource.saveEdit()">
+  <button id="table-cell-edit-done" mat-icon-button *ngIf="row.name === dataSource.editRow?.name" (click)="dataSource.saveEdit()">
     <mat-icon>done</mat-icon>
   </button>
-  <button mat-icon-button *ngIf="row.name === dataSource.editRow?.name" (click)="dataSource.cancelEdit()">
+  <button id="table-cell-edit-cancel" mat-icon-button *ngIf="row.name === dataSource.editRow?.name" (click)="dataSource.cancelEdit()">
     <mat-icon>clear</mat-icon>
   </button>
 </div>

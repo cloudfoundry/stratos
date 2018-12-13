@@ -69,10 +69,10 @@
           <div *ngIf="addForm && (dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)" class="add-container">
             <div class="spacer"></div>
             <ng-content select="[app-table-add]"></ng-content>
-            <button mat-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid">
+            <button id="addFormButtonAdd" mat-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid">
               <mat-icon>done</mat-icon>
             </button>
-            <button mat-icon-button (click)="dataSource.cancelAdd()">
+            <button id="addFormButtonCancel" mat-icon-button (click)="dataSource.cancelAdd()">
               <mat-icon>clear</mat-icon>
             </button>
           </div>
