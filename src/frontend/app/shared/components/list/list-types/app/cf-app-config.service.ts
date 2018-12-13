@@ -44,7 +44,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
     {
-      columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: {
+      columnId: 'name', headerCell: () => 'Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: {
         type: 'sort',
         orderKey: 'name',
         field: 'entity.name'

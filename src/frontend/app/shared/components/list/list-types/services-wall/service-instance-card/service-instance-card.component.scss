@@ -23,4 +23,8 @@
     display: flex;
     text-decoration: none;
   }
+  &__title {
+    // Title should not overlap with 3-dot menu
+    margin-right: 16px;
+  }
 }
