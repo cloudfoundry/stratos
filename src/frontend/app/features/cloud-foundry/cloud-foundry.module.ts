@@ -93,7 +93,6 @@ import { UsersRolesSelectComponent } from './users/manage-users/manage-users-sel
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { CustomImportModule } from '../../custom-import.module';
 
-
 @NgModule({
   imports: [
     CoreModule,

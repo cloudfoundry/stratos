@@ -49,7 +49,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
+    public cfOrgSpaceService: CfOrgSpaceDataService
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
@@ -97,8 +97,27 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.store.dispatch(new DeleteDeployAppSection());
     this.destroyDeployer();
     if (this.deployer) {
-      this.deployer.close();
+      if (!this.deployer.deploying) {
+        this.deployer.close();
+      } else {
+        this.setupCompletionNotification();
+      }
     }
+  }
+
+  private setupCompletionNotification() {
+    this.deployer.status$.pipe(
+      filter(status => !status.deploying),
+      first()
+    ).subscribe(status => {
+      if (status.error) {
+        this.snackBar.open(status.errorMsg, 'Dismiss');
+      } else {
+        const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
+        ref.onAction().subscribe(() => { this.goToAppSummary(); });
+      }
+      this.deployer.close();
+    });
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
@@ -122,14 +141,18 @@ export class DeployApplicationStep3Component implements OnDestroy {
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
+    this.goToAppSummary();
+    return observableOf({ success: true });
+  }
+
+  goToAppSummary() {
     // Take user to applications
     const { cfGuid } = this.deployer;
-    this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     if (this.appGuid) {
       this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
       // Ensure the application package_state is correct
       this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
+      this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }
-    return observableOf({ success: true });
   }
 }

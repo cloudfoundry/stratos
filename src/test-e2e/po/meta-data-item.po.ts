@@ -1,7 +1,7 @@
 import { by, ElementFinder, promise, element } from 'protractor';
 
 import { Component } from './component.po';
-import { BooleangIndicatorComponent } from './boolean-indicator.po';
+import { BooleanIndicatorComponent } from './boolean-indicator.po';
 
 export class MetaDataItemComponent extends Component {
 
@@ -27,8 +27,8 @@ export class MetaDataItemComponent extends Component {
     return this.locator.element(by.css('.metadata-item__value')).getText();
   }
 
-  public getBooleanIndicator(): BooleangIndicatorComponent {
-    return new BooleangIndicatorComponent(this.locator.element(by.css('.metadata-item__value')));
+  public getBooleanIndicator(): BooleanIndicatorComponent {
+    return new BooleanIndicatorComponent(this.locator.element(by.css('.metadata-item__value')));
   }
 
 }

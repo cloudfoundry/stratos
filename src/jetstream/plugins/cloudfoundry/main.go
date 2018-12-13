@@ -55,6 +55,10 @@ func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
+func (c *CloudFoundrySpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+	return nil
+}
+
 func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Info("CloudFoundry Connect...")
 

@@ -1,9 +1,11 @@
 # Cloud Foundry API v2 Feature Usage
 
 1. [High Level Stratos Concepts](#High-Level-Stratos-Concepts)
-2. [API Parameters](#API-Parameters)
-3. [API Examples](#API-Examples)
-3. [Summary](#Summary)
+1. [API Parameters](#API-Parameters)
+1. [API Examples](#API-Examples)
+1. [V2 Specifics](#V2-Specifics)
+1. [V2 Summary](#V2-Summary)
+
 
 ## High Level Stratos Concepts
 
@@ -99,6 +101,7 @@ The console user will connect to a CF with their personal CF credentials. These 
 the console but also how we have to fetch data.
 
 #### Listing users & their roles
+
 - We provide a way for users of all types to view a list of users (at the cf, organisation and space levels) and their roles
 - We have to fetch this information differently between CF administrators with certain scopes and non-cf administrators
 - CF Admins can list users via `/users`
@@ -113,7 +116,6 @@ the console but also how we have to fetch data.
 - Permissions are dictated by the admin/non-admin state of the connected user, cf feature flags and all of the users organisation and space roles
 - For CF admins we skip fetching roles, as there admin state overrides roles
 - For non-admins we hit each `users/<non-admin's guid>/<role>` endpoint, there's a lot of duplicated data here
-
 
 ## API Parameters
 
@@ -682,7 +684,123 @@ users/f2d71b96-4268-4a29-b8a1-88c856ee7f75/spaces?results-per-page=100&page=1
 ```
 </details>
 
-## Summary
+## V2 Specifics
+
+### Sorting/Filtering
+As described elsewhere Stratos lists can be sorted and/or filtered. To support this we try to make use of sorting and filtering via the API,
+ however in many cases this is not possible resulting in Stratos fetching the entire list and handling sorting, filtering and pagination
+ locally. Obviously this is a major issue when there are large numbers of rows.
+
+Below is a list of each endpoint and the type of sorting / filtering we use with them. Items marked in __*bold and italic*__ are missing
+ from the v2 api.
+
+Endpoint | Sorted Locally | Sorted via API | Filtered Locally | Filtered via API | Used API Pagination | Desired Sort
+--- | --- | --- | --- | --- | --- | ---
+`apps/${guid}/stats` | __*index in array*__, __*`state`*__, __*`usage.mem`*__, __*`usage.disk`*__, __*`usage.cpu`*__, __*`uptime`*__ | - | __*`state`*__ | -
+`apps/${guid}/routes` | __*`host`*__, __*`port`*__ | - | - | -
+`apps/${guid}/service_bindings` | `created_at`
+`apps` | __*`name`*__, __*`instances`*__, __*`disk_quota`*__, __*`memory`*__, `created_at` | - | `name`, `organisation`, `space` | `organisation`, `space`
+`organizations/${orgGuid}/spaces` | __*`name`*__, `created_at` | - | `name` | -
+`organizations`| __*`name`*__, `created_at` | - | `name` | -
+`organizations/${guid}/users` | __*`username`*__ | - | __*`username`*__
+`spaces` | __*`name`*__
+`spaces/${spaceGuid}/routes` | - | `created_at` | - | - | Yes | __*Host*__
+`spaces/${spaceGuid}/apps` | - | `created_at` | - | - | Yes | __*Name*__, __*Status*__
+`spaces/${spaceGuid}/services` | __*`name`*__ |  `created_at` | - | - |
+`spaces/${spaceGuid}/service_instances` | - | `created_at` | - | - | Yes | __*Instance name*__,__*Service name*__,__*Service Plan name*__,
+Other endpoints |
+`buildpacks` | __*`position`*__,  __*`name`*__, `created_at` | - | __*`name`*__ | -
+`config/feature_flags` | __*`name`*__ | - | __*`name`*__
+`events` | - | `timestamp` | - | `actee`, `type` | Yes |
+`security_groups` | __*`name`*__, `created_at` | - | __*`name`*__ | -
+`service_brokers`| __*`name`*__
+`service_instances` | `created_at` | - | `name`, `organisation`, `space` | -
+`service_instances/${guid}/service_bindings` | `created_at` |
+`service_plan_visibilities` | __*`service_plan_guid`*__
+`service_plan/${guid}/service_instances` | `created_at` |
+`services`| __*`label`*__, __*`active`*__, __*`bindable`*__ | - | `label`
+`services/${guid}/service_plans` | __*`name`*__, `created_at` |
+`stacks` | __*`name`*__, `created_at` | - | __*`name`*__
+`users` | __*`name`*__, `created_at` | - | `name` | -
+__*``*__
+
+### Inline Relations
+Below is a list of all the inline relations we use for each of the more fleshed out v3 endpoints of apps, spaces and organisations.
+
+#### Application
+Endpoint | Inline Relations
+--- | ---
+`apps` | <ul><li>app --> route</li><li>app --> space</li><li>space --> org</li></ul>
+`apps/${appGuid}` | <ul><li>app --> route</li><li>route --> domain</li><li>app --> space</li><li>space --> org</li><li>app --> stack</li><li>app --> service binding</li></ul>
+`apps/${appGuid}/routes` | <ul><li>route --> domain</li><li>route --> application</li></ul>
+`apps/${appGuid}/service_bindings` | <ul><li>service binding --> service instance</li></ul>
+`apps/${appGuid}/stats` | -
+`apps/${appGuid}/env` | -
+`apps/${appGuid}/summary` | -
+`apps/${appGuid}/routes/${routeGuid}` | -
+`apps/${appGuid}/instances/${index}` | -
+`apps/${appGuid}/restage` | -
+
+#### Organisation
+Endpoint | Inline Relations | Notes
+--- | --- | ---
+`organizations/${orgGuid}` | <ul><li>org --> space</li><li>space --> service instances</li><li>space --> apps</li><li>space --> routes</li><li>org --> domain</li><li>org --> quota definition</li><li>org --> private domains</li><li>org --> users</li><li>org --> managers</li><li>org --> billing managers</li><li>org --> auditors</li></ul>
+`organizations/${orgGuid}/spaces` | <ul><li>space --> apps</li><li>space --> service instances</li><li>space --> space quota</li></ul>
+`organizations` | <ul><li>org --> space</li><li>space --> service instances</li><li>space --> apps</li><li>space --> routes</li><li>org --> domain</li><li>org --> quota definition</li><li>org --> private domains</li></ul>
+`organizations/${orgGuid}/users` | <ul><li>user --> orgs</li><li>user --> audited orgs</li><li>user --> managed orgs</li><li>user --> billing manager</li><li>user --> space dev</li><li>user --> space manager</li><li>user --> space auditor</li></ul> | We can't switch to `/users?organization_guid=${guid}` as this fails for no cf admins
+
+#### Space
+Endpoint | Inline Relations | Notes
+--- | --- | ---
+`spaces` | - | Note currently used, spaces are either fetchined inline with an org or via the org spaces endpoint
+`spaces/${spaceGuid}` | <ul><li>space --> org</li><li>space --> domains</li><li>space --> routes</li><li>route --> domain</li><li>route --> applications</li></ul>
+`spaces/${spaceGuid}/routes` | <ul><li>route --> domain</li><li>route --> application</li></ul>
+`spaces/${spaceGuid}/apps` | -
+`spaces/${spaceGuid}/user_roles` | -
+`spaces/${spaceGuid}/services` | <ul><li>service --> service plan</li></ul>
+`spaces/${spaceGuid}/service_instances` | <ul><li>service instance --> service bindings</li><li>service binding --> application</li><li>service instance --> service plan</li><li>service instance --> space</li><li>space --> org</li><li>service instance --> service</li></ul>
+
+
+#### Others
+The include-relations property is populated by walking our relationship tree, so for a complete and exhaustive list of all possible
+relations please see the [`entity-factory.ts`](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/src/frontend/app/store/helpers/entity-factory.ts).
+
+In terms of api requests we also make use of...
+
+- `/buildpacks`
+- `/config/feature_flags`
+- `/events`
+- `/routes`
+- `/security_groups`
+- `/services`
+- `/service_bindings`
+- `/service_brokers`
+- `/service_instances`
+- `/service_plan_visibilities`
+- `/service_plan`
+- `/shared_domains`
+- `/stacks`
+- `/users`
+
+### Cloud Foundry, Organisation and Space Summary Information
+In the `Cloud Foundry` section of Stratos we show summary pages at the CF, Org and Space levels. These consist of information from the core
+cf/org/space but also statistic such as number of users or memory used within that cf/org/sapce. The only way to fetch these stats is via
+requesting a large amount of additional data, either inline with the org/space or as separate requests.
+Below is a table showing the stats at each level. The counts are respective of that level (number of routes in that specific cf, org or space)
+
+Stat/Info | CF Summary | Org Summary | Space Summary
+--- | --- | --- | ---
+No. of Apps | *yep* | *yep* | *yep*
+No. of App Instances | | *yep* | *yep*
+No. of Organisations | *yep*
+No. of Users | *yep* | *yep* | *yep*
+Memory Usage | *yep* | *yep* | *yep*
+No. of Routes | | *yep*| *yep*
+No. of Private Domains | |*yep*
+No. of Service Instances | | *yep*| *yep*
+Last 10 updated apps | *yep* | *yep* | *yep*
+
+## V2 Summary
 
 ### Current v2 Issues
 
@@ -708,7 +826,8 @@ users/f2d71b96-4268-4a29-b8a1-88c856ee7f75/spaces?results-per-page=100&page=1
 - The `<role>_url` in a user entity can only be called by an administrator or by the same user
   > Desired - URL behaves as per the `/users` suggestion above the response contains the organisaitons that are visible to the user that
     calls the url
-- `include-relations` works by specifying the name of the child property. If the inline-depth is greater than one this can lead relations being fetched that might not actually be required
+- `include-relations` works by specifying the name of the child property. If the `inline-relations-depth` is greater than one this can lead
+ relations being fetched that might not actually be required
   > Desired - Minor nice to have. Be able to specify relations like `include-relations=application-route,route-domain`
 
 ### Critical v2 Features
