@@ -11,7 +11,7 @@ generateReleaseTitle() {
     # This is the actual release
     RELEASE_TITLE="${REL_PARTS[0]}"
     PRE_RELEASE_ARG=""
-    RELEASE_DESCRIPTION=$(cat CHANGELOG.md | sed -n -e "/## ${REL_PARTS[0]}/,/##/p" | sed \$d)
+    RELEASE_DESCRIPTION=$(cat CHANGELOG.md | sed -n -e "/## ${REL_PARTS[0]}/,/##/p" | sed \$d | tail -n +2)
   else
     IFS='.' read -ra REL_TYPES <<< "${REL_PARTS[1]}"
     REL_TYPE="${REL_TYPES[0]}"
