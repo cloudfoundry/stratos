@@ -199,6 +199,26 @@ describe('Application View -', function () {
     });
   });
 
+  // Events tab tests should come before anything else adds events
+  describe('Events Tab -', () => {
+    let appEvents: ApplicationPageEventsTab;
+
+    beforeAll(() => {
+      appEvents = new ApplicationPageEventsTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+      appEvents.navigateTo();
+      appEvents.waitForPage();
+    });
+
+    it('One row in events table', () => {
+      expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
+      expect(appEvents.list.isTableView()).toBeTruthy();
+      expect(appEvents.list.getTotalResults()).toBe(1);
+      expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
+      expect(appEvents.list.table.getCell(0, 2).getText()).toBe('person\nadmin');
+    });
+
+  });
+
   describe('Variables Tab -', () => {
     let appVariables: ApplicationPageVariablesTab;
 
@@ -233,25 +253,6 @@ describe('Application View -', function () {
       // Delete Env Var
       appVariables.deleteVariable(0, envVarName);
       appVariables.list.empty.waitUntilShown();
-    });
-
-  });
-
-  describe('Events Tab -', () => {
-    let appEvents: ApplicationPageEventsTab;
-
-    beforeAll(() => {
-      appEvents = new ApplicationPageEventsTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
-      appEvents.navigateTo();
-      appEvents.waitForPage();
-    });
-
-    it('One row in events table', () => {
-      expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
-      expect(appEvents.list.isTableView()).toBeTruthy();
-      expect(appEvents.list.getTotalResults()).toBe(1);
-      expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
-      expect(appEvents.list.table.getCell(0, 2).getText()).toBe('person\nadmin');
     });
 
   });
