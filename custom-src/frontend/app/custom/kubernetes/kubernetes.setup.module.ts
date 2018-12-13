@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 
 import { StratosExtension } from '../../core/extension/extension-service';
-import { EndpointTypeConfig } from '../../features/endpoints/endpoint-helpers';
-import { EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
+import { EndpointAuthTypeConfig, EndpointType, EndpointTypeConfig } from '../../core/extension/extension-types';
 import { Validators } from '@angular/forms';
 import { CoreModule } from '../../core/core.module';
 import { CommonModule } from '@angular/common';
@@ -16,7 +15,8 @@ const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
   label: 'Kubernetes',
   authTypes: [],
   icon: 'kubernetes',
-  iconFont: 'stratos-icons'
+  iconFont: 'stratos-icons',
+  homeLink: (guid) => ['/kubernetes', guid]
 }];
 
 const kubernetesAuthTypes: EndpointAuthTypeConfig[] = [{

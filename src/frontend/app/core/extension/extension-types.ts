@@ -12,6 +12,8 @@ export interface EndpointTypeConfig {
   icon?: string;
   iconFont?: string;
   authTypes?: string[];
+  // Get the link to the home page for the given emndpoint GUID
+  homeLink?: (string) => string[];
 }
 
 export interface EndpointAuthTypeConfig {
