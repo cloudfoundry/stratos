@@ -100,19 +100,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-    this.applicationService.applicationStratProject$
-      .pipe(first())
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
-        ) {
-          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
-          const scm = scmService.getSCM(gitscm as GitSCMType);
-          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
-        }
-      });
+
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks.push({
@@ -141,6 +129,20 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
+        ) {
+          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
+          const scm = scmService.getSCM(gitscm as GitSCMType);
+          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+        }
+      });
   }
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

@@ -20,7 +20,7 @@ import {
   ProjectExists,
   ProjectFetchFail,
 } from '../../store/actions/deploy-applications.actions';
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
+import { gitBranchesSchemaKey, gitCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { GitCommit } from '../types/git.types';
@@ -74,35 +74,35 @@ export class DeployAppEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubBranchesSchemaKey,
+          entityKey: gitBranchesSchemaKey,
           type: action.type,
           paginationKey: 'branches'
         } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return action.scm.getBranches(action.projectName).pipe(
-            mergeMap(branches => {
-              const mappedData = {
-                entities: { githubBranches: {} },
-                result: []
-              } as NormalizedResponse;
+          mergeMap(branches => {
+            const mappedData = {
+              entities: { gitBranches: {} },
+              result: []
+            } as NormalizedResponse;
 
-              branches.forEach(b => {
-                const id = `${action.projectName}-${b.name}`;
-                b.projectId = action.projectName;
-                b.entityId = id;
-                mappedData.entities[githubBranchesSchemaKey][id] = {
-                  entity: b,
-                  metadata: {}
-                };
-                mappedData.result.push(id);
-              });
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+            branches.forEach(b => {
+              const id = `${action.projectName}-${b.name}`;
+              b.projectId = action.projectName;
+              b.entityId = id;
+              mappedData.entities[gitBranchesSchemaKey][id] = {
+                entity: b,
+                metadata: {}
+              };
+              mappedData.result.push(id);
+            });
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          ]));
       }));
 
   @Effect()
@@ -111,24 +111,24 @@ export class DeployAppEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubCommitSchemaKey,
+          entityKey: gitCommitSchemaKey,
           type: action.type
         } as ICFAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return action.scm.getCommit(action.projectName, action.commitSha).pipe(
-            mergeMap(commit => {
-              const mappedData = {
-                entities: { [githubCommitSchemaKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              this.addCommit(mappedData, action.projectName, commit);
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+          mergeMap(commit => {
+            const mappedData = {
+              entities: { [gitCommitSchemaKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.addCommit(mappedData, action.projectName, commit);
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          ]));
       }));
 
   @Effect()
@@ -137,32 +137,32 @@ export class DeployAppEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubCommitSchemaKey,
+          entityKey: gitCommitSchemaKey,
           type: action.type,
           paginationKey: action.paginationKey
         } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
         return action.scm.getCommits(action.projectName, action.sha).pipe(
-            mergeMap((commits: GitCommit[]) => {
-              const mappedData = {
-                entities: { [githubCommitSchemaKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              commits.forEach(commit => {
-                this.addCommit(mappedData, action.projectName, commit);
-              });
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+          mergeMap((commits: GitCommit[]) => {
+            const mappedData = {
+              entities: { [gitCommitSchemaKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            commits.forEach(commit => {
+              this.addCommit(mappedData, action.projectName, commit);
+            });
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          ]));
       }));
 
   addCommit(mappedData: NormalizedResponse, projectName: string, commit: GitCommit) {
     const id = projectName + '-' + commit.sha;
-    mappedData.entities[githubCommitSchemaKey][id] = {
+    mappedData.entities[gitCommitSchemaKey][id] = {
       entity: commit,
       metadata: {}
     };

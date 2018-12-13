@@ -19,7 +19,7 @@ import {
   domainSchemaKey,
   endpointSchemaKey,
   featureFlagSchemaKey,
-  githubBranchesSchemaKey,
+  gitBranchesSchemaKey,
   metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
@@ -33,7 +33,7 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
-  githubCommitSchemaKey,
+  gitCommitSchemaKey,
   serviceBrokerSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
@@ -54,8 +54,8 @@ export interface IRequestDataState extends IRequestTypeState {
   organization: IRequestEntityTypeState<APIResource<IOrganization>>;
   route: IRequestEntityTypeState<APIResource<IRoute>>;
   event: IRequestEntityTypeState<APIResource>;
-  githubBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  githubCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
+  gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
+  gitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
   domain: IRequestEntityTypeState<APIResource<IDomain>>;
   user: IRequestEntityTypeState<APIResource<CfUser>>;
   serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;
@@ -78,8 +78,8 @@ export interface IRequestState extends IRequestTypeState {
   organization: IRequestEntityTypeState<RequestInfoState>;
   route: IRequestEntityTypeState<RequestInfoState>;
   event: IRequestEntityTypeState<RequestInfoState>;
-  githubBranches: IRequestEntityTypeState<RequestInfoState>;
-  githubCommits: IRequestEntityTypeState<RequestInfoState>;
+  gitBranches: IRequestEntityTypeState<RequestInfoState>;
+  gitCommits: IRequestEntityTypeState<RequestInfoState>;
   domain: IRequestEntityTypeState<RequestInfoState>;
   user: IRequestEntityTypeState<RequestInfoState>;
   serviceInstance: IRequestEntityTypeState<RequestInfoState>;
@@ -100,8 +100,8 @@ export const defaultCfEntitiesState = {
   [routeSchemaKey]: {},
   [appEventSchemaKey]: {},
   [endpointSchemaKey]: {},
-  [githubBranchesSchemaKey]: {},
-  [githubCommitSchemaKey]: {},
+  [gitBranchesSchemaKey]: {},
+  [gitCommitSchemaKey]: {},
   [cfUserSchemaKey]: {},
   [domainSchemaKey]: {},
   [appEnvVarsSchemaKey]: {},

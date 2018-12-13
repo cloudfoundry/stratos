@@ -4,13 +4,13 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
+import { GitSCMService, GitSCMType } from '../../shared/data-services/scm/scm.service';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
 import { AppState } from '../app-state';
-import { githubRepoSchemaKey } from '../helpers/entity-factory';
+import { gitRepoSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
-import { GitSCMService, GitSCMType } from '../../shared/data-services/scm/scm.service';
 
 
 @Injectable()
@@ -27,21 +27,21 @@ export class GithubEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubRepoSchemaKey,
+          entityKey: gitRepoSchemaKey,
           type: action.type,
           guid: action.stProject.deploySource.project
         };
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        const scmType = action.stProject.deploySource.scm ||  action.stProject.deploySource.type;
+        const scmType = action.stProject.deploySource.scm || action.stProject.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType);
         return scm.getRepository(action.stProject.deploySource.project).pipe(
           mergeMap(repoDetails => {
             const mappedData = {
-              entities: { githubRepo: {} },
+              entities: { gitRepo: {} },
               result: []
             } as NormalizedResponse;
             const id = repoDetails.full_name;
-            mappedData.entities.githubRepo[id] = {
+            mappedData.entities.gitRepo[id] = {
               entity: repoDetails,
               metadata: {}
             };
@@ -53,6 +53,6 @@ export class GithubEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
           ]
-          ), );
+          ));
       }));
 }

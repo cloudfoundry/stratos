@@ -17,9 +17,9 @@ import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.acti
 import { AppState } from '../../../../../../store/app-state';
 import {
   entityFactory,
-  githubBranchesSchemaKey,
-  githubCommitSchemaKey,
-  githubRepoSchemaKey,
+  gitBranchesSchemaKey,
+  gitCommitSchemaKey,
+  gitRepoSchemaKey,
 } from '../../../../../../store/helpers/entity-factory';
 import { GitCommit, GitRepo } from '../../../../../../store/types/git.types';
 import { ApplicationService } from '../../../../application.service';
@@ -94,16 +94,16 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
-          githubRepoSchemaKey,
-          entityFactory(githubRepoSchemaKey),
+          gitRepoSchemaKey,
+          entityFactory(gitRepoSchemaKey),
           projectName,
           new FetchGitHubRepoInfo(stProject),
           false
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
-          githubCommitSchemaKey,
-          entityFactory(githubCommitSchemaKey),
+          gitCommitSchemaKey,
+          entityFactory(gitCommitSchemaKey),
           commitEntityKey,
           new FetchCommit(scm, commitId, projectName),
           false
@@ -111,8 +111,8 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         const branchKey = `${projectName}-${stProject.deploySource.branch}`;
         this.gitBranchEntityService = this.entityServiceFactory.create(
-          githubBranchesSchemaKey,
-          entityFactory(githubBranchesSchemaKey),
+          gitBranchesSchemaKey,
+          entityFactory(gitBranchesSchemaKey),
           branchKey,
           new FetchBranchesForProject(scm, projectName),
           false
