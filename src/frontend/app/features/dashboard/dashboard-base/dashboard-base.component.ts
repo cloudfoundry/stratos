@@ -53,8 +53,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   private breakpointSub: Subscription;
 
-
-
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();

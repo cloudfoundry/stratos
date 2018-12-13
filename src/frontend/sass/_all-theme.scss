@@ -1,5 +1,6 @@
 @import '../app/core/page-not-found-component/page-not-found-component.theme.component';
 @import '../app/features/dashboard/side-nav/side-nav.component.theme';
+@import '../app/features/dashboard/page-side-nav/page-side-nav-theme';
 @import '../app/features/dashboard/dashboard-base/dashboard-base.component.theme';
 @import '../app/features/login/login-page/login-page.component.theme';
 @import '../app/features/applications/deploy-application/deploy-application.component.theme';
@@ -120,6 +121,7 @@ $side-nav-light-active: #484848;
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
   @include app-multiline-title-theme($theme, $app-theme);
+  @include page-side-nav-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

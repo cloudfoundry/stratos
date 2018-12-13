@@ -1,0 +1,17 @@
+<nav class="page-side-nav">
+  <div class="page-side-nav__top">
+    <div class="page-side-nav__top-inner">
+      <div class="page-side-nav__header">
+        <div class="page-side-nav__header-text">{{ header }}</div>
+      </div>
+    </div>
+  </div>
+  <ul class="page-side-nav__items">
+    <li *ngFor="let tab of tabs">
+      <a *ngIf="!tab.hidden || !(tab.hidden | async)" class="page-side-nav__item" [routerLink]="[tab.link]"
+        [routerLinkActive]="['page-side-nav__item--active']">
+        <mat-icon *ngIf="tab.matIcon" [fontSet]="tab.matIconFont">{{ tab.matIcon }}</mat-icon> {{ tab.label }}
+      </a>
+    </li>
+  </ul>
+</nav>

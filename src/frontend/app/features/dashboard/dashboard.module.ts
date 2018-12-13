@@ -6,6 +6,7 @@ import { DashboardBaseComponent } from './dashboard-base/dashboard-base.componen
 import { SideNavComponent } from './side-nav/side-nav.component';
 import { MetricsModule } from '../metrics/metrics.module';
 import { TabNavService } from './tab-nav.service';
+import { PageSideNavComponent } from './page-side-nav/page-side-nav.component';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { TabNavService } from './tab-nav.service';
   ],
   declarations: [
     SideNavComponent,
-    DashboardBaseComponent
+    DashboardBaseComponent,
+    PageSideNavComponent
   ]
 })
 export class DashboardModule { }

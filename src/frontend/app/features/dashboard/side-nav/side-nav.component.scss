@@ -19,8 +19,8 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
     }
   }
   &__items {
-    list-style-type: none;
     flex: 1;
+    list-style-type: none;
     margin: 0;
     overflow-y: auto;
     padding: 0;
