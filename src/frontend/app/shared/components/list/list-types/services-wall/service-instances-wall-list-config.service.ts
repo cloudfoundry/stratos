@@ -5,10 +5,9 @@ import { Store } from '@ngrx/store';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
-import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { defaultPaginationPageSizeOptionsCards, ListViewTypes } from '../../list.component.types';
-import { createListFilterConfig } from '../../list.helper';
 import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
@@ -43,9 +42,9 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   ) {
     super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
     const multiFilterConfigs = [
-      createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
-      createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
-      createListFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
+      createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
+      createCfOrgSpaceFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
+      createCfOrgSpaceFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
     ];
 
     const transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];

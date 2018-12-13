@@ -51,6 +51,10 @@
       <div *ngIf="!hasDocumentationUrl() && !hasSupportUrl()">-</div>
     </app-meta-card-value>
   </app-meta-card-item>
+  <app-meta-card-item *ngIf="extraInfo?.providerDisplayName">
+    <app-meta-card-key>Provider</app-meta-card-key>
+    <app-meta-card-value>{{ extraInfo?.providerDisplayName }}</app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
