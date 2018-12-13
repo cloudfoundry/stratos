@@ -5,7 +5,7 @@
     </app-side-nav>
   </mat-sidenav>
   <div class="dashboard__inner">
-    <div *ngIf="tabNavService.tabNavs$ | async as tabs">
+    <div class="dashboard__page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
       <app-side-nav [tabs]="tabs">
       </app-side-nav>
     </div>

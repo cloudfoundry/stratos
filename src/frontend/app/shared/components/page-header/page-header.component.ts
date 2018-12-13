@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, withLatestFrom, tap, startWith } from 'rxjs/operators';
 import { Logout } from '../../../store/actions/auth.actions';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../store/types/internal-events.types';
@@ -29,16 +29,23 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
 
   @Input()
   endpointIds$: Observable<string[]>;
+  activeTab$: Observable<string>;
 
   @Input()
   set tabs(tabs: ISubHeaderTabs[]) {
-    this.tabNavService.setTabs(tabs.map(tab => ({
-      ...tab,
-      link: this.router.createUrlTree([tab.link], {
-        relativeTo: this.route
-      }).toString()
-    })));
+    if (tabs) {
+      this._tabs = tabs.map(tab => ({
+        ...tab,
+        link: this.router.createUrlTree([tab.link], {
+          relativeTo: this.route
+        }).toString()
+      }));
+      this.tabNavService.setTabs(this._tabs);
+      this.setTabHeader();
+    }
   }
+
+  private _tabs: ISubHeaderTabs[];
 
   @Input() showUnderFlow = false;
 
@@ -95,6 +102,21 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.activeTab$ = this.router.events.pipe(
+      map(this.setTabHeader),
+      startWith(this.setTabHeader())
+    );
+  }
+
+  private setTabHeader = () => {
+    if (!this._tabs) {
+      return null;
+    }
+    const activeTab = this._tabs.find(tab => this.router.isActive(tab.link, true));
+    if (!activeTab) {
+      return null;
+    }
+    return activeTab.label;
   }
 
   ngOnDestroy() {

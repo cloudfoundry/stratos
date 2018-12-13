@@ -3,6 +3,9 @@ $app-header-height: 56px;
 .dashboard {
   background-color: transparent;
   height: 100vh;
+  &__page-tabs {
+    margin-top: $app-header-height;
+  }
   &__inner {
     display: flex;
     height: 100%;
@@ -15,7 +18,7 @@ $app-header-height: 56px;
     width: 100%;
   }
   &___subHeader {
-    margin-top: 102px;
+    margin-top: $app-header-height;
   }
 }
 
