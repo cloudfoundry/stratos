@@ -6,14 +6,16 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
 import { AppState } from '../../../store/app-state';
+import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
-export interface SideNavItem {
-  text: string;
-  matIcon: string;
+export interface SideNavItem extends ISubHeaderTabs {
+  label: string;
+  matIcon?: string;
   matIconFont?: string;
   link: string;
+  position?: number;
   hidden?: Observable<boolean>;
 }
 
@@ -40,7 +42,7 @@ export class SideNavComponent implements OnInit {
     this.logoClicked.pipe(
       buffer(debounced$),
       map(toLength),
-      filter(x => x === 3), )
+      filter(x => x === 3))
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
   }
 }

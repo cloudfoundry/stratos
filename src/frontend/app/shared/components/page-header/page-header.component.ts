@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -10,13 +10,15 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { TabNavService } from '../../../features/dashboard/tab-nav.service';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent {
+export class PageHeaderComponent implements OnInit, OnDestroy {
+
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
@@ -29,7 +31,14 @@ export class PageHeaderComponent {
   endpointIds$: Observable<string[]>;
 
   @Input()
-  tabs: ISubHeaderTabs[];
+  set tabs(tabs: ISubHeaderTabs[]) {
+    this.tabNavService.setTabs(tabs.map(tab => ({
+      ...tab,
+      link: this.router.createUrlTree([tab.link], {
+        relativeTo: this.route
+      }).toString()
+    })));
+  }
 
   @Input() showUnderFlow = false;
 
@@ -69,7 +78,12 @@ export class PageHeaderComponent {
     this.store.dispatch(new Logout());
   }
 
-  constructor(private store: Store<AppState>, private route: ActivatedRoute) {
+  constructor(
+    private store: Store<AppState>,
+    private route: ActivatedRoute,
+    private router: Router,
+    private tabNavService: TabNavService,
+  ) {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
@@ -78,6 +92,13 @@ export class PageHeaderComponent {
     this.userNameFirstLetter$ = this.username$.pipe(
       map(name => name[0].toLocaleUpperCase())
     );
+  }
+
+  ngOnInit() {
+  }
+
+  ngOnDestroy() {
+    this.tabNavService.setTabs(undefined);
   }
 
 }

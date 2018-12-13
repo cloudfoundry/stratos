@@ -1,10 +1,14 @@
 <mat-sidenav-container class="dashboard">
   <app-routing-indicator class="routing-indicator"></app-routing-indicator>
-  <mat-sidenav #sidenav class="dashboard__side-nav" mode="side">
+  <mat-sidenav #sidenav class="dashboard__side-nav" mode="over">
     <app-side-nav [tabs]="sideNavTabs">
     </app-side-nav>
   </mat-sidenav>
   <div class="dashboard__inner">
+    <div *ngIf="tabNavService.tabNavs$ | async as tabs">
+      <app-side-nav [tabs]="tabs">
+      </app-side-nav>
+    </div>
     <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView}">
       <router-outlet></router-outlet>
     </div>

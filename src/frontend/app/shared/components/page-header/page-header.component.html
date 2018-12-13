@@ -58,8 +58,11 @@
       </mat-toolbar>
     </div>
   </div>
-  <app-page-subheader class="subheader" *ngIf="tabs" [tabs]="tabs">
-  </app-page-subheader>
+  <div>
+    SubHeader
+  </div>
+  <!-- <app-page-subheader class="subheader" *ngIf="tabs" [tabs]="tabs">
+  </app-page-subheader> -->
   <div *ngIf="showUnderFlow" class="page-header__underflow">
   </div>
   <app-page-header-events class="header-events" [endpointIds$]="endpointIds$"></app-page-header-events>

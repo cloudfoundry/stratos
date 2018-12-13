@@ -17,6 +17,7 @@ import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
 import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
+import { TabNavService } from '../tab-nav.service';
 
 
 @Component({
@@ -36,6 +37,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
     private endpointsService: EndpointsService,
+    public tabNavService: TabNavService
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
@@ -51,6 +53,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   private breakpointSub: Subscription;
 
+
+
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
@@ -59,6 +63,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());
   }
+
   ngOnInit() {
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
@@ -119,23 +124,23 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   private enableMobileNav() {
-    this.store.dispatch(new CloseSideNav());
-    this.store.dispatch(new ChangeSideNavMode('over'));
+    // this.store.dispatch(new CloseSideNav());
+    // this.store.dispatch(new ChangeSideNavMode('over'));
   }
 
   private disableMobileNav() {
-    this.store.dispatch(new OpenSideNav());
-    this.store.dispatch(new ChangeSideNavMode('side'));
+    // this.store.dispatch(new OpenSideNav());
+    // this.store.dispatch(new ChangeSideNavMode('side'));
   }
 
   private getNavigationRoutes(): SideNavItem[] {
     let navItems = this.collectNavigationRoutes('', this.router.config);
 
     // Sort by name
-    navItems = navItems.sort((a: any, b: any) => a.text.localeCompare(b.text));
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => a.label.localeCompare(b.label));
 
     // Sort by position
-    navItems = navItems.sort((a: any, b: any) => {
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => {
       const posA = a.position ? a.position : 99;
       const posB = b.position ? b.position : 99;
       return posA - posB;
