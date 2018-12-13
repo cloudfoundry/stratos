@@ -90,7 +90,7 @@ export class GitLabSCM implements GitSCM {
   }
 
   getCommitURL(projectName: string, commitSha: string): string {
-    return `https://gitlab.com/${projectName}/tree/${commitSha}`;
+    return `https://gitlab.com/${projectName}/commit/${commitSha}`;
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): string {

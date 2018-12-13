@@ -43,7 +43,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       );
       // Set Project data
       this.store.dispatch(
-        new CheckProjectExists(null, this.projectName)
+        new CheckProjectExists(this.scm, this.projectName)
       );
       // Set Source type
       this.store.dispatch(

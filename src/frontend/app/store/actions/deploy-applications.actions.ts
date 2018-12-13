@@ -92,7 +92,7 @@ export class FetchCommits implements PaginatedAction {
    * @memberof FetchCommits
    */
   constructor(public scm: GitSCM, public projectName: string, public sha: string) {
-    this.paginationKey = projectName + sha;
+    this.paginationKey = scm.getType() + projectName + sha;
   }
   actions = [
     '[Deploy App] Fetch commits start',
