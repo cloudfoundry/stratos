@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map, withLatestFrom, tap, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 import { Logout } from '../../../store/actions/auth.actions';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../store/types/internal-events.types';
@@ -10,7 +10,7 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { TabNavService } from '../../../features/dashboard/tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 
 @Component({
   selector: 'app-page-header',
@@ -42,6 +42,13 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
       }));
       this.tabNavService.setTabs(this._tabs);
       this.setTabHeader();
+    }
+  }
+
+  @Input()
+  set tabsHeader(header: string) {
+    if (header) {
+      this.tabNavService.setHeader(header);
     }
   }
 
@@ -120,7 +127,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.tabNavService.setTabs(undefined);
+    this.tabNavService.clear();
   }
 
 }

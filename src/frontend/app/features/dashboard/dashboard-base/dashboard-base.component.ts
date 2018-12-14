@@ -17,7 +17,7 @@ import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
 import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
-import { TabNavService } from '../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 
 
 @Component({

@@ -7,7 +7,7 @@
 
   .page-side-nav {
     &__item {
-      color: #000000;
+      color: rgba(0, 0, 0, .6);
       &--active {
         background-color: transparentize($primary-color, .9);
         color: $primary-color;

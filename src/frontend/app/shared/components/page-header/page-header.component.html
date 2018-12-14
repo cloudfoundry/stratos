@@ -61,10 +61,14 @@
     </div>
     <app-page-header-events class="header-events" [endpointIds$]="endpointIds$"></app-page-header-events>
   </div>
-  <div *ngIf="activeTab$ | async as activeTab" class="tab-header">{{ activeTab }}</div>
-  <!-- <app-page-subheader class="subheader" *ngIf="tabs" [tabs]="tabs">
-  </app-page-subheader> -->
+  <div *ngIf="activeTab$ | async as activeTab" class="tab-header">
+    <div class="tab-header__title">{{ activeTab }}</div>
+    <div class="sub-nav-actions" *ngIf="this.tabNavService.tabSubNav$ | async as portal">
+      <div class="sub-nav-actions__container">
+        <ng-container [cdkPortalOutlet]="portal"></ng-container>
+      </div>
+    </div>
+  </div>
   <div *ngIf="showUnderFlow" class="page-header__underflow">
   </div>
-
 </div>

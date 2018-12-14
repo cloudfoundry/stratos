@@ -4,6 +4,7 @@ $app-header-height: 56px;
   background-color: transparent;
   height: 100vh;
   &__page-tabs {
+    background-color: rgba(146, 146, 146, .1);
     margin-top: $app-header-height;
   }
   &__inner {

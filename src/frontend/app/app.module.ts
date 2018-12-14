@@ -24,6 +24,7 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { XSRFModule } from './xsrf.module';
 import { initEndpointExtensions } from './features/endpoints/endpoint-helpers';
+import { TabNavService } from './tab-nav.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -84,6 +85,7 @@ export class CustomRouterStateSerializer
   providers: [
     LoggedInService,
     ExtensionService,
+    TabNavService,
     DynamicExtensionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation

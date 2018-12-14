@@ -6,7 +6,7 @@
   </mat-sidenav>
   <div class="dashboard__inner">
     <div class="dashboard__page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
-      <app-page-side-nav [tabs]="tabs">
+      <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs">
       </app-page-side-nav>
     </div>
     <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView}">

@@ -23,7 +23,7 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
-
+import { PortalModule } from '@angular/cdk/portal';
 
 @NgModule({
   imports: [
@@ -43,7 +43,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     ClickStopPropagationDirective,
     DotContentComponent,
     ButtonBlurOnClickDirective,
-    PageNotFoundComponentComponent
+    PageNotFoundComponentComponent,
+    PortalModule
   ],
   providers: [
     AuthGuardService,
