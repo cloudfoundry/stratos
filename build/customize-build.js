@@ -23,6 +23,7 @@
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
   gulp.task('customize', function (cb) {
+    doShowVersions()
     doCustomize(false);
     doGenerateIndexHtml(true);
     cb();
@@ -47,6 +48,17 @@
     storeGitRepositoryMetadata();
     cb();
   });
+
+  function doShowVersions() {
+    console.log('Node Version: ' + process.versions.node || 'N/A');
+    try {
+      var response = execSync('npm --v');
+      var npmVersion = response.toString().trim();
+      console.log('NPM Version : ' + npmVersion || 'N/A');
+    } catch (e) {
+      console.log('NPM Version : N/A');
+    }
+  }
 
   function doCustomize(forceDefaults, reset) {
     var msg = !forceDefaults ? 'Checking for and applying customizations' : 'Removing customizations and applying defaults';
@@ -123,6 +135,7 @@
     const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
     const destFile = path.join(baseFolder, 'app/custom-import.module.ts');
     const customModuleFile = path.join(baseFolder, 'app/custom/custom.module.ts');
+    const customRoutingModuleFile = path.join(baseFolder, 'app/custom/custom-routing.module.ts');
 
     // Delete the existing file if it exists
     if (fs.existsSync(destFile)) {
@@ -130,7 +143,13 @@
     }
 
     if (!reset) {
-      const srcFile = fs.existsSync(customModuleFile) ? 'custom-src.module.ts_' : 'custom.module.ts_';
+      let srcFile = 'custom.module.ts_';
+      if (fs.existsSync(customModuleFile)) {
+        srcFile = 'custom-src.module.ts_';
+        if (fs.existsSync(customRoutingModuleFile)) {
+          srcFile = 'custom-src-routing.module.ts_';
+        }
+      }
       fs.copySync(path.join(defaultSrcFolder, srcFile), destFile);
     }
   }

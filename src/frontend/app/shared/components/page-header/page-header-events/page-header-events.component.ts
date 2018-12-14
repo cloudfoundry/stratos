@@ -1,17 +1,18 @@
 
-import { of as observableOf, Observable } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { withLatestFrom, map, filter, distinctUntilChanged } from 'rxjs/operators';
-
-import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
+import { Store } from '@ngrx/store';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { ToggleHeaderEvent } from '../../../../store/actions/dashboard-actions';
+import { AppState } from '../../../../store/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
-import { AppState } from '../../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { DashboardState } from '../../../../store/reducers/dashboard-reducer';
-import { ToggleHeaderEvent } from '../../../../store/actions/dashboard-actions';
+import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { EndpointModel } from '../../../../store/types/endpoint.types';
+
 
 @Component({
   selector: 'app-page-header-events',
@@ -56,14 +57,19 @@ export class PageHeaderEventsComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.cfId) {
-      this.endpointIds$ = observableOf([this.activatedRoute.snapshot.params.cfId]);
+    if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId) {
+      this.endpointIds$ = observableOf([this.activatedRoute.snapshot.params.endpointId]);
     }
     if (this.endpointIds$) {
+      const endpointMonitor = new PaginationMonitor<EndpointModel>(
+        this.store, CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)
+      );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
-      this.errorMessage$ = cfEndpointEventMonitor.hasErroredOverTime().pipe(
-        filter(errors => !!errors && !!errors.length),
-        withLatestFrom(this.cloudFoundryService.cFEndpoints$),
+      this.errorMessage$ = combineLatest(
+        cfEndpointEventMonitor.hasErroredOverTime(),
+        endpointMonitor.currentPage$
+      ).pipe(
+        filter(([errors]) => !!errors && !!errors.length),
         map(([errors, endpoints]) => {
           const endpointString = errors.map(
             id => endpoints.find(endpoint => endpoint.guid === id)

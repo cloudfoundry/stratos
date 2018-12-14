@@ -40,7 +40,7 @@ import {
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -210,6 +210,12 @@ export class CfUserService {
       this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
+  hasSpaceRoles(user: CfUser, spaceGuid: string): boolean {
+    return this.populatedArray(filterEntitiesByGuid(spaceGuid, user.audited_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.managed_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.spaces));
+  }
+
   getUserRoleInOrg = (
     userGuid: string,
     orgGuid: string,
@@ -332,7 +338,7 @@ export class CfUserService {
       }));
   }
 
-  public isConnectedUserAdmin = (store, cfGuid: string): Observable<boolean> =>
+  public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
     this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
       filter(state => !!state),
       map(state => state.isAdmin),

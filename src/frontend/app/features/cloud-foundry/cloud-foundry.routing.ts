@@ -66,6 +66,9 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
+import { StratosActionType } from '../../core/extension/extension-service';
 
 /* tslint:enable:max-line-length */
 const usersRoles = [
@@ -91,7 +94,7 @@ const cloudFoundry: Routes = [{
   component: CloudFoundryComponent
 },
 {
-  path: ':cfId',
+  path: ':endpointId',
   children: [
     {
       path: 'add-org',
@@ -101,6 +104,7 @@ const cloudFoundry: Routes = [{
       path: 'organizations/:orgId/add-space',
       component: AddSpaceComponent
     },
+    ...usersRoles,
     {
       path: '',
       // Root for attaching CF wide actions (i.e assignments, tabs)
@@ -131,7 +135,8 @@ const cloudFoundry: Routes = [{
         {
           path: '',
           data: {
-            uiFullView: true
+            uiFullView: true,
+            extensionsActionsKey: StratosActionType.Application
           },
           component: CloudFoundryTabsBaseComponent,
           children: [
@@ -175,6 +180,14 @@ const cloudFoundry: Routes = [{
             {
               path: 'security-groups',
               component: CloudFoundrySecurityGroupsComponent
+            },
+            {
+              path: '**',
+              component: PageNotFoundComponentComponent,
+              canActivate: [DynamicExtensionRoutes],
+              data: {
+                stratosRouteGroup: 'cfTabs'
+              }
             }
           ]
         },
@@ -212,7 +225,8 @@ const cloudFoundry: Routes = [{
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,
               data: {
-                uiFullView: true
+                uiFullView: true,
+                extensionsActionsKey: StratosActionType.CloudFoundryOrg
               },
               children: [
                 {
@@ -231,12 +245,22 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundryOrganizationUsersComponent
-                }]
+                },
+                {
+                  path: '**',
+                  component: PageNotFoundComponentComponent,
+                  canActivate: [DynamicExtensionRoutes],
+                  data: {
+                    stratosRouteGroup: 'cfOrgTabs'
+                  }
+                }
+              ]
             },
             {
               path: 'organizations/:orgId/spaces/:spaceId',
               data: {
-                uiFullView: true
+                uiFullView: true,
+                extensionsActionsKey: StratosActionType.CloudFoundrySpace
               },
               component: CloudFoundrySpaceBaseComponent,
               children: [
@@ -264,13 +288,28 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundrySpaceUsersComponent
+                },
+                {
+                  path: '**',
+                  component: PageNotFoundComponentComponent,
+                  canActivate: [DynamicExtensionRoutes],
+                  data: {
+                    stratosRouteGroup: 'cfSpaceTabs'
+                  }
                 }
               ]
             },
           ]
         }]
     },
-    ...usersRoles
+    {
+      path: '**',
+      component: PageNotFoundComponentComponent,
+      canActivate: [DynamicExtensionRoutes],
+      data: {
+        stratosRouteGroup: StratosActionType.CloudFoundry
+      }
+    }
   ]
 }];
 

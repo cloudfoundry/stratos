@@ -13,17 +13,11 @@ import {
 import { APP_GUID, CF_GUID } from '../../shared/entity.tokens';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import {
-  AppMetadataTypes,
-  GetAppEnvVarsAction,
-  GetAppStatsAction,
-  GetAppSummaryAction,
-} from '../../store/actions/app-metadata.actions';
+import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
-  appEnvVarsSchemaKey,
   applicationSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
@@ -35,6 +29,7 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
   stackSchemaKey,
+  appEnvVarsSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
@@ -47,12 +42,13 @@ import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
   PaginationObservables,
-} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -173,7 +169,7 @@ export class ApplicationService {
           });
         return appStateService.get(app, appInstances);
       })
-    ).pipe(publishReplay(1), refCount(), );
+    ).pipe(publishReplay(1), refCount());
   }
 
   private constructCoreObservables() {
@@ -181,7 +177,7 @@ export class ApplicationService {
     this.app$ = this.appEntityService.waitForEntity$;
     const moreWaiting$ = this.app$.pipe(
       filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)),
-      map(entityInfo => entityInfo.entity.entity), );
+      map(entityInfo => entityInfo.entity.entity));
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
@@ -206,18 +202,26 @@ export class ApplicationService {
       ))
     );
 
-    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount(), );
+    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount());
 
-    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.pipe(publishReplay(1), refCount(), );
+    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.pipe(publishReplay(1), refCount());
 
     this.appSummary$ = this.waitForAppEntity$.pipe(
       switchMap(() => this.appSummaryEntityService.entityObs$),
       publishReplay(1),
       refCount()
     );
-    const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
 
     this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
+  }
+
+  public getApplicationEnvVarsMonitor() {
+    const factory = new EntityMonitorFactory(this.store);
+    return factory.create<APIResource<IApp>>(
+      this.appGuid,
+      appEnvVarsSchemaKey,
+      entityFactory(appEnvVarsSchemaKey)
+    );
   }
 
   private constructAmalgamatedObservables() {
@@ -235,7 +239,7 @@ export class ApplicationService {
     // willing to do this to speed up the initial fetch for a running application.
     this.appStats$ = appStats.entities$;
 
-    this.appStatsFetching$ = appStats.pagination$.pipe(publishReplay(1), refCount(), );
+    this.appStatsFetching$ = appStats.pagination$.pipe(publishReplay(1), refCount());
 
     this.application$ = this.waitForAppEntity$.pipe(
       combineLatest(this.store.select(endpointEntitiesSelector)),
@@ -249,17 +253,17 @@ export class ApplicationService {
           stack: entity.entity.stack,
           cf: endpoints[entity.entity.cfGuid],
         };
-      }), publishReplay(1), refCount(), );
+      }), publishReplay(1), refCount());
 
     this.applicationState$ = this.waitForAppEntity$.pipe(
       combineLatest(this.appStats$.pipe(startWith(null))),
       map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
-      }), publishReplay(1), refCount(), );
+      }), publishReplay(1), refCount());
 
     this.applicationStratProject$ = this.appEnvVars.entities$.pipe(map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
-    }), publishReplay(1), refCount(), );
+    }), publishReplay(1), refCount());
 
     this.applicationRunning$ = this.application$.pipe(
       map(app => app ? app.app.entity.state === 'STARTED' : false)
@@ -280,15 +284,15 @@ export class ApplicationService {
       map(ev => getCurrentPageRequestInfo(ev).busy),
       startWith(false),
       publishReplay(1),
-      refCount(), );
+      refCount());
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.pipe(map(
       ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
-    ), startWith(false), publishReplay(1), refCount(), );
+    ), startWith(false), publishReplay(1), refCount());
 
     this.isFetchingStats$ = this.appStatsFetching$.pipe(map(
       appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
-    ), startWith(false), publishReplay(1), refCount(), );
+    ), startWith(false), publishReplay(1), refCount());
 
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
       map(({ entity }) => entity),

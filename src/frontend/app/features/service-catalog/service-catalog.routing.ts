@@ -17,11 +17,11 @@ const serviceCatalog: Routes = [
     component: ServiceCatalogPageComponent,
   },
   {
-    path: ':cfId/:serviceId/create',
+    path: ':endpointId/:serviceId/create',
     component: AddServiceInstanceComponent,
   },
   {
-    path: ':cfId/:serviceId',
+    path: ':endpointId/:serviceId',
     component: ServiceBaseComponent,
     children: [
       {

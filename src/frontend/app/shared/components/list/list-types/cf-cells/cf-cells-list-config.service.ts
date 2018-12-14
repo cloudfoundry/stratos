@@ -6,6 +6,7 @@ import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { IMetricVectorResult } from '../../../../../store/types/base-metric.types';
 import { IMetricCell } from '../../../../../store/types/metric.types';
+import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
 import {
   TableCellBooleanIndicatorComponent,
   TableCellBooleanIndicatorComponentConfig,
@@ -31,7 +32,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<IMetricVectorResult<IMetricCell>> = {
     // "0 signifies healthy, and 1 signifies unhealthy"
     isEnabled: (row: IMetricVectorResult<IMetricCell>) => row ? row.value[1] === '0' : false,
-    type: 'enabled-disabled',
+    type: BooleanIndicatorType.enabledDisabled,
     subtle: false,
     showText: false
   };

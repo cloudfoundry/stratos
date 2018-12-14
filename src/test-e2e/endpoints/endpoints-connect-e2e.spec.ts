@@ -1,5 +1,3 @@
-import { browser } from 'protractor';
-
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
@@ -76,7 +74,7 @@ describe('Endpoints', () => {
       it('should update service instance data on register', () => {
         connectDialog.connect();
         // Wait for snackbar
-        connectDialog.snackBar.waitForMessage('Connected ' + toConnect.name);
+        connectDialog.snackBar.waitForMessage(`Connected endpoint '${toConnect.name}'`);
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();

@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
+	"github.com/cf-stratos/mysqlstore"
 	"github.com/gorilla/sessions"
-	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -505,7 +505,21 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionStoreOptions:    sessionStoreOptions,
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
+		AuthProviders:          make(map[string]interfaces.AuthProvider),
 	}
+
+	// Initialize built-in auth providers
+
+	// Basic Auth
+	pp.AddAuthProvider(interfaces.AuthTypeHttpBasic, interfaces.AuthProvider{
+		Handler:  pp.doHttpBasicFlowRequest,
+		UserInfo: pp.GetCNSIUserFromBasicToken,
+	})
+
+	// OIDC
+	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
+		Handler: pp.doOidcFlowRequest,
+	})
 
 	return pp
 }
@@ -667,14 +681,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.EchoMiddleware)
 	}
 
-	// Allow the backend to run under /pp if running combined
-	var pp *echo.Group
-	staticDir, err := getStaticFiles()
-	if err == nil {
-		pp = e.Group("/pp")
-	} else {
-		pp = e.Group("")
-	}
+	staticDir, staticDirErr := getStaticFiles()
+
+	// Always serve the backend API from /pp
+	pp := e.Group("/pp")
 
 	pp.Use(p.setSecureCacheContentMiddleware)
 
@@ -770,7 +780,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	// Serve up static resources
-	if err == nil {
+	if staticDirErr == nil {
 		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)

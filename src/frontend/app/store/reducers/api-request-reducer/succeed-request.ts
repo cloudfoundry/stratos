@@ -2,7 +2,6 @@ import { IRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } fr
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
-  mergeInnerObject,
   mergeUpdatingState,
   setEntityRequestState,
   mergeObject,

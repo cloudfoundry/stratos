@@ -91,10 +91,17 @@ import {
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-
+import { CustomImportModule } from '../../custom-import.module';
 
 @NgModule({
-  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
+  imports: [
+    CoreModule,
+    SharedModule,
+    CloudFoundryRoutingModule,
+    RouterModule,
+    NgxChartsModule,
+    CustomImportModule
+  ],
   declarations: [
     CloudFoundryBaseComponent,
     CloudFoundryTabsBaseComponent,

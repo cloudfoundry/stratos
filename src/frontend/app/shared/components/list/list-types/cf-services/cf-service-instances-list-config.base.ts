@@ -77,6 +77,17 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       cellFlex: '1'
     },
     {
+      columnId: 'dashboard',
+      headerCell: () => 'Dashboard',
+      cellDefinition: {
+        externalLink: true,
+        getLink: (row: APIResource<IServiceInstance>) => row.entity.dashboard_url,
+        newTab: true,
+        showShortLink: true
+      },
+      cellFlex: '1'
+    },
+    {
       columnId: 'tags',
       headerCell: () => 'Tags',
       cellComponent: TableCellServiceInstanceTagsComponent,
@@ -84,7 +95,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     },
     {
       columnId: 'attachedApps',
-      headerCell: () => 'Application Attached',
+      headerCell: () => 'Attached Applications',
       cellComponent: TableCellServiceInstanceAppsAttachedComponent,
       cellFlex: '3'
     },
@@ -158,7 +169,11 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.serviceActionHelperService.deleteServiceInstance(serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
+    this.serviceActionHelperService.deleteServiceInstance(
+      serviceInstance.metadata.guid,
+      serviceInstance.entity.name,
+      serviceInstance.entity.cfGuid
+    )
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {

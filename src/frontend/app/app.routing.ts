@@ -2,6 +2,7 @@ import { of as observableOf } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
@@ -14,6 +15,7 @@ import { SharedModule } from './shared/shared.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
 import { environment } from '../environments/environment';
+import { CustomRoutingImportModule } from './custom-import.module';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'applications', pathMatch: 'full' },
@@ -26,7 +28,8 @@ const appRoutes: Routes = [
     component: DashboardBaseComponent,
     canActivate: [AuthGuardService, EndpointsService],
     children: [
-      { path: 'dashboard', component: HomePageComponent,
+      {
+        path: 'dashboard', component: HomePageComponent,
         data: {
           stratosNavigation: {
             text: 'Dashboard',
@@ -37,7 +40,8 @@ const appRoutes: Routes = [
           }
         }
       },
-      { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
+      {
+        path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             text: 'Applications',
@@ -64,7 +68,8 @@ const appRoutes: Routes = [
           loadChildren: 'app/features/metrics/metrics.module#MetricsModule',
         }]
       },
-      { path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule',
+      {
+        path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
           stratosNavigation: {
             text: 'Marketplace',
@@ -73,7 +78,8 @@ const appRoutes: Routes = [
           }
         },
       },
-      { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule',
+      {
+        path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule',
         data: {
           stratosNavigation: {
             text: 'Services',
@@ -83,7 +89,8 @@ const appRoutes: Routes = [
           }
         },
       },
-      { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
+      {
+        path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
         data: {
           stratosNavigation: {
             text: 'Cloud Foundry',
@@ -113,7 +120,8 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    CustomRoutingImportModule,
   ]
 })
 export class RouteModule { }

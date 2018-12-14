@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, mergeMap } from 'rxjs/operators';
+import { catchError, mergeMap, tap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -31,13 +31,16 @@ import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../act
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
+import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+import { EndpointType } from '../../core/extension/extension-types';
+import { SendClearEventAction } from '../actions/internal-events.actions';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 
 
 @Injectable()
@@ -119,6 +122,8 @@ export class EndpointsEffect {
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
         action.body,
+      ).pipe(
+        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -139,6 +144,8 @@ export class EndpointsEffect {
         null,
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
+      ).pipe(
+        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -159,6 +166,8 @@ export class EndpointsEffect {
         'delete',
         [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
         action.endpointType
+      ).pipe(
+        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -230,20 +239,22 @@ export class EndpointsEffect {
     return this.http.post(url, body || {}, {
       headers,
       params
-    }).pipe(mergeMap((endpoint: EndpointModel) => {
-      const actions = [];
-      if (actionStrings[0]) {
-        actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
+    }).pipe(
+      mergeMap((endpoint: EndpointModel) => {
+        const actions = [];
+        if (actionStrings[0]) {
+          actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
+        }
+        if (apiActionType === 'delete') {
+          actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+        }
+        if (apiActionType === 'create') {
+          actions.push(new GetSystemInfo());
+        }
+        actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
+        return actions;
       }
-      if (apiActionType === 'delete') {
-        actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
-      }
-      if (apiActionType === 'create') {
-        actions.push(new GetSystemInfo());
-      }
-      actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
-      return actions;
-    }),
+      ),
       catchError(e => {
         const actions = [];
         if (actionStrings[1]) {
@@ -252,6 +263,18 @@ export class EndpointsEffect {
         const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
         actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
         return actions;
-      }), );
+      }));
+  }
+
+  private clearEndpointInternalEvents(guid: string) {
+    this.store.dispatch(
+      new SendClearEventAction(
+        endpointSchemaKey,
+        guid,
+        {
+          clean: true
+        }
+      )
+    );
   }
 }

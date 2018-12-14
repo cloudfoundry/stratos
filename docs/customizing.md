@@ -33,7 +33,10 @@ The following image resources can be changed by creating the specified file in t
 |---|---|---|
 |favicon.ico|custom-src/frontend|Favorite icon to use|
 |logo.png|custom-src/frontend/assets|Logo to use on login screen and about page|
+|nav-logo.png|custom-src/frontend/assets|Logo to use in the top-left side navigation for the application logo|
 |login-bg.jpg|custom-src/frontend/assets|Image to use for the login page background|
+
+> NOTE: The `nav-logo.png` logo should have a height of 36px and a maximum width of 180 pixels.
 
 ### Customizing the Theme
 
@@ -85,8 +88,19 @@ Note that the class `stratos` has been placed on the `BODY` tag of the Stratos a
 
 ### Adding new Features
 
-Code for new features should be placed within the `custom-src/frontend/app/custom` folder. You can obviously create any sub-folder structure within this folder.
+Code for new features should be placed within the `custom-src/frontend/app/custom` folder. You can create any sub-folder structure within this folder.
 
-Stratos imports the module `CustomModule` into the application. This must be defined in the file `custom-src/frontend/app`.
+When you perform an `npm install` or explicitly run `npm run customize`, the customize script is run and will symlink the folder `custom-src/frontend/app/custom` to `src/frontend/app/custom`. It will also create a module to import your custom code - this is placed in the file `src/frontend/app/custom/custom-import.module.ts`. You should _not_ edit this file.
 
-> More detail on overriding the login page, adding routes and extending the UI will be added over time.
+Within the `custom-src/frontend/app/custom` folder you must create a module in the file `custom.module.ts` named `CustomModule` - this will be imported into the Stratos application and is the mechanism by which you can add custom code to the front-end.
+
+We currently expose the following extension points in the Stratos UI:
+
+- Changing the component to use for the login screen
+- Adding new items to the side navigation menu
+- Adding new tabs to the Application, Cloud Foundry, Organization and Space views
+- Adding new action buttons to the Application Wall, Application, Cloud Foundry, Organization and Space and Endpoint views
+
+We use Decorators to annotate components to indicate that they are Stratos extensions.
+
+See [Extensions](extensions.md) for more detail and examples of front-end extensions.

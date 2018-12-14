@@ -10,6 +10,7 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   defaultView = 'cards' as ListView;
   cardComponent;
   enableTextFilter = false;
+  showMetricsRange = false;
   getColumns = () => [];
   getGlobalActions = () => [];
   getMultiActions = () => [];
