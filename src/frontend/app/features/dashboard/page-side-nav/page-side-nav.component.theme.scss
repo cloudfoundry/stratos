@@ -6,6 +6,10 @@
   $side-nav-bottom-color: map-get($app-theme, subdued-color);
 
   .page-side-nav {
+    background-color: map-get($app-theme, app-background-color);
+    @include breakpoint(tablet) {
+      background-color: darken(map-get($app-theme, app-background-color), 4%);
+    }
     &__item {
       color: rgba(0, 0, 0, .6);
       &--active {

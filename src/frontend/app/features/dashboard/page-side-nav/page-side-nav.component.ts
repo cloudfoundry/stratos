@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
+import { TabNavService } from '../../../tab-nav.service';
 
 export interface IPageSideNavTab {
   key?: string;
@@ -22,10 +23,14 @@ export class PageSideNavComponent implements OnInit {
 
   @Input()
   public header: string;
+  public activeTab$: Observable<string>;
 
-  constructor() { }
+  constructor(public tabNavService: TabNavService) {
+
+  }
 
   ngOnInit() {
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable(this.tabs);
   }
 
 }

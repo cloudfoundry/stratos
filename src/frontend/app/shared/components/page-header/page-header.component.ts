@@ -41,7 +41,6 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
         }).toString()
       }));
       this.tabNavService.setTabs(this._tabs);
-      this.setTabHeader();
     }
   }
 
@@ -109,21 +108,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.activeTab$ = this.router.events.pipe(
-      map(this.setTabHeader),
-      startWith(this.setTabHeader())
-    );
-  }
-
-  private setTabHeader = () => {
-    if (!this._tabs) {
-      return null;
-    }
-    const activeTab = this._tabs.find(tab => this.router.isActive(tab.link, true));
-    if (!activeTab) {
-      return null;
-    }
-    return activeTab.label;
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable(this._tabs);
   }
 
   ngOnDestroy() {

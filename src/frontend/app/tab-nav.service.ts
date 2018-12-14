@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, asapScheduler, Observable } from 'rxjs';
 import { ISubHeaderTabs } from './shared/components/page-subheader/page-subheader.types';
-import { observeOn } from 'rxjs/operators';
+import { observeOn, map, startWith } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class TabNavService {
@@ -37,7 +38,26 @@ export class TabNavService {
     this.tabSubNavSubject.next(undefined);
   }
 
-  constructor() {
+  public getCurrentTabHeaderObservable(tabs: ISubHeaderTabs[]) {
+    return this.router.events.pipe(
+      map(() => this.getCurrentTabHeader(tabs)),
+      startWith(this.getCurrentTabHeader(tabs))
+    );
+  }
+
+  public getCurrentTabHeader = (tabs: ISubHeaderTabs[]) => {
+    if (!tabs) {
+      return null;
+    }
+    const activeTab = tabs.find(tab => this.router.isActive(tab.link, true));
+    if (!activeTab) {
+      return null;
+    }
+    return activeTab.label;
+  }
+
+
+  constructor(private router: Router) {
     this.tabNavsSubject = new BehaviorSubject(undefined);
     this.tabNavs$ = this.tabNavsSubject.asObservable().pipe(
       observeOn(asapScheduler)

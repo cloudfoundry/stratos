@@ -1,9 +1,23 @@
+@import '../../../../sass/mixins';
+
 .page-side-nav {
-  border-right: 1px solid #00000018;
+  $border-color: rgba(0, 0, 0, .1);
+  border-right: 1px solid $border-color;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  position: absolute;
   width: 200px;
+  z-index: 1;
+  &:hover {
+    .page-side-nav__items {
+      display: block;
+    }
+  }
+  @include breakpoint(tablet) {
+    border-bottom: none;
+    height: 100%;
+    position: relative;
+  }
   &__icon {
     font-size: 18px;
     height: 18px;
@@ -26,19 +40,40 @@
     }
   }
   &__items {
+    border-bottom: 1px solid $border-color;
+    display: none;
     flex: 1;
     list-style-type: none;
     margin: 0;
     overflow-y: auto;
-    padding: 0;
+    padding: 15px 0 0;
+
+    @include breakpoint(tablet) {
+      display: block;
+    }
   }
   &__items-header {
     align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, .1);
-    display: flex;
+    border-bottom: 1px solid $border-color;
+    display: none;
     font-weight: bold;
     height: 60px;
     opacity: .6;
     padding: 0 25px;
+    @include breakpoint(tablet) {
+      display: flex;
+    }
+  }
+  &__items-compact-header {
+    align-items: baseline;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    @include breakpoint(tablet) {
+      display: none;
+    }
+  }
+  &__items-compact-tab-label {
+    font-weight: bold;
   }
 }

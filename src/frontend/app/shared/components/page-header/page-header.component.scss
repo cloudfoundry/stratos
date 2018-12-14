@@ -1,3 +1,5 @@
+@import '../../../../sass/mixins';
+
 $top-index: 2;
 $bottom-index: $top-index - 1;
 .page-header {
@@ -42,10 +44,6 @@ $bottom-index: $top-index - 1;
     }
   }
   &__outer {
-    // left: 0;
-    // position: absolute;
-    // right: 0;
-    // top: 0;
     margin-bottom: 20px;
     z-index: 1;
   }
@@ -103,15 +101,24 @@ $bottom-index: $top-index - 1;
   border-bottom: 1px solid rgba(0, 0, 0, .1);
   display: flex;
   height: 60px;
-  margin: -20px -34px 0;
+  margin: -20px -20px 0;
+  margin-left: 180px;
   opacity: .6;
-  padding: 0 34px;
+  padding: 0;
+  @include breakpoint(tablet) {
+    margin: -20px -20px 0;
+    padding: 0 34px;
+  }
   &__title {
+    display: none;
     $font-size: 22px;
     font-size: $font-size;
     font-weight: bold;
     line-height: $font-size;
     margin-right: 20px;
+    @include breakpoint(tablet) {
+      display: flex;
+    }
   }
 }
 
