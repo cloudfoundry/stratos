@@ -2,6 +2,10 @@
 
 Weekly status updates are published here.
 
+## 12th October 2018
+
+The team have been preparing for and attending the CF Summit in Basel.
+
 ## 5th October 2018
 
 The team have been preparing for the CF Summit in Basel next week.
