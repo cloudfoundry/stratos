@@ -1,25 +1,25 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
-
 import { environment } from '../../../../../../environments/environment';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import {
+  getActionsFromExtensions,
+  getTabsFromExtensions,
+  StratosActionMetadata,
+  StratosActionType,
+  StratosTabType
+} from '../../../../../core/extension/extension-service';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
-import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { IPageSideNavTab } from '../../../../dashboard/page-side-nav/page-side-nav.component';
 import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import {
-  getTabsFromExtensions,
-  StratosTabType,
-  StratosActionMetadata,
-  getActionsFromExtensions,
-  StratosActionType
-} from '../../../../../core/extension/extension-service';
+
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -34,18 +34,21 @@ import {
 })
 export class CloudFoundryOrganizationBaseComponent {
 
-  tabLinks: ISubHeaderTabs[] = [
+  tabLinks: IPageSideNavTab[] = [
     {
       link: 'summary',
-      label: 'Summary'
+      label: 'Summary',
+      matIcon: 'description'
     },
     {
       link: 'spaces',
-      label: 'Spaces'
+      label: 'Spaces',
+      matIcon: 'language'
     },
     {
       link: 'users',
       label: 'Users',
+      matIcon: 'people'
     }
   ];
 

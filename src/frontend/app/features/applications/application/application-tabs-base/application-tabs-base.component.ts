@@ -10,7 +10,6 @@ import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
-import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
@@ -32,6 +31,7 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../core/extension/extension-service';
+import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -129,15 +129,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }
   ));
-
-  tabLinks: ISubHeaderTabs[] = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'instances', label: 'Instances' },
-    { link: 'routes', label: 'Routes' },
-    { link: 'log-stream', label: 'Log Stream' },
-    { link: 'services', label: 'Services' },
-    { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
+  header = 'Applications';
+  tabLinks: IPageSideNavTab[] = [
+    { link: 'summary', label: 'Summary', matIcon: 'description' },
+    { link: 'instances', label: 'Instances', matIcon: 'library_books' },
+    { link: 'routes', label: 'Routes', matIconFont: 'stratos-icons', matIcon: 'network_route' },
+    { link: 'log-stream', label: 'Log Stream', matIcon: 'featured_play_list' },
+    { link: 'services', label: 'Services', matIconFont: 'stratos-icons', matIcon: 'service' },
+    { link: 'variables', label: 'Variables', matIcon: 'lock' },
+    { link: 'events', label: 'Events', matIcon: 'watch_later' }
   ];
 
   private getBreadcrumbs(

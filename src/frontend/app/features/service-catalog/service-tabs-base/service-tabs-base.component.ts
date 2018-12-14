@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
-
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-import { AppState } from '../../../store/app-state';
-import { ServicesService } from '../services.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { AppState } from '../../../store/app-state';
+import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
+import { ServicesService } from '../services.service';
+
 
 @Component({
   selector: 'app-service-tabs-base',
@@ -20,10 +20,11 @@ export class ServiceTabsBaseComponent {
   hasVisiblePlans$: Observable<boolean>;
   servicesSubscription: Subscription;
 
-  tabLinks: ISubHeaderTabs[] = [
+  tabLinks: IPageSideNavTab[] = [
     {
       link: 'summary',
-      label: 'Summary'
+      label: 'Summary',
+      matIcon: 'description'
     },
     {
       link: 'instances',
