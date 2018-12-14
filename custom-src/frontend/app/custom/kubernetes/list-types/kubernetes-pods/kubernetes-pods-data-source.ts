@@ -7,8 +7,9 @@ import { AppState } from '../../../../store/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { GetKubernetesPods } from '../../store/kubernetes.actions';
 
-import { entityFactory, kubernetesPodsSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory } from '../../../../store/helpers/entity-factory';
 import { KubernetesPod } from '../../store/kube.types';
+import { kubernetesPodsSchemaKey } from '../../store/kubernetes.entities';
 
 export class KubernetesPodsDataSource extends ListDataSource<KubernetesPod, any> {
 

@@ -1,13 +1,3 @@
-import {
-  kubernetesSchemaKey,
-  kubernetesNodesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesNamespacesSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
-  kubernetesAppsSchemaKey
-} from './../../helpers/entity-factory';
 import { EndpointAction } from '../../actions/endpoint.actions';
 import {
   applicationSchemaKey,
@@ -16,6 +6,7 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
   serviceInstancesSchemaKey,
+  getEntitiesByGroup,
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
 
@@ -53,19 +44,14 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
       defaultPaginationEntityState
     );
   }
-  if (action.endpointType === 'k8s') {
+
+  // Check extensions
+  const entities = getEntitiesByGroup(action.endpointType);
+  if (entities.length > 0) {
+    const keys = entities.map(e => e.key);
     return paginationClearAllTypes(
       state,
-      [
-        kubernetesSchemaKey,
-        kubernetesNodesSchemaKey,
-        kubernetesPodsSchemaKey,
-        kubernetesNamespacesSchemaKey,
-        kubernetesServicesSchemaKey,
-        kubernetesStatefulSetsSchemaKey,
-        kubernetesDeploymentsSchemaKey,
-        kubernetesAppsSchemaKey,
-      ],
+      keys,
       defaultPaginationEntityState
     );
   }

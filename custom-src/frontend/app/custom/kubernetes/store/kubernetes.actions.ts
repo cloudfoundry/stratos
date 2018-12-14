@@ -3,7 +3,6 @@ import { SortDirection } from '@angular/material';
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../store/actions/metrics.actions';
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import {
-  entityFactory,
   kubernetesAppsSchemaKey,
   kubernetesDeploymentsSchemaKey,
   kubernetesNamespacesSchemaKey,
@@ -11,9 +10,10 @@ import {
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
-} from '../../../store/helpers/entity-factory';
+} from './kubernetes.entities';
 import { PaginatedAction, PaginationParam } from '../../../store/types/pagination.types';
 import { IRequestAction } from '../../../store/types/request.types';
+import { entityFactory } from '../../../store/helpers/entity-factory';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';

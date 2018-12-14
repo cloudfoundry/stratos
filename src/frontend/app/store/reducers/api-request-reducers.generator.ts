@@ -25,13 +25,6 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   userProfileSchemaKey,
-  kubernetesNodesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesNamespacesSchemaKey,
-  kubernetesAppsSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -80,7 +73,7 @@ function chainReducers(baseReducer, extraReducers) {
     return newState;
   };
 }
-// These should be const
+// Extensions can add to this list
 const entities = [
   'application',
   'stack',
@@ -116,16 +109,11 @@ const entities = [
   userProfileSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceBrokerSchemaKey,
-  kubernetesNodesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesNamespacesSchemaKey,
-  kubernetesAppsSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
 ];
 
-
+export function registerAPIRequestEntity(schemaKey: string) {
+  entities.push(schemaKey);
+}
 
 export function requestReducer(state, action) {
   const baseRequestReducer = requestReducerFactory(entities, requestActions);

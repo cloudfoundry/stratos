@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
-import { EndpointTypeConfig, EndpointAuthTypeConfig } from './extension-types';
+import { EndpointTypeConfig, EndpointAuthTypeConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -15,6 +15,7 @@ export interface StratosExtensionConfig {
   routes?: Route[];
   endpointTypes?: EndpointTypeConfig[];
   authTypes?: EndpointAuthTypeConfig[];
+  entities?: ExtensionEntitySchema[];
 }
 
 // The different types of Tab
@@ -71,7 +72,8 @@ const extensionMetadata = {
   tabs: {},
   actions: {},
   endpointTypes: [],
-  authTypes: []
+  authTypes: [],
+  entities: [] as ExtensionEntitySchema[]
 };
 
 /**
@@ -102,6 +104,9 @@ export function StratosExtension(config: StratosExtensionConfig) {
     }
     if (config.authTypes) {
       extensionMetadata.authTypes.push(...config.authTypes);
+    }
+    if (config.entities) {
+      extensionMetadata.entities.push(...config.entities);
     }
   };
 }

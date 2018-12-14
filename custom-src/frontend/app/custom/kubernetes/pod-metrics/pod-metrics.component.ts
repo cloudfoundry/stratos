@@ -15,7 +15,7 @@ import {
 } from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { AppState } from '../../../store/app-state';
-import { entityFactory, kubernetesPodsSchemaKey } from '../../../store/helpers/entity-factory';
+import { entityFactory } from '../../../store/helpers/entity-factory';
 import { EntityInfo } from '../../../store/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../store/types/base-metric.types';
 import { IMetricApplication } from '../../../store/types/metric.types';
@@ -25,6 +25,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
+import { kubernetesPodsSchemaKey } from '../store/kubernetes.entities';
 
 @Component({
   selector: 'app-pod-metrics',

@@ -11,10 +11,6 @@ import { AppState } from '../../../store/app-state';
 import {
   endpointSchemaKey,
   entityFactory,
-  kubernetesDeploymentsSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-  kubernetesPodsSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityInfo } from '../../../store/types/api.types';
@@ -28,6 +24,7 @@ import {
   KubePaginationAction,
   GetKubernetesPods,
 } from '../store/kubernetes.actions';
+import { kubernetesDeploymentsSchemaKey, kubernetesPodsSchemaKey, kubernetesStatefulSetsSchemaKey, kubernetesServicesSchemaKey } from '../store/kubernetes.entities';
 
 
 @Injectable()

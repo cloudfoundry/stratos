@@ -10,12 +10,13 @@ import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.fa
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { MetricQueryConfig, MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
-import { entityFactory, kubernetesNodesSchemaKey, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityInfo } from '../../../store/types/api.types';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
+import { kubernetesNodesSchemaKey } from '../store/kubernetes.entities';
 
 
 export enum KubeNodeMetric {

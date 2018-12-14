@@ -9,6 +9,9 @@ import { SharedModule } from '../../shared/shared.module';
 import { KubernetesCertsAuthFormComponent } from './auth-forms/kubernetes-certs-auth-form/kubernetes-certs-auth-form.component';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import { KubernetesConfigAuthFormComponent } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
+import { kubernetesEntities } from './store/kubernetes.entities';
+import { EffectsModule } from '@ngrx/effects';
+import { KubernetesEffects } from './store/kubernetes.effects';
 
 const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
   value: 'k8s',
@@ -60,17 +63,19 @@ const kubernetesAuthTypes: EndpointAuthTypeConfig[] = [{
 }
 ];
 
-
 @StratosExtension({
   endpointTypes: kubernetesEndpointTypes,
-  authTypes: kubernetesAuthTypes
-
+  authTypes: kubernetesAuthTypes,
+  entities: kubernetesEntities,
 })
 @NgModule({
   imports: [
     CoreModule,
     CommonModule,
     SharedModule,
+    EffectsModule.forFeature([
+      KubernetesEffects
+    ])
   ],
   declarations: [
     KubernetesCertsAuthFormComponent,

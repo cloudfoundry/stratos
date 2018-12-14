@@ -1,20 +1,20 @@
+import {
+  kubernetesNodesSchemaKey,
+  kubernetesNamespacesSchemaKey,
+  kubernetesPodsSchemaKey,
+  kubernetesServicesSchemaKey,
+  kubernetesDeploymentsSchemaKey,
+  kubernetesStatefulSetsSchemaKey,
+  kubernetesAppsSchemaKey
+} from './kubernetes.entities';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap, combineLatest } from 'rxjs/operators';
 
-import {
-  kubernetesAppsSchemaKey,
-  kubernetesDeploymentsSchemaKey,
-  kubernetesNamespacesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
-} from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
-import { kubernetesNodesSchemaKey } from '../../../store/helpers/entity-factory';
 import { NormalizedResponse } from '../../../store/types/api.types';
 import {
   StartRequestAction,

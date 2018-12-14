@@ -8,10 +8,11 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
-import { entityFactory, kubernetesNamespacesSchemaKey } from '../../../store/helpers/entity-factory';
+import { entityFactory } from '../../../store/helpers/entity-factory';
 import { KubernetesNamespace } from '../store/kube.types';
 import { GetKubernetesNamespace } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
+import { kubernetesNamespacesSchemaKey } from '../store/kubernetes.entities';
 
 @Injectable()
 export class KubernetesNamespaceService {

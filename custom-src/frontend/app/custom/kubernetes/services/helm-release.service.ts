@@ -4,15 +4,15 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, share } from 'rxjs/operators';
 
-import { kubernetesServicesSchemaKey } from '../../../../../../src/frontend/app/store/helpers/entity-factory';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
-import { entityFactory, kubernetesAppsSchemaKey } from '../../../store/helpers/entity-factory';
+import { entityFactory } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { KubernetesApp, KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
 import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
+import { kubernetesAppsSchemaKey, kubernetesServicesSchemaKey } from '../store/kubernetes.entities';
 
 @Injectable()
 export class HelmReleaseService {
