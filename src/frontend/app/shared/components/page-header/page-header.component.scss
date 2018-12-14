@@ -99,11 +99,17 @@ $bottom-index: $top-index - 1;
 }
 
 .tab-header {
-  $font-size: 16px;
+  $font-size: 22px;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  display: flex;
   font-size: $font-size;
+  font-weight: bold;
+  height: 60px;
   line-height: $font-size;
-  margin: -20px -38px 0;
-  padding: 17px;
+  margin: -20px -34px 0;
+  opacity: .6;
+  padding: 0 34px;
 }
 
 .mat-toolbar-row,

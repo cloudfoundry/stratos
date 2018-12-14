@@ -6,6 +6,9 @@
       </div>
     </div>
   </div>
+  <div class="page-side-nav__items-header">
+    Header
+  </div>
   <ul class="page-side-nav__items">
     <li *ngFor="let tab of tabs">
       <a *ngIf="!tab.hidden || !(tab.hidden | async)" class="page-side-nav__item" [routerLink]="[tab.link]"

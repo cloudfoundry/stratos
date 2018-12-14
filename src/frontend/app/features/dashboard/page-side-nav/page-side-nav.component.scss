@@ -26,4 +26,14 @@
     overflow-y: auto;
     padding: 0;
   }
+  
+  &__items-header {
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+    display: flex;
+    font-weight: bold;
+    height: 60px;
+    opacity: .6;
+    padding: 0px 15px;
+  }
 }

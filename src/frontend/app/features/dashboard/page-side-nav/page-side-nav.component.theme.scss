@@ -1,0 +1,17 @@
+@import '~@angular/material/theming';
+@mixin page-side-nav-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $primary-color: mat-color($primary, 500);
+  $side-nav-colors: map-get($app-theme, side-nav);
+  $side-nav-bottom-color: map-get($app-theme, subdued-color);
+
+  .page-side-nav {
+    &__item {
+      color: #000000;
+      &--active {
+        background-color: transparentize($primary-color, .9);
+        color: $primary-color;
+      }
+    }
+  }
+}
