@@ -98,15 +98,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
-      debounceTime(250)
-    ).subscribe(result => {
-      if (result.matches) {
-        this.enableMobileNav();
-      } else {
-        this.disableMobileNav();
-      }
-    });
 
     this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
       this.store.dispatch(new CloseSideNav());
@@ -119,16 +110,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
         this.sidenav.mode = dashboard.sideNavMode;
       });
 
-  }
-
-  private enableMobileNav() {
-    // this.store.dispatch(new CloseSideNav());
-    // this.store.dispatch(new ChangeSideNavMode('over'));
-  }
-
-  private disableMobileNav() {
-    // this.store.dispatch(new OpenSideNav());
-    // this.store.dispatch(new ChangeSideNavMode('side'));
   }
 
   private getNavigationRoutes(): SideNavItem[] {
