@@ -38,11 +38,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private metricsService: MetricsService,
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService
-  ) {
-    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
-      this.enableMobileNav();
-    }
-  }
+  ) { }
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
