@@ -133,13 +133,14 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
+import { GitSCMService } from './data-services/scm/scm.service';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { MomentModule } from 'ngx-moment';
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 
 @NgModule({
   imports: [
@@ -248,6 +249,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
+    MultilineTitleComponent,
   ],
   exports: [
     FormsModule,
@@ -359,6 +361,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    GitSCMService,
     MetricsRangeSelectorService
   ]
 })

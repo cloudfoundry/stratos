@@ -2,6 +2,38 @@
 
 Weekly status updates are published here.
 
+## 7th December 2018
+
+The team are continuing to tackle some of the smaller issues form the backlog as well as the following two features:
+
+- User Favorites - Allowing users to favorite Apps, Orgs, Spaces etc and to provide quick access to these items.
+- Inviting Users - Support for inviting users to a Cloud Foundry system via email and to grant appropriate rights to an Org/Space
+
+PRs:
+
+- Reduce size of Docker All-in-one image [\#3261](https://github.com/cloudfoundry-incubator/stratos/pull/3261)
+- Tidy up CLI login info [\#3269](https://github.com/cloudfoundry-incubator/stratos/pull/3269)
+- Add service provider name to marketplace service card [\#3268](https://github.com/cloudfoundry-incubator/stratos/pull/3268)
+- Add link to dashboard in service instance table [\#3267](https://github.com/cloudfoundry-incubator/stratos/pull/3267)
+- Add Org and Space status bar to Org/Space Cards [\#3265](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
+- Helm port configuration improvements and unit tests [\#3264](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
+- Add confirmation dialog to `Restage` app [\#3263](https://github.com/cloudfoundry-incubator/stratos/pull/3263)
+- Remove global manage apps link [\#3259](https://github.com/cloudfoundry-incubator/stratos/pull/3259)
+- Add user has roles filter to users tables [\#3258](https://github.com/cloudfoundry-incubator/stratos/pull/3258)
+
+
+## 30th November 2018
+
+A quieter week for the Stratos team - with some out on vacation as we head towards the festive season.
+
+PRs this week:
+
+- Make the table multi actions more obvious [\#3251](https://github.com/cloudfoundry-incubator/stratos/pull/3251)
+- Hide app vars tab if user is not a space developer [\#3247](https://github.com/cloudfoundry-incubator/stratos/pull/3247)
+- Improve resilience of e2e tests [\#3246](https://github.com/cloudfoundry-incubator/stratos/pull/3246)
+- App Wall filter and sort controls size tweaks [\#3243](https://github.com/cloudfoundry-incubator/stratos/pull/3243)
+- Deploy App: Add notification toast [\#3242](https://github.com/cloudfoundry-incubator/stratos/pull/3242)
+
 ## 23rd November 2018
 
 We've been continuing to test Stratos 2.2.0 and improving test automation and E2E test reliability.

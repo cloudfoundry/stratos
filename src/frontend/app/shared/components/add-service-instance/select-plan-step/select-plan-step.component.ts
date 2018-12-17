@@ -92,7 +92,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     });
 
     if (modeService.isMarketplaceMode()) {
-      this.store.dispatch(new SetCreateServiceInstanceCFDetails(activatedRoute.snapshot.params.cfId));
+      this.store.dispatch(new SetCreateServiceInstanceCFDetails(activatedRoute.snapshot.params.endpointId));
     }
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(

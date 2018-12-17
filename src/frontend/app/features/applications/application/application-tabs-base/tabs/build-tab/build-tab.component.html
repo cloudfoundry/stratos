@@ -76,7 +76,7 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile *ngIf="(applicationService.applicationStratProject$ | async)?.deploySource as deploySource; else notDeployedFromStratos">
+      <app-tile *ngIf="(deploySource$ | async) as deploySource; else notDeployedFromStratos" id="app-build-tab-deployment-info">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Deployment Info</mat-card-title>
@@ -89,8 +89,8 @@
 		                  {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
                 </app-metadata-item>
-                <app-metadata-item *ngSwitchCase="'github'" iconFont="stratos-icons" icon="github" label="GitHub">
-                    <a href="{{ deploySource.url }}/commit/{{ deploySource.commit }}"
+                <app-metadata-item *ngSwitchCase="'gitscm'" [iconFont]="deploySource.icon.fontName" [icon]="deploySource.icon.iconName" [label]="deploySource.label">
+                    <a href="{{ deploySource.commitURL }}"
                       rel="noopener noreferrer" target="_blank">
                       {{ deploySource.commit | slice:0:8 }}
                     </a>
@@ -106,7 +106,7 @@
         </mat-card>
       </app-tile>
       <ng-template #notDeployedFromStratos>
-        <app-tile>
+        <app-tile id="app-build-tab-deployment-info">
           <mat-card>
             <mat-card-header>
               <mat-card-title>No Deployment Info</mat-card-title>

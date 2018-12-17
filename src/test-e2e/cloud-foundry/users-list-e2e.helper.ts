@@ -8,6 +8,12 @@ import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent, UserRoleChip } from '../po/cf-users-list.po';
 
+export enum CfUserTableTestLevel {
+  Cf = 1,
+  Org = 2,
+  Space = 3
+}
+
 export function setUpTestOrgSpaceE2eTest(
   orgName: string,
   spaceName: string,
@@ -32,7 +38,7 @@ export function setUpTestOrgSpaceE2eTest(
       spaceName,
       userName,
       new CFHelpers(e2eSetup),
-      dropBillingManager));
+      dropBillingManager), 25000, 'Did not complete "setUpTestOrgSpaceUserRoles" within 25 seconds');
   });
 }
 
@@ -74,7 +80,8 @@ export function setUpTestOrgSpaceUserRoles(
 }
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-cf-users';
-export function setupCfUserTableTests(cfLevel = true, navToUserTableFn: (cfGuid, orgGuid, spaceGuid) => promise.Promise<any>) {
+export function setupCfUserTableTests(
+  cfLevel: CfUserTableTestLevel, navToUserTableFn: (cfGuid, orgGuid, spaceGuid) => promise.Promise<any>) {
 
   const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel);
   const spaceName = E2EHelpers.createCustomName(customOrgSpacesLabel);
@@ -107,8 +114,8 @@ export function setupCfUserTableTests(cfLevel = true, navToUserTableFn: (cfGuid,
     const userRowIndex = 0;
 
     let orgUserChip: UserRoleChip;
-    const testOrgName = cfLevel ? orgName : null;
-    const testSpaceName = cfLevel ? spaceName : null;
+    const testOrgName = cfLevel === CfUserTableTestLevel.Cf ? orgName : null;
+    const testSpaceName = cfLevel === CfUserTableTestLevel.Cf ? spaceName : null;
 
     beforeAll(() => {
       usersTable.waitUntilShown();
@@ -121,7 +128,7 @@ export function setupCfUserTableTests(cfLevel = true, navToUserTableFn: (cfGuid,
       return usersTable.expandSpaceChips(userRowIndex);
     });
 
-    it('Check org user pill is present and cannot be remove', () => {
+    it('Check org user pill is present and cannot be removed', () => {
       expect(orgUserChip.isPresent()).toBeTruthy();
       orgUserChip.check(false);
     });
@@ -138,23 +145,31 @@ export function setupCfUserTableTests(cfLevel = true, navToUserTableFn: (cfGuid,
       spaceManagerChip.remove();
     });
 
-    it('Check org pills are present, can be removed and then remove', () => {
-      const orgBillingManagerChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'Billing Manager');
-      orgBillingManagerChip.check(true);
-      orgBillingManagerChip.remove();
-      const orgAuditorChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'Auditor');
-      orgAuditorChip.check(true);
-      orgAuditorChip.remove();
-      const orgManagerChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'Manager');
-      orgManagerChip.check(true);
-      orgManagerChip.remove();
-    });
+    // If we're at space level, as soon as the space roles are removed the user is not visible
 
-    it('Check org user pill can now be removed and remove it', () => {
-      // Requires all previous tests
-      orgUserChip.check(true);
-      orgUserChip.remove();
-    });
+    if (cfLevel === CfUserTableTestLevel.Space) {
+      it('Check user is not visible if they have no space roles', () => {
+        usersTable.empty.waitUntilShown('`No users` message');
+      });
+    } else {
+      it('Check org pills are present, can be removed and then remove', () => {
+        const orgBillingManagerChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'Billing Manager');
+        orgBillingManagerChip.check(true);
+        orgBillingManagerChip.remove();
+        const orgAuditorChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'Auditor');
+        orgAuditorChip.check(true);
+        orgAuditorChip.remove();
+        const orgManagerChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'Manager');
+        orgManagerChip.check(true);
+        orgManagerChip.remove();
+      });
+
+      it('Check org user pill can now be removed and remove it', () => {
+        // Requires all previous tests
+        orgUserChip.check(true);
+        orgUserChip.remove();
+      });
+    }
   });
 
   afterAll(() => cfHelper.deleteOrgIfExisting(cfGuid, orgName));
