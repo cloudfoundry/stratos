@@ -132,6 +132,7 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { GitSCMService } from './data-services/scm/scm.service';
 import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
@@ -368,6 +369,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    GitSCMService,
     MetricsRangeSelectorService
   ]
 })
