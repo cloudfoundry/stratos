@@ -130,7 +130,7 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
+import { GitSCMService } from './data-services/scm/scm.service';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { MomentModule } from 'ngx-moment';
@@ -356,6 +356,7 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    GitSCMService,
     MetricsRangeSelectorService
   ]
 })
