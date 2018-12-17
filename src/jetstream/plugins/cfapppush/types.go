@@ -38,12 +38,13 @@ type DeploySource struct {
 }
 
 // Structure used to provide metadata about the GitHub source
-type GitHubSourceInfo struct {
+type GitSCMSourceInfo struct {
 	DeploySource
 	Project    string `json:"project"`
 	Branch     string `json:"branch"`
-	Url        string `json:"url"`
+	URL        string `json:"url"`
 	CommitHash string `json:"commit"`
+	SCM        string `json:"scm"`
 }
 
 // Structure used to provide metadata about the Git Url source
