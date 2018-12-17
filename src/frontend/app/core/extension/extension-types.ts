@@ -13,8 +13,10 @@ export interface EndpointTypeConfig {
   icon?: string;
   iconFont?: string;
   authTypes?: string[];
-  // Get the link to the home page for the given emndpoint GUID
+  // Get the link to the home page for the given endpoint GUID
   homeLink?: (string) => string[];
+  // Schema keys associated with this endpoint type (used when clearing pagination)
+  entitySchemaKeys?: string[];
 }
 
 export interface EndpointAuthTypeConfig {
@@ -52,5 +54,4 @@ export interface ExtensionEntitySchema {
   definition?: Schema;
   options?: schema.EntityOptions;
   relationKey?: string;
-  group?: string;
 }

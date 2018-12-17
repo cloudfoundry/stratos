@@ -61,3 +61,14 @@ export const kubernetesEntities: ExtensionEntitySchema[] = [
     group: 'k8s'
   }
 ];
+
+export const kubernetesEntityKeys: string[] = [
+  kubernetesSchemaKey,
+  kubernetesAppsSchemaKey,
+  kubernetesStatefulSetsSchemaKey,
+  kubernetesPodsSchemaKey,
+  kubernetesDeploymentsSchemaKey,
+  kubernetesNodesSchemaKey,
+  kubernetesNamespacesSchemaKey,
+  kubernetesServicesSchemaKey,
+];

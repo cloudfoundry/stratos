@@ -220,3 +220,9 @@ export function getTabsFromExtensions(tabType: StratosTabType) {
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
 }
+
+export function getEndpointSchemeKeys(type: string): string[] {
+  const ep = this.metadata.endpointTypes.find(e => e.value === type);
+  return ep ? ep.entitySchemaKeys || [] : [];
+}
+

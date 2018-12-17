@@ -45,17 +45,6 @@ export const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
-export function getEntitiesByGroup(groupName: string): EntitySchema[]  {
-  const items = [];
-  Object.values(entityCache).forEach((e => {
-    if (e.group === groupName) {
-      items.push(e);
-    }
-  }));
-  return items;
-}
-
-
 /**
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
  *

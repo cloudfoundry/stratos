@@ -9,6 +9,7 @@ import {
   getEntitiesByGroup,
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
+import { getEndpointSchemeKeys } from '../../../core/extension/extension-service';
 
 export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
   return entityKeys.reduce((prevState, entityKey) => {
@@ -46,12 +47,11 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
   }
 
   // Check extensions
-  const entities = getEntitiesByGroup(action.endpointType);
-  if (entities.length > 0) {
-    const keys = entities.map(e => e.key);
+  const entityKeys = getEndpointSchemeKeys(action.endpointType);
+  if (entityKeys.length > 0) {
     return paginationClearAllTypes(
       state,
-      keys,
+      entityKeys,
       defaultPaginationEntityState
     );
   }
