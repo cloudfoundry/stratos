@@ -127,8 +127,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       first(),
     ).subscribe(stratosProject => {
       this.projectName = stratosProject.deploySource.project;
-      thgitBranchesSchemaKeystratosProject.deploySource.commit;
-      const scmType = gitBranchesSchemaKeyurce.scm || stratosProject.deploySource.type;
+      this.deployedCommitSha = stratosProject.deploySource.commit;
+      const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
       const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;

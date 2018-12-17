@@ -63,7 +63,7 @@ export class FetchBranchesForProject implements PaginatedAction {
   type = FETCH_BRANCHES_FOR_PROJECT;
   entityKey = gitBranchesSchemaKey;
   paginationKey: 'branches';
-} gitBranchesSchemaKey
+}
 
 export class SaveAppDetails implements Action {
   constructor(public appDetails: GitAppDetails) { }
