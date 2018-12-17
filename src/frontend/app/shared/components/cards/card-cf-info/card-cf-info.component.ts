@@ -42,10 +42,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   }
 
   private getMetadataFromInfo(entity: EntityInfo<APIResource<ICfV2Info>>) {
-    if (entity && entity.entity && entity.entity.entity && entity.entity.entity) {
-      return entity.entity.entity;
-    }
-    return null;
+    return entity && entity.entity && entity.entity.entity ? entity.entity.entity : null;
   }
 
   private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {
