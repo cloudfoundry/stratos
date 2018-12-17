@@ -1,11 +1,11 @@
+import { CfUserService } from './../../../../shared/data-services/cf-user.service';
 
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith, switchMap } from 'rxjs/operators';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -32,6 +32,8 @@ import {
   StratosActionType
 } from '../../../../core/extension/extension-service';
 import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
+import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -76,7 +78,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -115,9 +118,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
+    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid, space.metadata.guid)
+      ),
+      map(can => !can)
+    );
+
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
   }
+
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
@@ -170,6 +181,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
           { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances` }
+        ]
+      },
+      {
+        key: 'space-routes',
+        breadcrumbs: [
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/routes` }
         ]
       },
       {

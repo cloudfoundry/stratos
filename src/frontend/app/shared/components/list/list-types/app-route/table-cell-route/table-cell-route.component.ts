@@ -1,12 +1,9 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 import { AppState } from '../../../../../../store/app-state';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { EntityInfo } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({

@@ -95,7 +95,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     },
     {
       columnId: 'attachedApps',
-      headerCell: () => 'Application Attached',
+      headerCell: () => 'Attached Applications',
       cellComponent: TableCellServiceInstanceAppsAttachedComponent,
       cellFlex: '3'
     },
