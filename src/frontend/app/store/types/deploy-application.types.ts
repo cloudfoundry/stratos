@@ -1,9 +1,10 @@
 import { NewAppCFDetails } from './create-application.types';
-import { GitBranch, GithubCommit } from './github.types';
+import { GitBranch, GitCommit } from './git.types';
 
 export interface SourceType {
   name: string;
   id: string;
+  group?: string;
 }
 
 export enum DeployState {
@@ -35,7 +36,7 @@ export enum SocketEventTypes {
   EVENT_PUSH_STARTED = 10002,
   EVENT_PUSH_COMPLETED = 10003,
   SOURCE_REQUIRED = 30000,
-  SOURCE_GITHUB = 30001,
+  SOURCE_GITSCM = 30001,
   SOURCE_FOLDER = 30002,
   SOURCE_FILE = 30003,
   SOURCE_FILE_DATA = 30004,
@@ -50,13 +51,15 @@ export interface DeployApplicationSource {
   type: SourceType;
   projectName?: string;
   branch?: GitBranch;
-  commit?: GithubCommit;
+  commit?: GitCommit;
   branchName?: string;
+  url?: string;
 }
 
 export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
+  url?: string;
 }
 
 export interface OverrideAppDetails {
