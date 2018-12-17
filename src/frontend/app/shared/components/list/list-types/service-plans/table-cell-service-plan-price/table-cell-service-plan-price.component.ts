@@ -11,15 +11,20 @@ import { TableCellCustom } from '../../../list.types';
   styleUrls: ['./table-cell-service-plan-price.component.scss'],
 })
 export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIResource<IServicePlan>> {
-  protected isFree: boolean;
-  protected canShowCosts: boolean;
+  isFree: boolean;
+  canShowCosts: boolean;
 
+  private _servicePlan;
   @Input()
   set row(servicePlan: APIResource<IServicePlan>) {
+    this._servicePlan = servicePlan;
     if (!servicePlan) {
       return;
     }
     this.isFree = servicePlan.entity.free;
     this.canShowCosts = canShowServicePlanCosts(servicePlan);
+  }
+  get row(): APIResource<IServicePlan> {
+    return this._servicePlan;
   }
 }

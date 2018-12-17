@@ -20,8 +20,8 @@ import { CardStatus } from '../application-state/application-state.service';
 })
 export class ServicePlanPublicComponent {
 
-  protected planAccessibility$: Observable<CardStatus>;
-  protected planAccessibilityMessage$: Observable<string>;
+  planAccessibility$: Observable<CardStatus>;
+  planAccessibilityMessage$: Observable<string>;
   private _servicePlan: APIResource<IServicePlan>;
   @Input()
   get servicePlan(): APIResource<IServicePlan> {
