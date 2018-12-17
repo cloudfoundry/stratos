@@ -5,9 +5,11 @@
     </button>
     <div class="tab-nav__inner" #navScroller [ngStyle]="{'margin-bottom.px': isOverflowing ? -(scrollBarWidth) : 0}">
       <nav *ngIf="tabs" #nav backgroundColor="primary" mat-tab-nav-bar class="tab-nav">
-        <a mat-tab-link [ngClass]="{'page-subheader__tab-hidden': (tab.hidden | async)}" class="mat-tab-fit" *ngFor="let tab of tabs" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
-      {{tab.label}}
-      </a>
+        <ng-container *ngFor="let tab of tabs">
+          <a mat-tab-link *ngIf="tab.hidden ? !(tab.hidden | async) : true" class="mat-tab-fit" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
+          {{tab.label}}
+          </a>
+        </ng-container>
       </nav>
     </div>
 
