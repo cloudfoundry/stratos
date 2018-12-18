@@ -39,7 +39,7 @@ import { GetOrganization } from './store/actions/organization.actions';
 import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
 import { CurrentUserPermissions } from './core/current-user-permissions.config';
 import { RouterNav } from './store/actions/router.actions';
-import { initEndpointExtensions } from './features/endpoints/endpoint-helpers';
+import { initEndpointExtensions, getFullEndpointApiUrl } from './features/endpoints/endpoint-helpers';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -138,8 +138,8 @@ export class AppModule {
         type: endpointType,
         routerLink: `/cloud-foundry/${endpoint.guid}`,
         lines: [
-          ['Address', endpoint.api_endpoint.Host],
-          ['User', endpoint.user ? endpoint.user.name : 'Not connected'],
+          ['Address', getFullEndpointApiUrl(endpoint)],
+          ['User', endpoint.user ? endpoint.user.name : 'Unknown'],
           ['Admin', endpoint.user && endpoint.user.admin ? 'Yes' : 'No']
         ],
         name: endpoint.name,

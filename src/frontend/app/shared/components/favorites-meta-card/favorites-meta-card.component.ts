@@ -74,7 +74,7 @@ export class FavoritesMetaCardComponent implements OnInit {
   public setConfirmation(prettyName: string, favorite: UserFavorite) {
     this.confirmation = new ConfirmationDialogConfig(
       `Unfavorite ${prettyName}`,
-      `Are you sure you would you like to unfavorite this ${prettyName.toLocaleLowerCase()} with the id ${favorite.entityId}?`,
+      `Are you sure you would like to unfavorite this ${prettyName.toLocaleLowerCase()} with the id ${favorite.entityId}?`,
       'Yes',
       true
     );

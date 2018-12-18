@@ -222,9 +222,6 @@ export class UserFavoriteManager {
     return favorites.reduce((newFavorites: UserFavorite[], favorite) => {
       const hasEndpoint = this.hasEndpointAsFavorite(newFavorites, favorite);
       if (!hasEndpoint) {
-        // Bug with faved entities that have been removed still being in the favorite list
-        // causing a cf to be added
-        // Should some how not do this
         const endpointFavorite = new UserFavoriteEndpoint(
           favorite.endpointId,
           favorite.endpointType
