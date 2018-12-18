@@ -4,6 +4,7 @@ import { RoutesTabComponent } from './routes-tab.component';
 import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { ApplicationEnvVarsHelper } from '../../build-tab/application-env-vars.service';
+import { DatePipe } from '@angular/common';
 
 describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;
@@ -15,7 +16,8 @@ describe('RoutesTabComponent', () => {
       imports: [...BaseTestModules],
       providers: [
         generateTestApplicationServiceProvider('test', 'test'),
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
+        DatePipe
       ]
     })
       .compileComponents();

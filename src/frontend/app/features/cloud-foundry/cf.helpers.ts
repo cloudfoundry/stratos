@@ -32,8 +32,6 @@ import { environment } from '../../../environments/environment';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
-
 export interface IUserRole<T> {
   string: string;
   key: T;
@@ -303,3 +301,16 @@ export function fetchTotalResults(
     map(pag => pag.totalResults)
   );
 }
+
+export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  // Filter by cf/org/space
+  const cfGuid = paginationState.clientPagination.filter.items['cf'];
+  const orgGuid = paginationState.clientPagination.filter.items['org'];
+  const spaceGuid = paginationState.clientPagination.filter.items['space'];
+  return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
+    const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+    const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+    return validCF && validOrg && validSpace;
+  });
+};

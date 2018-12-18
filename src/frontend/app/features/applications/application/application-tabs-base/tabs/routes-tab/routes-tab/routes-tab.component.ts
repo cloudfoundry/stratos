@@ -1,8 +1,10 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
+import { CurrentUserPermissionsService } from '../../../../../../../core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../shared/components/confirmation-dialog.service';
 import {
   CfAppRoutesListConfigService,
@@ -13,8 +15,9 @@ import { FetchAllDomains } from '../../../../../../../store/actions/domains.acti
 import { AppState } from '../../../../../../../store/app-state';
 import { domainSchemaKey, entityFactory } from '../../../../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource, EntityInfo } from '../../../../../../../store/types/api.types';
+import { APIResource } from '../../../../../../../store/types/api.types';
 import { ApplicationService } from '../../../../../application.service';
+import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-routes-tab',
@@ -26,11 +29,15 @@ import { ApplicationService } from '../../../../../application.service';
       useFactory: (
         store: Store<AppState>,
         appService: ApplicationService,
-        confirmDialog: ConfirmationDialogService) => {
-        return new CfAppRoutesListConfigService(store, appService, confirmDialog);
+        confirmDialog: ConfirmationDialogService,
+        datePipe: DatePipe,
+        cups: CurrentUserPermissionsService
+      ) => {
+        return new CfAppRoutesListConfigService(store, appService, confirmDialog, datePipe, cups);
       },
-      deps: [Store, ApplicationService, ConfirmationDialogService]
-    }
+      deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
+    },
+    CfOrgSpaceDataService
   ]
 })
 export class RoutesTabComponent implements OnInit {

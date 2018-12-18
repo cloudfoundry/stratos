@@ -16,10 +16,10 @@ import {
 } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import {
   TableCellRouteComponent,
-} from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
+} from '../../../shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
 import {
   TableCellTCPRouteComponent,
-} from '../../../shared/components/list/list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
+} from '../../../shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import {
   AppServiceBindingDataSource,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
@@ -37,7 +37,7 @@ import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.fa
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
-import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
+import { DeleteApplication, GetApplication } from '../../../store/actions/application.actions';
 import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
@@ -46,10 +46,8 @@ import {
   applicationSchemaKey,
   entityFactory,
   routeSchemaKey,
-  serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
 

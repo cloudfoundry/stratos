@@ -1,28 +1,32 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { CloudFoundryUsersComponent } from './cloud-foundry-users.component';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryRoutesComponent } from './cloud-foundry-routes.component';
 
-describe('CloudFoundryUsersComponent', () => {
-  let component: CloudFoundryUsersComponent;
-  let fixture: ComponentFixture<CloudFoundryUsersComponent>;
+describe('CloudFoundryRoutesComponent', () => {
+  let component: CloudFoundryRoutesComponent;
+  let fixture: ComponentFixture<CloudFoundryRoutesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryUsersComponent],
+      declarations: [CloudFoundryRoutesComponent],
       imports: [
         ...BaseTestModules
       ],
       providers: [
-        ActiveRouteCfOrgSpace
+        CloudFoundryEndpointService,
+        ActiveRouteCfOrgSpace,
+        DatePipe
       ]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CloudFoundryUsersComponent);
+    fixture = TestBed.createComponent(CloudFoundryRoutesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,15 +1,14 @@
-import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
-import { GitHubSCM } from './../../../../../../shared/data-services/scm/github-scm';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { combineLatest, distinct, map, tap } from 'rxjs/operators';
+import { combineLatest, distinct, map } from 'rxjs/operators';
 
-import { EntityInfo } from '../../../../../../store/types/api.types';
-import { AppSummary } from '../../../../../../store/types/app-metadata.types';
+import { IAppSummary } from '../../../../../../core/cf-api.types';
+import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
+import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
-import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
+import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
 
 
 @Component({
@@ -40,7 +39,7 @@ export class BuildTabComponent implements OnInit {
       combineLatest(
         this.applicationService.appSummary$
       ),
-      map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
+      map(([app, appSummary]: [ApplicationData, EntityInfo<APIResource<IAppSummary>>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 
@@ -58,7 +57,7 @@ export class BuildTabComponent implements OnInit {
     this.deploySource$ = this.applicationService.applicationStratProject$.pipe(
       map(project => {
         if (!!project) {
-          const deploySource =  { ... project.deploySource } as any;
+          const deploySource = { ...project.deploySource } as any;
 
           // Legacy
           if (deploySource.type === 'github') {
@@ -66,7 +65,7 @@ export class BuildTabComponent implements OnInit {
             deploySource.scm = 'github';
           }
 
-          const scmType = deploySource.scm  as GitSCMType;
+          const scmType = deploySource.scm as GitSCMType;
           const scm = this.scmService.getSCM(scmType);
           deploySource.label = scm.getLabel();
           deploySource.commitURL = scm.getCommitURL(deploySource.project, deploySource.commit);

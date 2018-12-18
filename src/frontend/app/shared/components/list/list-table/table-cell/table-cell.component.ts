@@ -29,9 +29,8 @@ import {
   TableCellEventTypeComponent,
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
-import { TableCellAppRouteComponent } from '../../list-types/app-route/table-cell-app-route/table-cell-app-route.component';
-import { TableCellRouteComponent } from '../../list-types/app-route/table-cell-route/table-cell-route.component';
-import { TableCellTCPRouteComponent } from '../../list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
+import { TableCellRouteComponent } from '../../list-types/cf-routes/table-cell-route/table-cell-route.component';
+import { TableCellTCPRouteComponent } from '../../list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import {
   TableCellEditVariableComponent,
 } from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
@@ -57,7 +56,7 @@ import {
 } from '../../list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import {
   TableCellRouteAppsAttachedComponent,
-} from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+} from '../../list-types/cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
@@ -129,7 +128,6 @@ export const listTableCells = [
   TableCellRouteComponent,
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,
-  TableCellAppRouteComponent,
   TableCellRadioComponent,
   TableCellServiceInstanceAppsAttachedComponent,
   TableCellServiceInstanceTagsComponent,
