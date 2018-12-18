@@ -56,10 +56,7 @@ import {
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import {
-  CfEndpointsMissingComponent,
-  CfEndpointsMissingComponent,
-} from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
