@@ -56,7 +56,10 @@ import {
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import {
+  CfEndpointsMissingComponent,
+  CfEndpointsMissingComponent,
+} from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
@@ -132,6 +135,7 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { GitSCMService } from './data-services/scm/scm.service';
 import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
@@ -366,6 +370,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    GitSCMService,
     MetricsRangeSelectorService
   ]
 })

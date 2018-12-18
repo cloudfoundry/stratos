@@ -29,6 +29,7 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
   stackSchemaKey,
+  appEnvVarsSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
@@ -47,6 +48,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -211,6 +213,15 @@ export class ApplicationService {
     );
 
     this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
+  }
+
+  public getApplicationEnvVarsMonitor() {
+    const factory = new EntityMonitorFactory(this.store);
+    return factory.create<APIResource<IApp>>(
+      this.appGuid,
+      appEnvVarsSchemaKey,
+      entityFactory(appEnvVarsSchemaKey)
+    );
   }
 
   private constructAmalgamatedObservables() {

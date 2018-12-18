@@ -41,20 +41,20 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe());
   }
 
+  private getMetadataFromInfo(entity: EntityInfo<APIResource<ICfV2Info>>) {
+    return entity && entity.entity && entity.entity.entity ? entity.entity.entity : null;
+  }
+
   private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {
-    let desc = '-';
-    if (entity && entity.entity && entity.entity.entity) {
-      const metadata = entity.entity.entity;
-      if (metadata.description.length === 0) {
-        // No descripion - custom overrides
-        if (metadata.support === 'pcfdev@pivotal.io') {
-          desc = 'PCF Dev';
-        }
-      } else {
-        desc = metadata.description;
-        desc += metadata.build ? ` (${metadata.build})` : '';
+    const metadata = this.getMetadataFromInfo(entity);
+    if (metadata) {
+      if (metadata.description) {
+        return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
+      }
+      if (metadata.support === 'pcfdev@pivotal.io') {
+        return 'PCF Dev';
       }
     }
-    return desc;
+    return '-';
   }
 }
