@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { GithubCommit } from '../../../store/types/github.types';
+import { GitCommit } from '../../../store/types/git.types';
 
 @Component({
   selector: 'app-github-commit-author',
@@ -8,6 +8,6 @@ import { GithubCommit } from '../../../store/types/github.types';
   styleUrls: ['./github-commit-author.component.scss']
 })
 export class GithubCommitAuthorComponent {
-  @Input() commit: GithubCommit;
+  @Input() commit: GitCommit;
   @Input() showAvatar = true;
 }
