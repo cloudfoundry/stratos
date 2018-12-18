@@ -67,7 +67,7 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
 
 export interface ApplicationData {
   fetching: boolean;
-  app: EntityInfo;
+  app: EntityInfo<IApp>;
   stack: EntityInfo;
   cf: any;
 }

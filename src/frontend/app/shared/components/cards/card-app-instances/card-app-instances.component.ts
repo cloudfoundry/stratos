@@ -38,8 +38,8 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     );
   }
 
-  private currentCount: 0;
-  public editCount: 0;
+  private currentCount = 0;
+  public editCount = 0;
 
   private sub: Subscription;
 
