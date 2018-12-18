@@ -178,18 +178,44 @@ export class UserFavoriteManager {
     if (!list || !list.length) {
       return observableOf(null);
     }
-    return combineLatest(list.map(
-      favGroup => combineLatest(favGroup.map(favorite => this.hydrateFavorite(favorite).pipe(
-        filter(entityInfo => !entityInfo || entityInfo.entityRequestInfo.fetching === false),
-        map(entityInfo => ({
-          entityInfo,
-          type: this.getTypeAndID(favorite).type,
-          cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
-          prettyName: favoritesConfigMapper.getPrettyName(favorite),
-          favorite
-        })))
-      ))
-    ));
+    return combineLatest(list.map(favGroup => this.hydrateGroup(favGroup)));
+  }
+
+  private hydrateGroup(favGroup: UserFavorite[]) {
+    const endpointIndex = favGroup.findIndex(fav => fav.entityType === 'endpoint');
+    const endpointFav = favGroup.splice(endpointIndex, 1)[0];
+
+    return this.hydrateFavorite<EndpointModel>(endpointFav).pipe(
+      filter(endpoint => !endpoint.entityRequestInfo.fetching),
+      switchMap(endpoint => {
+        const hydratedEndpoint = observableOf(this.mapToHydated(endpoint, endpointFav));
+        if (!endpoint || endpoint.entity.connectionStatus !== 'connected') {
+          return combineLatest([
+            hydratedEndpoint,
+            ...favGroup
+              .map(favorite => observableOf(this.mapToHydated(this.getDefaultEntityInfo(), favorite))),
+          ]);
+        }
+        return combineLatest([
+          hydratedEndpoint,
+          ...favGroup.map(favorite => this.hydrateFavorite(favorite).pipe(
+            filter(entityInfo => !entityInfo || entityInfo.entityRequestInfo.fetching === false),
+            map(entityInfo => this.mapToHydated(entityInfo, favorite))
+          )),
+        ]);
+      })
+    );
+
+  }
+
+  private mapToHydated(entityInfo: EntityInfo, favorite: UserFavorite) {
+    return {
+      entityInfo,
+      type: this.getTypeAndID(favorite).type,
+      cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
+      prettyName: favoritesConfigMapper.getPrettyName(favorite),
+      favorite
+    }
   }
 
   public addEndpointsToHydrateList = (favorites: UserFavorite[]) => {
@@ -220,11 +246,11 @@ export class UserFavoriteManager {
     return !favorite.entityId;
   }
 
-  public hydrateFavorite(favorite: UserFavorite): Observable<EntityInfo> {
+  public hydrateFavorite<T = any>(favorite: UserFavorite): Observable<EntityInfo<T>> {
     const { type, id } = this.getTypeAndID(favorite);
     const action = favoritesConfigMapper.getActionFromFavorite(favorite);
     if (action) {
-      const entityMonitor = new EntityMonitor(this.store, id, type, entityFactory(type));
+      const entityMonitor = new EntityMonitor<T>(this.store, id, type, entityFactory(type));
 
       if (favorite.entityType === 'endpoint') {
         return combineLatest(entityMonitor.entity$, entityMonitor.entityRequest$).pipe(
@@ -239,10 +265,14 @@ export class UserFavoriteManager {
       );
       return entityService.entityObs$;
     }
-    return observableOf({
+    return observableOf(this.getDefaultEntityInfo());
+  }
+
+  private getDefaultEntityInfo() {
+    return {
       entity: null,
       entityRequestInfo: getDefaultRequestState()
-    });
+    }
   }
 
   public getIsFavoriteObservable(favorite: UserFavorite) {
