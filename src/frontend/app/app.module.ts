@@ -139,8 +139,8 @@ export class AppModule {
         routerLink: `/cloud-foundry/${endpoint.guid}`,
         lines: [
           ['Address', getFullEndpointApiUrl(endpoint)],
-          ['User', endpoint.user ? endpoint.user.name : 'Unknown'],
-          ['Admin', endpoint.user && endpoint.user.admin ? 'Yes' : 'No']
+          ['User', endpoint.user ? endpoint.user.name : undefined],
+          ['Admin', endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined]
         ],
         name: endpoint.name,
         menuItems: [

@@ -1,7 +1,7 @@
 import { map, filter } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { IAllFavorites, UserFavoriteManager, IGroupedFavorites } from '../../../core/user-favorite-manager';
+import { IAllFavorites, UserFavoriteManager, IGroupedFavorites, IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 
@@ -37,7 +37,7 @@ export class FavoritesGlobalListComponent implements OnInit {
     });
   }
 
-  private sortFavoriteGroup(entityA, entityB) {
+  private sortFavoriteGroup(entityA: IFavoriteEntity, entityB: IFavoriteEntity) {
     if (entityA.favorite.entityType < entityB.favorite.entityType) {
       return -1;
     }

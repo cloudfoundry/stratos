@@ -7,9 +7,11 @@
     <div *ngIf="!favorites.error && !favorites.fetching">
       <div *ngFor="let favGroup of favorites.entityGroups">
         <div *ngIf="favGroup">
-          <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true" [endpointHasEntities]="!!favGroup.entities"
-            [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
-          <app-favorites-entity-list class="favorite-list_entities" [entities]="favGroup.entities"></app-favorites-entity-list>
+          {{favGroup.endpoint.user}}
+          <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true" [endpointDisconnected]="!favGroup.endpoint.user"
+            [endpointHasEntities]="!!favGroup.entities" [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
+          <app-favorites-entity-list [endpointDisconnected]="!favGroup.endpoint.user" class="favorite-list_entities"
+            [entities]="favGroup.entities"></app-favorites-entity-list>
         </div>
       </div>
     </div>
@@ -17,7 +19,7 @@
   <div *ngIf="favorites.fetching">
     <div class="favorite-list favorite-list-placeholder">
       <app-favorites-meta-card class="favorite-list__endpoint-card" [placeholder]="true"></app-favorites-meta-card>
-      <app-favorites-entity-list class="favorite-list_entities" [placeholder]="true"></app-favorites-entity-list>
+      <app-favorites-entity-list class="favorite-list_entities" [placeholder]="true" [endpointDisconnected]></app-favorites-entity-list>
     </div>
   </div>
 </div>

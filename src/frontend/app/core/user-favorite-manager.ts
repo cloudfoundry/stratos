@@ -124,6 +124,7 @@ export class UserFavoriteManager {
       mergeMap(this.getHydratedGroups),
       map(this.reduceGroupedRequests),
       catchError(e => {
+        console.log(e)
         return observableOf({
           error: true,
           fetching: false,
@@ -189,7 +190,7 @@ export class UserFavoriteManager {
       filter(endpoint => !endpoint.entityRequestInfo.fetching),
       switchMap(endpoint => {
         const hydratedEndpoint = observableOf(this.mapToHydated(endpoint, endpointFav));
-        if (!endpoint || endpoint.entity.connectionStatus !== 'connected') {
+        if (!endpoint || !endpoint.entity || endpoint.entity.connectionStatus !== 'connected') {
           return combineLatest([
             hydratedEndpoint,
             ...favGroup

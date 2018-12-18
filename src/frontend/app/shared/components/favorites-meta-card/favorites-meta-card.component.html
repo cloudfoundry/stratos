@@ -7,16 +7,21 @@
       <div class="fav-meta-card__type">{{ prettyName }}</div>
     </div>
   </app-meta-card-title>
-  <app-meta-card-item *ngFor="let line of config.lines">
-    <app-meta-card-key>{{ line[0] }}</app-meta-card-key>
-    <app-meta-card-value>{{ line[1] | async }} </app-meta-card-value>
-  </app-meta-card-item>
+  <ng-container *ngFor="let line of config.lines">
+    <app-meta-card-item *ngIf="line[1] | async as value">
+      <app-meta-card-key>{{ line[0] }}</app-meta-card-key>
+      <app-meta-card-value>{{ value }} </app-meta-card-value>
+    </app-meta-card-item>
+  </ng-container>
 </app-meta-card>
 
 <mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && !endpoint">
   <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
-  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore">Could not fetch {{ prettyName |
+  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && !endpointDisconnected">Could not
+    fetch {{ prettyName |
     lowercase }}</small>
+  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && endpointDisconnected">Endpoint
+    disconnected</small>
   <div class="error-details" *ngIf="showMore">
     <div class="error-details__label subtle-text">Type</div>
     <div class="error-details__value">{{ prettyName }}</div>

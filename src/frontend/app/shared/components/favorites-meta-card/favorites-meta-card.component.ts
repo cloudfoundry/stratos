@@ -34,6 +34,9 @@ export class FavoritesMetaCardComponent implements OnInit {
   @Input()
   public endpointHasEntities = false;
 
+  @Input()
+  public endpointDisconnected = false;
+
   public config: IFavoritesMetaCardConfig;
 
   public status$: Observable<CardStatus>;
@@ -62,6 +65,10 @@ export class FavoritesMetaCardComponent implements OnInit {
       const config = cardMapper && entity ? cardMapper(entity) : null;
 
       if (config) {
+        if (this.endpoint && this.endpointDisconnected) {
+          config.name = `${config.name} (Disconnected)`;
+          config.routerLink = '/endpoints';
+        }
         config.lines = this.mapLinesToObservables(config.lines);
         this.config = config;
         if (this.config.getStatus) {

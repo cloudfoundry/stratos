@@ -16,6 +16,9 @@ export class FavoritesEntityListComponent {
   @Input()
   public placeholder = false;
 
+  @Input()
+  public endpointDisconnected = false;
+
   public _entities: IFavoriteEntity[];
 
   public limitedEntities: IFavoriteEntity[];
