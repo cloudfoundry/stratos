@@ -34,12 +34,14 @@
 .meta-card-item-long-text,
 .meta-card-item-long-text-fixed {
   padding-top: 10px;
+
   .meta-card-item__value {
     padding-bottom: 10px;
     text-align: start;
     white-space: unset;
     word-wrap: break-word;
   }
+
   .meta-card-item__key {
     display: none;
   }
@@ -50,6 +52,7 @@
     height: 54px;
     line-height: 18px;
     position: relative;
+
     &::after {
       background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
       bottom: 0;
@@ -60,5 +63,13 @@
       text-align: right;
       width: 25%;
     }
+  }
+}
+
+.meta-card-item-flexed {
+  .meta-card-item__value {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
   }
 }

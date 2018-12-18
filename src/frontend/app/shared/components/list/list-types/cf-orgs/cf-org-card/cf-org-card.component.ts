@@ -34,6 +34,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   cardMenu: MetaCardMenuItem[];
   orgGuid: string;
   normalisedMemoryUsage: number;
+  normalisedInstanceUsage: number;
   memoryLimit: number;
   instancesLimit: number;
   subscriptions: Subscription[] = [];
@@ -107,8 +108,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     const quotaDefinition = this.row.entity.quota_definition;
     this.instancesLimit = quotaDefinition.entity.app_instance_limit;
     this.memoryLimit = quotaDefinition.entity.memory_limit;
-    this.
-      normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
+    this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
+    this.normalisedInstanceUsage = this.instancesCount / this.instancesLimit * 100;
   }
 
   ngOnDestroy = () => this.

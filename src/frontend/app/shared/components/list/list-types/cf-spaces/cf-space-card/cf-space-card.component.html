@@ -12,16 +12,27 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>App Instances</app-meta-card-key>
-    <app-meta-card-value>{{appInstancesCount }} / {{ appInstancesLimit | infinityPipe }}</app-meta-card-value>
+    <app-meta-card-value customStyle="flexed">
+      <div class="space-card__quota-chart">{{appInstancesCount }} / {{ appInstancesLimit | infinityPipe }}
+        <mat-progress-bar mode="determinate" [value]="normalisedInstanceUsage"></mat-progress-bar>
+      </div>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Instances</app-meta-card-key>
-    <app-meta-card-value>{{serviceInstancesCount }} / {{ serviceInstancesLimit | infinityPipe }}</app-meta-card-value>
+    <app-meta-card-value customStyle="flexed">
+      <div class="space-card__quota-chart">{{serviceInstancesCount }} / {{ serviceInstancesLimit | infinityPipe }}
+        <mat-progress-bar mode="determinate" [value]="normalisedServiceInstanceUsage"></mat-progress-bar>
+      </div>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Memory</app-meta-card-key>
-    <app-meta-card-value>{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}
+    <app-meta-card-value customStyle="flexed">
+      <div class="space-card__quota-chart">{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}
+        <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
+      </div>
     </app-meta-card-value>
-    <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
+
   </app-meta-card-item>
 </app-meta-card>

@@ -17,6 +17,7 @@ export class MetaCardItemComponent implements OnInit {
     'column': 'meta-card-item-column',
     'long-text': 'meta-card-item-long-text',
     'long-text-fixed': 'meta-card-item-long-text-fixed',
+    'flexed': 'meta-card-item-flexed '
   };
   itemStyle = 'meta-card-item-row';
   @ContentChild(MetaCardKeyComponent)

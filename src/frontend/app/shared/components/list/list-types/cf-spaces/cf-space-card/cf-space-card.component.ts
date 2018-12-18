@@ -41,6 +41,8 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   appInstancesLimit: number;
   orgGuid: string;
   normalisedMemoryUsage: number;
+  normalisedInstanceUsage: number;
+  normalisedServiceInstanceUsage: number;
   memoryLimit: number;
   instancesLimit: number;
   subscriptions: Subscription[] = [];
@@ -136,6 +138,8 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.serviceInstancesLimit = quotaDefinition.entity.total_services;
     this.memoryLimit = quotaDefinition.entity.memory_limit;
     this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
+    this.normalisedInstanceUsage = this.appInstancesCount / this.appInstancesLimit * 100;
+    this.normalisedServiceInstanceUsage = this.serviceInstancesCount / this.serviceInstancesLimit * 100;
   }
 
   ngOnDestroy = () => this.
