@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -14,7 +15,7 @@ import (
 
 func (uf *UserFavorites) getAll(c echo.Context) error {
 
-	store, err := NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
+	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
@@ -45,7 +46,7 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 
 func (uf *UserFavorites) delete(c echo.Context) error {
 
-	store, err := NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
+	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 
 func (uf *UserFavorites) create(c echo.Context) error {
 
-	store, err := NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
+	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
@@ -80,7 +81,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	req := c.Request()
 	body, _ := ioutil.ReadAll(req.Body())
 
-	favorite := UserFavoriteRecord{}
+	favorite := userfavoritesstore.UserFavoriteRecord{}
 	err = json.Unmarshal(body, &favorite)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
@@ -119,7 +120,25 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	return nil
 }
 
-func buildFavoriteStoreEntityGuid(favorite UserFavoriteRecord) string {
+// RemoveEndpointFavorites removes favorites form an endpoint using the given endpoint guid
+func (uf *UserFavorites) RemoveEndpointFavorites(endpointGUID string) error {
+	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
+	if err != nil {
+		return err
+	}
+
+	if len(endpointGUID) == 0 {
+		return errors.New("Invalid endpoint GUID")
+	}
+
+	err = store.DeleteFromEndpoint(endpointGUID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func buildFavoriteStoreEntityGuid(favorite userfavoritesstore.UserFavoriteRecord) string {
 	values := []string{}
 	if len(favorite.EntityID) > 0 {
 		values = append(values, favorite.EntityID)

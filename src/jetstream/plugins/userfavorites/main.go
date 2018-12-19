@@ -3,6 +3,7 @@ package userfavorites
 import (
 	"errors"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 )
@@ -14,7 +15,7 @@ type UserFavorites struct {
 
 // Init creates a new UserFavorites
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	InitRepositoryProvider(portalProxy.GetConfig().DatabaseProviderName)
+	userfavoritesstore.InitRepositoryProvider(portalProxy.GetConfig().DatabaseProviderName)
 	return &UserFavorites{portalProxy: portalProxy}, nil
 }
 

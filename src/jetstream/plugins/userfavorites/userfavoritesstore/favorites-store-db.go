@@ -1,4 +1,4 @@
-package userfavorites
+package userfavoritesstore
 
 import (
 	"database/sql"
@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	getFavorites   = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id FROM favorites WHERE user_guid = $1`
-	deleteFavorite = `DELETE FROM favorites WHERE user_guid = $1 AND guid = $2`
-	saveFavorite   = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id) VALUES ($1, $2, $3, $4, $5, $6)`
+	getFavorites           = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id FROM favorites WHERE user_guid = $1`
+	deleteFavorite         = `DELETE FROM favorites WHERE user_guid = $1 AND guid = $2`
+	saveFavorite           = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id) VALUES ($1, $2, $3, $4, $5, $6)`
+	deleteEndpointFavorite = `DELETE FROM favorites WHERE endpoint_id = $1`
 )
 
 // InitRepositoryProvider - One time init for the given DB Provider
@@ -78,4 +79,12 @@ func (p *FavoritesDBStore) Save(favoriteRecord UserFavoriteRecord) (*UserFavorit
 	}
 
 	return &favoriteRecord, nil
+}
+
+// DeleteFromEndpoint will remove all favorites for a given endpoint guid
+func (p *FavoritesDBStore) DeleteFromEndpoint(endpointGUID string) error {
+	if _, err := p.db.Exec(deleteEndpointFavorite, endpointGUID); err != nil {
+		return fmt.Errorf("Unable to User Favorite record: %v", err)
+	}
+	return nil
 }

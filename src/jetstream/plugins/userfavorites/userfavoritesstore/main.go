@@ -1,4 +1,4 @@
-package userfavorites
+package userfavoritesstore
 
 type UserFavoriteRecord struct {
 	GUID         string `json:"guid"`
@@ -14,4 +14,5 @@ type FavoritesStore interface {
 	List(userGUID string) ([]*UserFavoriteRecord, error)
 	Delete(userGUID string, guid string) error
 	Save(favoriteRecord UserFavoriteRecord) (*UserFavoriteRecord, error)
+	DeleteFromEndpoint(endpointGUID string) error
 }
