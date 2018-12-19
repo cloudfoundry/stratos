@@ -31,7 +31,6 @@ type FavoritesDBStore struct {
 
 // NewFavoritesDBStore will create a new instance of the FavoritesDBStore
 func NewFavoritesDBStore(dcp *sql.DB) (FavoritesStore, error) {
-	log.Debug("NewPostgresGooseDBVersionRepository")
 	return &FavoritesDBStore{db: dcp}, nil
 }
 
