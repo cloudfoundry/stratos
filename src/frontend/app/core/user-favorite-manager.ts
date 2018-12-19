@@ -124,7 +124,6 @@ export class UserFavoriteManager {
       mergeMap(this.getHydratedGroups),
       map(this.reduceGroupedRequests),
       catchError(e => {
-        console.log(e)
         return observableOf({
           error: true,
           fetching: false,
@@ -216,7 +215,7 @@ export class UserFavoriteManager {
       cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
       prettyName: favoritesConfigMapper.getPrettyName(favorite),
       favorite
-    }
+    };
   }
 
   public addEndpointsToHydrateList = (favorites: UserFavorite[]) => {
@@ -270,7 +269,7 @@ export class UserFavoriteManager {
     return {
       entity: null,
       entityRequestInfo: getDefaultRequestState()
-    }
+    };
   }
 
   public getIsFavoriteObservable(favorite: UserFavorite) {
