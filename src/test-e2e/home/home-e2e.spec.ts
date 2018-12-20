@@ -1,9 +1,7 @@
-import { HomePage } from './home.po';
 import { E2EHelpers, ConsoleUserType } from '../helpers/e2e-helpers';
-import { browser } from 'protractor';
+import { HomePage } from './home.po';
 
-// Dashboard page not implemented
-xdescribe('Home', () => {
+describe('Home', () => {
   const helpers = new E2EHelpers();
   const dashboardPage = new HomePage();
 
@@ -15,7 +13,7 @@ xdescribe('Home', () => {
     dashboardPage.navigateTo();
   });
 
-  it('- should reach dashboard page', () => {
-    expect(dashboardPage.).toBeTruthy();
+  it('- should reach home page', () => {
+    expect(dashboardPage.isActivePage()).toBeTruthy();
   });
 });
