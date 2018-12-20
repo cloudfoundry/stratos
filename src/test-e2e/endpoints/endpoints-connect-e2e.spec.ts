@@ -8,6 +8,7 @@ import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
+import { HomePage } from '../home/home.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
@@ -106,15 +107,15 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
       });
 
-      it('should go directly to applications view on logout and login', () => {
+      it('should go directly to home page view on logout and login', () => {
         endpointsPage.header.logout();
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(e2e.secrets.getConsoleNonAdminUsername(), e2e.secrets.getConsoleNonAdminPassword());
         loginPage.waitForLoading();
         loginPage.waitForApplicationPage();
-        const appPage = new ApplicationsPage();
-        expect(appPage.isActivePage()).toBeTruthy();
+        const homePage = new HomePage();
+        expect(homePage.isActivePage()).toBeTruthy();
       });
 
     });
