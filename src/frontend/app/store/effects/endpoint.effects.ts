@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, mergeMap, tap } from 'rxjs/operators';
+import { catchError, mergeMap, tap, debounce, debounceTime } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -41,6 +41,7 @@ import {
 import { EndpointType } from '../../core/extension/extension-types';
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 
 
 @Injectable()
@@ -167,7 +168,11 @@ export class EndpointsEffect {
         [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
         action.endpointType
       ).pipe(
-        tap(() => this.clearEndpointInternalEvents(action.guid))
+        debounceTime(1),
+        tap(() => {
+          this.store.dispatch(new GetUserFavoritesAction());
+          this.clearEndpointInternalEvents(action.guid);
+        })
       );
     }));
 
@@ -206,7 +211,7 @@ export class EndpointsEffect {
     }
     return message;
   }
-  private getEndpointUpdateAction(guid, type, updatingKey) {
+  private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
     return {
       entityKey: endpointStoreNames.type,
       guid,
