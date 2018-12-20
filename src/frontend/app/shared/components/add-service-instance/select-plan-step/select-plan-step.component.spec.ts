@@ -5,6 +5,7 @@ import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundr
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CardStatusComponent } from '../../cards/card-status/card-status.component';
+import { FocusDirective } from '../../focus.directive';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
@@ -25,7 +26,8 @@ describe('SelectPlanStepComponent', () => {
         CardStatusComponent,
         MetadataItemComponent,
         ServicePlanPublicComponent,
-        ServicePlanPriceComponent
+        ServicePlanPriceComponent,
+        FocusDirective
       ],
       imports: [BaseTestModulesNoShared],
       providers: [

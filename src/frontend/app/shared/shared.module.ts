@@ -79,9 +79,6 @@ import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
-import {
-  AppEventDetailDialogComponentComponent,
-} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -175,7 +172,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CodeBlockComponent,
     EventTabActorIconPipe,
     LogViewerComponent,
-    AppEventDetailDialogComponentComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
@@ -353,7 +349,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
-    AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
     NoServicePlansComponent

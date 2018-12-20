@@ -136,7 +136,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss');
           }
           return [];
-        }), ).subscribe();
+        })).subscribe();
     }
   }
 

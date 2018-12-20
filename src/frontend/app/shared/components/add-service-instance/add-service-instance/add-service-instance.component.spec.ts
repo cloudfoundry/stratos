@@ -18,6 +18,7 @@ import { AppChipsComponent } from '../../chips/chips.component';
 import {
   CreateApplicationStep1Component,
 } from '../../create-application/create-application-step1/create-application-step1.component';
+import { FocusDirective } from '../../focus.directive';
 import { MetaCardComponent } from '../../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from '../../list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from '../../list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -66,7 +67,8 @@ describe('AddServiceInstanceComponent', () => {
         ApplicationStateIconPipe,
         MultilineTitleComponent,
         ServicePlanPublicComponent,
-        ServicePlanPriceComponent
+        ServicePlanPriceComponent,
+        FocusDirective
       ],
       imports: [
         PageHeaderModule,
