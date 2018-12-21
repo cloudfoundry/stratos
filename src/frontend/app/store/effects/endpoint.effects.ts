@@ -123,8 +123,6 @@ export class EndpointsEffect {
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
         action.body,
-      ).pipe(
-        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -145,8 +143,6 @@ export class EndpointsEffect {
         null,
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
-      ).pipe(
-        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -167,12 +163,6 @@ export class EndpointsEffect {
         'delete',
         [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
         action.endpointType
-      ).pipe(
-        debounceTime(1),
-        tap(() => {
-          this.store.dispatch(new GetUserFavoritesAction());
-          this.clearEndpointInternalEvents(action.guid);
-        })
       );
     }));
 
@@ -250,12 +240,20 @@ export class EndpointsEffect {
         if (actionStrings[0]) {
           actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
         }
+
         if (apiActionType === 'delete') {
           actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+          actions.push(new GetUserFavoritesAction());
         }
+
         if (apiActionType === 'create') {
           actions.push(new GetSystemInfo());
         }
+
+        if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
+          actions.push(this.clearEndpointInternalEvents(apiAction.guid));
+        }
+
         actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
         return actions;
       }
@@ -272,14 +270,12 @@ export class EndpointsEffect {
   }
 
   private clearEndpointInternalEvents(guid: string) {
-    this.store.dispatch(
-      new SendClearEventAction(
-        endpointSchemaKey,
-        guid,
-        {
-          clean: true
-        }
-      )
+    return new SendClearEventAction(
+      endpointSchemaKey,
+      guid,
+      {
+        clean: true
+      }
     );
   }
 }
