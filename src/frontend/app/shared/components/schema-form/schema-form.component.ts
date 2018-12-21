@@ -136,10 +136,11 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     if (!schema) {
       return;
     }
-    return Object.keys(schema).reduce((obj, key) => {
+    const filterSchema = Object.keys(schema).reduce((obj, key) => {
       if (key !== '$schema') { obj[key] = schema[key]; }
       return obj;
     }, {});
+    return Object.keys(filterSchema).length > 0 ? filterSchema : null;
   }
 
   onFormChange(formData) {
