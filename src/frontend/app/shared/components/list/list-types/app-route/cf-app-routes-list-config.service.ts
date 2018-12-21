@@ -25,27 +25,27 @@ export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBa
   ) {
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, null, true);
 
+    this.setupList(store, appService);
+  }
+
+  private setupList(store: Store<AppState>, appService: ApplicationService) {
     const listActionAddRoute: IGlobalListAction<APIResource> = {
       action: () => {
         appService.application$.pipe(
           take(1),
-          tap(app => {
-            store.dispatch(
-              new RouterNav({
-                path: [
-                  'applications',
-                  appService.cfGuid,
-                  appService.appGuid,
-                  'add-route'
-                ],
-                query: {
-                  spaceGuid: app.app.entity.space_guid
-                }
-              })
-            );
-          })
-        )
-          .subscribe();
+        ).subscribe(app => {
+          store.dispatch(new RouterNav({
+            path: [
+              'applications',
+              appService.cfGuid,
+              appService.appGuid,
+              'add-route'
+            ],
+            query: {
+              spaceGuid: app.app.entity.space_guid
+            }
+          }));
+        });
       },
       icon: 'add',
       label: 'Add',

@@ -26,6 +26,11 @@ export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServi
     currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, null, false, false);
+
+    this.setupList();
+  }
+
+  private setupList() {
     this.getDataSource().getRowState = (route: APIResource<IRoute>): Observable<RowState> =>
       observableOf({
         disabledReason: 'Route is attached to other applications',

@@ -51,6 +51,14 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     ) : observableOf(false);
     super(store, confirmDialog, appService.cfGuid, datePipe, true, hasActions, () => canEditAppsInSpace, canEditAppsInSpace);
 
+    this.setupList(store, appService, getRoutesAction, genericRouteState);
+  }
+
+  private setupList(
+    store: Store<AppState>,
+    appService: ApplicationService,
+    getRoutesAction: GetAppRoutes | PaginatedAction,
+    genericRouteState: boolean) {
     this.getDataSource = () => {
       // Lazy init so that any changes to the columns & data functions (like sort) are correctly applied
       if (!this.dataSource) {

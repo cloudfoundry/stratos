@@ -35,6 +35,13 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
       refCount(),
     );
     super(store, confirmDialog, cfSpaceService.cfGuid, datePipe, false, true, () => canEditAppsInSpace, canEditAppsInSpace);
+
+    this.setupList(store, cfSpaceService);
+  }
+
+  private setupList(
+    store: Store<AppState>,
+    cfSpaceService: CloudFoundrySpaceService, ) {
     this.dataSource = new CfSpaceRoutesDataSource(
       store,
       this,

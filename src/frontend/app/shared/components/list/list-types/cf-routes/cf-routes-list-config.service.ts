@@ -49,6 +49,13 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     };
     super(store, confirmDialog, cfService.cfGuid, datePipe, true, true, canEditRoute, observableOf(false));
 
+    this.setupList(store, cfService, cfOrgSpaceService);
+  }
+
+  private setupList(
+    store: Store<AppState>,
+    cfService: CloudFoundryEndpointService,
+    cfOrgSpaceService: CfOrgSpaceDataService) {
     this.dataSource = new CfRoutesDataSource(
       store,
       this,

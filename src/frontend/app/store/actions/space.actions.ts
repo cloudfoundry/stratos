@@ -11,6 +11,7 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
+  domainSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -91,7 +92,10 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     public spaceGuid: string,
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations = [],
+    public includeRelations = [
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+    ],
     public populateMissing = true,
     public flattenPagination = true
   ) {
