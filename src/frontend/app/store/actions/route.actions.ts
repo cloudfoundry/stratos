@@ -96,11 +96,15 @@ export class DeleteRoute extends BaseRouteAction {
   removeEntityOnDelete = true;
 }
 export class UnmapRoute extends BaseRouteAction {
+  /**
+   * The key of the pagination section to remove the route from. Note, this should not be called `paginationKey`
+   * @param clearPaginationKey
+   */
   constructor(
     public routeGuid: string,
     public appGuid: string,
     public endpointGuid: string,
-    public removeEntityOnDelete = true
+    public clearPaginationKey?: string,
   ) {
     super(routeGuid, endpointGuid, appGuid);
     this.options = new RequestOptions();

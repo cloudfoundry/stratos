@@ -49,12 +49,12 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
       publishReplay(1),
       refCount(),
     ) : observableOf(false);
-    super(store, confirmDialog, appService.cfGuid, datePipe, true, hasActions, () => canEditAppsInSpace, canEditAppsInSpace);
+    super(store, confirmDialog, appService.cfGuid, datePipe, true, hasActions, () => canEditAppsInSpace, canEditAppsInSpace, true);
 
-    this.setupList(store, appService, getRoutesAction, genericRouteState);
+    this.setupBaseList(store, appService, getRoutesAction, genericRouteState);
   }
 
-  private setupList(
+  private setupBaseList(
     store: Store<AppState>,
     appService: ApplicationService,
     getRoutesAction: GetAppRoutes | PaginatedAction,

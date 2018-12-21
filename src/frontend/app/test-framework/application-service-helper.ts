@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
-import { IAppSummary, ISpace, IApp } from '../core/cf-api.types';
+import { IApp, IAppSummary, ISpace } from '../core/cf-api.types';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ApplicationData, ApplicationService } from '../features/applications/application.service';
 import {

@@ -219,13 +219,13 @@ export class CloudFoundryEndpointService {
   public getAppsInOrg(
     org: APIResource<IOrganization>
   ): Observable<APIResource<IApp>[]> {
-    return this.allApps$.pipe(
+    return org.entity.spaces ? this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
         const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
         return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
-    );
+    ) : observableOf([]);
   }
 
   public getAppsInSpace(
