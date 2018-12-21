@@ -9,10 +9,6 @@ export class HomePage extends Page {
     super('/home');
   }
 
-  navigateTo() {
-    return browser.get(this.navLink);
-  }
-
   isDashboardPage(strictCheck: boolean = true): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
       return url === browser.baseUrl + this.navLink || (strictCheck && url === browser.baseUrl + '/');
