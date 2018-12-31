@@ -1,9 +1,8 @@
-
-import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, tap, startWith } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -18,6 +17,7 @@ import { CfUser } from '../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
+
 
 @Component({
   selector: 'app-manage-users',

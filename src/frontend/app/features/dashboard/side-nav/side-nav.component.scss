@@ -1,7 +1,6 @@
 $side-nav-padding-h: 20px;
 $side-nav-mat-icon-width: 24px;
 $side-nav-mat-icon-padding-right: 15px;
-$side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $side-nav-mat-icon-padding-right;
 .side-nav {
   display: flex;
   flex-direction: column;
@@ -51,8 +50,10 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
   &__logo {
     align-items: center;
     display: flex;
-    padding-left: $side-nav-header-spacing;
+    width: 100%;
     &-text {
+      display: none;
+      flex: 1;
       padding: 0;
       text-align: center;
       text-transform: uppercase;

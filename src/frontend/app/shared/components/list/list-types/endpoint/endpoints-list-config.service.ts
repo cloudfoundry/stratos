@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
-
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { map, pairwise } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -9,9 +10,9 @@ import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import {
+  getEndpointUsername,
   getFullEndpointApiUrl,
   getNameForEndpointType,
-  getEndpointUsername,
 } from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
@@ -28,12 +29,9 @@ import { ConfirmationDialogService } from '../../../confirmation-dialog.service'
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
+import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-
-import { map, pairwise } from 'rxjs/operators';
-import { combineLatest, Observable } from 'rxjs';
-import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -232,9 +230,9 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   constructor(
     private store: Store<AppState>,
     private dialog: MatDialog,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory,
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
   ) {

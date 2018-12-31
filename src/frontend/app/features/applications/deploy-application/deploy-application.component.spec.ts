@@ -27,6 +27,9 @@ import {
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { DeployApplicationComponent } from './deploy-application.component';
+import { GithubProjectExistsDirective } from './github-project-exists.directive';
+import { HttpModule, Http, ConnectionBackend } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
@@ -43,12 +46,18 @@ describe('DeployApplicationComponent', () => {
         DeployApplicationOptionsStepComponent,
         DeployApplicationStepSourceUploadComponent,
         DeployApplicationFsComponent,
-        CommitListWrapperComponent
+        CommitListWrapperComponent,
+        GithubProjectExistsDirective
       ],
       providers: [
         CfOrgSpaceDataService,
         ApplicationEnvVarsHelper,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
+        Http,
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        }
       ],
       imports: [
         SharedModule,
@@ -64,6 +73,7 @@ describe('DeployApplicationComponent', () => {
         ),
         HttpClientModule,
         HttpClientTestingModule,
+        HttpModule
       ]
     })
       .compileComponents();
