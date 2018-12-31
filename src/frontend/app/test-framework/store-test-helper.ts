@@ -581,7 +581,7 @@ export function getInitialTestStoreState(): AppState {
       serviceInstance: {},
       serviceBinding: {},
       service: {},
-      githubCommits: {},
+      gitCommits: {},
       domain: {},
       metrics: {}
     },
@@ -695,9 +695,9 @@ export function getInitialTestStoreState(): AppState {
         }
       },
       domain: {},
-      githubBranches: {},
+      gitBranches: {},
       cloudFoundryInfo: {},
-      githubCommits: {},
+      gitCommits: {},
       endpoint: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
@@ -4300,8 +4300,8 @@ export function getInitialTestStoreState(): AppState {
       },
       domain: {},
       cloudFoundryInfo: {},
-      githubBranches: {},
-      githubCommits: {},
+      gitBranches: {},
+      gitCommits: {},
       application: {
         '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           entity: {

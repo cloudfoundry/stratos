@@ -57,7 +57,7 @@ export class ApplicationBasePage extends CFPage {
   }
 
   public goToGithubTab() {
-    return this.goToTab('GitHub', 'github');
+    return this.goToTab('GitHub', 'gitscm');
   }
 
   private goToTab(label: string, urlSuffix: string) {

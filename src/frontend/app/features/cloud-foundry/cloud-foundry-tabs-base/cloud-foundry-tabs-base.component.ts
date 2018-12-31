@@ -1,23 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, tap, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-import { canUpdateOrgSpaceRoles } from '../cf.helpers';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { AppState } from './../../../store/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
-  StratosTabType,
+  getActionsFromExtensions,
   getTabsFromExtensions,
   StratosActionMetadata,
-  getActionsFromExtensions,
-  StratosActionType
+  StratosActionType,
+  StratosTabType,
 } from '../../../core/extension/extension-service';
+import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { canUpdateOrgSpaceRoles } from '../cf.helpers';
+
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
