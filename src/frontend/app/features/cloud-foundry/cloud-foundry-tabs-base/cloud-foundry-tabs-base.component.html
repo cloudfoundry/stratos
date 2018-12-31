@@ -1,10 +1,6 @@
 <app-page-header [tabs]="tabLinks" [tabsHeader]="tabsHeader">
   <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="user-management" *ngIf="(canUpdateRoles$ | async) && (cfEndpointService.users$ | async)?.length"
-      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/users/manage" matTooltip="Manage Users">
-      <mat-icon>people</mat-icon>
-    </button>
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli" matTooltip="CLI Info">
       <mat-icon>keyboard</mat-icon>
     </button>

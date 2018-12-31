@@ -6,10 +6,6 @@
       matTooltip="Edit Organization">
       <mat-icon>mode_edit</mat-icon>
     </button>
-    <button mat-icon-button name="user-management" *ngIf="canUpdateRoles$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users/manage"
-      matTooltip="Manage Users">
-      <mat-icon>people</mat-icon>
-    </button>
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli"
       matTooltip="CLI Info">
       <mat-icon>keyboard</mat-icon>
