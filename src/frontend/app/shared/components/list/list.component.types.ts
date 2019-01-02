@@ -1,3 +1,4 @@
+import { RequestInfoState, ActionState } from './../../../store/reducers/api-request-reducer/types';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { ListView } from '../../../store/actions/list.actions';
@@ -148,7 +149,7 @@ export interface IMultiListAction<T> extends IOptionalAction<T> {
    *
    * @memberof IMultiListAction
    */
-  action: (items: T[]) => boolean;
+  action: (items: T[]) => boolean | Observable<ActionState>;
 }
 
 export interface IGlobalListAction<T> extends IOptionalAction<T> {

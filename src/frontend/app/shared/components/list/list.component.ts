@@ -23,6 +23,8 @@ import {
   Observable,
   of as observableOf,
   Subscription,
+  isObservable,
+  asapScheduler,
 } from 'rxjs';
 import {
   debounceTime,
@@ -38,6 +40,7 @@ import {
   takeWhile,
   tap,
   withLatestFrom,
+  subscribeOn,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -61,6 +64,7 @@ import {
   ListConfig,
   ListViewTypes,
 } from './list.component.types';
+import { RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 
 
 @Component({
@@ -191,6 +195,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   pageState$: Observable<string>;
 
   initialised$: Observable<boolean>;
+
+  pendingActions: Map<Observable<ActionState>, Subscription> = new Map<Observable<ActionState>, Subscription>();
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -508,6 +514,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource) {
       this.dataSource.destroy();
     }
+    this.pendingActions.forEach(sub => sub.unsubscribe());
   }
 
   private getDefaultListView(config: IListConfig<T>) {
@@ -535,7 +542,21 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    if (listActionConfig.action(Array.from(this.dataSource.selectedRows.values()))) {
+    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
+    if (isObservable(result)) {
+      const sub = result.pipe(
+        subscribeOn(asapScheduler)
+      ).subscribe(done => {
+        if (!done.busy) {
+          this.pendingActions.delete(result);
+          sub.unsubscribe();
+          if (!done.error) {
+            this.dataSource.selectClear();
+          }
+        }
+      });
+      this.pendingActions.set(result, sub);
+    } else {
       this.dataSource.selectClear();
     }
   }
