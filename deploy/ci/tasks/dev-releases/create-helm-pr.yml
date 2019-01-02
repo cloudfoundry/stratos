@@ -3,7 +3,6 @@ platform: linux
 inputs:
 - name: helm-release
 - name: helm-chart-repo
-- name: HELM_CHART_REPO_FOLDER
 image_resource:
   type: docker-image
   source:
