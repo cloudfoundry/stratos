@@ -28,7 +28,7 @@
         </div>
         <div class="list-component__header__right">
           <!-- Filter by text input -->
-          <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (maxedResults$ | async)">
+          <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
             </mat-form-field>
@@ -129,7 +129,7 @@
       </mat-card>
     </ng-template>
     <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async) || (dataSource.isLoadingPage$ | async)" class="list-component__no-entries">
-      <ng-container *ngIf="maxedResults$ | async">
+      <ng-container *ngIf="dataSource.maxedResults$ | async">
         <ng-container *ngTemplateOutlet="noEntriesMaxedResults ? noEntriesMaxedResults : defaultNoEntriesMaxedResults">
         </ng-container>
       </ng-container>

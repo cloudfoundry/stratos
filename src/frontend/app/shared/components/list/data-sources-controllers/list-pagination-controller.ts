@@ -50,9 +50,9 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
     this.pagination$ = this.createPaginationObservable(dataSource);
 
-    this.sort$ = this.createSortObservable(dataSource);
+    this.sort$ = this.dataSource.sort$;
 
-    this.filter$ = this.createFilterObservable(dataSource);
+    this.filter$ = this.dataSource.filter$;
 
     // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
     // filter resets other filters.
@@ -207,29 +207,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     );
   }
 
-  private createSortObservable(dataSource: IListDataSource<T>): Observable<ListSort> {
-    return dataSource.pagination$.pipe(
-      map(pag => ({
-        direction: pag.params['order-direction'] as SortDirection,
-        field: pag.params['order-direction-field']
-      })),
-      filter(x => !!x),
-      distinctUntilChanged((x, y) => {
-        return x.direction === y.direction && x.field === y.field;
-      }),
-      tag('list-sort')
-    );
-  }
-
-  private createFilterObservable(dataSource: IListDataSource<T>): Observable<ListFilter> {
-    return dataSource.pagination$.pipe(
-      map(pag => ({
-        string: dataSource.isLocal ? pag.clientPagination.filter.string : dataSource.getFilterFromParams(pag),
-        items: { ...pag.clientPagination.filter.items }
-      })),
-      tag('list-filter')
-    );
-  }
 }
 
 export function valueOrCommonFalsy(value, commonFalsy?) {

@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, withLatestFrom, filter, switchMap } from 'rxjs/operators';
 
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -105,7 +105,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
     this.action = action;
 
-    const statsSub = this.page$.pipe(
+    const statsSub = this.maxedResults$.pipe(
+      filter(maxedResults => !maxedResults),
+      switchMap(() => this.page$),
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
       withLatestFrom(this.pagination$),
@@ -130,8 +132,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         return actions;
       }),
       dispatchSequencer.sequence.bind(dispatchSequencer),
-      tag('stat-obs')).subscribe();
-
+      tag('stat-obs')
+    ).subscribe();
 
     this.subs = [statsSub];
   }
