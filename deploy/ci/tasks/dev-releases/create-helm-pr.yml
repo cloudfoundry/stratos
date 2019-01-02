@@ -2,6 +2,7 @@
 platform: linux
 inputs:
 - name: helm-release
+- name: helm-chart-repo
 image_resource:
   type: docker-image
   source:
@@ -21,12 +22,13 @@ run:
       
       ls -al ${HELM_RELEASE}
 
-      cd ${HELM_RELEASE}
+      pushd ${HELM_RELEASE}
       VERSION=$(cat version)
       CHART=$(ls console-helm-chart-*.tgz)
 
       echo $VERSION
       echo $CHART
+      popd
 
       cd ${HELM_CHART_REPO}
       cd ./${HELM_CHART_REPO_FOLDER}/console
