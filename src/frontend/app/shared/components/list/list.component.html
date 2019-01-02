@@ -13,7 +13,7 @@
           </div>
 
           <!-- Multi actions (those applied to selection) -->
-          <div class="multi-actions" *ngIf="(dataSource.isSelecting$ | async)">
+          <div class="list-component__header__left--multi-actions" *ngIf="(dataSource.isSelecting$ | async)">
             <ng-container *ngFor="let action of multiActions">
               <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
                 <mat-icon>{{action.icon}}</mat-icon>
