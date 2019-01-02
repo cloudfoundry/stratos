@@ -1,7 +1,17 @@
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 
 import { urlValidationExpression } from '../../core/utils.service';
-import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
+import { AppState } from '../../store/app-state';
+import { endpointSchemaKey } from '../../store/helpers/entity-factory';
+import { selectEntities } from '../../store/selectors/api.selectors';
+import { EndpointModel } from './../../store/types/endpoint.types';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { EndpointType, EndpointAuthTypeConfig } from '../../core/extension/extension-types';
+import { ExtensionService } from '../../core/extension/extension-service';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -42,7 +52,7 @@ const endpointTypes: EndpointTypeConfig[] = [
   },
 ];
 
-const endpointAuthTypes = [
+let endpointAuthTypes: EndpointAuthTypeConfig[] = [
   {
     name: 'Username and Password',
     value: 'creds',
@@ -50,13 +60,15 @@ const endpointAuthTypes = [
       username: ['', Validators.required],
       password: ['', Validators.required],
     },
-    types: new Array<EndpointType>('cf', 'metrics')
+    types: new Array<EndpointType>('cf', 'metrics'),
+    component: CredentialsAuthFormComponent
   },
   {
     name: 'Single Sign-On (SSO)',
     value: 'sso',
     form: {},
-    types: new Array<EndpointType>('cf')
+    types: new Array<EndpointType>('cf'),
+    component: SSOAuthFormComponent
   },
 ];
 
@@ -80,6 +92,11 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
   endpointTypes.forEach(ept => {
     endpointTypesMap[ept.value] = ept;
   });
+}
+
+export function addEndpointAuthTypes(extensions: EndpointAuthTypeConfig[]) {
+  endpointAuthTypes.forEach(t => t.formType = t.value);
+  endpointAuthTypes = endpointAuthTypes.concat(extensions);
 }
 
 // Get the name to display for a given Endpoint type
@@ -109,6 +126,20 @@ export function getIconForEndpoint(type: string): EndpointIcon {
   return icon;
 }
 
+export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
+  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+    first(),
+    map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
+  );
+}
+
 export function getEndpointAuthTypes() {
   return endpointAuthTypes;
+}
+
+export function initEndpointExtensions(extService: ExtensionService) {
+  // Register auth types before applying endpoint types
+  const endpointExtConfig = extService.getEndpointExtensionConfig();
+  addEndpointAuthTypes(endpointExtConfig.authTypes || []);
+  initEndpointTypes(endpointExtConfig.endpointTypes || []);
 }

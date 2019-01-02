@@ -11,6 +11,7 @@ import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/
 import { AppState } from '../../../../../store/app-state';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
+import { CfUser } from '../../../../../store/types/user.types';
 
 @Injectable()
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
@@ -22,6 +23,15 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
-    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfOrgService.org$, cfSpaceService.space$);
+    super(
+      store,
+      cfUserService,
+      router,
+      activeRouteCfOrgSpace,
+      userPerms,
+      (user: CfUser): boolean => cfUserService.hasSpaceRoles(user, activeRouteCfOrgSpace.spaceGuid),
+      cfOrgService.org$,
+      cfSpaceService.space$
+    );
   }
 }

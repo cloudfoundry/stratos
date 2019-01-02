@@ -186,8 +186,8 @@ export class DeployApplicationDeployer {
   }
 
   sendProjectInfo = (appSource: DeployApplicationSource) => {
-    if (appSource.type.id === 'github') {
-      return this.sendGitHubSourceMetadata(appSource);
+    if (appSource.type.group === 'gitscm') {
+      return this.sendGitSCMSourceMetadata(appSource);
     } else if (appSource.type.id === 'giturl') {
       return this.sendGitUrlSourceMetadata(appSource);
     } else if (appSource.type.id === 'file' || appSource.type.id === 'folder') {
@@ -196,18 +196,20 @@ export class DeployApplicationDeployer {
     return '';
   }
 
-  sendGitHubSourceMetadata = (appSource: DeployApplicationSource) => {
-    const github = {
+  sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
+    const gitscm = {
       project: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.id,
-      commit: appSource.commit
+      type: appSource.type.group,
+      commit: appSource.commit,
+      url: appSource.url,
+      scm: appSource.type.id
     };
 
     const msg = {
-      message: JSON.stringify(github),
+      message: JSON.stringify(gitscm),
       timestamp: Math.round((new Date()).getTime() / 1000),
-      type: SocketEventTypes.SOURCE_GITHUB
+      type: SocketEventTypes.SOURCE_GITSCM
     };
     return JSON.stringify(msg);
   }

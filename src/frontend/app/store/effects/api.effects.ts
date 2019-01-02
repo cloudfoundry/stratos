@@ -30,9 +30,10 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { isJetStreamError } from '../../core/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-const endpointHeader = 'x-cap-cnsi-list';
+export const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -40,14 +41,6 @@ interface APIErrorCheck {
   guid: string;
   url: string;
   errorResponse?: JetStreamCFErrorResponse;
-}
-
-interface JetStreamError {
-  error: {
-    status: string;
-    statusCode: number;
-  };
-  errorResponse: JetStreamCFErrorResponse;
 }
 
 interface JetStreamCFErrorResponse {
@@ -197,11 +190,18 @@ export class APIEffect {
               ),
             );
           }
+          const { error, errorCode, guid, url, errorResponse } = errorsCheck[0];
           this.store.dispatch(
             new WrapperRequestActionFailed(
               errorMessage,
-              { ...actionClone, endpointGuid: errorsCheck[0].guid },
-              requestType,
+              { ...actionClone, endpointGuid: guid },
+              requestType, {
+                endpointIds: [guid],
+                url,
+                eventCode: errorCode ? errorCode + '' : '500',
+                message: errorResponse ? errorResponse.description : 'Jetstream CF API request error',
+                error
+              }
             ),
           );
           return [];
@@ -227,8 +227,8 @@ export class APIEffect {
       }),
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
-        const endpoints: string[] = endpointString.split(',');
-        endpoints.forEach(endpoint =>
+        const endpointIds: string[] = endpointString.split(',');
+        endpointIds.forEach(endpoint =>
           this.store.dispatch(
             new SendEventAction(endpointSchemaKey, endpoint, {
               eventCode: error.status ? error.status + '' : '500',
@@ -241,7 +241,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+          endpointIds,
+          url: error.url || apiAction.options.url,
+          eventCode: error.status ? error.status + '' : '500',
+          message: 'Jetstream API request error',
+          error
+        });
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
@@ -317,19 +323,19 @@ export class APIEffect {
     }
     return Object.keys(resData).map(cfGuid => {
       // Return list of guid+error objects for those endpoints with errors
-      const endpoint = resData ? (resData[cfGuid] as JetStreamError) : null;
-      const succeeded = !endpoint || !endpoint.error;
+      const jetStreamError = isJetStreamError(resData ? resData[cfGuid] : null);
+      const succeeded = !jetStreamError || !jetStreamError.error;
       const errorCode =
-        endpoint && endpoint.error
-          ? endpoint.error.statusCode.toString()
+        jetStreamError && jetStreamError.error
+          ? jetStreamError.error.statusCode.toString()
           : '500';
       let errorResponse = null;
       if (!succeeded) {
         errorResponse =
-          endpoint &&
-            (!!endpoint.errorResponse &&
-              typeof endpoint.errorResponse !== 'string')
-            ? endpoint.errorResponse
+          jetStreamError &&
+            (!!jetStreamError.errorResponse &&
+              typeof jetStreamError.errorResponse !== 'string')
+            ? jetStreamError.errorResponse
             : ({} as JetStreamCFErrorResponse);
         // Use defaults if values are not provided
         errorResponse.code = errorResponse.code || 0;
@@ -572,4 +578,5 @@ export class APIEffect {
   private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
     return requestType === 'delete' && !apiAction.updatingKey;
   }
+
 }

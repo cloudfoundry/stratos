@@ -18,6 +18,7 @@ import { AppChipsComponent } from '../../chips/chips.component';
 import {
   CreateApplicationStep1Component,
 } from '../../create-application/create-application-step1/create-application-step1.component';
+import { FocusDirective } from '../../focus.directive';
 import { MetaCardComponent } from '../../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from '../../list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from '../../list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -25,6 +26,7 @@ import { MetaCardTitleComponent } from '../../list/list-cards/meta-card/meta-car
 import { MetaCardValueComponent } from '../../list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
 import { PageHeaderModule } from '../../page-header/page-header.module';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 import { SteppersModule } from '../../stepper/steppers.module';
@@ -60,7 +62,9 @@ describe('AddServiceInstanceComponent', () => {
         BooleanIndicatorComponent,
         AppChipsComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        MultilineTitleComponent,
+        FocusDirective
       ],
       imports: [
         PageHeaderModule,

@@ -1,4 +1,12 @@
 FROM {{BASE_IMAGE}}
+
+{{#IS_SLE}}
+RUN zypper addrepo  -G -c '{{SMT_INTERNAL}}' smt_internal
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_UPDATE}}' smt_internal_update
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SDK}}' smt_internal_sdk
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
+RUN zypper ref
+{{/IS_SLE}}
 RUN zypper in -y ca-certificates && \
     mkdir -p /srv && \
     mkdir -p /root/.npm-global
@@ -12,4 +20,10 @@ RUN zypper ar http://download.opensuse.org/repositories/devel:/tools:/scm/SLE_12
     zypper --no-gpg-checks in -y git
 {{/IS_SLE}}
 
+{{#IS_SLE}}
+RUN zypper rr  smt_internal
+RUN zypper rr  smt_internal_update
+RUN zypper rr  smt_internal_sdk
+RUN zypper rr  smt_internal_server
+{{/IS_SLE}}
 WORKDIR /srv

@@ -1,9 +1,19 @@
-import { Component, Inject, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Inject,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ViewContainerRef,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Type
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { delay, filter, map, pairwise, startWith, switchMap, distinctUntilChanged, tap } from 'rxjs/operators';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -13,20 +23,24 @@ import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
 import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { EndpointModel, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
-
+import { IAuthForm, EndpointAuthTypeConfig, EndpointType, IEndpointAuthComponent } from '../../../core/extension/extension-types';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
   templateUrl: './connect-endpoint-dialog.component.html',
   styleUrls: ['./connect-endpoint-dialog.component.scss']
 })
-export class ConnectEndpointDialogComponent implements OnDestroy {
+export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
+
+  @ViewChild('authForm', { read: ViewContainerRef }) container: ViewContainerRef;
+
   connecting$: Observable<boolean>;
   connectingError$: Observable<boolean>;
   fetchingInfo$: Observable<boolean>;
-  endpointConnected$: Observable<boolean>;
+  endpointConnected$: Observable<[boolean, EndpointModel]>;
   valid$: Observable<boolean>;
   canSubmit$: Observable<boolean>;
 
@@ -42,10 +56,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private hasAttemptedConnect: boolean;
   public authTypesForEndpoint = [];
-  public upload = true;
-  private kubeconfig = '';
-  private cert = '';
-  private certKey = '';
   public canShareEndpointToken = false;
   private cachedAuthTypeFormFields: string[] = [];
 
@@ -54,17 +64,26 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   // and end up with an empty list where we should have results.
   public connectDelay = 1000;
 
+  // Component reference for the dynamically created auth form
+  // private authFormComponentRef;
+
+  // The auth type that was initially auto-selected
+  private autoSelected: EndpointAuthTypeConfig;
+  public authFormComponentRef: ComponentRef<IAuthForm>;
+
   constructor(
     public store: Store<AppState>,
     public fb: FormBuilder,
     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
     public snackBar: MatSnackBar,
+    public endpointsService: EndpointsService,
     @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
       guid: string,
       type: EndpointType,
       ssoAllowed: boolean,
-    }
+    },
+    private resolver: ComponentFactoryResolver
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
     getEndpointAuthTypes().forEach(authType => {
@@ -80,23 +99,28 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
 
     // Create the endpoint form
-    let autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
-    this.cachedAuthTypeFormFields = Object.keys(autoSelected.form || {});
+    this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && data.ssoAllowed);
     if (ssoIndex >= 0) {
-      autoSelected = this.authTypesForEndpoint[ssoIndex];
+      this.autoSelected = this.authTypesForEndpoint[ssoIndex];
     }
 
+    this.cachedAuthTypeFormFields = Object.keys(this.autoSelected.form || {});
     this.endpointForm = this.fb.group({
-      authType: [autoSelected.value || '', Validators.required],
-      authValues: this.fb.group(autoSelected.form || {}),
+      authType: [this.autoSelected.value || '', Validators.required],
+      authValues: this.fb.group(this.autoSelected.form || {}),
       systemShared: false
     });
 
     this.setupObservables();
     this.setupSubscriptions();
+  }
+
+  ngOnInit() {
+    // Template container reference is not available at construction, so do this on init
+    this.createComponent(this.autoSelected.component);
   }
 
   authChanged() {
@@ -107,8 +131,25 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.cachedAuthTypeFormFields = authTypeFormFields;
       this.endpointForm.removeControl('authValues');
       this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+
+      // Update the auth form component
+      this.createComponent(authType.component);
     }
     this.bodyContent = '';
+  }
+  // Dynamically create the component for the selected auth type
+  createComponent(component: Type<IAuthForm>) {
+    if (!component) {
+      return;
+    }
+
+    this.container.clear();
+    if (this.authFormComponentRef) {
+      this.authFormComponentRef.destroy();
+    }
+    const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
+    this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
+    this.authFormComponentRef.instance.formGroup = this.endpointForm;
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
@@ -126,31 +167,15 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       });
 
     this.connectingSub = this.endpointConnected$.pipe(
-      filter(connected => connected),
-      delay(this.connectDelay))
-      .subscribe(() => {
+      filter(([connected]) => connected),
+      delay(this.connectDelay),
+      tap(() => {
         this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
         this.dialogRef.close();
-      });
-  }
-
-  dealWithFile($event, fileName: string) {
-    const file = $event;
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.updateFileState(fileName, reader.result);
-    };
-    reader.onerror = () => {
-      // Clear the form and thus make it invalid on error
-      this.updateFileState(fileName, null);
-    };
-    reader.readAsText(file);
-  }
-
-  private updateFileState(fileName: string, value: string | ArrayBuffer) {
-    this[fileName] = value;
-    const authValues: FormGroup = this.endpointForm.controls.authValues as FormGroup;
-    authValues.controls[fileName].setValue(value);
+      }),
+      distinctUntilChanged(([connected], [oldConnected]) => connected && oldConnected),
+      tap(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
+    ).subscribe();
   }
 
   setupObservables() {
@@ -167,7 +192,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     ).pipe(
-      map(request => !!(request && request.api_endpoint && request.user)));
+      map(endpoint => {
+        const isConnected = !!(endpoint && endpoint.api_endpoint && endpoint.user);
+        return [isConnected, endpoint] as [boolean, EndpointModel];
+      })
+    );
     const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
     this.connecting$ = busy$.pipe(
       pairwise(),
@@ -229,24 +258,16 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     );
   }
 
-  toggleAccept() {
-    this.upload = !this.upload;
-  }
-
   submit() {
     this.hasAttemptedConnect = true;
     const { authType, authValues, systemShared } = this.endpointForm.value;
-    const authVal = authValues;
-    if (this.endpointForm.value.authType === 'kubeconfig' || this.endpointForm.value.authType === 'kubeconfig-az') {
-      this.bodyContent = this.kubeconfig;
-    }
-    if (this.endpointForm.value.authType === 'kube-cert-auth') {
-      /** Body content is in the following encoding:
-       * base64encoded:base64encoded
-       */
-      const certBase64 = btoa(this.cert);
-      const certKeyBase64 = btoa(this.certKey);
-      this.bodyContent = `${certBase64}:${certKeyBase64}`;
+    let authVal = authValues;
+
+    // Allow the auth form to supply body content if it needs to
+    const endpointFormInstance = this.authFormComponentRef.instance as IEndpointAuthComponent;
+    if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
+      this.bodyContent = endpointFormInstance.getBody();
+      authVal = endpointFormInstance.getValues(authValues);
     }
 
     this.store.dispatch(new ConnectEndpoint(
@@ -262,5 +283,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   ngOnDestroy() {
     this.fetchSub.unsubscribe();
     this.connectingSub.unsubscribe();
+    this.authFormComponentRef.destroy();
   }
 }

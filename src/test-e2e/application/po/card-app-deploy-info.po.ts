@@ -9,11 +9,10 @@ export class CardAppDeployInfo extends MetaCard {
   github: MetaDataItemComponent;
 
   constructor(
-    locator: ElementFinder = element(by.css('app-build-tab app-tile-grid app-tile-group:nth-of-type(3) app-tile:nth-of-type(2)'))
+    locator: ElementFinder = element(by.id('app-build-tab-deployment-info'))
   ) {
     super(locator, MetaCardTitleType.MAT_CARD);
-    this.github = MetaDataItemComponent.withLabel(locator, 'GitHub');
-
+    this.github = MetaDataItemComponent.withDynamicLabel(locator, 'GitHub');
   }
 
 }
