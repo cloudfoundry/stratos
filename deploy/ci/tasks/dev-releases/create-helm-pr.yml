@@ -25,16 +25,15 @@ run:
       pushd ${HELM_RELEASE}
       VERSION=$(cat version)
       CHART=$(ls console-helm-chart-*.tgz)
-
-      echo $VERSION
-      echo $CHART
       popd
 
       cd ${HELM_CHART_REPO}
       cd ./${HELM_CHART_REPO_FOLDER}/console
       ls -al
       CHART_VERSION=$(cat Chart.yaml | grep "version:" | cut -d " " -f 2)
-      echo ${CHART_VERSION}
+
+      echo "New Chart version     : ${VERSION}"
+      echo "Existing Chart version: ${CHART_VERSION}"
 
       if [ "$CHART_VERSION" == "$VERSION" ]; then
         echo "This version has already been processed"
@@ -42,6 +41,25 @@ run:
       fi
 
       echo "Creating PR for Helm Chart"
+
+      # Unpack the Helm Chart, patch it and create the PR
+
+      # Unpack over the existing chart
+      cd ..
+      tar -xvf ${CHART}
+
+      cd console
+      git status
+
+      # Need to patch the registry
+      git diff
+
+      
+
+
+
+
+
 
 
 
