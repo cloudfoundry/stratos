@@ -38,6 +38,7 @@ import {
   takeWhile,
   tap,
   withLatestFrom,
+  combineLatest,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -466,21 +467,27 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         })
       );
 
-    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
-      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      switchMap(() => this.dataSource.pagination$),
+    const hasChangedPage$ = this.dataSource.pagination$.pipe(
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
+    );
+
+    const isMaxedResult$ = this.dataSource.pagination$.pipe(
+      map(pag => !!pag.maxedResults)
+    );
+
+    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
+      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
+      combineLatest(hasChangedPage$, isMaxedResult$),
+      map(([isLoadingPage, hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
       startWith(true)
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
       startWith(true),
       withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => {
-        return canShowLoading && loading;
-      }),
+      map(([loading, canShowLoading]) => canShowLoading && loading),
       distinctUntilChanged()
     );
 
