@@ -149,7 +149,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       // (except if we've maxed out results where the totalResults is miss-matched with entities collection)
       const newLength = paginationEntity.maxedResults && entities.length >= paginationEntity.params['results-per-page'] ?
         paginationEntity.maxedResults : entities.length;
-      if (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength) {
+      if (
+        paginationEntity.ids[paginationEntity.currentPage] &&
+        (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
       }
     };
