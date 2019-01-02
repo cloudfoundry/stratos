@@ -37,7 +37,7 @@ import { createGetApplicationAction } from '../../application.service';
 })
 export class CreateApplicationStep3Component implements OnInit {
 
-  constructor(private store: Store<AppState>, private router: Router, private entityServiceFactory: EntityServiceFactory) { }
+  constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory) { }
 
   @ViewChild('form')
   form: NgForm;
@@ -84,7 +84,7 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   validate(): boolean {
-    return !!this.selectedDomainGuid && !!this.hostName;
+    return !!this.selectedDomainGuid && !!this.hostName && this.form.valid;
   }
 
   createApp(): Observable<RequestInfoState> {

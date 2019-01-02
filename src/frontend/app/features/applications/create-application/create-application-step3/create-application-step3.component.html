@@ -8,6 +8,7 @@
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <input required [disabled]="!form.controls['domain']?.value" [(ngModel)]="hostName" matInput placeholder="Host" name="hostName">
+    <input required [disabled]="!form.controls['domain']?.value" [(ngModel)]="hostName" matInput placeholder="Host" name="hostName" maxlength="63">
+    <mat-error *ngIf="form.controls['hostName']?.errors?.maxlength">Host cannot exceed 63 characters</mat-error>
   </mat-form-field>
 </form>

@@ -234,7 +234,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private setupForms() {
     this.createNewInstanceForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+      name: new FormControl('', [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)]),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
