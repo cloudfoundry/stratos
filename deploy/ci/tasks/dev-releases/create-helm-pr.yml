@@ -1,0 +1,21 @@
+---
+platform: linux
+inputs:
+- name: helm-release
+image_resource:
+  type: docker-image
+  source:
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
+   tag: "latest"
+run:
+  path: bash
+  args:
+    - -xc
+    - |
+      # Initialize Helm for client-side use
+      helm init --client-only
+      ROOT_DIR=$PWD
+      HELM_RELEASE=${ROOT_DIR}/helm-release
+      
+      ls -al ${HELM_RELEASE}
