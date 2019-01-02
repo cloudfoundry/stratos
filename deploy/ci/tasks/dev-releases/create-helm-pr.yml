@@ -19,3 +19,10 @@ run:
       HELM_RELEASE=${ROOT_DIR}/helm-release
       
       ls -al ${HELM_RELEASE}
+
+      cat ${HELM_RELEASE}/tag
+      cat ${HELM_RELEASE}/version
+
+      CHART=$(ls ${HELM_RELEASE}/console-helm-chart-*.tgz)
+
+      echo $CHART

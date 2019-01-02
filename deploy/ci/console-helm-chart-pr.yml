@@ -8,6 +8,11 @@ resources:
     repository: ((helm-repo-github-repository))
     access_token: ((github-access-token))
     tag_filter: 2\.[0-9]*\.[0-9]*
+- name: helm-chart-repo
+  type: git
+  source:
+    uri: ((release-helm-repo))
+    private_key: ((github-private-key))
 # Stratos Git Repository
 - name: stratos
   type: git
@@ -21,6 +26,7 @@ jobs:
   - get: helm-release
     trigger: true
   - get: stratos
+  - get: helm-chart-repo
   - do:
     - task: build
       privileged: true
@@ -39,4 +45,5 @@ jobs:
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
+        HELM_CHART_REPO_FOLDER: ((release-helm-stable-folder))
 
