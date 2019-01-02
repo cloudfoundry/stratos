@@ -11,18 +11,35 @@ image_resource:
 run:
   path: bash
   args:
-    - -xc
+    - -c
     - |
       # Initialize Helm for client-side use
       helm init --client-only
       ROOT_DIR=$PWD
       HELM_RELEASE=${ROOT_DIR}/helm-release
+      HELM_CHART_REPO=${ROOT_DIR}/helm-chart-repo
       
       ls -al ${HELM_RELEASE}
 
-      cat ${HELM_RELEASE}/tag
-      cat ${HELM_RELEASE}/version
+      cd ${HELM_RELEASE}
+      VERSION=$(cat version)
+      CHART=$(ls console-helm-chart-*.tgz)
 
-      CHART=$(ls ${HELM_RELEASE}/console-helm-chart-*.tgz)
-
+      echo $VERSION
       echo $CHART
+
+      cd ${HELM_CHART_REPO}
+      cd ./${HELM_CHART_REPO_FOLDER}/console
+      ls -al
+      CHART_VERSION=$(cat Chart.yaml | grep "version:" | cut -d " " -f 2)
+      echo ${CHART_VERSION}
+
+      if [ "$CHART_VERSION" == "$VERSION" ]; then
+        echo "This version has already been processed"
+        exit 0
+      fi
+
+      echo "Creating PR for Helm Chart"
+
+
+
