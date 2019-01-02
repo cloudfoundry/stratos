@@ -86,4 +86,7 @@ run:
       echo ${GIT_BRANCH}
 
       git checkout -b ${GIT_BRANCH}
+      git add -A
+      git status
+      git commit -m "Stratos ${VERSION} Release Helm Chart Changes"
       git status
