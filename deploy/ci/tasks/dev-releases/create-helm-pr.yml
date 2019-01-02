@@ -9,6 +9,23 @@ image_resource:
    # Generated using scripts/Dockerfile.stratos-ci
    repository: splatform/stratos-ci-concourse
    tag: "latest"
+params:
+  GIT_USER:
+  GIT_EMAIL:
+  GITHUB_USER:
+  GITHUB_ORG:
+  GITHUB_REPO:
+  GITHUB_TOKEN:
+  GIT_PRIVATE_KEY:
+  GITHUB_TOKEN:
+  DOCKER_ORG:
+  DOCKER_REGISTRY:
+  HELM_REPO_PATH:
+  HELM_REPO_BRANCH:
+  HELM_CHART_REPO_FOLDER:
+  RELEASE_DOCKER_REGISTRY:
+  RELEASE_DOCKER_ORG:
+  
 run:
   path: bash
   args:
@@ -49,22 +66,24 @@ run:
       tar -xvf ${HELM_RELEASE}/${CHART}
 
       cd console
-      git status
 
       # Need to patch the registry
-      export TERM=xterm
-      git diff
-
       echo ${RELEASE_DOCKER_REGISTRY}
       echo ${RELEASE_DOCKER_ORG}
 
+      echo ${DOCKER_ORG}
+      echo ${DOCKER_REGISTRY}
 
+      sed -i -e 's/hostname: '"${DOCKER_REGISTRY}"'/hostname: '"${RELEASE_DOCKER_REGISTRY}"'/g' ./values.yaml
+      sed -i -e 's/organization: '"${DOCKER_ORG}"'/organization: '"${RELEASE_DOCKER_ORG}"'/g' ./values.yaml
 
+      git status
 
+      export TERM=xterm
+      git diff
 
+      GIT_BRANCH=stratos_release_${VERSION}
+      echo ${GIT_BRANCH}
 
-
-
-
-
-
+      git checkout -b ${GIT_BRANCH}
+      git status
