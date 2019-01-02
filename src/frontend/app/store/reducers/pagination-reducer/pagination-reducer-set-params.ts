@@ -9,7 +9,7 @@ export function paginationSetParams(state: PaginationEntityState, action: SetPar
     params = {
       [resultPerPageParam]: resultPerPageParamDefault,
       ...action.params,
-      q: getUniqueQParams(action, state)
+      q: action.params.q
     };
   } else {
     // Keep any existing values (for instance don't overwrite new params with initial set or params)
