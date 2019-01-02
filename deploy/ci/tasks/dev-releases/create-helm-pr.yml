@@ -3,6 +3,7 @@ platform: linux
 inputs:
 - name: helm-release
 - name: helm-chart-repo
+- name: HELM_CHART_REPO_FOLDER
 image_resource:
   type: docker-image
   source:
@@ -46,15 +47,20 @@ run:
 
       # Unpack over the existing chart
       cd ..
-      tar -xvf ${CHART}
+      tar -xvf ${HELM_RELEASE}/${CHART}
 
       cd console
       git status
 
       # Need to patch the registry
+      export TERM=xterm
       git diff
 
-      
+      echo ${RELEASE_DOCKER_REGISTRY}
+      echo ${RELEASE_DOCKER_ORG}
+
+
+
 
 
 
