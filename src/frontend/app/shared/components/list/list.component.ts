@@ -184,7 +184,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
-  maxedResults$: Observable<boolean>;
+  // maxedResults$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -309,21 +309,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.paginationController = new ListPaginationController(this.store, this.dataSource, this.ngZone);
     this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
-    this.maxedResults$ = !!this.dataSource.action.flattenPaginationMax ?
-      observableCombineLatest(this.dataSource.pagination$, this.paginationController.filter$).pipe(
-        distinctUntilChanged(),
-        map(([pagination, filters]) => {
-          const totalResults = this.dataSource.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
-          // Text filter is only shown when the current result set is not maxed, so we're safe to show the list if there's a text filter set
-          return !filters.string && this.dataSource.action.flattenPaginationMax < totalResults;
-        }),
-      ) : observableOf(false);
-
     const hasPages$ = this.dataSource.page$.pipe(
       map(pag => !!(pag && pag.length))
     );
 
-    this.hasRows$ = observableCombineLatest(hasPages$, this.maxedResults$).pipe(
+    this.hasRows$ = observableCombineLatest(hasPages$, this.dataSource.maxedResults$).pipe(
       map(([hasPages, maxedResults]) => !maxedResults && hasPages),
       startWith(false)
     );
@@ -405,11 +395,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       })
     );
 
-    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.maxedResults$).pipe(
+    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.dataSource.maxedResults$).pipe(
       map(([hasRows, isFiltering, maxedResults]) => !hasRows && isFiltering && !maxedResults)
     );
 
-    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.maxedResults$).pipe(
+    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.dataSource.maxedResults$).pipe(
       map(([hasRows, isFiltering, maxedResults]) => !hasRows && !isFiltering && !maxedResults)
     );
 
