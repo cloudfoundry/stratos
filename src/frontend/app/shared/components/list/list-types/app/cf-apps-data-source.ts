@@ -172,8 +172,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
       this.store.dispatch(new ResetPagination(this.entityKey, this.paginationKey));
     } else if (orgChanged || spaceChanged) {
-      params.q = qChanges;
-      this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, params, false, true));
+      const newParams = spreadPaginationParams(params);
+      newParams.q = qChanges;
+      this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, newParams, true, true));
     }
   }
 
