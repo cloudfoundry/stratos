@@ -160,6 +160,7 @@ export class MultiFilterManager<T> {
   public filterIsReady$: Observable<boolean>;
   public filterItems$: Observable<IListMultiFilterConfigItem[]>;
   public hasItems$: Observable<boolean>;
+  public hasOneItem$: Observable<boolean>;
   public initialValue: string;
 
   public filterKey: string;
@@ -172,6 +173,7 @@ export class MultiFilterManager<T> {
     this.filterKey = this.multiFilterConfig.key;
     this.allLabel = multiFilterConfig.allLabel || 'All';
     this.filterItems$ = this.getItemObservable(multiFilterConfig);
+    this.hasOneItem$ = this.filterItems$.pipe(map(items => items.length === 1));
     this.hasItems$ = this.filterItems$.pipe(map(items => !!items.length));
     this.filterIsReady$ = this.getReadyObservable(multiFilterConfig, dataSource, this.hasItems$);
   }

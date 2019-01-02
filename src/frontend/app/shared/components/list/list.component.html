@@ -18,7 +18,7 @@
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <ng-container *ngFor="let multiFilterManager of multiFilterManagers; first as isFirst">
-              <mat-form-field *ngIf="(multiFilterManager.hasItems$ | async) && !isFirst" [floatLabel]="'never'">
+              <mat-form-field *ngIf="!isFirst || !(multiFilterManager.hasOneItem$ | async)" [floatLabel]="'never'">
                 <mat-select id="{{multiFilterManager.key}}" matInput [(value)]="multiFilterManager.initialValue"
                   [disabled]="!(multiFilterManager.filterIsReady$ | async)" (selectionChange)="multiFilterManager.selectItem($event.value)">
                   <mat-option>{{ multiFilterManager.allLabel }}</mat-option>
