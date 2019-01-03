@@ -296,6 +296,31 @@ func (p *portalProxy) DoProxyRequest(requests []interfaces.ProxyRequestInfo) (ma
 	return responses, nil
 }
 
+// Convenience helper for a single request
+func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string) (*interfaces.CNSIRequest, error) {
+	requests := make([]interfaces.ProxyRequestInfo, 0)
+
+	proxyURL, err := url.Parse(requestUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req := interfaces.ProxyRequestInfo{}
+	req.UserGUID = userGUID
+	req.ResultGUID = "REQ_" + cnsiGUID
+	req.EndpointGUID = cnsiGUID
+	req.Method = method
+	req.URI = proxyURL
+	requests = append(requests, req)
+
+	responses, err := p.DoProxyRequest(requests)
+	if err != nil {
+		return nil, err
+	}
+
+	return responses[req.ResultGUID], err
+}
+
 func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*interfaces.CNSIRequest) error {
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cap-passthrough")
 

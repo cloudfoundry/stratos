@@ -26,8 +26,6 @@ describe('Service Instances Wall', () => {
   beforeEach(() => {
     servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
     servicesWallPage.waitForPage();
-    servicesWallPage.serviceInstancesList.header.clearSearchText();
-    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 0);
   });
 
   describe('', () => {
@@ -43,7 +41,6 @@ describe('Service Instances Wall', () => {
       createServiceInstance.waitForPage();
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
-
   });
 
   it('- should reach service instances wall page', () => {

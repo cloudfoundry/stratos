@@ -48,8 +48,8 @@ export class DetachAppsListConfigService implements IListConfig<APIResource> {
 
   constructor(private store: Store<AppState>, private activatedRoute: ActivatedRoute, private datePipe: DatePipe) {
 
-    const { serviceInstanceId, cfId } = activatedRoute.snapshot.params;
-    this.dataSource = new DetachAppsDataSource(cfId, serviceInstanceId, this.store, this);
+    const { serviceInstanceId, endpointId } = activatedRoute.snapshot.params;
+    this.dataSource = new DetachAppsDataSource(endpointId, serviceInstanceId, this.store, this);
   }
 
   getColumns = () => this.columns;

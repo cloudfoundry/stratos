@@ -1,7 +1,7 @@
 import { combineLatest, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, tap, withLatestFrom } from 'rxjs/operators';
-import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { distinctUntilChanged, map, publishReplay, refCount, tap } from 'rxjs/operators';
+
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { splitCurrentPage } from './local-list-controller.helpers';
 
@@ -22,7 +22,11 @@ export class LocalListController<T = any> {
 
   private pageSplitCache: (T | T[])[] = null;
 
+  /*
+   * Emit the core set of entities that are sorted and filtered but not paginated
+   */
   private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
+    // Updates whenever a page setting changes (current page, page size, sorting, etc) and not when
     const cleanPagination$ = pagination$.pipe(
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
     );
@@ -30,6 +34,9 @@ export class LocalListController<T = any> {
     return this.buildFullCleanPageObservable(page$, cleanPagination$, dataFunctions);
   }
 
+  /*
+   * Emit the core set of entities that are sorted and filtered but not paginated
+   */
   private buildFullCleanPageObservable(cleanPage$: Observable<T[]>, cleanPagination$: Observable<PaginationEntityState>, dataFunctions?) {
     return combineLatest(
       cleanPagination$,
@@ -52,6 +59,9 @@ export class LocalListController<T = any> {
     );
   }
 
+  /*
+   * Emit client side page changes
+   */
   private buildCurrentPageNumberObservable(pagination$: Observable<PaginationEntityState>) {
     return pagination$.pipe(
       map(pagination => pagination.clientPagination.currentPage),
@@ -59,6 +69,9 @@ export class LocalListController<T = any> {
     );
   }
 
+  /*
+   * Emit client side page size changes
+   */
   private buildCurrentPageSizeObservable(pagination$: Observable<PaginationEntityState>) {
     return pagination$.pipe(
       map(pagination => pagination.clientPagination.pageSize),
@@ -66,6 +79,12 @@ export class LocalListController<T = any> {
     );
   }
 
+  /*
+   * Emit a page, which has been created by splitting up a local list, when either
+   * 1) the core pages 'entities' (covers entire list of all entities and their order)
+   * 2) the client side page number changes
+   * 3) the client size page size changes
+   */
   private buildCurrentPageObservable(
     entities$: Observable<T[]>,
     currentPageNumber$: Observable<number>,
@@ -73,10 +92,12 @@ export class LocalListController<T = any> {
   ) {
     return combineLatest(
       entities$,
-      currentPageNumber$
+      currentPageSizeObservable$.pipe(tap(() => {
+        this.pageSplitCache = null;
+      })),
+      currentPageNumber$.pipe(),
     ).pipe(
-      withLatestFrom(currentPageSizeObservable$),
-      map(([[entities, currentPage], pageSize]) => {
+      map(([entities, pageSize, currentPage]) => {
         const pages = this.pageSplitCache ? this.pageSplitCache : entities;
         const data = splitCurrentPage(
           pages,
@@ -93,11 +114,11 @@ export class LocalListController<T = any> {
   }
 
   private getPaginationCompareString(paginationEntity: PaginationEntityState) {
-    return paginationEntity.clientPagination.pageSize
-      + paginationEntity.clientPagination.totalResults
-      + paginationEntity.params['order-direction-field']
-      + paginationEntity.params['order-direction']
-      + paginationEntity.clientPagination.filter.string
+    // Unique string excluding local pagination (watched elsewhere)
+    return paginationEntity.totalResults
+      + (paginationEntity.params['order-direction-field'] || '') + ','
+      + (paginationEntity.params['order-direction'] || '') + ','
+      + paginationEntity.clientPagination.filter.string + ','
       + Object.values(paginationEntity.clientPagination.filter.items);
     // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }

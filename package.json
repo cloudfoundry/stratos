@@ -70,6 +70,7 @@
     "rxjs": "^6.2.0",
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "~6.0.0",
+    "ts-md5": "^1.2.4",
     "web-animations-js": "^2.3.1",
     "xterm": "^3.5.0",
     "zone.js": "~0.8.26"

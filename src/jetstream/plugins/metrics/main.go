@@ -94,6 +94,10 @@ func (m *MetricsSpecification) Register(echoContext echo.Context) error {
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
 
+func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+	return nil
+}
+
 func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Metrics Connect...")
 

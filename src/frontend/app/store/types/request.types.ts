@@ -136,12 +136,19 @@ export class WrapperRequestActionSuccess extends RequestSuccessAction implements
     super();
   }
 }
-
+export interface InternalEndpointError {
+  endpointIds: string[];
+  eventCode?: string;
+  message?: string;
+  url: string;
+  error?;
+}
 export class WrapperRequestActionFailed extends RequestFailedAction implements IFailedRequestAction {
   constructor(
     public message: string,
     public apiAction: IRequestAction | PaginatedAction,
-    public requestType: ApiRequestTypes = 'fetch'
+    public requestType: ApiRequestTypes = 'fetch',
+    public internalEndpointError?: InternalEndpointError
   ) {
     super();
   }

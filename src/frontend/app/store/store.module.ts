@@ -29,6 +29,7 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { UsersEffects } from './effects/users.effects';
 import { AppReducersModule } from './reducers.module';
+import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 
 @NgModule({
   imports: [
@@ -37,6 +38,7 @@ import { AppReducersModule } from './reducers.module';
     HttpClientModule,
     EffectsModule.forRoot([
       APIEffect,
+      EndpointApiError,
       AuthEffect,
       UAASetupEffect,
       EndpointsEffect,

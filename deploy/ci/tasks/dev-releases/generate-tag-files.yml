@@ -17,6 +17,8 @@ run:
   args:
     - -exc
     - |
+      echo "Generate tag files started..."
+
       cd stratos
 
       RELEASE_TAG=$(cat .git/ref)
@@ -26,14 +28,28 @@ run:
       COMMIT_HASH=$(git log -1 --format="%h")
       LATEST_TAG=$VERSION-${COMMIT_HASH}
 
+      echo "Got version $VERSION from package.json."
+
+      echo "Got $LATEST_TAG as the latest git tag."
+
       if [ ! -z ${TAG_SUFFIX} ]; then
         if [ "${TAG_SUFFIX}" != "null" ]; then
+          echo "Adding tag suffix '$TAG_SUFFIX' to the latest tag."
           LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
+          echo "The latest tag is now $LATEST_TAG."
         fi
       fi
+      echo "Running store-git-metadata.sh..."
 
       ./build/store-git-metadata.sh
+
+      echo "Finished running store-git-metadata.sh."
+      echo "Creating ui-build-arg from the output of store-git-metadata.sh..."
+
       cat .stratos-git-metadata.json | tr -d '\n' > ../image-tag/ui-build-args
+      echo "Created ui-build-args."
+
+      echo "Creating v2-alpha-tag, v2-version and build-args..."
 
       cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
@@ -45,7 +61,19 @@ run:
       { "stratos_version": "${LATEST_TAG}" }
       EOF
 
+      echo "Created v2-alpha-tag, v2-version and build-args."
+
+      echo "Contens of build-args:"
       cat build-args
+
+      echo "Contens of ui-build-args:"
       cat ui-build-args
 
+      echo "Contens of v2-alpha-tag:"
+      cat v2-alpha-tag
+      
+      echo "Creating tag file tar..."
       tar -cf ${FILENAME}.tar v2-alpha-tag v2-version v2-tag v2-commit build-args ui-build-args
+
+      echo "Created tag file tar as ${FILENAME}.tar"
+      echo "Generate tag files complete!"

@@ -12,7 +12,7 @@ export class ApplicationPageGithubTab extends ApplicationBasePage {
   cardCommitInfo: CardGithubCommitInfo;
 
   constructor(public cfGuid: string, public appGuid: string) {
-    super(cfGuid, appGuid, 'github');
+    super(cfGuid, appGuid, 'gitscm');
     this.commits = new ListComponent();
     this.cardDeploymentInfo = new CardGithubDeployInfo();
     this.cardRepoInfo = new CardGithubRepoInfo();

@@ -100,7 +100,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           const appState = app.entity.state;
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
-          const dispatching = false;
           if (appState === 'STARTED') {
             actions.push({
               id: appGuid,

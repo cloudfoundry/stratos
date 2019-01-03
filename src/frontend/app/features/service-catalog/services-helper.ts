@@ -54,23 +54,23 @@ export const getServiceJsonParams = (params: any): {} => {
 
 export const isMarketplaceMode = (activatedRoute: ActivatedRoute) => {
   const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!serviceId && !!cfId;
 };
 
 export const isAppServicesMode = (activatedRoute: ActivatedRoute) => {
   const id = getIdFromRoute(activatedRoute, 'id');
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!id && !!cfId;
 };
 export const isServicesWallMode = (activatedRoute: ActivatedRoute) => {
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !cfId;
 };
 
 export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
   const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!cfId && !!serviceInstanceId;
 };
 

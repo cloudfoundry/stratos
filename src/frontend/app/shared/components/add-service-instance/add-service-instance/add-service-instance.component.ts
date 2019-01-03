@@ -132,7 +132,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
 
   private getIdsFromRoute() {
     const serviceId = getIdFromRoute(this.activatedRoute, 'serviceId');
-    const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
+    const cfId = getIdFromRoute(this.activatedRoute, 'endpointId');
     const appId = getIdFromRoute(this.activatedRoute, 'id');
     return { serviceId, cfId, appId };
   }
@@ -140,7 +140,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private setupForAppServiceMode() {
 
     const appId = getIdFromRoute(this.activatedRoute, 'id');
-    const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
+    const cfId = getIdFromRoute(this.activatedRoute, 'endpointId');
     this.appId = appId;
     this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
@@ -164,17 +164,17 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private configureForEditServiceInstanceMode() {
-    const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
-    const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
+    const { endpointId, serviceInstanceId } = this.activatedRoute.snapshot.params;
+    const entityService = this.getServiceInstanceEntityService(serviceInstanceId, endpointId);
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
       tap(serviceInstance => {
         const serviceInstanceEntity = serviceInstance.entity.entity;
-        this.csiGuidsService.cfGuid = cfId;
+        this.csiGuidsService.cfGuid = endpointId;
         this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
         const serviceGuid = serviceInstance.entity.entity.service_guid;
         this.csiGuidsService.serviceGuid = serviceGuid;
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceGuid);
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceGuid);
         this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
         this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
         this.store.dispatch(new SetCreateServiceInstance(
@@ -184,12 +184,12 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           ''
         ));
         this.store.dispatch(new SetCreateServiceInstanceServicePlan(serviceInstanceEntity.service_plan_guid));
-        const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, cfId);
+        const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, endpointId);
         spaceEntityService.waitForEntity$.pipe(
           filter(p => !!p),
           tap(spaceEntity => {
             this.store.dispatch(new SetCreateServiceInstanceCFDetails(
-              cfId,
+              endpointId,
               spaceEntity.entity.entity.organization_guid,
               spaceEntity.entity.metadata.guid)
             );
@@ -228,11 +228,11 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   isSpaceScoped = () => this.modeService.spaceScopedDetails.isSpaceScoped;
 
   private initialiseForMarketplaceMode(): Observable<boolean> {
-    const { cfId, serviceId } = this.activatedRoute.snapshot.params;
-    this.csiGuidsService.cfGuid = cfId;
+    const { endpointId, serviceId } = this.activatedRoute.snapshot.params;
+    this.csiGuidsService.cfGuid = endpointId;
     this.csiGuidsService.serviceGuid = serviceId;
-    this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceId);
-    const cfDetails = new SetCreateServiceInstanceCFDetails(cfId);
+    this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceId);
+    const cfDetails = new SetCreateServiceInstanceCFDetails(endpointId);
     if (this.modeService.spaceScopedDetails.isSpaceScoped) {
       cfDetails.spaceGuid = this.modeService.spaceScopedDetails.spaceGuid;
       cfDetails.orgGuid = this.modeService.spaceScopedDetails.orgGuid;
@@ -244,7 +244,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     return this.cfOrgSpaceService.cf.list$.pipe(
       filter(p => !!p),
       first(),
-      tap(e => this.cfOrgSpaceService.cf.select.next(cfId)),
+      tap(e => this.cfOrgSpaceService.cf.select.next(endpointId)),
       map(o => false),
     );
   }
