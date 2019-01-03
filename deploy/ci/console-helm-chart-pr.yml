@@ -46,5 +46,7 @@ jobs:
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
         HELM_CHART_REPO_FOLDER: ((release-helm-stable-folder))
+        HELM_REPO_NAME: ((release-helm-repo-name))
+        HELM_REPO_BRANCH: ((release-helm-repo-branch))
         RELEASE_DOCKER_REGISTRY: ((release-repository))
         RELEASE_DOCKER_ORG: ((release-repository-organization))

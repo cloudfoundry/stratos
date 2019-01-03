@@ -26,6 +26,8 @@ params:
   HELM_CHART_REPO_FOLDER:
   RELEASE_DOCKER_REGISTRY:
   RELEASE_DOCKER_ORG:
+  HELM_REPO_NAME:
+  HELM_REPO_BRANCH:
   
 run:
   path: bash
@@ -94,9 +96,15 @@ run:
       git checkout -b ${GIT_BRANCH}
       git add -A
       git status
-      git commit -m "Stratos ${VERSION} Release Helm Chart Changes"
-      git status
-
-      #git push -u origin ${GIT_BRANCH}
+      git commit -m "Stratos Release ${VERSION} Helm Chart Changes"
+      git push -u origin ${GIT_BRANCH}
 
       # Now create a PR for the changes
+      URL=https://api.github.com/repos/${HELM_REPO_NAME}/pulls
+      TITLE="Stratos Release ${VERSION}"
+      
+      curl -H "Content-Type: application/json" -H "authToken: ${GITHUB_TOKEN}" \
+      -d '{"title":"'"${TITLE}"'", "head": "'"${GIT_BRANCH}"'", "base": "'"${HELM_REPO_BRANCH}"'"}' ${URL}
+
+      echo "Helm Chart PR created"
+      
