@@ -165,7 +165,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
   haveMultiActions = new BehaviorSubject(false);
-  singleActions: IListAction<T>[];
+  hasSingleActions: boolean;
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
@@ -185,6 +185,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
+
+
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -253,7 +255,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.multiActions = this.setupActionsDefaultObservables(
       this.config.getMultiActions()
     );
-    this.singleActions = this.config.getSingleActions();
+    this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     if (this.dataSource.rowsState) {
@@ -544,21 +546,26 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
     const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
     if (isObservable(result)) {
-      const sub = result.pipe(
-        subscribeOn(asapScheduler)
-      ).subscribe(done => {
-        if (!done.busy) {
-          this.pendingActions.delete(result);
-          sub.unsubscribe();
-          if (!done.error) {
-            this.dataSource.selectClear();
-          }
-        }
-      });
+      const sub = this.getActionSub(result);
       this.pendingActions.set(result, sub);
     } else {
       this.dataSource.selectClear();
     }
+  }
+
+  private getActionSub(result: Observable<ActionState>) {
+    const sub = result.pipe(
+      subscribeOn(asapScheduler)
+    ).subscribe(done => {
+      if (!done.busy) {
+        this.pendingActions.delete(result);
+        sub.unsubscribe();
+        if (!done.error) {
+          this.dataSource.selectClear();
+        }
+      }
+    });
+    return sub;
   }
 
   executeActionGlobal(listActionConfig: IGlobalListAction<T>) {

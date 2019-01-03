@@ -72,27 +72,14 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   enableTextFilter = true;
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
-    const singleEnvVar = newValues.length === 1;
-    const confirmation = new ConfirmationDialogConfig(
-      singleEnvVar ? `Delete Environment Variable?` : `Delete Environment Variables?`,
-      singleEnvVar ?
-        `Are you sure you want to delete '${newValues[0].name}'?` :
-        `Are you sure you want to delete ${newValues.length} environment variables?`,
-      'Delete',
-      true
-    );
+    const confirmation = this.getConfirmationModal(newValues);
     const action = new AppVariablesDelete(
       this.envVarsDataSource.cfGuid,
       this.envVarsDataSource.appGuid,
       this.envVarsDataSource.transformedEntities,
       newValues);
 
-    const entityReq$ = new EntityMonitor(
-      this.store, this.envVarsDataSource.appGuid, applicationSchemaKey, entityFactory(applicationSchemaKey)
-    ).entityRequest$.pipe(
-      map(request => request.updating[UpdateExistingApplication.updateKey]),
-      filter(req => !!req)
-    );
+    const entityReq$ = this.getEntityMonitor();
     const trigger$ = new Subject();
     this.confirmDialog.open(
       confirmation,
@@ -104,6 +91,30 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     return trigger$.pipe(
       first(),
       switchMap(() => entityReq$)
+    );
+  }
+
+  private getEntityMonitor() {
+    return new EntityMonitor(
+      this.store,
+      this.envVarsDataSource.appGuid,
+      applicationSchemaKey,
+      entityFactory(applicationSchemaKey)
+    ).entityRequest$.pipe(
+      map(request => request.updating[UpdateExistingApplication.updateKey]),
+      filter(req => !!req)
+    );
+  }
+
+  private getConfirmationModal(newValues: ListAppEnvVar[]) {
+    const singleEnvVar = newValues.length === 1;
+    return new ConfirmationDialogConfig(
+      singleEnvVar ? `Delete Environment Variable?` : `Delete Environment Variables?`,
+      singleEnvVar ?
+        `Are you sure you want to delete '${newValues[0].name}'?` :
+        `Are you sure you want to delete ${newValues.length} environment variables?`,
+      'Delete',
+      true
     );
   }
 
