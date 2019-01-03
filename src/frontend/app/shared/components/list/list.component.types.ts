@@ -128,7 +128,7 @@ export class ListConfig<T> implements IListConfig<T> {
 export interface IBaseListAction<T> {
   icon?: string;
   label: string;
-  description: string;
+  description?: string;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {

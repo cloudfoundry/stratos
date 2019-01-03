@@ -5,13 +5,25 @@
       <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
         <div class="list-component__header__left">
           <!-- List Title -->
-          <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
+          <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{
+            config.text?.title }}</div>
           <!-- Time range selector -->
           <div class="list-component__header__left--metrics-range" *ngIf="config.showMetricsRange && !(isAddingOrSelecting$ | async)">
             <app-metrics-range-selector [baseAction]="config.getDataSource().action" (metricsAction)="config.getDataSource().updateMetricsAction($event)"></app-metrics-range-selector>
           </div>
+
+          <!-- Multi actions (those applied to selection) -->
+          <div class="list-component__header__left--multi-actions" *ngIf="(dataSource.isSelecting$ | async)">
+            <ng-container *ngFor="let action of multiActions">
+              <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
+                <mat-icon>{{action.icon}}</mat-icon>
+              </button>
+            </ng-container>
+          </div>
           <!-- Text to show when selecting rows -->
-          <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
+          <div class="list-component__header__left--text" *ngIf="!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)">
+            {{dataSource.selectedRows.size}} Selected
+          </div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'">
@@ -49,14 +61,7 @@
               <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
             </button>
           </div>
-          <!-- Multi actions (those applied to selection) -->
-          <div *ngIf="(dataSource.isSelecting$ | async)">
-            <ng-container *ngFor="let action of multiActions">
-              <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
-                <mat-icon>{{action.icon}}</mat-icon>
-              </button>
-            </ng-container>
-          </div>
+
           <!-- Global actions (those not applied to specific rows) -->
           <div *ngIf="!(isAddingOrSelecting$ | async) && globalActions?.length > 0">
             <ng-container *ngFor="let action of globalActions">
@@ -91,7 +96,7 @@
               <mat-icon>list</mat-icon>
             </button>
           </div>
-          <button id="app-list-refresh-button" mat-icon-button *ngIf="dataSource.refresh && !(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+          <button id="app-list-refresh-button" mat-icon-button *ngIf="dataSource.refresh" [disabled]="(dataSource.isLoadingPage$ | async) || (isAddingOrSelecting$ | async)" (click)="refresh()">
             <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
           </button>
         </div>
