@@ -31,6 +31,16 @@
       animation-play-state: running;
     }
 
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(359deg);
+      }
+    }
+
     button {
       margin-right: -10px;
       margin-top: -10px;
