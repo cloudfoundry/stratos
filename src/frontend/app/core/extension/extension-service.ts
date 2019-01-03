@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
-import { EndpointTypeConfig, initEndpointTypes } from '../../features/endpoints/endpoint-helpers';
-
+import { EndpointTypeConfig, EndpointAuthTypeConfig } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -15,6 +14,7 @@ export interface EndpointTypeExtension {
 export interface StratosExtensionConfig {
   routes?: Route[];
   endpointTypes?: EndpointTypeConfig[];
+  authTypes?: EndpointAuthTypeConfig[];
 }
 
 // The different types of Tab
@@ -57,6 +57,11 @@ export interface StratosEndpointMetadata {
   iconFont: string;
 }
 
+export interface StratosEndpointExtensionConfig {
+  endpointTypes?: EndpointTypeConfig[];
+  authTypes?: EndpointAuthTypeConfig[];
+}
+
 export type StratosRouteType = StratosTabType | StratosActionType;
 
 // Stores the extension metadata as defined by the decorators
@@ -65,7 +70,8 @@ const extensionMetadata = {
   extensionRoutes: {},
   tabs: {},
   actions: {},
-  endpointTypes: []
+  endpointTypes: [],
+  authTypes: []
 };
 
 /**
@@ -93,6 +99,9 @@ export function StratosExtension(config: StratosExtensionConfig) {
   return (_target) => {
     if (config.endpointTypes) {
       extensionMetadata.endpointTypes.push(...config.endpointTypes);
+    }
+    if (config.authTypes) {
+      extensionMetadata.authTypes.push(...config.authTypes);
     }
   };
 }
@@ -143,7 +152,10 @@ export class ExtensionService {
    */
   public init() {
     this.applyRoutesFromExtensions(this.router);
-    this.applyNewEndpointTypes();
+  }
+
+  public getEndpointExtensionConfig(): StratosEndpointExtensionConfig {
+    return this.metadata as StratosEndpointExtensionConfig;
   }
 
   /**
@@ -188,14 +200,9 @@ export class ExtensionService {
     }
     return index >= 0;
   }
-
-  private applyNewEndpointTypes() {
-    initEndpointTypes(this.metadata.endpointTypes);
-  }
 }
 
 // Helpers to access Extension metadata (without using the injectable Extension Service)
-
 
 export function getRoutesFromExtensions(routeType: StratosRouteType) {
   return extensionMetadata.extensionRoutes[routeType] || [];

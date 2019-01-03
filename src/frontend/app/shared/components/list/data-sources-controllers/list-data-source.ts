@@ -11,7 +11,7 @@ import {
   Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { first, publishReplay, refCount, tap } from 'rxjs/operators';
+import { first, publishReplay, refCount, tap, distinctUntilChanged, map, filter } from 'rxjs/operators';
 
 import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
@@ -29,6 +29,8 @@ import {
 } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { SortDirection } from '@angular/material';
+import { ListSort, ListFilter } from '../../../../store/actions/list.actions';
 
 
 export class DataFunctionDefinition {
@@ -83,6 +85,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Misc
   public isLoadingPage$: Observable<boolean> = observableOf(false);
   public rowsState: Observable<RowsState>;
+  public maxedResults$: Observable<boolean> = observableOf(false);
+
+  public filter$: Observable<ListFilter>;
+  public sort$: Observable<ListSort>;
 
   // ------------- Private
   private externalDestroy: () => void;
@@ -149,7 +155,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       // (except if we've maxed out results where the totalResults is miss-matched with entities collection)
       const newLength = paginationEntity.maxedResults && entities.length >= paginationEntity.params['results-per-page'] ?
         paginationEntity.maxedResults : entities.length;
-      if (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength) {
+      if (
+        paginationEntity.ids[paginationEntity.currentPage] &&
+        (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
       }
     };
@@ -160,6 +168,20 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
+
+    this.sort$ = this.createSortObservable();
+
+    this.filter$ = this.createFilterObservable();
+
+    this.maxedResults$ = !!this.action.flattenPaginationMax ?
+      combineLatest(this.pagination$, this.filter$).pipe(
+        distinctUntilChanged(),
+        map(([pagination, filters]) => {
+          const totalResults = this.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
+          // Text filter is only shown when the current result set is not maxed, so we're safe to show the list if there's a text filter set
+          return !filters.string && this.action.flattenPaginationMax < totalResults;
+        }),
+      ) : observableOf(false);
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -343,5 +365,29 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public updateMetricsAction(newAction: MetricsAction) {
     this.metricsAction = newAction;
     this.store.dispatch(newAction);
+  }
+
+  private createSortObservable(): Observable<ListSort> {
+    return this.pagination$.pipe(
+      map(pag => ({
+        direction: pag.params['order-direction'] as SortDirection,
+        field: pag.params['order-direction-field']
+      })),
+      filter(x => !!x),
+      distinctUntilChanged((x, y) => {
+        return x.direction === y.direction && x.field === y.field;
+      }),
+      tag('list-sort')
+    );
+  }
+
+  private createFilterObservable(): Observable<ListFilter> {
+    return this.pagination$.pipe(
+      map(pag => ({
+        string: this.isLocal ? pag.clientPagination.filter.string : this.getFilterFromParams(pag),
+        items: { ...pag.clientPagination.filter.items }
+      })),
+      tag('list-filter')
+    );
   }
 }

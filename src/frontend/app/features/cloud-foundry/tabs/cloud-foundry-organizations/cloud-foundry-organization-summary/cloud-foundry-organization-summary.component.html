@@ -35,14 +35,11 @@
           <app-card-number-metric icon="memory" label="Memory Usage" units="mb" value="{{ (cfOrgService.totalMem$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
-
       <app-tile-group>
         <app-tile>
-          <app-card-cf-recent-apps [allApps$]="cfOrgService.apps$" [loading$]="cfOrgService.loadingApps$" (refresh)="cfOrgService.fetchApps()"></app-card-cf-recent-apps>
+          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfOrgService.apps$" [loading$]="cfOrgService.loadingApps$" (refresh)="cfOrgService.fetchApps()"></app-card-cf-recent-apps>
         </app-tile>
       </app-tile-group>
     </app-loading-page>
-
-
   </app-tile-grid>
 </div>

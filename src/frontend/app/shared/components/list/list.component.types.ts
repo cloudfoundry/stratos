@@ -92,6 +92,7 @@ export interface IListConfig<T> {
 export interface IListMultiFilterConfig {
   key: string;
   label: string;
+  allLabel?: string;
   list$: Observable<IListMultiFilterConfigItem[]>;
   loading$: Observable<boolean>;
   select: BehaviorSubject<any>;

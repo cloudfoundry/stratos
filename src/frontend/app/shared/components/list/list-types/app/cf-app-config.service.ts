@@ -6,10 +6,9 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
-import { createListFilterConfig } from '../../list.helper';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
 import {
@@ -36,9 +35,9 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     this.appsDataSource = new CfAppsDataSource(this.store, this);
 
     this.multiFilterConfigs = [
-      createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
-      createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
-      createListFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
+      createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
+      createCfOrgSpaceFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
+      createCfOrgSpaceFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
     ];
   }
   appsDataSource: CfAppsDataSource;
