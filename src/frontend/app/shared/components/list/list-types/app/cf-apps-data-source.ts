@@ -35,6 +35,10 @@ export function createGetAllAppAction(paginationKey): GetAllApplications {
 }
 
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
+  if (!!paginationState.maxedResults) {
+    return entities;
+  }
   // Filter by cf/org/space
   const cfGuid = paginationState.clientPagination.filter.items['cf'];
   const orgGuid = paginationState.clientPagination.filter.items['org'];
