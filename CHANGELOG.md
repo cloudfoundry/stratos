@@ -1,20 +1,5 @@
 # Change Log
 
-## 2.3.0
-
-Test changes
-
-[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.2.0...2.3.0)
-
-This release contains a number of fixes and improvements. It introduces the first set of Extension points to allow
-users to take Stratos and extend it with new functionality. Initial documentation is available [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/docs/extensions.md). Additionally, when a metrics endpoint is connected, Cloud Foundry cell information is now shown in the Application Instances tab. A Cloud Foundry cells table and Cell summary pages have also been added to the Cloud Foundry section.
-
-- Item one
-- Item two
-- Item three
-
-End of 2.3.0 release notes
-
 ## 2.2.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.2...2.2.0)
