@@ -46,14 +46,14 @@ spec:
   ports:
 {{- if .Values.console.http_port }}
   - name: http
-    port: {{ .Values.console.http_port }}
+    nodePort: {{ .Values.console.http_port }}
     protocol: TCP
-    targetPort: 80
+    port: 80
 {{- end }}
   - name: https
-    port: {{ template "service.https_port" . }}
+    nodePort: {{ template "service.https_port" . }}
     protocol: TCP
-    targetPort: 443
+    port: 443
 {{- else }}
 # ClusterIP
   ports:
