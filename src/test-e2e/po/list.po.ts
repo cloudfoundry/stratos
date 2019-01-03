@@ -195,6 +195,10 @@ export class ListHeaderComponent extends Component {
     return this.locator.element(by.css('.list-component__header__right'));
   }
 
+  getLeftHeaderSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__left'));
+  }
+
   getSearchInputField(): ElementFinder {
     return this.getRightHeaderSection().all(by.css('.filter')).first().element(by.css('input'));
   }
@@ -281,7 +285,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getIconButton(iconText: string): ElementFinder {
-    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
+    return this.getLeftHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
 }

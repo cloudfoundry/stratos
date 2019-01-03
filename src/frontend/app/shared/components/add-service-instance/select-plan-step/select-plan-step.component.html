@@ -2,7 +2,7 @@
   <div #noplans></div>
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
-      <mat-select class="form-control" formControlName="servicePlans">
+      <mat-select class="form-control" formControlName="servicePlans" [appFocus]="servicePlans$ | async">
         <mat-option *ngFor="let servicePlan of servicePlans$ | async" [value]="servicePlan.id">{{ servicePlan.name }}</mat-option>
       </mat-select>
     </mat-form-field>

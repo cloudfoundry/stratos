@@ -1,11 +1,10 @@
-
+import { CfUserService } from './../../../../shared/data-services/cf-user.service';
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith, switchMap } from 'rxjs/operators';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -32,6 +31,10 @@ import {
   getActionsFromExtensions,
   StratosActionType
 } from '../../../../core/extension/extension-service';
+import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
+import { GitSCMService, GitSCMType } from './../../../../shared/data-services/scm/scm.service';
+
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -76,7 +79,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    scmService: GitSCMService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -95,17 +100,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-    this.applicationService.applicationStratProject$
-      .pipe(first())
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
-        ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
-      });
+
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks.push({
@@ -115,9 +110,41 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
+    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid, space.metadata.guid)
+      ),
+      map(can => !can)
+    );
+
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'instances', label: 'Instances' },
+      { link: 'routes', label: 'Routes' },
+      { link: 'log-stream', label: 'Log Stream' },
+      { link: 'services', label: 'Services' },
+      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events' }
+    ];
+
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
+        ) {
+          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
+          const scm = scmService.getSCM(gitscm as GitSCMType);
+          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+        }
+      });
   }
+
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
@@ -130,15 +157,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   ));
 
-  tabLinks: ISubHeaderTabs[] = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'instances', label: 'Instances' },
-    { link: 'routes', label: 'Routes' },
-    { link: 'log-stream', label: 'Log Stream' },
-    { link: 'services', label: 'Services' },
-    { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
-  ];
+  tabLinks: ISubHeaderTabs[];
 
   private getBreadcrumbs(
     application: IApp,

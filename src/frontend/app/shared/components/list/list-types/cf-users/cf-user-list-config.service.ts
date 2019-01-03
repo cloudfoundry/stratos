@@ -85,8 +85,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
       this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.entity.guid } });
     },
-    label: 'Manage',
-    description: `Change Roles`,
+    label: 'Manage Roles',
     createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
   };
 
@@ -102,7 +101,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     },
     icon: 'people',
     label: 'Manage',
-    description: `Change Roles`,
+    description: `Manage roles`,
   };
 
   private createManagerUsersUrl(): string {
