@@ -27,7 +27,7 @@ params:
   RELEASE_DOCKER_REGISTRY:
   RELEASE_DOCKER_ORG:
   HELM_REPO_NAME:
-  HELM_REPO_BRANCH:
+  HELM_CHART_REPO_BRANCH:
   
 run:
   path: bash
@@ -104,7 +104,6 @@ run:
       TITLE="Stratos Release ${VERSION}"
       
       curl -H "Content-Type: application/json" -H "authToken: ${GITHUB_TOKEN}" \
-      -d '{"title":"'"${TITLE}"'", "head": "'"${GIT_BRANCH}"'", "base": "'"${HELM_REPO_BRANCH}"'"}' ${URL}
+      -d '{"title":"'"${TITLE}"'", "head": "'"${GIT_BRANCH}"'", "base": "'"${HELM_CHART_REPO_BRANCH}"'"}' ${URL}
 
       echo "Helm Chart PR created"
-      
