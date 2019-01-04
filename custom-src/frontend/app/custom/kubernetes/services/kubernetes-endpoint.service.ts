@@ -24,8 +24,12 @@ import {
   KubePaginationAction,
   GetKubernetesPods,
 } from '../store/kubernetes.actions';
-import { kubernetesDeploymentsSchemaKey, kubernetesPodsSchemaKey, kubernetesStatefulSetsSchemaKey, kubernetesServicesSchemaKey } from '../store/kubernetes.entities';
-
+import {
+  kubernetesDeploymentsSchemaKey,
+  kubernetesPodsSchemaKey,
+  kubernetesStatefulSetsSchemaKey,
+  kubernetesServicesSchemaKey
+} from '../store/kubernetes.entities';
 
 @Injectable()
 export class KubernetesEndpointService {

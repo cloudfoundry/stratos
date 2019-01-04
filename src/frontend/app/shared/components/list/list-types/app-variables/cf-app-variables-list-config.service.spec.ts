@@ -44,7 +44,7 @@ describe('CfAppVariablesListConfigService', () => {
       remove: {
         imports: [CustomImportModule]
       }
-    });;
+    });
   });
 
   it('should be created', inject(
