@@ -21,3 +21,6 @@ helm plugin install https://github.com/lrills/helm-unittest
 # Run unit tests
 cd deploy/kubernetes
 helm unittest console
+
+# Run lint
+helm lint console
