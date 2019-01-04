@@ -185,7 +185,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
-  // maxedResults$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
