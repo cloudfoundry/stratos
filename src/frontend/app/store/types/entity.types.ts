@@ -1,10 +1,10 @@
 import {
   IService,
   IServiceBinding,
+  IServiceBroker,
   IServiceInstance,
   IServicePlan,
   IServicePlanVisibility,
-  IServiceBroker,
 } from '../../core/cf-api-svc.types';
 import { IApp, IDomain, IFeatureFlag, IOrganization, IRoute, ISecurityGroup, ISpace, IStack } from '../../core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
@@ -20,12 +20,14 @@ import {
   endpointSchemaKey,
   featureFlagSchemaKey,
   gitBranchesSchemaKey,
+  githubCommitSchemaKey,
   metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
   routeSchemaKey,
   securityGroupSchemaKey,
   serviceBindingSchemaKey,
+  serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
   servicePlanVisibilitySchemaKey,
@@ -34,7 +36,6 @@ import {
   spaceSchemaKey,
   stackSchemaKey,
   gitCommitSchemaKey,
-  serviceBrokerSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -66,6 +67,8 @@ export interface IRequestDataState extends IRequestTypeState {
   servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   metrics: IRequestEntityTypeState<IMetrics>;
+  // Extensibility
+  [name: string]: IRequestEntityTypeState<any>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -89,6 +92,8 @@ export interface IRequestState extends IRequestTypeState {
   securityGroup: IRequestEntityTypeState<RequestInfoState>;
   servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
   serviceBroker: IRequestEntityTypeState<RequestInfoState>;
+  // Extensibility
+  [name: string]: IRequestEntityTypeState<RequestInfoState>;
 }
 
 

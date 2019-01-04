@@ -3,6 +3,8 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { ExtensionService } from '../../core/extension/extension-service';
+import { registerAPIRequestEntity } from '../reducers/api-request-reducers.generator';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -34,13 +36,12 @@ export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
-
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
 export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 
-const entityCache: {
+export const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
@@ -67,6 +68,7 @@ export class EntitySchema extends schema.Entity {
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
+    public group?: string
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
@@ -397,4 +399,3 @@ export function entityFactory(key: string): EntitySchema {
 
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
 entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
-
