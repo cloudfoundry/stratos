@@ -1,3 +1,4 @@
+import { defaultCfEntitiesState } from './../store/types/entity.types';
 import { ModuleWithProviders } from '@angular/core';
 
 import { StoreModule } from '@ngrx/store';
@@ -6,11 +7,27 @@ import { AppState } from '../store/app-state';
 import { appReducers } from '../store/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../store/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../store/types/user.types';
+import { getEntitiesFromExtensions } from '../core/extension/extension-service';
+import { EntitySchema, entityCache } from '../store/helpers/entity-factory';
+import { registerAPIRequestEntity } from '../store/reducers/api-request-reducers.generator';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
 export function getInitialTestStoreState(): AppState {
+  const entities = getEntitiesFromExtensions();
+  const state = getDefaultInitialTestStoreState();
+  entities.forEach(entity => {
+    state.pagination[entity.entityKey] = {};
+    state.request[entity.entityKey] = {};
+    state.requestData[entity.entityKey] = {};
+  });
+
+  return state;
+}
+
+function getDefaultInitialTestStoreState(): AppState {
+
   return {
     auth: {
       loggedIn: true,
@@ -583,14 +600,7 @@ export function getInitialTestStoreState(): AppState {
       service: {},
       githubCommits: {},
       domain: {},
-      metrics: {},
-      kubernetesApp: {},
-      kubernetesDeployment: {},
-      kubernetesNamespace: {},
-      kubernetesNode: {},
-      kubernetesPod: {},
-      kubernetesService:{},
-      kubernetesStatefulSet: {}
+      metrics: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -629,20 +639,13 @@ export function getInitialTestStoreState(): AppState {
       }
     },
     request: {
-      kubernetesNode: {},
-      kubernetesPod: {},
-      servicePlanVisibility: {},
-      kubernetesNamespace: {},
-      kubernetesApp: {},
-      kubernetesService: {},
-      kubernetesStatefulSet: {},
-      kubernetesDeployment: {},
       serviceBroker: {},
       serviceInstance: {},
       servicePlan: {},
       service: {},
       serviceBinding: {},
       securityGroup: {},
+      servicePlanVisibility: {},
       featureFlag: {},
       securityRule: {},
       buildpack: {},
@@ -3893,14 +3896,7 @@ export function getInitialTestStoreState(): AppState {
       space_quota_definition: {},
     },
     requestData: {
-      kubernetesNode: {},
-      kubernetesPod: {},
       servicePlanVisibility: {},
-      kubernetesNamespace: {},
-      kubernetesApp: {},
-      kubernetesService: {},
-      kubernetesStatefulSet: {},
-      kubernetesDeployment: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
           entity: {
@@ -21853,3 +21849,11 @@ export function createBasicStoreModule(initialState: Partial<AppState> = getInit
   );
 }
 
+export function registerEntitiesForTesting(entities) {
+  entities.forEach(entity => {
+    const entitySchema = new EntitySchema(entity.entityKey, entity.definition, entity.options, entity.relationKey);
+    entityCache[entity.entityKey] = entitySchema;
+    defaultCfEntitiesState[entity.entityKey] = {};
+    registerAPIRequestEntity(entity.entityKey);
+  });
+}

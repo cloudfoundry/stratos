@@ -17,21 +17,13 @@ export class FileInputComponent implements OnInit {
 
   public name = '';
 
-
   private formGroupControl: FormGroupName;
-
- // private _parent;
 
   constructor(
     @Optional() @Host() @SkipSelf() private parent: ControlContainer,
   ) {}
 
   ngOnInit(): void {
-    //throw new Error("Method not implemented.");
-
-   console.log(this.fileFormControlName);
-   console.log(this.parent);
-
    if (this.parent instanceof FormGroupName) {
      this.formGroupControl = this.parent as FormGroupName;
    }

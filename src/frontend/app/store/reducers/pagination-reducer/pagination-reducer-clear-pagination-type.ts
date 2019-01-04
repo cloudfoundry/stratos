@@ -5,8 +5,7 @@ import {
   organizationSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
-  serviceInstancesSchemaKey,
-  getEntitiesByGroup,
+  serviceInstancesSchemaKey
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
 import { getEndpointSchemeKeys } from '../../../core/extension/extension-service';

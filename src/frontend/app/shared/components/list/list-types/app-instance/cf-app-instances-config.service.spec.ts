@@ -12,6 +12,7 @@ import { generateTestEntityServiceProvider } from '../../../../../test-framework
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../shared.module';
 import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
+import { CustomImportModule } from '../../../../../custom-import.module';
 
 describe('CfAppInstancesConfigService', () => {
 
@@ -38,6 +39,10 @@ describe('CfAppInstancesConfigService', () => {
         createBasicStoreModule(),
         RouterTestingModule,
       ]
+    }).overrideModule(ApplicationsModule, {
+      remove: {
+        imports: [CustomImportModule]
+      }
     });
   });
 

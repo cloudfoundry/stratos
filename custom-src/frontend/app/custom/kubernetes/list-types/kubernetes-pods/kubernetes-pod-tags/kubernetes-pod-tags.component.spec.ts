@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesPodTagsComponent } from './kubernetes-pod-tags.component';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { KubernetesStatus } from '../../../store/kube.types';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 
 describe('KubernetesPodTagsComponent', () => {
   let component: KubernetesPodTagsComponent<any>;
@@ -11,7 +11,7 @@ describe('KubernetesPodTagsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesPodTagsComponent],
-      imports: BaseTestModules
+      imports: KubernetesBaseTestModules
     })
       .compileComponents();
   }));

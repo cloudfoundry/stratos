@@ -15,50 +15,42 @@ export const kubernetesEntities: ExtensionEntitySchema[] = [
   {
     entityKey: kubernetesSchemaKey,
     definition: {},
-    options: { idAttribute: getAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getAPIResourceGuid }
   },
   {
     entityKey: kubernetesAppsSchemaKey,
     definition: {},
-    options: { idAttribute: getAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getAPIResourceGuid }
   },
   {
     entityKey: kubernetesStatefulSetsSchemaKey,
     definition: {},
-    options: { idAttribute: getKubeAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getKubeAPIResourceGuid }
   },
   {
     entityKey: kubernetesPodsSchemaKey,
     definition: {},
-    options: { idAttribute: getKubeAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getKubeAPIResourceGuid }
   },
   {
     entityKey: kubernetesDeploymentsSchemaKey,
     definition: {},
-    options: { idAttribute: getKubeAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getKubeAPIResourceGuid }
   },
   {
     entityKey: kubernetesNodesSchemaKey,
     definition: {},
-    options: { idAttribute: getKubeAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getKubeAPIResourceGuid }
   },
   {
     entityKey: kubernetesNamespacesSchemaKey,
     definition: {},
-    options: { idAttribute: getKubeAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getKubeAPIResourceGuid }
   },
   {
     entityKey: kubernetesServicesSchemaKey,
     definition: {},
-    options: { idAttribute: getKubeAPIResourceGuid },
-    group: 'k8s'
+    options: { idAttribute: getKubeAPIResourceGuid }
   }
 ];
 

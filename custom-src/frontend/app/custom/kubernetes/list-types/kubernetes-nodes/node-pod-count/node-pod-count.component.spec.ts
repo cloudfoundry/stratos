@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NodePodCountComponent } from './node-pod-count.component';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 
 describe('NodePodCountComponent', () => {
   let component: NodePodCountComponent;
@@ -12,7 +12,7 @@ describe('NodePodCountComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [NodePodCountComponent],
-      imports: BaseTestModules,
+      imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService]
     })
       .compileComponents();

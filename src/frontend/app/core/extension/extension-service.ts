@@ -222,7 +222,10 @@ export function getActionsFromExtensions(actionType: StratosActionType): Stratos
 }
 
 export function getEndpointSchemeKeys(type: string): string[] {
-  const ep = this.metadata.endpointTypes.find(e => e.value === type);
+  const ep = extensionMetadata.endpointTypes.find(e => e.value === type);
   return ep ? ep.entitySchemaKeys || [] : [];
 }
 
+export function getEntitiesFromExtensions() {
+  return extensionMetadata.entities;
+}
