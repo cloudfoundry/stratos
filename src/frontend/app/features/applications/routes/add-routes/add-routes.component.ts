@@ -1,18 +1,20 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, mergeMap, pairwise, switchMap, take, tap, combineLatest } from 'rxjs/operators';
+import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
-import { ISpace, IDomain } from '../../../../core/cf-api.types';
+import { IDomain, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { pathGet } from '../../../../core/utils.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   AssociateRouteWithAppApplication,
   GetAppRoutes,
 } from '../../../../store/actions/application-service-routes.actions';
+import { FetchAllDomains } from '../../../../store/actions/domains.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetSpace } from '../../../../store/actions/space.actions';
@@ -26,14 +28,11 @@ import {
 } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
-import { FetchAllDomains } from '../../../../store/actions/domains.actions';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
