@@ -144,7 +144,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       }
     });
 
-    const dataFunctions = getDataFunctionList(transformEntities);
+    const dataFunctions: DataFunction<any>[] = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.pipe(
       tap(items => this.transformedEntities = items)
@@ -178,8 +178,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         distinctUntilChanged(),
         map(([pagination, filters]) => {
           const totalResults = this.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
-          // Text filter is only shown when the current result set is not maxed, so we're safe to show the list if there's a text filter set
-          return !filters.string && this.action.flattenPaginationMax < totalResults;
+          return this.action.flattenPaginationMax < totalResults;
         }),
       ) : observableOf(false);
   }

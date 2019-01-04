@@ -23,6 +23,8 @@ import {
   Observable,
   of as observableOf,
   Subscription,
+  asapScheduler,
+  queueScheduler,
 } from 'rxjs';
 import {
   debounceTime,
@@ -39,6 +41,7 @@ import {
   tap,
   withLatestFrom,
   combineLatest,
+  throttleTime,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -185,7 +188,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
-  // maxedResults$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -474,28 +476,26 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
     const isMaxedResult$ = this.dataSource.pagination$.pipe(
-      map(pag => !!pag.maxedResults)
+      map(pag => !!pag.maxedResults),
     );
 
-    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
-      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      combineLatest(hasChangedPage$, isMaxedResult$),
-      map(([isLoadingPage, hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
-      startWith(true)
+    const canShowLoading$ = observableCombineLatest([hasChangedPage$, isMaxedResult$]).pipe(
+      map(([hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
+      startWith(true),
+      distinctUntilChanged()
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
       startWith(true),
-      withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => canShowLoading && loading),
-      distinctUntilChanged()
+      combineLatest(canShowLoading$),
+      map(([loading, canShowLoading]) => loading && canShowLoading),
+      distinctUntilChanged(),
+      throttleTime(100, queueScheduler, { leading: true, trailing: true }),
     );
 
     this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
-      withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => {
-        return !canShowLoading && loading;
-      }),
+      withLatestFrom(canShowLoading$, this.showProgressBar$),
+      map(([loading, canShowLoading, showProgressBar]) => !canShowLoading && loading && !showProgressBar),
       distinctUntilChanged()
     );
   }
