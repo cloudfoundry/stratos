@@ -600,14 +600,7 @@ function getDefaultInitialTestStoreState(): AppState {
       service: {},
       gitCommits: {},
       domain: {},
-      metrics: {},
-      kubernetesApp: {},
-      kubernetesDeployment: {},
-      kubernetesNamespace: {},
-      kubernetesNode: {},
-      kubernetesPod: {},
-      kubernetesService:{},
-      kubernetesStatefulSet: {}
+      metrics: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -646,14 +639,7 @@ function getDefaultInitialTestStoreState(): AppState {
       }
     },
     request: {
-      kubernetesNode: {},
-      kubernetesPod: {},
       servicePlanVisibility: {},
-      kubernetesNamespace: {},
-      kubernetesApp: {},
-      kubernetesService: {},
-      kubernetesStatefulSet: {},
-      kubernetesDeployment: {},
       serviceBroker: {},
       serviceInstance: {},
       servicePlan: {},
@@ -3910,14 +3896,7 @@ function getDefaultInitialTestStoreState(): AppState {
       space_quota_definition: {},
     },
     requestData: {
-      kubernetesNode: {},
-      kubernetesPod: {},
       servicePlanVisibility: {},
-      kubernetesNamespace: {},
-      kubernetesApp: {},
-      kubernetesService: {},
-      kubernetesStatefulSet: {},
-      kubernetesDeployment: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
           entity: {
