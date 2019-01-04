@@ -20,7 +20,7 @@ import {
   endpointSchemaKey,
   featureFlagSchemaKey,
   gitBranchesSchemaKey,
-  githubCommitSchemaKey,
+  gitCommitSchemaKey,
   metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
@@ -35,7 +35,6 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
-  gitCommitSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
