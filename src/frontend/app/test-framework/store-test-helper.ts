@@ -5472,7 +5472,7 @@ function getDefaultInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073387}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073387}'
             },
             memory: 16,
             instances: 2,
@@ -5651,7 +5651,7 @@ function getDefaultInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073124}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073124}'
             },
             memory: 16,
             instances: 1,
@@ -16353,7 +16353,7 @@ function getDefaultInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '531233b9-4e0f-4252-8866-ec65081df515',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506078991}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506078991}'
             },
             memory: 16,
             instances: 1,
