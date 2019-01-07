@@ -134,7 +134,8 @@ describe('Application View -', function () {
     });
 
     it('Deployment Info', () => {
-      appSummary.cardDeployInfo.waitForTitle('No Deployment Info');
+      appSummary.cardDeployInfo.waitForTitle('Deployment Info');
+      expect(appSummary.cardDeployInfo.getContent()).toBe('None');
     });
   });
 
