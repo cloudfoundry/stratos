@@ -13,6 +13,9 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
   name: "{{ .Release.Name }}-ui-ext"
 spec:
+  selector:
+    app: "{{ .Release.Name }}"
+    component: console
 {{- if .Values.console.service.clusterIP }}
   clusterIP: {{ .Values.console.service.clusterIP }}
 {{- end }}
