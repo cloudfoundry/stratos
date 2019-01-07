@@ -3,7 +3,13 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -16,22 +22,30 @@ import {
   startWith,
   switchMap,
   take,
-  tap
+  tap,
 } from 'rxjs/operators';
-import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
+
+import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
+import { pathGet, safeStringToObj } from '../../../../core/utils.service';
 import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
-import { SetCreateServiceInstanceOrg, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
+import {
+  SetCreateServiceInstanceOrg,
+  SetServiceInstanceGuid,
+} from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
-import { CreateServiceInstance, GetServiceInstance, UpdateServiceInstance } from '../../../../store/actions/service-instances.actions';
+import {
+  CreateServiceInstance,
+  GetServiceInstance,
+  UpdateServiceInstance,
+} from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
-  selectCreateServiceInstanceSpaceGuid
+  selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource, NormalizedResponse } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
@@ -40,7 +54,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-
+import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -92,24 +106,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   spaceScopeSub: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
+  serviceParamsValid = new BehaviorSubject(false);
+  serviceParams: object = null;
+  schemaFormConfig: SchemaFormConfig;
 
-  static isValidJsonValidatorFn = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
 
-      try {
-        if (formField.value) {
-          const jsonObj = JSON.parse(formField.value);
-          // Check if jsonObj is actually an obj
-          if (jsonObj.constructor !== {}.constructor) {
-            throw new Error('not an object');
-          }
-        }
-      } catch (e) {
-        return { 'notValidJson': { value: formField.value } };
-      }
-      return null;
-    };
-  }
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
       !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
@@ -179,7 +180,24 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  onEnter = () => {
+  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+    const schema = this.modeService.isEditServiceInstanceMode() ?
+      pathGet('entity.schemas.service_instance.update.parameters', selectedServicePlan) :
+      pathGet('entity.schemas.service_instance.create.parameters', selectedServicePlan);
+
+    if (!this.schemaFormConfig) {
+      // Create new config
+      this.schemaFormConfig = {
+        schema
+      };
+    } else {
+      // Update existing config (retaining any existing config)
+      this.schemaFormConfig = {
+        ...this.schemaFormConfig,
+        schema
+      };
+    }
+
     this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
@@ -187,7 +205,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         take(1),
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
-          this.createNewInstanceForm.controls.params.setValue(state.parameters);
+
+          this.schemaFormConfig.initialData = safeStringToObj(state.parameters);
+
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
@@ -198,6 +218,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ).subscribe();
     }
     this.subscriptions.push(this.setupFormValidatorData());
+  }
+
+  setServiceParams(data) {
+    this.serviceParams = data;
+  }
+
+  setParamsValid(valid: boolean) {
+    this.serviceParamsValid.next(valid);
   }
 
   resetForms = (mode: FormMode) => {
@@ -235,7 +263,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private setupForms() {
     this.createNewInstanceForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
     this.selectExistingInstanceForm = new FormGroup({
@@ -245,7 +272,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
@@ -330,10 +357,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
 
   private setupValidate() {
-    this.subscriptions.push(this.createNewInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.createNewInstanceForm.valid))).subscribe());
+    // For a new service instance the step is valid if the form and service params are both valid
+    this.subscriptions.push(
+      observableCombineLatest([
+        this.serviceParamsValid.asObservable(),
+        this.createNewInstanceForm.statusChanges
+      ]).pipe(
+        map(([serviceParamsValid, b]) => this.validate.next(serviceParamsValid && this.createNewInstanceForm.valid))
+      ).subscribe()
+    );
+    // For existing service instance the step is valid if the form is (there's no service params)
     this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.selectExistingInstanceForm.valid))).subscribe());
+      map(() => this.validate.next(this.selectExistingInstanceForm.valid))
+    ).subscribe());
   }
 
   private getNewServiceGuid(name: string, spaceGuid: string, servicePlanGuid: string) {
@@ -391,7 +427,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
+    const params = this.serviceParams;
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
@@ -432,7 +468,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    params = getServiceJsonParams(params);
 
     this.store.dispatch(new CreateServiceBinding(
       cfGuid,
