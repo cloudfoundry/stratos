@@ -1,25 +1,22 @@
-import { Directive, Input, EventEmitter, ElementRef, Renderer, Inject, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Directive, ElementRef, Inject, Input, NgZone, OnChanges } from '@angular/core';
 
 @Directive({
   selector: '[appFocus]'
 })
-export class FocusDirective implements OnInit, OnDestroy {
-  sub: Subscription;
-  @Input() appFocus: EventEmitter<boolean>;
+export class FocusDirective implements OnChanges {
+  @Input() appFocus: boolean;
 
-  constructor(@Inject(ElementRef) private element: ElementRef, private renderer: Renderer) {
+  constructor(@Inject(ElementRef) private element: ElementRef, private ngZone: NgZone) { }
+
+  public ngOnChanges() {
+    if (this.appFocus) {
+      this.focus();
+    }
   }
 
-  ngOnInit() {
-    this.sub = this.appFocus.subscribe(event => {
-      // this.renderer.invokeElementMethod(this.element.nativeElement, 'focus', []);
-      // this.element.nativeElement.focus();
-      this.renderer.invokeElementMethod(this.element.nativeElement, 'focus');
+  private focus() {
+    this.ngZone.runOutsideAngular(() => {
+      setTimeout(() => this.element.nativeElement.focus(), 250);
     });
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
   }
 }

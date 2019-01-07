@@ -168,9 +168,9 @@ func (ch *CFHosting) Init() error {
 		if err != nil {
 			// Not set in the environment and failed to read from the Secrets file
 			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
+		} else {
+			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = skipSslBool
 		}
-
-		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = skipSslBool
 
 		// Save to Console DB
 		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)

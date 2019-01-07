@@ -210,6 +210,12 @@ export class CfUserService {
       this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
+  hasSpaceRoles(user: CfUser, spaceGuid: string): boolean {
+    return this.populatedArray(filterEntitiesByGuid(spaceGuid, user.audited_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.managed_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.spaces));
+  }
+
   getUserRoleInOrg = (
     userGuid: string,
     orgGuid: string,

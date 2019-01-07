@@ -25,12 +25,12 @@ export class SendClearEventAction implements Action {
     public eventSubjectId: string,
     public params: {
       timestamp?: number,
-      eventCode?: string
+      eventCode?: string,
+      clean: boolean
     }
-
   ) {
-    const { timestamp, eventCode } = params;
-    if (!timestamp && !eventCode) {
+    const { timestamp, eventCode, clean } = params;
+    if (!timestamp && !eventCode && !clean) {
       throw new Error('Either a timestamp or event code is needed to clear events');
     }
   }
