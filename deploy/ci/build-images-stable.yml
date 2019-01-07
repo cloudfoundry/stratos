@@ -1,4 +1,5 @@
-# Nightly image build
+# Stable image build pipeline
+# This pipeline builds the stable Docker images for Docker Compose and AIO when the stable tag is updated
 ---
 resource_types:
 - name: docker-image
@@ -7,27 +8,29 @@ resource_types:
   source:
     repository: ((docker-resource-image))
     tag: ((docker-resource-image-tag))
+- name: stratos-git-resource
+  type: docker-image
+  source:
+    repository: splatform/stratos-git-tag-resource
+    tag: "latest"
 
 resources:
+# Stratos Git Repository
 - name: stratos
-  type: git
+  type: stratos-git-resource
   source:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
+    # Match stable tag
+    tag_filter: "stable"
 - name: aio-docker-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
     repository: splatform/stratos
-- name: after-midnight
-  type: time
-  source:
-    start: 12:00 AM
-    stop: 2:00 AM
-    location: UTC
-    # Docker Images
+# Docker Images
 - name: jetstream-dc-image
   type: docker-image
   source:
@@ -52,75 +55,16 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-organization))/stratos-dc-console
-- name: jetstream-helm-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-jetstream
-- name: postflight-helm-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-postflight-job
-- name: mariadb-helm-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-mariadb
-- name: ui-helm-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-console
-
 groups:
 - name: tests
   jobs:
-  - build-helm-images
   - build-dc-images
   - build-aio-image
 
 jobs:
-- name: build-helm-images
-  plan:
-  - get: stratos
-  - get: after-midnight
-    trigger: true
-  - aggregate:
-    - do:
-      - put: jetstream-helm-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  prod-build
-          tag_as_latest: true
-      - put: postflight-helm-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  postflight-job
-          tag_as_latest: true
-      - put: mariadb-helm-image
-        params:
-          dockerfile: stratos/deploy/db/Dockerfile.mariadb
-          build: stratos/deploy/db
-          tag_as_latest: true
-      - put: ui-helm-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.ui
-          build: stratos/
-          target_name: prod-build
-          tag_as_latest: true
-      timeout: 2h30m
-
 - name: build-dc-images
   plan:
   - get: stratos
-  - get: after-midnight
     trigger: true
   - aggregate:
     - do:
@@ -129,24 +73,24 @@ jobs:
           dockerfile: stratos/deploy/Dockerfile.bk
           build: stratos/
           target_name:  dev-build
-          tag_as_latest: true
+          tag: stratos/deploy/ci/tasks/build-images/stable-tag
       - put: dc-db-migrator-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk
           build: stratos/
           target_name:  db-migrator
-          tag_as_latest: true
+          tag: stratos/deploy/ci/tasks/build-images/stable-tag
       - put: mariadb-dc-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
-          tag_as_latest: true
+          tag: stratos/deploy/ci/tasks/build-images/stable-tag
       - put: ui-dc-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
-          tag_as_latest: true
+          tag: stratos/deploy/ci/tasks/build-images/stable-tag
       timeout: 2h30m
 
 - name: build-aio-image
@@ -154,9 +98,9 @@ jobs:
   serial: true
   plan:
   - get: stratos
-  - get: after-midnight
     trigger: true
   - put: aio-docker-image
     params:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
+      tag: stratos/deploy/ci/tasks/build-images/stable-tag
