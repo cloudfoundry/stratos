@@ -246,23 +246,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors() {
-    // Automatically select the cf on first load given the select mode setting
-    this.cf.list$.pipe(
-      first(),
-      tap(cfs => {
-        // if (this.cf.select.getValue()) {
-        //   return;
-        // }
-
-        if (!!cfs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.selectSet(this.cf.select, cfs[0].guid);
-        }
-      })
-    ).subscribe();
-
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(undefined),
       distinctUntilChanged(),

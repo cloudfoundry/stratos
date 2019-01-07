@@ -15,6 +15,10 @@ describe('Service Instances Wall', () => {
   let servicesHelperE2E: ServicesHelperE2E;
   let e2eSetup;
 
+  // When there's only one CF connected no filter is shown, hence we can't test the filter.
+  // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
+  const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
+
   beforeAll(() => {
     e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -57,27 +61,30 @@ describe('Service Instances Wall', () => {
     });
   });
 
-  it('- should have filters', () => {
-    servicesWallPage.serviceInstancesList.header.getFilterOptions(0).then(options => {
-      expect(options.length).toBeGreaterThan(0);
-      // Select the 'All' option to ensure we close the filter dropdown
-      options[0].click();
-    });
-    // Commenting out tests due to Issue #2720
-    // servicesWallPage.serviceInstancesList.header.getPlaceholderText(0).then(text => {
-    //   expect(text).toEqual('Cloud Foundry');
-    // });
+  if (hasCfFilter) {
+    it('- should have filters', () => {
+      servicesWallPage.serviceInstancesList.header.getFilterOptions(ServicesWallPage.FilterIds.cf).then(options => {
+        expect(options.length).toBeGreaterThan(0);
+        // Select the 'All' option to ensure we close the filter dropdown
+        options[0].click();
+      });
+      // Commenting out tests due to Issue #2720
+      // servicesWallPage.serviceInstancesList.header.getPlaceholderText(0).then(text => {
+      //   expect(text).toEqual('Cloud Foundry');
+      // });
 
-  });
-
-  it('- should change filter text when an option is selected', () => {
-    servicesWallPage.navigateTo();
-    servicesWallPage.waitForPage();
-    servicesWallPage.serviceInstancesList.header.selectFilterOption(0, 1);
-    servicesWallPage.serviceInstancesList.header.getFilterText().then(text => {
-      expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
     });
-  });
+
+    it('- should change filter text when an option is selected', () => {
+      servicesWallPage.navigateTo();
+      servicesWallPage.waitForPage();
+      servicesWallPage.serviceInstancesList.header.selectFilterOption(ServicesWallPage.FilterIds.cf, 1);
+      servicesWallPage.serviceInstancesList.header.getFilterText(ServicesWallPage.FilterIds.cf).then(text => {
+        expect(text).toEqual(secretsHelper.getDefaultCFEndpoint().name);
+      });
+    });
+  }
+
 
   it('- should have a search box', () => {
     expect(servicesWallPage.serviceInstancesList.header.getSearchInputField()).toBeDefined();
