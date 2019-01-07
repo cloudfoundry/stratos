@@ -11,7 +11,6 @@ import {
   Optional,
   OnChanges,
   SimpleChanges,
-  Injector,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
@@ -63,6 +62,7 @@ import {
   IOptionalAction,
   ListConfig,
   ListViewTypes,
+  MultiFilterManager,
 } from './list.component.types';
 import { RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 
@@ -168,11 +168,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   hasSingleActions: boolean;
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
-  multiFilterConfigs: IListMultiFilterConfig[];
-  multiFilterConfigsLoading$: Observable<boolean>;
+  multiFilterManagers: MultiFilterManager<T>[];
 
   paginationController: IListPaginationController<T>;
-  multiFilterWidgetObservables = new Array<Subscription>();
+  private multiFilterWidgetObservables = new Array<Subscription>();
 
   view$: Observable<ListView>;
 
@@ -248,6 +247,15 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
   }
 
+  private getMultiFilterManagers() {
+    const configs = this.config.getMultiFiltersConfigs();
+    if (!configs) {
+      return null;
+    }
+    return configs.map(config => new MultiFilterManager<T>(config, this.dataSource));
+  }
+
+  // TODO: This needs tidying up - NJ
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
       this.config.getGlobalActions()
@@ -264,7 +272,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       const schema = entityFactory(this.dataSource.entityKey);
       this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
     }
-    this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
+    this.multiFilterManagers = this.getMultiFilterManagers();
 
     // Create convenience observables that make the html clearer
     this.isAddingOrSelecting$ = observableCombineLatest(
@@ -304,7 +312,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         this.globalActions && this.globalActions.length ||
         this.multiActions && this.multiActions.length ||
         viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
-        this.multiFilterConfigs && this.multiFilterConfigs.length ||
+        this.multiFilterManagers && this.multiFilterManagers.length ||
         this.config.enableTextFilter
       );
     }));
@@ -370,18 +378,27 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     filterStoreToWidget.pipe(
       first(),
       tap(() => {
-        const multiFiltersLoading = [];
-        Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
-          filterConfig.select.next(this.multiFilters[filterConfig.key]);
-          const sub = filterConfig.select.asObservable().pipe(tap((filterItem: string) => {
-            this.paginationController.multiFilter(filterConfig, filterItem);
+        Object.values(this.multiFilterManagers).forEach((filterConfig: MultiFilterManager<T>, index: number) => {
+          // Pipe initial store value to the widget
+          filterConfig.applyInitialValue(this.multiFilters);
+          // The first filter will be hidden if there's only one filter option.
+          // To ensure subsequent filters behave correctly automatically select it
+          if (index === 0 && this.multiFilterManagers.length > 1) {
+            filterConfig.filterItems$.pipe(
+              first()
+            ).subscribe(list => {
+              if (list && list.length === 1) {
+                filterConfig.selectItem(list[0].value);
+              }
+            });
+          }
+
+          // Pipe changes in the widgets to the store
+          const sub = filterConfig.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
+            this.paginationController.multiFilter(filterConfig.multiFilterConfig, filterItem);
           }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
-          multiFiltersLoading.push(filterConfig.loading$);
         });
-        this.multiFilterConfigsLoading$ = observableCombineLatest(multiFiltersLoading).pipe(
-          map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
-        );
       })
     ).subscribe();
 
