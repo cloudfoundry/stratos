@@ -3,7 +3,7 @@
 The following guide details how to deploy Stratos in Kubernetes.
 
 <!-- TOC -->
-- [Requiremƒts](#requirements)
+- [Requirements](#requirements)
   * [Kubernetes](#kubernetes)
   * [Helm](#helm)
   * [Storage Class](#storage-class)
