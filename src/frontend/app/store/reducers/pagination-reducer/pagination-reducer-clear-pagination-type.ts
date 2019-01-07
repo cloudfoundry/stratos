@@ -5,9 +5,10 @@ import {
   organizationSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
-  serviceInstancesSchemaKey,
+  serviceInstancesSchemaKey
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
+import { getEndpointSchemeKeys } from '../../../core/extension/extension-service';
 
 export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
   return entityKeys.reduce((prevState, entityKey) => {
@@ -40,6 +41,16 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
         cfUserSchemaKey,
         serviceInstancesSchemaKey,
       ],
+      defaultPaginationEntityState
+    );
+  }
+
+  // Check extensions
+  const entityKeys = getEndpointSchemeKeys(action.endpointType);
+  if (entityKeys.length > 0) {
+    return paginationClearAllTypes(
+      state,
+      entityKeys,
       defaultPaginationEntityState
     );
   }
