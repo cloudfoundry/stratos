@@ -195,6 +195,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       // Update existing config (retaining any existing config)
       this.schemaFormConfig = {
         ...this.schemaFormConfig,
+        initialData: this.serviceParams,
         schema
       };
     }
@@ -207,7 +208,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.schemaFormConfig.initialData = safeStringToObj(state.parameters);
+          this.schemaFormConfig.initialData = safeStringToObj(state.parameters) || this.serviceParams;
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
@@ -428,9 +429,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = safeStringToObj(this.createNewInstanceForm.controls.params.value);
-    let tagsStr = null;
-    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
+    const params = this.serviceParams;
+    const tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
     const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
 
@@ -466,10 +466,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
 
-  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: string) => {
+  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    params = safeStringToObj(params);
 
     this.store.dispatch(new CreateServiceBinding(
       cfGuid,
