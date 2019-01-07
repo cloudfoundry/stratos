@@ -22,6 +22,8 @@ import {
   Observable,
   of as observableOf,
   Subscription,
+  isObservable,
+  asapScheduler,
 } from 'rxjs';
 import {
   debounceTime,
@@ -37,6 +39,7 @@ import {
   takeWhile,
   tap,
   withLatestFrom,
+  subscribeOn,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -61,6 +64,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 
 
 @Component({
@@ -161,7 +165,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
   haveMultiActions = new BehaviorSubject(false);
-  singleActions: IListAction<T>[];
+  hasSingleActions: boolean;
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterManagers: MultiFilterManager<T>[];
@@ -181,6 +185,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
 
+
+
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
   listViewKey: string;
@@ -190,6 +196,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   pageState$: Observable<string>;
 
   initialised$: Observable<boolean>;
+
+  pendingActions: Map<Observable<ActionState>, Subscription> = new Map<Observable<ActionState>, Subscription>();
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -255,7 +263,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.multiActions = this.setupActionsDefaultObservables(
       this.config.getMultiActions()
     );
-    this.singleActions = this.config.getSingleActions();
+    this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     if (this.dataSource.rowsState) {
@@ -525,6 +533,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource) {
       this.dataSource.destroy();
     }
+    this.pendingActions.forEach(sub => sub.unsubscribe());
   }
 
   private getDefaultListView(config: IListConfig<T>) {
@@ -552,9 +561,28 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    if (listActionConfig.action(Array.from(this.dataSource.selectedRows.values()))) {
+    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
+    if (isObservable(result)) {
+      const sub = this.getActionSub(result);
+      this.pendingActions.set(result, sub);
+    } else {
       this.dataSource.selectClear();
     }
+  }
+
+  private getActionSub(result: Observable<ActionState>) {
+    const sub = result.pipe(
+      subscribeOn(asapScheduler)
+    ).subscribe(done => {
+      if (!done.busy) {
+        this.pendingActions.delete(result);
+        sub.unsubscribe();
+        if (!done.error) {
+          this.dataSource.selectClear();
+        }
+      }
+    });
+    return sub;
   }
 
   executeActionGlobal(listActionConfig: IGlobalListAction<T>) {

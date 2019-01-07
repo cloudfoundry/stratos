@@ -74,10 +74,10 @@
           <div *ngIf="addForm && (dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)" class="add-container">
             <div class="spacer"></div>
             <ng-content select="[app-table-add]"></ng-content>
-            <button mat-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid">
+            <button id="addFormButtonAdd" mat-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid">
               <mat-icon>done</mat-icon>
             </button>
-            <button mat-icon-button (click)="dataSource.cancelAdd()">
+            <button id="addFormButtonCancel" mat-icon-button (click)="dataSource.cancelAdd()">
               <mat-icon>clear</mat-icon>
             </button>
           </div>
@@ -111,7 +111,7 @@
     <div class="list-component__body">
       <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
         <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController" [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController" [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
         </app-table>
       </div>
       <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">

@@ -91,6 +91,14 @@ export class ListTableComponent extends Component {
       });
   }
 
+  editRow(index: number, fieldId: string, newValue: string): promise.Promise<any> {
+    const cell = this.getRows().get(index);
+    cell.element(by.css('app-table-cell-edit button')).click();
+    const form = new FormComponent(cell);
+    form.fill({ [fieldId]: newValue });
+    return cell.element(by.id('table-cell-edit-done')).click();
+  }
+
   openRowActionMenuByIndex(index: number): MenuComponent {
     return this.openRowActionMenuByRow(this.getRows().get(index));
   }
@@ -281,6 +289,22 @@ export class ListHeaderComponent extends Component {
 
   getAdd(): ElementFinder {
     return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
+  }
+
+  getInlineAdd(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header .add-container'));
+  }
+
+  getInlineAddForm(): ElementFinder {
+    return this.getInlineAdd().element(by.css('form'));
+  }
+
+  getInlineAddFormAdd(): ElementFinder {
+    return this.getInlineAdd().element(by.css('button:first-of-type'));
+  }
+
+  getInlineAddFormCancel(): ElementFinder {
+    return this.getInlineAdd().element(by.id('addFormButtonCancel'));
   }
 
   getIconButton(iconText: string): ElementFinder {

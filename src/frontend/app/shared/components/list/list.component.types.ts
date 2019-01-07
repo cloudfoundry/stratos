@@ -1,11 +1,12 @@
-import { BehaviorSubject, Observable, of as observableOf, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { ListView } from '../../../store/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ActionState } from './../../../store/reducers/api-request-reducer/types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { map, startWith } from 'rxjs/operators';
 
 
 export enum ListViewTypes {
@@ -149,7 +150,7 @@ export interface IMultiListAction<T> extends IOptionalAction<T> {
    *
    * @memberof IMultiListAction
    */
-  action: (items: T[]) => boolean;
+  action: (items: T[]) => boolean | Observable<ActionState>;
 }
 
 export interface IGlobalListAction<T> extends IOptionalAction<T> {
