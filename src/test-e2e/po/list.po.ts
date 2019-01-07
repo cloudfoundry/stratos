@@ -177,10 +177,12 @@ export class ListHeaderComponent extends Component {
     super(locator.element(by.css('.list-component__header')));
   }
 
-  getFilterFormField(): ElementArrayFinder {
-    return this.locator
-      .element(by.css('.list-component__header__left--multi-filters'))
-      .all(by.tagName('mat-form-field'));
+  private getFilterSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__left--multi-filters'));
+  }
+
+  getFilterFormFields(): ElementArrayFinder {
+    return this.getFilterSection().all(by.tagName('mat-form-field'));
   }
 
   getRightHeaderSection(): ElementFinder {
@@ -213,27 +215,48 @@ export class ListHeaderComponent extends Component {
   getSearchText(): promise.Promise<string> {
     return this.getSearchInputField().getAttribute('value');
   }
-  getPlaceholderText(index = 0): promise.Promise<string> {
-    return this.getFilterFormField().get(index).element(by.tagName('mat-placeholder')).getText();
+
+  getFilterFormField(id: string): ElementFinder {
+    return this.getFilterSection().element(by.id(id));
   }
 
-  getFilterOptions(index = 0): promise.Promise<ElementFinder[]> {
-    this.getFilterFormField().get(index).click();
-    return element.all(by.tagName('mat-option')).then((matOptions: ElementFinder[]) => {
-      return matOptions;
+  getPlaceHolderText(id: string, ignoreMissing = false): promise.Promise<string> {
+    const filter = this.getFilterFormField(id);
+    return filter.isPresent().then(isPresent => {
+      if (isPresent) {
+        return filter.element(by.tagName('mat-placeholder')).getText();
+      } else if (!ignoreMissing) {
+        fail(`Failed to find filter with id '${id}'`);
+      }
     });
   }
 
-  getFilterText(index = 0): promise.Promise<string> {
-    return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
+  getFilterOptions(id: string, ignoreMissing = false): promise.Promise<ElementFinder[]> {
+    const filter = this.getFilterFormField(id);
+    return filter.isPresent().then(isPresent => {
+      if (isPresent) {
+        filter.click();
+        return element.all(by.id(id)).then((matOptions: ElementFinder[]) => matOptions);
+      } else if (!ignoreMissing) {
+        fail(`Failed to find filter with id '${id}'`);
+      }
+    });
   }
 
-  selectFilterOption(index: number, valueIndex): promise.Promise<any> {
-    return this.getFilterOptions(index).then(options => options[valueIndex].click());
+  getFilterText(id: string): promise.Promise<string> {
+    return this.getFilterFormField(id).element(by.css('.mat-select-value')).getText();
+  }
+
+  selectFilterOption(id: string, valueIndex: number, ignoreMissing = false): promise.Promise<any> {
+    return this.getFilterOptions(id, ignoreMissing).then(options => {
+      if (options) {
+        options[valueIndex].click();
+      }
+    });
   }
 
   getMultiFilterForm(): FormComponent {
-    return new FormComponent(this.locator.element(by.className('list-component__header__left--multi-filters')));
+    return new FormComponent(this.getFilterSection());
   }
 
   getRefreshListButton(): ElementFinder {
