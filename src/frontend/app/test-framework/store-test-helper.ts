@@ -7,7 +7,7 @@ import { appReducers } from '../store/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../store/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../store/types/user.types';
 import { getEntitiesFromExtensions } from '../core/extension/extension-service';
-import { EntitySchema, entityCache } from '../store/helpers/entity-factory';
+import { EntitySchema, addEntityToCache } from '../store/helpers/entity-factory';
 import { defaultCfEntitiesState } from '../store/types/entity.types';
 import { registerAPIRequestEntity } from '../store/reducers/api-request-reducers.generator';
 
@@ -21852,7 +21852,7 @@ export function createBasicStoreModule(initialState: Partial<AppState> = getInit
 export function registerEntitiesForTesting(entities) {
   entities.forEach(entity => {
     const entitySchema = new EntitySchema(entity.entityKey, entity.definition, entity.options, entity.relationKey);
-    entityCache[entity.entityKey] = entitySchema;
+    addEntityToCache(entitySchema);
     defaultCfEntitiesState[entity.entityKey] = {};
     registerAPIRequestEntity(entity.entityKey);
   });

@@ -41,7 +41,7 @@ export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
 export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 
-export const entityCache: {
+const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
@@ -67,8 +67,7 @@ export class EntitySchema extends schema.Entity {
     private entityKey: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
-    public relationKey?: string,
-    public group?: string
+    public relationKey?: string
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
@@ -395,6 +394,10 @@ export function entityFactory(key: string): EntitySchema {
     throw new Error(`Unknown entity schema type: ${key}`);
   }
   return entity;
+}
+
+export function addEntityToCache(entitySchema: EntitySchema) {
+  entityCache[entitySchema.key] = entitySchema;
 }
 
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
