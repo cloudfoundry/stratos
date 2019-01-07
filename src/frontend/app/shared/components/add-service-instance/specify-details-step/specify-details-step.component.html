@@ -21,15 +21,13 @@
           {{tag.label}}
           <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
         </mat-chip>
-        <input placeholder="Tags"  name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
+        <input placeholder="Tags" name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
       </mat-chip-list>
     </mat-form-field>
-    <mat-form-field>
-      <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
-      <mat-error *ngIf="createNewInstanceForm.controls.params?.hasError('notValidJson')">
-        Not valid JSON. Please specify a valid JSON Object
-      </mat-error>
-    </mat-form-field>
+    <div class="stepper-form__params">
+      <div>Service Parameters</div>
+      <app-schema-form [config]="schemaFormConfig" (dataChange)="setServiceParams($event)" (validChange)="setParamsValid($event)"></app-schema-form>
+    </div>
   </form>
   <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'" [formGroup]="selectExistingInstanceForm">
     <mat-form-field>
@@ -37,6 +35,6 @@
         <mat-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid" [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-
   </form>
+
 </div>

@@ -6,6 +6,7 @@
   &__tags {
     &__chip-list {
       mat-chip {
+
         &.stepper-form__tags__chip-list__chip,
         &.stepper-form__tags__chip-list__chip + &.stepper-form__tags__chip-list__chip {
           $chip-padding: 5px;
@@ -13,6 +14,10 @@
         }
       }
     }
+  }
+
+  &__params {
+    padding-top: 20px;
   }
 }
 

@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MomentModule } from 'ngx-moment';
+import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
 import {
@@ -109,6 +110,7 @@ import { PageHeaderModule } from './components/page-header/page-header.module';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { SchemaFormComponent } from './components/schema-form/schema-form.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
@@ -153,6 +155,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MaterialDesignFrameworkModule,
     MomentModule,
   ],
   declarations: [
@@ -247,6 +250,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
+    SchemaFormComponent,
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
