@@ -68,7 +68,6 @@ export class EntitySchema extends schema.Entity {
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string
-    public group?: string
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
