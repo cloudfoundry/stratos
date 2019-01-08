@@ -16,7 +16,7 @@ helm init --client-only
 helm version --client
 
 echo "Install Helm unit test plugin"
-helm plugin install https://github.com/lrills/helm-unittest
+helm plugin install https://github.com/cf-stratos/helm-unittest
 
 # Run unit tests
 cd deploy/kubernetes
