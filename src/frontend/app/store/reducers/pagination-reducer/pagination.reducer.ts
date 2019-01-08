@@ -17,6 +17,7 @@ import {
   SET_INITIAL_PARAMS,
   SET_PAGE,
   SET_PAGE_BUSY,
+  SET_PAGINATION_MAX_REACHED,
   SET_PARAMS,
   SET_RESULT_COUNT,
 } from '../../actions/pagination.actions';
@@ -28,6 +29,7 @@ import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
 import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
+import { paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
@@ -152,6 +154,10 @@ function paginate(action, state, updatePagination) {
 
   if (isEndpointAction(action)) {
     return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
+  }
+
+  if (action.type === SET_PAGINATION_MAX_REACHED) {
+    return paginationMaxReached(state, action);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

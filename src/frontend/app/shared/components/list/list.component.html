@@ -41,7 +41,7 @@
         </div>
         <div class="list-component__header__right">
           <!-- Filter by text input -->
-          <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async)">
+          <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
             </mat-form-field>
@@ -126,7 +126,18 @@
         </mat-card-content>
       </mat-card>
     </ng-template>
-    <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async)" class="list-component__no-entries">
+    <ng-template #defaultNoEntriesMaxedResults>
+      <mat-card class="list-component__default-no-entries">
+        <mat-card-content>
+          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. Please use the filters to reduce the number of results.'}}</div>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
+    <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async) || (dataSource.isLoadingPage$ | async)" class="list-component__no-entries">
+      <ng-container *ngIf="dataSource.maxedResults$ | async">
+        <ng-container *ngTemplateOutlet="noEntriesMaxedResults ? noEntriesMaxedResults : defaultNoEntriesMaxedResults">
+        </ng-container>
+      </ng-container>
       <ng-container *ngIf="(noRowsNotFiltering$ | async)">
         <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
         </ng-container>

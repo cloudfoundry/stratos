@@ -136,9 +136,16 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
+      if (paginatedAction.flattenPaginationMax < (paginatedAction.initialParams['results-per-page'] || 100)) {
+        throw new Error(`Action cannot contain a maximum amount of results smaller than the page size: ${JSON.stringify(paginatedAction)}`);
+      }
       request = flattenPagination(
+        this.store,
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
+        paginatedAction.flattenPaginationMax,
+        paginatedAction.entityKey,
+        paginatedAction.paginationKey
       );
     }
 
@@ -375,10 +382,10 @@ export class APIEffect {
     data,
     errorCheck: APIErrorCheck[],
   ): {
-      entities: NormalizedResponse;
-      totalResults: number;
-      totalPages: number;
-    } {
+    entities: NormalizedResponse;
+    totalResults: number;
+    totalPages: number;
+  } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
@@ -502,12 +509,12 @@ export class APIEffect {
     resData,
     apiAction: IRequestAction,
   ): {
-      resData;
-      entities;
-      totalResults;
-      totalPages;
-      errorsCheck: APIErrorCheck[];
-    } {
+    resData;
+    entities;
+    totalResults;
+    totalPages;
+    errorsCheck: APIErrorCheck[];
+  } {
     const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
