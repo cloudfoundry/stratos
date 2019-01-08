@@ -19,7 +19,7 @@ import { APIResource } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
-import { PaginationParam, QParam } from '../../store/types/pagination.types';
+import { PaginationParam, QParam, PaginatedAction } from '../../store/types/pagination.types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
 import { SetParams, ResetPagination } from '../../store/actions/pagination.actions';
 
@@ -78,25 +78,23 @@ export const initCfOrgSpaceService = (store: Store<AppState>,
   );
 };
 
-export const createSetCfOrSpaceMultipleFilterFn = (
+export const createCfOrSpaceMultipleFilterFn = (
   store: Store<AppState>,
-  endpointGuid: string,
-  entityKey: string,
-  paginationKey: string,
+  action: PaginatedAction,
   setQParam: (setQ: QParam, qs: QParam[]) => boolean) => {
   return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
     if (!changes.length) {
       return;
     }
 
-    const startingCfGuid = valueOrCommonFalsy(endpointGuid);
+    const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
     const startingOrgGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'organization_guid'), {}).value;
     const startingSpaceGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'space_guid'), {}).value;
 
     const qChanges = changes.reduce((qs: QParam[], change) => {
       switch (change.key) {
         case 'cf':
-          endpointGuid = change.value;
+          action.endpointGuid = change.value;
           setQParam(new QParam('organization_guid', '', ' IN '), qs);
           setQParam(new QParam('space_guid', '', ' IN '), qs);
           break;
@@ -110,16 +108,17 @@ export const createSetCfOrSpaceMultipleFilterFn = (
       return qs;
     }, spreadPaginationParams(params).q || []);
 
-    const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(endpointGuid);
+    const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
     const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
     const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
 
-    // Changes of org or space will reset pagination and start a new request. Changes of only cf requires a punt
+    // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
-      store.dispatch(new ResetPagination(entityKey, paginationKey));
+      store.dispatch(new ResetPagination(action.entityKey, action.paginationKey));
     } else if (orgChanged || spaceChanged) {
-      params.q = qChanges;
-      store.dispatch(new SetParams(entityKey, paginationKey, params, false, true));
+      const newParams = spreadPaginationParams(params);
+      newParams.q = qChanges;
+      store.dispatch(new SetParams(action.entityKey, action.paginationKey, newParams, true, true));
     }
   };
 };

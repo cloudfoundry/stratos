@@ -11,7 +11,7 @@ import { AppState } from '../../../../../store/app-state';
 import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../store/types/pagination.types';
-import { createSetCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
+import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 import { EntityMonitor } from '../../../../monitors/entity-monitor';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -94,7 +94,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
     this.appGuid = appGuid;
 
     this.setMultiFilter = (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
-      return createSetCfOrSpaceMultipleFilterFn(store, action.endpointGuid, action.entityKey, action.paginationKey, this.setQParam)
+      return createCfOrSpaceMultipleFilterFn(store, action, this.setQParam)
         (changes, params);
     };
   }

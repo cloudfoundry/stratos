@@ -125,7 +125,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
   }
 
   public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-    return createCfOrSpaceMultipleFilterFn(this.store, this.action.endpointGuid, this.entityKey, this.paginationKey, this.setQParam)
+    return createCfOrSpaceMultipleFilterFn(this.store, this.action, this.setQParam)
       (changes, params);
   }
 
