@@ -14,6 +14,9 @@
       <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
         A service instance with this name already exists. Please enter a different one.
       </mat-error>
+      <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('maxlength')">
+        A service instance name cannot exceed 50 characters.
+      </mat-error>
     </mat-form-field>
     <mat-form-field class="stepper-form__tags">
       <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
