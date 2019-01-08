@@ -1,7 +1,19 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, first, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  pairwise,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 
+import { sortStringify } from '../../../core/utils.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
@@ -42,9 +54,9 @@ export function getUniqueQParams(action: AddParams | SetParams, state) {
 
   // Update existing q params
   for (const actionParam of qActionPrams) {
-    const existingParam = qStatePrams.findIndex((stateParam: QParam) => stateParam.key === actionParam.key);
-    if (existingParam >= 0) {
-      qStatePrams[existingParam] = { ...actionParam };
+    const existingParamIndex = qStatePrams.findIndex((stateParam: QParam) => stateParam.key === actionParam.key);
+    if (existingParamIndex >= 0) {
+      qStatePrams[existingParamIndex] = { ...actionParam };
     } else {
       qStatePrams.push(actionParam);
     }
@@ -126,26 +138,47 @@ function shouldFetchLocalOrNonLocalList(
   isLocal: boolean,
   hasDispatchedOnce: boolean,
   pagination: PaginationEntityState,
+  prevPagination: PaginationEntityState
 ) {
   // The following could be written more succinctly, but kept verbose for clarity
-  return isLocal ? shouldFetchLocalList(hasDispatchedOnce, pagination) : shouldFetchNonLocalList(pagination);
+  return isLocal ? shouldFetchLocalList(hasDispatchedOnce, pagination, prevPagination) : shouldFetchNonLocalList(pagination);
 }
 
 function shouldFetchLocalList(
   hasDispatchedOnce: boolean,
   pagination: PaginationEntityState,
+  prevPagination: PaginationEntityState
 ): boolean {
   if (hasError(pagination)) {
     return false;
   }
 
+  const invalidOrMissingPage = !hasValidOrGettingPage(pagination);
+
   // Should a standard, non-maxed local list be refetched?
-  if (!hasDispatchedOnce && !hasValidOrGettingPage(pagination)) {
+  if (!hasDispatchedOnce && invalidOrMissingPage) {
     return true;
   }
 
   // Should a maxed local list be refetched?
-  return pagination.maxedResults && !hasValidOrGettingPage(pagination);
+  if (pagination.maxedResults) {
+    const paramsChanged = prevPagination && paginationParamsString(prevPagination.params) !== paginationParamsString(pagination.params);
+    return invalidOrMissingPage || paramsChanged;
+  }
+
+  return false;
+}
+
+function paginationParamsString(params: PaginationParam): string {
+  const clone = {
+    ...params,
+  };
+  delete clone.q;
+  const res1 = sortStringify(clone) + params.q ? sortStringify(params.q.reduce((res, q) => {
+    res[q.key] = q.value + q.joiner;
+    return res;
+  }, {})) : '';
+  return res1;
 }
 
 function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
@@ -163,23 +196,23 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
+  // .pipe(distinctUntilChanged())
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
-    tap(pagination => {
-      // This could be written more succinctly, however clearer in this more verbose form
-      if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, pagination)) {
+    startWith(null),
+    pairwise(),
+    tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
+      if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         populatePaginationFromParent(store, action).pipe(
           first(),
-          tap(newAction => {
-            store.dispatch(newAction || action);
-          })
-        ).subscribe();
+        ).subscribe(newAction => store.dispatch(newAction || action));
       }
-    })
+    }),
+    map(([prevPag, newPag]) => newPag)
   );
 
   let lastValidationFootprint: string;

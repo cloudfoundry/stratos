@@ -1,3 +1,4 @@
+# Nightly image build
 ---
 resource_types:
 - name: docker-image
@@ -114,6 +115,8 @@ jobs:
           build: stratos/
           target_name: prod-build
           tag_as_latest: true
+      timeout: 2h30m
+
 - name: build-dc-images
   plan:
   - get: stratos
@@ -144,6 +147,7 @@ jobs:
           build: stratos/
           target_name: prod-build
           tag_as_latest: true
+      timeout: 2h30m
 
 - name: build-aio-image
   public: true

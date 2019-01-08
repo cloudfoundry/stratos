@@ -1,5 +1,13 @@
 FROM {{BASE_IMAGE}}
 
+{{#IS_SLE}}
+RUN zypper addrepo  -G -c '{{SMT_INTERNAL}}' smt_internal
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_UPDATE}}' smt_internal_update
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SDK}}' smt_internal_sdk
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
+RUN zypper ref
+{{/IS_SLE}}
+
 RUN zypper -n ref && \
 zypper -n up && \
 zypper in -y wget tar git
@@ -14,6 +22,13 @@ RUN useradd -ms /bin/bash stratos && \
     mkdir -p /usr/dist && \
     chown stratos /usr/dist && \
     chgrp users /usr/dist
+
+{{#IS_SLE}}
+RUN zypper rr  smt_internal
+RUN zypper rr  smt_internal_update
+RUN zypper rr  smt_internal_sdk
+RUN zypper rr  smt_internal_server
+{{/IS_SLE}}
 
 USER stratos
 WORKDIR /home/stratos

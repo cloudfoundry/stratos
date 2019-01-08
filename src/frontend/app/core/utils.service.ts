@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { CardStatus } from '../shared/components/cards/card-status/card-status.component';
-
 export const urlValidationExpression =
   '^' +
   // protocol identifier
@@ -248,6 +246,22 @@ export function parseHttpPipeError(res): {} {
   return {};
 }
 
+export function safeStringToObj<T = object>(value: string): T {
+  try {
+    if (value) {
+      const jsonObj = JSON.parse(value);
+      // Check if jsonObj is actually an obj
+      if (jsonObj.constructor !== {}.constructor) {
+        throw new Error('not an object');
+      }
+      return jsonObj;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
 export const safeUnsubscribe = (...subs: Subscription[]) => {
   subs.forEach(sub => {
     if (sub) {
@@ -258,17 +272,9 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
 
-export function determineCardStatus(value: number, limit: number): CardStatus {
-  if ((limit !== 0 && !limit) || limit === -1) {
-    return CardStatus.NONE;
-  }
-
-  const usage = value / limit;
-  // Limit can be zero, which results in infinity
-  if (usage > 0.9 || usage === Infinity) {
-    return CardStatus.ERROR;
-  } else if (usage > 0.8) {
-    return CardStatus.WARNING;
-  }
-  return CardStatus.NONE;
-}
+export const sortStringify = (obj: { [key: string]: string }): string => {
+  const keys = Object.keys(obj).sort();
+  return keys.reduce((res, key) => {
+    return res += `${key}-${obj[key]},`;
+  }, '');
+};

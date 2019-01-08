@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, withLatestFrom, filter, switchMap } from 'rxjs/operators';
 
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -35,6 +35,10 @@ export function createGetAllAppAction(paginationKey): GetAllApplications {
 }
 
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
+  if (!!paginationState.maxedResults) {
+    return entities;
+  }
   // Filter by cf/org/space
   const cfGuid = paginationState.clientPagination.filter.items['cf'];
   const orgGuid = paginationState.clientPagination.filter.items['org'];
@@ -105,7 +109,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
     this.action = action;
 
-    const statsSub = this.page$.pipe(
+    const statsSub = this.maxedResults$.pipe(
+      filter(maxedResults => !maxedResults),
+      switchMap(() => this.page$),
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
       withLatestFrom(this.pagination$),
@@ -130,8 +136,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         return actions;
       }),
       dispatchSequencer.sequence.bind(dispatchSequencer),
-      tag('stat-obs')).subscribe();
-
+      tag('stat-obs')
+    ).subscribe();
 
     this.subs = [statsSub];
   }
@@ -170,8 +176,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
       this.store.dispatch(new ResetPagination(this.entityKey, this.paginationKey));
     } else if (orgChanged || spaceChanged) {
-      params.q = qChanges;
-      this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, params, false, true));
+      const newParams = spreadPaginationParams(params);
+      newParams.q = qChanges;
+      this.store.dispatch(new SetParams(this.entityKey, this.paginationKey, newParams, true, true));
     }
   }
 

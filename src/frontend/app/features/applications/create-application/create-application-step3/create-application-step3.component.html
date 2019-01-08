@@ -1,13 +1,14 @@
 <b>Create a route</b>
-<form novalidate #form="ngForm" class="stepper-form">
+<form [formGroup]="setDomainHost" class="stepper-form">
   <mat-form-field>
-    <mat-select placeholder="Domain" name="domain" [(ngModel)]="selectedDomainGuid">
+    <mat-select placeholder="Domain" name="domain" formControlName="domain">
       <mat-option *ngFor="let domain of (domains$ | async)" [value]="domain.entity.guid">
         <span>{{ domain.entity.name }}</span>
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <input required [disabled]="!form.controls['domain']?.value" [(ngModel)]="hostName" matInput placeholder="Host" name="hostName">
+    <input required formControlName="host" matInput placeholder="Host" name="hostName">
+    <mat-error *ngIf="setDomainHost.controls['host']?.errors?.maxlength">Host cannot exceed 63 characters</mat-error>
   </mat-form-field>
 </form>

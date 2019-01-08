@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../cards/card-status/card-status.component';
 import { CardCell } from '../../../list.types';
@@ -39,9 +39,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   public getRouterPath(row: EndpointModel) {
-    if (row.cnsi_type === 'cf') {
-      return ['/cloud-foundry', row.guid];
+    const ext = getEndpointTypes().find(ep => ep.value === row.cnsi_type);
+    if (ext && ext.homeLink) {
+      return ext.homeLink(row.guid);
     }
+    return '';
   }
 
   private mapStatus(endpoint: EndpointModel) {

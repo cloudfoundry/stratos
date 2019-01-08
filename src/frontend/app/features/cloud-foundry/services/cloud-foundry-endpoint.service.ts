@@ -216,7 +216,7 @@ export class CloudFoundryEndpointService {
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
   }
 
-  public getAppsInOrg(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
+  public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
@@ -226,7 +226,7 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  public getAppsInSpace(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
+  public getAppsInSpaceViaAllApps(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(apps => {
@@ -235,11 +235,6 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  public getAggregateStat(org: APIResource<IOrganization>, statMetric: string): Observable<number> {
-    return this.getAppsInOrg(org).pipe(
-      map(apps => this.getMetricFromApps(apps, statMetric))
-    );
-  }
   public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)

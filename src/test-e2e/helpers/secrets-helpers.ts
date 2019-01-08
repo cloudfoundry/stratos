@@ -49,7 +49,7 @@ export class SecretsHelpers {
     return this.secrets.consoleUsers.nonAdmin.password;
   }
 
-  getCloudFoundryEndpoints(): any {
+  getCloudFoundryEndpoints(): E2EConfigCloudFoundry[] {
     return this.secrets.endpoints.cf;
   }
 

@@ -14,6 +14,9 @@ import { generateTestEntityServiceProvider } from '../../../../test-framework/en
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { ApplicationEnvVarsHelper } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
+import { HttpModule, Http, ConnectionBackend } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../core/github.helpers';
 
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
@@ -34,7 +37,8 @@ describe('ApplicationTabsBaseComponent', () => {
         BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        HttpModule
       ],
       providers: [
         generateTestEntityServiceProvider(
@@ -44,7 +48,13 @@ describe('ApplicationTabsBaseComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
+        Http,
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        },
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
     })
       .compileComponents();

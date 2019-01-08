@@ -6,7 +6,6 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { isJetStreamError } from '../../core/jetstream.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
@@ -31,9 +30,10 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { isJetStreamError } from '../../core/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-const endpointHeader = 'x-cap-cnsi-list';
+export const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -136,6 +136,9 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
+      if (paginatedAction.flattenPaginationMax < (paginatedAction.initialParams['results-per-page'] || 100)) {
+        throw new Error(`Action cannot contain a maximum amount of results smaller than the page size: ${JSON.stringify(paginatedAction)}`);
+      }
       request = flattenPagination(
         this.store,
         request,
@@ -194,11 +197,18 @@ export class APIEffect {
               ),
             );
           }
+          const { error, errorCode, guid, url, errorResponse } = errorsCheck[0];
           this.store.dispatch(
             new WrapperRequestActionFailed(
               errorMessage,
-              { ...actionClone, endpointGuid: errorsCheck[0].guid },
-              requestType,
+              { ...actionClone, endpointGuid: guid },
+              requestType, {
+                endpointIds: [guid],
+                url,
+                eventCode: errorCode ? errorCode + '' : '500',
+                message: errorResponse ? errorResponse.description : 'Jetstream CF API request error',
+                error
+              }
             ),
           );
           return [];
@@ -224,8 +234,8 @@ export class APIEffect {
       }),
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
-        const endpoints: string[] = endpointString.split(',');
-        endpoints.forEach(endpoint =>
+        const endpointIds: string[] = endpointString.split(',');
+        endpointIds.forEach(endpoint =>
           this.store.dispatch(
             new SendEventAction(endpointSchemaKey, endpoint, {
               eventCode: error.status ? error.status + '' : '500',
@@ -238,7 +248,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+          endpointIds,
+          url: error.url || apiAction.options.url,
+          eventCode: error.status ? error.status + '' : '500',
+          message: 'Jetstream API request error',
+          error
+        });
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
@@ -366,10 +382,10 @@ export class APIEffect {
     data,
     errorCheck: APIErrorCheck[],
   ): {
-      entities: NormalizedResponse;
-      totalResults: number;
-      totalPages: number;
-    } {
+    entities: NormalizedResponse;
+    totalResults: number;
+    totalPages: number;
+  } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
@@ -496,12 +512,12 @@ export class APIEffect {
     resData,
     apiAction: IRequestAction,
   ): {
-      resData;
-      entities;
-      totalResults;
-      totalPages;
-      errorsCheck: APIErrorCheck[];
-    } {
+    resData;
+    entities;
+    totalResults;
+    totalPages;
+    errorsCheck: APIErrorCheck[];
+  } {
     const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;

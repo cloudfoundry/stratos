@@ -34,7 +34,6 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   ngOnInit() {
     this.apps$ = this.allApps$.pipe(
-      first(),
       map(allApps => this.processApps(allApps))
     );
   }

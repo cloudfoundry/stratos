@@ -14,6 +14,7 @@ import {
 import {
   createOrganizationStateObs,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-helper';
+import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -89,7 +90,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     );
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasAllApps$.pipe(
-      switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrg(this.row) : observableOf(null))
+      switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))
     );
 
     this.appCount$ = allApps$.pipe(
@@ -128,18 +129,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
       this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
     }
-    const quotaDefinition = this.row.entity.quota_definition || {
-      entity: {
-        memory_limit: -1,
-        app_instance_limit: -1,
-        instance_memory_limit: -1,
-        name: 'None assigned',
-        organization_guid: this.orgGuid,
-        total_services: -1,
-        total_routes: -1
-      },
-      metadata: null
-    };
+    const quotaDefinition = this.row.entity.quota_definition || createQuotaDefinition(this.orgGuid);
     this.instancesLimit = quotaDefinition.entity.app_instance_limit;
     this.memoryLimit = quotaDefinition.entity.memory_limit;
   }

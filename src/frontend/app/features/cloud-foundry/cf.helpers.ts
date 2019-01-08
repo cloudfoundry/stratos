@@ -179,7 +179,7 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
 
 export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({
-    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
     spaceGuid: getIdFromRoute(activatedRoute, 'spaceId')
   });
@@ -187,7 +187,7 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
 
 export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {
   return ({
-    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     cellId: getIdFromRoute(activatedRoute, 'cellId'),
   });
 }

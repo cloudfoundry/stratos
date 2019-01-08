@@ -3,12 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
+import { IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { GetService } from '../../../../../../store/actions/service.actions';
+import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 import { AppState } from '../../../../../../store/app-state';
-import { entityFactory, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({
@@ -25,13 +23,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
   }
 
   ngOnInit() {
-    this.serviceName$ = this.entityServiceFactory.create<APIResource<IService>>(
-      serviceSchemaKey,
-      entityFactory(serviceSchemaKey),
-      this.row.entity.service_guid,
-      new GetService(this.row.entity.service_guid, this.row.entity.cfGuid),
-      false
-    ).waitForEntity$.pipe(
+    this.serviceName$ = getCfService(this.row.entity.service_guid, this.row.entity.cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
       filter(s => !!s),
       map(s => {
         let serviceLabel = s.entity.entity.label;

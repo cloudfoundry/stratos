@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
+import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
 
 export interface AppEvent {
   actee_name: string;
@@ -60,6 +61,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   isSelecting$: BehaviorSubject<boolean>;
   isLoadingPage$: Observable<boolean>;
 
+  maxedResults$: Observable<boolean>;
+  filter$: Observable<ListFilter>;
+  sort$: Observable<ListSort>;
+
   editRow: T; // Edit items - remove once ng-content can exist in md-table
 
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
@@ -89,6 +94,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   refresh();
 
   updateMetricsAction(newAction: MetricsAction);
+
 }
 
 export type getRowUniqueId<T> = (T) => string;
