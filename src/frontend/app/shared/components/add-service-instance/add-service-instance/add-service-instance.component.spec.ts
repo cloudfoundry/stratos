@@ -31,6 +31,8 @@ import { MultilineTitleComponent } from '../../multiline-title/multiline-title.c
 import { PageHeaderModule } from '../../page-header/page-header.module';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { SteppersModule } from '../../stepper/steppers.module';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
@@ -67,6 +69,8 @@ describe('AddServiceInstanceComponent', () => {
         ApplicationStateIconPipe,
         SchemaFormComponent,
         MultilineTitleComponent,
+        ServicePlanPublicComponent,
+        ServicePlanPriceComponent,
         FocusDirective
       ],
       imports: [

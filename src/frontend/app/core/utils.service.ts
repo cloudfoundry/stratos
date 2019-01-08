@@ -246,7 +246,7 @@ export function parseHttpPipeError(res): {} {
   return {};
 }
 
-export function safeStringToObj(value: string): object {
+export function safeStringToObj<T = object>(value: string): T {
   try {
     if (value) {
       const jsonObj = JSON.parse(value);

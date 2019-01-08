@@ -78,7 +78,7 @@ export class GetServicePlansForService extends CFStartAction implements Paginate
     page: 1,
     'results-per-page': 100,
     'order-direction': 'desc',
-    'order-direction-field': 'creation',
+    'order-direction-field': 'name',
   };
   flattenPagination = true;
 }

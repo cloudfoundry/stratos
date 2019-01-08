@@ -58,6 +58,7 @@ export interface IServicePlan {
   description: string;
   service_guid: string;
   extra: string; // stringified IServiceExtra
+  extraTyped?: IServicePlanExtra;
   unique_id: string;
   public: boolean;
   bindable: number | boolean;

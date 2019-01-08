@@ -112,6 +112,8 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { SchemaFormComponent } from './components/schema-form/schema-form.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
+import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
@@ -214,6 +216,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     ServiceIconComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent,
     EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
@@ -310,6 +314,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CompactAppCardComponent,
     EnvVarViewComponent,
     ServiceIconComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent,
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,

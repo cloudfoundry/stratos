@@ -49,12 +49,13 @@ import {
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource, NormalizedResponse } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
+import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -194,6 +195,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       // Update existing config (retaining any existing config)
       this.schemaFormConfig = {
         ...this.schemaFormConfig,
+        initialData: this.serviceParams,
         schema
       };
     }
@@ -206,7 +208,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.schemaFormConfig.initialData = safeStringToObj(state.parameters);
+          this.schemaFormConfig.initialData = safeStringToObj(state.parameters) || this.serviceParams;
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
@@ -428,8 +430,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = this.serviceParams;
-    let tagsStr = null;
-    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
+    const tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
     const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
 
@@ -465,7 +466,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
 
-  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
+  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
 

@@ -600,7 +600,8 @@ function getDefaultInitialTestStoreState(): AppState {
       service: {},
       gitCommits: {},
       domain: {},
-      metrics: {}
+      metrics: {},
+      servicePlan: {}
     },
     dashboard: {
       sidenavOpen: true,

@@ -96,6 +96,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       // Update existing config (retaining any existing config)
       this.schemaFormConfig = {
         ...this.schemaFormConfig,
+        initialData: this.bindingParams,
         schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
       };
     }
