@@ -119,8 +119,6 @@ export const BaseTestModulesNoShared = [
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 
-export const getBaseProviders = [createBasicStoreModule()];
-
 export const getCfSpaceServiceMock = {
   provide: CloudFoundrySpaceService,
   useClass: CloudFoundrySpaceServiceMock

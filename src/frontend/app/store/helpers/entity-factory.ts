@@ -20,9 +20,9 @@ export const cfUserSchemaKey = 'user';
 export const appSummarySchemaKey = 'summary';
 export const appStatsSchemaKey = 'stats';
 export const appEnvVarsSchemaKey = 'environmentVars';
-export const githubBranchesSchemaKey = 'githubBranches';
-export const githubRepoSchemaKey = 'githubRepo';
-export const githubCommitSchemaKey = 'githubCommits';
+export const gitBranchesSchemaKey = 'gitBranches';
+export const gitRepoSchemaKey = 'gitRepo';
+export const gitCommitSchemaKey = 'gitCommits';
 export const serviceSchemaKey = 'service';
 export const serviceBindingSchemaKey = 'serviceBinding';
 export const servicePlanSchemaKey = 'servicePlan';
@@ -67,7 +67,7 @@ export class EntitySchema extends schema.Entity {
     private entityKey: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
-    public relationKey?: string,
+    public relationKey?: string
     public group?: string
   ) {
     super(entityKey, definition, options);
@@ -95,14 +95,14 @@ entityCache[appStatsSchemaKey] = AppStatSchema;
 const AppEnvVarSchema = new EntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsSchemaKey] = AppEnvVarSchema;
 
-const GithubBranchSchema = new EntitySchema(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
-entityCache[githubBranchesSchemaKey] = GithubBranchSchema;
+const GithubBranchSchema = new EntitySchema(gitBranchesSchemaKey, {}, { idAttribute: 'entityId' });
+entityCache[gitBranchesSchemaKey] = GithubBranchSchema;
 
-const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
-entityCache[githubRepoSchemaKey] = GithubRepoSchema;
+const GithubRepoSchema = new EntitySchema(gitRepoSchemaKey);
+entityCache[gitRepoSchemaKey] = GithubRepoSchema;
 
-const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
-entityCache[githubCommitSchemaKey] = GithubCommitSchema;
+const GithubCommitSchema = new EntitySchema(gitCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
+entityCache[gitCommitSchemaKey] = GithubCommitSchema;
 
 const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
 entityCache[cfInfoSchemaKey] = CFInfoSchema;
@@ -395,6 +395,10 @@ export function entityFactory(key: string): EntitySchema {
     throw new Error(`Unknown entity schema type: ${key}`);
   }
   return entity;
+}
+
+export function addEntityToCache(entitySchema: EntitySchema) {
+  entityCache[entitySchema.key] = entitySchema;
 }
 
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });

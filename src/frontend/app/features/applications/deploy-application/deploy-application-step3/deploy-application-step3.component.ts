@@ -96,10 +96,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
     this.destroyDeployer();
-    if (this.deployer && !this.deployer.deploying) {
-      this.deployer.close();
-    } else {
-      this.setupCompletionNotification();
+    if (this.deployer) {
+      if (!this.deployer.deploying) {
+        this.deployer.close();
+      } else {
+        this.setupCompletionNotification();
+      }
     }
   }
 

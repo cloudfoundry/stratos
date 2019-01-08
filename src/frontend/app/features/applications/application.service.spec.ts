@@ -13,6 +13,7 @@ import { generateTestApplicationServiceProvider } from '../../test-framework/app
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { ApplicationService } from './application.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { GitSCMService } from '../../shared/data-services/scm/scm.service';
 import { ExtensionService } from '../../core/extension/extension-service';
 
 describe('ApplicationService', () => {
@@ -39,6 +40,7 @@ describe('ApplicationService', () => {
         EntityMonitorFactory,
         PaginationMonitorFactory,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
+        GitSCMService,
         ExtensionService
       ]
     });

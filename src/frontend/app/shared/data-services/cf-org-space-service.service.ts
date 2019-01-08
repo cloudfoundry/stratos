@@ -1,6 +1,6 @@
-import { Injectable, OnDestroy, Optional } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription, of as observableOf } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
@@ -17,6 +17,21 @@ import { selectPaginationState } from '../../store/selectors/pagination.selector
 import { APIResource } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+
+export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
+  return {
+    key: key,
+    label: label,
+    ...cfOrgSpaceItem,
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+      return entities.map(entity => ({
+        label: entity.name,
+        item: entity,
+        value: entity.guid
+      }));
+    })),
+  };
+}
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
@@ -231,23 +246,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors() {
-    // Automatically select the cf on first load given the select mode setting
-    this.cf.list$.pipe(
-      first(),
-      tap(cfs => {
-        // if (this.cf.select.getValue()) {
-        //   return;
-        // }
-
-        if (!!cfs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.selectSet(this.cf.select, cfs[0].guid);
-        }
-      })
-    ).subscribe();
-
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(undefined),
       distinctUntilChanged(),

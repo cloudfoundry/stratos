@@ -18,21 +18,19 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
-import { GetService } from '../../store/actions/service.actions';
 import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   entityFactory,
   serviceBrokerSchemaKey,
   servicePlanVisibilitySchemaKey,
-  serviceSchemaKey,
   spaceSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getServiceInstancesInCf, getServicePlans, getSvcAvailability } from './services-helper';
+import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -75,13 +73,7 @@ export class ServicesService {
     this.cfGuid = getIdFromRoute(activatedRoute, 'endpointId');
     this.serviceGuid = getIdFromRoute(activatedRoute, 'serviceId');
 
-    this.serviceEntityService = this.entityServiceFactory.create(
-      serviceSchemaKey,
-      entityFactory(serviceSchemaKey),
-      this.serviceGuid,
-      new GetService(this.serviceGuid, this.cfGuid),
-      true
-    );
+    this.serviceEntityService = getCfService(this.serviceGuid, this.cfGuid, this.entityServiceFactory);
     this.service$ = this.serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),
       map(o => o.entity),
@@ -133,21 +125,6 @@ export class ServicesService {
       map(s => s[0]),
       first()
     )
-
-  getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
-    if (servicePlan.entity.public) {
-      return observableOf({
-        isPublic: true,
-        guid: servicePlan.metadata.guid
-      });
-    }
-    return this.service$.pipe(
-      switchMap(o => this.getServiceBrokerById(o.entity.service_broker_guid)),
-      combineLatest(this.servicePlanVisibilities$),
-      filter(([p, q]) => !!p && !!q),
-      map(([serviceBroker, allServicePlanVisibilities]) => getSvcAvailability(servicePlan, serviceBroker, allServicePlanVisibilities))
-    );
-  }
 
   getServiceName = () => {
     return observableCombineLatest(this.serviceExtraInfo$, this.service$)
