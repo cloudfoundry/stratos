@@ -10,7 +10,7 @@ metadata:
   name: "{{ .Release.Name }}-ui-ext"
 spec:
   ports:
-{{- if .Values.kube.console_http_port)) }}
+{{- if .Values.kube.console_http_port }}
   - name: http
     port: {{ .Values.kube.console_http_port }}
     protocol: TCP

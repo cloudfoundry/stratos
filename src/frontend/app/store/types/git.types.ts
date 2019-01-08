@@ -1,33 +1,33 @@
-import { schema } from 'normalizr';
 
-export interface GithubRepo {
-  pushed_at: string;
+export interface GitRepo {
+  pushed_at?: string;
+  last_activity_at?: string;
   created_at: string;
-  owner: GithubUser;
+  owner: GitUser;
   id: number;
   full_name: string;
   default_branch: string;
   description: string;
 }
 
-export interface GithubUser {
+export interface GitUser {
   avatar_url: string;
   html_url: string;
   id: number;
   login: string;
-  type: string;
 }
 
 export interface GitBranch {
   name: string;
-  commit?: GithubCommit;
+  commit?: GitCommit;
+  projectId?: string;
+  entityId?: string;
 }
 
-export interface GithubCommit {
+export interface GitCommit {
   sha: string;
-  url: string;
-  author?: GithubUser;
-  committer?: GithubUser;
+  author?: GitUser;
+  committer?: GitUser;
   html_url?: string;
   commit?: {
     author: {

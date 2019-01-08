@@ -19,6 +19,10 @@ As described in the standard `cf push` instructions [here](../README.md) the con
       cf marketplace
       ```
 
+    You can also create an [User-Provided Service Instance](https://docs.cloudfoundry.org/devguide/services/user-provided.html):
+    ```bash
+    cf cups console_db  -p '{"uri": "postgres://", "username":"console_appuser", "password":"***", "hostname":"192.168.12.34", "port":"5432", "dbname":"console_db" }'
+    ```
 1. Update the Console's Manifest
 
    * The the Console `manifest.yml` file and add the following:

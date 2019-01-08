@@ -1,3 +1,4 @@
+import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
 import { DatePipe } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
@@ -7,7 +8,6 @@ import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { GITHUB_API_URL } from '../../../../../../core/github.helpers';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
@@ -17,47 +17,48 @@ import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.acti
 import { AppState } from '../../../../../../store/app-state';
 import {
   entityFactory,
-  githubBranchesSchemaKey,
-  githubCommitSchemaKey,
-  githubRepoSchemaKey,
+  gitBranchesSchemaKey,
+  gitCommitSchemaKey,
+  gitRepoSchemaKey,
 } from '../../../../../../store/helpers/entity-factory';
-import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
+import { GitCommit, GitRepo } from '../../../../../../store/types/git.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
 
 
 @Component({
-  selector: 'app-github-tab',
-  templateUrl: './github-tab.component.html',
-  styleUrls: ['./github-tab.component.scss'],
+  selector: 'app-gitscm-tab',
+  templateUrl: './gitscm-tab.component.html',
+  styleUrls: ['./gitscm-tab.component.scss'],
   providers: [
     {
       provide: ListConfig,
       useFactory: (
         store: Store<AppState>,
         datePipe: DatePipe,
+        scmService: GitSCMService,
         applicationService: ApplicationService,
         entityServiceFactory: EntityServiceFactory) => {
-        return new GithubCommitsListConfigServiceAppTab(store, datePipe, applicationService, entityServiceFactory);
+        return new GithubCommitsListConfigServiceAppTab(store, datePipe, scmService, applicationService, entityServiceFactory);
       },
-      deps: [Store, DatePipe, ApplicationService, EntityServiceFactory]
+      deps: [Store, DatePipe, GitSCMService, ApplicationService, EntityServiceFactory]
     }
   ]
 })
-export class GithubTabComponent implements OnInit, OnDestroy {
+export class GitSCMTabComponent implements OnInit, OnDestroy {
 
   gitBranchEntityService: EntityService;
   gitCommitEntityService: EntityService;
-  gitHubRepoEntityService: EntityService;
+  gitSCMRepoEntityService: EntityService;
 
   deployAppSubscription: Subscription;
   stratosProject$: Observable<EnvVarStratosProject>;
-  gitHubRepo$: Observable<GithubRepo>;
-  githubRepoErrorSub: Subscription;
-  commit$: Observable<GithubCommit>;
+  gitSCMRepo$: Observable<GitRepo>;
+  gitSCMRepoErrorSub: Subscription;
+  commit$: Observable<GitCommit>;
   isHead$: Observable<boolean>;
   initialised$: Observable<boolean>;
-  private githubProjectEntityService: EntityService;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
   ngOnDestroy(): void {
@@ -67,8 +68,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
     }
-    if (this.githubRepoErrorSub) {
-      this.githubRepoErrorSub.unsubscribe();
+    if (this.gitSCMRepoErrorSub) {
+      this.gitSCMRepoErrorSub.unsubscribe();
     }
   }
 
@@ -77,7 +78,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private snackBar: MatSnackBar,
-    @Inject(GITHUB_API_URL) private gitHubURL: string
+    private scmService: GitSCMService
   ) { }
 
   ngOnInit() {
@@ -88,36 +89,40 @@ export class GithubTabComponent implements OnInit, OnDestroy {
         const commitId = stProject.deploySource.commit.trim();
         const commitEntityKey = projectName + '-' + commitId;
 
-        this.gitHubRepoEntityService = this.entityServiceFactory.create(
-          githubRepoSchemaKey,
-          entityFactory(githubRepoSchemaKey),
+        // Fallback to type if scm is not set (legacy support)
+        const scmType = stProject.deploySource.scm ||  stProject.deploySource.type;
+        const scm = this.scmService.getSCM(scmType as GitSCMType);
+
+        this.gitSCMRepoEntityService = this.entityServiceFactory.create(
+          gitRepoSchemaKey,
+          entityFactory(gitRepoSchemaKey),
           projectName,
           new FetchGitHubRepoInfo(stProject),
           false
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
-          githubCommitSchemaKey,
-          entityFactory(githubCommitSchemaKey),
+          gitCommitSchemaKey,
+          entityFactory(gitCommitSchemaKey),
           commitEntityKey,
-          new FetchCommit(commitId, projectName, this.gitHubURL),
+          new FetchCommit(scm, commitId, projectName),
           false
         );
 
         const branchKey = `${projectName}-${stProject.deploySource.branch}`;
         this.gitBranchEntityService = this.entityServiceFactory.create(
-          githubBranchesSchemaKey,
-          entityFactory(githubBranchesSchemaKey),
+          gitBranchesSchemaKey,
+          entityFactory(gitBranchesSchemaKey),
           branchKey,
-          new FetchBranchesForProject(projectName),
+          new FetchBranchesForProject(scm, projectName),
           false
         );
 
-        this.gitHubRepo$ = this.gitHubRepoEntityService.waitForEntity$.pipe(
+        this.gitSCMRepo$ = this.gitSCMRepoEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity.entity)
         );
 
-        this.githubRepoErrorSub = this.gitHubRepoEntityService.entityMonitor.entityRequest$.pipe(
+        this.gitSCMRepoErrorSub = this.gitSCMRepoEntityService.entityMonitor.entityRequest$.pipe(
           filter(request => !!request.error),
           map(request => request.message),
           distinctUntilChanged(),
@@ -125,12 +130,13 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           if (this.snackBarRef) {
             this.snackBarRef.dismiss();
           }
-          this.snackBarRef = this.snackBar.open(`Unable to fetch Github project: ${errorMessage}`, 'Dismiss');
+          this.snackBarRef = this.snackBar.open(`Unable to fetch ${scm.getLabel()} project: ${errorMessage}`, 'Dismiss');
         });
 
         this.commit$ = this.gitCommitEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity.entity)
         );
+
         this.isHead$ = this.gitBranchEntityService.waitForEntity$.pipe(
           map(p => {
             return (

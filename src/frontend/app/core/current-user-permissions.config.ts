@@ -5,6 +5,7 @@ export enum CurrentUserPermissions {
   APPLICATION_EDIT = 'edit.application',
   APPLICATION_CREATE = 'create.application',
   APPLICATION_MANAGE = 'manage.application',
+  APPLICATION_VIEW_ENV_VARS = 'env-vars.view.application',
   SPACE_VIEW = 'view.space',
   SPACE_CREATE = 'create.space',
   SPACE_DELETE = 'delete.space',
@@ -88,6 +89,7 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.APPLICATION_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.APPLICATION_MANAGE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.APPLICATION_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.SPACE_VIEW]: [
     // See #2186
     new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP),

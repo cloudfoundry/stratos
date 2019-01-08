@@ -1,12 +1,10 @@
-
-import { of as observableOf, Observable, Subscription } from 'rxjs';
-
-import { map, filter, take } from 'rxjs/operators';
-import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, take } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
@@ -14,6 +12,7 @@ import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-appli
 import { AppState } from '../../../store/app-state';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
+
 
 @Component({
   selector: 'app-edit-application',
@@ -69,7 +68,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.sub = this.applicationService.application$.pipe(
-      filter(app => app.app.entity),
+      filter(app => !!app.app.entity),
       take(1),
       map(app => app.app.entity)
     ).subscribe(app => {
