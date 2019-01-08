@@ -1,20 +1,21 @@
 
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-
-import { withLatestFrom, skipWhile, map, first, filter, tap } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
+import { RouterNav } from '../store/actions/router.actions';
+import { AppState, IRequestEntityTypeState } from '../store/app-state';
+import { AuthState } from '../store/reducers/auth.reducer';
 import {
   endpointEntitiesSelector,
-  endpointStatusSelector,
-  endpointsEntityRequestDataSelector
+  endpointsEntityRequestDataSelector,
+  endpointStatusSelector
 } from '../store/selectors/endpoint.selectors';
-import { Injectable } from '@angular/core';
-import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
-import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../store/app-state';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { EndpointModel, EndpointState } from '../store/types/endpoint.types';
 import { UserService } from './user.service';
-import { AuthState } from '../store/reducers/auth.reducer';
-import { RouterNav } from '../store/actions/router.actions';
+import { endpointHealthChecks, EndpointHealthCheck } from './endpoints-health-checks';
+
 
 
 @Injectable()
@@ -32,6 +33,18 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
+  }
+
+  public registerHealthCheck(healthCheck: EndpointHealthCheck) {
+    endpointHealthChecks.registerHealthCheck(healthCheck);
+  }
+
+  public checkEndpoint(endpoint: EndpointModel) {
+    endpointHealthChecks.checkEndpoint(endpoint);
+  }
+
+  public checkAllEndpoints() {
+    this.endpoints$.pipe(first()).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
@@ -78,4 +91,15 @@ export class EndpointsService implements CanActivate {
       first()
     );
   }
+
+  doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
+    return this.endpoints$.pipe(
+      map(endpoints => {
+        const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
+        return !haveAtLeastOne;
+      })
+    );
+  }
+
+
 }

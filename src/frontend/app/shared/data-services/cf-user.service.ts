@@ -40,7 +40,7 @@ import {
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -208,6 +208,12 @@ export class CfUserService {
     return this.populatedArray(this.filterByOrg(orgGuid, user.audited_spaces)) ||
       this.populatedArray(this.filterByOrg(orgGuid, user.managed_spaces)) ||
       this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
+  }
+
+  hasSpaceRoles(user: CfUser, spaceGuid: string): boolean {
+    return this.populatedArray(filterEntitiesByGuid(spaceGuid, user.audited_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.managed_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.spaces));
   }
 
   getUserRoleInOrg = (

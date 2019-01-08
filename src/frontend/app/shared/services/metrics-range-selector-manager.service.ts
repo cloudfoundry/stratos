@@ -40,6 +40,8 @@ export class MetricsRangeSelectorManagerService {
 
   private baseAction: MetricsAction;
 
+  private pollIndex: number;
+
   constructor(public metricRangeService: MetricsRangeSelectorService) { }
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
@@ -68,22 +70,29 @@ export class MetricsRangeSelectorManagerService {
     }
   }
 
+  private setTimeWindowFromStore(metrics: IMetrics) {
+    const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
+    const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
+    if (isDifferent) {
+      this.committedStartEnd = [start, end];
+    }
+    this.selectedTimeRange = timeRange;
+  }
+
   public init(entityMonitor: EntityMonitor<IMetrics>, baseAction: MetricsAction) {
     this.baseAction = baseAction;
     this.initSub = entityMonitor.entity$.pipe(
-      debounceTime(1),
       tap(metrics => {
-        if (!this.selectedTimeRange) {
-          const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
-
-          if (timeRange.queryType === MetricQueryType.RANGE_QUERY) {
-
-            const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
-            if (isDifferent) {
-              this.committedStartEnd = [start, end];
-            }
-          }
-          this.selectedTimeRange = timeRange;
+        if (metrics && !this.selectedTimeRange) {
+          this.setTimeWindowFromStore(metrics);
+        }
+      }),
+      debounceTime(0),
+      tap(metrics => {
+        // entity$ emits null first.
+        // If its still null after the debounce then we run setTimeWindowFromStore to get default selection
+        if (!metrics && !this.selectedTimeRange) {
+          this.setTimeWindowFromStore(metrics);
         }
       }),
       takeWhile(metrics => !metrics)
@@ -94,6 +103,7 @@ export class MetricsRangeSelectorManagerService {
     if (this.initSub) {
       this.initSub.unsubscribe();
     }
+    this.endWindowPoll();
   }
 
   get selectedTimeRange() {
@@ -101,12 +111,13 @@ export class MetricsRangeSelectorManagerService {
   }
 
   set selectedTimeRange(timeRange: ITimeRange) {
+    this.endWindowPoll();
     this.commit = null;
     this.start = null;
     this.end = null;
     this.selectedTimeRangeValue = timeRange;
     this.timeWindow$.next(this.selectedTimeRangeValue);
-    if (this.selectedTimeRangeValue.queryType === MetricQueryType.QUERY) {
+    if (this.selectedTimeRangeValue.value) {
       this.commitWindow(this.selectedTimeRangeValue);
     }
   }
@@ -127,13 +138,29 @@ export class MetricsRangeSelectorManagerService {
     return this.startEnd[this.endIndex];
   }
 
-  private commitWindow(window: ITimeRange) {
-    if (!window) {
+  private startWindowPoll(timeWindow: ITimeRange) {
+    this.endWindowPoll();
+    this.pollIndex = window.setInterval(
+      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow)),
+      10000
+    );
+  }
+
+  private endWindowPoll() {
+    window.clearInterval(this.pollIndex);
+  }
+
+  private commitWindow(timeWindow: ITimeRange) {
+    this.endWindowPoll();
+    if (!timeWindow) {
       return;
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, window));
+    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow));
+    if (timeWindow.value) {
+      this.startWindowPoll(timeWindow);
+    }
   }
 
   private commitAction(action: MetricsAction) {

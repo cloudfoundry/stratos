@@ -1,15 +1,14 @@
-import { NgModule, ModuleWithProviders } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 
 import { EndointsRoutingModule } from './endpoints.routing';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
-import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 
 @NgModule({
   imports: [
@@ -21,9 +20,13 @@ import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connec
   declarations: [
     EndpointsPageComponent,
     ConnectEndpointDialogComponent,
+    CredentialsAuthFormComponent,
+    SSOAuthFormComponent
   ],
   entryComponents: [
-    ConnectEndpointDialogComponent
+    ConnectEndpointDialogComponent,
+    CredentialsAuthFormComponent,
+    SSOAuthFormComponent
   ]
 })
 export class EndpointsModule { }

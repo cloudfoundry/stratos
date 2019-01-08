@@ -1,7 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { PaginationAction } from '../types/pagination.types';
-import { SystemInfo } from './../types/system.types';
+import { SystemInfo } from '../types/system.types';
 import { GetAllEndpoints } from './endpoint.actions';
 
 export const GET_SYSTEM_INFO = '[System] Get info';

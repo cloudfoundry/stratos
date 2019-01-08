@@ -12,7 +12,7 @@ docker-compose version
 
 echo "Preparing for e2e tests..."
 
-curl -sLk -o ./secrets.yaml https://travis.capbristol.com/yaml
+wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
@@ -23,6 +23,12 @@ export CERTS_PATH=./dev-certs
 
 # Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1
+
+# If suite is set, use it else use default `e2e`
+SUITE=$2
+if [ -z "$SUITE" ]; then
+  SUITE="e2e"
+fi
 
 # Test report folder name override
 TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
@@ -57,7 +63,7 @@ pushd src/jetstream
 ./jetstream > backend.log &
 popd
 
-E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
+E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then

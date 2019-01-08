@@ -4,6 +4,7 @@ import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
 
 describe('CF - Top Level - ', () => {
 
@@ -70,7 +71,7 @@ describe('CF - Top Level - ', () => {
   describe('As User', () => {
     beforeAll(() => {
       e2eSetup = e2e.setup(ConsoleUserType.admin)
-      .loginAs(ConsoleUserType.user);
+        .loginAs(ConsoleUserType.user);
     });
 
     describe('Basic Tests -', () => {
@@ -89,15 +90,20 @@ describe('CF - Top Level - ', () => {
 
       it('Walk Tabs', () => {
         cfPage.goToOrgTab();
-        cfPage.goToUsersTab();
-        // cfPage.goToFirehoseTab();// Is not shown to non-admins
-        cfPage.goToFeatureFlagsTab();
-        cfPage.goToBuildPacksTab();
-        cfPage.goToStacksTab();
-        cfPage.goToSecurityGroupsTab();
-        cfPage.goToSummaryTab();
+        const orgs = new ListComponent();
+        orgs.waitUntilShown();
+        orgs.getTotalResults().then(totalOrgs => {
+          if (totalOrgs <= 12) {
+            cfPage.goToUsersTab();
+          }
+          // cfPage.goToFirehoseTab();// Is not shown to non-admins
+          cfPage.goToFeatureFlagsTab();
+          cfPage.goToBuildPacksTab();
+          cfPage.goToStacksTab();
+          cfPage.goToSecurityGroupsTab();
+          cfPage.goToSummaryTab();
+        });
       });
-
     });
   });
 

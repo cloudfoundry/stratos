@@ -1,5 +1,6 @@
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -26,13 +27,18 @@ describe('Create Service Instance of Space Scoped Service', () => {
     expect(createServiceInstance.isActivePage()).toBeTruthy();
   });
 
-  it('- should be able to to create a service instance', () => {
+  describe('Long running tests - ', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
 
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name);
-    servicesWall.waitForPage();
+    it('- should be able to to create a service instance', () => {
 
-    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name);
+      servicesWall.waitForPage();
 
+      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
+
+    }, timeout);
   });
 
   it('- should not show service plan if wrong org/space are selected', () => {
@@ -48,9 +54,5 @@ describe('Create Service Instance of Space Scoped Service', () => {
   });
 
 
-  afterAll((done) => {
-    servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-  });
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
 });
-
-

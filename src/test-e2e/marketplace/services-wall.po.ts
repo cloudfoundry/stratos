@@ -16,6 +16,10 @@ export interface ServiceInstance {
 
 export class ServicesWallPage extends Page {
 
+  static FilterIds = {
+    cf: 'cf'
+  };
+
   serviceInstancesList = new ListComponent();
   constructor() {
     super('/services');
@@ -31,7 +35,7 @@ export class ServicesWallPage extends Page {
 
   getServiceInstanceFromCard = (card: ElementFinder): promise.Promise<ServiceInstance> => {
     const metaCard = new MetaCard(card, MetaCardTitleType.CUSTOM);
-    return metaCard.getMetaCardItems().then(items => ({
+    return metaCard.getMetaCardItems().then((items): ServiceInstance => ({
       serviceInstanceName: metaCard.getTitle(),
       spaceName: items[0].value,
       serviceName: items[1].value,

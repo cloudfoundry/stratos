@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -57,7 +58,7 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 	return m.makePrometheusRequest(c, cnsiList, "application_id=\""+appID+"\"")
 }
 
-func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string) []interfaces.ProxyRequestInfo {
+func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string, addJob bool) []interfaces.ProxyRequestInfo {
 	// Construct the metadata for proxying
 	requests := make([]interfaces.ProxyRequestInfo, 0)
 	for _, metric := range metrics {
@@ -72,7 +73,7 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 			addQueries = addQueries + ","
 		}
 
-		if metric.metrics.Job != "" {
+		if metric.metrics.Job != "" || addJob {
 			// stratos-metrics configures the firehose exporter to tag metrics with `job`
 			addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
 		} else if metric.metrics.Environment != "" {
@@ -108,6 +109,7 @@ func makePrometheusRequestURI(c echo.Context, prometheusOp string, modify string
 		}
 	}
 	uri.RawQuery = values.Encode()
+	log.Debugf("Sending prometheus query: %+v", uri.String())
 	return &uri
 }
 
@@ -139,7 +141,7 @@ func (m *MetricsSpecification) makePrometheusRequest(c echo.Context, cnsiList []
 	}
 
 	// Construct the metadata for proxying
-	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, queries)
+	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, queries, true)
 	responses, err := m.portalProxy.DoProxyRequest(requests)
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }

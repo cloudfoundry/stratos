@@ -73,8 +73,6 @@ export class E2ESetup {
   public adminReq: any;
   public userReq: any;
   private setupOps: any[] = [];
-  private userType: ConsoleUserType;
-  private loginUserType: ConsoleUserType;
   private reqHelper = new RequestHelpers();
   private resetsHelper = new ResetsHelpers();
 
@@ -85,9 +83,7 @@ export class E2ESetup {
     return new E2ESetup(userType);
   }
 
-  constructor(userType: ConsoleUserType) {
-    this.userType = userType;
-    this.loginUserType = userType;
+  constructor(public loginUserType: ConsoleUserType) {
     // Create requests in case we need to make any API requests as admin and/or user
     this.adminReq = this.reqHelper.newRequest();
     this.userReq = this.reqHelper.newRequest();

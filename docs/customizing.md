@@ -33,7 +33,10 @@ The following image resources can be changed by creating the specified file in t
 |---|---|---|
 |favicon.ico|custom-src/frontend|Favorite icon to use|
 |logo.png|custom-src/frontend/assets|Logo to use on login screen and about page|
+|nav-logo.png|custom-src/frontend/assets|Logo to use in the top-left side navigation for the application logo|
 |login-bg.jpg|custom-src/frontend/assets|Image to use for the login page background|
+
+> NOTE: The `nav-logo.png` logo should have a height of 36px and a maximum width of 180 pixels.
 
 ### Customizing the Theme
 

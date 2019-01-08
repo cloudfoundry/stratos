@@ -4,8 +4,12 @@ import {
   ChangeDetectorRef,
   Component,
   Input,
+  NgZone,
+  OnChanges,
   OnDestroy,
   OnInit,
+  Optional,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
 } from '@angular/core';
@@ -19,6 +23,9 @@ import {
   Observable,
   of as observableOf,
   Subscription,
+  queueScheduler,
+  isObservable,
+  asapScheduler,
 } from 'rxjs';
 import {
   debounceTime,
@@ -34,6 +41,9 @@ import {
   takeWhile,
   tap,
   withLatestFrom,
+  combineLatest,
+  throttleTime,
+  subscribeOn,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -56,7 +66,9 @@ import {
   IOptionalAction,
   ListConfig,
   ListViewTypes,
+  MultiFilterManager,
 } from './list.component.types';
+import { RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 
 
 @Component({
@@ -80,7 +92,7 @@ import {
     ])
   ]
 })
-export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
+export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
   @Input() addForm: NgForm;
@@ -88,6 +100,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @Input() noEntries: TemplateRef<any>;
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
+
+  @Input() noEntriesMaxedResults: TemplateRef<any>;
+
+  // List config when supplied as an attribute rather than a dependency
+  @Input() listConfig: ListConfig<T>;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator) {
@@ -150,18 +167,18 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
+  private multiFilterChangesSub: Subscription;
 
   globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
   haveMultiActions = new BehaviorSubject(false);
-  singleActions: IListAction<T>[];
+  hasSingleActions: boolean;
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
-  multiFilterConfigs: IListMultiFilterConfig[];
-  multiFilterConfigsLoading$: Observable<boolean>;
+  multiFilterManagers: MultiFilterManager<T>[];
 
   paginationController: IListPaginationController<T>;
-  multiFilterWidgetObservables = new Array<Subscription>();
+  private multiFilterWidgetObservables = new Array<Subscription>();
 
   view$: Observable<ListView>;
 
@@ -175,6 +192,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
 
+
+
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
   listViewKey: string;
@@ -185,6 +204,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   initialised$: Observable<boolean>;
 
+  pendingActions: Map<Observable<ActionState>, Subscription> = new Map<Observable<ActionState>, Subscription>();
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
@@ -194,24 +215,55 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private store: Store<AppState>,
     private cd: ChangeDetectorRef,
-    public config: ListConfig<T>
+    @Optional() public config: ListConfig<T>,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit() {
-    if (this.config.getInitialised) {
-      this.initialised$ = this.config.getInitialised().pipe(
-        filter(initialised => initialised),
-        first(),
-        tap(() => this.initialise()),
-        publishReplay(1), refCount()
-      );
-    } else {
-      this.initialise();
-      this.initialised$ = observableOf(true);
+    // null list means we have list bound but no value available yet
+    if (this.listConfig === null) {
+      // We will watch for changes to the list value
+      return;
+    } else if (this.listConfig) {
+      // A value for the list is already available
+      this.config = this.listConfig;
+    }
+
+    // Otherwise, do we have a value from the config?
+    if (this.config) {
+      if (this.config.getInitialised) {
+        this.initialised$ = this.config.getInitialised().pipe(
+          filter(initialised => initialised),
+          first(),
+          tap(() => this.initialise()),
+          publishReplay(1), refCount()
+        );
+      } else {
+        this.initialise();
+        this.initialised$ = observableOf(true);
+      }
     }
   }
 
+  // If the list changes, update to use the new value
+  ngOnChanges(changes: SimpleChanges) {
+    const listChanges = changes.list;
+    if (!!listChanges && listChanges.currentValue) {
+      this.ngOnDestroy();
+      // ngOnInit will pick up the new value and use it
+      this.ngOnInit();
+    }
+  }
 
+  private getMultiFilterManagers() {
+    const configs = this.config.getMultiFiltersConfigs();
+    if (!configs) {
+      return null;
+    }
+    return configs.map(config => new MultiFilterManager<T>(config, this.dataSource));
+  }
+
+  // TODO: This needs tidying up - NJ
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
       this.config.getGlobalActions()
@@ -219,7 +271,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.multiActions = this.setupActionsDefaultObservables(
       this.config.getMultiActions()
     );
-    this.singleActions = this.config.getSingleActions();
+    this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     if (this.dataSource.rowsState) {
@@ -228,7 +280,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       const schema = entityFactory(this.dataSource.entityKey);
       this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
     }
-    this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
+    this.multiFilterManagers = this.getMultiFilterManagers();
 
     // Create convenience observables that make the html clearer
     this.isAddingOrSelecting$ = observableCombineLatest(
@@ -268,15 +320,20 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         this.globalActions && this.globalActions.length ||
         this.multiActions && this.multiActions.length ||
         viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
-        this.multiFilterConfigs && this.multiFilterConfigs.length ||
+        this.multiFilterManagers && this.multiFilterManagers.length ||
         this.config.enableTextFilter
       );
     }));
 
-    this.paginationController = new ListPaginationController(this.store, this.dataSource);
+    this.paginationController = new ListPaginationController(this.store, this.dataSource, this.ngZone);
+    this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
-    this.hasRows$ = this.dataSource.page$.pipe(
-      map(pag => !!(pag && pag.length)),
+    const hasPages$ = this.dataSource.page$.pipe(
+      map(pag => !!(pag && pag.length))
+    );
+
+    this.hasRows$ = observableCombineLatest(hasPages$, this.dataSource.maxedResults$).pipe(
+      map(([hasPages, maxedResults]) => !maxedResults && hasPages),
       startWith(false)
     );
 
@@ -334,18 +391,27 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     filterStoreToWidget.pipe(
       first(),
       tap(() => {
-        const multiFiltersLoading = [];
-        Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
-          filterConfig.select.next(this.multiFilters[filterConfig.key]);
-          const sub = filterConfig.select.asObservable().pipe(tap((filterItem: string) => {
-            this.paginationController.multiFilter(filterConfig, filterItem);
+        Object.values(this.multiFilterManagers).forEach((filterConfig: MultiFilterManager<T>, index: number) => {
+          // Pipe initial store value to the widget
+          filterConfig.applyInitialValue(this.multiFilters);
+          // The first filter will be hidden if there's only one filter option.
+          // To ensure subsequent filters behave correctly automatically select it
+          if (index === 0 && this.multiFilterManagers.length > 1) {
+            filterConfig.filterItems$.pipe(
+              first()
+            ).subscribe(list => {
+              if (list && list.length === 1) {
+                filterConfig.selectItem(list[0].value);
+              }
+            });
+          }
+
+          // Pipe changes in the widgets to the store
+          const sub = filterConfig.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
+            this.paginationController.multiFilter(filterConfig.multiFilterConfig, filterItem);
           }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
-          multiFiltersLoading.push(filterConfig.loading$);
         });
-        this.multiFilterConfigsLoading$ = observableCombineLatest(multiFiltersLoading).pipe(
-          map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
-        );
       })
     ).subscribe();
 
@@ -357,27 +423,20 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       })
     );
 
-    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
-      map(([hasRows, isFiltering]) => {
-        return !hasRows && isFiltering;
-      })
+    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.dataSource.maxedResults$).pipe(
+      map(([hasRows, isFiltering, maxedResults]) => !hasRows && isFiltering && !maxedResults)
     );
-    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
-      map(([hasRows, isFiltering]) => {
-        return !hasRows && !isFiltering;
-      })
+
+    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$, this.dataSource.maxedResults$).pipe(
+      map(([hasRows, isFiltering, maxedResults]) => !hasRows && !isFiltering && !maxedResults)
     );
 
     this.hasRowsOrIsFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
-      map(([hasRows, isFiltering]) => {
-        return hasRows || isFiltering;
-      })
+      map(([hasRows, isFiltering]) => hasRows || isFiltering)
     );
 
     this.disableActions$ = observableCombineLatest(this.dataSource.isLoadingPage$, this.noRowsHaveFilter$).pipe(
-      map(([isLoading, noRowsHaveFilter]) => {
-        return isLoading || noRowsHaveFilter;
-      })
+      map(([isLoading, noRowsHaveFilter]) => isLoading || noRowsHaveFilter)
     );
 
     // Multi actions can be a list of actions that aren't visible. For those case, in effect, we don't have multi actions
@@ -435,29 +494,33 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         })
       );
 
-    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
-      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
-      switchMap(() => this.dataSource.pagination$),
+    const hasChangedPage$ = this.dataSource.pagination$.pipe(
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
-      startWith(true)
+    );
+
+    const isMaxedResult$ = this.dataSource.pagination$.pipe(
+      map(pag => !!pag.maxedResults),
+    );
+
+    const canShowLoading$ = observableCombineLatest([hasChangedPage$, isMaxedResult$]).pipe(
+      map(([hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
+      startWith(true),
+      distinctUntilChanged()
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
       startWith(true),
-      withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => {
-        return canShowLoading && loading;
-      }),
-      distinctUntilChanged()
+      combineLatest(canShowLoading$),
+      map(([loading, canShowLoading]) => loading && canShowLoading),
+      distinctUntilChanged(),
+      throttleTime(100, queueScheduler, { leading: true, trailing: true }),
     );
 
     this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
-      withLatestFrom(canShowLoading$),
-      map(([loading, canShowLoading]) => {
-        return !canShowLoading && loading;
-      }),
+      withLatestFrom(canShowLoading$, this.showProgressBar$),
+      map(([loading, canShowLoading, showProgressBar]) => !canShowLoading && loading && !showProgressBar),
       distinctUntilChanged()
     );
   }
@@ -480,6 +543,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     if (this.dataSource) {
       this.dataSource.destroy();
     }
+    if (this.multiFilterChangesSub) {
+      this.multiFilterChangesSub.unsubscribe();
+    }
+    this.pendingActions.forEach(sub => sub.unsubscribe());
   }
 
   private getDefaultListView(config: IListConfig<T>) {
@@ -507,9 +574,28 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    if (listActionConfig.action(Array.from(this.dataSource.selectedRows.values()))) {
+    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
+    if (isObservable(result)) {
+      const sub = this.getActionSub(result);
+      this.pendingActions.set(result, sub);
+    } else {
       this.dataSource.selectClear();
     }
+  }
+
+  private getActionSub(result: Observable<ActionState>) {
+    const sub = result.pipe(
+      subscribeOn(asapScheduler)
+    ).subscribe(done => {
+      if (!done.busy) {
+        this.pendingActions.delete(result);
+        sub.unsubscribe();
+        if (!done.error) {
+          this.dataSource.selectClear();
+        }
+      }
+    });
+    return sub;
   }
 
   executeActionGlobal(listActionConfig: IGlobalListAction<T>) {

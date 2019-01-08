@@ -1,12 +1,13 @@
-
-import { Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router, Route } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
+import { EndpointsService } from '../../../core/endpoints.service';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 import { AppState } from '../../../store/app-state';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
@@ -14,7 +15,9 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
+import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
+import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
+
 
 @Component({
   selector: 'app-dashboard-base',
@@ -32,6 +35,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
+    private endpointsService: EndpointsService,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
@@ -56,6 +60,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     this.store.dispatch(new GetCurrentUsersRelations());
   }
   ngOnInit() {
+    this.endpointsService.registerHealthCheck(
+      new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
+    );
     this.dispatchRelations();
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
@@ -143,11 +150,16 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     }
     return routes.reduce((nav, route) => {
       if (route.data && route.data.stratosNavigation) {
-        nav.push({
+        const item = {
           ...route.data.stratosNavigation,
           link: path + '/' + route.path
-        });
+        };
+        if (item.requiresEndpointType) {
+          item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+        }
+        nav.push(item);
       }
+
       const navs = this.collectNavigationRoutes(route.path, route.children);
       return nav.concat(navs);
     }, []);

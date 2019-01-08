@@ -12,6 +12,8 @@
   <button [routerLink]="['eula']" mat-button mat-raised-button color="primary">View EULA</button>
 </mat-card>
 
+<template #supportInfoContainer></template>
+
 <mat-card *ngIf="(sessionData$ | async) as session" class="about-page__card">
   <app-metadata-item icon="web_asset" label="Stratos Version">{{ session.version.proxy_version }}</app-metadata-item>
   <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>

@@ -1,11 +1,10 @@
 import { browser, promise } from 'protractor';
 
-import { IApp } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
@@ -16,7 +15,6 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CFPage } from '../po/cf-page.po';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -66,12 +64,12 @@ describe('Application Deploy -', function () {
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function() {
+    beforeEach(function () {
       originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
     });
 
-    afterEach(function() {
+    afterEach(function () {
       jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 
@@ -158,7 +156,7 @@ describe('Application Deploy -', function () {
 
         // Press next to get to overrides step
         deployApp.stepper.next();
-        });
+      });
 
       it('Should pass Overrides step', () => {
         e2e.debugLog(`${loggingPrefix} Overrides Step`);
@@ -213,7 +211,7 @@ describe('Application Deploy -', function () {
   describe('Tab Tests -', () => {
 
     beforeAll(() => {
-      // Should be deployed, no web-socket open, so we can wait for angular agiain
+      // Should be deployed, no web-socket open, so we can wait for angular again
       browser.waitForAngularEnabled(true);
 
       expect(appDetails.cfGuid).toBeDefined();
@@ -227,6 +225,7 @@ describe('Application Deploy -', function () {
       const appVariables = new ApplicationPageVariablesTab(appDetails.cfGuid, appDetails.appGuid);
       appVariables.goToVariablesTab();
 
+      // Existing env var
       expect(appVariables.list.empty.getDefault().isPresent()).toBeFalsy();
       expect(appVariables.list.table.getRows().count()).toBe(1);
       expect(appVariables.list.table.getCell(0, 1).getText()).toBe('STRATOS_PROJECT');
@@ -303,6 +302,7 @@ describe('Application Deploy -', function () {
     expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
 
     appSummary.cardDeployInfo.waitForTitle('Deployment Info');
+    appSummary.cardDeployInfo.github.waitUntilShown('Waiting for GitHub deployment information');
     expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
     appSummary.cardDeployInfo.github.getValue().then(commitHash => {
       expect(commitHash).toBeDefined();

@@ -1,24 +1,24 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
-import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
-
+import { debounce, distinctUntilChanged, finalize, map, pairwise, startWith, takeWhile, tap, filter } from 'rxjs/operators';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../monitors/entity-monitor';
-import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
-import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
+import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from './../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
+
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
   getSeriesName: (T) => string;
   mapSeriesItemName?: (value) => string | Date;
   mapSeriesItemValue?: (value) => any;
+  filterSeries?: MetricsFilterSeries;
   sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
 }
 
@@ -47,8 +47,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   public chartTypes = MetricsChartTypes;
 
-  private pollSub: Subscription;
-
   private timeSelectorSub: Subscription;
 
   public results$;
@@ -64,34 +62,34 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     private store: Store<AppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
-
-  private postFetchMiddleware(metricsArray: ChartSeries[]) {
+  private sort(metricsArray: ChartSeries[]) {
     if (this.metricsConfig.sort) {
       const newMetricsArray = [
         ...metricsArray
       ];
-      newMetricsArray.sort(this.metricsConfig.sort);
-      if (
-        this.committedAction.query.params &&
-        this.committedAction.query.params.start &&
-        this.committedAction.query.params.end
-      ) {
-        return MetricsChartManager.fillOutTimeOrderedChartSeries(
-          newMetricsArray,
-          this.committedAction.query.params.start as number,
-          this.committedAction.query.params.end as number,
-          this.committedAction.query.params.step as number,
-          this.metricsConfig,
-        );
-      }
+      return newMetricsArray.sort(this.metricsConfig.sort);
     }
     return metricsArray;
+  }
+  private postFetchMiddleware(metricsArray: ChartSeries[], params: [number, number, number]) {
+    const [start, end, step] = params;
+    const sortedArray = this.sort(metricsArray);
+    if (start && end && step) {
+      return MetricsChartManager.fillOutTimeOrderedChartSeries(
+        sortedArray,
+        start,
+        end,
+        step,
+        this.metricsConfig,
+      );
+    }
+    return sortedArray;
   }
 
   ngOnInit() {
     this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      this.metricsConfig.metricsAction.metricId,
+      this.metricsConfig.metricsAction.guid,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
@@ -99,35 +97,47 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     const baseResults$ = this.metricsMonitor.entity$.pipe(
       distinctUntilChanged((oldMetrics, newMetrics) => {
         return oldMetrics && oldMetrics.data === newMetrics.data;
-      })
+      }),
+
     );
 
     this.results$ = baseResults$.pipe(
       map(metrics => {
-        const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
+        if (!metrics) {
+          return metrics;
+        }
+        const mapMetricsData = this.mapMetricsToChartData(metrics, this.metricsConfig);
+        const metricsArray = this.metricsConfig.filterSeries ? this.metricsConfig.filterSeries(mapMetricsData) : mapMetricsData;
         if (!metricsArray.length) {
           return [];
         }
+
+        const query = metrics.query;
+        const { start, end, step } = query.params as { start: number, end: number, step: number };
         this.hasMultipleInstances = metricsArray.length > 1;
-        return this.postFetchMiddleware(metricsArray);
-      })
+        return this.postFetchMiddleware(metricsArray, [start, end, step]);
+      }),
+      distinctUntilChanged()
     );
 
     this.isRefreshing$ = combineLatest(
-      baseResults$,
-      this.metricsMonitor.isFetchingEntity$
+      this.results$,
+      this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
     ).pipe(
       debounce(([results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
       }),
-      map(([results, fetching]) => results && fetching)
+      map(([results, fetching]) => results && fetching),
+      distinctUntilChanged()
     );
 
     this.isFetching$ = combineLatest(
-      baseResults$.pipe(startWith(null)),
-      this.metricsMonitor.isFetchingEntity$
+      this.results$.pipe(startWith(null)),
+      this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
     ).pipe(
-      map(([results, fetching]) => !results && fetching)
+      map(([results, fetching]) => !results && fetching),
+      distinctUntilChanged(),
+      startWith(true),
     );
   }
 
@@ -140,26 +150,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     }
   }
 
-  private setup(action: MetricsAction) {
-    if (this.pollSub) {
-      this.pollSub.unsubscribe();
-    }
-    if (action.queryType === MetricQueryType.QUERY) {
-      this.pollSub = this.metricsMonitor
-        .poll(
-          10000,
-          () => {
-            this.store.dispatch(action);
-          },
-          request => ({ busy: request.fetching, error: request.error, message: request.message })
-        ).subscribe();
-    }
-  }
-
   ngOnDestroy() {
-    if (this.pollSub) {
-      this.pollSub.unsubscribe();
-    }
     if (this.timeSelectorSub) {
       this.timeSelectorSub.unsubscribe();
     }
@@ -184,7 +175,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   private commitAction(action: MetricsAction) {
     this.committedAction = action;
-    this.setup(action);
     this.store.dispatch(action);
   }
 }

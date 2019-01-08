@@ -7,9 +7,9 @@ import {
   cfInfoSchemaKey,
   cfUserSchemaKey,
   featureFlagSchemaKey,
-  githubBranchesSchemaKey,
-  githubCommitSchemaKey,
-  githubRepoSchemaKey,
+  gitBranchesSchemaKey,
+  gitCommitSchemaKey,
+  gitRepoSchemaKey,
   metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
@@ -73,7 +73,7 @@ function chainReducers(baseReducer, extraReducers) {
     return newState;
   };
 }
-// These should be const
+// Extensions can add to this list
 const entities = [
   'application',
   'stack',
@@ -89,9 +89,9 @@ const entities = [
   'uaaSetup',
   'user',
   cfInfoSchemaKey,
-  githubRepoSchemaKey,
-  githubBranchesSchemaKey,
-  githubCommitSchemaKey,
+  gitRepoSchemaKey,
+  gitBranchesSchemaKey,
+  gitCommitSchemaKey,
   appEnvVarsSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
@@ -111,7 +111,9 @@ const entities = [
   serviceBrokerSchemaKey,
 ];
 
-
+export function registerAPIRequestEntity(schemaKey: string) {
+  entities.push(schemaKey);
+}
 
 export function requestReducer(state, action) {
   const baseRequestReducer = requestReducerFactory(entities, requestActions);

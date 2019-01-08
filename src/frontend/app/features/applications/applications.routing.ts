@@ -1,6 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { StratosActionType, StratosTabType } from '../../core/extension/extension-service';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import {
   AddServiceInstanceComponent,
 } from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
@@ -10,7 +13,7 @@ import { ApplicationBaseComponent } from './application/application-base.compone
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
 import { EventsTabComponent } from './application/application-tabs-base/tabs/events-tab/events-tab.component';
-import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
+import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
@@ -25,9 +28,6 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
-import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
-import { StratosActionType, StratosTabType, extensionsActionRouteKey } from '../../core/extension/extension-service';
-import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 
 const applicationsRoutes: Routes = [
   {
@@ -50,7 +50,7 @@ const applicationsRoutes: Routes = [
         }
       },
       {
-        path: ':cfId/:id',
+        path: ':endpointId/:id',
         component: ApplicationBaseComponent,
         children: [
           {
@@ -89,12 +89,12 @@ const applicationsRoutes: Routes = [
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },
               { path: 'events', component: EventsTabComponent },
-              { path: 'github', component: GithubTabComponent },
+              { path: 'gitscm', component: GitSCMTabComponent },
               { path: 'metrics', component: MetricsTabComponent },
               {
                 path: '**',
                 component: PageNotFoundComponentComponent,
-                canActivate: [DynamicExtenstionRoutes],
+                canActivate: [DynamicExtensionRoutes],
                 data: {
                   stratosRouteGroup: StratosTabType.Application
                 }
@@ -108,7 +108,7 @@ const applicationsRoutes: Routes = [
           {
             path: '**',
             component: PageNotFoundComponentComponent,
-            canActivate: [DynamicExtenstionRoutes],
+            canActivate: [DynamicExtensionRoutes],
             data: {
               stratosRouteGroup: StratosActionType.Application
             }
@@ -120,7 +120,7 @@ const applicationsRoutes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponentComponent,
-    canActivate: [DynamicExtenstionRoutes],
+    canActivate: [DynamicExtensionRoutes],
     data: {
       stratosRouteGroup: StratosActionType.Applications
     }

@@ -1,9 +1,11 @@
-
-import { of as observableOf, Observable } from 'rxjs';
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { take, tap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, take, tap } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
@@ -19,9 +21,7 @@ import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import { DatePipe } from '@angular/common';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+
 
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
@@ -97,9 +97,12 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     },
     {
       columnId: 'mappedapps',
-      headerCell: () => 'Application Attached',
+      headerCell: () => 'Attached Applications',
       cellComponent: TableCellRouteAppsAttachedComponent,
       cellFlex: '4',
+      cellConfig: {
+        breadcrumbs: 'space-routes'
+      }
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',

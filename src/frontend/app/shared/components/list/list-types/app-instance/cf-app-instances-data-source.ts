@@ -1,5 +1,4 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';

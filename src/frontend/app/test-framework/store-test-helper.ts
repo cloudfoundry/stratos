@@ -6,11 +6,28 @@ import { AppState } from '../store/app-state';
 import { appReducers } from '../store/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../store/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../store/types/user.types';
+import { getEntitiesFromExtensions } from '../core/extension/extension-service';
+import { EntitySchema, addEntityToCache } from '../store/helpers/entity-factory';
+import { defaultCfEntitiesState } from '../store/types/entity.types';
+import { registerAPIRequestEntity } from '../store/reducers/api-request-reducers.generator';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
 export function getInitialTestStoreState(): AppState {
+  const entities = getEntitiesFromExtensions();
+  const state = getDefaultInitialTestStoreState();
+  entities.forEach(entity => {
+    state.pagination[entity.entityKey] = {};
+    state.request[entity.entityKey] = {};
+    state.requestData[entity.entityKey] = {};
+  });
+
+  return state;
+}
+
+function getDefaultInitialTestStoreState(): AppState {
+
   return {
     auth: {
       loggedIn: true,
@@ -581,9 +598,10 @@ export function getInitialTestStoreState(): AppState {
       serviceInstance: {},
       serviceBinding: {},
       service: {},
-      githubCommits: {},
+      gitCommits: {},
       domain: {},
-      metrics: {}
+      metrics: {},
+      servicePlan: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -695,9 +713,9 @@ export function getInitialTestStoreState(): AppState {
         }
       },
       domain: {},
-      githubBranches: {},
+      gitBranches: {},
       cloudFoundryInfo: {},
-      githubCommits: {},
+      gitCommits: {},
       endpoint: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
@@ -4300,8 +4318,8 @@ export function getInitialTestStoreState(): AppState {
       },
       domain: {},
       cloudFoundryInfo: {},
-      githubBranches: {},
-      githubCommits: {},
+      gitBranches: {},
+      gitCommits: {},
       application: {
         '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           entity: {
@@ -5455,7 +5473,7 @@ export function getInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073387}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073387}'
             },
             memory: 16,
             instances: 2,
@@ -5634,7 +5652,7 @@ export function getInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073124}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506073124}'
             },
             memory: 16,
             instances: 1,
@@ -16336,7 +16354,7 @@ export function getInitialTestStoreState(): AppState {
             detected_buildpack: 'Go',
             detected_buildpack_guid: '531233b9-4e0f-4252-8866-ec65081df515',
             environment_json: {
-              STRATOS_PROJECT: '{"url":"https://github.com/irfanhabib/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506078991}'
+              STRATOS_PROJECT: '{"url":"https://github.com/cf-stratos/go-env","commit":"f50a5b30d8903722c93a1334f1651e8c0c9e07a1\\n","branch":"master","timestamp":1506078991}'
             },
             memory: 16,
             instances: 1,
@@ -21832,3 +21850,11 @@ export function createBasicStoreModule(initialState: Partial<AppState> = getInit
   );
 }
 
+export function registerEntitiesForTesting(entities) {
+  entities.forEach(entity => {
+    const entitySchema = new EntitySchema(entity.entityKey, entity.definition, entity.options, entity.relationKey);
+    addEntityToCache(entitySchema);
+    defaultCfEntitiesState[entity.entityKey] = {};
+    registerAPIRequestEntity(entity.entityKey);
+  });
+}

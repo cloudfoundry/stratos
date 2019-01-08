@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
@@ -11,7 +11,7 @@ import { CardCell } from '../../../list.types';
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss']
 })
-export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
+export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
   static columns = 2;
 
@@ -37,6 +37,13 @@ export class CfEndpointCardComponent extends CardCell<EndpointModel> implements 
     return getFullEndpointApiUrl(row);
   }
 
+  public getRouterPath(row: EndpointModel) {
+    const ext = getEndpointTypes().find(ep => ep.value === row.cnsi_type);
+    if (ext && ext.homeLink) {
+      return ext.homeLink(row.guid);
+    }
+    return '';
+  }
 
   private mapStatus(endpoint: EndpointModel) {
     const connectionStatus = endpoint ? endpoint.connectionStatus : '';

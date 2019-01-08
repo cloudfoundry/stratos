@@ -1,11 +1,13 @@
-<span>
+<div class="file-input">
   <input [accept]="accept" type="file" (change)="onNativeInputFileSelect($event)" #inputFile hidden />
-  <button mat-button (click)="selectFile($event)">
-      <mat-icon>file_upload</mat-icon>
-      <ng-content *ngIf="!fileCount" select=".nofiles"></ng-content>
-      <span *ngIf="fileCount">
-          <span>{{fileCount}}</span>
-          <ng-content select=".selected"></ng-content>
-      </span>
-  </button>
-</span>
+  <mat-form-field class="file-input__form-field">
+    <div class="file-input__field" (click)="selectFile($event)">
+      <div *ngIf="!fileCount" class="file-input__input file-input__none">No file selected</div>
+      <div *ngIf="fileCount" class="file-input__input ">{{ name }}</div>
+      <input [hidden]=true class="file-input__input" matInput #message maxlength="256" value="No file selected">
+      <button class="file-input__button" mat-button>
+        <mat-icon>more_horiz</mat-icon>
+      </button>
+    </div>
+  </mat-form-field>
+</div>

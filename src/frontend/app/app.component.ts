@@ -1,11 +1,8 @@
-import { AfterContentInit, Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { AfterContentInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { create } from 'rxjs-spy';
 
 import { environment } from '../environments/environment';
 import { LoggedInService } from './logged-in.service';
-import { AppState } from './store/app-state';
 
 
 @Component({
@@ -19,9 +16,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   public animationsDisabled = false;
 
   constructor(
-    private store: Store<AppState>,
-    private router: Router,
-    private loggedInService: LoggedInService
+    private loggedInService: LoggedInService,
   ) {
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {

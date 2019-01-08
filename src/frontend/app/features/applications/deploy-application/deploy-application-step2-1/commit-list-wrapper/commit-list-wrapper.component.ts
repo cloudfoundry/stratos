@@ -10,7 +10,8 @@ import {
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
+import { GitCommit } from '../../../../../store/types/git.types';
+import { GitSCMService } from '../../../../../shared/data-services/scm/scm.service';
 
 @Component({
   selector: 'app-commit-list-wrapper',
@@ -21,19 +22,20 @@ import { GithubCommit } from '../../../../../store/types/github.types';
       provide: ListConfig,
       useFactory: (
         store: Store<AppState>,
-        datePipe: DatePipe) => {
-        return new GithubCommitsListConfigServiceDeploy(store, datePipe);
+        datePipe: DatePipe,
+        scmService: GitSCMService) => {
+        return new GithubCommitsListConfigServiceDeploy(store, datePipe, scmService);
       },
-      deps: [Store, DatePipe]
+      deps: [Store, DatePipe, GitSCMService]
     }
   ],
 })
 export class CommitListWrapperComponent {
 
-  selectedCommit$: Observable<APIResource<GithubCommit>>;
+  selectedCommit$: Observable<APIResource<GitCommit>>;
 
   constructor(
-    private listConfig: ListConfig<APIResource<GithubCommit>>
+    private listConfig: ListConfig<APIResource<GitCommit>>
   ) {
     const initialised$ = this.listConfig.getInitialised().pipe(
       filter(initialised => initialised)
@@ -43,7 +45,7 @@ export class CommitListWrapperComponent {
       map(() => this.listConfig.getDataSource().selectedRows),
       map(selectedRows => {
         const rows = Array.from(selectedRows.values());
-        return rows.length > 0 ? rows[0] as APIResource<GithubCommit> : null;
+        return rows.length > 0 ? rows[0] as APIResource<GitCommit> : null;
       }),
     );
   }

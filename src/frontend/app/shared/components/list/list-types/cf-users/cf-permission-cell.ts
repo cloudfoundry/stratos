@@ -27,10 +27,6 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
   spaceGuid?: string;
 }
 
-interface ICellPermissionUpdates {
-  [key: string]: Observable<boolean>;
-}
-
 export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 

@@ -25,7 +25,6 @@ export type StepOnNextFunction = () => Observable<StepOnNextResult>;
   styleUrls: ['./step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-
 export class StepComponent {
 
   public _onEnter: (data?: any) => void;

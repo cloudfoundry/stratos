@@ -7,7 +7,7 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
 
 function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
   return {
-    guid: activatedRoute.snapshot.params.cfId
+    guid: activatedRoute.snapshot.params.endpointId
   };
 }
 @Component({

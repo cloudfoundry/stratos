@@ -89,6 +89,14 @@
         }
       }
 
+      &--multi-actions {
+        button {
+          &:first-of-type {
+            margin-left: -10px;
+          }
+        }
+      }
+
       &--multi-filters {
         mat-form-field {
           padding-right: $title-content-padding;
