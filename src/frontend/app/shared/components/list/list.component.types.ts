@@ -162,7 +162,7 @@ export class MultiFilterManager<T> {
   public filterItems$: Observable<IListMultiFilterConfigItem[]>;
   public hasItems$: Observable<boolean>;
   public hasOneItem$: Observable<boolean>;
-  public initialValue: string;
+  public value: string;
 
   public filterKey: string;
   public allLabel: string;
@@ -200,15 +200,16 @@ export class MultiFilterManager<T> {
     );
   }
 
-  public applyInitialValue(multiFilters: {}) {
-    const initialValue = multiFilters[this.multiFilterConfig.key];
-    if (initialValue) {
-      this.initialValue = initialValue;
-      this.selectItem(initialValue);
+  public applyValue(multiFilters: {}) {
+    const value = multiFilters[this.multiFilterConfig.key];
+    if (value) {
+      this.value = value;
+      this.selectItem(value);
     }
   }
 
   public selectItem(itemValue: string) {
     this.multiFilterConfig.select.next(itemValue);
+    this.value = itemValue;
   }
 }

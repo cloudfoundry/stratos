@@ -162,7 +162,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       value: null
     };
   private filterString = '';
-  private multiFilters = {};
   private sortColumns: ITableColumn<T>[];
 
   private paginationWidgetToStore: Subscription;
@@ -381,34 +380,36 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
       this.filterString = paginationFilter.string;
-      this.multiFilters = { ...paginationFilter.items };
+      // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
+      // downs (change org to one with one space results in that space being selected)
+      Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
+        filterManager.applyValue(paginationFilter.items);
+      });
     }));
 
     // Multi filters (e.g. cf/org/space)
-    // - Ensure the initial value is correct
     // - Pass any multi filter changes made by the user to the pagination controller and thus the store
+    // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
     this.multiFilterWidgetObservables = new Array<Subscription>();
     filterStoreToWidget.pipe(
       first(),
       tap(() => {
-        Object.values(this.multiFilterManagers).forEach((filterConfig: MultiFilterManager<T>, index: number) => {
-          // Pipe initial store value to the widget
-          filterConfig.applyInitialValue(this.multiFilters);
+        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
           // The first filter will be hidden if there's only one filter option.
           // To ensure subsequent filters behave correctly automatically select it
           if (index === 0 && this.multiFilterManagers.length > 1) {
-            filterConfig.filterItems$.pipe(
+            filterManager.filterItems$.pipe(
               first()
             ).subscribe(list => {
               if (list && list.length === 1) {
-                filterConfig.selectItem(list[0].value);
+                filterManager.selectItem(list[0].value);
               }
             });
           }
 
           // Pipe changes in the widgets to the store
-          const sub = filterConfig.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
-            this.paginationController.multiFilter(filterConfig.multiFilterConfig, filterItem);
+          const sub = filterManager.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
+            this.paginationController.multiFilter(filterManager.multiFilterConfig, filterItem);
           }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
         });
