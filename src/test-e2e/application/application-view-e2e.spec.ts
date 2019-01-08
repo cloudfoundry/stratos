@@ -1,11 +1,11 @@
-import { promise, protractor } from 'protractor';
+import { promise, protractor, browser } from 'protractor';
 
 import { IApp } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageEventsTab } from './po/application-page-events.po';
 import { ApplicationPageInstancesTab } from './po/application-page-instances.po';
@@ -47,7 +47,7 @@ describe('Application View -', function () {
     cfHelper = applicationE2eHelper.cfHelper;
 
     protractor.promise.controlFlow().execute(() => cfHelper.updateDefaultCfOrgSpace());
-    protractor.promise.controlFlow().execute(() => createTestAppAndNav());
+    return protractor.promise.controlFlow().execute(() => createTestAppAndNav());
   });
 
   beforeAll(() => {
@@ -80,7 +80,6 @@ describe('Application View -', function () {
       testApplicationsBreadcrumb();
     });
   });
-
 
   it('Walk tabs', () => {
     appSummary.navigateTo();
@@ -135,7 +134,8 @@ describe('Application View -', function () {
     });
 
     it('Deployment Info', () => {
-      appSummary.cardDeployInfo.waitForTitle('No Deployment Info');
+      appSummary.cardDeployInfo.waitForTitle('Deployment Info');
+      expect(appSummary.cardDeployInfo.getContent()).toBe('None');
     });
   });
 
@@ -200,22 +200,7 @@ describe('Application View -', function () {
     });
   });
 
-  describe('Variables Tab -', () => {
-    let appVariables: ApplicationPageVariablesTab;
-
-    beforeAll(() => {
-      appVariables = new ApplicationPageVariablesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
-      appVariables.navigateTo();
-      appVariables.waitForPage();
-    });
-
-    it('Empty Variables Table', () => {
-      expect(appVariables.list.empty.getDefault().isPresent()).toBeTruthy();
-      expect(appVariables.list.empty.getDefault().getComponent().getText()).toBe('There are no variables');
-    });
-
-  });
-
+  // Events tab tests should come before anything else adds events
   describe('Events Tab -', () => {
     let appEvents: ApplicationPageEventsTab;
 
@@ -231,6 +216,44 @@ describe('Application View -', function () {
       expect(appEvents.list.getTotalResults()).toBe(1);
       expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
       expect(appEvents.list.table.getCell(0, 2).getText()).toBe('person\nadmin');
+    });
+
+  });
+
+  describe('Variables Tab -', () => {
+    let appVariables: ApplicationPageVariablesTab;
+
+    beforeAll(() => {
+      appVariables = new ApplicationPageVariablesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+      appVariables.goToVariablesTab();
+      appVariables.waitForPage();
+    });
+
+    it('Empty Variables Table', () => {
+      expect(appVariables.list.empty.getDefault().isPresent()).toBeTruthy();
+      expect(appVariables.list.empty.getDefault().getComponent().getText()).toBe('There are no variables');
+    });
+
+    it('CRUD Env Var', () => {
+      appVariables.list.empty.waitUntilShown();
+
+      // Add Env Var
+      const envVarName = E2EHelpers.createCustomName('envVar');
+      const envVarValue = 'new env var value';
+      appVariables.addVariable(envVarName, envVarValue);
+
+      expect(appVariables.list.table.getRows().count()).toBe(1);
+      expect(appVariables.list.table.getCell(0, 1).getText()).toBe(envVarName);
+      expect(appVariables.list.table.getCell(0, 2).getText()).toBe(envVarValue);
+
+      // Edit Env Var
+      const envVarValueEdited = `${envVarValue}-edited`;
+      appVariables.editVariable(0, envVarValueEdited);
+      expect(appVariables.list.table.getCell(0, 2).getText()).toBe(envVarValueEdited);
+
+      // Delete Env Var
+      appVariables.deleteVariable(0, envVarName);
+      appVariables.list.empty.waitUntilShown();
     });
 
   });

@@ -1,5 +1,4 @@
 import { CfUserService } from './../../../../shared/data-services/cf-user.service';
-
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -34,6 +33,8 @@ import {
 } from '../../../../core/extension/extension-service';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
+import { GitSCMService, GitSCMType } from './../../../../shared/data-services/scm/scm.service';
+
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -79,7 +80,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
     private ngZone: NgZone,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    scmService: GitSCMService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -98,17 +100,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-    this.applicationService.applicationStratProject$
-      .pipe(first())
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
-        ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
-      });
+
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks.push({
@@ -137,6 +129,20 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
+        ) {
+          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
+          const scm = scmService.getSCM(gitscm as GitSCMType);
+          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+        }
+      });
   }
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

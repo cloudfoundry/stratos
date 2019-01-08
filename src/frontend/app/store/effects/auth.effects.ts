@@ -1,16 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { mergeMap, tap, switchMap, catchError, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
-
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { GetSystemInfo } from '../actions/system.actions';
-import { AppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import {
   InvalidSession,
@@ -23,13 +18,13 @@ import {
   LogoutFailed,
   LogoutSuccess,
   RESET_AUTH,
+  RESET_SSO_AUTH,
   ResetAuth,
+  ResetSSOAuth,
   SESSION_INVALID,
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
-  ResetSSOAuth,
-  RESET_SSO_AUTH,
 } from './../actions/auth.actions';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -42,10 +37,7 @@ export class AuthEffect {
 
   constructor(
     private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-    private router: Router,
-    public dialog: MatDialog
+    private actions$: Actions
   ) { }
 
   @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN).pipe(
@@ -66,7 +58,7 @@ export class AuthEffect {
         headers: headers,
       }).pipe(
         map(data => new VerifySession()),
-        catchError((err, caught) => [new LoginFailed(err)]), );
+        catchError((err, caught) => [new LoginFailed(err)]));
     }));
 
   @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION).pipe(
@@ -121,7 +113,7 @@ export class AuthEffect {
             return [new LogoutSuccess(), new ResetAuth()];
           }
         }),
-        catchError((err, caught) => [new LogoutFailed(err)]), );
+        catchError((err, caught) => [new LogoutFailed(err)]));
     }));
 
   @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH).pipe(
@@ -130,12 +122,12 @@ export class AuthEffect {
       window.location.assign(window.location.origin);
     }));
 
-    @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.ofType<ResetSSOAuth>(RESET_SSO_AUTH).pipe(
-      tap((action) => {
-        // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
-        const returnUrl = encodeURI(window.location.origin);
-        window.open('/pp/v1/auth/sso_logout?state=' + returnUrl , '_self');
-      }));
+  @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.ofType<ResetSSOAuth>(RESET_SSO_AUTH).pipe(
+    tap(() => {
+      // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
+      const returnUrl = encodeURI(window.location.origin);
+      window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');
+    }));
 
   private isDomainMismatch(headers): boolean {
     if (headers.has(DOMAIN_HEADER)) {
