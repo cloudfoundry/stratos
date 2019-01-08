@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, withLatestFrom, filter, switchMap } from 'rxjs/operators';
 
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -20,7 +20,7 @@ import { createEntityRelationKey } from '../../../../../store/helpers/entity-rel
 import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationParam } from '../../../../../store/types/pagination.types';
-import { createSetCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
+import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
@@ -91,7 +91,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
     this.action = action;
 
-    const statsSub = this.page$.pipe(
+    const statsSub = this.maxedResults$.pipe(
+      filter(maxedResults => !maxedResults),
+      switchMap(() => this.page$),
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
       withLatestFrom(this.pagination$),
@@ -116,14 +118,14 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         return actions;
       }),
       dispatchSequencer.sequence.bind(dispatchSequencer),
-      tag('stat-obs')).subscribe();
-
+      tag('stat-obs')
+    ).subscribe();
 
     this.subs = [statsSub];
   }
 
   public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-    return createSetCfOrSpaceMultipleFilterFn(this.store, this.action.endpointGuid, this.entityKey, this.paginationKey, this.setQParam)
+    return createCfOrSpaceMultipleFilterFn(this.store, this.action.endpointGuid, this.entityKey, this.paginationKey, this.setQParam)
       (changes, params);
   }
 

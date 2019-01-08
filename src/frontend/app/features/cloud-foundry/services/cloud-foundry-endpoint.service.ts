@@ -216,7 +216,7 @@ export class CloudFoundryEndpointService {
 
   }
 
-  public getAppsInOrg(
+  public getAppsInOrgViaAllApps(
     org: APIResource<IOrganization>
   ): Observable<APIResource<IApp>[]> {
     return org.entity.spaces ? this.allApps$.pipe(
@@ -228,7 +228,7 @@ export class CloudFoundryEndpointService {
     ) : observableOf([]);
   }
 
-  public getAppsInSpace(
+  public getAppsInSpaceViaAllApps(
     space: APIResource<ISpace>
   ): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
@@ -239,14 +239,6 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  public getAggregateStat(
-    org: APIResource<IOrganization>,
-    statMetric: string
-  ): Observable<number> {
-    return this.getAppsInOrg(org).pipe(
-      map(apps => this.getMetricFromApps(apps, statMetric))
-    );
-  }
   public getMetricFromApps(
     apps: APIResource<IApp>[],
     statMetric: string

@@ -32,19 +32,7 @@ import { CfUser, SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-
-const noQuotaDefinition = (orgGuid: string) => ({
-  entity: {
-    memory_limit: -1,
-    app_instance_limit: -1,
-    instance_memory_limit: -1,
-    name: 'None assigned',
-    organization_guid: orgGuid,
-    total_services: -1,
-    total_routes: -1
-  },
-  metadata: null
-});
+import { createQuotaDefinition } from './cloud-foundry-organization.service';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -138,7 +126,7 @@ export class CloudFoundrySpaceService {
       if (q.entity.entity.space_quota_definition) {
         return q.entity.entity.space_quota_definition;
       } else {
-        return noQuotaDefinition(this.orgGuid);
+        return createQuotaDefinition(this.orgGuid);
       }
     }));
 
@@ -159,7 +147,7 @@ export class CloudFoundrySpaceService {
 
   private initialiseAppObservables() {
     this.apps$ = this.space$.pipe(
-      switchMap(space => this.cfEndpointService.getAppsInSpace(space.entity))
+      switchMap(space => this.cfEndpointService.getAppsInSpaceViaAllApps(space.entity))
     );
 
     this.appInstances$ = this.apps$.pipe(

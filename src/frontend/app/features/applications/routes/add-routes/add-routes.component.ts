@@ -81,8 +81,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     });
 
     this.addHTTPRoute = new FormGroup({
-      host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern)]),
-      path: new FormControl('', [Validators.pattern(pathPattern)])
+      host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)]),
+      path: new FormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
     });
 
     this.addTCPRoute = new FormGroup({

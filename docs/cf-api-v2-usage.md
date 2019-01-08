@@ -43,7 +43,7 @@ Stratos exercises many features of the Cloud Foundry v2 API, in order to underst
     spaces property
       - The resulting org entity will only have the spaces relation, each space will have no other relation
   - The user navigates to a space summary screen
-  - The space summary screen states the space should applications, service instances, space quoata, service binding, etc
+  - The space summary screen states the space should contain applications, service instances, space quota, service binding, etc
   - Entity validation will fetch the missing relations using the `_url` of the relation
 - Examples 2
   - To show the applications in the applications list we fetch a list of apps with the following relations
@@ -824,7 +824,7 @@ Last 10 updated apps | *yep* | *yep* | *yep*
 - The user entities that are returned by the `/users` request contain a lot of duplicated organisation and space entities.
   > Desired - Entities are listed in a common bucket and referenced by guid inline. Think this might be how v3 works
 - The `<role>_url` in a user entity can only be called by an administrator or by the same user
-  > Desired - URL behaves as per the `/users` suggestion above the response contains the organisaitons that are visible to the user that
+  > Desired - URL behaves as per the `/users` suggestion above the response contains the organisations that are visible to the user that
     calls the url
 - `include-relations` works by specifying the name of the child property. If the `inline-relations-depth` is greater than one this can lead
  relations being fetched that might not actually be required

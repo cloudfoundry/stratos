@@ -23,7 +23,6 @@ import {
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
-import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
@@ -73,7 +72,12 @@ export function getDefaultPaginationEntityState(): PaginationEntityState {
   };
 }
 
-export const defaultPaginationState = { ...defaultCfEntitiesState };
+// Initialized when all entity types have been registered
+export let defaultPaginationState = {};
+
+export function setDefaultPaginationState(state: any) {
+  defaultPaginationState = state;
+}
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;

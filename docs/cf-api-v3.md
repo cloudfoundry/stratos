@@ -2,6 +2,10 @@
 
 See [Cloud Foundry API v2 Feature Usage](cf-api-v2-usage.md) for v2 information
 
+1. [Comparing v2 features to v3](#Comparing-v2-features-to-v3)
+1. [V3 Availability](#V3-Availability)
+1. [Stratos Adoption of v3](#Stratos-Adoption-of-v3)
+
 ## Comparing v2 features to v3
 
 ### Entity Relations... `include-relations` --> `include`
@@ -17,7 +21,7 @@ See [Cloud Foundry API v2 Feature Usage](cf-api-v2-usage.md) for v2 information
 - This is covered just fine (fetch a specific page, total page count, total result count, etc)
 
 ### Collections - Sorting
-- It looks like all endpoints can be sorted via `created_at` and `updated_at` dates, plus some also have `name`. Given that v2 really only
+- It looks like all entities can be sorted via `created_at` and `updated_at` dates, plus some also have `name`. Given that v2 really only
   supported sorting by `created_at` date this should be fine for feature parity
 - However in order for Stratos to leave behind local sorting there are many missing sort fields (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingfiltering))
 
@@ -37,7 +41,7 @@ See [Cloud Foundry API v2 Feature Usage](cf-api-v2-usage.md) for v2 information
   - App `package_updated_at` is from a separate entity that is not `linked` and requires an additional request
   - App instance state should now come form `/processes` and given that instance:process are now not 1:1 harder to summaries state from
 
-## Availability
+## V3 Availability
 - Stratos needs to support cloud foundry's with different api versions from many different providers and epochs
 - Currently, it looks like neither SCF (2.84.0), IBM Cloud (2.106.0) or PCFDev (2.82.0) support v3 with `includes`. PWS (2.125.0) and
  SAP (2.120.0) however do.
@@ -95,6 +99,9 @@ Then Stratos should either ..
 - Support new 'processes' concept (https://github.com/cloudfoundry-incubator/stratos/issues/3154), including updating how
   we determine application state
 - Fully investigate non `get` methods (create an application, delete a space, etc)
+- Related Issues
+  - https://github.com/cloudfoundry-incubator/stratos/issues/2922
+  - https://github.com/cloudfoundry-incubator/stratos/issues/3149 (Container issue for related v3 api process changes)
 
 ### Questions
 - Will `include` cover children of children? For instance `app` --> `route` --> `domain`
