@@ -7,11 +7,9 @@
         <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field>
-      <textarea matInput placeholder="JSON parameters" matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="params"></textarea>
-      <mat-error *ngIf="stepperForm.controls.params?.hasError('notValidJson')">
-        Not valid JSON. Please specify a valid JSON Object
-      </mat-error>
-    </mat-form-field>
+    <div *ngIf="stepperForm.controls.apps.value" class="stepper-form__params">
+      <div>Binding Parameters</div>
+      <app-schema-form [config]="schemaFormConfig" (dataChange)="setBindingParams($event)" (validChange)="setParamValid($event)"></app-schema-form>
+    </div>
   </form>
 </div>

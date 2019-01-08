@@ -76,43 +76,41 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile *ngIf="(applicationService.applicationStratProject$ | async)?.deploySource as deploySource; else notDeployedFromStratos">
+      <app-tile id="app-build-tab-deployment-info">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Deployment Info</mat-card-title>
           </mat-card-header>
-          <mat-card-content>
+          <mat-card-content *ngIf="(deploySource$ | async) as deploySource; else notDeployedFromStratos">
             <span [ngSwitch]="deploySource.type">
-                <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                    <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
-                    [matTooltipHideDelay]="1500">
-		                  {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
-                  </div>
-                </app-metadata-item>
-                <app-metadata-item *ngSwitchCase="'github'" iconFont="stratos-icons" icon="github" label="GitHub">
-                    <a href="{{ deploySource.url }}/commit/{{ deploySource.commit }}"
-                      rel="noopener noreferrer" target="_blank">
-                      {{ deploySource.commit | slice:0:8 }}
-                    </a>
-                  </app-metadata-item>
-                  <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
-                    Deployed from local folder
-                  </app-metadata-item>
-                  <app-metadata-item *ngSwitchCase="'archive'" icon="insert_drive_file" label="File">
-                    Deployed from local file
-                  </app-metadata-item>
-                </span>
+              <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
+                <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}" [matTooltipHideDelay]="1500">
+                  {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
+                </div>
+              </app-metadata-item>
+              <app-metadata-item *ngSwitchCase="'gitscm'" [iconFont]="deploySource.icon.fontName" [icon]="deploySource.icon.iconName" [label]="deploySource.label">
+                <a href="{{ deploySource.commitURL }}" rel="noopener noreferrer" target="_blank">
+                  {{ deploySource.commit | slice:0:8 }}
+                </a>
+              </app-metadata-item>
+              <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
+                Deployed from local folder
+              </app-metadata-item>
+              <app-metadata-item *ngSwitchCase="'archive'" icon="insert_drive_file" label="File">
+                Deployed from local file
+              </app-metadata-item>
+              <app-metadata-item *ngSwitchCase="'docker'" iconFont="stratos-icons" icon="docker" label="Docker Image">
+                <a *ngIf="deploySource.dockerUrl; else noDockerUrl" href="{{ deploySource.dockerUrl }}" rel="noopener noreferrer" target="_blank">
+                  {{deploySource.dockerImage}}
+                </a>
+                <ng-template #noDockerUrl>{{deploySource.dockerImage}}</ng-template>
+              </app-metadata-item>
+            </span>
           </mat-card-content>
+          <ng-template #notDeployedFromStratos>
+            <mat-card-content>None</mat-card-content>
+          </ng-template>
         </mat-card>
       </app-tile>
-      <ng-template #notDeployedFromStratos>
-        <app-tile>
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>No Deployment Info</mat-card-title>
-            </mat-card-header>
-          </mat-card>
-        </app-tile>
-      </ng-template>
     </app-tile-group>
   </app-tile-grid>

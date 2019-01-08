@@ -1,5 +1,6 @@
 import { Type } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Schema, schema } from 'normalizr';
 
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
@@ -12,6 +13,10 @@ export interface EndpointTypeConfig {
   icon?: string;
   iconFont?: string;
   authTypes?: string[];
+  // Get the link to the home page for the given endpoint GUID
+  homeLink?: (string) => string[];
+  // Schema keys associated with this endpoint type (used when clearing pagination)
+  entitySchemaKeys?: string[];
 }
 
 export interface EndpointAuthTypeConfig {
@@ -42,4 +47,11 @@ export interface IEndpointAuthComponent extends IAuthForm {
   // Allows auth type to override which values are sent to the backend when connecting
   getValues(values: EndpointAuthValues): EndpointAuthValues;  // Map of values to send
   getBody(): string;  // Get the body contents to send
+}
+
+export interface ExtensionEntitySchema {
+  entityKey: string;
+  definition?: Schema;
+  options?: schema.EntityOptions;
+  relationKey?: string;
 }

@@ -211,7 +211,7 @@ describe('Application Deploy -', function () {
   describe('Tab Tests -', () => {
 
     beforeAll(() => {
-      // Should be deployed, no web-socket open, so we can wait for angular agiain
+      // Should be deployed, no web-socket open, so we can wait for angular again
       browser.waitForAngularEnabled(true);
 
       expect(appDetails.cfGuid).toBeDefined();
@@ -225,6 +225,7 @@ describe('Application Deploy -', function () {
       const appVariables = new ApplicationPageVariablesTab(appDetails.cfGuid, appDetails.appGuid);
       appVariables.goToVariablesTab();
 
+      // Existing env var
       expect(appVariables.list.empty.getDefault().isPresent()).toBeFalsy();
       expect(appVariables.list.table.getRows().count()).toBe(1);
       expect(appVariables.list.table.getCell(0, 1).getText()).toBe('STRATOS_PROJECT');
@@ -301,6 +302,7 @@ describe('Application Deploy -', function () {
     expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
 
     appSummary.cardDeployInfo.waitForTitle('Deployment Info');
+    appSummary.cardDeployInfo.github.waitUntilShown('Waiting for GitHub deployment information');
     expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
     appSummary.cardDeployInfo.github.getValue().then(commitHash => {
       expect(commitHash).toBeDefined();

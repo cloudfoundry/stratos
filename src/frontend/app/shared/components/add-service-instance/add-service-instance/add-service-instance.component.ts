@@ -69,6 +69,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   bindAppStepperText = 'Bind App (Optional)';
   appId: string;
   public inMarketplaceMode: boolean;
+
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
@@ -128,13 +129,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     } else if (this.modeService.isServicesWallMode()) {
       this.store.dispatch(new ResetCreateServiceInstanceState());
     }
-  }
-
-  private getIdsFromRoute() {
-    const serviceId = getIdFromRoute(this.activatedRoute, 'serviceId');
-    const cfId = getIdFromRoute(this.activatedRoute, 'endpointId');
-    const appId = getIdFromRoute(this.activatedRoute, 'id');
-    return { serviceId, cfId, appId };
   }
 
   private setupForAppServiceMode() {

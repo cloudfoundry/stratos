@@ -35,6 +35,18 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
+export const createQuotaDefinition = (orgGuid: string): APIResource<IQuotaDefinition> => ({
+  entity: {
+    memory_limit: -1,
+    app_instance_limit: -1,
+    instance_memory_limit: -1,
+    name: 'None assigned',
+    organization_guid: orgGuid,
+    total_services: -1,
+    total_routes: -1
+  },
+  metadata: null
+});
 
 @Injectable()
 export class CloudFoundryOrganizationService {
@@ -132,7 +144,7 @@ export class CloudFoundryOrganizationService {
 
   private initialiseAppObservables() {
     this.apps$ = this.org$.pipe(
-      switchMap(org => this.cfEndpointService.getAppsInOrg(org.entity))
+      switchMap(org => this.cfEndpointService.getAppsInOrgViaAllApps(org.entity))
     );
     this.appInstances$ = this.apps$.pipe(
       filter($apps => !!$apps),
