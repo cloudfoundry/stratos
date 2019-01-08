@@ -22,7 +22,7 @@ You can do it in two ways:
 
     > **NOTE:** To deploy Stratos in this way the CF Docker support have to be [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
 
-    - download [manifest-docker.yml](../manifest-docker.yml) or create your own manifest file:
+    - download [manifest-docker.yml](../../manifest-docker.yml) or create your own manifest file:
         ```yaml
         applications:
         - name: console
