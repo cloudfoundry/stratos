@@ -17,7 +17,7 @@ import {
   getRequestTypeFromMethod,
   startApiRequest,
 } from '../reducers/api-request-reducer/request-helpers';
-import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
+import { qParamKeyFromString, qParamToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
@@ -486,6 +486,9 @@ export class APIEffect {
     return paginationState
       ? {
         ...paginationState.params,
+        q: [
+          ...(paginationState.params.q || [])
+        ],
         page: paginationState.currentPage.toString(),
       }
       : {};
@@ -564,14 +567,31 @@ export class APIEffect {
 
   private setRequestParams(
     requestParams: URLSearchParams,
-    params: { [key: string]: any },
+    params: PaginationParam,
   ) {
     if (params.hasOwnProperty('q')) {
-      // Convert q into a cf q string
-      params.qString = qParamsToString(params.q);
-      for (const q of params.qString) {
-        requestParams.append('q', q);
-      }
+      // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
+      // be overwritten in `params`
+
+      // Clear `requestParams` `q` and start afresh
+      const initialQParams = requestParams.getAll('q');
+      requestParams.delete('q');
+
+      // Loop through all the NEW params that we wish to keep
+      params.q.forEach(qParam => {
+        // Add new param we wish to keep
+        requestParams.append('q', qParamToString(qParam));
+        // Remove any initial params that have been `overwritten`. This won't be added again later on
+        const haveInitialParam = initialQParams.findIndex(qParamStr => qParam.key === qParamKeyFromString(qParamStr));
+        if (haveInitialParam >= 0) {
+          initialQParams.splice(haveInitialParam, 1);
+        }
+      });
+
+      // Add the rest of the initial params
+      initialQParams.forEach(qParamStr => requestParams.append('q', qParamStr));
+
+      // Remove from q from `params` so it's not added again below
       delete params.qString;
       delete params.q;
     }

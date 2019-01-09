@@ -8,20 +8,37 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Applications</app-meta-card-key>
-    <app-meta-card-value>{{ appCount }}</app-meta-card-value>
+    <app-meta-card-value>{{ appCount$ | async }}</app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
+  <app-meta-card-item *ngIf="(cfEndpointService.hasAllApps$ | async) !== false; else noInstanceCount">
     <app-meta-card-key>App Instances</app-meta-card-key>
-    <app-meta-card-value>{{appInstancesCount }} / {{ appInstancesLimit | infinityPipe }}</app-meta-card-value>
+    <app-meta-card-value>
+      <ng-container *ngIf="appInstancesLimit">{{appInstancesCount }} / {{ appInstancesLimit | infinityPipe }}</ng-container>
+    </app-meta-card-value>
   </app-meta-card-item>
+  <ng-template #noInstanceCount>
+    <app-meta-card-item>
+      <app-meta-card-key>App Instances Quota</app-meta-card-key>
+      <app-meta-card-value>{{ appInstancesLimit | infinityPipe }}</app-meta-card-value>
+    </app-meta-card-item>
+  </ng-template>
   <app-meta-card-item>
     <app-meta-card-key>Service Instances</app-meta-card-key>
-    <app-meta-card-value>{{serviceInstancesCount }} / {{ serviceInstancesLimit | infinityPipe }}</app-meta-card-value>
+    <app-meta-card-value>
+      <ng-container *ngIf="serviceInstancesLimit">{{serviceInstancesCount }} / {{ serviceInstancesLimit | infinityPipe }}</ng-container>
+    </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
+  <app-meta-card-item *ngIf="(cfEndpointService.hasAllApps$ | async) !== false; else noMemoryTotal">
     <app-meta-card-key>Memory</app-meta-card-key>
-    <app-meta-card-value>{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}
+    <app-meta-card-value>
+      <ng-container *ngIf="memoryLimit">{{ memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}</ng-container>
     </app-meta-card-value>
     <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
   </app-meta-card-item>
+  <ng-template #noMemoryTotal>
+    <app-meta-card-item>
+      <app-meta-card-key>Memory Quota</app-meta-card-key>
+      <app-meta-card-value>{{ this.memoryLimit | MbToHumanSize }}</app-meta-card-value>
+    </app-meta-card-item>
+  </ng-template>
 </app-meta-card>

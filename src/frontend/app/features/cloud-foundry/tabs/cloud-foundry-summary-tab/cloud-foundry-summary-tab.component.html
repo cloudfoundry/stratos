@@ -5,24 +5,26 @@
         <app-card-cf-info></app-card-cf-info>
       </app-tile>
     </app-tile-group>
-    <app-tile-group>
-      <app-tile>
-        <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric>
-      </app-tile>
-      <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
-      </app-tile>
-      <app-tile *ngIf="(cfEndpointService.users$ | async)?.length">
-        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
-      </app-tile>
-      <app-tile>
-        <app-card-number-metric icon="memory" units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
-      </app-tile>
-    </app-tile-group>
-    <app-tile-group>
-      <app-tile>
-        <app-card-cf-recent-apps></app-card-cf-recent-apps>
-      </app-tile>
-    </app-tile-group>
+    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application" value="{{ (cfEndpointService.totalApps$ | async) }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="(cfEndpointService.users$ | async)?.length">
+          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="cfEndpointService.hasAllApps$ | async">
+          <app-card-number-metric icon="memory" units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+      <app-tile-group>
+        <app-tile>
+          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfEndpointService.allApps$"></app-card-cf-recent-apps>
+        </app-tile>
+      </app-tile-group>
+    </app-loading-page>
   </app-tile-grid>
 </div>

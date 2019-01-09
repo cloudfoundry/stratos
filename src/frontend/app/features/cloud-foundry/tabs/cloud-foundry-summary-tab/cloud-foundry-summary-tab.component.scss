@@ -2,4 +2,13 @@
   display: flex;
   min-height: 100%;
   width: 100%;
+
+  app-loading-page {
+    position: relative;
+
+    app-tile-group {
+      margin-bottom: 24px;
+    }
+  }
+
 }

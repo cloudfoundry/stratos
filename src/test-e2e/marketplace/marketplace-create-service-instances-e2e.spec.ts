@@ -62,7 +62,6 @@ describe('Marketplace', () => {
     beforeEach(() => {
       marketplaceSummaryPage.navigateTo();
       marketplaceSummaryPage.waitForPage();
-
     });
 
     it('- should have an Add Service Instance button', () => {

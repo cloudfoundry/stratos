@@ -35,12 +35,17 @@ export interface PaginationObservables<T> {
   entities$: Observable<T[]>;
 }
 
-export function qParamsToString(params: QParam[]) {
-  return params.map(joinQParam);
+export function qParamsToString(params: QParam[]): string[] {
+  return params.map(qParamToString);
 }
 
-function joinQParam(q: QParam) {
+export function qParamToString(q: QParam): string {
   return `${q.key}${q.joiner}${(q.value as string[]).join ? (q.value as string[]).join(',') : q.value}`;
+}
+
+export function qParamKeyFromString(qParamString: string): string {
+  const match = qParamString.match(/(>=|<=|<|>| IN |,|:|=)/);
+  return match.index >= 0 ? qParamString.substring(0, match.index) : null;
 }
 
 export function getUniqueQParams(action: AddParams | SetParams, state) {

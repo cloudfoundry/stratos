@@ -9,10 +9,10 @@ import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
 import { AppState } from '../../store/app-state';
-import { applicationSchemaKey, endpointSchemaKey } from '../../store/helpers/entity-factory';
+import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';
-import { PaginationEntityState } from '../../store/types/pagination.types';
+import { PaginationEntityState, PaginatedAction } from '../../store/types/pagination.types';
 import {
   CfUser,
   CfUserRoleParams,
@@ -27,7 +27,12 @@ import { ICfRolesState } from '../../store/types/current-user-roles.types';
 import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { selectEntities } from '../../store/selectors/api.selectors';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
+import { environment } from '../../../environments/environment';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 
+const { proxyAPIVersion, cfAPIVersion } = environment;
 
 export interface IUserRole<T> {
   string: string;
@@ -264,4 +269,37 @@ export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolea
 
 export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
+}
+
+export function createFetchTotalResultsPagKey(standardActionKey: string): string {
+  return standardActionKey + '-totalResults';
+}
+
+export function fetchTotalResults(
+  action: PaginatedAction,
+  store: Store<AppState>,
+  paginationMonitorFactory: PaginationMonitorFactory
+): Observable<number> {
+
+  action.paginationKey = createFetchTotalResultsPagKey(action.paginationKey);
+  action.initialParams['results-per-page'] = 1;
+  action.flattenPagination = false;
+
+  const pagObs = getPaginationObservables({
+    store,
+    action,
+    paginationMonitor: paginationMonitorFactory.create(
+      action.paginationKey,
+      entityFactory(action.entityKey)
+    )
+  });
+  // Ensure the request is made by sub'ing to the entities observable
+  pagObs.entities$.pipe(
+    first(),
+  ).subscribe();
+
+  return pagObs.pagination$.pipe(
+    filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
+    map(pag => pag.totalResults)
+  );
 }
