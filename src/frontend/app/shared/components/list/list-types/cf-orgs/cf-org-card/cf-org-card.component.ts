@@ -7,6 +7,7 @@ import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
@@ -41,8 +42,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   cardMenu: MetaCardMenuItem[];
   orgGuid: string;
   normalisedMemoryUsage: number;
-  memoryLimit: number;
-  instancesLimit: number;
+  memoryLimit: string;
+  instancesLimit: string;
   subscriptions: Subscription[] = [];
   memoryTotal: number;
   instancesCount: number;
@@ -124,20 +125,19 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   setValues = (role: string, apps: APIResource<IApp>[]) => {
     this.userRolesInOrg = role;
+    const quotaDefinition = this.row.entity.quota_definition || createQuotaDefinition(this.orgGuid);
+
     if (apps) {
       this.setAppsDependentCounts(apps);
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
-      this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
+      this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.entity.memory_limit * 100;
     }
-    const quotaDefinition = this.row.entity.quota_definition || createQuotaDefinition(this.orgGuid);
-    this.instancesLimit = quotaDefinition.entity.app_instance_limit;
-    this.memoryLimit = quotaDefinition.entity.memory_limit;
+
+    this.instancesLimit = truthyIncludingZeroString(quotaDefinition.entity.app_instance_limit);
+    this.memoryLimit = truthyIncludingZeroString(quotaDefinition.entity.memory_limit);
   }
 
-  ngOnDestroy = () => this.
-    subscriptions.forEach(p =>
-      p.unsubscribe())
-
+  ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
 
   edit = () => {
     this.store.dispatch(

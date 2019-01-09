@@ -13,7 +13,8 @@ import {
 } from '../../core/cf-api-svc.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { CardStatus } from '../../shared/components/application-state/application-state.service';
+import { safeStringToObj } from '../../core/utils.service';
+import { CardStatus } from '../../shared/components/cards/card-status/card-status.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBroker } from '../../store/actions/service-broker.actions';
 import { GetServiceInstances } from '../../store/actions/service-instances.actions';
@@ -31,7 +32,6 @@ import { getPaginationObservables } from '../../store/reducers/pagination-reduce
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
-import { safeStringToObj } from '../../core/utils.service';
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   serviceBroker: APIResource<IServiceBroker>,

@@ -3,8 +3,8 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IApp, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
-import { determineCardStatus, truthyIncludingZero } from '../../../core/utils.service';
-import { CardStatus } from '../../../shared/components/cards/card-status/card-status.component';
+import { truthyIncludingZero } from '../../../core/utils.service';
+import { CardStatus, determineCardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { entityFactory, spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { APIResource } from '../../../store/types/api.types';
@@ -54,7 +54,7 @@ function createAllAppsInSpaceObs(
   space$: Observable<APIResource<ISpace>>,
   cfEndpointService: CloudFoundryEndpointService): Observable<APIResource<IApp>[]> {
   return space$.pipe(
-    switchMap(space => cfEndpointService.getAppsInSpace(space))
+    switchMap(space => cfEndpointService.getAppsInSpaceViaAllApps(space))
   );
 }
 

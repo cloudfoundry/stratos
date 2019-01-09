@@ -7,6 +7,7 @@ import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
@@ -42,12 +43,11 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   spaceGuid: string;
   serviceInstancesCount: number;
   appInstancesCount: number;
-  serviceInstancesLimit: number;
-  appInstancesLimit: number;
+  serviceInstancesLimit: string;
+  appInstancesLimit: string;
   orgGuid: string;
   normalisedMemoryUsage: number;
-  memoryLimit: number;
-  instancesLimit: number;
+  memoryLimit: string;
   subscriptions: Subscription[] = [];
   memoryTotal: number;
   appCount$: Observable<number>;
@@ -139,15 +139,15 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   setValues = (roles: string, apps: APIResource<IApp>[]) => {
     this.userRolesInSpace = roles;
+    const quotaDefinition = this.row.entity.space_quota_definition || createQuotaDefinition(this.orgGuid);
     if (apps) {
       this.setAppsDependentCounts(apps);
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(this.row.entity.apps, 'memory');
-      this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
+      this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.entity.memory_limit * 100;
     }
-    const quotaDefinition = this.row.entity.space_quota_definition || createQuotaDefinition(this.orgGuid);
-    this.appInstancesLimit = quotaDefinition.entity.app_instance_limit;
-    this.serviceInstancesLimit = quotaDefinition.entity.total_services;
-    this.memoryLimit = quotaDefinition.entity.memory_limit;
+    this.appInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.app_instance_limit);
+    this.serviceInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.total_services);
+    this.memoryLimit = truthyIncludingZeroString(quotaDefinition.entity.memory_limit);
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 

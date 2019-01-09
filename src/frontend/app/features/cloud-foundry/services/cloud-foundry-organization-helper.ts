@@ -3,8 +3,8 @@ import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
 import { IApp, IOrganization } from '../../../core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
-import { truthyIncludingZero, determineCardStatus } from '../../../core/utils.service';
-import { CardStatus } from '../../../shared/components/cards/card-status/card-status.component';
+import { truthyIncludingZero } from '../../../core/utils.service';
+import { CardStatus, determineCardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { entityFactory, organizationSchemaKey } from '../../../store/helpers/entity-factory';
 import { APIResource } from '../../../store/types/api.types';
@@ -56,7 +56,7 @@ function createAllAppsInOrgObs(
   org$: Observable<APIResource<IOrganization>>,
   cfEndpointService: CloudFoundryEndpointService): Observable<APIResource<IApp>[]> {
   return org$.pipe(
-    switchMap(org => cfEndpointService.getAppsInOrg(org))
+    switchMap(org => cfEndpointService.getAppsInOrgViaAllApps(org))
   );
 }
 

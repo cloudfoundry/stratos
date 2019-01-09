@@ -11,7 +11,7 @@ import {
 } from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { APIResource } from '../../../store/types/api.types';
-import { CardStatus } from '../application-state/application-state.service';
+import { CardStatus } from '../cards/card-status/card-status.component';
 
 @Component({
   selector: 'app-service-plan-public',

@@ -2,10 +2,10 @@ import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { determineCardStatus, UtilsService } from '../../../../core/utils.service';
+import { UtilsService } from '../../../../core/utils.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { CardStatus } from '../card-status/card-status.component';
+import { CardStatus, determineCardStatus } from '../card-status/card-status.component';
 
 @Component({
   selector: 'app-card-number-metric',
