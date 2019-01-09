@@ -12,6 +12,7 @@ import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-a
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 import { EndpointType, EndpointAuthTypeConfig, EndpointTypeConfig } from '../../core/extension/extension-types';
 import { ExtensionService } from '../../core/extension/extension-service';
+import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -62,6 +63,13 @@ let endpointAuthTypes: EndpointAuthTypeConfig[] = [
     form: {},
     types: new Array<EndpointType>('cf'),
     component: SSOAuthFormComponent
+  },
+  {
+    name: 'No Authentication',
+    value: 'none',
+    form: {},
+    types: new Array<EndpointType>('metrics'),
+    component: NoneAuthFormComponent
   },
 ];
 

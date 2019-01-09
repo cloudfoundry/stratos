@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -126,15 +127,23 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	log.Debug("Metrics Connect...")
 
 	connectType := ec.FormValue("connect_type")
-	if connectType != interfaces.AuthConnectTypeCreds {
-		return nil, false, errors.New("Only username/password is accepted for Metrics endpoints")
-	}
 
-	username := ec.FormValue("username")
-	password := ec.FormValue("password")
+	var username, password string
+	haveCreds := false
 
-	if len(username) == 0 || len(password) == 0 {
-		return nil, false, errors.New("Need username and password")
+	switch connectType {
+	case interfaces.AuthConnectTypeCreds:
+		username := ec.FormValue("username")
+		password := ec.FormValue("password")
+		if connectType == interfaces.AuthConnectTypeCreds && (len(username) == 0 || len(password) == 0) {
+			return nil, false, errors.New("Need username and password")
+		}
+	case interfaces.AuthConnectTypeNone:
+		username = "none"
+		password = "none"
+		haveCreds = false
+	default:
+		return nil, false, errors.New("Only username/password or no authentication is accepted for Metrics endpoints")
 	}
 
 	authString := fmt.Sprintf("%s:%s", username, password)
@@ -146,6 +155,8 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		RefreshToken: username,
 	}
 
+	log.Debug("Looking for Stratos metrics metadata resource....")
+
 	// Metadata indicates which Cloud Foundry/Kubernetes endpoints the metrics endpoint can supply data for
 	metricsMetadataEndpoint := fmt.Sprintf("%s/stratos", cnsiRecord.APIEndpoint)
 	req, err := http.NewRequest("GET", metricsMetadataEndpoint, nil)
@@ -155,13 +166,14 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		return nil, false, fmt.Errorf(msg, err)
 	}
 
-	req.SetBasicAuth(username, password)
+	if haveCreds {
+		req.SetBasicAuth(username, password)
+	}
 
 	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
 	res, err := h.Do(req)
 
 	if err == nil && res.StatusCode == http.StatusNotFound {
-
 		log.Debug("Checking if this is a prometheus endpoint")
 		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
 		statusEndpoint := fmt.Sprintf("%s/api/v1/status/config", cnsiRecord.APIEndpoint)
@@ -170,6 +182,10 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 			msg := "Failed to create request for the Metrics Endpoint: %v"
 			log.Errorf(msg, err)
 			return nil, false, fmt.Errorf(msg, err)
+		}
+
+		if haveCreds {
+			req.SetBasicAuth(username, password)
 		}
 		response, err := h.Do(req)
 		defer response.Body.Close()
@@ -195,6 +211,8 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 
 func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClient http.Client) (string, error) {
 
+	log.Debug("createMetadata")
+
 	basicMetricRequest := fmt.Sprintf("%s/api/v1/query?query=firehose_total_metrics_received", metricEndpoint)
 	req, err := http.NewRequest("GET", basicMetricRequest, nil)
 	if err != nil {
@@ -212,7 +230,6 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 	if err != nil {
 		log.Errorf("Unexpected response: %v", err)
 		return "", interfaces.LogHTTPError(res, err)
-
 	}
 
 	queryResponse := &PrometheusQueryResponse{}
@@ -230,13 +247,23 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		log.Warnf("Multiple series detected, its possible multiple cloud-foundries are being monitored. Selecting the first one")
 	}
 
+	log.Infof("%v+", queryResponse.Data.Result[0].Metric)
+
 	if queryResponse.Data.Result[0].Metric.Environment == "" {
 		log.Errorf("No environmnent detected in %v", queryResponse)
 		return "", interfaces.LogHTTPError(res, err)
 	}
 
 	environment := queryResponse.Data.Result[0].Metric.Environment
-	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"wss://%s\",\"environment\":\"%s\"}]", environment, environment)
+	url := queryResponse.Data.Result[0].Metric.Environment
+	job := queryResponse.Data.Result[0].Metric.Job
+
+	// Ensure URL has wss:// prefix
+	if !strings.HasPrefix(url, "wss://") {
+		url = fmt.Sprintf("wss://%s", environment)
+	}
+
+	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"%s\",\"environment\":\"%s\",\"job\":\"%s\"}]", url, environment, job)
 	return stratosMetadata, nil
 }
 
@@ -308,11 +335,13 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
+				endpoint.Metadata["metrics_environment"] = provider.Environment
 			}
 			// For K8S
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
+				endpoint.Metadata["metrics_environment"] = ""
 			}
 		}
 	}
