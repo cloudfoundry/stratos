@@ -47,7 +47,7 @@ jobs:
   - stage: Test
     name: Frontend Unit Tests
     node_js:
-    - '8'
+    - '8.11.2'
     - '10'
     - 'node'
     env:
