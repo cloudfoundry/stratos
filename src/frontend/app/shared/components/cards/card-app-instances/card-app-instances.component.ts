@@ -4,10 +4,10 @@ import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { CardStatus } from '../../../../core/cf.types';
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
-import { CardStatus } from '../card-status/card-status.component';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);

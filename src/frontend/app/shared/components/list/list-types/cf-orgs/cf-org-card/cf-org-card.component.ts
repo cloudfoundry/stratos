@@ -9,12 +9,11 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { CardStatus } from '../../../../../../core/cf.types';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  createOrganizationStateObs,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-helper';
+import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
 import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
@@ -26,7 +25,6 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { CardStatus } from '../../../../cards/card-status/card-status.component';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -116,7 +114,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.orgGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
 
-    this.orgStatus$ = createOrganizationStateObs(this.orgGuid, this.cfEndpointService, this.emf);
+    const orgQuotaHelper = new OrgQuotaHelper(this.cfEndpointService, this.emf, this.orgGuid);
+    this.orgStatus$ = orgQuotaHelper.createStateObs();
   }
 
   setAppsDependentCounts = (apps: APIResource<IApp>[]) => {

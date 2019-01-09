@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardStatus } from '../card-status/card-status.component';
+import { CardStatus } from '../../../../core/cf.types';
 
 @Component({
   selector: 'app-card-app-status',

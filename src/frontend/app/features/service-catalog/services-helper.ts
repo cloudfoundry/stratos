@@ -14,7 +14,6 @@ import {
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { safeStringToObj } from '../../core/utils.service';
-import { CardStatus } from '../../shared/components/cards/card-status/card-status.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBroker } from '../../store/actions/service-broker.actions';
 import { GetServiceInstances } from '../../store/actions/service-instances.actions';
@@ -31,6 +30,7 @@ import { createEntityRelationPaginationKey } from '../../store/helpers/entity-re
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { CardStatus } from '../../core/cf.types';
 import { ServicePlanAccessibility } from './services.service';
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,

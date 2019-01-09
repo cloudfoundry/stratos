@@ -1,15 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export enum CardStatus {
-  NONE = 'none',
-  OK = 'ok',
-  WARNING = 'warning',
-  TENTATIVE = 'tentative',
-  INCOMPLETE = 'incomplete',
-  ERROR = 'error',
-  BUSY = 'busy'
-}
+import { CardStatus } from '../../../../core/cf.types';
 
 export function determineCardStatus(value: number, limit: number): CardStatus {
   if ((limit !== 0 && !limit) || limit === -1) {

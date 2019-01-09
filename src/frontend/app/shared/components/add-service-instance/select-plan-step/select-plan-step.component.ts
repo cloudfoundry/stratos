@@ -27,6 +27,7 @@ import {
 
 import { IServicePlan } from '../../../../core/cf-api-svc.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
+import { CardStatus } from '../../../../core/cf.types';
 import {
   canShowServicePlanCosts,
   getServicePlanAccessibilityCardStatus,
@@ -45,8 +46,6 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
-import { CardStatus } from '../../cards/card-status/card-status.component';
-
 
 @Component({
   selector: 'app-select-plan-step',

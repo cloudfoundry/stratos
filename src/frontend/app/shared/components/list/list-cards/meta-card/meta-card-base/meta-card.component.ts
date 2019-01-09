@@ -1,12 +1,12 @@
-
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { CardStatus } from '../../../../../../core/cf.types';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { CardStatus } from '../../../../cards/card-status/card-status.component';
 
 
 export interface MetaCardMenuItem {

@@ -3,9 +3,10 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { UtilsService } from '../../../../core/utils.service';
+import { CardStatus } from '../../../../core/cf.types';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { CardStatus, determineCardStatus } from '../card-status/card-status.component';
+import { determineCardStatus } from '../card-status/card-status.component';
 
 @Component({
   selector: 'app-card-number-metric',

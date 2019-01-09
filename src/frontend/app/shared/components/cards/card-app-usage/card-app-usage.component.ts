@@ -5,8 +5,7 @@ import { map, share, startWith } from 'rxjs/operators';
 import { pathGet } from '../../../../core/utils.service';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardStatus } from '../card-status/card-status.component';
-
+import { CardStatus } from '../../../../core/cf.types';
 
 @Component({
   selector: 'app-card-app-usage',

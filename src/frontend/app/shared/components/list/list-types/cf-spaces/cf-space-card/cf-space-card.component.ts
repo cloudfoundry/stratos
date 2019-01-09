@@ -9,6 +9,7 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { CardStatus } from '../../../../../../core/cf.types';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -16,7 +17,7 @@ import {
   CloudFoundryOrganizationService,
   createQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { createSpaceStateObs } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-helper';
+import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
@@ -26,7 +27,6 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { CardStatus } from '../../../../cards/card-status/card-status.component';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -129,12 +129,12 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
     this.subscriptions.push(fetchData$.subscribe());
 
-    this.spaceStatus$ = createSpaceStateObs(this.spaceGuid, this.cfEndpointService, this.emf);
+    const spaceQuotaHelper = new SpaceQuotaHelper(this.cfEndpointService, this.emf, this.spaceGuid);
+    this.spaceStatus$ = spaceQuotaHelper.createStateObs();
   }
 
   setAppsDependentCounts = (apps: APIResource<IApp>[]) => {
-    // this.appCount = this.row.entity.apps ? this.row.entity.apps.length : 0;
-    this.appInstancesCount = getStartedAppInstanceCount(this.row.entity.apps);
+    this.appInstancesCount = getStartedAppInstanceCount(apps);
   }
 
   setValues = (roles: string, apps: APIResource<IApp>[]) => {
@@ -142,7 +142,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     const quotaDefinition = this.row.entity.space_quota_definition || createQuotaDefinition(this.orgGuid);
     if (apps) {
       this.setAppsDependentCounts(apps);
-      this.memoryTotal = this.cfEndpointService.getMetricFromApps(this.row.entity.apps, 'memory');
+      this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
       this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.entity.memory_limit * 100;
     }
     this.appInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.app_instance_limit);
