@@ -8,11 +8,13 @@
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
-    <div class="meta-card__header-container__title">
-      <ng-container *ngTemplateOutlet="title.content"></ng-container>
-    </div>
-    <div class="meta-card__header-container__icon" *ngIf="statusIconByTitle">
-      <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+    <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title' ">
+      <div class="meta-card__header-container__title__content">
+        <ng-container *ngTemplateOutlet="title.content"></ng-container>
+      </div>
+      <div class="meta-card__header-container__title--with-icon__icon" *ngIf="statusIconByTitle">
+        <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+      </div>
     </div>
     <div class="meta-card__header-container__actions" *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
       <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu" [disabled]="isDeleting$ | async">

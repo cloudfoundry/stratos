@@ -38,12 +38,23 @@
   }
 
   &__header-container {
-    &__title {
+
+    &__title,
+    &__title--with-icon {
+      display: flex;
       flex: 1;
     }
 
-    &__icon {
-      flex: 0 0 30px;
+    &__title {
+      justify-content: space-between;
+    }
+
+    &__title--with-icon {
+      justify-content: flex-start;
+
+      &__icon {
+        margin-top: -1px;
+      }
     }
 
     &__actions {
