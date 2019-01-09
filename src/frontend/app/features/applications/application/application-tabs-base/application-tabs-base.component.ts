@@ -101,15 +101,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       first()
     );
 
-    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
-      if (hasMetrics) {
-        this.tabLinks.push({
-          link: 'metrics',
-          label: 'Metrics'
-        });
-      }
-    });
-
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
       switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.metadata.guid)
@@ -126,6 +117,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
       { link: 'events', label: 'Events' }
     ];
+
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+      if (hasMetrics) {
+        this.tabLinks.push({
+          link: 'metrics',
+          label: 'Metrics'
+        });
+      }
+    });
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
