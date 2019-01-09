@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -22,6 +22,8 @@ const RECENT_ITEMS_COUNT = 10;
 export class CardCfRecentAppsComponent implements OnInit {
 
   @Input() allApps$: Observable<APIResource<IApp>[]>;
+  @Input() loading$: Observable<boolean>;
+  @Output() refresh = new EventEmitter<any>();
 
   constructor(
     private store: Store<AppState>,
@@ -32,7 +34,6 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   ngOnInit() {
     this.apps$ = this.allApps$.pipe(
-      first(),
       map(allApps => this.processApps(allApps))
     );
   }
