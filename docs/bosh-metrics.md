@@ -128,5 +128,4 @@ Open a web browser and load the Prometheus URL. open the `Status` menu and selec
 
 > Note: It can take a few minutes before all of the targets appear in Prometheus and their state becomes `UP`. You should see targets named `bosh`, `cf` and `firehose` as well as many others if everything is working correctly.
 
-You should now be able to follow the instructions at the top of this page for registering and connecting Prometheus to Stratos.
-
+You should now be able to follow the [Connecting Prometheus to Stratos](#connecting-prometheus-to-stratos) instructions for registering and connecting Prometheus to Stratos.

@@ -70,6 +70,12 @@ type PrometheusQueryResponse struct {
 	} `json:"data"`
 }
 
+type MetricsAuth struct {
+	Type     string
+	Username string
+	Password string
+}
+
 // Init creates a new MetricsSpecification
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &MetricsSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
@@ -127,32 +133,31 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	log.Debug("Metrics Connect...")
 
 	connectType := ec.FormValue("connect_type")
-
-	var username, password string
-	haveCreds := false
+	auth := &MetricsAuth{
+		Type: connectType,
+	}
 
 	switch connectType {
 	case interfaces.AuthConnectTypeCreds:
-		username := ec.FormValue("username")
-		password := ec.FormValue("password")
-		if connectType == interfaces.AuthConnectTypeCreds && (len(username) == 0 || len(password) == 0) {
+		auth.Username = ec.FormValue("username")
+		auth.Password = ec.FormValue("password")
+		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
 			return nil, false, errors.New("Need username and password")
 		}
 	case interfaces.AuthConnectTypeNone:
-		username = "none"
-		password = "none"
-		haveCreds = false
+		auth.Username = "none"
+		auth.Password = "none"
 	default:
 		return nil, false, errors.New("Only username/password or no authentication is accepted for Metrics endpoints")
 	}
 
-	authString := fmt.Sprintf("%s:%s", username, password)
+	authString := fmt.Sprintf("%s:%s", auth.Username, auth.Password)
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
 	tr := &interfaces.TokenRecord{
 		AuthType:     interfaces.AuthTypeHttpBasic,
 		AuthToken:    base64EncodedAuthString,
-		RefreshToken: username,
+		RefreshToken: auth.Username,
 	}
 
 	log.Debug("Looking for Stratos metrics metadata resource....")
@@ -165,10 +170,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		log.Errorf(msg, err)
 		return nil, false, fmt.Errorf(msg, err)
 	}
-
-	if haveCreds {
-		req.SetBasicAuth(username, password)
-	}
+	m.addAuth(req, auth)
 
 	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
 	res, err := h.Do(req)
@@ -183,10 +185,8 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 			log.Errorf(msg, err)
 			return nil, false, fmt.Errorf(msg, err)
 		}
+		m.addAuth(req, auth)
 
-		if haveCreds {
-			req.SetBasicAuth(username, password)
-		}
 		response, err := h.Do(req)
 		defer response.Body.Close()
 		if err != nil || response.StatusCode != http.StatusOK {
@@ -194,7 +194,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 			return nil, false, interfaces.LogHTTPError(res, err)
 		}
 
-		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h)
+		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
 		return tr, false, nil
 	} else if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
@@ -209,10 +209,13 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	return tr, false, nil
 }
 
-func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClient http.Client) (string, error) {
+func (m *MetricsSpecification) addAuth(req *http.Request, auth *MetricsAuth) {
+	if auth.Type == interfaces.AuthConnectTypeCreds {
+		req.SetBasicAuth(auth.Username, auth.Password)
+	}
+}
 
-	log.Debug("createMetadata")
-
+func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClient http.Client, auth *MetricsAuth) (string, error) {
 	basicMetricRequest := fmt.Sprintf("%s/api/v1/query?query=firehose_total_metrics_received", metricEndpoint)
 	req, err := http.NewRequest("GET", basicMetricRequest, nil)
 	if err != nil {
@@ -220,6 +223,7 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		log.Errorf(msg, err)
 		return "", fmt.Errorf(msg, err)
 	}
+	m.addAuth(req, auth)
 	res, err := httpClient.Do(req)
 	defer res.Body.Close()
 	if err != nil || res.StatusCode != http.StatusOK {
@@ -247,8 +251,6 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		log.Warnf("Multiple series detected, its possible multiple cloud-foundries are being monitored. Selecting the first one")
 	}
 
-	log.Infof("%v+", queryResponse.Data.Result[0].Metric)
-
 	if queryResponse.Data.Result[0].Metric.Environment == "" {
 		log.Errorf("No environmnent detected in %v", queryResponse)
 		return "", interfaces.LogHTTPError(res, err)
@@ -263,8 +265,18 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		url = fmt.Sprintf("wss://%s", environment)
 	}
 
-	stratosMetadata := fmt.Sprintf("[{\"type\":\"cf\",\"url\":\"%s\",\"environment\":\"%s\",\"job\":\"%s\"}]", url, environment, job)
-	return stratosMetadata, nil
+	storeMetadata := &MetricsProviderMetadata{
+		Type:        "cf",
+		URL:         url,
+		Job:         job,
+		Environment: environment,
+	}
+
+	jsonMsg, err := json.Marshal(storeMetadata)
+	if err != nil {
+		return "", interfaces.LogHTTPError(res, err)
+	}
+	return string(jsonMsg), nil
 }
 
 // Init performs plugin initialization
