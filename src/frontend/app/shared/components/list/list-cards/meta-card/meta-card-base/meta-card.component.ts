@@ -17,18 +17,6 @@ export interface MetaCardMenuItem {
   disabled?: Observable<boolean>;
 }
 
-export interface MetaCardComponentConfig {
-  statusIcon?: boolean;
-  statusIconByTitle?: boolean;
-  statusIconTooltip?: string;
-}
-
-const defaultConfig = {
-  statusIcon: true,
-  statusIconByTitle: false,
-  statusIconTooltip: null,
-};
-
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
@@ -45,17 +33,12 @@ export class MetaCardComponent {
   @Input()
   status$: Observable<CardStatus>;
 
-  _config: MetaCardComponentConfig = { ...defaultConfig };
   @Input()
-  set config(config: MetaCardComponentConfig) {
-    this._config = {
-      ...this._config,
-      ...config
-    };
-  }
-  get config(): MetaCardComponentConfig {
-    return this._config;
-  }
+  statusIcon = true;
+  @Input()
+  statusIconByTitle = false;
+  @Input()
+  statusIconTooltip: string;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {

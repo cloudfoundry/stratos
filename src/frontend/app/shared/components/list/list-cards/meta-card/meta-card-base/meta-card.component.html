@@ -11,7 +11,7 @@
     <div class="meta-card__header-container__title">
       <ng-container *ngTemplateOutlet="title.content"></ng-container>
     </div>
-    <div class="meta-card__header-container__icon" *ngIf="config.statusIconByTitle">
+    <div class="meta-card__header-container__icon" *ngIf="statusIconByTitle">
       <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
     </div>
     <div class="meta-card__header-container__actions" *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
@@ -27,7 +27,7 @@
         </ng-container>
       </mat-menu>
     </div>
-    <ng-container *ngIf="!config.statusIconByTitle">
+    <ng-container *ngIf="!statusIconByTitle">
       <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
     </ng-container>
   </mat-card-header>
@@ -40,5 +40,5 @@
   </mat-card-content>
 </mat-card>
 <ng-template #statusIcon>
-  <app-application-state-icon *ngIf="config.statusIcon && status$" [status]="status$ | async" matTooltip="{{config.statusIconTooltip}}"></app-application-state-icon>
+  <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async" matTooltip="{{statusIconTooltip}}"></app-application-state-icon>
 </ng-template>
