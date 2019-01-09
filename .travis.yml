@@ -46,6 +46,10 @@ jobs:
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
     name: Frontend Unit Tests
+    node_js:
+    - '8'
+    - '10'
+    - 'node'
     env:
     - CI_ENV=true
     script:
