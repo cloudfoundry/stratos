@@ -5,8 +5,8 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import {
-  generateTestCfEndpointServiceProvider,
   BaseTestModulesNoShared,
+  generateTestCfEndpointServiceProvider,
   MetadataCardTestComponents,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganizationServiceMock } from '../../../../test-framework/cloud-foundry-organization.service.mock';
@@ -14,8 +14,9 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
-import { CardCfOrgUserDetailsComponent } from './card-cf-org-user-details.component';
 import { CapitalizeFirstPipe } from '../../../pipes/capitalizeFirstLetter.pipe';
+import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
+import { CardCfOrgUserDetailsComponent } from './card-cf-org-user-details.component';
 
 describe('CardCfOrgUserDetailsComponent', () => {
   let component: CardCfOrgUserDetailsComponent;
@@ -23,7 +24,7 @@ describe('CardCfOrgUserDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardCfOrgUserDetailsComponent, ...MetadataCardTestComponents, CapitalizeFirstPipe],
+      declarations: [CardCfOrgUserDetailsComponent, ...MetadataCardTestComponents, CapitalizeFirstPipe, BooleanIndicatorComponent],
       imports: [...BaseTestModulesNoShared],
       providers: [
         CfUserService,

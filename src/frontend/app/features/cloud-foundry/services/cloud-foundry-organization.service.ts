@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap, startWith } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
-import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
+import { getStartedAppInstanceCount, getEntityFlattenedList } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -196,12 +196,7 @@ export class CloudFoundryOrganizationService {
     );
   }
 
-  private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {
-    return map(entities => {
-      const allInstances = entities
-        .map(s => s.entity[property])
-        .filter(s => !!s);
-      return [].concat.apply([], allInstances);
-    });
+  private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {
+    return map(entities => getEntityFlattenedList(property, entities));
   }
 }

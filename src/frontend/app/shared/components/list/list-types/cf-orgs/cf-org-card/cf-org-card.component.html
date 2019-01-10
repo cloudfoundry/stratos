@@ -1,4 +1,4 @@
-<app-meta-card class="org-card" [clickAction]="goToSummary" [entityConfig]="entityConfig" [actionMenu]="cardMenu">
+<app-meta-card class="org-card" [clickAction]="goToSummary" [status$]="orgStatus$" [entityConfig]="entityConfig" [actionMenu]="cardMenu" [statusIconByTitle]="true" [statusIconTooltip]="'Org near or at quota limits'">
   <app-meta-card-title class="org-card__title">
     <app-multiline-title class="org-card__title-link">{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>
@@ -13,7 +13,8 @@
   <app-meta-card-item *ngIf="(cfEndpointService.hasAllApps$ | async) !== false; else noInstanceCount">
     <app-meta-card-key>Instances</app-meta-card-key>
     <app-meta-card-value>
-      <ng-container *ngIf="instancesLimit">{{instancesCount }} / {{ instancesLimit | infinityPipe }}</ng-container>
+      <ng-container *ngIf="instancesLimit; else noInstancesLimit">{{instancesCount }} / {{ instancesLimit | infinityPipe }}</ng-container>
+      <ng-template #noInstancesLimit>{{ instancesCount }}</ng-template>
     </app-meta-card-value>
   </app-meta-card-item>
   <ng-template #noInstanceCount>
@@ -25,7 +26,8 @@
   <app-meta-card-item *ngIf="(cfEndpointService.hasAllApps$ | async) !== false; else noMemoryTotal">
     <app-meta-card-key>Memory</app-meta-card-key>
     <app-meta-card-value>
-      <ng-container *ngIf="memoryLimit">{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}</ng-container>
+      <ng-container *ngIf="memoryLimit; else noMemoryLimit">{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}</ng-container>
+      <ng-template #noMemoryLimit>{{ memoryTotal | MbToHumanSize }}</ng-template>
     </app-meta-card-value>
     <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
   </app-meta-card-item>
