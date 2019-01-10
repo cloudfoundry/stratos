@@ -5,8 +5,8 @@ import { map, startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { CardStatus } from '../../../../../core/cf.types';
 import { AppState } from '../../../../../store/app-state';
+import { CardStatus } from '../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 

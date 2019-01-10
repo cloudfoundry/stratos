@@ -9,7 +9,6 @@ import { CurrentUserPermissions } from '../../../../../../core/current-user-perm
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { CardStatus } from '../../../../../../core/cf.types';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -26,7 +25,7 @@ import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';

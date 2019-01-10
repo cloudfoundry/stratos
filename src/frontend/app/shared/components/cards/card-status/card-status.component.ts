@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CardStatus } from '../../../../core/cf.types';
+import { CardStatus } from '../../../shared.types';
+
 
 export function determineCardStatus(value: number, limit: number): CardStatus {
   if ((limit !== 0 && !limit) || limit === -1) {

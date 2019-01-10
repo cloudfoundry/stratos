@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { CardStatus } from '../../../core/cf.types';
+import { CardStatus } from '../../shared.types';
 import { ApplicationStateData } from './application-state.service';
 
 @Component({

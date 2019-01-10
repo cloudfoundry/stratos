@@ -2,9 +2,8 @@ import { Component, ContentChild, ContentChildren, Input, QueryList } from '@ang
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CardStatus } from '../../../../../../core/cf.types';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 

@@ -4,7 +4,6 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { IServiceBroker, IServicePlan } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { CardStatus } from '../../../core/cf.types';
 import {
   getCfService,
   getServiceBroker,
@@ -12,6 +11,7 @@ import {
 } from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { APIResource } from '../../../store/types/api.types';
+import { CardStatus } from '../../shared.types';
 
 @Component({
   selector: 'app-service-plan-public',

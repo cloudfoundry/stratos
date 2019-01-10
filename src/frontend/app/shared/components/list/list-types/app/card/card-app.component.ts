@@ -6,13 +6,12 @@ import { map, startWith } from 'rxjs/operators';
 import { IApp } from '../../../../../../core/cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { CardStatus } from '../../../../../../core/cf.types';
 import { AppState } from '../../../../../../store/app-state';
 import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 

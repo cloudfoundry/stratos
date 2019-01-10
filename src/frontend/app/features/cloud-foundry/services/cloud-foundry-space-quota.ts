@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 import { IApp, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { CardStatus } from '../../../shared/shared.types';
 import { spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { APIResource } from '../../../store/types/api.types';
-import { CardStatus } from '../../../core/cf.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { OrgSpaceQuotaHelper } from './cloud-foundry-org-space-quota';
 

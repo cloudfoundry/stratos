@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 
-import { CardStatus } from '../../../../core/cf.types';
+import { CardStatus } from '../../../shared.types';
+
 
 @Component({
   selector: 'app-application-state-icon',

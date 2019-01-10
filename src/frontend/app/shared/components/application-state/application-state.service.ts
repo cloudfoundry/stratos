@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { CardStatus } from '../../../core/cf.types';
+import { CardStatus } from '../../shared.types';
+
 
 
 export interface ApplicationStateData {

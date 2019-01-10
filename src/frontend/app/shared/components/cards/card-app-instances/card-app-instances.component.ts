@@ -4,8 +4,8 @@ import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardStatus } from '../../../../core/cf.types';
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
+import { CardStatus } from '../../../shared.types';
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 

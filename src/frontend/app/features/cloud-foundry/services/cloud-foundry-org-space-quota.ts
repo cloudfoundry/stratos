@@ -5,10 +5,10 @@ import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { truthyIncludingZero } from '../../../core/utils.service';
 import { determineCardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { CardStatus } from '../../../shared/shared.types';
 import { entityFactory } from '../../../store/helpers/entity-factory';
 import { APIResource } from '../../../store/types/api.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CardStatus } from '../../../core/cf.types';
 
 
 export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
