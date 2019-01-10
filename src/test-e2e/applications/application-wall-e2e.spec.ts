@@ -68,8 +68,8 @@ describe('Application Wall Tests -', () => {
           const spaceName1 = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-1';
           const spaceName2 = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-2';
           return promise.all([
-            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, org.entity.name, spaceName1, defaultCf, true),
-            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, org.entity.name, spaceName2, defaultCf, true),
+            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, spaceName1, defaultCf, true),
+            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, spaceName2, defaultCf, true),
           ]);
         })
         .then(([s1, s2]) => {
