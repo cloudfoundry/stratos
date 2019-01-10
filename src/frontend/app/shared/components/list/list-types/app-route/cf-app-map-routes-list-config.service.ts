@@ -45,7 +45,6 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     // Add the 'radio' button column that will pick the single route to map
     this.getColumns().splice(0, 0, {
       columnId: 'radio',
-      // headerCell: () => '',
       cellComponent: TableCellRadioComponent,
       cellConfig: {
         isDisabled: (row): boolean => row && row.entity && row.entity.apps && row.entity.apps.find(
