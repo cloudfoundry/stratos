@@ -199,6 +199,7 @@ const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema,
     apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    space: new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;

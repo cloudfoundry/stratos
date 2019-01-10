@@ -3,6 +3,7 @@ import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
 
 
@@ -12,7 +13,7 @@ export class LocalListController<T = any> {
     page$: Observable<T[]>,
     pagination$: Observable<PaginationEntityState>,
     private setResultCount: (pagination: PaginationEntityState, entities: (T | T[])[]) => void,
-    dataFunctions?
+    dataFunctions?: DataFunction<any>[]
   ) {
     const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
     const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
@@ -25,7 +26,10 @@ export class LocalListController<T = any> {
   /*
    * Emit the core set of entities that are sorted and filtered but not paginated
    */
-  private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
+  private buildPagesObservable(
+    page$: Observable<T[]>,
+    pagination$: Observable<PaginationEntityState>,
+    dataFunctions?: DataFunction<any>[]) {
     // Updates whenever a page setting changes (current page, page size, sorting, etc) and not when
     const cleanPagination$ = pagination$.pipe(
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
@@ -37,7 +41,10 @@ export class LocalListController<T = any> {
   /*
    * Emit the core set of entities that are sorted and filtered but not paginated
    */
-  private buildFullCleanPageObservable(cleanPage$: Observable<T[]>, cleanPagination$: Observable<PaginationEntityState>, dataFunctions?) {
+  private buildFullCleanPageObservable(
+    cleanPage$: Observable<T[]>,
+    cleanPagination$: Observable<PaginationEntityState>,
+    dataFunctions?: DataFunction<any>[]) {
     return combineLatest(
       cleanPagination$,
       cleanPage$
@@ -47,7 +54,11 @@ export class LocalListController<T = any> {
         if (!entities || !entities.length) {
           return { paginationEntity, entities: [] };
         }
-        if (dataFunctions && dataFunctions.length) {
+        // If this list has a max entities count configured and we've exceeded that don't apply local filtering
+        // (the entities collection is junk)
+        const isMaxedResults = paginationEntity.maxedResults && entities.length >=
+          paginationEntity.params['results-per-page'] ? true : false;
+        if (dataFunctions && dataFunctions.length && !isMaxedResults) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);

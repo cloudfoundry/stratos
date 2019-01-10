@@ -341,11 +341,11 @@ describe('Application Deploy -', function () {
       expect(route).not.toBeNull();
       expect(route.length).toBeGreaterThan(testAppName.length);
       const randomRouteStyleAppName = testAppName.replace(/[\.:]/g, '');
-      expect(route.startsWith(randomRouteStyleAppName)).toBeTruthy();
+      expect(route.startsWith(randomRouteStyleAppName.substring(0, randomRouteStyleAppName.length - 11), 7)).toBeTruthy();
     });
     appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
       expect(tcpRoute).not.toBeNull();
-      expect(tcpRoute).toBe('No');
+      expect(tcpRoute).toBe('highlight_off');
     });
   });
 

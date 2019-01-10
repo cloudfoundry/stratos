@@ -269,3 +269,13 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
     }
   });
 };
+
+export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
+export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
+
+export const sortStringify = (obj: { [key: string]: string }): string => {
+  const keys = Object.keys(obj).sort();
+  return keys.reduce((res, key) => {
+    return res += `${key}-${obj[key]},`;
+  }, '');
+};

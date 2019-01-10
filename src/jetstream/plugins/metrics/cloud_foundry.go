@@ -74,7 +74,13 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		}
 
 		if addJob {
-			addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
+			if metric.metrics.Job != "" {
+				// stratos-metrics configures the firehose exporter to tag metrics with `job`
+				addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
+			} else if metric.metrics.Environment != "" {
+				// prometheus-boshrelease deployed firehose exporter tags metrics with `environment`
+				addQueries = addQueries + "environment=\"" + metric.metrics.Environment + "\""
+			}
 		}
 
 		req.URI = makePrometheusRequestURI(c, prometheusOp, addQueries)

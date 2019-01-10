@@ -132,8 +132,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       switchMap(sharedDomains => this.appService.waitForAppEntity$
         .pipe(
           switchMap(app => {
-            const space = app.entity.entity.space as APIResource<ISpace>;
-            this.spaceGuid = space.metadata.guid;
+            this.spaceGuid = app.entity.entity.space_guid;
             const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
               entityFactory(spaceSchemaKey),
               this.spaceGuid,

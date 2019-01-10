@@ -1,7 +1,20 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { entityFactory, routeSchemaKey } from '../helpers/entity-factory';
+
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
+} from '../helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { Route } from '../types/route.types';
+import { getActions } from './action.helper';
 
 
 export const CREATE_ROUTE = '[Route] Create start';
@@ -83,11 +96,15 @@ export class DeleteRoute extends BaseRouteAction {
   removeEntityOnDelete = true;
 }
 export class UnmapRoute extends BaseRouteAction {
+  /**
+   * The key of the pagination section to remove the route from. Note, this should not be called `paginationKey`
+   * @param clearPaginationKey
+   */
   constructor(
     public routeGuid: string,
     public appGuid: string,
     public endpointGuid: string,
-    public removeEntityOnDelete = true
+    public clearPaginationKey?: string,
   ) {
     super(routeGuid, endpointGuid, appGuid);
     this.options = new RequestOptions();
@@ -120,3 +137,33 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
+export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {
+  paginationKey: string;
+  constructor(
+    public endpointGuid: string,
+    public includeRelations = [
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, spaceSchemaKey),
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `routes`;
+    this.options.method = 'get';
+    this.paginationKey = createEntityRelationPaginationKey('cf', this.endpointGuid);
+  }
+  entity = [entityFactory(routeSchemaKey)];
+  entityKey = routeSchemaKey;
+  options: RequestOptions;
+  actions = getActions('Routes', 'Fetch all');
+  initialParams = {
+    'results-per-page': 100,
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'route',
+  };
+  flattenPaginationMax = 800;
+  flattenPagination = true;
+}
