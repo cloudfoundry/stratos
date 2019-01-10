@@ -12,7 +12,7 @@ patchHelmChart () {
   sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REG}"'/g' ${CHART_PATH}/values.yaml
 
   sed -i -e 's/version: 0.1.0/version: '"${CHART_VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
-  sed -i -e 's/appVersion: 0.1.0/version: '"${APP_VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
+  sed -i -e 's/appVersion: 0.1.0/appVersion: '"${APP_VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
 }
 
 patchHelmChartDev () {
