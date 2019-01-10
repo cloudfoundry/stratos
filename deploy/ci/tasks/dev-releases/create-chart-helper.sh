@@ -6,13 +6,13 @@ patchHelmChart () {
   local DOCKER_REG=$3
   local CHART_PATH=$4
   local CHART_VERSION=$5
-  local VERSION=$6
+  local APP_VERSION=$6
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REG}"'/g' ${CHART_PATH}/values.yaml
 
   sed -i -e 's/version: 0.1.0/version: '"${CHART_VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
-  sed -i -e 's/appVersion: 0.1.0/version: '"${VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
+  sed -i -e 's/appVersion: 0.1.0/appVersion: '"${APP_VERSION}"'/g' ${CHART_PATH}/Chart.yaml  
 }
 
 patchHelmChartDev () {
@@ -20,7 +20,9 @@ patchHelmChartDev () {
   local DOCKER_ORG=$2
   local DOCKER_REG=$3
   local CHART_PATH=$4
-  patchHelmChart ${TAG} ${DOCKER_ORG} ${DOCKER_REG} ${CHART_PATH}
+  local CHART_VERSION=$5
+  local APP_VERSION=$6
+  patchHelmChart ${TAG} ${DOCKER_ORG} ${DOCKER_REG} ${CHART_PATH} ${CHART_VERSION} ${APP_VERSION}
 
   sed -i -e 's/imagePullPolicy: IfNotPresent/imagePullPolicy: Always/g' ${CHART_PATH}/values.yaml  
 }
