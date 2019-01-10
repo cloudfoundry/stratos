@@ -81,6 +81,10 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Organizations', 'organizations');
   }
 
+  goToRoutesTab() {
+    return this.goToTab('Routes', 'routes');
+  }
+
   goToUsersTab() {
     return this.goToTab('Users', 'users');
   }

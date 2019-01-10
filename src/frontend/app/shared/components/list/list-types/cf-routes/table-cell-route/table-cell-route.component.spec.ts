@@ -1,14 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TableCellRouteComponent } from './table-cell-route.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
-import { SharedModule } from '../../../../../shared.module';
 import { RouterTestingModule } from '@angular/router/testing';
+
+import { APIResource } from '../../../../../../store/types/api.types';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { ListCfRoute } from '../cf-routes-data-source-base';
+import { TableCellRouteComponent } from './table-cell-route.component';
 
 describe('TableCellRouteComponent', () => {
-  let component: TableCellRouteComponent<any>;
-  let fixture: ComponentFixture<TableCellRouteComponent<any>>;
+  let component: TableCellRouteComponent;
+  let fixture: ComponentFixture<TableCellRouteComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -32,7 +32,7 @@ describe('TableCellRouteComponent', () => {
           }
         }
       }
-    } as EntityInfo;
+    } as APIResource<ListCfRoute>;
     fixture.detectChanges();
   });
 

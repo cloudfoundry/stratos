@@ -1,15 +1,14 @@
-import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
-import { GitHubSCM } from './../../../../../../shared/data-services/scm/github-scm';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { combineLatest, distinct, map, tap, startWith } from 'rxjs/operators';
+import { combineLatest, distinct, map, startWith } from 'rxjs/operators';
 
-import { EntityInfo } from '../../../../../../store/types/api.types';
-import { AppSummary } from '../../../../../../store/types/app-metadata.types';
+import { IAppSummary } from '../../../../../../core/cf-api.types';
+import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
+import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
-import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
+import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -41,7 +40,7 @@ export class BuildTabComponent implements OnInit {
       combineLatest(
         this.applicationService.appSummary$
       ),
-      map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
+      map(([app, appSummary]: [ApplicationData, EntityInfo<APIResource<IAppSummary>>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 

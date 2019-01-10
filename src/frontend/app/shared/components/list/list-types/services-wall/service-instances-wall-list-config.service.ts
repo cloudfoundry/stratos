@@ -3,12 +3,12 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { defaultPaginationPageSizeOptionsCards, ListViewTypes } from '../../list.component.types';
-import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';

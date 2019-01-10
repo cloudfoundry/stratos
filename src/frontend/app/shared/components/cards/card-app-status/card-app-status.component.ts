@@ -1,8 +1,9 @@
-import { ApplicationService } from '../../../../features/applications/application.service';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CardStatus } from '../../application-state/application-state.service';
+
+import { ApplicationService } from '../../../../features/applications/application.service';
+import { CardStatus } from '../../../shared.types';
 
 @Component({
   selector: 'app-card-app-status',

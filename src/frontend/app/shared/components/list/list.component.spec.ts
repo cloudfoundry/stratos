@@ -1,4 +1,4 @@
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
@@ -19,6 +19,11 @@ import { EndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-car
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+
+class MockedNgZone {
+  run = fn => fn();
+  runOutsideAngular = fn => fn();
+}
 
 describe('ListComponent', () => {
 
@@ -50,11 +55,13 @@ describe('ListComponent', () => {
           createBasicStoreModule(store),
         ],
         providers: [
-          { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } }
+          { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
+          // Fun fact, NgZone will execute something on import which causes an undefined error
+          { provide: MockedNgZone, useValue: new MockedNgZone },
         ]
       });
-      inject([Store, ChangeDetectorRef], (iStore: Store<AppState>, cd: ChangeDetectorRef) => {
-        const component = new ListComponent<APIResource>(iStore, cd, config);
+      inject([Store, ChangeDetectorRef, NgZone], (iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone) => {
+        const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);
       })();
     }
@@ -106,7 +113,7 @@ describe('ListComponent', () => {
     let component: ListComponent<EndpointModel>;
     let fixture: ComponentFixture<ListComponent<EndpointModel>>;
 
-    beforeEach(() => {
+    beforeEach(async(() => {
       TestBed.configureTestingModule({
         providers: [
           { provide: ListConfig, useClass: EndpointsListConfigService },
@@ -122,19 +129,22 @@ describe('ListComponent', () => {
         ],
       })
         .compileComponents();
+    }));
+
+    beforeEach(() => {
       fixture = TestBed.createComponent<ListComponent<EndpointModel>>(ListComponent);
       component = fixture.componentInstance;
       component.columns = [];
     });
 
-    it('should be created', async(() => {
+    it('should be created', () => {
       fixture.detectChanges();
       expect(component).toBeTruthy();
-    }));
+    });
 
 
     describe('Header', () => {
-      it('Nothing enabled', async(() => {
+      it('Nothing enabled', () => {
         component.config.getMultiFiltersConfigs = () => [];
         component.config.enableTextFilter = false;
         component.config.viewType = ListViewTypes.CARD_ONLY;
@@ -168,9 +178,9 @@ describe('ListComponent', () => {
           expect(hasControls).toBeFalsy();
         });
 
-      }));
+      });
 
-      it('Everything enabled', async(() => {
+      it('Everything enabled', () => {
         component.config.getMultiFiltersConfigs = () => {
           return [
             {
@@ -225,7 +235,7 @@ describe('ListComponent', () => {
         // sort - hard to test for sort, as it relies on
         // const sortSection: HTMLElement = headerRightSection.querySelector('.sort');
         // expect(sortSection.hidden).toBeFalsy();
-      }));
+      });
 
       it('First filter hidden if only one option', async(() => {
         component.config.getMultiFiltersConfigs = () => {
@@ -273,7 +283,7 @@ describe('ListComponent', () => {
     });
 
 
-    it('No rows', async(() => {
+    it('No rows', () => {
       fixture.detectChanges();
 
       const hostElement = fixture.nativeElement;
@@ -285,7 +295,7 @@ describe('ListComponent', () => {
       // Shows empty message
       const noEntriesMessage: HTMLElement = hostElement.querySelector('.list-component__default-no-entries');
       expect(noEntriesMessage.hidden).toBeFalsy();
-    }));
+    });
 
   });
 
