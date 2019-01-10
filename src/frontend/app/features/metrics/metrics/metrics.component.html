@@ -33,7 +33,7 @@
               <div>{{ svc.name }}</div>
               <div>{{ ep.metadata[svc.guid].type }}</div>
               <app-metadata-item icon="link" label="Address">{{ svc.url }}</app-metadata-item>
-              <app-metadata-item icon="history" label="Promethues Job">{{ svc.metadata.metrics_job || 'N/A' }}</app-metadata-item>
+              <app-metadata-item icon="history" label="Prometheus Job">{{ svc.metadata.metrics_job || 'N/A' }}</app-metadata-item>
               <div class="metrics-extra" *ngIf="svc.metadata && svc.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
                 <div *ngIf="jobDetails[svc.metadata.metrics_job]">
                   <app-metadata-item icon="help_outline" label="Exporter Health">{{

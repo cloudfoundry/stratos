@@ -1,0 +1,2 @@
+<ng-container *ngIf="servicePlan">{{ servicePlan.entity.public ? 'Yes' : 'No'}}</ng-container>
+<span *ngIf="(planAccessibility$ | async) !== 'ok'"> ({{ planAccessibilityMessage$ | async }})</span>

@@ -1,8 +1,17 @@
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 
-import { StratosEndpointMetadata } from '../../core/extension/extension-service';
 import { urlValidationExpression } from '../../core/utils.service';
-import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
+import { AppState } from '../../store/app-state';
+import { endpointSchemaKey } from '../../store/helpers/entity-factory';
+import { selectEntities } from '../../store/selectors/api.selectors';
+import { EndpointModel } from './../../store/types/endpoint.types';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { EndpointType, EndpointAuthTypeConfig, EndpointTypeConfig } from '../../core/extension/extension-types';
+import { ExtensionService } from '../../core/extension/extension-service';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -13,15 +22,6 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
-export interface EndpointTypeConfig {
-  value: EndpointType;
-  label: string;
-  urlValidation?: string;
-  allowTokenSharing?: boolean;
-  icon?: string;
-  iconFont?: string;
-  authTypes?: string[];
-}
 
 export interface EndpointIcon {
   name: string;
@@ -34,16 +34,18 @@ const endpointTypes: EndpointTypeConfig[] = [
     label: 'Cloud Foundry',
     urlValidation: urlValidationExpression,
     icon: 'cloud_foundry',
-    iconFont: 'stratos-icons'
+    iconFont: 'stratos-icons',
+    homeLink: (guid) => ['/cloud-foundry', guid]
   },
   {
     value: 'metrics',
     label: 'Metrics',
-    allowTokenSharing: true
+    allowTokenSharing: true,
+    homeLink: (guid) => ['/endpoints/metrics', guid]
   },
 ];
 
-const endpointAuthTypes = [
+let endpointAuthTypes: EndpointAuthTypeConfig[] = [
   {
     name: 'Username and Password',
     value: 'creds',
@@ -51,48 +53,15 @@ const endpointAuthTypes = [
       username: ['', Validators.required],
       password: ['', Validators.required],
     },
-    types: new Array<EndpointType>('cf', 'metrics')
-  },
-  {
-    name: 'CAASP (OIDC)',
-    value: 'kubeconfig',
-    form: {
-      kubeconfig: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
+    types: new Array<EndpointType>('cf', 'metrics'),
+    component: CredentialsAuthFormComponent
   },
   {
     name: 'Single Sign-On (SSO)',
     value: 'sso',
     form: {},
-    types: new Array<EndpointType>('cf')
-  },
-  {
-    name: 'Azure AKS',
-    value: 'kubeconfig-az',
-    form: {
-      kubeconfig: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
-    name: 'AWS IAM (EKS)',
-    value: 'aws-iam',
-    form: {
-      cluster: ['', Validators.required],
-      access_key: ['', Validators.required],
-      secret_key: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
-  },
-  {
-    name: 'Kubernetes Cert Auth',
-    value: 'kube-cert-auth',
-    form: {
-      cert: ['', Validators.required],
-      certKey: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('k8s')
+    types: new Array<EndpointType>('cf'),
+    component: SSOAuthFormComponent
   },
 ];
 
@@ -107,18 +76,20 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
       epType.authTypes.forEach(authType => {
         const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
         if (endpointAuthType) {
-          // endpointAuthType.types.push(epType.type);
-          endpointAuthType.types.push(endpointAuthType.value); // TODO: RC Check this change
+          endpointAuthType.types.push(endpointAuthType.value as EndpointType);
         }
       });
     }
   });
 
-  // TODO: Sort alphabetically
-
   endpointTypes.forEach(ept => {
     endpointTypesMap[ept.value] = ept;
   });
+}
+
+export function addEndpointAuthTypes(extensions: EndpointAuthTypeConfig[]) {
+  endpointAuthTypes.forEach(t => t.formType = t.value);
+  endpointAuthTypes = endpointAuthTypes.concat(extensions);
 }
 
 // Get the name to display for a given Endpoint type
@@ -148,6 +119,20 @@ export function getIconForEndpoint(type: string): EndpointIcon {
   return icon;
 }
 
+export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
+  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+    first(),
+    map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
+  );
+}
+
 export function getEndpointAuthTypes() {
   return endpointAuthTypes;
+}
+
+export function initEndpointExtensions(extService: ExtensionService) {
+  // Register auth types before applying endpoint types
+  const endpointExtConfig = extService.getEndpointExtensionConfig();
+  addEndpointAuthTypes(endpointExtConfig.authTypes || []);
+  initEndpointTypes(endpointExtConfig.endpointTypes || []);
 }

@@ -148,7 +148,7 @@ export class E2EHelpers {
       });
   }
 
-  scrollIntoView(element) {
+  scrollIntoView(element: ElementFinder) {
     return browser.controlFlow().execute(() => {
       browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
     });
@@ -161,7 +161,7 @@ export class E2EHelpers {
   }
 
   // Cloud Foundry
-  getCustomerOrgSpaceLabel(isoTime, orgSpace) {
+  getCustomOrgSpaceLabel(isoTime, orgSpace) {
     return E2EHelpers.customOrgSpaceLabel + '.' + orgSpace + '.' + (isoTime || (new Date()).toISOString());
   }
 

@@ -1,3 +1,4 @@
+import { CustomImportModule } from './../../../custom-import.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApplicationDeleteComponent } from './application-delete.component';
@@ -27,8 +28,11 @@ describe('ApplicationDeleteComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
       ]
-    })
-      .compileComponents();
+    }).overrideModule(ApplicationsModule, {
+      remove: {
+        imports: [CustomImportModule]
+      }
+    }).compileComponents();
   }));
 
   beforeEach(() => {

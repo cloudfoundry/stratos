@@ -46,10 +46,8 @@ export class CfSpacesListConfigService implements IListConfig<APIResource> {
 
   constructor(
     private store: Store<AppState>,
-    private cfOrgService: CloudFoundryOrganizationService,
-    private confirmDialog: ConfirmationDialogService
+    cfOrgService: CloudFoundryOrganizationService,
   ) {
-
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 

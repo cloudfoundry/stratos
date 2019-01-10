@@ -1,16 +1,11 @@
 <b>Select the service</b>
 <div class="select-service">
   <form class="stepper-form" [formGroup]="stepperForm">
-    <div class="select-service__select-wrapper">
-      <div class="select-service__select-wrapper__fields">
-        <mat-form-field>
-          <mat-select class="form-control" placeholder="Service" formControlName="service">
-            <mat-option *ngFor="let service of services$ | async" [value]="service.metadata.guid">{{ service.entity.label }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <app-cf-service-card disableCardClick="true" [row]="selectedService$ | async"></app-cf-service-card>
-      </div>
-      <mat-progress-spinner class="service-busy-indicator" diameter="20" [ngClass]="{'service-busy-indicator__show': isFetching$ | async}" mode="indeterminate"></mat-progress-spinner>
-    </div>
+    <mat-form-field>
+      <mat-select class="form-control" placeholder="Service" formControlName="service" [disabled]="isFetching$ | async">
+        <mat-option *ngFor="let service of services$ | async" [value]="service.metadata.guid">{{ service.entity.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <app-cf-service-card disableCardClick="true" [row]="selectedService$ | async"></app-cf-service-card>
   </form>
 </div>

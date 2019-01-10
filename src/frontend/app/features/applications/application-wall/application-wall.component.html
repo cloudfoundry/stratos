@@ -1,15 +1,13 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Applications</h1>
-  <div class="page-header-right">
-    <ng-container *ngIf="(haveConnectedCf$ | async)">
-      <ng-container *appUserPermission="canCreateApplication">
-        <button id="appwall-create-application" mat-icon-button [routerLink]="'/applications/new/'">
-          <mat-icon>add</mat-icon>
-        </button>
-        <button id="appwall-deploy-application" mat-icon-button [routerLink]="'/applications/deploy/'">
-          <mat-icon>file_upload</mat-icon>
-        </button>
-      </ng-container>
+  <div *ngIf="haveConnectedCf$ | async" class="page-header-right">
+    <ng-container *appUserPermission="canCreateApplication">
+      <button id="appwall-create-application" mat-icon-button [routerLink]="'/applications/new/'">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button id="appwall-deploy-application" mat-icon-button [routerLink]="'/applications/deploy/'">
+        <mat-icon>file_upload</mat-icon>
+      </button>
     </ng-container>
   </div>
 </app-page-header>
@@ -27,5 +25,5 @@
   text: ''
 }"></app-no-content-message>
 </ng-template>
-<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
+<app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
 </app-list>

@@ -11,14 +11,30 @@ dbProvider: mysql
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
 imagePullPolicy: IfNotPresent
+# useLb is deprecated - use console.service.type
 useLb: false
 console:
-  port: 443
   cookieDomain:
+  # externalIP deprecated - use console.service.externalIPs
 # externalIP: 127.0.0.1
   backendLogLevel: info
   ssoLogin: false
   ssoOptions:
+
+  # Stratos Services
+  service:
+    annotations: []
+    externalIPs: []
+    loadBalancerIP:
+    loadBalancerSourceRanges: []
+    servicePort: 443
+    # nodePort: 30000
+    type: ClusterIP
+    externalName:
+    http:
+      enabled: false
+      servicePort: 80
+      # nodePort: 30001
 images:
   console: stratos-console
   proxy: stratos-jetstream

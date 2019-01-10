@@ -15,7 +15,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { SetDeployCommit } from '../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
-import { GithubCommit } from '../../../../store/types/github.types';
+import { GitCommit } from '../../../../store/types/git.types';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 
 @Component({
@@ -29,7 +29,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 export class DeployApplicationStep21Component {
 
   validate: Observable<boolean>;
-  selectedCommit$: Observable<APIResource<GithubCommit>>;
+  selectedCommit$: Observable<APIResource<GitCommit>>;
 
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;

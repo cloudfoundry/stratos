@@ -1,0 +1,115 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: image-tag
+- name: helm-repo
+image_resource:
+  type: docker-image
+  source:
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
+   tag: "latest"
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Initialize Helm for client-side use
+      helm init --client-only
+      ROOT_DIR=$PWD
+      STRATOS=${ROOT_DIR}/stratos
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
+      
+      HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
+      GIT_TAG=$(cat image-tag/v2-alpha-tag)
+      VERSION=$(cat image-tag/v2-version)
+      RELEASE_VERSION=$(cat image-tag/v2-tag)
+      COMMIT=$(cat image-tag/v2-commit)
+
+      HELM_REPOSITORY=${GITHUB_ORG}/${GITHUB_REPO}
+
+      cd stratos
+
+      # $VERSION is version number - e.g. 2.3.0
+      # Find the last tag created for this release tag
+      LAST_TAG=$(git tag --sort=creatordate | grep "$VERSION-" | awk '{a[i++]=$0} END {for (j=i-1; j>=0;) print a[j--] }' | head -n 1)
+      echo "Last tag: $LAST_TAG"
+
+      # Get the commit hash for this tag
+      LAST_TAG_COMMIT=$(git rev-list --abbrev-commit -n 1 ${LAST_TAG})
+
+      if [ "$COMMIT" != "$LAST_TAG_COMMIT" ]; then
+        echo "Can not make release - no release candidate published"
+        echo "The commit for the \"stable\" tag does not match that of the tag \"$LAST_TAG\""
+        #exit 1
+      fi
+
+      echo "Making release"
+
+      # Need to create the Helm chart
+
+      # Download the Helm chart form the last RC/Beta/Alpha - we'll modify it
+      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY}/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
+      echo $HELM_CHART_URL
+
+      mkdir tmp
+      cd tmp
+      wget -O console.tar.gz ${HELM_CHART_URL}
+      tar -xvf console.tar.gz
+      cat console/Chart.yaml
+      
+      sed -i -e 's/version: '"${LAST_TAG}"'/version: '"${VERSION}"'/g' console/Chart.yaml  
+      cat console/Chart.yaml
+
+      # Package modified Helm chart
+      HELM_FILE=console-helm-chart-${VERSION}-${COMMIT}.tgz
+      tar -cvzf ${HELM_FILE} ./console
+
+      # Set git username and password so that we can push changes
+      setupGitConfig
+
+      # Create tag for the release
+      git tag -f -a ${VERSION} -m "${VERSION}"
+      git push -f origin ${VERSION}
+
+      # Create a tag for the release and push the tag
+      # Check that the release exists
+      set +e
+      github-release info -t ${VERSION}
+      RETVAL=$?
+      set -e
+
+      # Delete the release if it already exists
+      if [ $RETVAL -eq 0 ]; then
+        github-release delete -t ${VERSION}
+      fi
+
+      cd ..
+
+      # Generate title for the release, based on the tag
+      # Sets RELEASE_TITLE and PRE_RELEASE_ARG
+      generateReleaseTitle ${VERSION}
+
+      echo "Release Title - ${RELEASE_TITLE}"
+      echo "Release Arg   - ${PRE_RELEASE_ARG}"
+
+      # Create new release
+      github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
+
+      # Upload Helm chart to release
+      github-release upload -t ${VERSION} --file ./tmp/${HELM_FILE} --name "${HELM_FILE}"
+
+      set +e
+
+      echo "RELEASE COMPLETE"
+      echo "Version      : ${VERSION}"
+      echo "Base Version : ${LAST_TAG}"
+      echo ""
+      #echo "Release created on GitHub: https://github.com/$"
+      echo "Helm Chart filename : ${HELM_FILE}"
+      echo "Helm Chart URL      : https://github.com/${HELM_REPOSITORY}/releases/download/${VERSION}/${HELM_FILE}"
+
+
+

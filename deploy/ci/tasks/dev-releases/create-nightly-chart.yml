@@ -8,8 +8,8 @@ outputs:
 image_resource:
   type: docker-image
   source:
-  # Generated using Dockerfile.stratos-helm
-   repository:  splatform/ci-stratos-helm
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
    tag: "latest"
 
 run:
@@ -17,8 +17,8 @@ run:
   args:
     - -xc
     - |
-
-      helm init || true
+      # Initialize Helm for client-side use
+      helm init --client-only
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
@@ -27,7 +27,7 @@ run:
       TAG=$(nightlyTag)
       IMAGE_TAG=${TAG}
       # Patch Helm chart
-      patchHelmChartDev ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      patchHelmChartDev ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console ${IMAGE_TAG} ${VERSION}
 
       # Generate Helm package
       updateHelmDependency

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -17,12 +16,11 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
@@ -97,12 +95,10 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private confirmDialog: ConfirmationDialogService,
-    private activatedRoute: ActivatedRoute,
+    activatedRoute: ActivatedRoute,
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
     const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
-      createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
     ]);

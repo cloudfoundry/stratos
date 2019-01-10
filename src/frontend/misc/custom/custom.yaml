@@ -5,8 +5,10 @@ files:
   favicon.ico: "favicon.ico"
   login-bg.jpg: "assets/login-bg.jpg"
   logo.png: "assets/logo.png"
+  nav-logo.png: "assets/nav-logo.png"
   eula.html: "assets/eula.html" 
 
 folders:
+  - "app/custom"
   - "assets/custom"
   - "sass/custom"

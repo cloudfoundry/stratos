@@ -181,6 +181,11 @@ describe('ListComponent', () => {
                   label: 'filterItemLabel',
                   item: 'filterItemItem',
                   value: 'filterItemValue'
+                },
+                {
+                  label: 'filterItemLabel2',
+                  item: 'filterItemItem2',
+                  value: 'filterItemValue2'
                 }
               ]),
               loading$: observableOf(false),
@@ -220,6 +225,50 @@ describe('ListComponent', () => {
         // sort - hard to test for sort, as it relies on
         // const sortSection: HTMLElement = headerRightSection.querySelector('.sort');
         // expect(sortSection.hidden).toBeFalsy();
+      }));
+
+      it('First filter hidden if only one option', async(() => {
+        component.config.getMultiFiltersConfigs = () => {
+          return [
+            {
+              key: 'filterTestKey',
+              label: 'filterTestLabel',
+              list$: observableOf([
+                {
+                  label: 'filterItemLabel',
+                  item: 'filterItemItem',
+                  value: 'filterItemValue'
+                },
+              ]),
+              loading$: observableOf(false),
+              select: new BehaviorSubject(false)
+            }
+          ];
+        };
+        component.config.enableTextFilter = true;
+        component.config.viewType = ListViewTypes.CARD_ONLY;
+        component.config.defaultView = 'card' as ListView;
+        component.config.cardComponent = EndpointCardComponent;
+        component.config.getColumns = () => [
+          {
+            columnId: 'filterTestKey',
+            headerCell: () => 'a',
+            cellDefinition: {
+              getValue: (row) => `${row}`
+            },
+            sort: true,
+          }
+        ];
+
+        fixture.detectChanges();
+
+        const hostElement = fixture.nativeElement;
+
+        // multi filters
+        const multiFilterSection: HTMLElement = hostElement.querySelector('.list-component__header__left--multi-filters');
+        expect(multiFilterSection.hidden).toBeFalsy();
+        expect(multiFilterSection.childElementCount).toBe(0);
+
       }));
     });
 

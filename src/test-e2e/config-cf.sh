@@ -36,6 +36,6 @@ cf target -s "dev"
 #cf passwd
 
 # Deploy Node env
-git clone https://github.com/irfanhabib/node-env
+git clone https://github.com/cf-stratos/node-env
 cd node-env
 cf push

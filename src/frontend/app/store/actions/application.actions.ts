@@ -179,7 +179,7 @@ export class DeleteApplicationInstance extends CFStartAction
   guid: string;
   constructor(
     public appGuid: string,
-    private index: number,
+    index: number,
     public endpointGuid: string
   ) {
     super();

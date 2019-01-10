@@ -25,6 +25,14 @@ import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
+export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
+  return new FetchApplicationMetricsAction(
+    appGuid,
+    cfGuid,
+    new MetricQueryConfig('firehose_container_metric_cpu_percentage'),
+    MetricQueryType.QUERY
+  );
+}
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -215,12 +223,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   getInitialised = () => this.initialised$;
 
   private createMetricsResults(entityServiceFactory: EntityServiceFactory) {
-    const metricsAction = new FetchApplicationMetricsAction(
-      this.appService.appGuid,
-      this.appService.cfGuid,
-      new MetricQueryConfig('firehose_container_metric_cpu_percentage'),
-      MetricQueryType.QUERY
-    );
+    const metricsAction = createAppInstancesMetricAction(this.appService.appGuid, this.appService.cfGuid);
     return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
       metricSchemaKey,
       entityFactory(metricSchemaKey),
@@ -229,5 +232,4 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       false
     );
   }
-
 }
