@@ -1,29 +1,32 @@
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { IDomain, IRoute } from '../../../core/cf-api.types';
+import { APIResource } from '../../../store/types/api.types';
 
-export const isTCPRoute = (route: APIResource) => route.entity.port !== null && route.entity.port !== '';
+export const isTCPRoute = (port: string) => port !== null && port !== '';
 
 export interface Domain {
   name: string;
 }
+/**
+ * Create a url from a route. Note - Called from both IRoute and IAppSummaryRoute sources
+ */
 export const getRoute = (
-  route: APIResource,
+  routePort: any,
+  routeHost: string,
+  routePath: string,
   browsable: boolean = false,
   secure: boolean = false,
-  domain: EntityInfo
+  domain: string
 ) => {
-  if (!route) {
-    return;
-  }
   let protocol = '';
   if (browsable) {
     protocol = secure ? 'https://' : 'http://';
   }
-  if (route.entity.port) {
+  if (routePort) {
     // Note: Hostname and path are not supported for TCP routes
-    return `${protocol}${domain.entity.name}:${route.entity.port}`;
+    return `${protocol}${domain}:${routePort}`;
   }
-  const path = route.entity.path && route.entity.path.length && route.entity.path[0] !== `/` ? `/${route.entity.path}` : route.entity.path;
-  return `${protocol}${route.entity.host}.${domain.entity.name}${path}`;
+  const path = routePath && routePath.length && routePath[0] !== `/` ? `/${routePath}` : routePath;
+  return `${protocol}${routeHost}.${domain}${path}`;
 };
 
 export const getMappedApps = (route: APIResource): APIResource[] => {

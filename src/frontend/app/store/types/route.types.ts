@@ -14,6 +14,7 @@ export class Route {
 export interface RouteMode {
   id: string;
   label: string;
+  submitLabel: string;
 }
 
 

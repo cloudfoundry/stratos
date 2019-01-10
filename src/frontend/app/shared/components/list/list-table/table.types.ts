@@ -27,6 +27,7 @@ export interface ICellDefinition<T> {
   getAsyncLink?: (value) => string;
   newTab?: boolean;
   asyncValue?: ICellAsyncValue;
+  showShortLink?: boolean;
 }
 
 export type CellConfigFunction<T> = (row: T) => any;
@@ -47,6 +48,7 @@ export interface ITableText {
   title?: string;
   filter?: string;
   noEntries?: string;
+  maxedResults?: string;
 }
 
 export const listTableComponents = [

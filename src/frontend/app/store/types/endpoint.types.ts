@@ -2,6 +2,7 @@ import { ScopeStrings } from '../../core/current-user-permissions.config';
 import { MetricsAPITargets } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { EndpointType } from '../../core/extension/extension-types';
 
 export interface INewlyConnectedEndpointInfo {
   account: string;
@@ -44,6 +45,7 @@ export interface EndpointModel {
   metadata?: {
     metrics?: string;
     metrics_job?: string;
+    metrics_environment?: string;
     metrics_targets?: MetricsAPITargets;
   };
   system_shared_token: boolean;
@@ -69,10 +71,6 @@ export interface EndpointState {
   error: boolean;
   message: string;
 }
-
-// If we support more endpoint types in future, this type should be extended
-// We defined the build-in endpoints and allow for custom ones via any string
-export type EndpointType = 'cf' | 'metrics' | 'k8s' | string;
 
 export interface StateUpdateAction {
   type: string;

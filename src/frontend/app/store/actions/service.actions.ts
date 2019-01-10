@@ -2,11 +2,11 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { entityFactory, servicePlanSchemaKey, serviceSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
-import { PaginationAction } from '../types/pagination.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
-export class GetAllServices extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
     public endpointGuid: string = null,
@@ -31,6 +31,7 @@ export class GetAllServices extends CFStartAction implements PaginationAction, E
     'order-direction': 'desc',
     'order-direction-field': 'label',
   };
+  flattenPagination = true;
 }
 export class GetService extends CFStartAction implements EntityInlineParentAction {
   constructor(
@@ -53,7 +54,7 @@ export class GetService extends CFStartAction implements EntityInlineParentActio
   options: RequestOptions;
 }
 
-export class GetServicePlansForService extends CFStartAction implements PaginationAction {
+export class GetServicePlansForService extends CFStartAction implements PaginatedAction {
   constructor(
     public serviceGuid: string,
     public endpointGuid: string,
@@ -77,7 +78,7 @@ export class GetServicePlansForService extends CFStartAction implements Paginati
     page: 1,
     'results-per-page': 100,
     'order-direction': 'desc',
-    'order-direction-field': 'creation',
+    'order-direction-field': 'name',
   };
   flattenPagination = true;
 }

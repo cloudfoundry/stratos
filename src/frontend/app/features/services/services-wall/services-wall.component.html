@@ -1,10 +1,12 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Services</h1>
   <div class="page-header-right">
-    <ng-container *appUserPermission="canCreateServiceInstance">
-      <button mat-icon-button [routerLink]="'/services/new/'">
-      <mat-icon>add</mat-icon>
-    </button>
+    <ng-container *ngIf="(haveConnectedCf$ | async)">
+      <ng-container *appUserPermission="canCreateServiceInstance">
+        <button mat-icon-button [routerLink]="'/services/new/'">
+          <mat-icon>add</mat-icon>
+        </button>
+      </ng-container>
     </ng-container>
   </div>
 </app-page-header>

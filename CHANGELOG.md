@@ -2,10 +2,9 @@
 
 ## 2.2.0
 
-[Full Changelog](https://github.com/suse/stratos/compare/2.1.2...2.2.0)
-This release concentrates on Kubernetes and Metrics integration. Information regarding Kubernetes, such as pods, namespaces, etc, can be discovered by registering and connecting to it as a Stratos `Endpoint`. Similarly by registering and connecting a new `Metrics` endpoint Kubernetes pod charts can be viewed. For more information about the Stratos Metrics component, including how to deploy one, please see [Stratos Metrics](https://github.com/SUSE/stratos-metrics).
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.2...2.2.0)
 
-This release also contains a number of fixes and improvements. It introduces the first set of Extension points to allow
+This release contains a number of fixes and improvements. It introduces the first set of Extension points to allow
 users to take Stratos and extend it with new functionality. Initial documentation is available [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/docs/extensions.md). Additionally, when a metrics endpoint is connected, Cloud Foundry cell information is now shown in the Application Instances tab. A Cloud Foundry cells table and Cell summary pages have also been added to the Cloud Foundry section.
 
 **Fixes:**

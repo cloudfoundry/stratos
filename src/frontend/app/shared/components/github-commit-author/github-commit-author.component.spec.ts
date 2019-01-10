@@ -18,7 +18,6 @@ describe('GithubCommitAuthorComponent', () => {
     component = fixture.componentInstance;
     component.commit = {
       sha: '',
-      url: '',
       commit: {
         author: {
           name: 'author_name',

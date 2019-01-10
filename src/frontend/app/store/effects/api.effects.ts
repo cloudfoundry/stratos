@@ -17,7 +17,7 @@ import {
   getRequestTypeFromMethod,
   startApiRequest,
 } from '../reducers/api-request-reducer/request-helpers';
-import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
+import { qParamKeyFromString, qParamToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
@@ -30,6 +30,7 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { isJetStreamError } from '../../core/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -40,14 +41,6 @@ interface APIErrorCheck {
   guid: string;
   url: string;
   errorResponse?: JetStreamCFErrorResponse;
-}
-
-interface JetStreamError {
-  error: {
-    status: string;
-    statusCode: number;
-  };
-  errorResponse: JetStreamCFErrorResponse;
 }
 
 interface JetStreamCFErrorResponse {
@@ -143,9 +136,16 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
+      if (paginatedAction.flattenPaginationMax < (paginatedAction.initialParams['results-per-page'] || 100)) {
+        throw new Error(`Action cannot contain a maximum amount of results smaller than the page size: ${JSON.stringify(paginatedAction)}`);
+      }
       request = flattenPagination(
+        this.store,
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
+        paginatedAction.flattenPaginationMax,
+        paginatedAction.entityKey,
+        paginatedAction.paginationKey
       );
     }
 
@@ -235,6 +235,19 @@ export class APIEffect {
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
         const endpointIds: string[] = endpointString.split(',');
+        endpointIds.forEach(endpoint =>
+          this.store.dispatch(
+            new SendEventAction(endpointSchemaKey, endpoint, {
+              eventCode: error.status ? error.status + '' : '500',
+              severity: InternalEventSeverity.ERROR,
+              message: 'Jetstream API request error',
+              metadata: {
+                error,
+                url: error.url || apiAction.options.url,
+              },
+            }),
+          ),
+        );
         const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
           endpointIds,
           url: error.url || apiAction.options.url,
@@ -317,19 +330,19 @@ export class APIEffect {
     }
     return Object.keys(resData).map(cfGuid => {
       // Return list of guid+error objects for those endpoints with errors
-      const endpoint = resData ? (resData[cfGuid] as JetStreamError) : null;
-      const succeeded = !endpoint || !endpoint.error;
+      const jetStreamError = isJetStreamError(resData ? resData[cfGuid] : null);
+      const succeeded = !jetStreamError || !jetStreamError.error;
       const errorCode =
-        endpoint && endpoint.error
-          ? endpoint.error.statusCode.toString()
+        jetStreamError && jetStreamError.error
+          ? jetStreamError.error.statusCode.toString()
           : '500';
       let errorResponse = null;
       if (!succeeded) {
         errorResponse =
-          endpoint &&
-            (!!endpoint.errorResponse &&
-              typeof endpoint.errorResponse !== 'string')
-            ? endpoint.errorResponse
+          jetStreamError &&
+            (!!jetStreamError.errorResponse &&
+              typeof jetStreamError.errorResponse !== 'string')
+            ? jetStreamError.errorResponse
             : ({} as JetStreamCFErrorResponse);
         // Use defaults if values are not provided
         errorResponse.code = errorResponse.code || 0;
@@ -369,10 +382,10 @@ export class APIEffect {
     data,
     errorCheck: APIErrorCheck[],
   ): {
-      entities: NormalizedResponse;
-      totalResults: number;
-      totalPages: number;
-    } {
+    entities: NormalizedResponse;
+    totalResults: number;
+    totalPages: number;
+  } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
@@ -473,6 +486,9 @@ export class APIEffect {
     return paginationState
       ? {
         ...paginationState.params,
+        q: [
+          ...(paginationState.params.q || [])
+        ],
         page: paginationState.currentPage.toString(),
       }
       : {};
@@ -496,12 +512,12 @@ export class APIEffect {
     resData,
     apiAction: IRequestAction,
   ): {
-      resData;
-      entities;
-      totalResults;
-      totalPages;
-      errorsCheck: APIErrorCheck[];
-    } {
+    resData;
+    entities;
+    totalResults;
+    totalPages;
+    errorsCheck: APIErrorCheck[];
+  } {
     const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
@@ -551,14 +567,31 @@ export class APIEffect {
 
   private setRequestParams(
     requestParams: URLSearchParams,
-    params: { [key: string]: any },
+    params: PaginationParam,
   ) {
     if (params.hasOwnProperty('q')) {
-      // Convert q into a cf q string
-      params.qString = qParamsToString(params.q);
-      for (const q of params.qString) {
-        requestParams.append('q', q);
-      }
+      // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
+      // be overwritten in `params`
+
+      // Clear `requestParams` `q` and start afresh
+      const initialQParams = requestParams.getAll('q');
+      requestParams.delete('q');
+
+      // Loop through all the NEW params that we wish to keep
+      params.q.forEach(qParam => {
+        // Add new param we wish to keep
+        requestParams.append('q', qParamToString(qParam));
+        // Remove any initial params that have been `overwritten`. This won't be added again later on
+        const haveInitialParam = initialQParams.findIndex(qParamStr => qParam.key === qParamKeyFromString(qParamStr));
+        if (haveInitialParam >= 0) {
+          initialQParams.splice(haveInitialParam, 1);
+        }
+      });
+
+      // Add the rest of the initial params
+      initialQParams.forEach(qParamStr => requestParams.append('q', qParamStr));
+
+      // Remove from q from `params` so it's not added again below
       delete params.qString;
       delete params.q;
     }
@@ -572,4 +605,5 @@ export class APIEffect {
   private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
     return requestType === 'delete' && !apiAction.updatingKey;
   }
+
 }

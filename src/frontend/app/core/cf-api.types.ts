@@ -21,6 +21,17 @@ export interface IRoute {
   cfGuid?: string;
 }
 
+/**
+ * Different routes interface to cover the non-standard entity returned from a app summary request
+ */
+export interface IAppSummaryRoute {
+  domain: IDomain;
+  guid: string;
+  host: string;
+  path: string;
+  port?: any;
+}
+
 export interface ISpace {
   name: string;
   organization_guid: string;
@@ -240,6 +251,7 @@ export interface IQuotaDefinition {
   total_services?: number;
   total_routes?: number;
   total_private_domains?: number;
+  non_basic_services_allowed?: boolean;
 }
 
 export interface IUpdateSpace {
@@ -264,7 +276,7 @@ export interface IUpdateOrganization {
 export interface IAppSummary {
   guid: string;
   name: string;
-  routes: APIResource<IRoute>[];
+  routes: APIResource<IAppSummaryRoute>[];
   running_instances: number;
   services: IService[];
   available_domains: IDomain[];

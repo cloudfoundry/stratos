@@ -1,6 +1,6 @@
 <app-meta-card *ngIf="serviceInstanceEntity" class="app-service-card" [actionMenu]="cardMenu" [entityConfig]="entityConfig">
   <app-meta-card-title>
-    <div class="app-service-card__title">{{ serviceInstanceEntity.entity.name }}</div>
+    <app-multiline-title class="service-instance-card__title">{{ serviceInstanceEntity.entity.name }}</app-multiline-title>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Space</app-meta-card-key>

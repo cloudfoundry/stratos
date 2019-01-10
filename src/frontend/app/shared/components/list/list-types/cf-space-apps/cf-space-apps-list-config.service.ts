@@ -31,11 +31,6 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       columnId: 'apps', headerCell: () => 'Applications',
       cellComponent: TableCellAppNameComponent,
       cellFlex: '1',
-      sort: {
-        type: 'sort',
-        orderKey: 'apps',
-        field: 'entity.name'
-      }
     },
     {
       columnId: 'status',
@@ -46,6 +41,14 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
         initialStateOnly: true
       },
       cellComponent: TableCellAppStatusComponent
+    },
+    {
+      columnId: 'instances',
+      headerCell: () => 'Instances',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${row.entity.instances}`
+      },
+      cellFlex: '1'
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
@@ -59,19 +62,6 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       },
       cellFlex: '2'
     },
-    {
-      columnId: 'instances',
-      headerCell: () => 'Instances',
-      cellDefinition: {
-        getValue: (row: APIResource) => `${row.entity.instances}`
-      },
-      cellFlex: '1', sort: {
-        type: 'sort',
-        orderKey: 'instances',
-        field: 'entity.instances'
-      }
-    },
-
   ]
 
   constructor(

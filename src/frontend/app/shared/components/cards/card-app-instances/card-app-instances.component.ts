@@ -1,13 +1,13 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Observable, Subscription } from 'rxjs';
-import { map, first, tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
+import { CardStatus } from '../../../shared.types';
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
-import { CardStatus } from './../../application-state/application-state.service';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
@@ -38,8 +38,8 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     );
   }
 
-  private currentCount: 0;
-  public editCount: 0;
+  private currentCount = 0;
+  public editCount = 0;
 
   private sub: Subscription;
 

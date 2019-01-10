@@ -19,6 +19,8 @@ import { RunningInstancesComponent } from '../../../running-instances/running-in
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { EventTabActorIconPipe } from '../../list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { listTableCells, TableCellComponent } from './table-cell.component';
+import { ServicePlanPublicComponent } from '../../../service-plan-public/service-plan-public.component';
+import { ServicePlanPriceComponent } from '../../../service-plan-price/service-plan-price.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -41,7 +43,9 @@ describe('TableCellComponent', () => {
         AppChipsComponent,
         BooleanIndicatorComponent,
         CfRoleCheckboxComponent,
-        GithubCommitAuthorComponent
+        GithubCommitAuthorComponent,
+        ServicePlanPriceComponent,
+        ServicePlanPublicComponent
       ],
       imports: [
         CoreModule

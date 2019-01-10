@@ -1,5 +1,3 @@
-import { browser } from 'protractor';
-
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
