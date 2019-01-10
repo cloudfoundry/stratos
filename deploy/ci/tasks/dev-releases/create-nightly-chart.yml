@@ -29,11 +29,17 @@ run:
       # Patch Helm chart
       patchHelmChartDev ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console ${IMAGE_TAG} ${VERSION}
 
+      echo ${IMAGE_TAG}
+      echo ${TAG}
+      
       # Generate Helm package
       updateHelmDependency
       helm package console
+      pwd
+      ls -al
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
+      ls -al
       INDEX_FILE=${HELM_REPO}/index.yaml
       CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
       if [ -f ${INDEX_FILE} ]; then
