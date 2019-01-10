@@ -38,13 +38,12 @@ export class TableCellRouteAppsAttachedComponent implements OnInit {
             url: {
               link: `/applications/${app.entity.cfGuid}/${app.metadata.guid}`,
               params: {
-                breadcrumbs: config.breadcrumbs
+                breadcrumbs: config ? config.breadcrumbs : null
               },
             }
           };
         }) : [];
-      }),
-      first()
+      })
     );
   }
 }

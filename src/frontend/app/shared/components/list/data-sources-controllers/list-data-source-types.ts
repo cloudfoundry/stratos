@@ -88,7 +88,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
    */
   getFilterFromParams(pag: PaginationEntityState): string;
   /**
-   * Set's data source specific multi filter properties
+   * Set's data source specific multi filter properties. Only applicable in maxedResult world
    */
   setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam);
   refresh();

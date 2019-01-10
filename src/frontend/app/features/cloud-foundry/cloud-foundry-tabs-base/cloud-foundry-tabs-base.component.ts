@@ -64,6 +64,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         label: 'Cells',
         hidden: cellsHidden$
       },
+      { link: 'routes', label: 'Routes' },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',

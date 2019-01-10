@@ -92,6 +92,7 @@ import {
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { CustomImportModule } from '../../custom-import.module';
+import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 
 @NgModule({
   imports: [
@@ -143,6 +144,7 @@ import { CustomImportModule } from '../../custom-import.module';
     SpaceRolesListWrapperComponent,
     UsersRolesSelectComponent,
     UsersRolesConfirmComponent,
+    CloudFoundryRoutesComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

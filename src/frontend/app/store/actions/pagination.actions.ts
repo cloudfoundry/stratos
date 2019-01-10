@@ -31,7 +31,7 @@ export class ClearPaginationOfType implements Action {
 }
 
 export class ClearPaginationOfEntity implements Action {
-  constructor(public entityKey: string, public entityGuid) {
+  constructor(public entityKey: string, public entityGuid, public paginationKey?: string) {
   }
   type = CLEAR_PAGINATION_OF_ENTITY;
 }
