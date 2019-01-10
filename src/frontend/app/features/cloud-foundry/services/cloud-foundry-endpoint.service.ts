@@ -60,6 +60,7 @@ export class CloudFoundryEndpointService {
   paginationSubscription: any;
   allApps$: Observable<APIResource<IApp>[]>;
   hasAllApps$: Observable<boolean>;
+  loadingApps$: Observable<boolean>;
   totalApps$: Observable<number>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
@@ -72,6 +73,8 @@ export class CloudFoundryEndpointService {
   cfGuid: string;
 
   getAllOrgsAction: GetAllOrganizations;
+
+  private getAllAppsAction: GetAllApplications;
 
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
@@ -100,12 +103,7 @@ export class CloudFoundryEndpointService {
       ]);
   }
 
-  public static fetchAppCount(
-    store: Store<AppState>,
-    pmf: PaginationMonitorFactory,
-    cfGuid: string,
-    orgGuid?: string,
-    spaceGuid?: string)
+  public static fetchAppCount(store: Store<AppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
     : Observable<number> {
     const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
@@ -127,11 +125,11 @@ export class CloudFoundryEndpointService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
     private pmf: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
+    this.getAllAppsAction = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       endpointSchemaKey,
@@ -150,7 +148,6 @@ export class CloudFoundryEndpointService {
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();
-
   }
 
   private constructCoreObservables() {
@@ -159,7 +156,7 @@ export class CloudFoundryEndpointService {
     this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
       store: this.store,
       action: this.getAllOrgsAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
+      paginationMonitor: this.pmf.create(
         this.getAllOrgsAction.paginationKey,
         entityFactory(organizationSchemaKey)
       )
@@ -175,18 +172,23 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObservables() {
-    const action = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
     const pagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
-      action,
-      paginationMonitor: this.pmf.create(action.paginationKey, entityFactory(action.entityKey))
+      action: this.getAllAppsAction,
+      paginationMonitor: this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey))
     });
 
     this.allApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
       switchMap(() => pagObs.pagination$),
       filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
       switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$)
+    );
+
+    this.loadingApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
+      switchMap(() => pagObs.pagination$),
+      filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[pagination.currentPage]),
+      map(pagination => pagination.pageRequests[pagination.currentPage].busy)
     );
 
     this.hasAllApps$ = this.allApps$.pipe(
@@ -199,7 +201,6 @@ export class CloudFoundryEndpointService {
   }
 
   private constructSecondaryObservable() {
-
     this.hasSSHAccess$ = this.info$.pipe(
       map(p => !!(p.entity.entity &&
         p.entity.entity.app_ssh_endpoint &&
@@ -213,24 +214,19 @@ export class CloudFoundryEndpointService {
     );
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
-
   }
 
-  public getAppsInOrgViaAllApps(
-    org: APIResource<IOrganization>
-  ): Observable<APIResource<IApp>[]> {
-    return org.entity.spaces ? this.allApps$.pipe(
+  public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
+    return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
         const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
         return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
-    ) : observableOf([]);
+    );
   }
 
-  public getAppsInSpaceViaAllApps(
-    space: APIResource<ISpace>
-  ): Observable<APIResource<IApp>[]> {
+  public getAppsInSpaceViaAllApps(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(apps => {
@@ -239,10 +235,7 @@ export class CloudFoundryEndpointService {
     );
   }
 
-  public getMetricFromApps(
-    apps: APIResource<IApp>[],
-    statMetric: string
-  ): number {
+  public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
@@ -255,7 +248,7 @@ export class CloudFoundryEndpointService {
       {
         store: this.store,
         action,
-        paginationMonitor: this.paginationMonitorFactory.create(
+        paginationMonitor: this.pmf.create(
           action.paginationKey,
           entityFactory(domainSchemaKey)
         )
@@ -266,5 +259,9 @@ export class CloudFoundryEndpointService {
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {
     this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
+  }
+
+  fetchApps() {
+    this.store.dispatch(this.getAllAppsAction);
   }
 }

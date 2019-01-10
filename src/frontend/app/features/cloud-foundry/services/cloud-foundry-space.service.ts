@@ -49,6 +49,7 @@ export class CloudFoundrySpaceService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   appCount$: Observable<number>;
+  loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   allSpaceUsers$: Observable<APIResource<CfUser>[]>;
   usersPaginationKey: string;
@@ -68,6 +69,10 @@ export class CloudFoundrySpaceService {
     this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
 
     this.initialiseObservables();
+  }
+
+  public fetchApps() {
+    this.cfEndpointService.fetchApps();
   }
 
   private initialiseObservables() {
@@ -158,10 +163,11 @@ export class CloudFoundrySpaceService {
       map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
     );
 
-
     this.appCount$ = this.cfEndpointService.hasAllApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
+
+    this.loadingApps$ = this.cfEndpointService.loadingApps$;
   }
 
   private countExistingApps(): Observable<number> {

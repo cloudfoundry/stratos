@@ -22,7 +22,7 @@
       </app-tile-group>
       <app-tile-group>
         <app-tile>
-          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfEndpointService.allApps$"></app-card-cf-recent-apps>
+          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfEndpointService.allApps$" [loading$]="cfEndpointService.loadingApps$" (refresh)="cfEndpointService.fetchApps()"></app-card-cf-recent-apps>
         </app-tile>
       </app-tile-group>
     </app-loading-page>

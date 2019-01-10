@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap, startWith } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
@@ -62,6 +62,7 @@ export class CloudFoundryOrganizationService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   appCount$: Observable<number>;
+  loadingApps$: Observable<boolean>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   allOrgUsers$: Observable<APIResource<CfUser>[]>;
   usersPaginationKey: string;
@@ -83,6 +84,10 @@ export class CloudFoundryOrganizationService {
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
     this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
+  }
+
+  public fetchApps() {
+    this.cfEndpointService.fetchApps();
   }
 
   private initialiseObservables() {
@@ -151,6 +156,8 @@ export class CloudFoundryOrganizationService {
     this.appCount$ = this.cfEndpointService.hasAllApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
+
+    this.loadingApps$ = this.cfEndpointService.loadingApps$;
   }
 
   private countExistingApps(): Observable<number> {
