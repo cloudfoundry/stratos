@@ -8,8 +8,8 @@
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
-    <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title' ">
-      <div class="meta-card__header-container__title__content">
+    <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
+      <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
         <ng-container *ngTemplateOutlet="title.content"></ng-container>
       </div>
       <div class="meta-card__header-container__title--with-icon__icon" *ngIf="statusIconByTitle">
