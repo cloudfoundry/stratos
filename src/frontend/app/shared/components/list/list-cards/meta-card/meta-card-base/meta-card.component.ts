@@ -42,6 +42,7 @@ export class MetaCardComponent {
 
   userFavoriteManager: UserFavoriteManager;
 
+  @Input()
   statusIcon = true;
   @Input()
   statusIconByTitle = false;

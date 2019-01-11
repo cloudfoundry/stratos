@@ -1,8 +1,8 @@
-import { UserFavorite } from '../../../store/types/user-favorites.types';
-import { IFavoriteTypeInfo } from '../../../store/types/user-favorites.types';
 import { Observable } from 'rxjs';
-import { CardStatus } from '../application-state/application-state.service';
+
 import { IRequestAction } from '../../../store/types/request.types';
+import { IFavoriteTypeInfo, UserFavorite } from '../../../store/types/user-favorites.types';
+import { CardStatus } from '../../shared.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 
 /**

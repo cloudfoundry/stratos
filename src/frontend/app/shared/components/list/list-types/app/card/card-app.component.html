@@ -1,5 +1,4 @@
-<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$"
-  [entityConfig]="entityConfig" [favorite]="favorite">
+<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$" [entityConfig]="entityConfig" [favorite]="favorite" [statusIcon]="false">
   <app-meta-card-title>
     <app-multiline-title>{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>

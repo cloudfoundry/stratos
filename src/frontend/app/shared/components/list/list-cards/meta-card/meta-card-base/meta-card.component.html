@@ -13,7 +13,7 @@
         <ng-container *ngTemplateOutlet="title.content"></ng-container>
       </div>
       <div class="meta-card__header-container__title--with-icon__icon" *ngIf="statusIconByTitle">
-        <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+        <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
       </div>
     </div>
     <app-entity-favorite-star class="meta-card__favorite" *ngIf="favorite" [favorite]="favorite">
@@ -32,7 +32,7 @@
       </mat-menu>
     </div>
     <ng-container *ngIf="!statusIconByTitle">
-      <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+      <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
     </ng-container>
   </mat-card-header>
   <mat-card-content>
@@ -43,6 +43,6 @@
     </div>
   </mat-card-content>
 </mat-card>
-<ng-template #statusIcon>
-  <app-application-state-icon *ngIf="!favorite && statusIcon && status$" [status]="status$ | async" matTooltip="{{statusIconTooltip}}"></app-application-state-icon>
+<ng-template #statusIconTmple>
+  <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async" matTooltip="{{statusIconTooltip}}"></app-application-state-icon>
 </ng-template>

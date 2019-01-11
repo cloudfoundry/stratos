@@ -1,16 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
-import { Observable, isObservable, of as observableOf } from 'rxjs';
-import { CardStatus } from '../application-state/application-state.service';
-import { UserFavorite } from '../../../store/types/user-favorites.types';
-import { AppState } from '../../../store/app-state';
 import { Store } from '@ngrx/store';
+import { isObservable, Observable, of as observableOf } from 'rxjs';
+
+import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
-import { ComponentEntityMonitorConfig } from '../../shared.types';
+import { AppState } from '../../../store/app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
+import { UserFavorite } from '../../../store/types/user-favorites.types';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
 @Component({
   selector: 'app-favorites-meta-card',
