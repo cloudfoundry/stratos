@@ -28,7 +28,7 @@ describe('Application Routes -', () => {
       const defaultCf = e2e.secrets.getDefaultCFEndpoint();
       // Only available until after `info` call has completed as part of setup
       cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-      applicationE2eHelper.createApp(
+      return applicationE2eHelper.createApp(
         cfGuid,
         e2e.secrets.getDefaultCFEndpoint().testOrg,
         e2e.secrets.getDefaultCFEndpoint().testSpace,
@@ -150,6 +150,7 @@ describe('Application Routes -', () => {
     mapExistingRoutesList.header.getRefreshListButton().click();
 
     // Find the row index of the route that's just been unbound
+    mapExistingRoutesList.header.setSearchText(routeHostName);
     const rowIndexP = mapExistingRoutesList.table.getTableData().then(rows =>
       rows.findIndex(row => row['route'].startsWith(routeHostName, 7) && row['route'].endsWith('/' + routePath))
     );
