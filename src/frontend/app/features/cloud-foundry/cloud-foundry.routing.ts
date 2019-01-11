@@ -69,6 +69,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
 import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
 import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import { StratosActionType } from '../../core/extension/extension-service';
+import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 
 /* tslint:enable:max-line-length */
 const usersRoles = [
@@ -180,6 +181,10 @@ const cloudFoundry: Routes = [{
             {
               path: 'security-groups',
               component: CloudFoundrySecurityGroupsComponent
+            },
+            {
+              path: 'routes',
+              component: CloudFoundryRoutesComponent
             },
             {
               path: '**',

@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
@@ -33,19 +33,23 @@ import { createGetApplicationAction } from '../../application.service';
 @Component({
   selector: 'app-create-application-step3',
   templateUrl: './create-application-step3.component.html',
-  styleUrls: ['./create-application-step3.component.scss']
+  styleUrls: ['./create-application-step3.component.scss'],
+  providers: [
+    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+  ]
 })
 export class CreateApplicationStep3Component implements OnInit {
 
-  constructor(private store: Store<AppState>, private router: Router, private entityServiceFactory: EntityServiceFactory) { }
+  setDomainHost: FormGroup;
 
-  @ViewChild('form')
-  form: NgForm;
-
-  hostName: string;
+  constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory) {
+    this.setDomainHost = new FormGroup({
+      domain: new FormControl('', [Validators.required]),
+      host: new FormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
+    });
+  }
 
   domains$: Observable<IDomain[]>;
-  selectedDomainGuid: string;
 
   message = null;
 
@@ -84,13 +88,13 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   validate(): boolean {
-    return !!this.selectedDomainGuid && !!this.hostName;
+    return this.setDomainHost.valid;
   }
 
   createApp(): Observable<RequestInfoState> {
     const { cloudFoundryDetails, name } = this.newAppData;
 
-    const { cloudFoundry, org, space } = cloudFoundryDetails;
+    const { cloudFoundry, space } = cloudFoundryDetails;
     const newAppGuid = name + space;
 
     this.store.dispatch(new CreateNewApplication(
@@ -104,12 +108,13 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   createRoute(): Observable<RequestInfoState> {
-    const { cloudFoundryDetails, name } = this.newAppData;
+    const { cloudFoundryDetails } = this.newAppData;
 
-    const { cloudFoundry, org, space } = cloudFoundryDetails;
-    const hostName = this.hostName;
-    const shouldCreate = this.selectedDomainGuid && hostName && this.form.valid;
-    const newRouteGuid = hostName + this.selectedDomainGuid;
+    const { cloudFoundry, space } = cloudFoundryDetails;
+    const hostName = this.hostControl().value;
+    const selectedDomainGuid = this.domainControl().value;
+    const shouldCreate = selectedDomainGuid && hostName;
+    const newRouteGuid = hostName + selectedDomainGuid;
 
     if (shouldCreate) {
       this.store.dispatch(new CreateRoute(
@@ -117,7 +122,7 @@ export class CreateApplicationStep3Component implements OnInit {
         cloudFoundry,
         {
           space_guid: space,
-          domain_guid: this.selectedDomainGuid,
+          domain_guid: selectedDomainGuid,
           host: hostName
         }
       ));
@@ -130,7 +135,7 @@ export class CreateApplicationStep3Component implements OnInit {
     });
   }
 
-  associateRoute(appGuid, routeGuid, endpointGuid): Observable<RequestInfoState> {
+  associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
     this.store.dispatch(new AssociateRouteWithAppApplication(appGuid, routeGuid, endpointGuid));
     return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, appGuid)),
       'Application and route created. Could not associated route with app');
@@ -138,9 +143,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   private wrapObservable(obs$: Observable<RequestInfoState>, errorString: string): Observable<RequestInfoState> {
     return obs$.pipe(
-      filter((state: RequestInfoState) => {
-        return state && !state.creating;
-      }),
+      filter((state: RequestInfoState) => state && !state.creating),
       first(),
       tap(state => {
         if (state.error) {
@@ -155,7 +158,8 @@ export class CreateApplicationStep3Component implements OnInit {
     this.domains$ = this.store.select(selectNewAppState).pipe(
       filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.cloudFoundry && state.cloudFoundryDetails.org),
       mergeMap(state => {
-        this.hostName = state.name.split(' ').join('-').toLowerCase();
+        this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
+        this.hostControl().markAsDirty();
         this.newAppData = state;
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
           organizationSchemaKey,
@@ -167,15 +171,24 @@ export class CreateApplicationStep3Component implements OnInit {
           true
         );
         return orgEntService.waitForEntity$.pipe(
-          map(({ entity, entityRequestInfo }) => {
-            if (!this.selectedDomainGuid && entity.entity.domains && entity.entity.domains.length) {
-              this.selectedDomainGuid = entity.entity.domains[0].entity.guid;
+          map(({ entity }) => {
+            if (!this.domainControl().value && entity.entity.domains && entity.entity.domains.length) {
+              this.domainControl().setValue(entity.entity.domains[0].entity.guid);
+              this.hostControl().enable();
             }
             return entity.entity.domains;
           })
         );
       })
     );
+  }
+
+  private domainControl(): AbstractControl {
+    return this.setDomainHost.controls.domain;
+  }
+
+  private hostControl(): AbstractControl {
+    return this.setDomainHost.controls.host;
   }
 
 }

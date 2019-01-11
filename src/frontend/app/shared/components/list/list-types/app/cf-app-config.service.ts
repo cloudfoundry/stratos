@@ -7,7 +7,6 @@ import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
-import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CardAppComponent } from './card/card-app.component';
@@ -29,10 +28,10 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     private datePipe: DatePipe,
     private store: Store<AppState>,
     private utilsService: UtilsService,
-    private appStateService: ApplicationStateService,
     private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     super();
+
     this.appsDataSource = new CfAppsDataSource(this.store, this);
 
     this.multiFilterConfigs = [
@@ -118,5 +117,6 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
+  getInitialised = () => this.appsDataSource.initialised$;
 
 }

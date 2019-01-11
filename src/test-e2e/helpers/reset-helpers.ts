@@ -16,7 +16,7 @@ export class ResetsHelpers {
   constructor() { }
 
   /**
-   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * Get all of the registered Endpoints and connect all of them for which credentials
    * have been configured
    */
   connectAllEndpoints(req, userType: ConsoleUserType = ConsoleUserType.admin) {

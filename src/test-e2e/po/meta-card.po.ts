@@ -43,6 +43,10 @@ export class MetaCard extends Component {
     return this.getTitleElement().getText();
   }
 
+  getContent(): promise.Promise<string> {
+    return this.elementFinder.element(by.css('mat-card-content')).getText();
+  }
+
   openActionMenu(): promise.Promise<MenuComponent> {
     return this.elementFinder.element(by.css('.meta-card__header__button')).click().then(() => {
       // Wait until menu is shown

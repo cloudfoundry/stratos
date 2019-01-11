@@ -1,32 +1,37 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { ISpace } from '../../../../../../core/cf-api.types';
+import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
+import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
+  createQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
-import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 
 
 @Component({
@@ -39,28 +44,29 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   spaceGuid: string;
   serviceInstancesCount: number;
   appInstancesCount: number;
-  serviceInstancesLimit: number;
-  appInstancesLimit: number;
+  serviceInstancesLimit: string;
+  appInstancesLimit: string;
   orgGuid: string;
   normalisedMemoryUsage: number;
-  memoryLimit: number;
-  instancesLimit: number;
+  memoryLimit: string;
   subscriptions: Subscription[] = [];
   memoryTotal: number;
-  orgApps$: Observable<APIResource<any>[]>;
-  appCount: number;
+  appCount$: Observable<number>;
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
   favorite: UserFavorite;
+  spaceStatus$: Observable<CardStatus>;
 
   constructor(
     private cfUserService: CfUserService,
-    private cfEndpointService: CloudFoundryEndpointService,
+    public cfEndpointService: CloudFoundryEndpointService,
     private store: Store<AppState>,
     private cfOrgService: CloudFoundryOrganizationService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private emf: EntityMonitorFactory
   ) {
     super();
   }
@@ -101,51 +107,54 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
       map(u => getSpaceRolesString(u))
     );
 
-    const fetchData$ = userRole$.pipe(
-      tap((roles) => {
-        this.setValues(roles);
+    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasAllApps$.pipe(
+      switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInSpaceViaAllApps(this.row) : observableOf(null))
+    );
+
+    this.appCount$ = allApps$.pipe(
+      switchMap(allApps => allApps ? observableOf(allApps.length) : CloudFoundryEndpointService.fetchAppCount(
+        this.store,
+        this.paginationMonitorFactory,
+        this.cfEndpointService.cfGuid,
+        this.orgGuid,
+        this.row.metadata.guid
+      ))
+    );
+
+    const fetchData$ = observableCombineLatest(
+      userRole$,
+      allApps$
+    ).pipe(
+      tap(([role, apps]) => {
+        this.setValues(role, apps);
       })
     );
 
     this.subscriptions.push(fetchData$.subscribe());
 
+    const spaceQuotaHelper = new SpaceQuotaHelper(this.cfEndpointService, this.emf, this.spaceGuid);
+    this.spaceStatus$ = spaceQuotaHelper.createStateObs();
   }
 
-  setCounts = () => {
-    this.appCount = this.row.entity.apps ? this.row.entity.apps.length : 0;
-    this.appInstancesCount = getStartedAppInstanceCount(this.row.entity.apps);
+  setAppsDependentCounts = (apps: APIResource<IApp>[]) => {
+    this.appInstancesCount = getStartedAppInstanceCount(apps);
+  }
+
+  setValues = (roles: string, apps: APIResource<IApp>[]) => {
+    this.userRolesInSpace = roles;
+    const quotaDefinition = this.row.entity.space_quota_definition || createQuotaDefinition(this.orgGuid);
+    if (apps) {
+      this.setAppsDependentCounts(apps);
+      this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
+      this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.entity.memory_limit * 100;
+    }
+    this.appInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.app_instance_limit);
+    this.serviceInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.total_services);
+    this.memoryLimit = truthyIncludingZeroString(quotaDefinition.entity.memory_limit);
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
-  setValues = (roles: string) => {
-    this.userRolesInSpace = roles;
-    this.setCounts();
-    this.memoryTotal = this.cfEndpointService.getMetricFromApps(this.row.entity.apps, 'memory');
-    let quotaDefinition = this.row.entity.space_quota_definition;
-    if (!quotaDefinition) {
-      quotaDefinition = {
-        entity: {
-          memory_limit: -1,
-          app_instance_limit: -1,
-          instance_memory_limit: -1,
-          name: 'None assigned',
-          organization_guid: this.orgGuid,
-          total_services: -1,
-          total_routes: -1
-        },
-        metadata: null
-      };
-    }
-    this.appInstancesLimit = quotaDefinition.entity.app_instance_limit;
-    this.serviceInstancesLimit = quotaDefinition.entity.total_services;
-    this.memoryLimit = quotaDefinition.entity.memory_limit;
-    this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
-  }
-
-  ngOnDestroy = () => this.
-    subscriptions.forEach(p =>
-      p.unsubscribe())
-
+  ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
 
   edit = () => {
     this.store.dispatch(

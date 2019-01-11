@@ -1,18 +1,15 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { CardStatus } from '../application-state.service';
+import { Component, Input } from '@angular/core';
+
+import { CardStatus } from '../../../shared.types';
+
 
 @Component({
   selector: 'app-application-state-icon',
   templateUrl: './application-state-icon.component.html',
   styleUrls: ['./application-state-icon.component.scss']
 })
-export class ApplicationStateIconComponent implements OnInit {
-
-  constructor() { }
+export class ApplicationStateIconComponent {
 
   @Input() public status: CardStatus;
-
-  ngOnInit() {
-  }
 
 }

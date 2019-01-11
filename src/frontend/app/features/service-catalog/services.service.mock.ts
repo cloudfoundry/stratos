@@ -86,10 +86,6 @@ export class ServicesServiceMock {
     }
   });
   getVisibleServicePlans = () => this.servicePlans$;
-  getOrgsForSelectedServicePlan = () => observableOf([]);
-  getSelectedServicePlanAccessibility = () => observableOf({
-    isPublic: true
-  })
   getServicePlanAccessibility = () => observableOf({
     isPublic: true
   })

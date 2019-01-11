@@ -67,7 +67,7 @@ export class EntitySchema extends schema.Entity {
     private entityKey: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
-    public relationKey?: string,
+    public relationKey?: string
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
@@ -199,6 +199,7 @@ const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema,
     apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    space: new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
@@ -399,6 +400,9 @@ export function entityFactory(key: string): EntitySchema {
   return entity;
 }
 
+export function addEntityToCache(entitySchema: EntitySchema) {
+  entityCache[entitySchema.key] = entitySchema;
+}
+
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
 entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
-

@@ -17,5 +17,7 @@ export class CloudFoundryOrganizationServiceMock {
       entityRequestInfo: getDefaultRequestState()
     });
   allOrgUsersAction = new GetAllOrgUsers('guid', 'guid-key', 'guid', true);
-  allOrgUsers = {};
+  allOrgUsers$ = observableOf([]);
+  apps$ = observableOf([]);
+  appCount$ = observableOf(0);
 }

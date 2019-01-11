@@ -61,14 +61,21 @@ type ConnectedEndpoint struct {
 }
 
 const (
-	AuthTypeOAuth2    = "OAuth2"
-	AuthTypeOIDC      = "OIDC"
+	// AuthTypeOAuth2 means OAuth2
+	AuthTypeOAuth2 = "OAuth2"
+	// AuthTypeOIDC means no OIDC
+	AuthTypeOIDC = "OIDC"
+	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	AuthTypeAKS       = "AKS"
+	// AuthTypeAKS means AKS
+	AuthTypeAKS = "AKS"
 )
 
 const (
+	// AuthConnectTypeCreds means authenticate with username/password credentials
 	AuthConnectTypeCreds = "creds"
+	// AuthConnectTypeNone means no authentication
+	AuthConnectTypeNone = "none"
 )
 
 // Token record for an endpoint (includes the Endpoint GUID)

@@ -11,12 +11,17 @@ import { createEntityRelationKey } from '../../store/helpers/entity-relations/en
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
+  spreadPaginationParams,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
+import { PaginationParam, QParam, PaginatedAction } from '../../store/types/pagination.types';
+import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
+import { SetParams, ResetPagination } from '../../store/actions/pagination.actions';
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   return {
@@ -71,6 +76,51 @@ export const initCfOrgSpaceService = (store: Store<AppState>,
       }
     })
   );
+};
+
+export const createCfOrSpaceMultipleFilterFn = (
+  store: Store<AppState>,
+  action: PaginatedAction,
+  setQParam: (setQ: QParam, qs: QParam[]) => boolean) => {
+  return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
+    if (!changes.length) {
+      return;
+    }
+
+    const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
+    const startingOrgGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const startingSpaceGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    const qChanges = changes.reduce((qs: QParam[], change) => {
+      switch (change.key) {
+        case 'cf':
+          action.endpointGuid = change.value;
+          setQParam(new QParam('organization_guid', '', ' IN '), qs);
+          setQParam(new QParam('space_guid', '', ' IN '), qs);
+          break;
+        case 'org':
+          setQParam(new QParam('organization_guid', change.value, ' IN '), qs);
+          break;
+        case 'space':
+          setQParam(new QParam('space_guid', change.value, ' IN '), qs);
+          break;
+      }
+      return qs;
+    }, spreadPaginationParams(params).q || []);
+
+    const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
+    const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
+    if (cfGuidChanged && !orgChanged && !spaceChanged) {
+      store.dispatch(new ResetPagination(action.entityKey, action.paginationKey));
+    } else if (orgChanged || spaceChanged) {
+      const newParams = spreadPaginationParams(params);
+      newParams.q = qChanges;
+      store.dispatch(new SetParams(action.entityKey, action.paginationKey, newParams, true, true));
+    }
+  };
 };
 
 
@@ -246,23 +296,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors() {
-    // Automatically select the cf on first load given the select mode setting
-    this.cf.list$.pipe(
-      first(),
-      tap(cfs => {
-        // if (this.cf.select.getValue()) {
-        //   return;
-        // }
-
-        if (!!cfs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.selectSet(this.cf.select, cfs[0].guid);
-        }
-      })
-    ).subscribe();
-
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(undefined),
       distinctUntilChanged(),

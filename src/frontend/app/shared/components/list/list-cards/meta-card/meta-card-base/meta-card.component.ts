@@ -1,17 +1,16 @@
-import { AppState } from './../../../../../../store/app-state';
-
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { map, first, tap } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
+
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { CardStatus } from '../../../../application-state/application-state.service';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
-import { Store } from '@ngrx/store';
-import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
-import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
+import { AppState } from './../../../../../../store/app-state';
 
 
 export interface MetaCardMenuItem {
@@ -21,6 +20,7 @@ export interface MetaCardMenuItem {
   can?: Observable<boolean>;
   disabled?: Observable<boolean>;
 }
+
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
@@ -41,6 +41,12 @@ export class MetaCardComponent {
   public favorite: UserFavorite;
 
   userFavoriteManager: UserFavoriteManager;
+
+  statusIcon = true;
+  @Input()
+  statusIconByTitle = false;
+  @Input()
+  statusIconTooltip: string;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
