@@ -11,11 +11,11 @@ metadata:
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
     app.kubernetes.io/component: "console-ext-service"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-  name: "{{ .Release.Name }}-ui-ext"
+  name: "{{ .Release.Name }}-ext"
 spec:
   selector:
     app: "{{ .Release.Name }}"
-    component: console
+    component: stratos
 {{- if .Values.console.service.clusterIP }}
   clusterIP: {{ .Values.console.service.clusterIP }}
 {{- end }}
@@ -67,7 +67,7 @@ metadata:
     app.kubernetes.io/name: "stratos"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-    app.kubernetes.io/component: "console-mariadb-service"
+    app.kubernetes.io/component: "stratos-db-service"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   type: ClusterIP
@@ -77,5 +77,4 @@ spec:
     targetPort: mysql
   selector:
     app: "{{ .Release.Name }}"
-
 
