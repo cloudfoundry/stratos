@@ -16,7 +16,7 @@ describe('Space Routes List -', () => {
   let defaultCf: E2EConfigCloudFoundry;
   let endpointGuid: string;
   let defaultOrgGuid: string;
-  let spaceGuid: string;
+  let createdSpaceGuid: string;
   const routesList = new ListComponent();
 
   const timeAllowed = 50000;
@@ -61,7 +61,7 @@ describe('Space Routes List -', () => {
         })
         .catch(error => { throw new Error(`Failed to create space: ${error.toString()}`); })
         .then((space: APIResource<ISpace>) => {
-          spaceGuid = space.metadata.guid;
+          createdSpaceGuid = space.metadata.guid;
           if (!routeHosts || !routeHosts.length) {
             return promise.fullyResolved(space);
           }
@@ -76,8 +76,8 @@ describe('Space Routes List -', () => {
               const domainGuid = domains[0].metadata.guid;
               // Chain the creation of the routes to ensure there's a nice sequential 'created_at' value to be used for sort tests
               const promises = orderImportant ?
-                chainCreateRoute(spaceGuid, domainGuid, routeHosts) :
-                concurrentCreateRoute(spaceGuid, domainGuid, routeHosts);
+                chainCreateRoute(createdSpaceGuid, domainGuid, routeHosts) :
+                concurrentCreateRoute(createdSpaceGuid, domainGuid, routeHosts);
 
               return promises.then(() => space);
             });
@@ -88,7 +88,7 @@ describe('Space Routes List -', () => {
   }
 
   function navToSpaceRoutes() {
-    const spacePage = CfSpaceLevelPage.forEndpoint(endpointGuid, defaultOrgGuid, spaceGuid);
+    const spacePage = CfSpaceLevelPage.forEndpoint(endpointGuid, defaultOrgGuid, createdSpaceGuid);
     spacePage.navigateTo();
     spacePage.waitForPageOrChildPage();
     spacePage.loadingIndicator.waitUntilNotShown();
