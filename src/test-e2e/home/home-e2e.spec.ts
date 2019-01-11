@@ -1,12 +1,15 @@
-import { E2EHelpers, ConsoleUserType } from '../helpers/e2e-helpers';
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { HomePage } from './home.po';
 
 describe('Home', () => {
-  const helpers = new E2EHelpers();
   const dashboardPage = new HomePage();
 
   beforeAll(() => {
-    helpers.setupApp(ConsoleUserType.admin);
+    e2e.setup(ConsoleUserType.user)
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.user);
   });
 
   beforeEach(() => {
