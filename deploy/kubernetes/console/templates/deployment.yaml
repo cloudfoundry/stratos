@@ -258,6 +258,10 @@ metadata:
     app.kubernetes.io/component: "stratos-db"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos-db"
   template:
     metadata:
       labels:
@@ -267,10 +271,6 @@ spec:
         app.kubernetes.io/component: "stratos-db"
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
-    selector:
-      matchLabels:
-        app.kubernetes.io/name: "stratos"
-        app.kubernetes.io/component: "stratos-db"
     spec:
       containers:
       - name: mariadb
