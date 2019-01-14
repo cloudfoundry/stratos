@@ -119,11 +119,11 @@ waitForHelmRelease
 
 # Copy the helm chart folder to a temp location
 TMP_DIR=${TMP_DIR:-/tmp}
-HELM_TMP=${TMP_DIR}/tmp/stratos_helm_test
+HELM_TMP=${TMP_DIR}/stratos_helm_test
 echo $HELM_TMP
 
 rm -rf ${HELM_TMP}
-mkdir -p {HELM_TMP}
+mkdir -p ${HELM_TMP}
 cp -R "${STRATOS}/deploy/kubernetes/console" {HELM_TMP}
 
 pushd ${HELM_TMP} > /dev/null
