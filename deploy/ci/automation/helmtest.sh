@@ -124,7 +124,7 @@ echo $HELM_TMP
 
 rm -rf ${HELM_TMP}
 mkdir -p ${HELM_TMP}
-cp -R "${STRATOS}/deploy/kubernetes/console" {HELM_TMP}
+cp -R "${STRATOS}/deploy/kubernetes/console" ${HELM_TMP}
 
 pushd ${HELM_TMP} > /dev/null
 # Make sure we can package the chart
