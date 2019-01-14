@@ -6,7 +6,6 @@ echo "================="
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STRATOS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
-STRATOS=$(printf %q "${STRATOS}")
 
 CYAN="\033[96m"
 YELLOW="\033[93m"
@@ -119,12 +118,13 @@ waitForHelmRelease
 # Try and upgrade to the latest Chart
 
 # Copy the helm chart folder to a temp location
-HELM_TMP="${STRATOS}/tmp/helm"
+TMP_DIR=${TMP_DIR:-/tmp}
+HELM_TMP=${TMP_DIR}/tmp/stratos_helm_test
 echo $HELM_TMP
 
 rm -rf ${HELM_TMP}
 mkdir -p {HELM_TMP}
-cp -R ${STRATOS}/deploy/kubernetes/console {HELM_TMP}
+cp -R "${STRATOS}/deploy/kubernetes/console" {HELM_TMP}
 
 pushd ${HELM_TMP} > /dev/null
 # Make sure we can package the chart
