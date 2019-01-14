@@ -75,6 +75,9 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
+import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
+import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
@@ -145,32 +148,6 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
-import { CardAppComponent } from './components/list/list-types/app/card/card-app.component';
-import { EndpointCardComponent } from './components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
-import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
-import { CfSpaceCardComponent } from './components/list/list-types/cf-spaces/cf-space-card/cf-space-card.component';
-import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
-import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
-import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import { CfServiceCardComponent } from './components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
-import { AppServiceBindingCardComponent } from './components/list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
-import { ServiceInstanceCardComponent } from './components/list/list-types/services-wall/service-instance-card/service-instance-card.component';
-import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
-import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
-import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
-
-export const listCards = [
-  CardAppComponent,
-  EndpointCardComponent,
-  CfOrgCardComponent,
-  CfSpaceCardComponent,
-  CfBuildpackCardComponent,
-  CfSecurityGroupsCardComponent,
-  CfStacksCardComponent,
-  CfServiceCardComponent,
-  AppServiceBindingCardComponent,
-  ServiceInstanceCardComponent
-];
 @NgModule({
   imports: [
     CommonModule,
