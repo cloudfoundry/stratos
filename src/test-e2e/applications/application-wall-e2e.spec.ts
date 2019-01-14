@@ -62,8 +62,8 @@ describe('Application Wall Tests -', () => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
     endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
 
-    browser.wait(
-      cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName, true)
+    return browser.wait(
+      cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName, false)
         .then((org: APIResource<IOrganization>) => {
           const spaceName1 = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-1';
           const spaceName2 = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-2';
@@ -147,7 +147,7 @@ describe('Application Wall Tests -', () => {
   describe('No Pages -', () => {
     const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-no-pages';
     beforeAll(() => {
-      setup(orgName, [], false);
+      return setup(orgName, [], false);
     });
 
     beforeAll(() => {
@@ -192,7 +192,7 @@ describe('Application Wall Tests -', () => {
 
     beforeAll(() => {
       appNames = createAppNames(3);
-      setup(orgName, appNames, true);
+      return setup(orgName, appNames, true);
     }, timeAllowed);
 
     beforeAll(() => {
