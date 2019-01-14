@@ -69,10 +69,7 @@ fi
 docker-compose -f docker-compose.development.yml down
 popd
 
-# Pause the PCF Dev instance for now
-echo "Suspending PCF Dev"
-cf pcfdev suspend
-cf pcfdev status
+echo "All done"
 
 # Return exit code form the e2e tests
 exit $RET
