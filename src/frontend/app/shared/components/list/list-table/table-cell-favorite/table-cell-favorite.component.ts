@@ -8,19 +8,6 @@ export interface TableCellFavoriteComponentConfig<T> {
   createUserFavorite: (entity: T) => UserFavorite;
 }
 
-export function createTableColumnFavorite<T>(createUserFavorite: (entity: T) => UserFavorite): ITableColumn<T> {
-  const cellConfig: TableCellFavoriteComponentConfig<T> = {
-    createUserFavorite
-  };
-  return {
-    columnId: 'favorite',
-    headerCell: () => 'Favorite',
-    cellComponent: TableCellFavoriteComponent,
-    cellFlex: '0 0 100px',
-    cellConfig
-  };
-}
-
 @Component({
   selector: 'app-table-cell-favorite',
   templateUrl: './table-cell-favorite.component.html',
@@ -51,4 +38,17 @@ export class TableCellFavoriteComponent<T> extends TableCellCustom<T> {
       this.favorite = this.config.createUserFavorite(this.row);
     }
   }
+}
+
+export function createTableColumnFavorite<T>(createUserFavorite: (entity: T) => UserFavorite): ITableColumn<T> {
+  const cellConfig: TableCellFavoriteComponentConfig<T> = {
+    createUserFavorite
+  };
+  return {
+    columnId: 'favorite',
+    headerCell: () => 'Favorite',
+    cellComponent: TableCellFavoriteComponent,
+    cellFlex: '0 0 100px',
+    cellConfig
+  };
 }
