@@ -6,7 +6,7 @@ echo "================="
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STRATOS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
-STRATOS=$(printf %q "$STRATOS")
+STRATOS=$(printf %q "${STRATOS}")
 
 CYAN="\033[96m"
 YELLOW="\033[93m"
@@ -120,17 +120,20 @@ waitForHelmRelease
 
 # Copy the helm chart folder to a temp location
 HELM_TMP="${STRATOS}/tmp/helm"
-HELM_TMP=$(printf %q "$HELM_TMP")
+HELM_TMP=$(printf %q "${HELM_TMP}")
+echo $HELM_TMP
+
 rm -rf ${HELM_TMP}
 mkdir -p {HELM_TMP}
-cp -R ${STRATOS}/deploy/kubernetes/console ${HELM_TMP}
+cp -R "${STRATOS}/deploy/kubernetes/console" "${HELM_TMP}"
 
-pushd ${HELM_TMP} > /dev/null
+pushd "${HELM_TMP}" > /dev/null
 # Make sure we can package the chart
 helm package ${HELM_TMP}/console
 
 CHART_FILE=$(ls ${HELM_TMP}/*.tgz)
-CHART_FILE=$(printf %q "$CHART_FILE")
+CHART_FILE=$(printf %q "${CHART_FILE}")
+echo "Chart file path: ${CHART_FILE}"
 
 popd > /dev/null
 
