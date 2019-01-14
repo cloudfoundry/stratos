@@ -110,7 +110,7 @@ helm search ${HELM_REPO_NAME}/console
 
 # Install latest version first
 log "Installing latest release"
-helm install ${HELM_REPO_NAME}/console --name ${NAME} --namespace ${NAMESPACE}
+helm install "${HELM_REPO_NAME}/console" --name ${NAME} --namespace ${NAMESPACE}
 
 # Wait for the chart to deploy and be ready
 waitForHelmRelease
@@ -118,31 +118,31 @@ waitForHelmRelease
 # Try and upgrade to the latest Chart
 
 # Copy the helm chart folder to a temp location
-HELM_TMP=${STRATOS}/tmp/helm
-rm -rf ${HELM_TMP}
-mkdir -p ${HELM_TMP}
-cp -R ${STRATOS}/deploy/kubernetes/console ${HELM_TMP}
+HELM_TMP="${STRATOS}/tmp/helm"
+rm -rf "${HELM_TMP}"
+mkdir -p "${HELM_TMP}"
+cp -R "${STRATOS}/deploy/kubernetes/console" "${HELM_TMP}"
 
-pushd ${HELM_TMP} > /dev/null
+pushd "${HELM_TMP}" > /dev/null
 # Make sure we can package the chart
-helm package ${HELM_TMP}/console
+helm package "${HELM_TMP}/console"
 
-CHART_FILE=$(ls ${HELM_TMP}/*.tgz)
+CHART_FILE=$(ls "${HELM_TMP}/*.tgz")
 popd > /dev/null
 
 log "Upgrading using latest Helm Chart"
-helm upgrade ${NAME} ${CHART_FILE} --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION}
+helm upgrade ${NAME} "${CHART_FILE}" --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 checkVersion console-0.1.0
 waitForHelmRelease
 
 # Change just the chart version and try to upgrade
-sed -i.bak -e 's/version: 0.1.0/version: 0.2.0/g' ${HELM_TMP}/console/Chart.yaml
-sed -i.bak -e 's/appVersion: 0.1.0/appVersion: 0.2.0/g' ${HELM_TMP}/console/Chart.yaml
-cat ${HELM_TMP}/console/Chart.yaml
+sed -i.bak -e 's/version: 0.1.0/version: 0.2.0/g' "${HELM_TMP}/console/Chart.yaml"
+sed -i.bak -e 's/appVersion: 0.1.0/appVersion: 0.2.0/g' "${HELM_TMP}/console/Chart.yaml"
+cat "${HELM_TMP}/console/Chart.yaml"
 
 log "Upgrading using latest Helm Chart (checking chart upgrade)"
-helm upgrade ${NAME} ${HELM_TMP}/console --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION}
+helm upgrade ${NAME} "${HELM_TMP}/console" --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.2.0
@@ -151,7 +151,7 @@ checkVersion console-0.2.0
 deleteRelease
 
 log "Installing using latest Helm Chart"
-helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set consoleVersion=${DEV_IMAGE_VERSION}
+helm install "${CHART_FILE}" --name ${NAME} --namespace ${NAMESPACE} --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.1.0
