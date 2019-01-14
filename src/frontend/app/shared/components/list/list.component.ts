@@ -18,16 +18,17 @@ import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
 import {
+  asapScheduler,
   BehaviorSubject,
   combineLatest as observableCombineLatest,
+  isObservable,
   Observable,
   of as observableOf,
-  Subscription,
   queueScheduler,
-  isObservable,
-  asapScheduler,
+  Subscription,
 } from 'rxjs';
 import {
+  combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -37,18 +38,17 @@ import {
   publishReplay,
   refCount,
   startWith,
-  switchMap,
+  subscribeOn,
   takeWhile,
   tap,
-  withLatestFrom,
-  combineLatest,
   throttleTime,
-  subscribeOn,
+  withLatestFrom,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory } from '../../../store/helpers/entity-factory';
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ListView } from './../../../store/actions/list.actions';
@@ -59,16 +59,13 @@ import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
-  IListAction,
   IListConfig,
-  IListMultiFilterConfig,
   IMultiListAction,
   IOptionalAction,
   ListConfig,
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
-import { RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 
 
 @Component({

@@ -21,11 +21,13 @@ import { AppState } from '../../../../../store/app-state';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
+import { UserFavorite, UserFavoriteEndpoint } from '../../../../../store/types/user-favorites.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
@@ -189,7 +191,9 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private globalActions = [];
 
-  columns = endpointColumns;
+  columns = [
+    ...endpointColumns
+  ];
   isLocal = true;
   dataSource: EndpointsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
@@ -236,6 +240,12 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
   ) {
+    this.columns.splice(1, 0, createTableColumnFavorite((row: EndpointModel): UserFavorite => {
+      return new UserFavoriteEndpoint(
+        row.guid,
+        'cf',
+      );
+    }));
     this.dataSource = new EndpointsDataSource(
       this.store,
       this,

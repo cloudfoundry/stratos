@@ -2,11 +2,15 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { IApp } from '../../../../../core/cf-api.types';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
+import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
+import { UserFavorite } from '../../../../../store/types/user-favorites.types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CardAppComponent } from './card/card-app.component';
@@ -41,7 +45,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     ];
   }
   appsDataSource: CfAppsDataSource;
-  columns: Array<ITableColumn<APIResource>> = [
+  columns: Array<ITableColumn<APIResource<IApp>>> = [
     {
       columnId: 'name', headerCell: () => 'Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: {
         type: 'sort',
@@ -49,6 +53,14 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         field: 'entity.name'
       }
     },
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite => {
+      return new UserFavorite(
+        row.entity.cfGuid,
+        'cf',
+        applicationSchemaKey,
+        row.entity.guid,
+      );
+    }),
     {
       columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent,
     },

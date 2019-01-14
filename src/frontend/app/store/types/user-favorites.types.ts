@@ -1,9 +1,9 @@
 import { UserFavoritesEffect } from '../effects/user-favorites-effect';
 import { endpointSchemaKey } from '../helpers/entity-factory';
+
 /**
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */
-
 export interface IFavoriteTypeInfo {
   endpointType: string;
   entityType?: string;
