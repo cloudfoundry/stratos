@@ -118,20 +118,26 @@ waitForHelmRelease
 # Try and upgrade to the latest Chart
 
 # Copy the helm chart folder to a temp location
-HELM_TMP=${STRATOS}/tmp/helm
+TMP_DIR=${TMP_DIR:-/tmp}
+HELM_TMP=${TMP_DIR}/stratos_helm_test
+echo $HELM_TMP
+
 rm -rf ${HELM_TMP}
 mkdir -p ${HELM_TMP}
-cp -R ${STRATOS}/deploy/kubernetes/console ${HELM_TMP}
+cp -R "${STRATOS}/deploy/kubernetes/console" ${HELM_TMP}
 
 pushd ${HELM_TMP} > /dev/null
 # Make sure we can package the chart
 helm package ${HELM_TMP}/console
 
 CHART_FILE=$(ls ${HELM_TMP}/*.tgz)
+CHART_FILE=$(printf %q "${CHART_FILE}")
+echo "Chart file path: ${CHART_FILE}"
+
 popd > /dev/null
 
 log "Upgrading using latest Helm Chart"
-helm upgrade ${NAME} ${CHART_FILE} --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION}
+helm upgrade ${NAME} ${CHART_FILE} --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 checkVersion console-0.1.0
 waitForHelmRelease
@@ -142,7 +148,7 @@ sed -i.bak -e 's/appVersion: 0.1.0/appVersion: 0.2.0/g' ${HELM_TMP}/console/Char
 cat ${HELM_TMP}/console/Chart.yaml
 
 log "Upgrading using latest Helm Chart (checking chart upgrade)"
-helm upgrade ${NAME} ${HELM_TMP}/console --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION}
+helm upgrade ${NAME} ${HELM_TMP}/console --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.2.0
@@ -151,7 +157,7 @@ checkVersion console-0.2.0
 deleteRelease
 
 log "Installing using latest Helm Chart"
-helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set consoleVersion=${DEV_IMAGE_VERSION}
+helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.1.0
