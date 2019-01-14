@@ -13,6 +13,7 @@ import {
   getSpacesFromOrgWithRole,
 } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -25,7 +26,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   isMarketplaceMode: boolean;
   constructor(
     private store: Store<AppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    public route: ActivatedRoute
   ) { }
 
   public spaces$: Observable<ISpace[]>;
@@ -52,6 +54,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
+    if (this.route.root.snapshot.queryParams.endpointGuid) {
+      this.cfOrgSpaceService.cf.select.next(this.route.root.snapshot.queryParams.endpointGuid);
+    }
     this.spaces$ = this.getSpacesFromPermissions();
     this.hasOrgs$ = this.cfOrgSpaceService.org.list$.pipe(
       map(o => o && o.length > 0)

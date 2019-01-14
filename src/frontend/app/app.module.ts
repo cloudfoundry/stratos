@@ -111,7 +111,7 @@ export class AppModule {
     ext: ExtensionService,
     private permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
-    private store: Store<AppState>,
+    private store: Store<AppState>
   ) {
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
@@ -146,7 +146,7 @@ export class AppModule {
         menuItems: [
           {
             label: 'Deploy application',
-            action: () => this.store.dispatch(new RouterNav({ path: ['applications/deploy'] })),
+            action: () => this.store.dispatch(new RouterNav({ path: ['applications/deploy'], query: { endpointGuid: endpoint.guid } })),
             can: this.permissionService.can(CurrentUserPermissions.APPLICATION_CREATE)
           }
         ]
