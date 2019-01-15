@@ -103,8 +103,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-exit 1
-
 # Clean up any old organisations
 clean_orgs
 
