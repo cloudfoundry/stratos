@@ -41,7 +41,7 @@ describe('CreateApplicationStep1Component', () => {
             }
           }
         }
-      },]
+      }]
     })
       .compileComponents();
   }));
