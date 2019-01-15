@@ -109,10 +109,6 @@ if [ $RET -ne 0 ]; then
   set -e
 fi
 
-# Get the E2E config
-rm -f secrets.yaml
-curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-
 rm -rf node_modules
 npm install
 
@@ -122,7 +118,7 @@ mkdir -p ./e2e-reports
 export E2E_REPORT_FOLDER=./e2e-reports
 
 # Run the E2E tests
-"$DIRPATH/runandrecord.sh" https://console.local.pcfdev.io ${SUITE}
+"$DIRPATH/runandrecord.sh" https://console.${CF_DOMAIN} ${SUITE}
 RET=$?
 
 # If we had test failures then copy console log to reports folder

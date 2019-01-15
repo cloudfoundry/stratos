@@ -54,29 +54,56 @@ function clean_deployments {
   docker rmi $(docker images -q) -f > /dev/null 2>&1
 }
 
+function checkPCFDevStatus {
+  echo "Checking PCF Dev status"
+  FULL_STATUS=$(cf pcfdev status)
+  echo "$FULL_STATUS"
+
+  STATUS=$(echo "$FULL_STATUS" | head -n 1)
+  if [ "$STATUS" != "Running" ]; then
+    echo "PCF Dev is not running... aborting"
+    exit 1
+  fi
+}
+
 # Need TEST_CONFIG_URL to be set
 if [ -z "${TEST_CONFIG_URL}" ]; then
   echo "You must set TEST_CONFIG_URL to the URL for retrieving the test config (secrets) metadata"
   exit 1
 fi
 
-echo "Checking PCF Dev status"
-FULL_STATUS=$(cf pcfdev status)
-echo "$FULL_STATUS"
-
-STATUS=$(echo "$FULL_STATUS" | head -n 1)
-if [ "$STATUS" != "Running" ]; then
-  echo "PCF Dev is not running... aborting"
-  exit 1
+# Is the test config file a local file? (must be absolute path)
+if [[ "${TEST_CONFIG_URL}" == /* ]]; then
+  rm -f secrets.yaml
+  cp "${TEST_CONFIG_URL}" secrets.yaml
+else
+  # Get the E2E config
+  rm -f secrets.yaml
+  curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 fi
 
-cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o e2e -s e2e
-cf apps
+CF_DOMAIN=${CF_DOMAIN-local.pcfdev.io}
+if [ -z "${CF_URL}" ]; then
+  CF_URL=https://api.${CF_DOMAIN}
+fi
+CF_USER=${CF_USER}
+CF_PASSWORD=${CF_PASSWORD}
+
+echo ${CF_URL}
+
+if [ "${CF_URL}" == "https://api.local.pcfdev.io" ]; then
+  checkPCFDevStatus
+fi
+
+cf login -a ${CF_URL} --skip-ssl-validation -u ${CF_USER} -p ${CF_PASSWORD} -o e2e -s e2e
+cf buildpacks
 
 if [ $? -ne 0 ]; then
-  echo "Unable to list apps - looks like a problem with PCFDev"
+  echo "Unable to list buildpacks - looks like a problem with the test Cloud Foundry"
   exit 1
 fi
+
+exit 1
 
 # Clean up any old organisations
 clean_orgs

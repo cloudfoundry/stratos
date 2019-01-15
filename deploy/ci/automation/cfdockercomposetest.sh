@@ -42,10 +42,6 @@ docker ps
 echo "Waiting 30 seconds for UAA to start up ..."
 sleep 30
 
-# Get the E2E config
-rm -f secrets.yaml
-curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-
 # Need node modules to run the tests
 rm -rf node_modules
 npm install
