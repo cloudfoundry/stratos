@@ -1,5 +1,6 @@
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of as observableOf } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -13,7 +14,6 @@ import {
   getSpacesFromOrgWithRole,
 } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
-import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-create-application-step1',
