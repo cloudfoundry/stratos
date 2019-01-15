@@ -6,7 +6,10 @@ import { IApp } from '../../../../../core/cf-api.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
+import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
+import { UserFavorite } from '../../../../../store/types/user-favorites.types';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { defaultPaginationPageSizeOptionsTable, IListConfig, ListViewTypes } from '../../list.component.types';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
@@ -32,6 +35,14 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       cellComponent: TableCellAppNameComponent,
       cellFlex: '1',
     },
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite => {
+      return new UserFavorite(
+        row.entity.cfGuid,
+        'cf',
+        applicationSchemaKey,
+        row.entity.guid,
+      );
+    }),
     {
       columnId: 'status',
       headerCell: () => 'Status',

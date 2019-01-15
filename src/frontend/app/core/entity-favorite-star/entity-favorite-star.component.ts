@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+
+import { AppState } from '../../store/app-state';
 import { UserFavorite } from '../../store/types/user-favorites.types';
 import { UserFavoriteManager } from '../user-favorite-manager';
-import { AppState } from '../../store/app-state';
 
 @Component({
   selector: 'app-entity-favorite-star',

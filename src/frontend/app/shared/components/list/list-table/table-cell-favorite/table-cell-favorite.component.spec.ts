@@ -1,16 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellFavoriteComponent } from './table-cell-favorite.component';
 
 describe('TableCellFavoriteComponent', () => {
-  let component: TableCellFavoriteComponent;
-  let fixture: ComponentFixture<TableCellFavoriteComponent>;
+  let component: TableCellFavoriteComponent<any>;
+  let fixture: ComponentFixture<TableCellFavoriteComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellFavoriteComponent ]
+      declarations: [
+        TableCellFavoriteComponent,
+      ],
+      imports: [
+        ...BaseTestModulesNoShared
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
