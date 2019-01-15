@@ -14,7 +14,7 @@ import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
 import { EndpointHealthCheck } from '../core/endpoints-health-checks';
 
 const SuseCustomizations: CustomizationsMetadata = {
-  copyright: '&copy; 2018 SUSE',
+  copyright: '&copy; 2019 SUSE',
   hasEula: true,
 };
 
