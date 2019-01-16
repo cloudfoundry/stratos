@@ -48,7 +48,7 @@ export class PageSubHeaderComponent extends Component {
 
   waitForItem(name: string): promise.Promise<void> {
     const elm = this.getItem(name);
-    return browser.wait(until.presenceOf(element(elm)), 10000);
+    return browser.wait(until.presenceOf(element(elm)), 10000, 'Time out waiting for tab: ' + name);
   }
 
   goToItemAndWait(name: string, baseUrl: string, suffix: string): promise.Promise<any> {
