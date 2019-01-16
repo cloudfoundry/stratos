@@ -131,8 +131,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
 
-    this.applicationService.applicationStratProject$
-      .pipe(first())
+    // Ensure tab gets updated if the app is redeployed from a different SCM Type
+    this.stratosProjectSub = this.applicationService.applicationStratProject$
       .subscribe(stratProject => {
         if (
           stratProject &&
@@ -152,6 +152,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
+  stratosProjectSub: Subscription;
   autoRefreshString = 'auto-refresh';
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
@@ -389,6 +390,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$);
+    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$, this.stratosProjectSub);
   }
 }

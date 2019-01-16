@@ -87,16 +87,19 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
         const commitId = stProject.deploySource.commit.trim();
-        const commitEntityKey = projectName + '-' + commitId;
 
         // Fallback to type if scm is not set (legacy support)
         const scmType = stProject.deploySource.scm ||  stProject.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
+        // Ensure the SCM type is included in the key
+        const repoEntityKey = `${scmType}-${projectName}`;
+        const commitEntityKey = `${repoEntityKey}-${commitId}`;
+
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           gitRepoSchemaKey,
           entityFactory(gitRepoSchemaKey),
-          projectName,
+          repoEntityKey,
           new FetchGitHubRepoInfo(stProject),
           false
         );
