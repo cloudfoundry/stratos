@@ -18,12 +18,13 @@ export class KubernetesPodsDataSource extends ListDataSource<KubernetesPod, any>
     kubeGuid: BaseKubeGuid,
     listConfig: IListConfig<KubernetesPod>
   ) {
+    const action = new GetKubernetesPods(kubeGuid.guid);
     super({
       store,
-      action: new GetKubernetesPods(kubeGuid.guid),
+      action,
       schema: entityFactory(kubernetesPodsSchemaKey),
       getRowUniqueId: object => object.name,
-      paginationKey: getPaginationKey(kubernetesPodsSchemaKey, kubeGuid.guid),
+      paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,
       transformEntities: [{ type: 'filter', field: 'metadata.name' }]
