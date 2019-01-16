@@ -1,11 +1,11 @@
-import { by, element } from 'protractor';
+import { by, element, ElementFinder } from 'protractor';
 
 import { Component } from './component.po';
 
 
 export class LoadingIndicatorComponent extends Component {
 
-  constructor() {
-    super(element(by.css('.loading-page__indicator')));
+  constructor(parent?: ElementFinder) {
+    super(parent ? parent.element(by.css('.loading-page__indicator')) : element(by.css('.loading-page__indicator')));
   }
 }

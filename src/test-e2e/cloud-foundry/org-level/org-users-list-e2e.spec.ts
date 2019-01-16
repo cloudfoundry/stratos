@@ -1,5 +1,7 @@
+import { LoadingIndicatorComponent } from './../../po/loading-indicator.po';
 import { CfUserTableTestLevel, setupCfUserTableTests } from '../users-list-e2e.helper';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
+import { by, element } from 'protractor';
 
 describe('Org Users List -', () => {
   setupCfUserTableTests(CfUserTableTestLevel.Org, (cfGuid, orgGuid) => {
@@ -7,6 +9,9 @@ describe('Org Users List -', () => {
     orgPage.navigateTo();
     orgPage.waitForPageOrChildPage();
     orgPage.loadingIndicator.waitUntilNotShown();
+    // Wait until the loading indicator for the bottom tile grid has gone as well
+    const tileLoadingIndicator = new LoadingIndicatorComponent(element(by.css('app-tile-grid')));
+    tileLoadingIndicator.waitUntilNotShown();
     return orgPage.goToUsersTab();
   });
 });
