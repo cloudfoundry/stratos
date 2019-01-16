@@ -38,6 +38,10 @@ export class CfOrgLevelPage extends CFPage {
     return this.goToTab('Users', 'users');
   }
 
+  waitForTab(tabName: string) {
+    return this.subHeader.waitForItem(tabName);
+  }
+
   private goToTab(label: string, urlSuffix: string) {
     return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
   }

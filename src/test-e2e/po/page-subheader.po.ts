@@ -46,6 +46,11 @@ export class PageSubHeaderComponent extends Component {
     return this.getItem(name).click();
   }
 
+  waitForItem(name: string): promise.Promise<void> {
+    const elm = this.getItem(name);
+    return browser.wait(until.presenceOf(element(elm)), 10000);
+  }
+
   goToItemAndWait(name: string, baseUrl: string, suffix: string): promise.Promise<any> {
     this.clickItem(name);
     if (!suffix.startsWith('/')) {

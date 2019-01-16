@@ -10,8 +10,10 @@ describe('Org Users List -', () => {
     orgPage.waitForPageOrChildPage();
     orgPage.loadingIndicator.waitUntilNotShown();
     // Wait until the loading indicator for the bottom tile grid has gone as well
-    const tileLoadingIndicator = new LoadingIndicatorComponent(element(by.css('app-tile-grid')));
-    tileLoadingIndicator.waitUntilNotShown();
+    //const tileLoadingIndicator = new LoadingIndicatorComponent(element(by.css('app-tile-grid')));
+    //tileLoadingIndicator.waitUntilNotShown();
+    // Just wait until the users tab is visible
+    orgPage.waitForTab('Users');
     return orgPage.goToUsersTab();
   });
 });
