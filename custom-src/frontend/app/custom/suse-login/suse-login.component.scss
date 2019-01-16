@@ -144,17 +144,20 @@
   }
 }
 
+// On small screens, hide the intro and just show the login box
 @media(max-width: 768px) {
   .suse-login:not(.suse-login-sso) {
-    &__intro {
-      display: none;
-    }
-    &__box {
-      margin: 0;
-    }
-    &__content {
-      max-width: 400px;
-      width: 80%;
+    .suse-login {
+      &__intro {
+        display: none;
+      }
+      &__box {
+        margin: 0;
+      }
+      &__content {
+        max-width: 400px;
+        width: 80%;
+      }
     }
   }
 }
