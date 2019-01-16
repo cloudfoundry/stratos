@@ -4,6 +4,7 @@
   $primary: map-get($theme, primary);
   $foreground-colors: map-get($theme, foreground);
   $background-colors: map-get($theme, background);
+
   .list-component {
     &__header {
       &--selected {
@@ -16,5 +17,18 @@
         }
       }
     }
+  }
+
+  // Fix box-shadow issue on table header
+  // Ensure we use the same box-shadow color as Angular Material
+  // See: https://github.com/angular/material2/blob/master/src/lib/core/style/_elevation.scss
+  $mat-elevation-color: black !default;
+  $elevation-color: map-get($foreground-colors, elevation);
+  $elevation-color-or-default: if($elevation-color == null, $mat-elevation-color, $elevation-color);
+  
+  .list-component .list-component__header mat-card {
+    box-shadow: 0 2px 1px -2px #{rgba($elevation-color-or-default, .2)},
+      0 1px 1px 0 #{rgba($elevation-color-or-default, .142)},
+      0 1px 5px 0 #{rgba($elevation-color-or-default, .12)};
   }
 }
