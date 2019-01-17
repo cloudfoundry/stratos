@@ -42,10 +42,7 @@ const kubernetes: Routes = [{
 },
 {
   path: ':endpointId/namespaces/:namespaceName/pods/:podName',
-  component: PodMetricsComponent,
-  data: {
-    uiFullView: true
-  },
+  component: PodMetricsComponent
 },
 {
   path: ':endpointId/nodes/:nodeName',
