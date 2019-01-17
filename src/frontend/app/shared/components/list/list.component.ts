@@ -495,34 +495,39 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         })
       );
 
-    const hasChangedPage$ = this.dataSource.pagination$.pipe(
-      map(pag => pag.currentPage),
+    const loadingHasChanged$ = this.dataSource.isLoadingPage$.pipe(
+      distinctUntilChanged(),
       pairwise(),
-      map(([oldPage, newPage]) => oldPage !== newPage),
-    );
-
-    const isMaxedResult$ = this.dataSource.pagination$.pipe(
-      map(pag => !!pag.maxedResults),
-    );
-
-    const canShowLoading$ = observableCombineLatest([hasChangedPage$, isMaxedResult$]).pipe(
-      map(([hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
+      map(([oldLoading, newLoading]) =>
+        !oldLoading && newLoading
+      ),
       startWith(true),
-      distinctUntilChanged()
+    );
+
+    const hasFilterChangedSinceLastLoading$ = loadingHasChanged$.pipe(
+      filter(hasChanged => hasChanged),
+      withLatestFrom(this.dataSource.pagination$),
+      pairwise(),
+      map(([[hasChanged, oldPage], [newHasChanged, newPage]]) =>
+        oldPage.currentPage !== newPage.currentPage ||
+        oldPage.clientPagination.filter !== newPage.clientPagination.filter ||
+        oldPage.params !== newPage.params
+      ),
+      startWith(true),
+      tap(hasChanged => console.log(hasChanged, 'hasChanged'))
+    );
+
+    this.isRefreshing$ = observableCombineLatest(hasFilterChangedSinceLastLoading$, this.dataSource.isLoadingPage$).pipe(
+      map(([hasChanged, loading]) => !hasChanged && loading),
+      tap(console.log)
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
-      startWith(true),
-      combineLatest(canShowLoading$),
-      map(([loading, canShowLoading]) => loading && canShowLoading),
+      withLatestFrom(this.isRefreshing$),
+      map(([loading, isRefreshing]) => !isRefreshing && loading),
       distinctUntilChanged(),
-      throttleTime(100, queueScheduler, { leading: true, trailing: true }),
-    );
-
-    this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
-      withLatestFrom(canShowLoading$, this.showProgressBar$),
-      map(([loading, canShowLoading, showProgressBar]) => !canShowLoading && loading && !showProgressBar),
-      distinctUntilChanged()
+      tap((showProgress) => console.log(showProgress, 'showProgress')),
+      startWith(true),
     );
   }
 
