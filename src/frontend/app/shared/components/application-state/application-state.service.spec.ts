@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
+
 import { ApplicationStateService } from './application-state.service';
 
 
-fdescribe('ApplicationStateService', () => {
+describe('ApplicationStateService', () => {
 
   const $translate = { instant: (label) => label };
   let cfAppStateService;
