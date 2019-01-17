@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -80,16 +80,16 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
     this.action = action;
 
-    const statsSub = this.maxedResults$.pipe(
-      filter(maxedResults => !maxedResults),
-      switchMap(() => this.page$),
+    const statsSub = this.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
-      withLatestFrom(this.pagination$),
       // Ensure we keep pagination smooth
       debounceTime(250),
-      map(([page, pagination]) => {
-        if (!page) {
+      // Allow maxedResults time to settle - see #3359
+      delay(100),
+      withLatestFrom(this.maxedResults$),
+      map(([page, maxedResults]) => {
+        if (!page || maxedResults) {
           return [];
         }
         const actions = new Array<DispatchSequencerAction>();
