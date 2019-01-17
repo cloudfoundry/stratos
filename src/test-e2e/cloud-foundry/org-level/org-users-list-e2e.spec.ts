@@ -9,14 +9,14 @@ describe('Org Users List -', () => {
     const orgPage = CfOrgLevelPage.forEndpoint(cfGuid, orgGuid);
     orgPage.navigateTo();
     orgPage.waitForPageOrChildPage();
-    // orgPage.loadingIndicator.waitUntilNotShown();
+    orgPage.loadingIndicator.waitUntilNotShown();
+    e2e.log('Waiting for org detail...');
     // Wait until the loading indicator for the bottom tile grid has gone as well
-    //const tileLoadingIndicator = new LoadingIndicatorComponent(element(by.css('app-tile-grid')));
-    //tileLoadingIndicator.waitUntilNotShown();
+    const tileLoadingIndicator = new LoadingIndicatorComponent(element(by.css('app-tile-grid')));
+    tileLoadingIndicator.waitUntilNotShown('Org detaal loading indicator', 30000);
     // Just wait until the users tab is visible
     e2e.log('Wait for user tab');
     orgPage.waitForTab('Users');
-    e2e.sleep(5000);
     e2e.log('Go to user tab');
     return orgPage.goToUsersTab();
   });

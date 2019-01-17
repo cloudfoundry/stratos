@@ -42,8 +42,8 @@ export class Component {
       });
   }
 
-  waitUntilNotShown(description = 'Element'): promise.Promise<void> {
-    return browser.wait(until.invisibilityOf(this.locator), 20000, description);
+  waitUntilNotShown(description = 'Element', timeout = 20000): promise.Promise<void> {
+    return browser.wait(until.invisibilityOf(this.locator), timeout, description);
   }
 
   scrollIntoView(): promise.Promise<void> {
