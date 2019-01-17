@@ -80,7 +80,7 @@ export interface KubePaginationAction extends PaginatedAction, KubeAction { }
 export class GetKubernetesReleasePods implements KubePaginationAction {
 
   constructor(public kubeGuid: string, releaseName: string) {
-    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, releaseName, kubeGuid);
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `release-${releaseName}`, kubeGuid);
     this.initialParams = {
       labelSelector: `app.kubernetes.io/instance=${releaseName}`,
       ...sortPodsByName
@@ -166,7 +166,7 @@ export class GetKubernetesNamespace implements KubeAction {
 
 export class GetKubernetesPods implements KubePaginationAction {
   constructor(public kubeGuid) {
-    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, kubeGuid);
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, 'k8', kubeGuid);
   }
   type = GET_POD_INFO;
   entityKey = kubernetesPodsSchemaKey;
@@ -184,7 +184,7 @@ export class GetKubernetesPods implements KubePaginationAction {
 
 export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
   constructor(public kubeGuid: string, public nodeName: string) {
-    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, nodeName, kubeGuid);
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `node-${nodeName}`, kubeGuid);
     this.initialParams = {
       fieldSelector: `spec.nodeName=${nodeName}`,
       ...sortPodsByName
@@ -204,7 +204,7 @@ export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
 
 export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction {
   constructor(public kubeGuid: string, public namespaceName: string) {
-    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, namespaceName, kubeGuid);
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `ns-${namespaceName}`, kubeGuid);
   }
   type = GET_PODS_IN_NAMESPACE_INFO;
   entityKey = kubernetesPodsSchemaKey;
