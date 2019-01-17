@@ -132,7 +132,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
 
     // Ensure tab gets updated if the app is redeployed from a different SCM Type
-    this.stratosProjectSub = this.applicationService.applicationStratProject$
+    this.stratosProjectSub = this.applicationService.applicationStratProject$.pipe(first())
       .subscribe(stratProject => {
         if (
           stratProject &&
