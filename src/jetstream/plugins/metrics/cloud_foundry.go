@@ -154,7 +154,6 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 
 	// Only proceed if the user is an Cloud Foundry admin of all of the endpoints we are requesting metrics for
 	if !canAccessMetrics {
-		log.Warn("NOT an ADMIN")
 		return interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"You must be a Cloud Foundry admin to access CF-level metrics",
