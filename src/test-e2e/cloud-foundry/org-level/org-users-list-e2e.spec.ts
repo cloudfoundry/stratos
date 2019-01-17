@@ -2,6 +2,7 @@ import { LoadingIndicatorComponent } from './../../po/loading-indicator.po';
 import { CfUserTableTestLevel, setupCfUserTableTests } from '../users-list-e2e.helper';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 import { by, element } from 'protractor';
+import { e2e } from '../../e2e';
 
 describe('Org Users List -', () => {
   setupCfUserTableTests(CfUserTableTestLevel.Org, (cfGuid, orgGuid) => {
@@ -13,7 +14,10 @@ describe('Org Users List -', () => {
     //const tileLoadingIndicator = new LoadingIndicatorComponent(element(by.css('app-tile-grid')));
     //tileLoadingIndicator.waitUntilNotShown();
     // Just wait until the users tab is visible
+    e2e.log('Wait for user tab');
     orgPage.waitForTab('Users');
+    e2e.sleep(5000);
+    e2e.log('Go to user tab');
     return orgPage.goToUsersTab();
   });
 });
