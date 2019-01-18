@@ -31,6 +31,8 @@ This release contains a number of fixes and improvements:
 - Cannot deploy application from folder upload [\#3188](https://github.com/cloudfoundry-incubator/stratos/pull/3188)
 - Fix issue where only first 100 services were shown in service marketplace [\#3161](https://github.com/cloudfoundry-incubator/stratos/pull/3161)
 - Fix marketplace provisioning for asynchronous services [\#3086](https://github.com/cloudfoundry-incubator/stratos/pull/3086)
+- Fix K8S Services not using correct label to select them [\#129](https://github.com/SUSE/stratos/pull/129)
+- Fix issue with large files being sent into request URL [\#90](https://github.com/SUSE/stratos/pull/90)
 
 **Improvements:**
 - App Deploy: Add Public GitLab Repository support [\#3239](https://github.com/cloudfoundry-incubator/stratos/pull/3239)
@@ -60,6 +62,9 @@ This release contains a number of fixes and improvements:
 - Add user has roles filter to users tables [\#3258](https://github.com/cloudfoundry-incubator/stratos/pull/3258)
 - Deploy App: Add notification toast [\#3242](https://github.com/cloudfoundry-incubator/stratos/pull/3242)
 - Update app instance cell data when scaling up [\#3133](https://github.com/cloudfoundry-incubator/stratos/pull/3133)
+- Use product branding in place of Stratos [\#126](https://github.com/SUSE/stratos/pull/126)
+- Show error on Kubernetes pages and Kubernetes endpoint page [\#96](https://github.com/SUSE/stratos/pull/96)
+- Add validation when connecting Kubernetes endpoints [\#94](https://github.com/SUSE/stratos/pull/94)
 
 ## 2.2.0
 
