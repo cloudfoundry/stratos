@@ -24,10 +24,11 @@ import {
   isObservable,
   Observable,
   of as observableOf,
-  Subject,
+  queueScheduler,
   Subscription,
 } from 'rxjs';
 import {
+  combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -40,10 +41,9 @@ import {
   subscribeOn,
   takeWhile,
   tap,
-  withLatestFrom,
+  throttleTime,
 } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../core/utils.service';
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory } from '../../../store/helpers/entity-factory';
@@ -65,6 +65,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { safeUnsubscribe } from '../../../core/utils.service';
 
 
 @Component({
@@ -163,7 +164,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
   private multiFilterChangesSub: Subscription;
-  private hasChangedPageSub: Subscription;
 
   globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
@@ -492,23 +492,17 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         })
       );
 
-    const showChangedPage = new Subject<boolean>();
-    this.hasChangedPageSub = this.dataSource.pagination$.pipe(
+    const hasChangedPage$ = this.dataSource.pagination$.pipe(
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
-    ).subscribe(show => {
-      // This can be updated before isLoadingPage can fire
-      if (show) {
-        showChangedPage.next(true);
-      }
-    });
+    );
 
     const isMaxedResult$ = this.dataSource.pagination$.pipe(
       map(pag => !!pag.maxedResults),
     );
 
-    const canShowLoading$ = observableCombineLatest([showChangedPage.asObservable(), isMaxedResult$]).pipe(
+    const canShowLoading$ = observableCombineLatest([hasChangedPage$, isMaxedResult$]).pipe(
       map(([hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
       startWith(true),
       distinctUntilChanged()
@@ -516,15 +510,12 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
       startWith(true),
-      withLatestFrom(canShowLoading$),
+      combineLatest(canShowLoading$),
       map(([loading, canShowLoading]) => loading && canShowLoading && !this.isRefreshing),
       distinctUntilChanged(),
-      tap(show => {
-        if (!show) {
-          showChangedPage.next(false);
-        }
-      })
+      throttleTime(100, queueScheduler, { leading: true, trailing: true }),
     );
+
   }
 
   ngAfterViewInit() {
@@ -537,8 +528,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginationWidgetToStore,
       this.filterWidgetToStore,
       this.uberSub,
-      this.multiFilterChangesSub,
-      this.hasChangedPageSub
+      this.multiFilterChangesSub
     );
     if (this.dataSource) {
       this.dataSource.destroy();
