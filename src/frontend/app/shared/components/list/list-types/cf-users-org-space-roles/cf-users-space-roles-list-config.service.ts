@@ -1,6 +1,7 @@
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+
 import { ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListView } from '../../../../../store/actions/list.actions';
@@ -23,7 +24,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   hideRefresh = true;
   text = {
     title: null,
-    filter: 'Search by space name',
+    filter: 'Search by name',
     noEntries: 'There are no spaces'
   };
   columns: ITableColumn<APIResource<ISpace>>[] = [{
@@ -70,7 +71,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   }];
   initialised = new BehaviorSubject<boolean>(false);
 
-  constructor(private store: Store<AppState>, private cfGuid: string, private spaceGuid: string, userPerms: CurrentUserPermissionsService) {
+  constructor(private store: Store<AppState>, cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectUsersRolesRoles).pipe(
       first()
     ).subscribe(newRoles => {

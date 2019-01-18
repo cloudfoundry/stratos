@@ -1,6 +1,5 @@
-import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
 import { DatePipe } from '@angular/common';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -12,6 +11,7 @@ import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
+import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
 import { FetchBranchesForProject, FetchCommit } from '../../../../../../store/actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
 import { AppState } from '../../../../../../store/app-state';
@@ -24,7 +24,7 @@ import {
 import { GitCommit, GitRepo } from '../../../../../../store/types/git.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
-import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.service';
+import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
 
 
 @Component({
@@ -87,16 +87,19 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
         const commitId = stProject.deploySource.commit.trim();
-        const commitEntityKey = projectName + '-' + commitId;
 
         // Fallback to type if scm is not set (legacy support)
-        const scmType = stProject.deploySource.scm ||  stProject.deploySource.type;
+        const scmType = stProject.deploySource.scm || stProject.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType);
+
+        // Ensure the SCM type is included in the key
+        const repoEntityKey = `${scmType}-${projectName}`;
+        const commitEntityKey = `${repoEntityKey}-${commitId}`;
 
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           gitRepoSchemaKey,
           entityFactory(gitRepoSchemaKey),
-          projectName,
+          repoEntityKey,
           new FetchGitHubRepoInfo(stProject),
           false
         );
@@ -109,7 +112,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
           false
         );
 
-        const branchKey = `${projectName}-${stProject.deploySource.branch}`;
+        const branchKey = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
         this.gitBranchEntityService = this.entityServiceFactory.create(
           gitBranchesSchemaKey,
           entityFactory(gitBranchesSchemaKey),

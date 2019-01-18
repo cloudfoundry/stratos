@@ -182,7 +182,9 @@ export class CloudFoundryEndpointService {
     this.allApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
       switchMap(() => pagObs.pagination$),
       filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-      switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$)
+      switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$),
+      publishReplay(1),
+      refCount()
     );
 
     this.loadingApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process

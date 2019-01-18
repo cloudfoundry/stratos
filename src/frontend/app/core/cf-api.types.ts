@@ -154,7 +154,7 @@ export interface IDeveloper {
   audited_spaces_url: string;
 }
 
-export interface IOrganization {
+export interface IOrganization<spaceT = APIResource<ISpace>[]> {
   name: string;
   billing_enabled?: boolean;
   quota_definition_guid?: string;
@@ -176,7 +176,7 @@ export interface IOrganization {
   space_quota_definitions_url?: string;
   guid?: string;
   cfGuid?: string;
-  spaces?: APIResource<ISpace>[];
+  spaces?: spaceT;
   private_domains?: APIResource<IPrivateDomain>[];
   quota_definition?: APIResource<IQuotaDefinition>;
 }
