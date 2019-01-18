@@ -41,7 +41,7 @@ This release contains a number of fixes and improvements:
 - Add service provider name to marketplace service card [\#3268](https://github.com/cloudfoundry-incubator/stratos/pull/3268)
 - Add link to dashboard in service instance table [\#3267](https://github.com/cloudfoundry-incubator/stratos/pull/3267)
 - Add confirmation dialog to `Restage` app [\#3263](https://github.com/cloudfoundry-incubator/stratos/pull/3263)
-- Add support for JSON Schemas when binding services to applications h[\#3050](ttps://github.com/cloudfoundry-incubator/stratos/pull/3050)
+- Add support for JSON Schemas when binding services to applications [\#3050](ttps://github.com/cloudfoundry-incubator/stratos/pull/3050)
 - Scalability Improvements: Handle large number of apps in cf dashboards [\#3212](https://github.com/cloudfoundry-incubator/stratos/pull/3212)
 - Support prometheus-boshrelease as a metrics endpoint [\#3202](https://github.com/cloudfoundry-incubator/stratos/pull/3202)
 - Show better error message on login screen when account locked [\#3235](https://github.com/cloudfoundry-incubator/stratos/pull/3235)
