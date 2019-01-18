@@ -222,7 +222,8 @@ export class CloudFoundryEndpointService {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
-        const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
+        const spaces = org.entity.spaces || [];
+        const orgSpaces = spaces.map(s => s.metadata.guid);
         return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
     );
