@@ -598,7 +598,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public refresh() {
     if (this.dataSource.refresh) {
-      this.isRefreshing = true;
       this.dataSource.refresh();
       this.dataSource.isLoadingPage$.pipe(
         tap(isLoading => {
@@ -607,7 +606,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
           }
         }),
         takeWhile(isLoading => isLoading)
-      ).subscribe(null, null, () => this.isRefreshing = false);
+      );
     }
   }
 
