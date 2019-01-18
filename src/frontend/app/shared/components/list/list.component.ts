@@ -24,11 +24,9 @@ import {
   isObservable,
   Observable,
   of as observableOf,
-  queueScheduler,
   Subscription,
 } from 'rxjs';
 import {
-  combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -41,9 +39,10 @@ import {
   subscribeOn,
   takeWhile,
   tap,
-  throttleTime,
+  withLatestFrom,
 } from 'rxjs/operators';
 
+import { safeUnsubscribe } from '../../../core/utils.service';
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory } from '../../../store/helpers/entity-factory';
@@ -65,7 +64,6 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
-import { safeUnsubscribe } from '../../../core/utils.service';
 
 
 @Component({
@@ -186,7 +184,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   isFiltering$: Observable<boolean>;
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
-  public isRefreshing = false;
+  isRefreshing$: Observable<boolean>;
 
 
 
@@ -492,30 +490,39 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         })
       );
 
-    const hasChangedPage$ = this.dataSource.pagination$.pipe(
-      map(pag => pag.currentPage),
+    const loadingHasChanged$ = this.dataSource.isLoadingPage$.pipe(
+      distinctUntilChanged(),
       pairwise(),
-      map(([oldPage, newPage]) => oldPage !== newPage),
+      map(([oldLoading, newLoading]) =>
+        oldLoading !== newLoading
+      ),
+      startWith(true)
     );
 
-    const isMaxedResult$ = this.dataSource.pagination$.pipe(
-      map(pag => !!pag.maxedResults),
+    const hasFilterChangedSinceLastLoading$ = loadingHasChanged$.pipe(
+      filter(hasChanged => hasChanged),
+      withLatestFrom(this.dataSource.pagination$),
+      pairwise(),
+      map(([oldData, newData]) => [oldData[1], newData[1]]),
+      map(([oldPage, newPage]) =>
+        oldPage.currentPage !== newPage.currentPage ||
+        oldPage.clientPagination.filter !== newPage.clientPagination.filter ||
+        oldPage.params !== newPage.params
+      ),
+      startWith(true)
     );
 
-    const canShowLoading$ = observableCombineLatest([hasChangedPage$, isMaxedResult$]).pipe(
-      map(([hasChangedPage, isLoadingMaxedResults]) => hasChangedPage || isLoadingMaxedResults),
-      startWith(true),
-      distinctUntilChanged()
+    this.isRefreshing$ = observableCombineLatest(hasFilterChangedSinceLastLoading$, this.dataSource.isLoadingPage$).pipe(
+      map(([hasChanged, loading]) => !hasChanged && loading),
+      startWith(false)
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
-      startWith(true),
-      combineLatest(canShowLoading$),
-      map(([loading, canShowLoading]) => loading && canShowLoading && !this.isRefreshing),
+      withLatestFrom(this.isRefreshing$),
+      map(([loading, isRefreshing]) => !isRefreshing && loading),
       distinctUntilChanged(),
-      throttleTime(100, queueScheduler, { leading: true, trailing: true }),
+      startWith(true),
     );
-
   }
 
   ngAfterViewInit() {
@@ -591,7 +598,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public refresh() {
     if (this.dataSource.refresh) {
-      this.isRefreshing = true;
       this.dataSource.refresh();
       this.dataSource.isLoadingPage$.pipe(
         tap(isLoading => {
@@ -600,7 +606,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
           }
         }),
         takeWhile(isLoading => isLoading)
-      ).subscribe(null, null, () => this.isRefreshing = false);
+      );
     }
   }
 
