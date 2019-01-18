@@ -508,7 +508,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       filter(hasChanged => hasChanged),
       withLatestFrom(this.dataSource.pagination$),
       pairwise(),
-      map(([[hasChanged, oldPage], [newHasChanged, newPage]]) => [oldPage, newPage]),
+      map(([oldData, newData]) => [oldData[1], newData[1]]),
       map(([oldPage, newPage]) =>
         oldPage.currentPage !== newPage.currentPage ||
         oldPage.clientPagination.filter !== newPage.clientPagination.filter ||
