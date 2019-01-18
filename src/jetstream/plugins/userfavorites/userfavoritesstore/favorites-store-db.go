@@ -13,6 +13,7 @@ var (
 	getFavorites           = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id FROM favorites WHERE user_guid = $1`
 	deleteFavorite         = `DELETE FROM favorites WHERE user_guid = $1 AND guid = $2`
 	saveFavorite           = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id) VALUES ($1, $2, $3, $4, $5, $6)`
+	setMetadata            = `UPDATE favorites SET metadata = $3 WHERE user_guid = $1 AND guid = $2`
 	deleteEndpointFavorite = `DELETE FROM favorites WHERE endpoint_id = $1`
 )
 
@@ -48,7 +49,7 @@ func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) 
 
 	for rows.Next() {
 		favorite := new(UserFavoriteRecord)
-		err := rows.Scan(&favorite.GUID, &favorite.EndpointType, &favorite.EndpointID, &favorite.EntityType, &favorite.EntityID)
+		err := rows.Scan(&favorite.GUID, &favorite.EndpointType, &favorite.EndpointID, &favorite.EntityType, &favorite.EntityID, &favorite.Metadata)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan User Favorite records: %v", err)
 		}
@@ -65,7 +66,16 @@ func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) 
 // Delete will delete a User Favorite from the datastore
 func (p *FavoritesDBStore) Delete(userGUID string, guid string) error {
 	if _, err := p.db.Exec(deleteFavorite, userGUID, guid); err != nil {
-		return fmt.Errorf("Unable to User Favorite record: %v", err)
+		return fmt.Errorf("Unable to delete User Favorite record: %v", err)
+	}
+
+	return nil
+}
+
+// SetMetadata will set the metadata for a User Favorite from the datastore
+func (p *FavoritesDBStore) SetMetadata(userGUID string, guid string, metadata string) error {
+	if _, err := p.db.Exec(setMetadata, userGUID, guid, metadata); err != nil {
+		return fmt.Errorf("Unable to set metadata on User Favorite record: %v", err)
 	}
 
 	return nil
@@ -74,7 +84,7 @@ func (p *FavoritesDBStore) Delete(userGUID string, guid string) error {
 // Save will persist a User Favorite to a datastore
 func (p *FavoritesDBStore) Save(favoriteRecord UserFavoriteRecord) (*UserFavoriteRecord, error) {
 	if _, err := p.db.Exec(saveFavorite, favoriteRecord.GUID, favoriteRecord.UserGUID, favoriteRecord.EndpointType, favoriteRecord.EndpointID, favoriteRecord.EntityType, favoriteRecord.EntityID); err != nil {
-		return nil, fmt.Errorf("Unable to User Favorite record: %v", err)
+		return nil, fmt.Errorf("Unable to save User Favorite record: %v", err)
 	}
 
 	return &favoriteRecord, nil

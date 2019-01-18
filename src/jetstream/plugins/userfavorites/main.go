@@ -46,6 +46,7 @@ func (uf *UserFavorites) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/favorites", uf.getAll)
 	echoGroup.DELETE("/favorites/:guid", uf.delete)
 	echoGroup.POST("/favorites", uf.create)
+	echoGroup.POST("/favorites/:guid/metadata", uf.setMetadata)
 }
 
 // Init performs plugin initialization

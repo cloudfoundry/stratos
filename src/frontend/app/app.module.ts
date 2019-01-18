@@ -1,3 +1,4 @@
+import { IFavoriteMetadata } from './store/types/user-favorites.types';
 import { AppState } from './store/app-state';
 import { APIResource } from './store/types/api.types';
 import { NgModule } from '@angular/core';
@@ -29,7 +30,7 @@ import { favoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { EndpointModel } from './store/types/endpoint.types';
 import { applicationSchemaKey, endpointSchemaKey, spaceSchemaKey, organizationSchemaKey } from './store/helpers/entity-factory';
 import { IApp, ISpace, IOrganization } from './core/cf-api.types';
-import { startWith, map } from 'rxjs/operators';
+import { startWith, map, combineLatest, debounceTime } from 'rxjs/operators';
 import { ApplicationStateService } from './shared/components/application-state/application-state.service';
 import { ApplicationService, createGetApplicationAction } from './features/applications/application.service';
 import { Store } from '@ngrx/store';
@@ -40,6 +41,8 @@ import { CurrentUserPermissionsService } from './core/current-user-permissions.s
 import { CurrentUserPermissions } from './core/current-user-permissions.config';
 import { RouterNav } from './store/actions/router.actions';
 import { initEndpointExtensions, getFullEndpointApiUrl } from './features/endpoints/endpoint-helpers';
+import { getAPIRequestDataState } from './store/selectors/api.selectors';
+import { UserFavoriteManager } from './core/user-favorite-manager';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -107,17 +110,31 @@ export class CustomRouterStateSerializer
   bootstrap: [AppComponent]
 })
 export class AppModule {
+  private userFavoriteManager: UserFavoriteManager;
   constructor(
     ext: ExtensionService,
     private permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
   ) {
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);
     // Once the CF modules become an extension point, these should be moved to a CF specific module
     this.registerCfFavoriteMappers();
+    this.userFavoriteManager = new UserFavoriteManager(store);
+    this.store.select(getAPIRequestDataState)
+      .pipe(
+        combineLatest(this.userFavoriteManager.getAllFavorites()),
+        debounceTime(500)
+      )
+      .subscribe(
+        ([entities, favorites]) => {
+          favorites.forEach(fav => {
+            console.log(entities[fav.entityType][fav.entityId]);
+          });
+        }
+      );
   }
 
   private registerCfFavoriteMappers() {
@@ -129,18 +146,25 @@ export class AppModule {
     this.registerCfOrgMapper(endpointType);
   }
   private registerCfEndpointMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig({
+    interface IEndpointFavMetadata extends IFavoriteMetadata {
+      guid: string;
+      address: string;
+      user: string;
+      admin: string;
+    }
+
+    favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IEndpointFavMetadata>({
       endpointType,
       entityType: endpointSchemaKey
     },
       'Cloud Foundry',
-      (endpoint: EndpointModel) => ({
+      (endpoint: IEndpointFavMetadata) => ({
         type: endpointType,
         routerLink: `/cloud-foundry/${endpoint.guid}`,
         lines: [
-          ['Address', getFullEndpointApiUrl(endpoint)],
-          ['User', endpoint.user ? endpoint.user.name : undefined],
-          ['Admin', endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined]
+          ['Address', endpoint.address],
+          ['User', endpoint.user],
+          ['Admin', endpoint.admin]
         ],
         name: endpoint.name,
         menuItems: [
@@ -152,75 +176,103 @@ export class AppModule {
         ]
       }),
       () => new GetAllEndpoints(false),
+      endpoint => ({
+        guid: endpoint.guid,
+        address: getFullEndpointApiUrl(endpoint),
+        user: endpoint.user ? endpoint.user.name : undefined,
+        admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
+      })
     );
   }
   private registerCfApplicationMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig({
+
+    interface IAppFavMetadata extends IFavoriteMetadata {
+      guid: string;
+      cfGuid: string;
+      name: string;
+    }
+
+    favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>({
       endpointType,
       entityType: applicationSchemaKey
     },
       'Application',
-      (app: APIResource<IApp>) => {
-        const initState = this.appStateService.get(app.entity, null);
-        const appState$ = ApplicationService.getApplicationState(
-          this.store,
-          this.appStateService,
-          app.entity,
-          app.metadata.guid,
-          app.entity.cfGuid
-        ).pipe(
-          startWith(initState)
-        );
+      (app: IAppFavMetadata) => {
         return {
-          getStatus: () => appState$.pipe(
-            map(state => state.indicator)
-          ),
           type: applicationSchemaKey,
-          routerLink: `/applications/${app.entity.cfGuid}/${app.entity.guid}/summary`,
-          lines: [
-            ['State', appState$.pipe(map(state => state.label))]
-          ],
-          name: app.entity.name
+          routerLink: `/applications/${app.cfGuid}/${app.guid}/summary`,
+          name: app.name,
+          lines: []
         };
       },
-      favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId)
+      favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId),
+      app => ({
+        guid: app.metadata.guid,
+        cfGuid: app.entity.cfGuid,
+        name: app.entity.name,
+      })
     );
   }
   private registerCfSpaceMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig({
+
+    interface ISpaceFavMetadata extends IFavoriteMetadata {
+      guid: string;
+      orgGuid: string;
+      name: string;
+      cfGuid: string;
+    }
+
+    favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>({
       endpointType,
       entityType: spaceSchemaKey
     },
       'Space',
-      (space: APIResource<ISpace>) => {
-        const orgGuid = space.entity.organization_guid || space.entity.organization.entity.guid;
+      (space: ISpaceFavMetadata) => {
         return {
           type: spaceSchemaKey,
-          routerLink: `/cloud-foundry/${space.entity.cfGuid}/organizations/${orgGuid}/spaces/${space.entity.guid}/summary`,
-          lines: [
-          ],
-          name: space.entity.name
+          routerLink: `/cloud-foundry/${space.cfGuid}/organizations/${space.orgGuid}/spaces/${space.guid}/summary`,
+          lines: [],
+          name: space.name
         };
       },
-      favorite => new GetSpace(favorite.entityId, favorite.endpointId)
+      favorite => new GetSpace(favorite.entityId, favorite.endpointId),
+      space => ({
+        guid: space.metadata.guid,
+        orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
+        name: space.entity.name,
+        cfGuid: space.entity.cfGuid,
+      })
     );
 
   }
   private registerCfOrgMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig({
+    interface IOrgFavMetadata extends IFavoriteMetadata {
+      guid: string;
+      status: string;
+      name: string;
+      cfGuid: string;
+    }
+
+    favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>({
       endpointType,
       entityType: organizationSchemaKey
     },
       'Organization',
-      (org: APIResource<IOrganization>) => ({
+      (org: IOrgFavMetadata) => ({
         type: organizationSchemaKey,
-        routerLink: `/cloud-foundry/${org.entity.cfGuid}/organizations/${org.entity.guid}`,
+        routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
         lines: [
-          ['Status', this.getOrgStatus(org)]
+          ['Status', org.status]
         ],
-        name: org.entity.name
+        name: org.name
       }),
-      favorite => new GetOrganization(favorite.entityId, favorite.endpointId)
+      favorite => new GetOrganization(favorite.entityId, favorite.endpointId),
+      org => ({
+        guid: org.metadata.guid,
+        status: this.getOrgStatus(org),
+        name: org.entity.name,
+        cfGuid: org.entity.cfGuid,
+      })
     );
   }
   private getOrgStatus(org: APIResource<IOrganization>) {

@@ -66,6 +66,28 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 	return nil
 }
 
+func (uf *UserFavorites) setMetadata(c echo.Context) error {
+
+	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
+	if err != nil {
+		return err
+	}
+
+	favoriteGUID := c.Param("guid")
+	if len(favoriteGUID) == 0 {
+		return errors.New("Invalid favorite GUID")
+	}
+
+	userGUID := c.Get("user_id").(string)
+	err = store.Delete(userGUID, favoriteGUID)
+	if err != nil {
+		return err
+	}
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
+	return nil
+}
+
 func (uf *UserFavorites) create(c echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())

@@ -1,7 +1,8 @@
+import { entityRelationMissingQuotaGuid } from './../../../store/helpers/entity-relations/entity-relations.spec';
 import { Observable } from 'rxjs';
 
 import { IRequestAction } from '../../../store/types/request.types';
-import { IFavoriteTypeInfo, UserFavorite } from '../../../store/types/user-favorites.types';
+import { IFavoriteTypeInfo, UserFavorite, IFavoriteMetadata } from '../../../store/types/user-favorites.types';
 import { CardStatus } from '../../shared.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 
@@ -19,18 +20,20 @@ export interface IFavoritesMetaCardConfig {
   menuItems?: MetaCardMenuItem[];
 }
 
-export type TFavoriteMapperFunction = (entity?) => IFavoritesMetaCardConfig;
+export type TFavoriteMapperFunction<T> = (entity: T) => IFavoritesMetaCardConfig;
 
 interface IFavoriteMappers {
   [key: string]: {
-    mapper: TFavoriteMapperFunction,
+    mapper: TFavoriteMapperFunction<any>,
     prettyName: string,
     actionGenerator: TFavoriteActionGenerator
+    entityToMetadata: TEntityToMetadata<any>
   };
 }
 
 export type TFavoriteActionGenerator = (favorite: UserFavorite) => IRequestAction;
 
+export type TEntityToMetadata<T, Q extends IFavoriteMetadata> = (entity: T) => Q;
 export interface IFavoriteActionGenerators {
   [key: string]: TFavoriteActionGenerator;
 }
@@ -52,17 +55,19 @@ class FavoritesConfigMapper {
    * @param mapper Takes an entity and maps it to favorite meta card config
    * @param actionGenerator Takes a favorite and returns an action that can be used to hydrate the favorite
    */
-  public registerFavoriteConfig(
+  public registerFavoriteConfig<T, Q extends IFavoriteMetadata>(
     favoriteInfo: IFavoriteTypeInfo,
     prettyName: string,
-    mapper: TFavoriteMapperFunction,
-    actionGenerator: TFavoriteActionGenerator
+    mapper: TFavoriteMapperFunction<Q>,
+    actionGenerator: TFavoriteActionGenerator,
+    entityToMetadata: TEntityToMetadata<T, Q>
   ) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favoriteInfo);
     this.mappers[mapperKey] = {
       mapper,
       prettyName,
-      actionGenerator
+      actionGenerator,
+      entityToMetadata
     };
   }
   /**

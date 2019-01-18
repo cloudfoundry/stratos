@@ -22,27 +22,27 @@ interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite[];
 }
 
-export interface IFavoriteEntity {
+export interface IFavoriteEntity<T> {
   type: string;
   prettyName: string;
-  cardMapper: TFavoriteMapperFunction;
+  cardMapper: TFavoriteMapperFunction<TemplateStringsArray>;
   entity: any;
   favorite: UserFavorite;
 }
 
-export interface IGroupedFavorites {
-  endpoint: IEndpointFavoriteEntity;
-  entities: IFavoriteEntity[];
+export interface IGroupedFavorites<T> {
+  endpoint: IEndpointFavoriteEntity<T>;
+  entities: IFavoriteEntity<T>[];
 }
 
-export interface IEndpointFavoriteEntity extends IFavoriteEntity {
+export interface IEndpointFavoriteEntity<T> extends IFavoriteEntity<T> {
   entity: EndpointModel;
 }
 
-export interface IAllFavorites {
+export interface IAllFavorites<T> {
   fetching: boolean;
   error: boolean;
-  entityGroups: IGroupedFavorites[];
+  entityGroups: IGroupedFavorites<T>[];
 }
 
 export interface IHydrationResults {
@@ -103,23 +103,25 @@ export class UserFavoriteManager {
     return pagination.pageRequests[pagination.currentPage];
   }
 
-  public hydrateAllFavorites(): Observable<IAllFavorites> {
+  public getAllFavorites() {
     const paginationMonitor = new PaginationMonitor<UserFavorite>(
       this.store,
       userFavoritesPaginationKey,
       entityFactory(userFavoritesSchemaKey)
     );
-
-    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
-
-    return this.getHydrateObservable(waitForFavorites$, paginationMonitor);
+    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor)
+    return waitForFavorites$.pipe(
+      switchMap(() => paginationMonitor.currentPage$)
+    );
   }
 
-  private getHydrateObservable(waitForFavorites$: Observable<ActionState>, paginationMonitor: PaginationMonitor) {
-    return waitForFavorites$.pipe(
-      switchMap(() => paginationMonitor.currentPage$.pipe(
-        map(this.addEndpointsToHydrateList)
-      )),
+  public hydrateAllFavorites(): Observable<IAllFavorites> {
+    return this.getHydrateObservable();
+  }
+
+  private getHydrateObservable() {
+    return this.getAllFavorites().pipe(
+      map(this.addEndpointsToHydrateList),
       map(this.groupIntermediateFavorites),
       mergeMap(this.getHydratedGroups),
       map(this.reduceGroupedRequests),

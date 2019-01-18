@@ -9,6 +9,11 @@ export interface IFavoriteTypeInfo {
   entityType?: string;
 }
 
+export interface IFavoriteMetadata {
+  [key: string]: string;
+}
+
+
 export class UserFavorite implements IFavoriteTypeInfo {
   public guid: string;
   constructor(
@@ -19,6 +24,7 @@ export class UserFavorite implements IFavoriteTypeInfo {
     */
     public entityType: string,
     public entityId?: string,
+    public metadata?: IFavoriteMetadata
   ) {
     this.guid = UserFavoritesEffect.buildFavoriteStoreEntityGuid(this);
   }
