@@ -2,6 +2,33 @@
 
 Weekly status updates are published here.
 
+## 18 January 2019
+
+We created a test release of 2.3.0 and identified a number of issues to be resolved for release.
+
+The remainder of this week was spent fixing the issues identified.
+
+A 2.3.0 Release Candidate will be published later today or on Monday of next week.
+
+We hope to finish testing and publish the 2.3.0 release next week.
+
+The 2.3.0 Change Log has been updated and is available [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md)
+
+## 11 January 2019
+
+Happy New Year!
+
+The focus of the week was in preparing 2.3.0 release:
+
+- We reviewed, updated and merged over 20 outstanding PRs that were targeted at 2.3.0 release
+- We’ve made some improvements to our Helm chart to the external service configuration
+- We’ve tweaked our release process and updated and improved our Concourse release pipelines
+- Performed initial testing of 2.3.0 build
+
+We expect to create a Release Candidate next for 2.3.0 so QA can kick the tyres as well.
+
+We’re also looking at the roadmap for this year and planning our releases throughout 2019.
+
 ## 21st December 2018
 
 Rounding off our year, here's some highlights from the last few weeks.

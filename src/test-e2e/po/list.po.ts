@@ -111,6 +111,10 @@ export class ListTableComponent extends Component {
   toggleSort(headerTitle: string): promise.Promise<any> {
     return this.locator.element(by.cssContainingText('mat-header-row app-table-cell', headerTitle)).click();
   }
+
+  getRowCount(): promise.Promise<number> {
+    return this.getRows().count();
+  }
 }
 
 // Page Object for the List Card View
@@ -181,8 +185,11 @@ export class ListCardComponent extends Component {
 // List Header (filter/search bar)
 export class ListHeaderComponent extends Component {
 
+  listLocator: ElementFinder;
+
   constructor(locator: ElementFinder) {
     super(locator.element(by.css('.list-component__header')));
+    this.listLocator = locator;
   }
 
   private getFilterSection(): ElementFinder {
@@ -269,6 +276,29 @@ export class ListHeaderComponent extends Component {
 
   getRefreshListButton(): ElementFinder {
     return this.getRightHeaderSection().element(by.css('#app-list-refresh-button'));
+  }
+
+  getRefreshListButtonAnimated(): ElementFinder {
+    return this.getRefreshListButton().element(by.css('.refresh-icon.refreshing'));
+  }
+
+  refresh() {
+    this.getRefreshListButton().click();
+    return this.waitForNotRefreshing();
+  }
+
+  isRefreshing(): promise.Promise<boolean> {
+    return this.getRefreshListButton().element(by.css('.refresh-icon')).getCssValue('animation-play-state').then(state =>
+      state === 'running'
+    );
+  }
+
+  waitForRefreshing(): promise.Promise<any> {
+    return browser.wait(until.visibilityOf(this.getRefreshListButtonAnimated()), 5000);
+  }
+
+  waitForNotRefreshing(): promise.Promise<any> {
+    return browser.wait(until.invisibilityOf(this.getRefreshListButtonAnimated()), 10000);
   }
 
   getCardListViewToggleButton(): ElementFinder {
@@ -415,10 +445,20 @@ export class ListComponent extends Component {
     return this.hasClass('list-component__cards', listElement);
   }
 
-  refresh() {
-    this.locator.element(by.id('app-list-refresh-button')).click();
-    const refreshIcon = element(by.css('.refresh-icon.refreshing'));
-    return browser.wait(until.invisibilityOf(refreshIcon), 10000);
+  private getLoadingIndicator(): ElementFinder {
+    return this.locator.element(by.css('.list-component > mat-progress-bar'));
+  }
+
+  isLoading(): promise.Promise<boolean> {
+    return this.locator.element(by.css('.list-component > mat-progress-bar')).isPresent();
+  }
+
+  waitForLoadingIndicator(): promise.Promise<any> {
+    return browser.wait(until.visibilityOf(this.getLoadingIndicator()), 1000);
+  }
+
+  waitForNoLoadingIndicator(): promise.Promise<any> {
+    return browser.wait(until.invisibilityOf(this.getLoadingIndicator()), 10000);
   }
 
   getTotalResults(): promise.Promise<number> {

@@ -10,7 +10,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
-import { GitSCMService } from '../../../../data-services/scm/scm.service';
 
 @Injectable()
 export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GitCommit>> {

@@ -18,7 +18,7 @@ export class DateTimeComponent implements OnDestroy {
   private changeSub: Subscription;
   private dateTimeValue: moment.Moment;
 
-  private dateObservable: Observable<moment.Moment>;
+  private dateObservable: Observable<Date>;
   private timeObservable: Observable<string>;
 
   @Output()
@@ -50,12 +50,12 @@ export class DateTimeComponent implements OnDestroy {
     ).pipe(
       debounceTime(250),
       filter(([time, date]) => !!(time && date)),
-      map(([time, date]: [string, moment.Moment]) => {
+      map(([time, date]: [string, Date]) => {
         const [hour, minute] = time.split(':');
         return [
           parseInt(hour, 10),
           parseInt(minute, 10),
-          date
+          moment(date)
         ];
       }),
       filter(([hour, minute]: [number, number, moment.Moment]) => {
