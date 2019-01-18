@@ -27,8 +27,10 @@ export class HelmReleaseServicesDataSource extends ListDataSource<KubeService, a
       schema: entityFactory(kubernetesServicesSchemaKey),
       getRowUniqueId: object => object.name,
       paginationKey: getPaginationKey(kubernetesServicesSchemaKey, kubeGuid.guid),
-      transformEntity: map((pods: KubeService[]) =>
-        pods.filter(p => p.metadata.labels && p.metadata.labels.release === helmReleaseService.helmReleaseName)),
+      transformEntity: map((services: KubeService[]) => services.filter(svc =>
+        svc.metadata.labels &&
+        svc.metadata.labels['app.kubernetes.io/instance'] === helmReleaseService.helmReleaseName
+      )),
       isLocal: true,
       listConfig,
       transformEntities: [{ type: 'filter', field: 'metadata.name' }]
