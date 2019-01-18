@@ -102,7 +102,7 @@ export class FetchCFCellMetricsAction extends MetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, null, queryType, isSeries);
+    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries);
   }
 }
 

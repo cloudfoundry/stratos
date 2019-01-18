@@ -1,18 +1,16 @@
-import { SessionData } from './../../store/types/auth.types';
-import { Observable } from 'rxjs';
-import { Component, Inject, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-
-import { LoginPageComponent } from '../../features/login/login-page/login-page.component';
-import { AppState } from '../../store/app-state';
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
+import { AppState } from '../../store/app-state';
 import { AuthState } from '../../store/reducers/auth.reducer';
+import { SessionData } from './../../store/types/auth.types';
 
 @Component({
   selector: 'app-suse-about-info',
   templateUrl: './suse-about-info.component.html',
   styleUrls: ['./suse-about-info.component.scss'],
-  encapsulation: ViewEncapsulation.None
 })
 export class SuseAboutInfoComponent {
 

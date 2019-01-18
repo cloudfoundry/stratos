@@ -131,8 +131,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
 
-    this.applicationService.applicationStratProject$
-      .pipe(first())
+    // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
+    this.stratosProjectSub = this.applicationService.applicationStratProject$
       .subscribe(stratProject => {
         if (
           stratProject &&
@@ -141,7 +141,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         ) {
           const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
           const scm = scmService.getSCM(gitscm as GitSCMType);
-          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+
+          // Add tab or update existing tab
+          const tab = this.tabLinks.find(t => t.link === 'gitscm');
+          if (!tab) {
+            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+          } else {
+            tab.label = scm.getLabel();
+          }
         }
       });
   }
@@ -152,6 +159,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
+  stratosProjectSub: Subscription;
   autoRefreshString = 'auto-refresh';
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
@@ -389,6 +397,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$);
+    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$, this.stratosProjectSub);
   }
 }

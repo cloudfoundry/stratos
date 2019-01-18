@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/subtle"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -29,7 +30,7 @@ const StratosSSOHeader = "x-stratos-sso-login"
 // Header to communicate any error during SSO
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
-func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool) error {
+func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
 	// Add header so front-end knows SSO login is enabled
 	if config.SSOLogin {
 		// A non-empty SSO Header means SSO is enabled
@@ -51,12 +52,12 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 
 	var logMessage = ""
 	if !doNotLog {
-		logMessage = "User session could not be found: %v"
+		logMessage = msg + ": %v"
 	}
 
 	return interfaces.NewHTTPShadowError(
 		http.StatusUnauthorized,
-		"User session could not be found", logMessage, err,
+		msg, logMessage, err,
 	)
 }
 
@@ -78,7 +79,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
 		}
-		return handleSessionError(p.Config, c, err, isVerify)
+		return handleSessionError(p.Config, c, err, isVerify, "User session could not be found")
 	}
 }
 
@@ -170,7 +171,6 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		// get the user guid
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err == nil {
-
 			// check their admin status in UAA
 			u, err := p.GetUAAUser(userID.(string))
 			if err != nil {
@@ -182,7 +182,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		return handleSessionError(p.Config, c, err, false)
+		return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin to access this API")
 	}
 }
 

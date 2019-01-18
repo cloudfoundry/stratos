@@ -1,5 +1,66 @@
 # Change Log
 
+## 2.3.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.2.0...2.3.0)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+- Service instance names should be limited to 50 chars [\#3262](https://github.com/cloudfoundry-incubator/stratos/issues/3262)
+- Metrics Charts: CPU usage tooltip should round value [\#3336](https://github.com/cloudfoundry-incubator/stratos/issues/3336)
+- Allow apps in "offline while updating" state to be started[\#3332](https://github.com/cloudfoundry-incubator/stratos/issues/3332)
+- Manage Users - space table filtering does not work “Search by space name” [\#3329](https://github.com/cloudfoundry-incubator/stratos/issues/3329)
+- Make it clearer that you can manage roles for multiple users [\#3250](https://github.com/cloudfoundry-incubator/stratos/issues/3250)
+- Register an endpoint arrow misaligned [\#3221](https://github.com/cloudfoundry-incubator/stratos/issues/3221)
+- Fix exception when navigating away from the first deploy app step [\#3277](https://github.com/cloudfoundry-incubator/stratos/pull/3277)
+- Ensure we don't try to get length of undefined endpoint description [\#3274](https://github.com/cloudfoundry-incubator/stratos/pull/3274)
+- Fix null exception after creating a space in an new org [\#3351](https://github.com/cloudfoundry-incubator/stratos/pull/3351)
+- Fixes double requests when single cf connected for lists with cf filter [\#3313](https://github.com/cloudfoundry-incubator/stratos/pull/3313)
+- Fix auto select of single items in multi filter list [\#3306](https://github.com/cloudfoundry-incubator/stratos/pull/3306)
+- Ensure an empty errorResponse gets picked up as a jetstream error [\#3301](https://github.com/cloudfoundry-incubator/stratos/pull/3301)
+- Validate entity names locally [\#3296](https://github.com/cloudfoundry-incubator/stratos/pull/3296)
+- Application Environment Variables fixes & improvements [\#3286](https://github.com/cloudfoundry-incubator/stratos/pull/3286)
+- Hide app vars tab if user is not a space developer [\#3247](https://github.com/cloudfoundry-incubator/stratos/pull/3247)
+- Limit card titles to two-lines with ellipsis/fade out [\#3241](https://github.com/cloudfoundry-incubator/stratos/pull/3241)
+- Fix CLI info formatting [\#3237](https://github.com/cloudfoundry-incubator/stratos/pull/3237)
+- Add Route: Use correct label for submit button [\#3231](https://github.com/cloudfoundry-incubator/stratos/pull/3231)
+- Fix for cancel broken on add route [\#3228](https://github.com/cloudfoundry-incubator/stratos/pull/3228)
+- Fix display of generic error bar [\#3214](https://github.com/cloudfoundry-incubator/stratos/pull/3214)
+- Only show + icon when we have at least one connected CF [\#3211](https://github.com/cloudfoundry-incubator/stratos/pull/3211)
+- Cannot deploy application from folder upload [\#3188](https://github.com/cloudfoundry-incubator/stratos/pull/3188)
+- Fix issue where only first 100 services were shown in service marketplace [\#3161](https://github.com/cloudfoundry-incubator/stratos/pull/3161)
+- Fix marketplace provisioning for asynchronous services [\#3086](https://github.com/cloudfoundry-incubator/stratos/pull/3086)
+
+**Improvements:**
+- App Deploy: Add Public GitLab Repository support [\#3239](https://github.com/cloudfoundry-incubator/stratos/pull/3239)
+- Add a routes list to the CF tabs, Routes Refactor & Route Bug Fixes [\#3292](https://github.com/cloudfoundry-incubator/stratos/pull/3292)
+- Add deployment info for apps deployed via docker & fix info for local/archive apps [\#3291](https://github.com/cloudfoundry-incubator/stratos/pull/3291)
+- Add service plan list to service pages [\#3275](https://github.com/cloudfoundry-incubator/stratos/pull/3275)
+- Add Org and Space status bar to Org/Space Cards [\#3265](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
+- Add service provider name to marketplace service card [\#3268](https://github.com/cloudfoundry-incubator/stratos/pull/3268)
+- Add link to dashboard in service instance table [\#3267](https://github.com/cloudfoundry-incubator/stratos/pull/3267)
+- Add confirmation dialog to `Restage` app [\#3263](https://github.com/cloudfoundry-incubator/stratos/pull/3263)
+- Add support for JSON Schemas when binding services to applications [\#3050](https://github.com/cloudfoundry-incubator/stratos/pull/3050)
+- Scalability Improvements: Handle large number of apps in cf dashboards [\#3212](https://github.com/cloudfoundry-incubator/stratos/pull/3212)
+- Support prometheus-boshrelease as a metrics endpoint [\#3202](https://github.com/cloudfoundry-incubator/stratos/pull/3202)
+- Show better error message on login screen when account locked [\#3235](https://github.com/cloudfoundry-incubator/stratos/pull/3235)
+- Helm Chart Service port configuration improvements  [\#3264](https://github.com/cloudfoundry-incubator/stratos/pull/3264)
+- List Multifilter Improvements [\#3270](https://github.com/cloudfoundry-incubator/stratos/pull/3270)
+- Stratos can now be deployed as a CF App using docker image [\#3294](https://github.com/cloudfoundry-incubator/stratos/pull/3294)
+- Create stable docker image [\#3307](https://github.com/cloudfoundry-incubator/stratos/issues/3307)
+- About Page Title customization support [\#3356](https://github.com/cloudfoundry-incubator/stratos/pull/3356)
+- Make the table multi actions more obvious [\#3251](https://github.com/cloudfoundry-incubator/stratos/pull/3251)
+- Use SHA256 to compare SSH public key fingerprint [\#3249](https://github.com/cloudfoundry-incubator/stratos/pull/3249)
+- Show refresh button for latest modified application lists [\#3213](https://github.com/cloudfoundry-incubator/stratos/pull/3213)
+- Improve focus & tabbing [\#3288](https://github.com/cloudfoundry-incubator/stratos/pull/3288)
+- Tidy up CLI login info [\#3269](https://github.com/cloudfoundry-incubator/stratos/pull/3269)
+- Reduce size of Docker All-in-one image [\#3261](https://github.com/cloudfoundry-incubator/stratos/pull/3261)
+- Remove global manage apps link [\#3259](https://github.com/cloudfoundry-incubator/stratos/pull/3259)
+- Add user has roles filter to users tables [\#3258](https://github.com/cloudfoundry-incubator/stratos/pull/3258)
+- Deploy App: Add notification toast [\#3242](https://github.com/cloudfoundry-incubator/stratos/pull/3242)
+- Update app instance cell data when scaling up [\#3133](https://github.com/cloudfoundry-incubator/stratos/pull/3133)
+
 ## 2.2.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.1.2...2.2.0)
