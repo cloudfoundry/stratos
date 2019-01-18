@@ -4,7 +4,7 @@
 
 <div *ngIf="(sessionData$ | async) as session">
   <mat-card class="diagnostics-page__card">
-    <app-metadata-item icon="web_asset" label="Stratos Version">{{ session.version.proxy_version }}</app-metadata-item>
+    <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
     <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
     <div *ngIf="(this.userIsAdmin$ | async) as isAdminUser">
       <app-metadata-item *ngIf="!isAdminUser" icon="person" label="User">{{ session.user.name }}</app-metadata-item>
