@@ -7,6 +7,7 @@ import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { KubernetesSetupModule } from './kubernetes/kubernetes.setup.module';
 import { SuseLoginComponent } from './suse-login/suse-login.component';
+import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
 import { EndpointsService } from '../core/endpoints.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
@@ -16,6 +17,7 @@ import { EndpointHealthCheck } from '../core/endpoints-health-checks';
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
   hasEula: true,
+  aboutInfoComponent: SuseAboutInfoComponent
 };
 
 @NgModule({
@@ -26,10 +28,12 @@ const SuseCustomizations: CustomizationsMetadata = {
     KubernetesSetupModule
   ],
   declarations: [
-    SuseLoginComponent
+    SuseLoginComponent,
+    SuseAboutInfoComponent
   ],
   entryComponents: [
     SuseLoginComponent,
+    SuseAboutInfoComponent
   ],
   providers: [
     { provide: Customizations, useValue: SuseCustomizations }

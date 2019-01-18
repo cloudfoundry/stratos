@@ -62,6 +62,11 @@ $suse-side-nav-active: #003358;
   .side-nav__bottom {
     color: $suse-text-gray;
   }
+
+  // Remove green page underflow run on about page
+  app-about-page .page-header__underflow {
+    background-color: transparent;
+  }
 }
 
 // Remove background image from setup screen (e.g. upgrade screen)
