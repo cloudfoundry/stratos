@@ -18,16 +18,17 @@ import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
 import {
+  asapScheduler,
   BehaviorSubject,
   combineLatest as observableCombineLatest,
+  isObservable,
   Observable,
   of as observableOf,
-  Subscription,
   queueScheduler,
-  isObservable,
-  asapScheduler,
+  Subscription,
 } from 'rxjs';
 import {
+  combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -37,18 +38,16 @@ import {
   publishReplay,
   refCount,
   startWith,
-  switchMap,
+  subscribeOn,
   takeWhile,
   tap,
-  withLatestFrom,
-  combineLatest,
   throttleTime,
-  subscribeOn,
 } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory } from '../../../store/helpers/entity-factory';
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ListView } from './../../../store/actions/list.actions';
@@ -59,16 +58,14 @@ import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
-  IListAction,
   IListConfig,
-  IListMultiFilterConfig,
   IMultiListAction,
   IOptionalAction,
   ListConfig,
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
-import { RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
+import { safeUnsubscribe } from '../../../core/utils.service';
 
 
 @Component({
@@ -189,7 +186,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   isFiltering$: Observable<boolean>;
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
-  isRefreshing$: Observable<boolean>;
+  public isRefreshing = false;
 
 
 
@@ -514,16 +511,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
       startWith(true),
       combineLatest(canShowLoading$),
-      map(([loading, canShowLoading]) => loading && canShowLoading),
+      map(([loading, canShowLoading]) => loading && canShowLoading && !this.isRefreshing),
       distinctUntilChanged(),
       throttleTime(100, queueScheduler, { leading: true, trailing: true }),
     );
 
-    this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
-      withLatestFrom(canShowLoading$, this.showProgressBar$),
-      map(([loading, canShowLoading, showProgressBar]) => !canShowLoading && loading && !showProgressBar),
-      distinctUntilChanged()
-    );
   }
 
   ngAfterViewInit() {
@@ -531,21 +523,15 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   ngOnDestroy() {
-    this.multiFilterWidgetObservables.forEach(sub => sub.unsubscribe());
-    if (this.paginationWidgetToStore) {
-      this.paginationWidgetToStore.unsubscribe();
-    }
-    if (this.filterWidgetToStore) {
-      this.filterWidgetToStore.unsubscribe();
-    }
-    if (this.uberSub) {
-      this.uberSub.unsubscribe();
-    }
+    safeUnsubscribe(
+      ...this.multiFilterWidgetObservables,
+      this.paginationWidgetToStore,
+      this.filterWidgetToStore,
+      this.uberSub,
+      this.multiFilterChangesSub
+    );
     if (this.dataSource) {
       this.dataSource.destroy();
-    }
-    if (this.multiFilterChangesSub) {
-      this.multiFilterChangesSub.unsubscribe();
     }
     this.pendingActions.forEach(sub => sub.unsubscribe());
   }
@@ -605,6 +591,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public refresh() {
     if (this.dataSource.refresh) {
+      this.isRefreshing = true;
       this.dataSource.refresh();
       this.dataSource.isLoadingPage$.pipe(
         tap(isLoading => {
@@ -613,7 +600,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
           }
         }),
         takeWhile(isLoading => isLoading)
-      ).subscribe();
+      ).subscribe(null, null, () => this.isRefreshing = false);
     }
   }
 
