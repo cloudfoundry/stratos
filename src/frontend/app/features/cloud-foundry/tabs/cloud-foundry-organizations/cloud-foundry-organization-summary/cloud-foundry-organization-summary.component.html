@@ -6,7 +6,7 @@
         </app-card-cf-org-user-details>
       </app-tile>
     </app-tile-group>
-    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+    <app-loading-page id="cf-org-summary-loading" [isLoading]="detailsLoading$" text="Retrieving details">
       <app-tile-group>
         <app-tile>
           <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" icon="language" label="Spaces" labelSingular="Space" value="{{ (cfOrgService.spaces$ | async)?.length }}"></app-card-number-metric>
