@@ -499,34 +499,33 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       distinctUntilChanged(),
       pairwise(),
       map(([oldLoading, newLoading]) =>
-        !oldLoading && newLoading
+        oldLoading !== newLoading
       ),
-      startWith(true),
+      startWith(true)
     );
 
     const hasFilterChangedSinceLastLoading$ = loadingHasChanged$.pipe(
       filter(hasChanged => hasChanged),
       withLatestFrom(this.dataSource.pagination$),
       pairwise(),
-      map(([[hasChanged, oldPage], [newHasChanged, newPage]]) =>
+      map(([[hasChanged, oldPage], [newHasChanged, newPage]]) => [oldPage, newPage]),
+      map(([oldPage, newPage]) =>
         oldPage.currentPage !== newPage.currentPage ||
         oldPage.clientPagination.filter !== newPage.clientPagination.filter ||
         oldPage.params !== newPage.params
       ),
-      startWith(true),
-      tap(hasChanged => console.log(hasChanged, 'hasChanged'))
+      startWith(true)
     );
 
     this.isRefreshing$ = observableCombineLatest(hasFilterChangedSinceLastLoading$, this.dataSource.isLoadingPage$).pipe(
       map(([hasChanged, loading]) => !hasChanged && loading),
-      tap(console.log)
+      startWith(false)
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
       withLatestFrom(this.isRefreshing$),
       map(([loading, isRefreshing]) => !isRefreshing && loading),
       distinctUntilChanged(),
-      tap((showProgress) => console.log(showProgress, 'showProgress')),
       startWith(true),
     );
   }
