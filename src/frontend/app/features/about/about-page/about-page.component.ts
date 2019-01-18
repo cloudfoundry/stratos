@@ -28,14 +28,18 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   versionNumber$: Observable<string>;
   userIsAdmin$: Observable<boolean>;
 
+  @ViewChild('aboutInfoContainer', { read: ViewContainerRef }) aboutInfoContainer;
   @ViewChild('supportInfoContainer', { read: ViewContainerRef }) supportInfoContainer;
 
+  aboutInfoComponentRef: ComponentRef<any>;
   componentRef: ComponentRef<any>;
 
   constructor(
     private store: Store<AppState>,
     private resolver: ComponentFactoryResolver,
-    @Inject(Customizations) public customizations: CustomizationsMetadata) { }
+    @Inject(Customizations) public customizations: CustomizationsMetadata
+  ) { }
+
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
       filter(auth => !!(auth && auth.sessionData)),
@@ -53,12 +57,24 @@ export class AboutPageComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.addAboutInfoComponent();
     this.addSupportInfo();
   }
 
   ngOnDestroy() {
+    if (this.aboutInfoComponentRef) {
+      this.aboutInfoComponentRef.destroy();
+    }
     if (this.componentRef) {
       this.componentRef.destroy();
+    }
+  }
+
+  addAboutInfoComponent() {
+    this.aboutInfoContainer.clear();
+    if (this.customizations.aboutInfoComponent) {
+      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.aboutInfoComponent);
+      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(factory);
     }
   }
 

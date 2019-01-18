@@ -1,6 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
@@ -23,6 +25,7 @@ import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
 
   multiFilterConfigs: IListMultiFilterConfig[];
+  initialised$: Observable<boolean>;
 
   constructor(
     private datePipe: DatePipe,
@@ -32,13 +35,25 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   ) {
     super();
 
-    this.appsDataSource = new CfAppsDataSource(this.store, this);
+    // Apply the initial cf guid to the data source. Normally this is done via applying the selection to the filter... however this is too
+    // late for maxedResult world
+    this.initialised$ = this.cfOrgSpaceService.cf.loading$.pipe(
+      filter(isLoading => !isLoading),
+      switchMap(() => this.cfOrgSpaceService.cf.list$),
+      first(),
+      map(cfs => {
+        const cfGuid = cfs.length === 1 ? cfs[0].guid : null;
+        this.appsDataSource = new CfAppsDataSource(this.store, this, undefined, undefined, undefined, cfGuid);
+        return true;
+      })
+    );
 
     this.multiFilterConfigs = [
       createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createCfOrgSpaceFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
       createCfOrgSpaceFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
     ];
+
   }
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
@@ -117,6 +132,6 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
-  getInitialised = () => this.appsDataSource.initialised$;
+  getInitialised = () => this.initialised$;
 
 }

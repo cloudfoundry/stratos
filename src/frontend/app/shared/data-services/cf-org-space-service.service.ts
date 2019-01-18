@@ -1,10 +1,22 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
+import { ResetPagination, SetParams } from '../../store/actions/pagination.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
@@ -17,11 +29,10 @@ import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpo
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { PaginatedAction, PaginationParam, QParam } from '../../store/types/pagination.types';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
-import { PaginationParam, QParam, PaginatedAction } from '../../store/types/pagination.types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
-import { SetParams, ResetPagination } from '../../store/actions/pagination.actions';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   return {
@@ -200,10 +211,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createCf() {
+    const list$ = this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+      // Ensure we have endpoints
+      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
+      publishReplay(1),
+      refCount(),
+    );
     this.cf = {
-      list$: this.store.select(endpointsRegisteredEntitiesSelector).pipe(
-        // Ensure we have endpoints
-        filter(endpoints => endpoints && !!Object.keys(endpoints).length),
+      list$: list$.pipe(
         // Filter out non-cf endpoints
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
         // Ensure we have at least one connected cf
@@ -218,9 +233,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
         first(),
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
-        })
+        }),
       ),
-      loading$: this.allOrgsLoading$,
+      loading$: list$.pipe(
+        map(cfs => !cfs)
+      ),
       select: new BehaviorSubject(undefined)
     };
   }

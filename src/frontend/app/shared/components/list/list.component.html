@@ -97,7 +97,7 @@
             </button>
           </div>
           <button id="app-list-refresh-button" mat-icon-button *ngIf="dataSource.refresh" [disabled]="(dataSource.isLoadingPage$ | async) || (isAddingOrSelecting$ | async)" (click)="refresh()">
-            <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
+            <mat-icon class="refresh-icon" [ngClass]="{refreshing: isRefreshing}" aria-label="Refresh list data">refresh</mat-icon>
           </button>
         </div>
 
@@ -105,7 +105,7 @@
     </div>
     <div class="refresh-button__no-header" *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
       <button id="app-list-refresh-button" mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
-        <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
+        <mat-icon class="refresh-icon" [ngClass]="{refreshing: isRefreshing}" aria-label="Refresh list data">refresh</mat-icon>
       </button>
     </div>
     <div class="list-component__body">
