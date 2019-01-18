@@ -17,18 +17,19 @@ import {
   SET_INITIAL_PARAMS,
   SET_PAGE,
   SET_PAGE_BUSY,
+  SET_PAGINATION_MAX_REACHED,
   SET_PARAMS,
   SET_RESULT_COUNT,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
-import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
 import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
+import { paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
@@ -71,7 +72,12 @@ export function getDefaultPaginationEntityState(): PaginationEntityState {
   };
 }
 
-export const defaultPaginationState = { ...defaultCfEntitiesState };
+// Initialized when all entity types have been registered
+export let defaultPaginationState = {};
+
+export function setDefaultPaginationState(state: any) {
+  defaultPaginationState = state;
+}
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
@@ -148,6 +154,10 @@ function paginate(action, state, updatePagination) {
 
   if (isEndpointAction(action)) {
     return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
+  }
+
+  if (action.type === SET_PAGINATION_MAX_REACHED) {
+    return paginationMaxReached(state, action);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

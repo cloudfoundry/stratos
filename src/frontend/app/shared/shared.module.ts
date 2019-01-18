@@ -5,6 +5,8 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MomentModule } from 'ngx-moment';
+import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
 import {
@@ -54,6 +56,7 @@ import {
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
+import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
@@ -63,6 +66,7 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
 import {
   CreateApplicationStep1Component,
 } from './components/create-application/create-application-step1/create-application-step1.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
@@ -76,9 +80,6 @@ import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
-import {
-  AppEventDetailDialogComponentComponent,
-} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -98,13 +99,23 @@ import { LoadingPageComponent } from './components/loading-page/loading-page.com
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
+import {
+  MetricsParentRangeSelectorComponent,
+} from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
+import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { SchemaFormComponent } from './components/schema-form/schema-form.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
+import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
@@ -120,27 +131,19 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { GitSCMService } from './data-services/scm/scm.service';
 import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { UserPermissionDirective } from './user-permission.directive';
-import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
-import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
-import { DateTimeComponent } from './components/date-time/date-time.component';
-import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
-import { MomentModule } from 'ngx-moment';
-import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
-import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
-import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
+import { UserPermissionDirective } from './user-permission.directive';
 
 @NgModule({
   imports: [
@@ -152,6 +155,7 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MaterialDesignFrameworkModule,
     MomentModule,
   ],
   declarations: [
@@ -171,7 +175,6 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CodeBlockComponent,
     EventTabActorIconPipe,
     LogViewerComponent,
-    AppEventDetailDialogComponentComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
@@ -213,6 +216,8 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     ServiceIconComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent,
     EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
@@ -245,6 +250,7 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CfEndpointsMissingComponent,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
+    SchemaFormComponent,
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
@@ -308,6 +314,8 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CompactAppCardComponent,
     EnvVarViewComponent,
     ServiceIconComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent,
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
@@ -345,7 +353,6 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
-    AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
     NoServicePlansComponent
@@ -361,6 +368,7 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    GitSCMService,
     MetricsRangeSelectorService
   ]
 })

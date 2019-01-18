@@ -7,17 +7,13 @@ import { IApp } from '../../../../../../core/cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/app-state';
-import { endpointSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-  CardStatus,
-} from '../../../../application-state/application-state.service';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 
 @Component({
   selector: 'app-card-app',

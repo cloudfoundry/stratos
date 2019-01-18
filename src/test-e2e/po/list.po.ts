@@ -91,6 +91,14 @@ export class ListTableComponent extends Component {
       });
   }
 
+  editRow(index: number, fieldId: string, newValue: string): promise.Promise<any> {
+    const cell = this.getRows().get(index);
+    cell.element(by.css('app-table-cell-edit button')).click();
+    const form = new FormComponent(cell);
+    form.fill({ [fieldId]: newValue });
+    return cell.element(by.id('table-cell-edit-done')).click();
+  }
+
   openRowActionMenuByIndex(index: number): MenuComponent {
     return this.openRowActionMenuByRow(this.getRows().get(index));
   }
@@ -102,6 +110,10 @@ export class ListTableComponent extends Component {
 
   toggleSort(headerTitle: string): promise.Promise<any> {
     return this.locator.element(by.cssContainingText('mat-header-row app-table-cell', headerTitle)).click();
+  }
+
+  getRowCount(): promise.Promise<number> {
+    return this.getRows().count();
   }
 }
 
@@ -173,18 +185,27 @@ export class ListCardComponent extends Component {
 // List Header (filter/search bar)
 export class ListHeaderComponent extends Component {
 
+  listLocator: ElementFinder;
+
   constructor(locator: ElementFinder) {
     super(locator.element(by.css('.list-component__header')));
+    this.listLocator = locator;
   }
 
-  getFilterFormField(): ElementArrayFinder {
-    return this.locator
-      .element(by.css('.list-component__header__left--multi-filters'))
-      .all(by.tagName('mat-form-field'));
+  private getFilterSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__left--multi-filters'));
+  }
+
+  getFilterFormFields(): ElementArrayFinder {
+    return this.getFilterSection().all(by.tagName('mat-form-field'));
   }
 
   getRightHeaderSection(): ElementFinder {
     return this.locator.element(by.css('.list-component__header__right'));
+  }
+
+  getLeftHeaderSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__left'));
   }
 
   getSearchInputField(): ElementFinder {
@@ -209,31 +230,75 @@ export class ListHeaderComponent extends Component {
   getSearchText(): promise.Promise<string> {
     return this.getSearchInputField().getAttribute('value');
   }
-  getPlaceholderText(index = 0): promise.Promise<string> {
-    return this.getFilterFormField().get(index).element(by.tagName('mat-placeholder')).getText();
+
+  getFilterFormField(id: string): ElementFinder {
+    return this.getFilterSection().element(by.id(id));
   }
 
-  getFilterOptions(index = 0): promise.Promise<ElementFinder[]> {
-    this.getFilterFormField().get(index).click();
-    return element.all(by.tagName('mat-option')).then((matOptions: ElementFinder[]) => {
-      return matOptions;
+  getPlaceHolderText(id: string, ignoreMissing = false): promise.Promise<string> {
+    const filter = this.getFilterFormField(id);
+    return filter.isPresent().then(isPresent => {
+      if (isPresent) {
+        return filter.element(by.tagName('mat-placeholder')).getText();
+      } else if (!ignoreMissing) {
+        fail(`Failed to find filter with id '${id}'`);
+      }
     });
   }
 
-  getFilterText(index = 0): promise.Promise<string> {
-    return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
+  getFilterOptions(id: string, ignoreMissing = false): promise.Promise<ElementFinder[]> {
+    const filter = this.getFilterFormField(id);
+    return filter.isPresent().then(isPresent => {
+      if (isPresent) {
+        filter.click();
+        return element.all(by.id(id)).then((matOptions: ElementFinder[]) => matOptions);
+      } else if (!ignoreMissing) {
+        fail(`Failed to find filter with id '${id}'`);
+      }
+    });
   }
 
-  selectFilterOption(index: number, valueIndex): promise.Promise<any> {
-    return this.getFilterOptions(index).then(options => options[valueIndex].click());
+  getFilterText(id: string): promise.Promise<string> {
+    return this.getFilterFormField(id).element(by.css('.mat-select-value')).getText();
+  }
+
+  selectFilterOption(id: string, valueIndex: number, ignoreMissing = false): promise.Promise<any> {
+    return this.getFilterOptions(id, ignoreMissing).then(options => {
+      if (options) {
+        options[valueIndex].click();
+      }
+    });
   }
 
   getMultiFilterForm(): FormComponent {
-    return new FormComponent(this.locator.element(by.className('list-component__header__left--multi-filters')));
+    return new FormComponent(this.getFilterSection());
   }
 
   getRefreshListButton(): ElementFinder {
     return this.getRightHeaderSection().element(by.css('#app-list-refresh-button'));
+  }
+
+  getRefreshListButtonAnimated(): ElementFinder {
+    return this.getRefreshListButton().element(by.css('.refresh-icon.refreshing'));
+  }
+
+  refresh() {
+    this.getRefreshListButton().click();
+    return this.waitForNotRefreshing();
+  }
+
+  isRefreshing(): promise.Promise<boolean> {
+    return this.getRefreshListButton().element(by.css('.refresh-icon')).getCssValue('animation-play-state').then(state =>
+      state === 'running'
+    );
+  }
+
+  waitForRefreshing(): promise.Promise<any> {
+    return browser.wait(until.visibilityOf(this.getRefreshListButtonAnimated()), 5000);
+  }
+
+  waitForNotRefreshing(): promise.Promise<any> {
+    return browser.wait(until.invisibilityOf(this.getRefreshListButtonAnimated()), 10000);
   }
 
   getCardListViewToggleButton(): ElementFinder {
@@ -256,8 +321,24 @@ export class ListHeaderComponent extends Component {
     return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
   }
 
+  getInlineAdd(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header .add-container'));
+  }
+
+  getInlineAddForm(): ElementFinder {
+    return this.getInlineAdd().element(by.css('form'));
+  }
+
+  getInlineAddFormAdd(): ElementFinder {
+    return this.getInlineAdd().element(by.css('button:first-of-type'));
+  }
+
+  getInlineAddFormCancel(): ElementFinder {
+    return this.getInlineAdd().element(by.id('addFormButtonCancel'));
+  }
+
   getIconButton(iconText: string): ElementFinder {
-    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
+    return this.getLeftHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
 }
@@ -364,10 +445,20 @@ export class ListComponent extends Component {
     return this.hasClass('list-component__cards', listElement);
   }
 
-  refresh() {
-    this.locator.element(by.id('app-list-refresh-button')).click();
-    const refreshIcon = element(by.css('.refresh-icon.refreshing'));
-    return browser.wait(until.invisibilityOf(refreshIcon), 10000);
+  private getLoadingIndicator(): ElementFinder {
+    return this.locator.element(by.css('.list-component > mat-progress-bar'));
+  }
+
+  isLoading(): promise.Promise<boolean> {
+    return this.locator.element(by.css('.list-component > mat-progress-bar')).isPresent();
+  }
+
+  waitForLoadingIndicator(): promise.Promise<any> {
+    return browser.wait(until.visibilityOf(this.getLoadingIndicator()), 1000);
+  }
+
+  waitForNoLoadingIndicator(): promise.Promise<any> {
+    return browser.wait(until.invisibilityOf(this.getLoadingIndicator()), 10000);
   }
 
   getTotalResults(): promise.Promise<number> {

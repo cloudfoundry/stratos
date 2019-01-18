@@ -1,13 +1,11 @@
-
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-
-import { startWith, map, share } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { map, share, startWith } from 'rxjs/operators';
 
+import { pathGet } from '../../../../core/utils.service';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardStatus } from '../../application-state/application-state.service';
-import { pathGet } from '../../../../core/utils.service';
+import { CardStatus } from '../../../shared.types';
 
 @Component({
   selector: 'app-card-app-usage',

@@ -27,8 +27,9 @@
         <div class="steppers__navigation-right">
           <button id="stepper_cancel" color="primary" mat-button [routerLink]="cancel$ | async" [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)" *ngIf="cancel" (click)="steps[currentIndex].onLeave(false)">{{ this.getCancelButtonText(currentIndex) }}</button>
           <button id="stepper_next" class="steppers__navigation-right__next" [color]="steps[currentIndex].destructiveStep ? 'warn' : 'primary'" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)" [disabled]="steps[currentIndex].busy || steps[currentIndex].blocked || !canGoNext(currentIndex)">
-              <mat-progress-spinner *ngIf="showNextButtonProgress; else nextButtonText" diameter="20" mode="indeterminate" color="accent"></mat-progress-spinner>&nbsp;<!--white space added to ensure line height is applied (important for situations where there's no cancel)-->
-              <ng-template #nextButtonText>{{ this.getNextButtonText(currentIndex) }}</ng-template>
+            <mat-progress-spinner *ngIf="showNextButtonProgress; else nextButtonText" diameter="20" mode="indeterminate" color="accent"></mat-progress-spinner>&nbsp;
+            <!--white space added to ensure line height is applied (important for situations where there's no cancel)-->
+            <ng-template #nextButtonText>{{ this.getNextButtonText(currentIndex) }}</ng-template>
           </button>
         </div>
       </div>

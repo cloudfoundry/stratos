@@ -1,10 +1,10 @@
 import {
   IService,
   IServiceBinding,
+  IServiceBroker,
   IServiceInstance,
   IServicePlan,
   IServicePlanVisibility,
-  IServiceBroker,
 } from '../../core/cf-api-svc.types';
 import { IApp, IDomain, IFeatureFlag, IOrganization, IRoute, ISecurityGroup, ISpace, IStack } from '../../core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
@@ -19,13 +19,15 @@ import {
   domainSchemaKey,
   endpointSchemaKey,
   featureFlagSchemaKey,
-  githubBranchesSchemaKey,
+  gitBranchesSchemaKey,
+  gitCommitSchemaKey,
   metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
   routeSchemaKey,
   securityGroupSchemaKey,
   serviceBindingSchemaKey,
+  serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
   servicePlanVisibilitySchemaKey,
@@ -33,14 +35,12 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
-  githubCommitSchemaKey,
-  serviceBrokerSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
-import { GitBranch, GithubCommit } from './github.types';
+import { GitBranch, GitCommit } from './git.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
 
@@ -54,8 +54,8 @@ export interface IRequestDataState extends IRequestTypeState {
   organization: IRequestEntityTypeState<APIResource<IOrganization>>;
   route: IRequestEntityTypeState<APIResource<IRoute>>;
   event: IRequestEntityTypeState<APIResource>;
-  githubBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  githubCommits: IRequestEntityTypeState<APIResource<GithubCommit>>;
+  gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
+  gitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
   domain: IRequestEntityTypeState<APIResource<IDomain>>;
   user: IRequestEntityTypeState<APIResource<CfUser>>;
   serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;
@@ -66,6 +66,8 @@ export interface IRequestDataState extends IRequestTypeState {
   servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   metrics: IRequestEntityTypeState<IMetrics>;
+  // Extensibility
+  [name: string]: IRequestEntityTypeState<any>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -78,8 +80,8 @@ export interface IRequestState extends IRequestTypeState {
   organization: IRequestEntityTypeState<RequestInfoState>;
   route: IRequestEntityTypeState<RequestInfoState>;
   event: IRequestEntityTypeState<RequestInfoState>;
-  githubBranches: IRequestEntityTypeState<RequestInfoState>;
-  githubCommits: IRequestEntityTypeState<RequestInfoState>;
+  gitBranches: IRequestEntityTypeState<RequestInfoState>;
+  gitCommits: IRequestEntityTypeState<RequestInfoState>;
   domain: IRequestEntityTypeState<RequestInfoState>;
   user: IRequestEntityTypeState<RequestInfoState>;
   serviceInstance: IRequestEntityTypeState<RequestInfoState>;
@@ -89,6 +91,8 @@ export interface IRequestState extends IRequestTypeState {
   securityGroup: IRequestEntityTypeState<RequestInfoState>;
   servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
   serviceBroker: IRequestEntityTypeState<RequestInfoState>;
+  // Extensibility
+  [name: string]: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -100,8 +104,8 @@ export const defaultCfEntitiesState = {
   [routeSchemaKey]: {},
   [appEventSchemaKey]: {},
   [endpointSchemaKey]: {},
-  [githubBranchesSchemaKey]: {},
-  [githubCommitSchemaKey]: {},
+  [gitBranchesSchemaKey]: {},
+  [gitCommitSchemaKey]: {},
   [cfUserSchemaKey]: {},
   [domainSchemaKey]: {},
   [appEnvVarsSchemaKey]: {},

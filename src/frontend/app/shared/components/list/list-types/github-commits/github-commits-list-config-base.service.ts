@@ -5,14 +5,14 @@ import { BehaviorSubject } from 'rxjs';
 
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { GithubCommit } from '../../../../../store/types/github.types';
+import { GitCommit } from '../../../../../store/types/git.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 
 @Injectable()
-export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GithubCommit>> {
+export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GitCommit>> {
   protected dataSource: GithubCommitsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
@@ -20,7 +20,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
     noEntries: 'There are no commits'
   };
 
-  protected columns: ITableColumn<APIResource<GithubCommit>>[] = [
+  protected columns: ITableColumn<APIResource<GitCommit>>[] = [
     {
       columnId: 'message',
       headerCell: () => 'Message',

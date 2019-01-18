@@ -1,11 +1,10 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { GITHUB_API_URL } from '../../core/github.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { parseHttpPipeError } from '../../core/utils.service';
 import {
@@ -21,10 +20,10 @@ import {
   ProjectExists,
   ProjectFetchFail,
 } from '../../store/actions/deploy-applications.actions';
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
+import { gitBranchesSchemaKey, gitCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
-import { GithubCommit } from '../types/github.types';
+import { GitCommit } from '../types/git.types';
 import {
   ICFAction,
   StartRequestAction,
@@ -49,7 +48,6 @@ export class DeployAppEffects {
     private actions$: Actions,
     private store: Store<AppState>,
     private logger: LoggerService,
-    @Inject(GITHUB_API_URL) private gitHubURL: string
   ) { }
 
   @Effect()
@@ -60,14 +58,13 @@ export class DeployAppEffects {
         return state.projectExists && state.projectExists.checking;
       }),
       switchMap(([action, state]: any) => {
-        return this.http
-          .get(`${this.gitHubURL}/repos/${action.projectName}`).pipe(
-            map(res => new ProjectExists(action.projectName, res)),
-            catchError(err => observableOf(err.status === 404 ?
-              new ProjectDoesntExist(action.projectName) :
-              new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err))
-            ))
-          );
+        return action.scm.getRepository(action.projectName).pipe(
+          map(res => new ProjectExists(action.projectName, res)),
+          catchError(err => observableOf(err.status === 404 ?
+            new ProjectDoesntExist(action.projectName) :
+            new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err))
+          ))
+        );
       })
     );
 
@@ -77,37 +74,36 @@ export class DeployAppEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubBranchesSchemaKey,
+          entityKey: gitBranchesSchemaKey,
           type: action.type,
           paginationKey: 'branches'
         } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        return this.http
-          .get(`${this.gitHubURL}/repos/${action.projectName}/branches`).pipe(
-            mergeMap(response => {
-              const branches = response.json();
-              const mappedData = {
-                entities: { githubBranches: {} },
-                result: []
-              } as NormalizedResponse;
+        return action.scm.getBranches(action.projectName).pipe(
+          mergeMap(branches => {
+            const mappedData = {
+              entities: { gitBranches: {} },
+              result: []
+            } as NormalizedResponse;
 
-              branches.forEach(b => {
-                const id = `${action.projectName}-${b.name}`;
-                b.projectId = action.projectName;
-                b.entityId = id;
-                mappedData.entities[githubBranchesSchemaKey][id] = {
-                  entity: b,
-                  metadata: {}
-                };
-                mappedData.result.push(id);
-              });
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+            const scmType = action.scm.getType();
+            branches.forEach(b => {
+              const id = `${scmType}-${action.projectName}-${b.name}`;
+              b.projectId = action.projectName;
+              b.entityId = id;
+              mappedData.entities[gitBranchesSchemaKey][id] = {
+                entity: b,
+                metadata: {}
+              };
+              mappedData.result.push(id);
+            });
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          ]));
       }));
 
   @Effect()
@@ -116,26 +112,24 @@ export class DeployAppEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubCommitSchemaKey,
+          entityKey: gitCommitSchemaKey,
           type: action.type
         } as ICFAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        return this.http
-          .get(action.commit.url).pipe(
-            mergeMap(response => {
-              const commit = response.json();
-              const mappedData = {
-                entities: { [githubCommitSchemaKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              this.addCommit(mappedData, action.projectName, commit);
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+        return action.scm.getCommit(action.projectName, action.commitSha).pipe(
+          mergeMap(commit => {
+            const mappedData = {
+              entities: { [gitCommitSchemaKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.addCommit(mappedData, action.scm.getType(), action.projectName, commit);
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          ]));
       }));
 
   @Effect()
@@ -144,34 +138,32 @@ export class DeployAppEffects {
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {
-          entityKey: githubCommitSchemaKey,
+          entityKey: gitCommitSchemaKey,
           type: action.type,
           paginationKey: action.paginationKey
         } as PaginatedAction;
         this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        return this.http
-          .get(`${this.gitHubURL}/repos/${action.projectName}/commits?sha=${action.sha}`).pipe(
-            mergeMap(response => {
-              const commits: GithubCommit[] = response.json();
-              const mappedData = {
-                entities: { [githubCommitSchemaKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              commits.forEach(commit => {
-                this.addCommit(mappedData, action.projectName, commit);
-              });
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-            ]), );
+        return action.scm.getCommits(action.projectName, action.sha).pipe(
+          mergeMap((commits: GitCommit[]) => {
+            const mappedData = {
+              entities: { [gitCommitSchemaKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            commits.forEach(commit => {
+              this.addCommit(mappedData, action.scm.getType(), action.projectName, commit);
+            });
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          ]));
       }));
 
-  addCommit(mappedData: NormalizedResponse, projectName: string, commit: GithubCommit) {
-    const id = projectName + '-' + commit.sha;
-    mappedData.entities[githubCommitSchemaKey][id] = {
+  addCommit(mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
+    const id = scmType + '-' + projectName + '-' + commit.sha;
+    mappedData.entities[gitCommitSchemaKey][id] = {
       entity: commit,
       metadata: {}
     };

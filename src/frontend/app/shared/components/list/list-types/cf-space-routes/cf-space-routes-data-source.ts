@@ -1,13 +1,11 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { IRoute } from '../../../../../core/cf-api.types';
 import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,
-  entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
@@ -16,13 +14,12 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
-import { SpaceRouteDataSourceHelper } from './cf-space-route-row-state.helper';
+import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 
-export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
 
-  cfGuid: string;
+export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {
 
   constructor(
     store: Store<AppState>,
@@ -36,21 +33,8 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
     ], true, false);
     action.initialParams['order-direction-field'] = 'creation';
-    const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
-      store,
-      paginationKey
-    );
-    super({
-      store,
-      action: action,
-      schema: entityFactory(routeSchemaKey),
-      getRowUniqueId: getRowMetadata,
-      paginationKey: action.paginationKey,
-      isLocal: false,
-      listConfig,
-      rowsState: rowStateManager.observable,
-      destroy: () => sub.unsubscribe()
-    });
-    this.cfGuid = cfGuid;
+    super(store, listConfig, cfGuid, action, false);
   }
+
 }
+

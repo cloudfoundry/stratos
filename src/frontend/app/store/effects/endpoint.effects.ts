@@ -31,13 +31,14 @@ import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../act
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
+import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+import { EndpointType } from '../../core/extension/extension-types';
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 

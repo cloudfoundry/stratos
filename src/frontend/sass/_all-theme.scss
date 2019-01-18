@@ -37,6 +37,8 @@
 @import '../app/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../app/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
 @import '../app/features/applications/application-wall/application-wall.component.theme';
+@import '../app/features/services/services-wall/services-wall.component.theme';
+@import '../app/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../app/shared/components/multiline-title/multiline-title.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
@@ -44,6 +46,7 @@
 @import './mat-themes';
 @import './fonts';
 @import './ansi-colors';
+@import '../app/shared/components/schema-form/schema-form.component.theme';
 // Defaults
 $side-nav-light-text: #fff;
 $side-nav-light-bg: #333;
@@ -116,6 +119,7 @@ $side-nav-light-active: #484848;
   @include page-404($theme, $app-theme);
   @include about-page-theme($theme, $app-theme);
   @include meta-card-component($theme, $app-theme);
+  @include app-schema-form-theme($theme, $app-theme);
   @include start-end-theme($theme, $app-theme);
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
