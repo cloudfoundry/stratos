@@ -2,6 +2,117 @@
 
 Weekly status updates are published here.
 
+## 21st December 2018
+
+Rounding off our year, here's some highlights from the last few weeks.
+
+- User Favourites - Great progress has been made and we're almost ready to merge to master.
+- Page Tabs & Side Nav Update - The horizontal tabs shown in sections such as Application, Cloud Foundry, Organisation, etc have found a smart new home in a side nav. For screenshots see PR #3289
+
+PRs:
+- Add a routes list to the CF tabs, Routes Refactor & Route Bug Fixes (#3292)
+- Add deployment info for apps deployed via docker & fix info for local/archive apps (#3291)
+- Improve focus & tabbing (#3288)
+- Application Env Var fix & improvements (#3286)
+- Fix exception when navigating away from the first deploy app step (#3277)
+- Add service plan tab to service pages (#3275)
+- List Multifilter Improvements (don't show cloud foundry selector if there's only one connected) (#3270)
+- Update side nav logo with light version of new logo (#2921)
+- Hide app vars tab if user is not a space developer (#3247)
+- Show app chip list for space routes list bound apps (#3041)
+
+Community PRs:
+
+- Fixes Async Service Provisioning Bug (#3090) (merged)
+- [autoscaler] add autoscaler tab in app page (#3266)
+
+
+## 7th December 2018
+
+The team are continuing to tackle some of the smaller issues form the backlog as well as the following two features:
+
+- User Favorites - Allowing users to favorite Apps, Orgs, Spaces etc and to provide quick access to these items.
+- Inviting Users - Support for inviting users to a Cloud Foundry system via email and to grant appropriate rights to an Org/Space
+
+PRs:
+
+- Reduce size of Docker All-in-one image [\#3261](https://github.com/cloudfoundry-incubator/stratos/pull/3261)
+- Tidy up CLI login info [\#3269](https://github.com/cloudfoundry-incubator/stratos/pull/3269)
+- Add service provider name to marketplace service card [\#3268](https://github.com/cloudfoundry-incubator/stratos/pull/3268)
+- Add link to dashboard in service instance table [\#3267](https://github.com/cloudfoundry-incubator/stratos/pull/3267)
+- Add Org and Space status bar to Org/Space Cards [\#3265](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
+- Helm port configuration improvements and unit tests [\#3264](https://github.com/cloudfoundry-incubator/stratos/pull/3265)
+- Add confirmation dialog to `Restage` app [\#3263](https://github.com/cloudfoundry-incubator/stratos/pull/3263)
+- Remove global manage apps link [\#3259](https://github.com/cloudfoundry-incubator/stratos/pull/3259)
+- Add user has roles filter to users tables [\#3258](https://github.com/cloudfoundry-incubator/stratos/pull/3258)
+
+
+## 30th November 2018
+
+A quieter week for the Stratos team - with some out on vacation as we head towards the festive season.
+
+PRs this week:
+
+- Make the table multi actions more obvious [\#3251](https://github.com/cloudfoundry-incubator/stratos/pull/3251)
+- Hide app vars tab if user is not a space developer [\#3247](https://github.com/cloudfoundry-incubator/stratos/pull/3247)
+- Improve resilience of e2e tests [\#3246](https://github.com/cloudfoundry-incubator/stratos/pull/3246)
+- App Wall filter and sort controls size tweaks [\#3243](https://github.com/cloudfoundry-incubator/stratos/pull/3243)
+- Deploy App: Add notification toast [\#3242](https://github.com/cloudfoundry-incubator/stratos/pull/3242)
+
+## 23rd November 2018
+
+We've been continuing to test Stratos 2.2.0 and improving test automation and E2E test reliability.
+
+We've started to work through some of the GitHub issues - the focus for the next couple of sprints is to fix and close out some of the smaller issues and bugs.
+
+We're also working to improve the scalability of Stratos with large numbers of Apps/Orgs/Spaces/Users.
+
+PRs this week:
+
+- App Deploy: Add Public GitLab Repository support [\#3239](https://github.com/cloudfoundry-incubator/stratos/pull/3239)
+- Fix CLI info formatting [\#3237](https://github.com/cloudfoundry-incubator/stratos/pull/3237)
+- Show better error message on login screen when account locked [\#3235](https://github.com/cloudfoundry-incubator/stratos/pull/3235)
+- Add Route: Use correct label for submit button [\#3231](https://github.com/cloudfoundry-incubator/stratos/pull/3231)
+- Fix for cancel broken on add route [\#3228](https://github.com/cloudfoundry-incubator/stratos/pull/3228)
+- Backend: Update to latest version of Echo Web Server [\#3216](https://github.com/cloudfoundry-incubator/stratos/pull/3216)
+- Show refresh button for latest modified application lists [\#3213](https://github.com/cloudfoundry-incubator/stratos/pull/3213)
+- Scalability: Handle large number of apps in cf dashboards [\#3212](https://github.com/cloudfoundry-incubator/stratos/pull/3212)
+- Support prometheus-boshrelease as a metrics endpoint [\#3202](https://github.com/cloudfoundry-incubator/stratos/pull/3202)
+- Fix alignment of arrow when no endpoints registered [\#3234](https://github.com/cloudfoundry-incubator/stratos/pull/3234)
+- Run customize when prebuild and log node and npm versions [\#3232](https://github.com/cloudfoundry-incubator/stratos/pull/3232)
+- Add stricter check for jetstream error object [\#3223](https://github.com/cloudfoundry-incubator/stratos/pull/3223)
+- Improve paginated/pagination action naming [\#3218](https://github.com/cloudfoundry-incubator/stratos/pull/3218)
+- Fix display of generic error bar [\#3214](https://github.com/cloudfoundry-incubator/stratos/pull/3214)
+- Only show + icon when we have at least one connected CF [\#3211](https://github.com/cloudfoundry-incubator/stratos/pull/3211)
+
+## 16th November 2018
+
+This week the team has been working on:
+
+- Testing Stratos 2.2.0
+- Enabling Extensions to be published separately
+- Test automation
+- E2E Test reliability
+- Space service tidy up [\#3197](https://github.com/cloudfoundry-incubator/stratos/pull/3197)
+
+## 9th November 2018
+
+This week the team has been:
+
+- Testing Stratos 2.2.0
+- Working towards enabling Extensions to be published separately
+- Updating developer documents: [\#3184](https://github.com/cloudfoundry-incubator/stratos/pull/3184)
+- Adding initial document for back-end plugins: [\#3189](https://github.com/cloudfoundry-incubator/stratos/pull/3189)
+- Fixed bug with deploying with folder upload: [\#3191](https://github.com/cloudfoundry-incubator/stratos/pull/3191)
+
+## 2nd November 2018
+
+This week we have mostly been:
+
+- Releasing Stratos 2.2.0. More details can be found at https://github.com/cloudfoundry-incubator/stratos/releases/tag/2.2.0. 
+- Discussing integration of the Autoscaler (https://github.com/cloudfoundry-incubator/app-autoscaler) UI (https://github.com/cloudfoundry-incubator/app-autoscaler-ui) into Stratos. We’ve provided a first round of guidance to the Autoscaler team and are looking forward to the second round next week. The initial designs look great.
+- Knowledge sharing activities revolving helm charts and concourse release pipelines
+
 ## 26th October 2018
 
 The team were away attending a workshop this week.

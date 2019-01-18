@@ -163,7 +163,7 @@ function createApps {
   popd
 
   rm -rf go-env
-  git clone https://github.com/irfanhabib/go-env
+  git clone https://github.com/cf-stratos/go-env
   pushd go-env
   cf push -m 22M
 

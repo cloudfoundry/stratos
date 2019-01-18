@@ -14,51 +14,13 @@
         </mat-select>
       </mat-form-field>
       <input type="hidden" *ngIf="authTypesForEndpoint.length === 1" name="authType" formControlName="authType">
-      <div *ngIf="endpointForm.value.authType === 'creds'" formGroupName="authValues" class="connection-dialog__auth">
-        <mat-form-field>
-          <input matInput placeholder="Username" formControlName="username">
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Password" type="password" formControlName="password">
-        </mat-form-field>
-      </div>
-      <div *ngIf="endpointForm.value.authType === 'kubeconfig' || endpointForm.value.authType === 'kubeconfig-az'" formGroupName="authValues" class="connection-dialog__auth">
-        <span>Specify `kubeconfig` file:</span>
-        <app-file-input placeholder="kubeconfig" (onFileSelect)="dealWithFile($event, 'kubeconfig')" [accept]="upload">
-        </app-file-input>
-        <input matInput formControlName="kubeconfig" hidden=true>
-      </div>
-      <div *ngIf="endpointForm.value.authType === 'kube-cert-auth'" formGroupName="authValues" class="connection-dialog__auth">
-        <span>Specify Certificate file:</span>
-        <app-file-input placeholder="cert" (onFileSelect)="dealWithFile($event, 'cert')" [accept]="upload">
-        </app-file-input>
-        <span>Specify Certificate key file:</span>
-        <app-file-input placeholder="certKey" (onFileSelect)="dealWithFile($event, 'certKey')" [accept]="upload">
-        </app-file-input>
-        <input matInput formControlName="cert" hidden=true>
-        <input matInput formControlName="certKey" hidden=true>
-      </div>
-      <div *ngIf="endpointForm.value.authType === 'aws-iam'" formGroupName="authValues" class="connection-dialog__auth">
-        <mat-form-field>
-          <input matInput placeholder="Cluster" formControlName="cluster">
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Access Key ID" formControlName="access_key">
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Secret Access Key" type="password" formControlName="secret_key">
-        </mat-form-field>
-      </div>
+      <template #authForm></template>
       <mat-checkbox *ngIf="canShareEndpointToken" class="connection-dialog__shared" matInput name="systemShared" formControlName="systemShared">Share this endpoint connection</mat-checkbox>
-      <div *ngIf="endpointForm.value.authType === 'sso'" formGroupName="authValues" class="connection-dialog__auth">
-        <p>You will be redirected to the Single Sign-On UI for this endpoint and returned to Stratos upon completion.</p>
-      </div>
     </mat-dialog-content>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>
     <mat-dialog-actions class="connection-dialog__actions">
       <button [mat-dialog-close]="true" mat-button color="warn">Cancel</button>
       <button type="submit" [disabled]="!(canSubmit$ | async)" mat-button color="primary">Connect</button>
-      <!-- <button type="submit" mat-button color="primary">Connect</button> -->
     </mat-dialog-actions>
   </form>
 </div>

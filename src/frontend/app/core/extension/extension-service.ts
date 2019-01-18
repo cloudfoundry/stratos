@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
-import { EndpointTypeConfig, initEndpointTypes } from '../../features/endpoints/endpoint-helpers';
-
+import { EndpointTypeConfig, EndpointAuthTypeConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -15,6 +14,8 @@ export interface EndpointTypeExtension {
 export interface StratosExtensionConfig {
   routes?: Route[];
   endpointTypes?: EndpointTypeConfig[];
+  authTypes?: EndpointAuthTypeConfig[];
+  entities?: ExtensionEntitySchema[];
 }
 
 // The different types of Tab
@@ -57,6 +58,11 @@ export interface StratosEndpointMetadata {
   iconFont: string;
 }
 
+export interface StratosEndpointExtensionConfig {
+  endpointTypes?: EndpointTypeConfig[];
+  authTypes?: EndpointAuthTypeConfig[];
+}
+
 export type StratosRouteType = StratosTabType | StratosActionType;
 
 // Stores the extension metadata as defined by the decorators
@@ -65,7 +71,9 @@ const extensionMetadata = {
   extensionRoutes: {},
   tabs: {},
   actions: {},
-  endpointTypes: []
+  endpointTypes: [],
+  authTypes: [],
+  entities: [] as ExtensionEntitySchema[]
 };
 
 /**
@@ -93,6 +101,12 @@ export function StratosExtension(config: StratosExtensionConfig) {
   return (_target) => {
     if (config.endpointTypes) {
       extensionMetadata.endpointTypes.push(...config.endpointTypes);
+    }
+    if (config.authTypes) {
+      extensionMetadata.authTypes.push(...config.authTypes);
+    }
+    if (config.entities) {
+      extensionMetadata.entities.push(...config.entities);
     }
   };
 }
@@ -143,7 +157,10 @@ export class ExtensionService {
    */
   public init() {
     this.applyRoutesFromExtensions(this.router);
-    this.applyNewEndpointTypes();
+  }
+
+  public getEndpointExtensionConfig(): StratosEndpointExtensionConfig {
+    return this.metadata as StratosEndpointExtensionConfig;
   }
 
   /**
@@ -152,7 +169,15 @@ export class ExtensionService {
   private applyRoutesFromExtensions(router: Router) {
     const routeConfig = [...router.config];
 
-    const dashboardRoute = routeConfig.find(r => r.path === '' && !!r.component && r.component.name === 'DashboardBaseComponent');
+    // Find the route that has the 'about' page as a child - this is the dashboard base
+    const dashboardRoute = routeConfig.find(r => {
+      if (r.path === '' && !!r.component && r.children) {
+        return !!r.children.find(c => c.path === 'about');
+      } else {
+        return false;
+      }
+    });
+
     let needsReset = false;
     if (dashboardRoute) {
       // Move any stratos extension routes under the dashboard base route
@@ -180,14 +205,9 @@ export class ExtensionService {
     }
     return index >= 0;
   }
-
-  private applyNewEndpointTypes() {
-    initEndpointTypes(this.metadata.endpointTypes);
-  }
 }
 
 // Helpers to access Extension metadata (without using the injectable Extension Service)
-
 
 export function getRoutesFromExtensions(routeType: StratosRouteType) {
   return extensionMetadata.extensionRoutes[routeType] || [];
@@ -199,4 +219,13 @@ export function getTabsFromExtensions(tabType: StratosTabType) {
 
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
+}
+
+export function getEndpointSchemeKeys(type: string): string[] {
+  const ep = extensionMetadata.endpointTypes.find(e => e.value === type);
+  return ep ? ep.entitySchemaKeys || [] : [];
+}
+
+export function getEntitiesFromExtensions() {
+  return extensionMetadata.entities;
 }

@@ -416,7 +416,7 @@
 [[projects]]
   branch = "master"
   digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
-  name = "github.com/irfanhabib/mysqlstore"
+  name = "github.com/cf-stratos/mysqlstore"
   packages = ["."]
   pruneopts = "UT"
   revision = "304308519d1355852f92cd88b31153c8a9a4e4db"

@@ -20,7 +20,7 @@ docker run --rm \
 --volume "${HOME}/.bosh/cache:/bosh-cache" \
 --volume "${PWD}:${PWD}" \
 --env "RUBY_VERSION=2.2.3" \
-irfanhabib/bosh-cli-fissile \
+splatform/bosh-cli-fissile \
 /usr/local/bin/create-release.sh \
     "$(id -u)" "$(id -g)" /bosh-cache --dir "${PWD}/deploy/stratos-ui-release" --force --name "stratos-ui"
 popd

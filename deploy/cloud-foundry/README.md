@@ -2,17 +2,42 @@
 
 ## Deployment Steps
 
-The quickest way to install Stratos is to deploy it as a Cloud Foundry application. To do so, clone the `stratos` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
+The quickest way to install Stratos is to deploy it as a Cloud Foundry application. 
 
-```
-git clone https://github.com/cloudfoundry-incubator/stratos
-cd stratos
-git checkout tags/stable -b stable
-./build/store-git-metadata.sh
-cf push
-```
+You can do it in two ways:
 
->**NOTE** The console will pre-configure the host Cloud Foundry endpoint. No other CF instance can be registered unless the instructions in the section 'Enable Endpoints Dashboard to register additional Cloud Foundry endpoints' are followed.
+1. Build Stratos from the [source code](https://github.com/cloudfoundry-incubator/stratos)
+
+    To do so, `clone` the **stratos** repository, `cd` into the newly cloned repository and `push` to Cloud Foundry. This can be done with:
+
+    ```
+    git clone https://github.com/cloudfoundry-incubator/stratos
+    cd stratos
+    git checkout tags/stable -b stable
+    ./build/store-git-metadata.sh
+    cf push
+   ```
+
+2. Deploy Stratos using the [`splatform/stratos`](https://hub.docker.com/r/splatform/stratos) docker image 
+
+    > **NOTE:** To deploy Stratos in this way the CF Docker support have to be [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
+
+    - download [manifest-docker.yml](../../manifest-docker.yml) or create your own manifest file:
+        ```yaml
+        applications:
+        - name: console
+          docker:
+            image: splatform/stratos:stable
+          instances: 1
+          memory: 128M
+          disk_quota: 384M
+        ```
+    - now, you can simply push it to Cloud Foundry:
+        ```
+        cf push -f manifest-docker.yml
+        ```
+
+>**NOTE:** The console will pre-configure the host Cloud Foundry endpoint. No other CF instance can be registered unless the instructions in the section 'Enable Endpoints Dashboard to register additional Cloud Foundry endpoints' are followed.
  All other deployment methods (helm, docker-compose, docker all-in-one, etc) allow the registration of multiple CF instances by default.
 
 You will then be able to open a web browser and navigate to the console URL:

@@ -60,7 +60,7 @@ export class DetachServiceInstanceComponent {
     private activatedRoute: ActivatedRoute,
     private entityServiceFactory: EntityServiceFactory
   ) {
-    this.cfGuid = activatedRoute.snapshot.params.cfId;
+    this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
 
     const serviceBindingEntityService = this.entityServiceFactory.create<APIResource<IServiceInstance>>(

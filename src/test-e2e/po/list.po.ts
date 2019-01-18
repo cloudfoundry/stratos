@@ -91,6 +91,14 @@ export class ListTableComponent extends Component {
       });
   }
 
+  editRow(index: number, fieldId: string, newValue: string): promise.Promise<any> {
+    const cell = this.getRows().get(index);
+    cell.element(by.css('app-table-cell-edit button')).click();
+    const form = new FormComponent(cell);
+    form.fill({ [fieldId]: newValue });
+    return cell.element(by.id('table-cell-edit-done')).click();
+  }
+
   openRowActionMenuByIndex(index: number): MenuComponent {
     return this.openRowActionMenuByRow(this.getRows().get(index));
   }
@@ -110,7 +118,7 @@ export class ListCardComponent extends Component {
 
   static cardsCss = 'app-card:not(.row-filler)';
 
-  constructor(locator: ElementFinder) {
+  constructor(locator: ElementFinder, private header: ListHeaderComponent) {
     super(locator);
   }
 
@@ -129,19 +137,33 @@ export class ListCardComponent extends Component {
     return new MetaCard(this.getCards().get(index), metaType);
   }
 
+  private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
+    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+      elem.getText().then(text => text === title)
+    ).first();
+    browser.wait(until.presenceOf(card));
+    return card.element(by.xpath('ancestor::app-card'));
+  }
+
   waitForCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    const cardTitle = this.locator.element(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title));
-    return browser.wait(until.visibilityOf(cardTitle), 10000).then(() => {
-      return this.findCardByTitle(title, metaType);
+    const cardElement = this.findCardElementByTitle(title, metaType);
+    return browser.wait(until.visibilityOf(cardElement), 10000).then(() => {
+      // We've found the title, now get the actual element
+      return new MetaCard(cardElement, metaType);
     });
   }
 
-  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): promise.Promise<MetaCard> {
-    return this.getCards().filter(elem => {
-      return elem.element(by.cssContainingText(metaType, title)).isPresent();
-    }).then(e => {
-      expect(e.length).toBe(1);
-      return new MetaCard(e[0], metaType);
+  findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM, filter = false): promise.Promise<MetaCard> {
+    if (filter) {
+      this.header.waitUntilShown();
+      this.header.setSearchText(title);
+      return this.waitForCardByTitle(title, metaType);
+    }
+
+    const cardElement = this.findCardElementByTitle(title, metaType);
+    return cardElement.isPresent().then(isPresent => {
+      expect(isPresent).toBeTruthy();
+      return Promise.resolve(new MetaCard(cardElement, metaType));
     });
   }
 
@@ -163,14 +185,20 @@ export class ListHeaderComponent extends Component {
     super(locator.element(by.css('.list-component__header')));
   }
 
-  getFilterFormField(): ElementArrayFinder {
-    return this.locator
-      .element(by.css('.list-component__header__left--multi-filters'))
-      .all(by.tagName('mat-form-field'));
+  private getFilterSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__left--multi-filters'));
+  }
+
+  getFilterFormFields(): ElementArrayFinder {
+    return this.getFilterSection().all(by.tagName('mat-form-field'));
   }
 
   getRightHeaderSection(): ElementFinder {
     return this.locator.element(by.css('.list-component__header__right'));
+  }
+
+  getLeftHeaderSection(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header__left'));
   }
 
   getSearchInputField(): ElementFinder {
@@ -195,27 +223,48 @@ export class ListHeaderComponent extends Component {
   getSearchText(): promise.Promise<string> {
     return this.getSearchInputField().getAttribute('value');
   }
-  getPlaceholderText(index = 0): promise.Promise<string> {
-    return this.getFilterFormField().get(index).element(by.tagName('mat-placeholder')).getText();
+
+  getFilterFormField(id: string): ElementFinder {
+    return this.getFilterSection().element(by.id(id));
   }
 
-  getFilterOptions(index = 0): promise.Promise<ElementFinder[]> {
-    this.getFilterFormField().get(index).click();
-    return element.all(by.tagName('mat-option')).then((matOptions: ElementFinder[]) => {
-      return matOptions;
+  getPlaceHolderText(id: string, ignoreMissing = false): promise.Promise<string> {
+    const filter = this.getFilterFormField(id);
+    return filter.isPresent().then(isPresent => {
+      if (isPresent) {
+        return filter.element(by.tagName('mat-placeholder')).getText();
+      } else if (!ignoreMissing) {
+        fail(`Failed to find filter with id '${id}'`);
+      }
     });
   }
 
-  getFilterText(index = 0): promise.Promise<string> {
-    return this.getFilterFormField().get(index).element(by.css('.mat-select-value')).getText();
+  getFilterOptions(id: string, ignoreMissing = false): promise.Promise<ElementFinder[]> {
+    const filter = this.getFilterFormField(id);
+    return filter.isPresent().then(isPresent => {
+      if (isPresent) {
+        filter.click();
+        return element.all(by.id(id)).then((matOptions: ElementFinder[]) => matOptions);
+      } else if (!ignoreMissing) {
+        fail(`Failed to find filter with id '${id}'`);
+      }
+    });
   }
 
-  selectFilterOption(index: number, valueIndex): promise.Promise<any> {
-    return this.getFilterOptions(index).then(options => options[valueIndex].click());
+  getFilterText(id: string): promise.Promise<string> {
+    return this.getFilterFormField(id).element(by.css('.mat-select-value')).getText();
+  }
+
+  selectFilterOption(id: string, valueIndex: number, ignoreMissing = false): promise.Promise<any> {
+    return this.getFilterOptions(id, ignoreMissing).then(options => {
+      if (options) {
+        options[valueIndex].click();
+      }
+    });
   }
 
   getMultiFilterForm(): FormComponent {
-    return new FormComponent(this.locator.element(by.className('list-component__header__left--multi-filters')));
+    return new FormComponent(this.getFilterSection());
   }
 
   getRefreshListButton(): ElementFinder {
@@ -242,8 +291,24 @@ export class ListHeaderComponent extends Component {
     return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'add'));
   }
 
+  getInlineAdd(): ElementFinder {
+    return this.locator.element(by.css('.list-component__header .add-container'));
+  }
+
+  getInlineAddForm(): ElementFinder {
+    return this.getInlineAdd().element(by.css('form'));
+  }
+
+  getInlineAddFormAdd(): ElementFinder {
+    return this.getInlineAdd().element(by.css('button:first-of-type'));
+  }
+
+  getInlineAddFormCancel(): ElementFinder {
+    return this.getInlineAdd().element(by.id('addFormButtonCancel'));
+  }
+
   getIconButton(iconText: string): ElementFinder {
-    return this.getRightHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
+    return this.getLeftHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
 }
@@ -334,8 +399,8 @@ export class ListComponent extends Component {
   constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
-    this.cards = new ListCardComponent(locator);
     this.header = new ListHeaderComponent(locator);
+    this.cards = new ListCardComponent(locator, this.header);
     this.pagination = new ListPaginationComponent(locator);
     this.empty = new ListEmptyComponent(locator);
   }
@@ -356,7 +421,7 @@ export class ListComponent extends Component {
     return browser.wait(until.invisibilityOf(refreshIcon), 10000);
   }
 
-  getTotalResults() {
+  getTotalResults(): promise.Promise<number> {
     // const paginator = new PaginatorComponent();
     return this.pagination.isDisplayed().then(havePaginator => {
       if (havePaginator) {

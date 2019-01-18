@@ -28,7 +28,7 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
       ]);
     }
     case CLEAR_EVENTS: {
-      return this.clearEvents(state, action);
+      return clearEvents(state, action as SendClearEventAction);
     }
   }
   return state;
@@ -54,7 +54,7 @@ function setSubjectEvents(state: InternalEventsState, eventSubjectId: string, ev
 function clearEvents(state: InternalEventsState, clearAction: SendClearEventAction) {
   const { eventSubjectId, eventType, params } = clearAction;
   const events = getEvents(state, eventSubjectId, eventType);
-  const filteredEvents = events.filter((event: InternalEventState) => {
+  const filteredEvents = clearAction.params.clean ? [] : events.filter((event: InternalEventState) => {
     if (params.timestamp) {
       return params.timestamp < event.timestamp;
     }

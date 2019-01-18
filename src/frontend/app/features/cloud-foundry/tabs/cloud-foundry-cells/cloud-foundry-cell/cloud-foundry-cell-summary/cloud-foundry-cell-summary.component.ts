@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CardStatus } from '../../../../../../shared/components/application-state/application-state.service';
 import {
   CfCellHealthListConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-cell-health/cf-cell-health-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
+import { CardStatus } from '../../../../../../shared/shared.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({

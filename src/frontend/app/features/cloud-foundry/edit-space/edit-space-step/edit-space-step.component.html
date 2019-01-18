@@ -1,8 +1,8 @@
 <div class="edit-space">
-  <div>Specify the new name for the space: </div>
+  <div>Specify the new name for the space</div>
   <form [formGroup]="editSpaceForm" class="stepper-form">
     <mat-form-field>
-      <input matInput formControlName="spaceName" [(ngModel)]="spaceName" placeholder="Space Name">
+      <input matInput formControlName="spaceName" [(ngModel)]="spaceName" placeholder="Space Name" [appFocus]="true">
       <mat-error *ngIf="!validate()">
         A space with this name already exists. Please enter a different one.
       </mat-error>

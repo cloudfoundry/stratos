@@ -5,7 +5,7 @@ import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpe
 import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
 import { CFStartAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
@@ -47,7 +47,7 @@ const applicationEntitySchema = entityFactory(applicationSchemaKey);
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string, public includeRelations = [], public populateMissing = false) {
+  constructor(public paginationKey: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'apps';
@@ -57,14 +57,14 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entity = [applicationEntitySchema];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
-  endpointGuid: string = null;
-  initialParams = {
+  initialParams: PaginationParam = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
     page: 1,
     'results-per-page': 100,
   };
   flattenPagination = true;
+  flattenPaginationMax = 500;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
@@ -179,7 +179,7 @@ export class DeleteApplicationInstance extends CFStartAction
   guid: string;
   constructor(
     public appGuid: string,
-    private index: number,
+    index: number,
     public endpointGuid: string
   ) {
     super();

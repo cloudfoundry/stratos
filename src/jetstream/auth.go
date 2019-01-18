@@ -34,6 +34,12 @@ type UAAResponse struct {
 	IDToken      string `json:"id_token"`
 }
 
+// UAAErrorResponse is the error response returned by Cloud Foundry UAA Service
+type UAAErrorResponse struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
 // LoginHookFunc - function that can be hooked into a successful user login
 type LoginHookFunc func(c echo.Context) error
 
@@ -227,10 +233,20 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 	log.Debug("loginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
+		// Check the Error
+		errMessage := "Access Denied"
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			// Try and parse the Response into UAA error structure
+			authError := &UAAErrorResponse{}
+			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
+				errMessage = authError.ErrorDescription
+			}
+		}
+
 		err = interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
-			"Access Denied",
-			"Access Denied: %v", err)
+			errMessage,
+			"UAA Login failed: %s: %v", errMessage, err)
 		return nil, err
 	}
 
@@ -424,6 +440,17 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 					"Error occurred: %s", err)
 			}
 
+			// Validate the connection - some endpoints may want to validate that the connected endpoint
+			err = endpointPlugin.Validate(userID, cnsiRecord, *tokenRecord)
+			if err != nil {
+				// Clear the token
+				p.ClearCNSIToken(cnsiRecord, userID)
+				return nil, interfaces.NewHTTPShadowError(
+					http.StatusBadRequest,
+					"Could not connect to the endpoint",
+					"Could not connect to the endpoint: %s", err)
+			}
+
 			resp := &interfaces.LoginRes{
 				Account:     userID,
 				TokenExpiry: tokenRecord.TokenExpiry,
@@ -431,7 +458,6 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				Admin:       isAdmin,
 			}
 
-			// TODO: Only do this for OAuth token types
 			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
 			if ok {
 				// If this is a system shared endpoint, then remove some metadata that should be send back to other users
@@ -583,18 +609,24 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 		userGUID = tokens.SystemSharedUserGuid
 	}
 
+	// Clear the token
+	return p.ClearCNSIToken(cnsiRecord, userGUID)
+}
+
+// Clear the CNSI token
+func (p *portalProxy) ClearCNSIToken(cnsiRecord interfaces.CNSIRecord, userGUID string) error {
 	// If cnsi is cf AND cf is auto-register only clear the entry
 	p.Config.AutoRegisterCFUrl = strings.TrimRight(p.Config.AutoRegisterCFUrl, "/")
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
 		log.Debug("Setting token record as disconnected")
 
 		tokenRecord := p.InitEndpointTokenRecord(0, "cleared_token", "cleared_token", true)
-		if err := p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord); err != nil {
+		if err := p.setCNSITokenRecord(cnsiRecord.GUID, userGUID, tokenRecord); err != nil {
 			return fmt.Errorf("Unable to clear token: %s", err)
 		}
 	} else {
 		log.Debug("Deleting Token")
-		if err := p.deleteCNSIToken(cnsiGUID, userGUID); err != nil {
+		if err := p.deleteCNSIToken(cnsiRecord.GUID, userGUID); err != nil {
 			return fmt.Errorf("Unable to delete token: %s", err)
 		}
 	}
