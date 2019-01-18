@@ -1,4 +1,4 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
 
 import { CFResponse, createEmptyCfResponse } from '../../frontend/app/store/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -9,6 +9,7 @@ import { ListComponent } from '../po/list.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
+const until = protractor.ExpectedConditions;
 
 export class ServicesHelperE2E {
 
@@ -92,9 +93,32 @@ export class ServicesHelperE2E {
 
       this.setServiceInstanceDetail();
 
-      this.createServiceInstance.stepper.next();
+      this.createInstanceAttempt(0, 3, serviceName);
     });
   }
+
+  createInstanceAttempt = (retryNumber: number, maxRetries: number, serviceName: string) => {
+    this.createServiceInstance.stepper.next();
+    browser.wait(until.or(
+      until.invisibilityOf(this.createServiceInstance.stepper.nextButton()),
+      this.createServiceInstance.stepper.canNext.bind(this.createServiceInstance.stepper)
+    ), 10000);
+
+    this.createServiceInstance.stepper.canNext().then(canNext => {
+      if (canNext) {
+        const attemptsLeft = maxRetries - retryNumber;
+        if (!!attemptsLeft) {
+          e2e.log(`Failed to create service instance '${this.serviceInstanceName}' of type '${serviceName}'.
+           Attempting ${attemptsLeft} more time/s`);
+          browser.sleep(1000);
+          this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName);
+        } else {
+          fail(`Failed to create service instance after ${maxRetries} retries`);
+        }
+      }
+    });
+  }
+
   canBindAppStep = (): promise.Promise<boolean> => {
     return this.cfHelper.fetchDefaultSpaceGuid(true)
       .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(CFHelpers.cachedDefaultCfGuid, spaceGuid))
