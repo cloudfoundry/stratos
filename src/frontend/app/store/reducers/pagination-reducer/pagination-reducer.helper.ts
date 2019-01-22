@@ -161,7 +161,7 @@ function shouldFetchLocalList(
   }
 
   // Should a maxed local list be refetched?
-  if (pagination.maxedResults) {
+  if (pagination.maxedMode) {
     const paramsChanged = prevPagination && paginationParamsString(prevPagination.params) !== paginationParamsString(pagination.params);
     return invalidOrMissingPage || paramsChanged;
   }
