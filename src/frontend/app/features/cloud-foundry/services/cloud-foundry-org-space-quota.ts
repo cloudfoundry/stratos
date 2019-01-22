@@ -35,7 +35,7 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
   public createStateObs(): Observable<CardStatus> {
     return combineLatest(
       this.hasQuotas(),
-      this.cfEndpointService.hasAllApps$
+      this.cfEndpointService.appsPagObs.hasEntities$
     ).pipe(
       switchMap(([validQuotas, hasApps]) =>
         // It can be expensive to iterate over apps to determine usage, so cut out early if there's no quotas or we can't determine all apps

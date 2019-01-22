@@ -1,4 +1,4 @@
-<ng-container *ngIf="(cfEndpointService.hasAllApps$ | async) !== false">
+<ng-container *ngIf="(cfEndpointService.appsPagObs.hasEntities$ | async) !== false">
   <mat-card class="recent-apps-card">
     <mat-card-header class="recent-apps-card__header">
       <mat-card-title>Recently updated applications</mat-card-title>
