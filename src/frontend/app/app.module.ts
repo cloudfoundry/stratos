@@ -1,4 +1,4 @@
-import { IFavoriteMetadata } from './store/types/user-favorites.types';
+import { IFavoriteMetadata, IEndpointFavMetadata } from './store/types/user-favorites.types';
 import { AppState } from './store/app-state';
 import { APIResource } from './store/types/api.types';
 import { NgModule } from '@angular/core';
@@ -43,6 +43,7 @@ import { RouterNav } from './store/actions/router.actions';
 import { initEndpointExtensions, getFullEndpointApiUrl } from './features/endpoints/endpoint-helpers';
 import { getAPIRequestDataState } from './store/selectors/api.selectors';
 import { UserFavoriteManager } from './core/user-favorite-manager';
+import { IAppFavMetadata, ISpaceFavMetadata, IOrgFavMetadata } from './cf-favourite-types';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -146,13 +147,6 @@ export class AppModule {
     this.registerCfOrgMapper(endpointType);
   }
   private registerCfEndpointMapper(endpointType: string) {
-    interface IEndpointFavMetadata extends IFavoriteMetadata {
-      guid: string;
-      address: string;
-      user: string;
-      admin: string;
-    }
-
     favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IEndpointFavMetadata>({
       endpointType,
       entityType: endpointSchemaKey
@@ -186,11 +180,6 @@ export class AppModule {
   }
   private registerCfApplicationMapper(endpointType: string) {
 
-    interface IAppFavMetadata extends IFavoriteMetadata {
-      guid: string;
-      cfGuid: string;
-      name: string;
-    }
 
     favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>({
       endpointType,
@@ -214,13 +203,6 @@ export class AppModule {
     );
   }
   private registerCfSpaceMapper(endpointType: string) {
-
-    interface ISpaceFavMetadata extends IFavoriteMetadata {
-      guid: string;
-      orgGuid: string;
-      name: string;
-      cfGuid: string;
-    }
 
     favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>({
       endpointType,
@@ -246,12 +228,6 @@ export class AppModule {
 
   }
   private registerCfOrgMapper(endpointType: string) {
-    interface IOrgFavMetadata extends IFavoriteMetadata {
-      guid: string;
-      status: string;
-      name: string;
-      cfGuid: string;
-    }
 
     favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>({
       endpointType,

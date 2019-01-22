@@ -16,6 +16,7 @@ import { UserFavorite } from '../../../../../../store/types/user-favorites.types
 import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
+import { IAppFavMetadata } from '../../../../../../cf-favourite-types';
 
 @Component({
   selector: 'app-card-app',
@@ -32,7 +33,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   multipleConnectedEndpoints$: Observable<boolean>;
   entityConfig: ComponentEntityMonitorConfig;
 
-  public favorite: UserFavorite;
+  public favorite: UserFavorite<IAppFavMetadata>;
 
   constructor(
     private store: Store<AppState>,

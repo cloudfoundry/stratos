@@ -5,7 +5,7 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
-import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from '../../../../../../store/types/user-favorites.types';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
@@ -38,7 +38,7 @@ export class MetaCardComponent {
   status$: Observable<CardStatus>;
 
   @Input()
-  public favorite: UserFavorite;
+  public favorite: UserFavorite<IFavoriteMetadata>;
 
   userFavoriteManager: UserFavoriteManager;
 

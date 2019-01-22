@@ -1,4 +1,4 @@
-import { UserFavorite } from './../../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from './../../../store/types/user-favorites.types';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -34,7 +34,7 @@ export class PageHeaderComponent {
 
   @Input() showUnderFlow = false;
 
-  @Input() favorite: UserFavorite;
+  @Input() favorite: UserFavorite<IFavoriteMetadata>;
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;

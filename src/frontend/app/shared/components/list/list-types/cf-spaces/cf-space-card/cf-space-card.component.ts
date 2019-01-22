@@ -32,6 +32,7 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 
 
 @Component({
@@ -55,7 +56,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
-  favorite: UserFavorite;
+  favorite: UserFavorite<ISpaceFavMetadata>;
   spaceStatus$: Observable<CardStatus>;
 
   constructor(

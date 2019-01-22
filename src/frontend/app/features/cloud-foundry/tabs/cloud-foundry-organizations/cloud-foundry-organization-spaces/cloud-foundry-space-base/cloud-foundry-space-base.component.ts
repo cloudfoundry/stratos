@@ -25,6 +25,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
+import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -79,7 +80,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   private deleteRedirectSub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
-  public favorite: UserFavorite;
+  public favorite: UserFavorite<ISpaceFavMetadata>;
 
 
   constructor(

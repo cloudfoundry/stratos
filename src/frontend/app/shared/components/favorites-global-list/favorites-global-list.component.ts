@@ -11,7 +11,7 @@ import { AppState } from '../../../store/app-state';
   styleUrls: ['./favorites-global-list.component.scss']
 })
 export class FavoritesGlobalListComponent implements OnInit {
-  public favs$: Observable<IAllFavorites>;
+  public favs$: Observable<IAllFavorites<any>>;
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
@@ -24,7 +24,7 @@ export class FavoritesGlobalListComponent implements OnInit {
       }))
     );
   }
-  private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {
+  private sortFavoriteGroups(entityGroups: IGroupedFavorites<any>[]) {
     if (!entityGroups) {
       return entityGroups;
     }
@@ -37,7 +37,7 @@ export class FavoritesGlobalListComponent implements OnInit {
     });
   }
 
-  private sortFavoriteGroup(entityA: IFavoriteEntity, entityB: IFavoriteEntity) {
+  private sortFavoriteGroup(entityA: IFavoriteEntity<any>, entityB: IFavoriteEntity<any>) {
     if (entityA.favorite.entityType < entityB.favorite.entityType) {
       return -1;
     }

@@ -20,7 +20,7 @@ import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from '../../../../../../store/types/user-favorites.types';
 import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
@@ -50,7 +50,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
-  public favorite: UserFavorite;
+  public favorite: UserFavorite<IFavoriteMetadata>;
   public orgStatus$: Observable<CardStatus>;
 
   constructor(

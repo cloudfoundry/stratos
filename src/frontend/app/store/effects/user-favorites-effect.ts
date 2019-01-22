@@ -13,7 +13,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction, StartRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { environment } from '../../../environments/environment';
 import { RemoveUserFavoriteAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
-import { UserFavorite } from '../types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -30,9 +30,11 @@ export class UserFavoritesEffect {
 
   @Effect() saveFavorite$ = this.actions$.ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE).pipe(
     withLatestFrom(
-      new PaginationMonitor<UserFavorite>(this.store, userFavoritesPaginationKey, entityFactory(userFavoritesSchemaKey)).currentPage$
+      new PaginationMonitor<
+        UserFavorite<IFavoriteMetadata>
+      >(this.store, userFavoritesPaginationKey, entityFactory(userFavoritesSchemaKey)).currentPage$
     ),
-    mergeMap(([action, favorites]: [SaveUserFavoriteAction, UserFavorite[]]) => {
+    mergeMap(([action, favorites]: [SaveUserFavoriteAction, UserFavorite<IFavoriteMetadata>[]]) => {
       const apiAction = {
         entityKey: userFavoritesSchemaKey,
         type: action.type,
@@ -52,9 +54,9 @@ export class UserFavoritesEffect {
         endpointId,
         entityType,
         endpointType
-      } as UserFavorite;
+      } as UserFavorite<IFavoriteMetadata>;
 
-      return this.http.post<UserFavorite>(favoriteUrlPath, favorite).pipe(
+      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, favorite).pipe(
         mergeMap(newFavorite => {
           const entities = {
             [userFavoritesSchemaKey]: {
@@ -70,7 +72,7 @@ export class UserFavoritesEffect {
             entities,
             result: Object.keys(entities[userFavoritesSchemaKey]),
             totalPages: 1
-          } as NormalizedResponse<UserFavorite>;
+          } as NormalizedResponse<UserFavorite<IFavoriteMetadata>>;
 
           const pagintionAction = {
             ...apiAction,
@@ -95,9 +97,9 @@ export class UserFavoritesEffect {
         paginationKey: 'userFavorites'
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      return this.http.get<UserFavorite[]>(favoriteUrlPath).pipe(
+      return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
         map(favorites => {
-          return favorites.reduce<NormalizedResponse<UserFavorite>>((mappedData, favorite) => {
+          return favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((mappedData, favorite) => {
             const { guid } = favorite;
             if (guid) {
               mappedData.entities[userFavoritesSchemaKey][guid] = favorite;
@@ -113,18 +115,20 @@ export class UserFavoritesEffect {
 
   @Effect() removeFavorite$ = this.actions$.ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE).pipe(
     withLatestFrom(
-      new PaginationMonitor<UserFavorite>(this.store, userFavoritesPaginationKey, entityFactory(userFavoritesSchemaKey)).currentPage$
+      new PaginationMonitor<
+        UserFavorite<IFavoriteMetadata>
+      >(this.store, userFavoritesPaginationKey, entityFactory(userFavoritesSchemaKey)).currentPage$
     ),
-    switchMap(([action, favorites]: [RemoveUserFavoriteAction, UserFavorite[]]) => {
+    switchMap(([action, favorites]: [RemoveUserFavoriteAction, UserFavorite<IFavoriteMetadata>[]]) => {
       const apiAction = {
         entityKey: userFavoritesSchemaKey,
         type: action.type,
         paginationKey: 'userFavorites'
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      return this.http.delete<UserFavorite[]>(`${favoriteUrlPath}/${action.guid}`).pipe(
+      return this.http.delete<UserFavorite<IFavoriteMetadata>[]>(`${favoriteUrlPath}/${action.guid}`).pipe(
         map(() => {
-          return favorites.reduce<NormalizedResponse<UserFavorite>>((mappedData, favorite) => {
+          return favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((mappedData, favorite) => {
             const { guid } = favorite;
             if (guid && guid !== action.guid) {
               mappedData.entities[userFavoritesSchemaKey][guid] = favorite;
@@ -138,7 +142,7 @@ export class UserFavoritesEffect {
     })
   );
 
-  static buildFavoriteStoreEntityGuid(favorite: UserFavorite) {
+  static buildFavoriteStoreEntityGuid(favorite: UserFavorite<IFavoriteMetadata>) {
     const {
       entityId,
       endpointId,

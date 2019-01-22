@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 
-import { UserFavorite } from '../../../../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from '../../../../../store/types/user-favorites.types';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
 
-export interface TableCellFavoriteComponentConfig<T> {
-  createUserFavorite: (entity: T) => UserFavorite;
+export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata> {
+  createUserFavorite: (entity: T) => UserFavorite<Y>;
 }
 
 @Component({
@@ -13,14 +13,14 @@ export interface TableCellFavoriteComponentConfig<T> {
   templateUrl: './table-cell-favorite.component.html',
   styleUrls: ['./table-cell-favorite.component.scss']
 })
-export class TableCellFavoriteComponent<T> extends TableCellCustom<T> {
+export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends TableCellCustom<T> {
 
-  favorite: UserFavorite;
+  public favorite: UserFavorite<Y>;
 
-  private _config: TableCellFavoriteComponentConfig<T>;
+  private _config: TableCellFavoriteComponentConfig<T, Y>;
   @Input('config')
   get config() { return this._config; }
-  set config(config: TableCellFavoriteComponentConfig<T>) {
+  set config(config: TableCellFavoriteComponentConfig<T, Y>) {
     this._config = config;
     this.createUserFavorite();
   }
@@ -40,8 +40,10 @@ export class TableCellFavoriteComponent<T> extends TableCellCustom<T> {
   }
 }
 
-export function createTableColumnFavorite<T>(createUserFavorite: (entity: T) => UserFavorite): ITableColumn<T> {
-  const cellConfig: TableCellFavoriteComponentConfig<T> = {
+export function createTableColumnFavorite<T, Y extends IFavoriteMetadata>(
+  createUserFavorite: (entity: T) => UserFavorite<Y>
+): ITableColumn<T> {
+  const cellConfig: TableCellFavoriteComponentConfig<T, Y> = {
     createUserFavorite
   };
   return {

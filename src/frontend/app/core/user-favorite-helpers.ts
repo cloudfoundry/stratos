@@ -1,11 +1,11 @@
-import { Action } from 'rxjs/internal/scheduler/Action';
-import { UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
+import { UserFavorite, UserFavoriteEndpoint, IFavoriteMetadata } from '../store/types/user-favorites.types';
 import { CfAPIResource } from './../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
 
-export function getFavoriteFromCfEntity(entity, entityKey: string) {
+export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, entityKey: string) {
   if (isCfEntity(entity as CfAPIResource)) {
-    return new UserFavorite(
+
+    return new UserFavorite<T>(
       entity.entity.cfGuid,
       'cf',
       entityKey,

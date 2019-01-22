@@ -8,7 +8,7 @@ import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 })
 export class FavoritesEntityListComponent {
   @Input()
-  set entities(e: IFavoriteEntity[]) {
+  set entities(e: IFavoriteEntity<any>[]) {
     this._entities = e ? [...e] : e;
     this.limitEntities(e, this.limit);
   }
@@ -19,9 +19,9 @@ export class FavoritesEntityListComponent {
   @Input()
   public endpointDisconnected = false;
 
-  public _entities: IFavoriteEntity[];
+  public _entities: IFavoriteEntity<any>[];
 
-  public limitedEntities: IFavoriteEntity[];
+  public limitedEntities: IFavoriteEntity<any>[];
   public minLimit = 3;
   public limit = this.minLimit;
 
@@ -30,7 +30,7 @@ export class FavoritesEntityListComponent {
     this.limitEntities([...this._entities], this.limit);
   }
 
-  private limitEntities(entities: IFavoriteEntity[], limit: number) {
+  private limitEntities(entities: IFavoriteEntity<any>[], limit: number) {
     if (!entities || limit === null) {
       this.limitedEntities = entities;
     } else {

@@ -15,6 +15,7 @@ import { defaultPaginationPageSizeOptionsTable, IListConfig, ListViewTypes } fro
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
+import { ISpaceFavMetadata } from '../../../../../cf-favourite-types';
 
 @Injectable()
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
@@ -35,7 +36,7 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       cellComponent: TableCellAppNameComponent,
       cellFlex: '1',
     },
-    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite => {
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<ISpaceFavMetadata> => {
       return new UserFavorite(
         row.entity.cfGuid,
         'cf',

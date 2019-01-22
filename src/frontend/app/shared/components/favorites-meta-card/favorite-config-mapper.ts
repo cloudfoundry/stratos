@@ -26,16 +26,16 @@ interface IFavoriteMappers {
   [key: string]: {
     mapper: TFavoriteMapperFunction<any>,
     prettyName: string,
-    actionGenerator: TFavoriteActionGenerator
-    entityToMetadata: TEntityToMetadata<any>
+    actionGenerator: TFavoriteActionGenerator<IFavoriteMetadata>
+    entityToMetadata: TEntityToMetadata<any, any>
   };
 }
 
-export type TFavoriteActionGenerator = (favorite: UserFavorite) => IRequestAction;
+export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => IRequestAction;
 
 export type TEntityToMetadata<T, Q extends IFavoriteMetadata> = (entity: T) => Q;
 export interface IFavoriteActionGenerators {
-  [key: string]: TFavoriteActionGenerator;
+  [key: string]: TFavoriteActionGenerator<IFavoriteMetadata>;
 }
 /**
  * Stores the config used to hydrator and render favorites.
@@ -59,7 +59,7 @@ class FavoritesConfigMapper {
     favoriteInfo: IFavoriteTypeInfo,
     prettyName: string,
     mapper: TFavoriteMapperFunction<Q>,
-    actionGenerator: TFavoriteActionGenerator,
+    actionGenerator: TFavoriteActionGenerator<Q>,
     entityToMetadata: TEntityToMetadata<T, Q>
   ) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favoriteInfo);
@@ -92,7 +92,7 @@ class FavoritesConfigMapper {
    * For a given favorite, return the corresponding hydration action
    * @param favorite
    */
-  public getActionFromFavorite(favorite: UserFavorite) {
+  public getActionFromFavorite<T extends IFavoriteMetadata>(favorite: UserFavorite<T>) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].actionGenerator(favorite) : null;
   }

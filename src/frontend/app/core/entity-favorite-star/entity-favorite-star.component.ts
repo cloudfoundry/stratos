@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { AppState } from '../../store/app-state';
-import { UserFavorite } from '../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from '../../store/types/user-favorites.types';
 import { UserFavoriteManager } from '../user-favorite-manager';
 
 @Component({
@@ -14,7 +14,7 @@ import { UserFavoriteManager } from '../user-favorite-manager';
 export class EntityFavoriteStarComponent implements OnInit {
 
   @Input()
-  private favorite: UserFavorite;
+  private favorite: UserFavorite<IFavoriteMetadata>;
 
   private userFavoriteManager: UserFavoriteManager;
 

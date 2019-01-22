@@ -20,6 +20,7 @@ import { UserFavorite } from '../../../../../store/types/user-favorites.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { IOrgFavMetadata } from '../../../../../cf-favourite-types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -62,7 +63,7 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
-  public favorite$: Observable<UserFavorite>;
+  public favorite$: Observable<UserFavorite<IOrgFavMetadata>>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,

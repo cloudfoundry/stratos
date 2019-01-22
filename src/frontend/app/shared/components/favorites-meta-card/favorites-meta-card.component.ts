@@ -6,7 +6,7 @@ import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
-import { UserFavorite } from '../../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from '../../../store/types/user-favorites.types';
 import { CardStatus, ComponentEntityMonitorConfig } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
@@ -17,10 +17,10 @@ import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
   templateUrl: './favorites-meta-card.component.html',
   styleUrls: ['./favorites-meta-card.component.scss']
 })
-export class FavoritesMetaCardComponent implements OnInit {
+export class FavoritesMetaCardComponent<T> implements OnInit {
 
   @Input()
-  public favoriteEntity: IFavoriteEntity;
+  public favoriteEntity: IFavoriteEntity<T>;
 
   @Input()
   public compact = false;
@@ -41,7 +41,7 @@ export class FavoritesMetaCardComponent implements OnInit {
 
   public status$: Observable<CardStatus>;
 
-  public favorite: UserFavorite;
+  public favorite: UserFavorite<IFavoriteMetadata>;
 
   public entityConfig: ComponentEntityMonitorConfig;
 
@@ -78,7 +78,7 @@ export class FavoritesMetaCardComponent implements OnInit {
     }
   }
 
-  public setConfirmation(prettyName: string, favorite: UserFavorite) {
+  public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(
       `Unfavorite ${prettyName}`,
       `Are you sure you would like to unfavorite this ${prettyName.toLocaleLowerCase()} with the id ${favorite.entityId}?`,

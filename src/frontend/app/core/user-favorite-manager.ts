@@ -1,25 +1,23 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, filter, first, map, switchMap, tap, mergeMap, startWith } from 'rxjs/operators';
+import { catchError, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
+import { favoritesConfigMapper, TFavoriteMapperFunction } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
-import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
 import { AppState } from '../store/app-state';
-import { userFavoritesPaginationKey } from '../store/effects/user-favorites-effect';
 import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
+import { getDefaultRequestState } from '../store/reducers/api-request-reducer/types';
 import { isFavorite } from '../store/selectors/favorite.selectors';
-import { PaginationEntityState } from '../store/types/pagination.types';
-import { UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
-import { EntityService } from './entity-service';
 import { EntityInfo } from '../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
-import {
-  favoritesConfigMapper, TFavoriteMapperFunction
-} from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { getDefaultRequestState, ActionState } from '../store/reducers/api-request-reducer/types';
+import { PaginationEntityState } from '../store/types/pagination.types';
+import { UserFavorite, IFavoriteMetadata, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
+import { EntityService } from './entity-service';
+import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
+import { userFavoritesPaginationKey } from '../store/effects/user-favorites-effect';
+import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
 interface IntermediateFavoritesGroup {
-  [endpointId: string]: UserFavorite[];
+  [endpointId: string]: UserFavorite<IFavoriteMetadata>[];
 }
 
 export interface IFavoriteEntity<T> {
@@ -27,7 +25,7 @@ export interface IFavoriteEntity<T> {
   prettyName: string;
   cardMapper: TFavoriteMapperFunction<TemplateStringsArray>;
   entity: any;
-  favorite: UserFavorite;
+  favorite: UserFavorite<IFavoriteMetadata>;
 }
 
 export interface IGroupedFavorites<T> {
@@ -48,16 +46,18 @@ export interface IAllFavorites<T> {
 export interface IHydrationResults {
   entityInfo: EntityInfo<any>;
   type: string;
-  cardMapper: TFavoriteMapperFunction;
+  cardMapper: TFavoriteMapperFunction<any>;
   prettyName: string;
-  favorite: UserFavorite;
+  favorite: UserFavorite<IFavoriteMetadata>;
 }
 
 export class UserFavoriteManager {
   constructor(private store: Store<AppState>) { }
 
-  private groupIntermediateFavorites = (favorites: UserFavorite[]): UserFavorite[][] => {
-    const intermediateFavoritesGroup = favorites.reduce((intermediate: IntermediateFavoritesGroup, favorite: UserFavorite) => {
+  private groupIntermediateFavorites = (favorites: UserFavorite<IFavoriteMetadata>[]): UserFavorite<IFavoriteMetadata>[][] => {
+    const intermediateFavoritesGroup = favorites.reduce((
+      intermediate: IntermediateFavoritesGroup, favorite: UserFavorite<IFavoriteMetadata>
+    ) => {
       const { endpointId } = favorite;
       if (!intermediate[endpointId]) {
         intermediate[endpointId] = [];
@@ -74,11 +74,11 @@ export class UserFavoriteManager {
     return Object.values(intermediateFavoritesGroup).reduce((favsArray, favs) => {
       favsArray.push(favs);
       return favsArray;
-    }, [] as UserFavorite[][]);
+    }, [] as UserFavorite<IFavoriteMetadata>[][]);
   }
 
-  private groupFavoriteEntities(intermediateEntitiesGroup: IFavoriteEntity[][]): IGroupedFavorites[] {
-    return Object.values(intermediateEntitiesGroup).reduce((group: IGroupedFavorites[], userFavorites: IFavoriteEntity[]) => {
+  private groupFavoriteEntities<T>(intermediateEntitiesGroup: IFavoriteEntity<T>[][]): IGroupedFavorites<T>[] {
+    return Object.values(intermediateEntitiesGroup).reduce((group: IGroupedFavorites<T>[], userFavorites: IFavoriteEntity<T>[]) => {
       const [
         endpoint,
         ...entities
@@ -88,10 +88,10 @@ export class UserFavoriteManager {
         entities: entities && entities.length ? entities : null
       });
       return group;
-    }, [] as IGroupedFavorites[]);
+    }, [] as IGroupedFavorites<T>[]);
   }
 
-  private getTypeAndID(favorite: UserFavorite) {
+  private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
     const type = favorite.entityType;
     return {
       type,
@@ -104,18 +104,18 @@ export class UserFavoriteManager {
   }
 
   public getAllFavorites() {
-    const paginationMonitor = new PaginationMonitor<UserFavorite>(
+    const paginationMonitor = new PaginationMonitor<UserFavorite<IFavoriteMetadata>>(
       this.store,
       userFavoritesPaginationKey,
       entityFactory(userFavoritesSchemaKey)
     );
-    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor)
+    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
     return waitForFavorites$.pipe(
       switchMap(() => paginationMonitor.currentPage$)
     );
   }
 
-  public hydrateAllFavorites(): Observable<IAllFavorites> {
+  public hydrateAllFavorites(): Observable<IAllFavorites<any>> {
     return this.getHydrateObservable();
   }
 
@@ -140,7 +140,7 @@ export class UserFavoriteManager {
     );
   }
 
-  private getWaitForFavoritesObservable(paginationMonitor: PaginationMonitor<UserFavorite>) {
+  private getWaitForFavoritesObservable(paginationMonitor: PaginationMonitor<UserFavorite<IFavoriteMetadata>>) {
     return paginationMonitor.pagination$.pipe(
       map(this.getCurrentPagePagination),
       filter(pageRequest => !!pageRequest),
@@ -153,7 +153,7 @@ export class UserFavoriteManager {
     );
   }
 
-  private reduceGroupedRequests = (entityRequests: IHydrationResults[][]): IAllFavorites => {
+  private reduceGroupedRequests = <T>(entityRequests: IHydrationResults[][]): IAllFavorites<T> => {
     if (!entityRequests) {
       return {
         error: false,
@@ -176,14 +176,14 @@ export class UserFavoriteManager {
     };
   }
 
-  private getHydratedGroups = (list: UserFavorite[][]) => {
+  private getHydratedGroups = (list: UserFavorite<IFavoriteMetadata>[][]) => {
     if (!list || !list.length) {
       return observableOf(null);
     }
     return combineLatest(list.map(favGroup => this.hydrateGroup(favGroup)));
   }
 
-  private hydrateGroup(favGroup: UserFavorite[]) {
+  private hydrateGroup(favGroup: UserFavorite<IFavoriteMetadata>[]) {
     const endpointIndex = favGroup.findIndex(fav => fav.entityType === 'endpoint');
     const endpointFav = favGroup.splice(endpointIndex, 1)[0];
 
@@ -210,7 +210,7 @@ export class UserFavoriteManager {
 
   }
 
-  private mapToHydated(entityInfo: EntityInfo, favorite: UserFavorite) {
+  private mapToHydated(entityInfo: EntityInfo, favorite: UserFavorite<IFavoriteMetadata>) {
     return {
       entityInfo,
       type: this.getTypeAndID(favorite).type,
@@ -220,8 +220,8 @@ export class UserFavoriteManager {
     };
   }
 
-  public addEndpointsToHydrateList = (favorites: UserFavorite[]) => {
-    return favorites.reduce((newFavorites: UserFavorite[], favorite) => {
+  public addEndpointsToHydrateList = (favorites: UserFavorite<IFavoriteMetadata>[]) => {
+    return favorites.reduce((newFavorites: UserFavorite<IFavoriteMetadata>[], favorite) => {
       const hasEndpoint = this.hasEndpointAsFavorite(newFavorites, favorite);
       if (!hasEndpoint) {
         const endpointFavorite = new UserFavoriteEndpoint(
@@ -234,18 +234,18 @@ export class UserFavoriteManager {
     }, favorites);
   }
 
-  public hasEndpointAsFavorite(allFavorites: UserFavorite[], favoriteToFindEndpoint: UserFavorite) {
+  public hasEndpointAsFavorite(allFavorites: UserFavorite<IFavoriteMetadata>[], favoriteToFindEndpoint: UserFavorite<IFavoriteMetadata>) {
     if (this.isEndpointType(favoriteToFindEndpoint)) {
       return true;
     }
     return !!allFavorites.find(favorite => this.isEndpointType(favorite) && favorite.endpointId === favoriteToFindEndpoint.endpointId);
   }
 
-  private isEndpointType(favorite: UserFavorite) {
+  private isEndpointType(favorite: UserFavorite<IFavoriteMetadata>) {
     return !favorite.entityId;
   }
 
-  public hydrateFavorite<T = any>(favorite: UserFavorite): Observable<EntityInfo<T>> {
+  public hydrateFavorite<T>(favorite: UserFavorite<IFavoriteMetadata>): Observable<EntityInfo<T>> {
     const { type, id } = this.getTypeAndID(favorite);
     const action = favoritesConfigMapper.getActionFromFavorite(favorite);
     if (action) {
@@ -274,13 +274,13 @@ export class UserFavoriteManager {
     };
   }
 
-  public getIsFavoriteObservable(favorite: UserFavorite) {
+  public getIsFavoriteObservable(favorite: UserFavorite<IFavoriteMetadata>) {
     return this.store.select(
       isFavorite(favorite)
     );
   }
 
-  public toggleFavorite(favorite: UserFavorite) {
+  public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
     this.getIsFavoriteObservable(favorite).pipe(
       first(),
       tap(isFav => {

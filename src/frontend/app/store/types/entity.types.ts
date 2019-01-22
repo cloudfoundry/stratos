@@ -43,7 +43,7 @@ import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
 import { GitBranch, GitCommit } from './git.types';
 import { SystemInfo } from './system.types';
-import { UserFavorite } from './user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from './user-favorites.types';
 import { CfUser } from './user.types';
 
 export interface IRequestDataState extends IRequestTypeState {
@@ -68,7 +68,7 @@ export interface IRequestDataState extends IRequestTypeState {
   servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   metrics: IRequestEntityTypeState<IMetrics>;
-  userFavorites: IRequestEntityTypeState<UserFavorite>;
+  userFavorites: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>;
   // Extensibility
   [name: string]: IRequestEntityTypeState<any>;
 }

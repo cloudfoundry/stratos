@@ -8,7 +8,7 @@ import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
-import { UserFavorite } from '../../../../../store/types/user-favorites.types';
+import { UserFavorite, IFavoriteMetadata } from '../../../../../store/types/user-favorites.types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
@@ -53,7 +53,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         field: 'entity.name'
       }
     },
-    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite => {
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<IFavoriteMetadata> => {
       return new UserFavorite(
         row.entity.cfGuid,
         'cf',
