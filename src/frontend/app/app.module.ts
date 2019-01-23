@@ -1,49 +1,49 @@
-import { IFavoriteMetadata, IEndpointFavMetadata } from './store/types/user-favorites.types';
-import { AppState } from './store/app-state';
-import { APIResource } from './store/types/api.types';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
-
+import { Store } from '@ngrx/store';
+import { combineLatest, debounceTime } from 'rxjs/operators';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
+import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
+import { IApp, IOrganization, ISpace } from './core/cf-api.types';
 import { CoreModule } from './core/core.module';
+import { CurrentUserPermissions } from './core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
+import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
+import { createGetApplicationAction } from './features/applications/application.service';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
+import { getFullEndpointApiUrl, initEndpointExtensions } from './features/endpoints/endpoint-helpers';
 import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
-import { SharedModule } from './shared/shared.module';
-import { AppStoreModule } from './store/store.module';
-import { XSRFModule } from './xsrf.module';
-import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
-import { EndpointModel } from './store/types/endpoint.types';
-import { applicationSchemaKey, endpointSchemaKey, spaceSchemaKey, organizationSchemaKey } from './store/helpers/entity-factory';
-import { IApp, ISpace, IOrganization } from './core/cf-api.types';
-import { startWith, map, combineLatest, debounceTime } from 'rxjs/operators';
 import { ApplicationStateService } from './shared/components/application-state/application-state.service';
-import { ApplicationService, createGetApplicationAction } from './features/applications/application.service';
-import { Store } from '@ngrx/store';
+import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
+import { SharedModule } from './shared/shared.module';
 import { GetAllEndpoints } from './store/actions/endpoint.actions';
-import { GetSpace } from './store/actions/space.actions';
 import { GetOrganization } from './store/actions/organization.actions';
-import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
-import { CurrentUserPermissions } from './core/current-user-permissions.config';
 import { RouterNav } from './store/actions/router.actions';
-import { initEndpointExtensions, getFullEndpointApiUrl } from './features/endpoints/endpoint-helpers';
+import { GetSpace } from './store/actions/space.actions';
+import { AppState } from './store/app-state';
+import { applicationSchemaKey, endpointSchemaKey, organizationSchemaKey, spaceSchemaKey } from './store/helpers/entity-factory';
 import { getAPIRequestDataState } from './store/selectors/api.selectors';
-import { UserFavoriteManager } from './core/user-favorite-manager';
-import { IAppFavMetadata, ISpaceFavMetadata, IOrgFavMetadata } from './cf-favourite-types';
+import { AppStoreModule } from './store/store.module';
+import { APIResource } from './store/types/api.types';
+import { EndpointModel } from './store/types/endpoint.types';
+import { IEndpointFavMetadata } from './store/types/user-favorites.types';
+import { XSRFModule } from './xsrf.module';
+
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -171,6 +171,7 @@ export class AppModule {
       }),
       () => new GetAllEndpoints(false),
       endpoint => ({
+        name: endpoint.name,
         guid: endpoint.guid,
         address: getFullEndpointApiUrl(endpoint),
         user: endpoint.user ? endpoint.user.name : undefined,

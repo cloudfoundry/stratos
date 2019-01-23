@@ -1,9 +1,9 @@
-<app-meta-card [ngClass]="{'fav-meta-card__clickable': !!config.routerLink}" [actionMenu]="config.menuItems"
-  [routerLink]="config.routerLink" class="fav-meta-card" *ngIf="config" [status$]="status$" [entityConfig]="entityConfig">
+<app-meta-card [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}" [actionMenu]="config.menuItems"
+  [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$" [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div class="fav-meta-card__header">
-      <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ config.name }}</h2>
-      <h3 class="fav-meta-card__header-text" *ngIf="compact">{{ config.name }}</h3>
+      <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ name$ | async }}</h2>
+      <h3 class="fav-meta-card__header-text" *ngIf="compact">{{ name$ | async }}</h3>
       <div class="fav-meta-card__type">{{ prettyName }}</div>
     </div>
   </app-meta-card-title>
@@ -17,10 +17,11 @@
 
 <mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && !endpoint">
   <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
-  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && !endpointDisconnected">Could not
+  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && !(endpointConnected$ | async)">Could
+    not
     fetch {{ prettyName |
     lowercase }}</small>
-  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && endpointDisconnected">Endpoint
+  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && (endpointConnected$ | async)">Endpoint
     disconnected</small>
   <div class="error-details" *ngIf="showMore">
     <div class="error-details__label subtle-text">Type</div>

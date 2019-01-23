@@ -1,4 +1,4 @@
-import { map, filter } from 'rxjs/operators';
+import { map, filter, tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IAllFavorites, UserFavoriteManager, IGroupedFavorites, IFavoriteEntity } from '../../../core/user-favorite-manager';
@@ -11,7 +11,7 @@ import { AppState } from '../../../store/app-state';
   styleUrls: ['./favorites-global-list.component.scss']
 })
 export class FavoritesGlobalListComponent implements OnInit {
-  public favs$: Observable<IAllFavorites<any>>;
+  public favs$: Observable<IGroupedFavorites[]>;
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
@@ -20,11 +20,11 @@ export class FavoritesGlobalListComponent implements OnInit {
       filter(favs => !!favs),
       map(favs => ({
         ...favs,
-        entityGroups: this.sortFavoriteGroups(favs.entityGroups)
+        entityGroups: this.sortFavoriteGroups(favs)
       }))
     );
   }
-  private sortFavoriteGroups(entityGroups: IGroupedFavorites<any>[]) {
+  private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {
     if (!entityGroups) {
       return entityGroups;
     }
@@ -37,7 +37,7 @@ export class FavoritesGlobalListComponent implements OnInit {
     });
   }
 
-  private sortFavoriteGroup(entityA: IFavoriteEntity<any>, entityB: IFavoriteEntity<any>) {
+  private sortFavoriteGroup(entityA: IFavoriteEntity, entityB: IFavoriteEntity) {
     if (entityA.favorite.entityType < entityB.favorite.entityType) {
       return -1;
     }

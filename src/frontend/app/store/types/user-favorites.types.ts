@@ -46,7 +46,6 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
     public entityId?: string,
     entity?: Y,
   ) {
-    debugger;
     if (entity) {
       this.metadata = favoritesConfigMapper.getEntityMetadata(this, entity);
     }

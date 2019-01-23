@@ -11,16 +11,16 @@ import { CardStatus, ComponentEntityMonitorConfig } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
+import { EndpointModel } from '../../../store/types/endpoint.types';
+import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-favorites-meta-card',
   templateUrl: './favorites-meta-card.component.html',
   styleUrls: ['./favorites-meta-card.component.scss']
 })
-export class FavoritesMetaCardComponent<T> implements OnInit {
-
-  @Input()
-  public favoriteEntity: IFavoriteEntity<T>;
+export class FavoritesMetaCardComponent {
 
   @Input()
   public compact = false;
@@ -51,32 +51,41 @@ export class FavoritesMetaCardComponent<T> implements OnInit {
 
   public confirmation: ConfirmationDialogConfig;
 
-  constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
+  public endpointConnected$: Observable<boolean>;
+  public name$: Observable<string>;
+  public routerLink$: Observable<string>;
 
-  ngOnInit() {
-    if (!this.placeholder && this.favoriteEntity) {
-      const { cardMapper, entity, favorite, prettyName } = this.favoriteEntity;
+  @Input()
+  set favoriteEntity(favoriteEntity: IFavoriteEntity) {
+    if (!this.placeholder && favoriteEntity) {
+      const endpoint$ = this.store.select(endpointEntitiesSelector).pipe(
+        map(endpoints => endpoints[favoriteEntity.favorite.endpointId])
+      );
+      this.endpointConnected$ = endpoint$.pipe(map(endpoint => !!endpoint.user));
+      const { cardMapper, favorite, prettyName } = favoriteEntity;
       this.favorite = favorite;
       this.prettyName = prettyName;
       this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
 
       this.setConfirmation(prettyName, favorite);
 
-      const config = cardMapper && entity ? cardMapper(entity) : null;
+      const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
 
       if (config) {
-        if (this.endpoint && this.endpointDisconnected) {
-          config.name = `${config.name} (Disconnected)`;
-          config.routerLink = '/endpoints';
+        if (this.endpoint) {
+          this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));
+          this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : '/endpoints'));
+        } else {
+          this.name$ = observableOf(config.name);
+          this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : null));
         }
         config.lines = this.mapLinesToObservables(config.lines);
         this.config = config;
-        if (this.config.getStatus) {
-          this.status$ = this.config.getStatus(entity);
-        }
       }
     }
   }
+
+  constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
 
   public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(

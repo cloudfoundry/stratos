@@ -16,11 +16,10 @@ export interface IFavoritesMetaCardConfig {
   lines: TFavoritesMetaCardLine[];
   routerLink?: string;
   name: string;
-  getStatus?: (entity) => Observable<CardStatus>;
   menuItems?: MetaCardMenuItem[];
 }
 
-export type TFavoriteMapperFunction<T> = (entity: T) => IFavoritesMetaCardConfig;
+export type TFavoriteMapperFunction<T extends IFavoriteMetadata> = (entity: T) => IFavoritesMetaCardConfig;
 
 interface IFavoriteMappers {
   [key: string]: {
