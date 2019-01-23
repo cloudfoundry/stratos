@@ -86,12 +86,16 @@ export class UserFavoriteManager {
     return pagination.pageRequests[pagination.currentPage];
   }
 
-  public getAllFavorites() {
-    const paginationMonitor = new PaginationMonitor<UserFavorite<IFavoriteMetadata>>(
+  public getFavoritesMonitor() {
+    return new PaginationMonitor<UserFavorite<IFavoriteMetadata>>(
       this.store,
       userFavoritesPaginationKey,
       entityFactory(userFavoritesSchemaKey)
     );
+  }
+
+  public getAllFavorites() {
+    const paginationMonitor = this.getFavoritesMonitor();
     const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
     return waitForFavorites$.pipe(
       switchMap(() => paginationMonitor.currentPage$)
@@ -105,8 +109,12 @@ export class UserFavoriteManager {
   private getHydrateObservable() {
     return this.getAllFavorites().pipe(
       switchMap(this.addEndpointsToHydrateList),
+      tap(console.log),
       map(this.groupIntermediateFavorites),
-      map(this.getHydratedGroups)
+      tap(console.log),
+      map(this.getHydratedGroups),
+
+      tap(console.log),
     );
   }
 

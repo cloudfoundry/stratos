@@ -70,7 +70,7 @@ export class FavoritesMetaCardComponent {
       this.setConfirmation(prettyName, favorite);
 
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
-
+      console.log(config);
       if (config) {
         if (this.endpoint) {
           this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));

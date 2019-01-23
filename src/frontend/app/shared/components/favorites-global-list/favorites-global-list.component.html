@@ -3,8 +3,8 @@
     It looks like you don't have any favorites, why don't you start by adding your favorite <a [routerLink]="['/endpoints']">endpoint</a>?
   </div>
   <div *ngIf="favorites.error && !favorites.fetching">Could not fetch favorites</div>
-  <div class="favorite-list" *ngIf="!favorites.error && !favorites.fetching && favorites.entityGroups">
-    <div *ngIf="!favorites.error && !favorites.fetching">
+  <div class="favorite-list" *ngIf="favorites.entityGroups">
+    <div *ngIf=" !favorites.error && !favorites.fetching">
       <div *ngFor="let favGroup of favorites.entityGroups">
         <div *ngIf="favGroup && favGroup.endpoint">
           <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true" [endpointHasEntities]="!!favGroup.entities"

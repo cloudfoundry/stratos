@@ -1,9 +1,15 @@
-import { map, filter, tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { IAllFavorites, UserFavoriteManager, IGroupedFavorites, IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
 import { AppState } from '../../../store/app-state';
+
+interface IFavoritesInfo {
+  entityGroups: IGroupedFavorites[];
+  fetching: boolean;
+  error: boolean;
+}
 
 @Component({
   selector: 'app-favorites-global-list',
@@ -11,19 +17,25 @@ import { AppState } from '../../../store/app-state';
   styleUrls: ['./favorites-global-list.component.scss']
 })
 export class FavoritesGlobalListComponent implements OnInit {
-  public favs$: Observable<IGroupedFavorites[]>;
+  public favs$: Observable<IFavoritesInfo>;
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     const manager = new UserFavoriteManager(this.store);
-    this.favs$ = manager.hydrateAllFavorites().pipe(
-      filter(favs => !!favs),
-      map(favs => ({
-        ...favs,
-        entityGroups: this.sortFavoriteGroups(favs)
+    const monitor = manager.getFavoritesMonitor();
+    this.favs$ = combineLatest(
+      manager.hydrateAllFavorites(),
+      monitor.fetchingCurrentPage$,
+      monitor.currentPageError$
+    ).pipe(
+      map(([favs, fetching, error]) => ({
+        entityGroups: this.sortFavoriteGroups(favs),
+        fetching,
+        error
       }))
     );
   }
+
   private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {
     if (!entityGroups) {
       return entityGroups;
