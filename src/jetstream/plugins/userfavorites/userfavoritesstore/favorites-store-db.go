@@ -2,6 +2,7 @@ package userfavoritesstore
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
@@ -10,9 +11,9 @@ import (
 )
 
 var (
-	getFavorites           = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id FROM favorites WHERE user_guid = $1`
+	getFavorites           = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id, metadata FROM favorites WHERE user_guid = $1`
 	deleteFavorite         = `DELETE FROM favorites WHERE user_guid = $1 AND guid = $2`
-	saveFavorite           = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id) VALUES ($1, $2, $3, $4, $5, $6)`
+	saveFavorite           = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 	setMetadata            = `UPDATE favorites SET metadata = $3 WHERE user_guid = $1 AND guid = $2`
 	deleteEndpointFavorite = `DELETE FROM favorites WHERE endpoint_id = $1`
 )
@@ -49,10 +50,22 @@ func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) 
 
 	for rows.Next() {
 		favorite := new(UserFavoriteRecord)
-		err := rows.Scan(&favorite.GUID, &favorite.EndpointType, &favorite.EndpointID, &favorite.EntityType, &favorite.EntityID, &favorite.Metadata)
+		var metaString sql.NullString
+		err := rows.Scan(&favorite.GUID, &favorite.EndpointType, &favorite.EndpointID, &favorite.EntityType, &favorite.EntityID, &metaString)
 		if err != nil {
+			fmt.Println(err)
 			return nil, fmt.Errorf("Unable to scan User Favorite records: %v", err)
 		}
+
+		var metadata map[string]interface{}
+		err = json.Unmarshal([]byte(metaString.String), &metadata)
+		fmt.Println(metadata)
+		if err != nil {
+			fmt.Println(err)
+			return nil, fmt.Errorf("Unable to Marshal User Favorite metadata: %v", err)
+		}
+		favorite.Metadata = metadata
+
 		favoritesList = append(favoritesList, favorite)
 	}
 
@@ -83,7 +96,13 @@ func (p *FavoritesDBStore) SetMetadata(userGUID string, guid string, metadata st
 
 // Save will persist a User Favorite to a datastore
 func (p *FavoritesDBStore) Save(favoriteRecord UserFavoriteRecord) (*UserFavoriteRecord, error) {
-	if _, err := p.db.Exec(saveFavorite, favoriteRecord.GUID, favoriteRecord.UserGUID, favoriteRecord.EndpointType, favoriteRecord.EndpointID, favoriteRecord.EntityType, favoriteRecord.EntityID); err != nil {
+
+	metaString, err := json.Marshal(favoriteRecord.Metadata)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to marshal User Favorite metadata: %v", err)
+	}
+	if _, err := p.db.Exec(saveFavorite, favoriteRecord.GUID, favoriteRecord.UserGUID, favoriteRecord.EndpointType, favoriteRecord.EndpointID, favoriteRecord.EntityType, favoriteRecord.EntityID, metaString); err != nil {
 		return nil, fmt.Errorf("Unable to save User Favorite record: %v", err)
 	}
 

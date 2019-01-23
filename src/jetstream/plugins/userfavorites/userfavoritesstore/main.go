@@ -1,13 +1,13 @@
 package userfavoritesstore
 
 type UserFavoriteRecord struct {
-	GUID         string `json:"guid"`
-	UserGUID     string `json:"-"`
-	EndpointType string `json:"endpointType"`
-	EndpointID   string `json:"endpointId"`
-	EntityType   string `json:"entityType"`
-	EntityID     string `json:"entityId"`
-	Metadata     string `json:"metadata"`
+	GUID         string                 `json:"guid"`
+	UserGUID     string                 `json:"-"`
+	EndpointType string                 `json:"endpointType"`
+	EndpointID   string                 `json:"endpointId"`
+	EntityType   string                 `json:"entityType"`
+	EntityID     string                 `json:"entityId"`
+	Metadata     map[string]interface{} `json:"metadata"`
 }
 
 // FavoritesStore is the user favorites repository

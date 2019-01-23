@@ -226,7 +226,8 @@ export class UserFavoriteManager {
       if (!hasEndpoint) {
         const endpointFavorite = new UserFavoriteEndpoint(
           favorite.endpointId,
-          favorite.endpointType
+          favorite.endpointType,
+          null
         );
         newFavorites.push(endpointFavorite);
       }

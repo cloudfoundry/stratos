@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, first } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -38,7 +38,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  public favorite: UserFavoriteEndpoint;
+  public favorite$: Observable<UserFavoriteEndpoint>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -46,9 +46,14 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     endpointsService: EndpointsService
   ) {
 
-    this.favorite = new UserFavoriteEndpoint(
-      this.cfEndpointService.cfGuid,
-      'cf',
+    this.favorite$ = endpointsService.endpoints$.pipe(
+      first(),
+      map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
+      map(endpoint => new UserFavoriteEndpoint(
+        this.cfEndpointService.cfGuid,
+        'cf',
+        endpoint
+      ))
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService

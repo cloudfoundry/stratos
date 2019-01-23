@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" [favorite]="favorite">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" [favorite]="favorite$ | async">
   <h1>{{ (applicationService.application$ | async)?.app?.entity?.name }} </h1>
   <div class="page-header-right">
     <a class="app-page-header__anchor" mat-icon-button *ngIf="(applicationService.applicationUrl$ | async) != null && (applicationService.application$ | async)?.app.entity.state === 'STARTED'"

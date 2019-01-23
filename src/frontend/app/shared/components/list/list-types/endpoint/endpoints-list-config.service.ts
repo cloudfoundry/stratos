@@ -244,6 +244,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       return new UserFavoriteEndpoint(
         row.guid,
         'cf',
+        row
       );
     }));
     this.dataSource = new EndpointsDataSource(

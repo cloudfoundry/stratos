@@ -70,12 +70,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   public appState$: Observable<ApplicationStateData>;
 
-  public favorite = new UserFavorite(
-    this.applicationService.cfGuid,
-    'cf',
-    applicationSchemaKey,
-    this.applicationService.appGuid,
+  public favorite$ = this.applicationService.app$.pipe(
+    filter(app => !!app),
+    map(app => new UserFavorite(
+      this.applicationService.cfGuid,
+      'cf',
+      applicationSchemaKey,
+      this.applicationService.appGuid,
+      app
+    ))
   );
+
 
   isBusyUpdating$: Observable<{ updating: boolean }>;
 

@@ -4,12 +4,12 @@ import { EndpointModel } from '../store/types/endpoint.types';
 
 export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, entityKey: string) {
   if (isCfEntity(entity as CfAPIResource)) {
-
     return new UserFavorite<T>(
       entity.entity.cfGuid,
       'cf',
       entityKey,
       entity.metadata.guid,
+      entity
     );
   }
   return null;
@@ -19,7 +19,8 @@ export function getFavoriteFromEndpointEntity(endpoint: EndpointModel) {
   if (isEndpointEntity(endpoint)) {
     return new UserFavoriteEndpoint(
       endpoint.guid,
-      endpoint.cnsi_type
+      endpoint.cnsi_type,
+      endpoint
     );
   }
   return null;

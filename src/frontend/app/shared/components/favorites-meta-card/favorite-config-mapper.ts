@@ -96,6 +96,16 @@ class FavoritesConfigMapper {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].actionGenerator(favorite) : null;
   }
+
+  /**
+   * For a given favorite, return the corresponding hydration action
+   * @param favorite
+   */
+  public getEntityMetadata<T extends IFavoriteMetadata, Y = any>(favorite: UserFavorite<T>, entity: Y) {
+    const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
+    return this.mappers[mapperKey] && this.mappers[mapperKey].entityToMetadata ? this.mappers[mapperKey].entityToMetadata(entity) : null;
+  }
+
 }
 
 export const favoritesConfigMapper = new FavoritesConfigMapper();

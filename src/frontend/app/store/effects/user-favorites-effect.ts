@@ -1,3 +1,4 @@
+import { BackendUserFavorite } from './../types/user-favorites.types';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
@@ -46,17 +47,19 @@ export class UserFavoritesEffect {
         entityId,
         endpointId,
         entityType,
-        endpointType
+        endpointType,
+        metadata
       } = action.favorite;
 
       const favorite = {
         entityId,
         endpointId,
         entityType,
-        endpointType
-      } as UserFavorite<IFavoriteMetadata>;
+        endpointType,
+        metadata: JSON.stringify(metadata)
+      } as BackendUserFavorite;
 
-      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, favorite).pipe(
+      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
         mergeMap(newFavorite => {
           const entities = {
             [userFavoritesSchemaKey]: {
