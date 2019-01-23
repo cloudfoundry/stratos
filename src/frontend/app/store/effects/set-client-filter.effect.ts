@@ -1,11 +1,11 @@
-
-import {map} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
 
 import { SET_CLIENT_FILTER, SetClientFilter, SetClientPage } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
+
 
 
 @Injectable()

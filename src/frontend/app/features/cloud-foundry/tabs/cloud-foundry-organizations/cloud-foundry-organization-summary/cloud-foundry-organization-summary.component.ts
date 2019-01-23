@@ -27,11 +27,10 @@ export class CloudFoundryOrganizationSummaryComponent {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
+      // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfOrgService.allOrgUsers$,
-      cfOrgService.appCount$
     ]).pipe(
       map(() => false),
       startWith(true)

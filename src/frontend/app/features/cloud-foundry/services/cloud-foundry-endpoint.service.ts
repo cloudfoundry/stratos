@@ -38,7 +38,6 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { QParam } from '../../../store/types/pagination.types';
-import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 
@@ -62,7 +61,7 @@ export class CloudFoundryEndpointService {
   totalMem$: Observable<number>;
   paginationSubscription: any;
   appsPagObs: PaginationObservables<APIResource<IApp>>;
-  users$: Observable<APIResource<CfUser>[]>;
+  usersCount$: Observable<number | null>;
   orgs$: Observable<APIResource<IOrganization>[]>;
   info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
   cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
@@ -162,21 +161,21 @@ export class CloudFoundryEndpointService {
       )
     }, true).entities$;
 
-    this.users$ = this.cfUserService.getUsers(this.cfGuid);
-
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
-    this.constructAppObservables();
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid);
+
+    this.constructAppObs();
 
     this.fetchDomains();
   }
 
-  constructAppObservables() {
-    const paginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey));
+  constructAppObs() {
+    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey));
     this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
-      paginationMonitor
+      paginationMonitor: appPaginationMonitor
     });
   }
 

@@ -46,9 +46,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
-    const usersHidden$ = cfEndpointService.users$.pipe(
-      startWith(null),
-      map(users => !users)
+    const usersHidden$ = cfEndpointService.usersCount$.pipe(
+      map(count => !count),
+      startWith(true),
     );
 
     const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(

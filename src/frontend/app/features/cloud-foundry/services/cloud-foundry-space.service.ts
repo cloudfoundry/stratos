@@ -9,11 +9,10 @@ import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAllSpaceUsers, GetSpace } from '../../../store/actions/space.actions';
+import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
-  cfUserSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceBindingSchemaKey,
@@ -22,13 +21,9 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
 } from '../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfUser, SpaceUserRoleNames } from '../../../store/types/user.types';
+import { SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -51,8 +46,7 @@ export class CloudFoundrySpaceService {
   appCount$: Observable<number>;
   loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  allSpaceUsers$: Observable<APIResource<CfUser>[]>;
-  usersPaginationKey: string;
+  usersCount$: Observable<number | null>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -66,7 +60,6 @@ export class CloudFoundrySpaceService {
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
 
     this.initialiseObservables();
   }
@@ -90,6 +83,7 @@ export class CloudFoundrySpaceService {
       map(u => getSpaceRolesString(u))
     );
 
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
   }
 
   private initialiseSpaceObservables() {
@@ -103,8 +97,9 @@ export class CloudFoundrySpaceService {
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
-          // We're only interested in fetching space roles via the space request for non-admins. This is the only way to guarantee the roles
-          // are present for all users associated with the space
+          // We're only interested in fetching space roles via the space request for non-admins.
+          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
+          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
           relations.push(
             createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.DEVELOPER),
             createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.MANAGER),
@@ -134,20 +129,6 @@ export class CloudFoundrySpaceService {
         return createQuotaDefinition(this.orgGuid);
       }
     }));
-
-    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
-        return getPaginationObservables({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            this.usersPaginationKey,
-            entityFactory(cfUserSchemaKey)
-          )
-        }).entities$;
-      })
-    );
   }
 
   private initialiseAppObservables() {

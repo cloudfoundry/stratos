@@ -10,11 +10,10 @@ import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cor
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAllOrgUsers, GetOrganization } from '../../../store/actions/organization.actions';
+import { GetOrganization } from '../../../store/actions/organization.actions';
 import { DeleteSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
-  cfUserSchemaKey,
   domainSchemaKey,
   entityFactory,
   organizationSchemaKey,
@@ -24,13 +23,9 @@ import {
   serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfUser, OrgUserRoleNames } from '../../../store/types/user.types';
+import { OrgUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -64,8 +59,7 @@ export class CloudFoundryOrganizationService {
   appCount$: Observable<number>;
   loadingApps$: Observable<boolean>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
-  allOrgUsers$: Observable<APIResource<CfUser>[]>;
-  usersPaginationKey: string;
+  usersCount$: Observable<number | null>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -77,7 +71,6 @@ export class CloudFoundryOrganizationService {
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid);
 
     this.initialiseObservables();
   }
@@ -102,8 +95,9 @@ export class CloudFoundryOrganizationService {
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
-          // We're only interested in fetching org roles via the org request for non-admins. This is the only way to guarantee the roles
-          // are present for all users associated with the org
+          // We're only interested in fetching org roles via the org request for non-admins.
+          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
+          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
           relations.push(
             createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.USER),
             createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.MANAGER),
@@ -158,6 +152,8 @@ export class CloudFoundryOrganizationService {
     );
 
     this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid);
   }
 
   private countExistingApps(): Observable<number> {
@@ -179,21 +175,6 @@ export class CloudFoundryOrganizationService {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
-
-
-    this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const action = new GetAllOrgUsers(this.orgGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
-        return getPaginationObservables<APIResource<CfUser>>({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            this.usersPaginationKey,
-            entityFactory(cfUserSchemaKey)
-          )
-        }).entities$;
-      })
-    );
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {
