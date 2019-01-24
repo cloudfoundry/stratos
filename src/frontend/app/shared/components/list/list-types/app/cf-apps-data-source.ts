@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { debounceTime, distinctUntilChanged, map, withLatestFrom, filter, switchMap } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../core/dispatch-sequencer';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -17,7 +17,6 @@ import {
   spaceSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
-import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationParam } from '../../../../../store/types/pagination.types';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
@@ -38,7 +37,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
   public static paginationKey = 'applicationWall';
   private subs: Subscription[];
   public action: GetAllApplications;
-  public initialised$: Observable<boolean>;
 
 
   constructor(
@@ -47,9 +45,11 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
     seedPaginationKey = CfAppsDataSource.paginationKey,
+    startingCfGuid?: string
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
     const action = createGetAllAppAction(paginationKey);
+    action.endpointGuid = startingCfGuid;
 
     const dispatchSequencer = new DispatchSequencer(store);
 
@@ -78,29 +78,18 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       destroy: () => this.subs.forEach(sub => sub.unsubscribe())
     });
 
-    // Reapply the cf guid to the action. Normally this is done via reapplying the selection to the filter... however this is too slow
-    // for maxedResult world
-    this.initialised$ = store.select(selectPaginationState(action.entityKey, action.paginationKey)).pipe(
-      map(pagination => {
-        if (pagination && pagination.clientPagination) {
-          action.endpointGuid = pagination.clientPagination.filter.items.cf;
-        }
-        return true;
-      })
-    );
-
     this.action = action;
 
-    const statsSub = this.maxedResults$.pipe(
-      filter(maxedResults => !maxedResults),
-      switchMap(() => this.page$),
+    const statsSub = this.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(this)),
-      withLatestFrom(this.pagination$),
       // Ensure we keep pagination smooth
       debounceTime(250),
-      map(([page, pagination]) => {
-        if (!page) {
+      // Allow maxedResults time to settle - see #3359
+      delay(100),
+      withLatestFrom(this.maxedResults$),
+      map(([page, maxedResults]) => {
+        if (!page || maxedResults) {
           return [];
         }
         const actions = new Array<DispatchSequencerAction>();
