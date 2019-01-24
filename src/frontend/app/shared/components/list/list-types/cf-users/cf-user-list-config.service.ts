@@ -217,6 +217,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     };
     this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
       org$: safeOrg$,
+      isOrgLevel: !space$,
       spaces$: safeSpaces$
     };
   }

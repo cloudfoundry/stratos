@@ -216,7 +216,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     includeRelations?: string[]) {
     super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
     this.options.url = `spaces/${guid}/user_roles`;
-    this.flattenPaginationMax = 201; // TODO: RC
+    this.flattenPaginationMax = 600;
   }
   actions = getActions('Spaces', 'List all user roles');
 }

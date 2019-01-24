@@ -185,12 +185,12 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
   options: RequestOptions;
   initialParams = {
     page: 1,
-    'results-per-page': 75, // TODO: RC
+    'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 1500; // TODO: RC
+  flattenPaginationMax = 600;
   skipValidation: boolean;
   populateMissing: boolean;
 }
