@@ -210,9 +210,8 @@ export class AppModule {
       })
     );
   }
+
   private registerCfApplicationMapper(endpointType: string) {
-
-
     favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>({
       endpointType,
       entityType: applicationSchemaKey
@@ -222,8 +221,7 @@ export class AppModule {
         return {
           type: applicationSchemaKey,
           routerLink: `/applications/${app.cfGuid}/${app.guid}/summary`,
-          name: app.name,
-          lines: []
+          name: app.name
         };
       },
       favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId),
@@ -234,8 +232,8 @@ export class AppModule {
       })
     );
   }
-  private registerCfSpaceMapper(endpointType: string) {
 
+  private registerCfSpaceMapper(endpointType: string) {
     favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>({
       endpointType,
       entityType: spaceSchemaKey
@@ -245,7 +243,6 @@ export class AppModule {
         return {
           type: spaceSchemaKey,
           routerLink: `/cloud-foundry/${space.cfGuid}/organizations/${space.orgGuid}/spaces/${space.guid}/summary`,
-          lines: [],
           name: space.name
         };
       },
@@ -269,9 +266,6 @@ export class AppModule {
       (org: IOrgFavMetadata) => ({
         type: organizationSchemaKey,
         routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
-        lines: [
-          ['Status', org.status]
-        ],
         name: org.name
       }),
       favorite => new GetOrganization(favorite.entityId, favorite.endpointId),

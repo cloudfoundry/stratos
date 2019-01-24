@@ -13,7 +13,7 @@ export type TFavoritesMetaCardLine = [string, string | Observable<string>];
 
 export interface IFavoritesMetaCardConfig {
   type: string;
-  lines: TFavoritesMetaCardLine[];
+  lines?: TFavoritesMetaCardLine[];
   routerLink?: string;
   name: string;
   menuItems?: MetaCardMenuItem[];

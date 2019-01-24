@@ -107,6 +107,9 @@ export class FavoritesMetaCardComponent {
   }
 
   private mapLinesToObservables(lines: [string, string | Observable<string>][]) {
+    if (!lines) {
+      return [];
+    }
     return lines.map(line => {
       const [label, value] = line;
       if (!isObservable(value)) {
