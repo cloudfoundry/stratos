@@ -2,10 +2,11 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 
+import { IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IApp } from '../../../../core/cf-api.types';
-import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { pathGet, safeUnsubscribe } from '../../../../core/utils.service';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
@@ -15,9 +16,8 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { CsiGuidsService } from '../csi-guids.service';
-import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -30,18 +30,21 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   boundAppId: string;
 
   validateSubscription: Subscription;
-  validate = new BehaviorSubject(true);
+  validate = new BehaviorSubject<boolean>(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
   apps$: Observable<APIResource<IApp>[]>;
   guideText = 'Specify the application to bind (Optional)';
+  selectedServicePlan: APIResource<IServicePlan>;
+  bindingParams: object = {};
+  schemaFormConfig: SchemaFormConfig;
+
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.stepperForm = new FormGroup({
       apps: new FormControl(''),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
   }
 
@@ -54,16 +57,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.validateSubscription = this.stepperForm.statusChanges.pipe(
-      map(() => {
-        if (this.stepperForm.pristine) {
-          setTimeout(() => this.validate.next(true));
-        }
-        setTimeout(() => this.validate.next(this.stepperForm.valid));
-      })
-    ).subscribe();
-
-
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
       switchMap(createServiceInstance => {
@@ -80,17 +73,54 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.setBoundApp();
   }
 
-  submit = (): Observable<StepOnNextResult> => {
-    this.setApp();
-    return observableOf({ success: true });
+  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+    if (selectedServicePlan) {
+      // Don't overwrite if it's null (we've returned to this step from the next)
+      this.selectedServicePlan = selectedServicePlan;
+    }
+
+    // Start
+    this.validateSubscription = this.stepperForm.controls['apps'].valueChanges.subscribe(app => {
+      if (!app) {
+        // If there's no app selected the step will always be valid
+        this.validate.next(true);
+      }
+    });
+
+    if (!this.schemaFormConfig) {
+      // Create new config
+      this.schemaFormConfig = {
+        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan),
+      };
+    } else {
+      // Update existing config (retaining any existing config)
+      this.schemaFormConfig = {
+        ...this.schemaFormConfig,
+        initialData: this.bindingParams,
+        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
+      };
+    }
+
   }
 
-  setApp = () => this.store.dispatch(
-    new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.stepperForm.controls.params.value)
-  )
+  setBindingParams(data) {
+    this.bindingParams = data;
+  }
+
+  setParamValid(valid: boolean) {
+    this.validate.next(valid);
+  }
+
+  submit = (): Observable<StepOnNextResult> => {
+    this.store.dispatch(new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams));
+    return observableOf({
+      success: true,
+      data: this.selectedServicePlan
+    });
+  }
 
   ngOnDestroy(): void {
-    this.validateSubscription.unsubscribe();
+    safeUnsubscribe(this.validateSubscription);
   }
 
 }

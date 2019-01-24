@@ -36,6 +36,7 @@ import { AppState } from '../store/app-state';
 import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
+import { MultilineTitleComponent } from '../shared/components/multiline-title/multiline-title.component';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -118,8 +119,6 @@ export const BaseTestModulesNoShared = [
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 
-export const getBaseProviders = [createBasicStoreModule()];
-
 export const getCfSpaceServiceMock = {
   provide: CloudFoundrySpaceService,
   useClass: CloudFoundrySpaceServiceMock
@@ -127,4 +126,4 @@ export const getCfSpaceServiceMock = {
 
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
-  MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent];
+  MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];

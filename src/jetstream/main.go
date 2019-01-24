@@ -505,7 +505,21 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionStoreOptions:    sessionStoreOptions,
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
+		AuthProviders:          make(map[string]interfaces.AuthProvider),
 	}
+
+	// Initialize built-in auth providers
+
+	// Basic Auth
+	pp.AddAuthProvider(interfaces.AuthTypeHttpBasic, interfaces.AuthProvider{
+		Handler:  pp.doHttpBasicFlowRequest,
+		UserInfo: pp.GetCNSIUserFromBasicToken,
+	})
+
+	// OIDC
+	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
+		Handler: pp.doOidcFlowRequest,
+	})
 
 	return pp
 }

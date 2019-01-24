@@ -18,7 +18,7 @@ import {
   ProjectDoesntExist,
 } from '../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
@@ -163,7 +163,7 @@ export class DeployApplicationStep2Component
               action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
                 fetchBranchesAction.paginationKey,
-                entityFactory(githubBranchesSchemaKey)
+                entityFactory(gitBranchesSchemaKey)
               )
             },
             true
@@ -175,7 +175,7 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(fetchBranches);
 
     const paginationAction = {
-      entityKey: githubBranchesSchemaKey,
+      entityKey: gitBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
@@ -193,7 +193,7 @@ export class DeployApplicationStep2Component
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
       paginationAction.paginationKey,
-      entityFactory(githubBranchesSchemaKey)
+      entityFactory(gitBranchesSchemaKey)
     );
 
     this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
@@ -216,13 +216,13 @@ export class DeployApplicationStep2Component
     ).pipe(
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
-        if (branch && !!projectInfo && branch.projectId ===  projectInfo.full_name) {
+        if (branch && !!projectInfo && branch.projectId === projectInfo.full_name) {
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
           const entityKey = projectInfo.full_name + '-' + commitSha;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
-            githubCommitSchemaKey,
-            entityFactory(githubCommitSchemaKey),
+            gitCommitSchemaKey,
+            entityFactory(gitCommitSchemaKey),
             entityKey,
             new FetchCommit(this.scm, commitSha, projectInfo.full_name),
           );

@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
+import { gitBranchesSchemaKey, gitCommitSchemaKey } from '../helpers/entity-factory';
 import { GitAppDetails, SourceType, OverrideAppDetails } from '../types/deploy-application.types';
 import { GitBranch, GitCommit } from '../types/git.types';
 import { PaginatedAction } from '../types/pagination.types';
@@ -61,7 +61,7 @@ export class FetchBranchesForProject implements PaginatedAction {
     FETCH_BRANCH_FAILED
   ];
   type = FETCH_BRANCHES_FOR_PROJECT;
-  entityKey = githubBranchesSchemaKey;
+  entityKey = gitBranchesSchemaKey;
   paginationKey: 'branches';
 }
 
@@ -80,7 +80,7 @@ export class FetchCommit implements IRequestAction {
 
   constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
   type = FETCH_COMMIT;
-  entityKey = githubCommitSchemaKey;
+  entityKey = gitCommitSchemaKey;
 }
 
 export class FetchCommits implements PaginatedAction {
@@ -92,7 +92,7 @@ export class FetchCommits implements PaginatedAction {
    * @memberof FetchCommits
    */
   constructor(public scm: GitSCM, public projectName: string, public sha: string) {
-    this.paginationKey = projectName + sha;
+    this.paginationKey = scm.getType() + projectName + sha;
   }
   actions = [
     '[Deploy App] Fetch commits start',
@@ -100,7 +100,7 @@ export class FetchCommits implements PaginatedAction {
     '[Deploy App] Fetch commits failed',
   ];
   type = FETCH_COMMITS;
-  entityKey = githubCommitSchemaKey;
+  entityKey = gitCommitSchemaKey;
   paginationKey: string;
   initialParams = {
     'order-direction': 'asc',

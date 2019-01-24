@@ -1,4 +1,4 @@
-import { promise, protractor, browser } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
 
 import { IApp } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
@@ -16,8 +16,6 @@ describe('Application Routes -', () => {
   let appRoutes;
   let routeHostName, routePath;
 
-  const EC = protractor.ExpectedConditions;
-
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -30,7 +28,7 @@ describe('Application Routes -', () => {
       const defaultCf = e2e.secrets.getDefaultCFEndpoint();
       // Only available until after `info` call has completed as part of setup
       cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-      applicationE2eHelper.createApp(
+      return applicationE2eHelper.createApp(
         cfGuid,
         e2e.secrets.getDefaultCFEndpoint().testOrg,
         e2e.secrets.getDefaultCFEndpoint().testSpace,
@@ -108,11 +106,11 @@ describe('Application Routes -', () => {
     expect(appRoutes.list.table.getRows().count()).toBe(1);
     appRoutes.list.table.getCell(0, 1).getText().then(route => {
       expect(route).toBeTruthy();
-      expect(route.startsWith(routeHostName)).toBeTruthy();
+      expect(route.startsWith(routeHostName, 7)).toBeTruthy();
       expect(route.endsWith('/' + routePath)).toBeTruthy();
       expect(spaceContainsRoute(app.entity.space_guid, routeHostName, routePath)).toBeTruthy();
     });
-    expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('No');
+    expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('highlight_off');
   });
 
   it('Unmap existing route', () => {
@@ -152,13 +150,14 @@ describe('Application Routes -', () => {
     mapExistingRoutesList.header.getRefreshListButton().click();
 
     // Find the row index of the route that's just been unbound
+    mapExistingRoutesList.header.setSearchText(routeHostName);
     const rowIndexP = mapExistingRoutesList.table.getTableData().then(rows =>
-      rows.findIndex(row => row['route'].startsWith(routeHostName) && row['route'].endsWith('/' + routePath))
+      rows.findIndex(row => row['route'].startsWith(routeHostName, 7) && row['route'].endsWith('/' + routePath))
     );
 
     expect(rowIndexP).toBeGreaterThanOrEqual(0);
 
-    const restOfTest = rowIndexP.then(rowIndex => {
+    return rowIndexP.then(rowIndex => {
       mapExistingRoutesList.table.selectRow(rowIndex);
       expect(addRoutePage.stepper.canNext()).toBeTruthy();
       addRoutePage.stepper.next();
@@ -172,10 +171,10 @@ describe('Application Routes -', () => {
       expect(appRoutes.list.table.getRows().count()).toBe(1);
       appRoutes.list.table.getCell(0, 1).getText().then(route => {
         expect(route).toBeTruthy();
-        expect(route.startsWith(routeHostName)).toBeTruthy();
+        expect(route.startsWith(routeHostName, 7)).toBeTruthy();
         expect(route.endsWith('/' + routePath)).toBeTruthy();
       });
-      expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('No');
+      expect(appRoutes.list.table.getCell(0, 2).getText()).toBe('highlight_off');
     });
   });
 
@@ -200,7 +199,7 @@ describe('Application Routes -', () => {
     expect(appRoutes.list.empty.getCustomLineOne()).toBe('This application has no routes');
 
     browser.wait(waitForRouteToBeDeleted(app.entity.space_guid, routeHostName, routePath),
-    10000, 'Route should have been deleted from the space');
+      10000, 'Route should have been deleted from the space');
   });
 
   afterAll(() => {

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { TableCellCustom } from '../../../list.types';
+import { getEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
 
 @Component({
   selector: 'app-table-cell-endpoint-name',
@@ -10,14 +11,10 @@ import { TableCellCustom } from '../../../list.types';
 export class TableCellEndpointNameComponent<T> extends TableCellCustom<T> {
 
   getLinkForEndpoint(row) {
-    switch (row.cnsi_type) {
-      case 'cf':
-        return '/cloud-foundry/' + row.guid;
-      case 'metrics':
-        return '/endpoints/metrics/' + row.guid;
-      default:
-        return '';
+    const ext = getEndpointTypes().find(ep => ep.value === row.cnsi_type);
+    if (ext && ext.homeLink) {
+      return ext.homeLink(row.guid).join('/');
     }
-
+    return '';
   }
 }

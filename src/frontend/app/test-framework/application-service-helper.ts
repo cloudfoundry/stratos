@@ -1,21 +1,23 @@
-
-import { of as observableOf, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf } from 'rxjs';
 
+import { IApp, IAppSummary, ISpace } from '../core/cf-api.types';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ApplicationData, ApplicationService } from '../features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+} from '../shared/components/application-state/application-state.service';
+import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../store/app-state';
 import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../store/types/api.types';
-import { AppStat, AppSummary } from '../store/types/app-metadata.types';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
-import { ISpace } from '../core/cf-api.types';
+import { AppStat } from '../store/types/app-metadata.types';
+
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -48,7 +50,12 @@ export class ApplicationServiceMock {
     },
     fetching: false
   } as ApplicationData));
-  appSummary$: Observable<EntityInfo<AppSummary>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
+  app$: Observable<EntityInfo<APIResource<IApp>>> = observableOf({
+    entity: { entity: {} }
+  } as EntityInfo<APIResource<IApp>>);
+  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
+    entityRequestInfo: { fetching: false }
+  } as EntityInfo<APIResource<IAppSummary>>);
   appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });

@@ -13,7 +13,7 @@
     </div>
     <form class="stepper-form" [formGroup]="domainFormGroup">
       <mat-form-field>
-        <mat-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required>
+        <mat-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required [appFocus]="domains">
           <mat-option *ngFor="let domain of domains" [value]="domain">{{domain?.entity?.name}}</mat-option>
         </mat-select>
       </mat-form-field>
@@ -28,12 +28,14 @@
           <mat-form-field>
             <input matInput formControlName="host" placeholder="Host" required>
             <mat-error *ngIf="addHTTPRoute.controls['host'].errors?.pattern">Invalid Hostname</mat-error>
+            <mat-error *ngIf="addHTTPRoute.controls['host'].errors?.maxlength">Host cannot exceed 63 characters</mat-error>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field>
             <input matInput formControlName="path" placeholder="Path">
             <mat-error *ngIf="addHTTPRoute.controls['path'].errors?.pattern">Invalid Path</mat-error>
+            <mat-error *ngIf="addHTTPRoute.controls['path'].errors?.maxlength">Path cannot exceed 128 characters</mat-error>
             <span matPrefix>/&nbsp;</span>
           </mat-form-field>
         </div>

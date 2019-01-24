@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 
+import { CardStatus } from '../../shared.types';
+
+
+
 export interface ApplicationStateData {
   label: string;
   subLabel?: string;
@@ -7,16 +11,6 @@ export interface ApplicationStateData {
   actions: {
     [key: string]: boolean
   };
-}
-
-export enum CardStatus {
-  NONE = 'none',
-  OK = 'ok',
-  WARNING = 'warning',
-  TENTATIVE = 'tentative',
-  INCOMPLETE = 'incomplete',
-  ERROR = 'error',
-  BUSY = 'busy'
 }
 
 @Injectable()
@@ -60,7 +54,7 @@ export class ApplicationStateService {
       PENDING: {
         label: 'Offline while Updating',
         indicator: CardStatus.WARNING,
-        actions: 'delete'
+        actions: 'start, delete'
       },
       STAGED: {
         label: 'Offline',
@@ -193,11 +187,11 @@ export class ApplicationStateService {
   }
 
   /**
-* @description Get the application state metadata for an application based on its summary and
-* optionally its instance metadata.
-* @param {object} summary - the application summary metadata (either from summary or entity)
-* @param {object} appInstances - the application instances metadata (from the app stats API call)
-*/
+  * @description Get the application state metadata for an application based on its summary and
+  * optionally its instance metadata.
+  * @param {object} summary - the application summary metadata (either from summary or entity)
+  * @param {object} appInstances - the application instances metadata (from the app stats API call)
+  */
   get(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);

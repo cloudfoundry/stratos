@@ -61,10 +61,7 @@ set +e
 # Kill the docker container
 docker kill $CONTAINER_ID
 
-# Pause the PCF Dev instance for now
-echo "Suspending PCF Dev"
-cf pcfdev suspend
-cf pcfdev status
+echo "All done"
 
 # Return exit code form the e2e tests
 exit $RET

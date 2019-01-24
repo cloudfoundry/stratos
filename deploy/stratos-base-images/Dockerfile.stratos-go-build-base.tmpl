@@ -1,5 +1,13 @@
 FROM {{BASE_IMAGE}}
 
+{{#IS_SLE}}
+RUN zypper addrepo  -G -c '{{SMT_INTERNAL}}' smt_internal
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_UPDATE}}' smt_internal_update
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SDK}}' smt_internal_sdk
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
+RUN zypper ref
+{{/IS_SLE}}
+
 RUN zypper -n ref && \
 zypper -n up && \
 zypper in -y which tar git gcc curl wget
@@ -18,5 +26,12 @@ RUN curl https://glide.sh/get | sh
 
 # Install dep for backend go dependency management
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+{{#IS_SLE}}
+RUN zypper rr  smt_internal
+RUN zypper rr  smt_internal_update
+RUN zypper rr  smt_internal_sdk
+RUN zypper rr  smt_internal_server
+{{/IS_SLE}}
 
 WORKDIR /home/stratos/go

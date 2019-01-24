@@ -2,18 +2,12 @@
 
 ## Deployment Steps
 
-The quickest way to install Stratos is to deploy it as a Cloud Foundry application. To do so, clone the `stratos` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
+The quickest way to install Stratos is to deploy it as a Cloud Foundry application. 
 
-```
-git clone https://github.com/cloudfoundry-incubator/stratos
-cd stratos
-git checkout tags/stable -b stable
-./build/store-git-metadata.sh
-cf push
-```
+You can do it in two ways:
 
->**NOTE** The console will pre-configure the host Cloud Foundry endpoint. No other CF instance can be registered unless the instructions in the section 'Enable Endpoints Dashboard to register additional Cloud Foundry endpoints' are followed.
- All other deployment methods (helm, docker-compose, docker all-in-one, etc) allow the registration of multiple CF instances by default.
+1. [Deploy Stratos from source](#Deploy-Stratos-from-source)
+1. [Deploy Stratos from docker image](#Deploy-Stratos-from-docker-image)
 
 You will then be able to open a web browser and navigate to the console URL:
 
@@ -25,16 +19,34 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 If you run into issues, please refer to the [Troubleshooting Guide](#troubleshooting) below.
 
+> The console will pre-configure the host Cloud Foundry endpoint. No other CF instance should be registered unless the instructions in
+ the section [Associate Cloud Foundry database service](#Associate-Cloud-Foundry-database-service) are followed.
+ All other deployment methods (helm, docker-compose, docker all-in-one, etc) allow the registration of multiple CF instances by default.
+
 Note:
 
 1. You need the cf CLI command line tool installed and available on the path.
-2. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
-3. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
-4. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
+1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
+1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
+1. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
-### Pre-building the UI
+### Deploy Stratos from source
 
-Due to the memory usage of the Angular compiler (see below), when deployed to Cloud Foundry via `cf push`, Stratos does not use AOT (Ahead-of-Time) complilation.
+To do so, `clone` the **stratos** repository, `cd` into the newly cloned repository and `push` to Cloud Foundry. This can be done with:
+
+```
+git clone https://github.com/cloudfoundry-incubator/stratos
+cd stratos
+git checkout tags/stable -b stable
+./build/store-git-metadata.sh
+cf push
+```
+
+If the cf push exceeds the time allowed see the instructions [here](#Pre-building-the-UI)
+
+#### Pre-building the UI
+
+Due to the memory usage of the Angular compiler (see below), when deployed to Cloud Foundry via `cf push`, Stratos does not use AOT (Ahead-of-Time) compilation.
 
 If you wish to enable AOT or reduce the push time, you can pre-build the UI before pushing.
 
@@ -53,12 +65,39 @@ You will need a recent version of Node installed locally to do this.
 The `prebuild-ui` npm script performs a build of the front-end UI and then zips up the resulting folder into a package named `stratos-frontend-prebuild.zip`. The Stratos buildpack will unpack this zip file and use its contents instead of building the UI during staging, when this file is present.
 
 
-### Memory Usage
+#### Memory Usage
 
 The Stratos Cloud Foundry `manifest.yml` states that the application requires
 `1512MB` of memory. This is required during the build process of the
 application since building an angular2 app is a memory intensive process. The
 memory limit can be scaled down after the app has been pushed, using the cf CLI.
+
+### Deploy Stratos from docker image
+
+Deploy Stratos using the [`splatform/stratos`](https://hub.docker.com/r/splatform/stratos) docker image
+
+> **NOTE:** Your Cloud Foundry must have docker support [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
+
+```
+cf push -o splatform/stratos:stable -m 128M -k 384M
+```
+
+Alternatively cf push using a manifest
+
+- download [manifest-docker.yml](../../manifest-docker.yml) or create your own manifest file:
+    ```yaml
+    applications:
+    - name: console
+      docker:
+        image: splatform/stratos:stable
+      instances: 1
+      memory: 128M
+      disk_quota: 384M
+    ```
+- now, you can simply push it to Cloud Foundry:
+    ```
+    cf push -f manifest-docker.yml
+    ```
 
 ## Associate Cloud Foundry database service
 Follow instructions [here](db-migration/README.md).

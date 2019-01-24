@@ -9,6 +9,7 @@ import { CheckboxComponent } from '../po/checkbox.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 import { ManagerUsersPage } from './manage-users-page.po';
 import { setUpTestOrgSpaceE2eTest } from './users-list-e2e.helper';
+import { StepperComponent } from '../po/stepper.po';
 
 describe('Manage Users Stepper', () => {
 
@@ -40,39 +41,53 @@ describe('Manage Users Stepper', () => {
   const timeout = 100000;
   extendE2ETestTime(timeout);
 
-  it('Check flow + add/remove roles ', () => {
-    const stpr = manageUsersPage.stepper;
 
-    // Select Users Step
-    const selectUsersList = manageUsersPage.selectUsersStep.selectUsersList;
-    expect(stpr.getActiveStepName()).toBe('Select Users');
-    selectUsersList.header.setSearchText(userName);
-    expect(selectUsersList.getTotalResults()).toBe(1);
-    expect(stpr.canPrevious()).toBeFalsy();
-    expect(stpr.canCancel()).toBeTruthy();
-    expect(stpr.canNext()).toBeFalsy();
+  let managerUsersStepper: StepperComponent;
+  let orgManagerCheckbox: CheckboxComponent,
+    orgAuditorCheckbox: CheckboxComponent,
+    orgBillingManagerCheckbox: CheckboxComponent,
+    orgUserCheckbox: CheckboxComponent;
+  let spaceManagerCheckbox: CheckboxComponent, spaceAuditorCheckbox: CheckboxComponent, spaceDeveloperCheckbox: CheckboxComponent;
 
-    selectUsersList.table.selectRow(0, false);
-    expect(stpr.canNext()).toBeTruthy();
-    stpr.next();
+  // Note - Test are sequential, all are required in the stated order
+
+  it('Open stepper and check initial state', () => {
+    const cfPage = CfTopLevelPage.forEndpoint(cfGuid);
+    cfPage.navigateTo();
+    cfPage.goToUsersTab();
+
+    const usersTable = new CFUsersListComponent();
+    usersTable.header.setSearchText(userName);
+    expect(usersTable.getTotalResults()).toBe(1);
+
+    const selectUser = new CheckboxComponent(usersTable.table.getCell(0, 0));
+    selectUser.getComponent().click();
+    const usersButton = usersTable.header.getIconButton('people');
+    expect(usersButton.isDisplayed()).toBeTruthy();
+    usersButton.click();
+
+    manageUsersPage = new ManagerUsersPage(cfGuid, null, null, userGuid);
+    manageUsersPage.waitForPage();
+    expect(manageUsersPage.stepper.getActiveStepName()).toBe('Select Roles');
 
     // Select Roles Step
     const modifyStep = manageUsersPage.modifyUsersStep;
     const orgsList = modifyStep.orgsList;
     const spacesList = modifyStep.spacesList;
-    expect(stpr.getActiveStepName()).toBe('Select Roles');
+    managerUsersStepper = manageUsersPage.stepper;
+
     orgsList.waitUntilShown();
     modifyStep.setOrg(orgName);
     // ... check button state
-    expect(stpr.canPrevious()).toBeTruthy();
-    expect(stpr.canCancel()).toBeTruthy();
-    expect(stpr.canNext()).toBeFalsy();
+    expect(managerUsersStepper.canPrevious()).toBeFalsy();
+    expect(managerUsersStepper.canCancel()).toBeTruthy();
+    expect(managerUsersStepper.canNext()).toBeFalsy();
 
     // ... check org state
-    const orgManagerCheckbox = modifyStep.getOrgManagerCheckbox();
-    const orgAuditorCheckbox = modifyStep.getOrgAuditorCheckbox();
-    const orgBillingManagerCheckbox = modifyStep.getOrgBillingManagerCheckbox();
-    const orgUserCheckbox = modifyStep.getOrgUserCheckbox();
+    orgManagerCheckbox = modifyStep.getOrgManagerCheckbox();
+    orgAuditorCheckbox = modifyStep.getOrgAuditorCheckbox();
+    orgBillingManagerCheckbox = modifyStep.getOrgBillingManagerCheckbox();
+    orgUserCheckbox = modifyStep.getOrgUserCheckbox();
 
     expect(orgManagerCheckbox.isDisabled()).toBeFalsy();
     expect(orgManagerCheckbox.isChecked()).toBeTruthy();
@@ -86,9 +101,9 @@ describe('Manage Users Stepper', () => {
     // ... check space state
     expect(spacesList.getTotalResults()).toBe(1);
     expect(spacesList.table.getCell(0, 0).getText()).toBe(spaceName);
-    const spaceManagerCheckbox = modifyStep.getSpaceManagerCheckbox(0);
-    const spaceAuditorCheckbox = modifyStep.getSpaceAuditorCheckbox(0);
-    const spaceDeveloperCheckbox = modifyStep.getSpaceDeveloperCheckbox(0);
+    spaceManagerCheckbox = modifyStep.getSpaceManagerCheckbox(0);
+    spaceAuditorCheckbox = modifyStep.getSpaceAuditorCheckbox(0);
+    spaceDeveloperCheckbox = modifyStep.getSpaceDeveloperCheckbox(0);
     expect(spaceManagerCheckbox.isDisabled()).toBeFalsy();
     expect(spaceManagerCheckbox.isChecked()).toBeTruthy();
     expect(spaceAuditorCheckbox.isDisabled()).toBeFalsy();
@@ -98,10 +113,12 @@ describe('Manage Users Stepper', () => {
 
     // ... check button state on toggle changes
     orgManagerCheckbox.getComponent().click();
-    expect(stpr.canNext()).toBeTruthy();
+    expect(managerUsersStepper.canNext()).toBeTruthy();
     orgManagerCheckbox.getComponent().click();
-    expect(stpr.canNext()).toBeFalsy();
+    expect(managerUsersStepper.canNext()).toBeFalsy();
+  });
 
+  it('Make role changes', () => {
     // ... remove all that are checked
     orgManagerCheckbox.getComponent().click();
     orgAuditorCheckbox.getComponent().click();
@@ -131,11 +148,13 @@ describe('Manage Users Stepper', () => {
     expect(spaceDeveloperCheckbox.isChecked()).toBeFalsy();
 
 
-    expect(stpr.canNext()).toBeTruthy();
-    stpr.next();
+    expect(managerUsersStepper.canNext()).toBeTruthy();
+    managerUsersStepper.next();
+  });
 
+  it('Confirm role changes', () => {
     // Confirm Step
-    expect(stpr.getActiveStepName()).toBe('Confirm');
+    expect(managerUsersStepper.getActiveStepName()).toBe('Confirm');
     const confirmStep = manageUsersPage.confirmStep;
 
     const orgTarget = `Org: ${orgName}`;
@@ -143,12 +162,12 @@ describe('Manage Users Stepper', () => {
 
     // ... initial action table state
     expect(confirmStep.actionTable.table.getTableData()).toEqual(createActionTableDate(orgTarget, spaceTarget, ''));
-    expect(stpr.canPrevious()).toBeTruthy();
-    expect(stpr.canCancel()).toBeTruthy();
-    expect(stpr.canNext()).toBeTruthy();
+    expect(managerUsersStepper.canPrevious()).toBeTruthy();
+    expect(managerUsersStepper.canCancel()).toBeTruthy();
+    expect(managerUsersStepper.canNext()).toBeTruthy();
 
-    stpr.next();
-    expect(stpr.getActiveStepName()).toBe('Confirm');
+    managerUsersStepper.next();
+    expect(managerUsersStepper.getActiveStepName()).toBe('Confirm');
 
     // Wait until all of the spinners have gone
     const spinners = element.all(by.tagName('mat-progress-spinner'));
@@ -160,33 +179,12 @@ describe('Manage Users Stepper', () => {
 
     // ... action table state after submit
     expect(confirmStep.actionTable.table.getTableData()).toEqual(createActionTableDate(orgTarget, spaceTarget, 'done'));
-    expect(stpr.canPrevious()).toBeFalsy();
-    expect(stpr.canCancel()).toBeFalsy();
-    expect(stpr.canNext()).toBeTruthy();
+    expect(managerUsersStepper.canPrevious()).toBeFalsy();
+    expect(managerUsersStepper.canCancel()).toBeFalsy();
+    expect(managerUsersStepper.canNext()).toBeTruthy();
 
-    stpr.next();
-    stpr.waitUntilNotShown();
-
-  }, timeout);
-
-  it('Open stepper with preselected user', () => {
-    const cfPage = CfTopLevelPage.forEndpoint(cfGuid);
-    cfPage.navigateTo();
-    cfPage.goToUsersTab();
-
-    const usersTable = new CFUsersListComponent();
-    usersTable.header.setSearchText(userName);
-    expect(usersTable.getTotalResults()).toBe(1);
-
-    const selectUser = new CheckboxComponent(usersTable.table.getCell(0, 0));
-    selectUser.getComponent().click();
-    const usersButton = usersTable.header.getIconButton('people');
-    expect(usersButton.isDisplayed()).toBeTruthy();
-    usersButton.click();
-
-    manageUsersPage = new ManagerUsersPage(cfGuid, null, null, userGuid);
-    manageUsersPage.waitForPage();
-    expect(manageUsersPage.stepper.getActiveStepName()).toBe('Select Roles');
+    managerUsersStepper.next();
+    managerUsersStepper.waitUntilNotShown();
   });
 
   function createActionTableDate(orgTarget, spaceTarget, stateIcon) {

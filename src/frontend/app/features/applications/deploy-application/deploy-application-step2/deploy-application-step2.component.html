@@ -46,8 +46,7 @@
             </div>
           </div>
           <mat-form-field>
-            <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)"
-              required>
+            <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)" required>
               <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
                 {{ branch.name }}
               </mat-option>

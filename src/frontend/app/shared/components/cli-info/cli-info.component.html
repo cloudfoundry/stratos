@@ -12,21 +12,22 @@
       <app-code-block>cf api {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</app-code-block>
 
       <p>3. Login</p>
-      <app-code-block codeBlockStyle="pre" hide-copy="true">$ cf login
-        API endpoint: {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}
+      <app-code-block>cf login</app-code-block>
+      <p>Output</p>
+      <app-code-block codeBlockStyle="pre" hideCopy="true">
+        <pre>API endpoint: <b>{{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</b>
 
-        Email> {{context.username || '[username]'}}
+Email> {{context.username || '[username]'}}
 
-        Password> [password]
-        Authenticating...
-        OK
+Password> [password]
+Authenticating...
+<b>OK</b></pre>
       </app-code-block>
 
       <p>4. Target an org and space</p>
       <app-code-block>cf target -o "{{context.orgName || '[organization name]'}}" -s "{{context.spaceName || '[space name]'}}"
       </app-code-block>
     </div>
-
     <ng-content></ng-content>
-
   </div>
+</div>

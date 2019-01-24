@@ -14,7 +14,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 export class AddOrganizationComponent {
   cfUrl: string;
   constructor(
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     const cfId = activeRouteCfOrgSpace.cfGuid;
     this.cfUrl = `/cloud-foundry/${cfId}/organizations`;
