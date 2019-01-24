@@ -13,8 +13,9 @@ import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction, StartRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { environment } from '../../../environments/environment';
-import { RemoveUserFavoriteAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
+import { UpdateUserFavoriteMetadataAction, UpdateUserFavoriteMetadataSuccessAction } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import { RemoveUserFavoriteAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -129,7 +130,7 @@ export class UserFavoritesEffect {
         paginationKey: 'userFavorites'
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      return this.http.delete<UserFavorite<IFavoriteMetadata>[]>(`${favoriteUrlPath}/${action.guid}`).pipe(
+      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`).pipe(
         map(() => {
           return favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((mappedData, favorite) => {
             const { guid } = favorite;
@@ -141,6 +142,19 @@ export class UserFavoritesEffect {
           }, { entities: { [userFavoritesSchemaKey]: {} }, result: [] });
         }),
         map(mappedData => new WrapperRequestActionSuccess(mappedData, apiAction))
+      );
+    })
+  );
+
+  @Effect() updateMetatdata$ = this.actions$.ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE).pipe(
+    mergeMap((action: UpdateUserFavoriteMetadataAction) => {
+      return this.http.post<UserFavorite<IFavoriteMetadata>>(
+        `${favoriteUrlPath}/${action.favorite.guid}/metadata`,
+        action.favorite.metadata
+      ).pipe(
+        map(() => {
+          return new UpdateUserFavoriteMetadataSuccessAction(action.favorite);
+        })
       );
     })
   );

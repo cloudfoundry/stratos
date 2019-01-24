@@ -1,19 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
-
+import { map } from 'rxjs/operators';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../../../store/helpers/entity-factory';
-import { UserFavorite, IFavoriteMetadata } from '../../../store/types/user-favorites.types';
+import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
+import { IFavoriteMetadata, UserFavorite } from '../../../store/types/user-favorites.types';
 import { CardStatus, ComponentEntityMonitorConfig } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
-import { EndpointModel } from '../../../store/types/endpoint.types';
-import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
-import { map } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -70,7 +69,6 @@ export class FavoritesMetaCardComponent {
       this.setConfirmation(prettyName, favorite);
 
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
-      console.log(config);
       if (config) {
         if (this.endpoint) {
           this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));

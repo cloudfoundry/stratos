@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
-import { combineLatest, debounceTime } from 'rxjs/operators';
+import { combineLatest, debounceTime, withLatestFrom } from 'rxjs/operators';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
@@ -41,8 +41,9 @@ import { getAPIRequestDataState } from './store/selectors/api.selectors';
 import { AppStoreModule } from './store/store.module';
 import { APIResource } from './store/types/api.types';
 import { EndpointModel } from './store/types/endpoint.types';
-import { IEndpointFavMetadata } from './store/types/user-favorites.types';
+import { IEndpointFavMetadata, IFavoriteMetadata } from './store/types/user-favorites.types';
 import { XSRFModule } from './xsrf.module';
+import { UpdateUserFavoriteMetadataAction } from './store/actions/user-favourites-actions/update-user-favorite-metadata-action';
 
 
 // Create action for router navigation. See
@@ -124,18 +125,48 @@ export class AppModule {
     // Once the CF modules become an extension point, these should be moved to a CF specific module
     this.registerCfFavoriteMappers();
     this.userFavoriteManager = new UserFavoriteManager(store);
+    const allFavs$ = this.userFavoriteManager.getAllFavorites();
     this.store.select(getAPIRequestDataState)
       .pipe(
-        combineLatest(this.userFavoriteManager.getAllFavorites()),
-        debounceTime(500)
+        debounceTime(2000),
+        withLatestFrom(allFavs$)
       )
       .subscribe(
         ([entities, favorites]) => {
           favorites.forEach(fav => {
-            console.log(entities[fav.entityType][fav.entityId]);
+            const entity = entities[fav.entityType][fav.entityId || fav.endpointId];
+            if (entity) {
+              const newMetadata = favoritesConfigMapper.getEntityMetadata(fav, entity);
+              if (this.metadataHasChanged(fav.metadata, newMetadata)) {
+                this.store.dispatch(new UpdateUserFavoriteMetadataAction({
+                  ...fav,
+                  metadata: newMetadata
+                }));
+              }
+            }
           });
         }
       );
+  }
+
+  private metadataHasChanged(oldMeta: IFavoriteMetadata, newMeta: IFavoriteMetadata) {
+    if ((!oldMeta && newMeta) || (oldMeta && !newMeta)) {
+      return true;
+    }
+    const oldKeys = Object.keys(oldMeta);
+    const newKeys = Object.keys(newMeta);
+    const oldValues = Object.values(oldMeta);
+    const newValues = Object.values(newMeta);
+    if (oldKeys.length !== newKeys.length) {
+      return true;
+    }
+    if (oldKeys.sort().join(',') !== newKeys.sort().join(',')) {
+      return true;
+    }
+    if (oldValues.sort().join(',') !== newValues.sort().join(',')) {
+      return true;
+    }
+    return false;
   }
 
   private registerCfFavoriteMappers() {

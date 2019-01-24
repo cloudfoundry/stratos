@@ -36,6 +36,7 @@ import { ApplicationData, ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
 import { GitSCMService, GitSCMType } from './../../../../shared/data-services/scm/scm.service';
 import { UserFavorite } from './../../../../store/types/user-favorites.types';
+import { IAppFavMetadata } from '../../../../cf-favourite-types';
 
 
 // Confirmation dialogs
@@ -72,12 +73,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => new UserFavorite(
+    map(app => new UserFavorite<IAppFavMetadata, APIResource<IApp>>(
       this.applicationService.cfGuid,
       'cf',
       applicationSchemaKey,
       this.applicationService.appGuid,
-      app
+      app.entity
     ))
   );
 

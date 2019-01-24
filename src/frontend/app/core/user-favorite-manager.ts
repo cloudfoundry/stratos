@@ -10,7 +10,6 @@ import { userFavoritesPaginationKey } from '../store/effects/user-favorites-effe
 import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
-import { EndpointModel } from '../store/types/endpoint.types';
 import { PaginationEntityState } from '../store/types/pagination.types';
 import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
@@ -31,9 +30,6 @@ export interface IGroupedFavorites {
   entities: IHydrationResults[];
 }
 
-export interface IEndpointFavoriteEntity extends IFavoriteEntity {
-  entity: EndpointModel;
-}
 
 export interface IAllFavorites {
   fetching: boolean;
@@ -109,12 +105,8 @@ export class UserFavoriteManager {
   private getHydrateObservable() {
     return this.getAllFavorites().pipe(
       switchMap(this.addEndpointsToHydrateList),
-      tap(console.log),
       map(this.groupIntermediateFavorites),
-      tap(console.log),
-      map(this.getHydratedGroups),
-
-      tap(console.log),
+      map(this.getHydratedGroups)
     );
   }
 

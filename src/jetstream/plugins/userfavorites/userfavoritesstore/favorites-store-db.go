@@ -14,7 +14,7 @@ var (
 	getFavorites           = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id, metadata FROM favorites WHERE user_guid = $1`
 	deleteFavorite         = `DELETE FROM favorites WHERE user_guid = $1 AND guid = $2`
 	saveFavorite           = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-	setMetadata            = `UPDATE favorites SET metadata = $3 WHERE user_guid = $1 AND guid = $2`
+	setMetadata            = `UPDATE favorites SET metadata = $1 WHERE user_guid = $2 AND guid = $3`
 	deleteEndpointFavorite = `DELETE FROM favorites WHERE endpoint_id = $1`
 )
 
@@ -53,15 +53,12 @@ func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) 
 		var metaString sql.NullString
 		err := rows.Scan(&favorite.GUID, &favorite.EndpointType, &favorite.EndpointID, &favorite.EntityType, &favorite.EntityID, &metaString)
 		if err != nil {
-			fmt.Println(err)
 			return nil, fmt.Errorf("Unable to scan User Favorite records: %v", err)
 		}
 
 		var metadata map[string]interface{}
 		err = json.Unmarshal([]byte(metaString.String), &metadata)
-		fmt.Println(metadata)
 		if err != nil {
-			fmt.Println(err)
 			return nil, fmt.Errorf("Unable to Marshal User Favorite metadata: %v", err)
 		}
 		favorite.Metadata = metadata
@@ -87,10 +84,9 @@ func (p *FavoritesDBStore) Delete(userGUID string, guid string) error {
 
 // SetMetadata will set the metadata for a User Favorite from the datastore
 func (p *FavoritesDBStore) SetMetadata(userGUID string, guid string, metadata string) error {
-	if _, err := p.db.Exec(setMetadata, userGUID, guid, metadata); err != nil {
+	if _, err := p.db.Exec(setMetadata, metadata, userGUID, guid); err != nil {
 		return fmt.Errorf("Unable to set metadata on User Favorite record: %v", err)
 	}
-
 	return nil
 }
 

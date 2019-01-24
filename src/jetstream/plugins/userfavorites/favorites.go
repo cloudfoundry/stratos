@@ -3,6 +3,7 @@ package userfavorites
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -79,14 +80,26 @@ func (uf *UserFavorites) setMetadata(c echo.Context) error {
 	if len(favoriteGUID) == 0 {
 		return errors.New("Invalid favorite GUID")
 	}
-
+	req := c.Request()
+	body, _ := ioutil.ReadAll(req.Body())
 	userGUID := c.Get("user_id").(string)
-	err = store.Delete(userGUID, favoriteGUID)
+	// Unmarshal
+	var msg map[string]interface{}
+	err = json.Unmarshal(body, &msg)
+	if err != nil {
+		return fmt.Errorf("Unable to un Marshal User Favorite metadata body: %v", err)
+	}
+
+	metadataBytes, err := json.Marshal(msg)
+	if err != nil {
+		return fmt.Errorf("Unable to Marshal User Favorite metadata: %v", err)
+	}
+	err = store.SetMetadata(userGUID, favoriteGUID, string(metadataBytes))
 	if err != nil {
 		return err
 	}
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
+	c.Response().Write([]byte("{\"response\": \"User Favorite metadata updated okay\"}"))
 	return nil
 }
 
