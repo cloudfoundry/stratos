@@ -1,5 +1,6 @@
-<app-meta-card [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}" [actionMenu]="config.menuItems"
-  [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$" [entityConfig]="entityConfig">
+<app-meta-card [favorite]="favorite" [confirmFavoriteRemoval]="true" [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}"
+  [actionMenu]="config.menuItems" [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$"
+  [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div class="fav-meta-card__header">
       <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ name$ | async }}</h2>
@@ -14,7 +15,6 @@
     </app-meta-card-item>
   </ng-container>
 </app-meta-card>
-
 <mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && !endpoint">
   <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
   <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && !(endpointConnected$ | async)">Could

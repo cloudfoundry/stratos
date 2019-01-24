@@ -82,7 +82,7 @@ class FavoritesConfigMapper {
   * For a given favorite, return the corresponding human readable type name
   * @param favorite
   */
-  public getPrettyName(favorite: IFavoriteTypeInfo) {
+  public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].prettyName : null;
   }

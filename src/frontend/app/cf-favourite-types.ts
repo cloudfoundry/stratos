@@ -20,6 +20,3 @@ export interface IAppFavMetadata extends IFavoriteMetadata {
   cfGuid: string;
   name: string;
 }
-
-
-//IFavoriteMetadata

@@ -6,12 +6,11 @@ import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
 import { AppState } from '../store/app-state';
-import { userFavoritesPaginationKey } from '../store/effects/user-favorites-effect';
 import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
 import { PaginationEntityState } from '../store/types/pagination.types';
-import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
 interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite<IFavoriteMetadata>[];
@@ -144,7 +143,7 @@ export class UserFavoriteManager {
     return {
       type: this.getTypeAndID(favorite).type,
       cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
-      prettyName: favoritesConfigMapper.getPrettyName(favorite),
+      prettyName: favoritesConfigMapper.getPrettyTypeName(favorite),
       favorite
     };
   }

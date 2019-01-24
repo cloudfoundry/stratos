@@ -1,6 +1,8 @@
 import { UserFavorite, UserFavoriteEndpoint, IFavoriteMetadata } from '../store/types/user-favorites.types';
 import { CfAPIResource } from './../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
+import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
+import { isFavorite } from '../store/selectors/favorite.selectors';
 
 export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, entityKey: string) {
   if (isCfEntity(entity as CfAPIResource)) {

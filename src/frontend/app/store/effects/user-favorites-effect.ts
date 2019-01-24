@@ -1,9 +1,8 @@
-import { BackendUserFavorite } from './../types/user-favorites.types';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { mergeMap, switchMap, withLatestFrom, map } from 'rxjs/operators';
+import { mergeMap, switchMap, withLatestFrom, map, tap } from 'rxjs/operators';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { SaveUserFavoriteAction } from '../actions/user-favourites-actions/save-user-favorite-action';
@@ -13,11 +12,14 @@ import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction, StartRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { environment } from '../../../environments/environment';
-import { UpdateUserFavoriteMetadataAction, UpdateUserFavoriteMetadataSuccessAction } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import {
+  UpdateUserFavoriteMetadataAction,
+  UpdateUserFavoriteMetadataSuccessAction
+} from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
+import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
 import { RemoveUserFavoriteAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
-
-export const userFavoritesPaginationKey = 'userFavorites';
+import { ToggleUserFavoriteAction } from '../actions/user-favourites-actions/toggle-user-favorite-action';
+import { UserFavoriteManager } from '../../core/user-favorite-manager';
 
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
@@ -30,11 +32,14 @@ export class UserFavoritesEffect {
     private store: Store<AppState>,
   ) { }
 
+  private userFavoriteManager = new UserFavoriteManager(this.store);
+
   @Effect() saveFavorite$ = this.actions$.ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE).pipe(
     withLatestFrom(
-      new PaginationMonitor<
-        UserFavorite<IFavoriteMetadata>
-      >(this.store, userFavoritesPaginationKey, entityFactory(userFavoritesSchemaKey)).currentPage$
+      new PaginationMonitor<UserFavorite<IFavoriteMetadata>>(
+        this.store, userFavoritesPaginationKey,
+        entityFactory(userFavoritesSchemaKey)
+      ).currentPage$
     ),
     mergeMap(([action, favorites]: [SaveUserFavoriteAction, UserFavorite<IFavoriteMetadata>[]]) => {
       const apiAction = {
@@ -44,29 +49,13 @@ export class UserFavoritesEffect {
 
       this.store.dispatch(new StartRequestAction(apiAction));
 
-      const {
-        entityId,
-        endpointId,
-        entityType,
-        endpointType,
-        metadata
-      } = action.favorite;
-
-      const favorite = {
-        entityId,
-        endpointId,
-        entityType,
-        endpointType,
-        metadata: JSON.stringify(metadata)
-      } as BackendUserFavorite;
-
       return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
         mergeMap(newFavorite => {
           const entities = {
             [userFavoritesSchemaKey]: {
               ...favorites.reduce((favObj, favoriteFromArray) => ({
                 ...favObj,
-                [UserFavoritesEffect.buildFavoriteStoreEntityGuid(favoriteFromArray)]: favoriteFromArray
+                [UserFavorite.buildFavoriteStoreEntityGuid(favoriteFromArray)]: favoriteFromArray
               }), {}),
               [newFavorite.guid]: newFavorite
             }
@@ -117,6 +106,20 @@ export class UserFavoritesEffect {
     })
   );
 
+  @Effect() toggleFavorite = this.actions$.ofType<ToggleUserFavoriteAction>(ToggleUserFavoriteAction.ACTION_TYPE).pipe(
+    switchMap(action =>
+      this.userFavoriteManager.getIsFavoriteObservable(action.favorite).pipe(
+        tap(isFav => {
+          if (isFav) {
+            this.store.dispatch(new RemoveUserFavoriteAction(action.favorite.guid));
+          } else {
+            this.store.dispatch(new SaveUserFavoriteAction(action.favorite));
+          }
+        })
+      )
+    )
+  );
+
   @Effect() removeFavorite$ = this.actions$.ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE).pipe(
     withLatestFrom(
       new PaginationMonitor<
@@ -158,29 +161,4 @@ export class UserFavoritesEffect {
       );
     })
   );
-
-  static buildFavoriteStoreEntityGuid(favorite: UserFavorite<IFavoriteMetadata>) {
-    const {
-      entityId,
-      endpointId,
-      entityType,
-      endpointType,
-    } = favorite;
-    return [
-      entityId,
-      endpointId,
-      entityType,
-      endpointType,
-    ]
-      .reduce((newArray, value) => {
-        if (value) {
-          return [
-            ...newArray,
-            value,
-          ];
-        }
-        return newArray;
-      }, [])
-      .join('-');
-  }
 }

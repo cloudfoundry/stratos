@@ -1,8 +1,8 @@
-import { UserFavoritesEffect } from '../effects/user-favorites-effect';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { favoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { EndpointModel } from './endpoint.types';
 
+export const userFavoritesPaginationKey = 'userFavorites';
 
 export interface IEndpointFavMetadata extends IFavoriteMetadata {
   guid: string;
@@ -34,6 +34,8 @@ export interface BackendUserFavorite {
 }
 
 export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavoriteTypeInfo {
+
+
   public guid: string;
   public metadata: T = null;
   constructor(
@@ -49,7 +51,32 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
     if (entity) {
       this.metadata = favoritesConfigMapper.getEntityMetadata(this, entity);
     }
-    this.guid = UserFavoritesEffect.buildFavoriteStoreEntityGuid(this);
+    this.guid = UserFavorite.buildFavoriteStoreEntityGuid(this);
+  }
+
+  static buildFavoriteStoreEntityGuid(favorite: UserFavorite<IFavoriteMetadata>) {
+    const {
+      entityId,
+      endpointId,
+      entityType,
+      endpointType,
+    } = favorite;
+    return [
+      entityId,
+      endpointId,
+      entityType,
+      endpointType,
+    ]
+      .reduce((newArray, value) => {
+        if (value) {
+          return [
+            ...newArray,
+            value,
+          ];
+        }
+        return newArray;
+      }, [])
+      .join('-');
   }
 }
 
