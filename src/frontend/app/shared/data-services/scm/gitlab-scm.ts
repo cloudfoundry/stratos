@@ -97,7 +97,7 @@ export class GitLabSCM implements GitSCM {
     return `https://gitlab.com/${projectName}/compare/${commitSha1}...${commitSha2}`;
   }
 
-  getMacthingRepositories(projectName: string): Observable<string[]> {
+  getMatchingRepositories(projectName: string): Observable<string[]> {
     const prjParts = projectName.split('/');
     let url = `${gitLabAPIUrl}/projects?search=${projectName}`;
     if (prjParts.length > 1) {

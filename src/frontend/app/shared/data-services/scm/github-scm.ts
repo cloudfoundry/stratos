@@ -60,7 +60,7 @@ export class GitHubSCM implements GitSCM {
     return `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`;
   }
 
-  getMacthingRepositories(projectName: string): Observable<string[]> {
+  getMatchingRepositories(projectName: string): Observable<string[]> {
     const prjParts = projectName.split('/');
     let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name`;
     if (prjParts.length > 1) {
