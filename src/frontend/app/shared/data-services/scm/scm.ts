@@ -19,4 +19,5 @@ export interface GitSCM {
   getCloneURL(projectName: string): string;
   getCommitURL(projectName: string, commitSha: string): string;
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): string;
+  getMacthingRepositories(projectName: string): Observable<string[]>;
 }

@@ -97,6 +97,20 @@ export class GitLabSCM implements GitSCM {
     return `https://gitlab.com/${projectName}/compare/${commitSha1}...${commitSha2}`;
   }
 
+  getMacthingRepositories(projectName: string): Observable<string[]> {
+    const prjParts = projectName.split('/');
+    let url = `${gitLabAPIUrl}/projects?search=${projectName}`;
+    if (prjParts.length > 1) {
+      url = `${gitLabAPIUrl}/users/${prjParts[0]}/projects?search=${prjParts[1]}`;
+    }
+    return this.http.get(url).pipe(
+      map(response => response.json()),
+      map(repos => {
+        return repos.map(item => item.path_with_namespace);
+      })
+    );
+  }
+
   private convertProject(prj: any): GitRepo {
     return {
       ...prj,

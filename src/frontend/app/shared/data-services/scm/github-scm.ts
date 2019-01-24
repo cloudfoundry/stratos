@@ -1,6 +1,6 @@
 import { GitSCM, SCMIcon } from './scm';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { Http } from '@angular/http';
 import { GitSCMType } from './scm.service';
 import { GitRepo, GitCommit, GitBranch } from '../../../store/types/git.types';
@@ -58,6 +58,21 @@ export class GitHubSCM implements GitSCM {
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): string {
     return `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`;
+  }
+
+  getMacthingRepositories(projectName: string): Observable<string[]> {
+    const prjParts = projectName.split('/');
+    let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name`;
+    if (prjParts.length > 1) {
+      url = `${this.gitHubURL}/search/repositories?q=${prjParts[1]}+in:name+user:${prjParts[0]}`;
+    }
+    return this.http.get(url).pipe(
+      map(response => response.json()),
+      filter(repos => !!repos.items),
+      map(repos => {
+        return repos.items.map(item => item.full_name);
+      })
+    );
   }
 
 }
