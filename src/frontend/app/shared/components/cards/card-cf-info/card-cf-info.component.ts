@@ -1,10 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs/operators';
 import { Subscription, Observable } from 'rxjs';
 import { EntityInfo, APIResource } from '../../../../store/types/api.types';
-import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ICfV2Info } from '../../../../core/cf-api.types';
+import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { MatDialog } from '@angular/material';
+import {
+  UserInviteConfigurationDialogComponent
+} from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -14,7 +18,14 @@ import { ICfV2Info } from '../../../../core/cf-api.types';
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
-  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
+
+  userInviteConfigured$: Observable<boolean>;
+
+  constructor(
+    public cfEndpointService: CloudFoundryEndpointService,
+    public userInviteService: UserInviteService,
+    private dialog: MatDialog
+  ) { }
 
   description$: Observable<string>;
 
@@ -24,8 +35,14 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
         this.apiUrl = this.getApiEndpointUrl(endpoint.entity.api_endpoint);
       })
     );
-
     this.subs.push(obs$.subscribe());
+
+    this.userInviteConfigured$ = this.cfEndpointService.endpoint$.pipe(
+      filter(v => !!v.entity && !!v.entity.metadata),
+      map(v => {
+        return v.entity && v.entity.metadata['userInviteAllowed'] === 'true';
+      })
+    );
 
     this.description$ = this.cfEndpointService.info$.pipe(
       map(entity => this.getDescription(entity))
@@ -56,5 +73,17 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
       }
     }
     return '-';
+  }
+
+  configureUserInvites() {
+    this.dialog.open(UserInviteConfigurationDialogComponent, {
+      data: {
+        guid: this.cfEndpointService.cfGuid
+      }
+    });
+  }
+
+  deConfigureUserInvites() {
+    this.userInviteService.unconfigure(this.cfEndpointService.cfGuid).subscribe();
   }
 }

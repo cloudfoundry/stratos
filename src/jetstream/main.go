@@ -199,11 +199,18 @@ func main() {
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
+	initedPlugins := make(map[string]interfaces.StratosPlugin)
+
 	// Initialise general plugins
-	for _, plugin := range portalProxy.Plugins {
-		plugin.Init()
+	for name, plugin := range portalProxy.Plugins {
+		if err = plugin.Init(); err == nil {
+			initedPlugins[name] = plugin
+		} else {
+			log.Infof("Plugin %s is disabled: %s", name, err.Error())
+		}
 	}
 
+	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
 
 	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
@@ -762,13 +769,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
-		if err != nil {
-			// Plugin doesn't implement an Endpoint Plugin interface, skip
-			continue
+		if err == nil {
+			// Plugin supports endpoint plugin
+			endpointType := endpointPlugin.GetType()
+			adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 		}
-
-		endpointType := endpointPlugin.GetType()
-		adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 
 		routePlugin, err := plugin.GetRoutePlugin()
 		if err == nil {

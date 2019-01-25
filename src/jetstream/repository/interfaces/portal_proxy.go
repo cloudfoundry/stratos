@@ -62,4 +62,8 @@ type PortalProxy interface {
 	GetAuthProvider(name string) AuthProvider
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)
 	OAuthHandlerFunc(cnsiRequest *CNSIRequest, req *http.Request, refreshOAuthTokenFunc RefreshOAuthTokenFunc) AuthHandlerFunc
+
+	// Tokens - lower-level access
+	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
+	DeleteEndpointToken(cnsiGUID string, userGUID string) error
 }

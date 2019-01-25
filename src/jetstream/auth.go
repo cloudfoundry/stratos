@@ -23,23 +23,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
-// UAAResponse - Response returned by Cloud Foundry UAA Service
-type UAAResponse struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	Scope        string `json:"scope"`
-	JTI          string `json:"jti"`
-	IDToken      string `json:"id_token"`
-}
-
-// UAAErrorResponse is the error response returned by Cloud Foundry UAA Service
-type UAAErrorResponse struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
-}
-
 // LoginHookFunc - function that can be hooked into a successful user login
 type LoginHookFunc func(c echo.Context) error
 
@@ -237,7 +220,7 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 		errMessage := "Access Denied"
 		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
 			// Try and parse the Response into UAA error structure
-			authError := &UAAErrorResponse{}
+			authError := &interfaces.UAAErrorResponse{}
 			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
 				errMessage = authError.ErrorDescription
 			}
@@ -543,7 +526,7 @@ func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord interfaces.CNSIRe
 	return &tokenRecord, nil
 }
 
-func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 
 	uaaRes, u, err := p.loginHttpBasic(c)
 
@@ -556,7 +539,7 @@ func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 	return uaaRes, u, &cnsiRecord, nil
 }
 
-func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 	endpoint := cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
@@ -656,7 +639,7 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 	return nil
 }
 
-func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
+func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	if c.Request().Method() == http.MethodGet {
 		code := c.QueryParam("code")
@@ -685,7 +668,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	return uaaRes, u, nil
 }
 
-func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
+func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -722,7 +705,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
 	log.Debug("getUAATokenWithCreds")
 
 	body := url.Values{}
@@ -735,7 +718,7 @@ func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, c
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
 	log.Debug("getUAATokenWithCreds")
 
 	body := url.Values{}
@@ -747,7 +730,7 @@ func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, pas
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*interfaces.UAAResponse, error) {
 	log.Debug("getUAATokenWithRefreshToken")
 
 	body := url.Values{}
@@ -762,7 +745,7 @@ func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refres
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
 	log.WithField("authEndpoint", authEndpoint).Debug("getUAAToken")
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
@@ -784,7 +767,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 
 	defer res.Body.Close()
 
-	var response UAAResponse
+	var response interfaces.UAAResponse
 
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&response); err != nil {

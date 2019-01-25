@@ -341,6 +341,26 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	return nil
 }
 
+func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord) error {
+	log.Debug("SaveEndpointToken")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return err
+	}
+
+	return tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, tokenRecord, p.Config.EncryptionKeyInBytes)
+}
+
+func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) error {
+	log.Debug("DeleteEndpointToken")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return err
+	}
+
+	return tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
+}
+
 func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {
 	log.Debug("GetCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)

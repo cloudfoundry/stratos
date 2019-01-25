@@ -93,6 +93,8 @@ import { UsersRolesSelectComponent } from './users/manage-users/manage-users-sel
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { CustomImportModule } from '../../custom-import.module';
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
+import { UserInviteConfigurationDialogComponent } from './user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteService } from './user-invites/user-invite.service';
 
 @NgModule({
   imports: [
@@ -145,6 +147,7 @@ import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-f
     UsersRolesSelectComponent,
     UsersRolesConfirmComponent,
     CloudFoundryRoutesComponent,
+    UserInviteConfigurationDialogComponent,
   ],
   providers: [
     CFEndpointsListConfigService,
@@ -160,7 +163,12 @@ import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-f
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
     CfRolesService,
-    CloudFoundryCellService
+    CloudFoundryCellService,
+    UserInviteService,
   ],
+  entryComponents: [
+    UserInviteConfigurationDialogComponent
+  ]
+
 })
 export class CloudFoundryModule { }
