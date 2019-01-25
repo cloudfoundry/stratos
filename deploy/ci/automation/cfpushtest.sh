@@ -126,9 +126,6 @@ if [ $RET -ne 0 ]; then
   cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
 fi 
 
-# Delete the app
-cf delete -f -r console
-
 rm $MANIFEST
 
 # Stop the database server
@@ -138,6 +135,13 @@ if [ -n "$DB_DOCKER_PID" ]; then
 fi
 
 set +e
+
+# Delete the app - add one retry if it fails first time
+cf delete -f -r console
+if [ $? -ne 0 ]; then
+  sleep 60
+  cf delete -f -r console
+fi
 
 echo "All done"
 
