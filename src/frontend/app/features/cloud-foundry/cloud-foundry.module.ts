@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
+import { CustomImportModule } from '../../custom-import.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -77,12 +78,19 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
 } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import {
+  UserInviteConfigurationDialogComponent,
+} from './user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteService } from './user-invites/user-invite.service';
+import { InviteUsersCreateComponent } from './users/invite-users/invite-users-create/invite-users-create.component';
+import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
 import { UsersRolesModifyComponent } from './users/manage-users/manage-users-modify/manage-users-modify.component';
@@ -91,10 +99,6 @@ import {
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { CustomImportModule } from '../../custom-import.module';
-import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
-import { UserInviteConfigurationDialogComponent } from './user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import { UserInviteService } from './user-invites/user-invite.service';
 
 @NgModule({
   imports: [
@@ -148,6 +152,8 @@ import { UserInviteService } from './user-invites/user-invite.service';
     UsersRolesConfirmComponent,
     CloudFoundryRoutesComponent,
     UserInviteConfigurationDialogComponent,
+    InviteUsersComponent,
+    InviteUsersCreateComponent
   ],
   providers: [
     CFEndpointsListConfigService,

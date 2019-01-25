@@ -31,5 +31,15 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
       (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
       cfOrgService.org$
     );
+
+    // TODO: RC Permissions (as per config shown in cf summary)
+    this.getGlobalActions = () => [{
+      action: () => {
+        router.navigate([this.createManagerUsersUrl(`/users/invite`)]);
+      },
+      icon: 'add', // TODO: RC
+      label: 'Invite', // TODO: RC
+      description: 'Invite users to this organization'
+    }];
   }
 }

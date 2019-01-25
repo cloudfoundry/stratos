@@ -104,7 +104,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Manage roles`,
   };
 
-  private createManagerUsersUrl(): string {
+  protected createManagerUsersUrl(stepperPath: string = `/users/manage`): string {
     let route = `/cloud-foundry/${this.cfUserService.activeRouteCfOrgSpace.cfGuid}`;
     if (this.activeRouteCfOrgSpace.orgGuid) {
       route += `/organizations/${this.activeRouteCfOrgSpace.orgGuid}`;
@@ -112,7 +112,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         route += `/spaces/${this.activeRouteCfOrgSpace.spaceGuid}`;
       }
     }
-    route += `/users/manage`;
+    route += stepperPath;
     return route;
   }
 
