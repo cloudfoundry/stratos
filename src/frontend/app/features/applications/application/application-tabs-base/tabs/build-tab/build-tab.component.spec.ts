@@ -15,6 +15,9 @@ import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
+import { HttpModule, Http, ConnectionBackend } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
+import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../../core/github.helpers';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
@@ -37,13 +40,20 @@ describe('BuildTabComponent', () => {
           {
             initialState
           }
-        )
+        ),
+        HttpModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         AppStoreModule,
         ApplicationStateService,
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
+        Http,
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        },
+        { provide: GITHUB_API_URL, useValue: null }
       ]
     })
       .compileComponents();
@@ -56,6 +66,10 @@ describe('BuildTabComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
+
+  afterEach(() => {
+    fixture.destroy();
+  });
 
   it('should be created', () => {
     expect(component).toBeTruthy();

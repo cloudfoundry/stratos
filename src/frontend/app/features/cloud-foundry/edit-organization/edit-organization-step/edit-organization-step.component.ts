@@ -5,6 +5,7 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
 import { IOrganization } from '../../../../core/cf-api.types';
+import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { UpdateOrganization } from '../../../../store/actions/organization.actions';
@@ -126,6 +127,6 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.fetchOrgsSub.unsubscribe();
+    safeUnsubscribe(this.fetchOrgsSub, this.orgSubscription);
   }
 }

@@ -246,10 +246,36 @@ export function parseHttpPipeError(res): {} {
   return {};
 }
 
+export function safeStringToObj<T = object>(value: string): T {
+  try {
+    if (value) {
+      const jsonObj = JSON.parse(value);
+      // Check if jsonObj is actually an obj
+      if (jsonObj.constructor !== {}.constructor) {
+        throw new Error('not an object');
+      }
+      return jsonObj;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
 export const safeUnsubscribe = (...subs: Subscription[]) => {
   subs.forEach(sub => {
     if (sub) {
       sub.unsubscribe();
     }
   });
+};
+
+export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
+export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
+
+export const sortStringify = (obj: { [key: string]: string }): string => {
+  const keys = Object.keys(obj).sort();
+  return keys.reduce((res, key) => {
+    return res += `${key}-${obj[key]},`;
+  }, '');
 };

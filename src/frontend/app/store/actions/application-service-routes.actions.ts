@@ -29,7 +29,8 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
     public endpointGuid: string,
     public paginationKey: string = null,
     public includeRelations: string[] = [
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey)
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
     ],
     public populateMissing = true
   ) {

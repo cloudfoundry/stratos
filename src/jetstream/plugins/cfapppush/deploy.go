@@ -52,7 +52,7 @@ const (
 // Source exchange messages
 const (
 	SOURCE_REQUIRED MessageType = iota + 30000
-	SOURCE_GITHUB
+	SOURCE_GITSCM
 	SOURCE_FOLDER
 	SOURCE_FILE
 	SOURCE_FILE_DATA
@@ -119,8 +119,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	// Get the source, depending on the source type
 	switch msg.Type {
-	case SOURCE_GITHUB:
-		stratosProject, appDir, err = getGitHubSource(clientWebSocket, tempDir, msg)
+	case SOURCE_GITSCM:
+		stratosProject, appDir, err = getGitSCMSource(clientWebSocket, tempDir, msg)
 	case SOURCE_FOLDER:
 		stratosProject, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
 	case SOURCE_GITURL:
@@ -358,21 +358,20 @@ func getArchiverFor(filePath string) archiver.Archiver {
 	return nil
 }
 
-func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
+func getGitSCMSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
 	var (
 		err error
 	)
 
-	// The msg data is JSON for the GitHub info
-	info := GitHubSourceInfo{}
+	// The msg data is JSON for the GitSCM info
+	info := GitSCMSourceInfo{}
 	if err = json.Unmarshal([]byte(msg.Message), &info); err != nil {
 		return StratosProject{}, tempDir, err
 	}
 
-	info.Url = fmt.Sprintf("https://github.com/%s", info.Project)
-	log.Debugf("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, info.Url)
+	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, info.URL)
 	cloneDetails := CloneDetails{
-		Url:    info.Url,
+		Url:    info.URL,
 		Branch: info.Branch,
 		Commit: info.CommitHash,
 	}

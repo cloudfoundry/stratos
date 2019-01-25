@@ -1,7 +1,6 @@
-
-import {of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { of as observableOf, Subject } from 'rxjs';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
@@ -11,6 +10,12 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { EntityMonitor } from '../../../../monitors/entity-monitor';
+import { applicationSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
+import { map, tap, filter, switchMap, first } from 'rxjs/operators';
+import { UpdateExistingApplication } from '../../../../../store/actions/application.actions';
 
 @Injectable()
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
@@ -18,8 +23,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
     action: (items: ListAppEnvVar[]) => {
-      this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
-      return true;
+      return this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
     },
     icon: 'delete',
     label: 'Delete',
@@ -28,7 +32,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private listActionDelete: IListAction<ListAppEnvVar> = {
     action: (item: ListAppEnvVar) => {
-      this.dispatchDeleteAction([item]);
+      return this.dispatchDeleteAction([item]);
     },
     label: 'Delete',
     description: '',
@@ -68,12 +72,49 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   enableTextFilter = true;
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
-    this.store.dispatch(
-      new AppVariablesDelete(
-        this.envVarsDataSource.cfGuid,
-        this.envVarsDataSource.appGuid,
-        this.envVarsDataSource.transformedEntities,
-        newValues)
+    const confirmation = this.getConfirmationModal(newValues);
+    const action = new AppVariablesDelete(
+      this.envVarsDataSource.cfGuid,
+      this.envVarsDataSource.appGuid,
+      this.envVarsDataSource.transformedEntities,
+      newValues);
+
+    const entityReq$ = this.getEntityMonitor();
+    const trigger$ = new Subject();
+    this.confirmDialog.open(
+      confirmation,
+      () => {
+        this.store.dispatch(action);
+        trigger$.next();
+      }
+    );
+    return trigger$.pipe(
+      first(),
+      switchMap(() => entityReq$)
+    );
+  }
+
+  private getEntityMonitor() {
+    return new EntityMonitor(
+      this.store,
+      this.envVarsDataSource.appGuid,
+      applicationSchemaKey,
+      entityFactory(applicationSchemaKey)
+    ).entityRequest$.pipe(
+      map(request => request.updating[UpdateExistingApplication.updateKey]),
+      filter(req => !!req)
+    );
+  }
+
+  private getConfirmationModal(newValues: ListAppEnvVar[]) {
+    const singleEnvVar = newValues.length === 1;
+    return new ConfirmationDialogConfig(
+      singleEnvVar ? `Delete Environment Variable?` : `Delete Environment Variables?`,
+      singleEnvVar ?
+        `Are you sure you want to delete '${newValues[0].name}'?` :
+        `Are you sure you want to delete ${newValues.length} environment variables?`,
+      'Delete',
+      true
     );
   }
 
@@ -86,7 +127,8 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   constructor(
     private store: Store<AppState>,
-    private appService: ApplicationService
+    private appService: ApplicationService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     this.envVarsDataSource = new CfAppVariablesDataSource(this.store, this.appService, this);
   }

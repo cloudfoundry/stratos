@@ -4,14 +4,18 @@
   display: flex;
   justify-content: center;
   left: 0;
+  margin: -5px;
   position: absolute;
   right: 0;
   top: 0;
+
   &__indicator {
     flex: none;
+
     &-bar {
       margin-top: 15px;
     }
+
     &-alert {
       font-size: 18px;
       font-weight: 600;

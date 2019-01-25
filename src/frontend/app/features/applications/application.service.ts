@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
+import { IApp, IOrganization, ISpace, IAppSummary } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -29,13 +29,14 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
   stackSchemaKey,
+  appEnvVarsSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
-import { AppStat, AppSummary } from '../../store/types/app-metadata.types';
+import { AppStat } from '../../store/types/app-metadata.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
   getCurrentPageRequestInfo,
@@ -47,6 +48,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -65,7 +67,7 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
 
 export interface ApplicationData {
   fetching: boolean;
-  app: EntityInfo;
+  app: EntityInfo<IApp>;
   stack: EntityInfo;
   cf: any;
 }
@@ -73,12 +75,12 @@ export interface ApplicationData {
 @Injectable()
 export class ApplicationService {
 
-  private appEntityService: EntityService;
-  private appSummaryEntityService: EntityService;
+  private appEntityService: EntityService<APIResource<IApp>>;
+  private appSummaryEntityService: EntityService<APIResource<IAppSummary>>;
 
   constructor(
-    @Inject(CF_GUID) public cfGuid,
-    @Inject(APP_GUID) public appGuid,
+    @Inject(CF_GUID) public cfGuid: string,
+    @Inject(APP_GUID) public appGuid: string,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
@@ -93,7 +95,7 @@ export class ApplicationService {
       createGetApplicationAction(appGuid, cfGuid)
     );
 
-    this.appSummaryEntityService = this.entityServiceFactory.create(
+    this.appSummaryEntityService = this.entityServiceFactory.create<APIResource<IAppSummary>>(
       appSummarySchemaKey,
       entityFactory(appSummarySchemaKey),
       appGuid,
@@ -121,7 +123,7 @@ export class ApplicationService {
 
   app$: Observable<EntityInfo<APIResource<IApp>>>;
   waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
-  appSummary$: Observable<EntityInfo<AppSummary>>;
+  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
@@ -213,6 +215,15 @@ export class ApplicationService {
     this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
   }
 
+  public getApplicationEnvVarsMonitor() {
+    const factory = new EntityMonitorFactory(this.store);
+    return factory.create<APIResource<IApp>>(
+      this.appGuid,
+      appEnvVarsSchemaKey,
+      entityFactory(appEnvVarsSchemaKey)
+    );
+  }
+
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
     const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
@@ -285,26 +296,18 @@ export class ApplicationService {
 
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
       map(({ entity }) => entity),
+      filter(app => !!app),
       map(app => {
-        const routes = app && app.entity.routes ? app.entity.routes : [];
-        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p));
-        if (nonTCPRoutes.length > 0) {
-          return nonTCPRoutes[0];
-        }
-        return null;
+        const routes = app.entity.routes ? app.entity.routes : [];
+        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.entity.port));
+        return nonTCPRoutes[0] || null;
       }),
-      map(entRoute => {
-        if (!!entRoute && !!entRoute.entity && !!entRoute.entity.domain) {
-          return getRoute(entRoute, true, false, {
-            entityRequestInfo: undefined,
-            entity: entRoute.entity.domain
-          });
-        }
-        return null;
-      })
+      map(entRoute => !!entRoute && !!entRoute.entity && !!entRoute.entity.domain ?
+        getRoute(entRoute.entity.port, entRoute.entity.host, entRoute.entity.path, true, false, entRoute.entity.domain.name) :
+        null
+      )
     );
   }
-
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {

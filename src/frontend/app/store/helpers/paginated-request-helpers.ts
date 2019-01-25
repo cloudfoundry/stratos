@@ -1,19 +1,24 @@
 import { HttpClient } from '@angular/common/http';
 import { Http, Request, RequestOptions, Response } from '@angular/http';
+import { Store } from '@ngrx/store';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
+import { PaginationMaxedResults } from '../actions/pagination.actions';
+import { AppState } from '../app-state';
 import { CFResponse } from '../types/api.types';
 
 
-export interface IPaginationFlattener<T> {
-  getTotalPages: (res: T) => number;
+export interface IPaginationFlattener<T, C> {
+  getTotalPages: (res: C) => number;
+  getTotalResults: (res: C) => number;
   mergePages: (res: T[]) => T;
-  fetch: (...args) => Observable<T>;
+  fetch: (...args) => Observable<C>;
   buildFetchParams: (i: number) => any[];
+  clearResults: (res: C, allResults: number) => Observable<C>;
 }
 
-export class BaseHttpClientFetcher<T = CFResponse> {
+export class BaseHttpClientFetcher<T> {
   constructor(
     private httpClient: HttpClient,
     public url,
@@ -38,7 +43,7 @@ export class BaseHttpClientFetcher<T = CFResponse> {
   }
 }
 
-export class BaseHttpFetcher<T = CFResponse> {
+export class BaseHttpFetcher {
   constructor(
     private http: Http,
     private requestOptions: RequestOptions,
@@ -66,8 +71,7 @@ export class BaseHttpFetcher<T = CFResponse> {
   }
 }
 
-export class CfAPIFlattener extends BaseHttpFetcher
-  implements IPaginationFlattener<CFResponse> {
+export class CfAPIFlattener extends BaseHttpFetcher implements IPaginationFlattener<CFResponse, { [cfGuid: string]: CFResponse }> {
 
   constructor(http: Http, requestOptions: RequestOptions) {
     super(http, requestOptions, 'page');
@@ -95,16 +99,39 @@ export class CfAPIFlattener extends BaseHttpFetcher
     }
     return newResData;
   }
+  public getTotalResults = res => {
+    return Object.keys(res).reduce((count, endpointGuid) => {
+      const endpoint: CFResponse = res[endpointGuid];
+      return count + endpoint.total_results;
+    }, 0);
+  }
+  public clearResults = (res: { [cfGuid: string]: CFResponse }, allResults: number): Observable<any> => {
+    Object.keys(res).forEach(endpointKey => {
+      const endpoint = res[endpointKey];
+      endpoint.total_pages = 1;
+    });
+    return observableOf(res);
+  }
 }
 
 
-export function flattenPagination<T>(
-  firstRequest: Observable<T>,
-  flattener: IPaginationFlattener<T>,
+export function flattenPagination<T, C>(
+  store: Store<AppState>,
+  firstRequest: Observable<C>,
+  flattener: IPaginationFlattener<T, C>,
+  maxCount?: number,
+  entityKey?: string,
+  paginationKey?: string
 ) {
   return firstRequest.pipe(
     first(),
     mergeMap(firstResData => {
+      const allResults = flattener.getTotalResults(firstResData);
+      // If we have too many results only return basic first page information
+      if (maxCount && allResults > maxCount) {
+        store.dispatch(new PaginationMaxedResults(allResults, entityKey, paginationKey));
+        return forkJoin([flattener.clearResults(firstResData, allResults)]);
+      }
       // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
       // Make those requests
       const maxRequests = flattener.getTotalPages(firstResData);

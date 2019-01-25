@@ -3,18 +3,18 @@ import { browser } from 'protractor';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
 import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
-  const testOrgName = e2e.helper.getCustomerOrgSpaceLabel(null, 'org');
-  const testOrg2Name = e2e.helper.getCustomerOrgSpaceLabel(null, 'org2');
-  const testSpaceName = e2e.helper.getCustomerOrgSpaceLabel(null, 'space');
+  const testOrgName = e2e.helper.getCustomOrgSpaceLabel(null, 'org');
+  const testOrg2Name = e2e.helper.getCustomOrgSpaceLabel(null, 'org2');
+  const testSpaceName = e2e.helper.getCustomOrgSpaceLabel(null, 'space');
   let endpointGuid;
 
   let cloudFoundry: CfTopLevelPage;
@@ -135,13 +135,13 @@ describe('CF - Manage Organizations and Spaces', () => {
       // Go to org tab
       const cardView = cloudFoundry.goToOrgView();
       const list = new ListComponent();
-      list.refresh();
+      list.header.refresh();
       cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
         org.click();
 
         cloudFoundry.subHeader.clickItem('Spaces');
         cardView.cards.waitUntilShown();
-        list.refresh();
+        list.header.refresh();
 
         // Add space
         // Click the add button to add a space
@@ -192,7 +192,7 @@ describe('CF - Manage Organizations and Spaces', () => {
       cloudFoundry.subHeader.clickItem('Spaces');
       cardView.cards.waitUntilShown();
       const list = new ListComponent();
-      list.refresh();
+      list.header.refresh();
 
       // Add space
       // Click the add button to add a space

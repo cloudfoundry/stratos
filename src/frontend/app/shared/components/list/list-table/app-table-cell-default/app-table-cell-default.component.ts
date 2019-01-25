@@ -34,6 +34,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
   public linkValue: string;
   public linkTarget = '_self';
   public valueGenerator: (row: T) => string;
+  public showShortLink = false;
 
   public init() {
     this.setValueGenerator();
@@ -46,6 +47,10 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
       this.linkTarget = '_blank';
     }
     this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
+    this.showShortLink = this.cellDefinition.showShortLink;
+    if (this.showShortLink && !this.isExternalLink) {
+      throw Error('Short links must be external links');
+    }
   }
 
   private setSyncLink() {

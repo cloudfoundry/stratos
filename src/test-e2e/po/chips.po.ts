@@ -22,7 +22,7 @@ export class ChipsComponent extends Component {
   }
 
   getExpandChips(): ElementFinder {
-    return this.getExpandCollapseChips().element(by.cssContainingText('span', '+'));
+    return this.locator.element(by.css('button.app-chips__limit.app-chips__show-more'));
   }
 
   expandIfCan(): promise.Promise<any> {

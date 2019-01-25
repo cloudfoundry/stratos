@@ -31,6 +31,7 @@ export class GetAllServices extends CFStartAction implements PaginatedAction, En
     'order-direction': 'desc',
     'order-direction-field': 'label',
   };
+  flattenPagination = true;
 }
 export class GetService extends CFStartAction implements EntityInlineParentAction {
   constructor(
@@ -77,7 +78,7 @@ export class GetServicePlansForService extends CFStartAction implements Paginate
     page: 1,
     'results-per-page': 100,
     'order-direction': 'desc',
-    'order-direction-field': 'creation',
+    'order-direction-field': 'name',
   };
   flattenPagination = true;
 }
