@@ -1,5 +1,4 @@
 import { e2e } from '../e2e';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
 
 describe('Check Availability of an existing system', () => {

@@ -27,6 +27,7 @@ export class MetricsTabComponent {
           new MetricQueryConfig('firehose_container_metric_cpu_percentage')
         ),
         'CPU Usage (%)',
+        ChartDataTypes.CPU_PERCENT
       ),
       chartConfigBuilder(
         new FetchApplicationChartMetricsAction(

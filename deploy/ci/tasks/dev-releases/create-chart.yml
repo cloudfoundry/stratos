@@ -9,8 +9,8 @@ outputs:
 image_resource:
   type: docker-image
   source:
-  # Generated using Dockerfile.stratos-helm
-   repository:  splatform/ci-stratos-helm
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
    tag: "latest"
 
 run:
@@ -18,22 +18,25 @@ run:
   args:
     - -exc
     - |
-      # Expect this command to fail since k8s isn't available but it will initialise helm locally
-      helm init || true
+      # Initialize Helm for client-side use
+      helm init --client-only
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
       HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
       VERSION=$(cat image-tag/v2-version)
+      RELEASE_VERSION=$(cat image-tag/v2-tag)
+      COMMIT=$(cat image-tag/v2-commit)
+
       # Required for setupAndPushChange commit message
       IMAGE_TAG=${GIT_TAG}
       cd ${STRATOS}/deploy/kubernetes/
-      patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console ${RELEASE_VERSION} ${VERSION}
       # Generate Helm package
       updateHelmDependency
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${RELEASE_VERSION}-${COMMIT}.tgz
       cd ${ROOT_DIR}/helm-chart/
       if [ -f ${HELM_REPO}/index.yaml ]; then
         cp ${HELM_REPO}/index.yaml ${ROOT_DIR}/helm-chart/

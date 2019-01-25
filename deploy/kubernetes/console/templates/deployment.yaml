@@ -2,20 +2,24 @@
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: console
+  name: stratos
 spec:
-  serviceName: console
+  serviceName: stratos
   replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: "stratos"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-        app.kubernetes.io/component: "console"
+        app.kubernetes.io/component: "stratos"
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
-        component: console
+        component: stratos
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
@@ -246,21 +250,25 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: console-mariadb
+  name: stratos-db
   labels:
     app.kubernetes.io/name: "stratos"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-    app.kubernetes.io/component: "console-mariadb"
+    app.kubernetes.io/component: "stratos-db"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos-db"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: "stratos"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-        app.kubernetes.io/component: "console-mariadb"
+        app.kubernetes.io/component: "stratos-db"
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
     spec:

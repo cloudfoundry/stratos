@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -27,11 +28,8 @@ var (
 
 // Metrics endpoints - non-admin - for a Cloud Foundry Application
 func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
-
 	// We need to go and fetch the CF App, to make sure that the user is permitted to access it
-
 	// We'll do this synchronously here for now - this can be done optimistically in parallel in the future
-
 	// Use the passthrough mechanism to get the App metadata from Cloud Foundry
 	appID := c.Param("appId")
 	prometheusOp := c.Param("op")
@@ -74,7 +72,13 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		}
 
 		if addJob {
-			addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
+			if metric.metrics.Job != "" {
+				// stratos-metrics configures the firehose exporter to tag metrics with `job`
+				addQueries = addQueries + "job=\"" + metric.metrics.Job + "\""
+			} else if metric.metrics.Environment != "" {
+				// prometheus-boshrelease deployed firehose exporter tags metrics with `environment`
+				addQueries = addQueries + "environment=\"" + metric.metrics.Environment + "\""
+			}
 		}
 
 		req.URI = makePrometheusRequestURI(c, prometheusOp, addQueries)
@@ -116,7 +120,45 @@ func getEchoURL(c echo.Context) url.URL {
 
 // Metrics API endpoints - admin - for a Cloud Foundry deployment
 func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
+	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")
+	if err != nil {
+		return errors.New("Could not find session user_id")
+	}
 	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	// User must be an admin of the Cloud Foundry
+	// Check each in the list and if any is not, then return an error
+	canAccessMetrics := true
+	for _, endpointID := range cnsiList {
+		// Get token for the UserID and EndpointID
+		token, exists := m.portalProxy.GetCNSITokenRecord(endpointID, userGUID)
+		if !exists {
+			// Could not get a token for the user
+			canAccessMetrics = false
+			break
+		} else {
+			userTokenInfo, err := m.portalProxy.GetUserTokenInfo(token.AuthToken)
+			if err == nil {
+				// Do they have they admin scope for Cloud Foundry?
+				isAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), m.portalProxy.GetConfig().CFAdminIdentifier)
+				if !isAdmin {
+					canAccessMetrics = false
+					break
+				}
+			} else {
+				// Could not decode the user's token to determine if they are an admin, so default is that they are not
+				canAccessMetrics = false
+				break
+			}
+		}
+	}
+
+	// Only proceed if the user is an Cloud Foundry admin of all of the endpoints we are requesting metrics for
+	if !canAccessMetrics {
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"You must be a Cloud Foundry admin to access CF-level metrics",
+			"You must be a Cloud Foundry admin to access CF-level metrics")
+	}
 
 	return m.makePrometheusRequest(c, cnsiList, "")
 }

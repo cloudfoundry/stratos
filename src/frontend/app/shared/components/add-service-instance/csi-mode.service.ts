@@ -40,7 +40,7 @@ export class CsiModeService {
   ) {
     const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
     const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
-    const cfId = getIdFromRoute(activatedRoute, 'cfId');
+    const cfId = getIdFromRoute(activatedRoute, 'endpointId');
     const id = getIdFromRoute(activatedRoute, 'id');
 
     if (!!serviceId && !!cfId) {

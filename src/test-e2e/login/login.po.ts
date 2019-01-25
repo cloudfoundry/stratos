@@ -4,6 +4,7 @@ import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ssoHelper } from '../helpers/sso-helper';
 import { Component } from '../po/component.po';
 import { SSOLoginPage } from './sso-login.po';
+import { EndpointsPage } from '../endpoints/endpoints.po';
 
 const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
 const until = protractor.ExpectedConditions;
@@ -78,9 +79,14 @@ export class LoginPage {
     return this.getLoginError().then(text => text === LOGIN_FAIL_MSG);
   }
 
+  waitForDashboardPage() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
+  }
+
   // Wait until an application page is shown (one that uses the dashboard base)
   waitForApplicationPage() {
     return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
+    // return browser.wait(until.presenceOf(element(by.tagName('app-application-wall'))), 5000);
   }
 
   waitForLogin() {

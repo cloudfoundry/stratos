@@ -14,7 +14,7 @@ function usage {
     echo "       -o Value   Organization in Docker registry"
     echo "       -t Value   Tag for images"
     echo "       -p         Push images to registry"
-    echo "       -s         Is SLE"
+    echo "       -s         Is SLE build"
     echo "       -h         Help"
     exit 1
 }
@@ -38,7 +38,7 @@ while getopts "b:r:o:t:psh" opt ; do
             PUSH_IMAGES=true
             ;;
         s)
-            IS_SLE=true
+            IS_SLE="true"
             ;;
         h)
             usage

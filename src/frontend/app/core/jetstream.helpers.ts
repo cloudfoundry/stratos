@@ -9,6 +9,6 @@ export interface JetStreamError {
 export function isJetStreamError(obj): JetStreamError {
   return obj &&
     obj.error && obj.error.status && obj.error.statusCode &&
-    obj.errorResponse ?
+    'errorResponse' in obj ?
     obj as JetStreamError : null;
 }

@@ -35,6 +35,13 @@ pushd deploy
 docker-compose -f docker-compose.development.yml up -d
 popd
 
+echo "Docker Containers"
+docker ps
+
+# Wait for the UAA to become available
+echo "Waiting 30 seconds for UAA to start up ..."
+sleep 30
+
 # Get the E2E config
 rm -f secrets.yaml
 curl -k ${TEST_CONFIG_URL} --output secrets.yaml
@@ -44,7 +51,7 @@ rm -rf node_modules
 npm install
 
 # Run the E2E tests
-"$DIRPATH/runandrecord.sh" https://localhost:443
+"$DIRPATH/runandrecord.sh" https://127.0.0.1
 RET=$?
 
 set +e
@@ -62,10 +69,7 @@ fi
 docker-compose -f docker-compose.development.yml down
 popd
 
-# Pause the PCF Dev instance for now
-echo "Suspending PCF Dev"
-cf pcfdev suspend
-cf pcfdev status
+echo "All done"
 
 # Return exit code form the e2e tests
 exit $RET

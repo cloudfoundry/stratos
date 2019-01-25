@@ -6,7 +6,6 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { isJetStreamError } from '../../core/jetstream.helpers';
 import { LoggerService } from '../../core/logger.service';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
@@ -18,7 +17,7 @@ import {
   getRequestTypeFromMethod,
   startApiRequest,
 } from '../reducers/api-request-reducer/request-helpers';
-import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
+import { qParamKeyFromString, qParamToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
@@ -31,9 +30,10 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { isJetStreamError } from '../../core/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-const endpointHeader = 'x-cap-cnsi-list';
+export const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -136,9 +136,16 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
+      if (paginatedAction.flattenPaginationMax < (paginatedAction.initialParams['results-per-page'] || 100)) {
+        throw new Error(`Action cannot contain a maximum amount of results smaller than the page size: ${JSON.stringify(paginatedAction)}`);
+      }
       request = flattenPagination(
+        this.store,
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
+        paginatedAction.flattenPaginationMax,
+        paginatedAction.entityKey,
+        paginatedAction.paginationKey
       );
     }
 
@@ -190,11 +197,18 @@ export class APIEffect {
               ),
             );
           }
+          const { error, errorCode, guid, url, errorResponse } = errorsCheck[0];
           this.store.dispatch(
             new WrapperRequestActionFailed(
               errorMessage,
-              { ...actionClone, endpointGuid: errorsCheck[0].guid },
-              requestType,
+              { ...actionClone, endpointGuid: guid },
+              requestType, {
+                endpointIds: [guid],
+                url,
+                eventCode: errorCode ? errorCode + '' : '500',
+                message: errorResponse ? errorResponse.description : 'Jetstream CF API request error',
+                error
+              }
             ),
           );
           return [];
@@ -220,8 +234,8 @@ export class APIEffect {
       }),
       catchError(error => {
         const endpointString = options.headers.get(endpointHeader) || '';
-        const endpoints: string[] = endpointString.split(',');
-        endpoints.forEach(endpoint =>
+        const endpointIds: string[] = endpointString.split(',');
+        endpointIds.forEach(endpoint =>
           this.store.dispatch(
             new SendEventAction(endpointSchemaKey, endpoint, {
               eventCode: error.status ? error.status + '' : '500',
@@ -234,7 +248,13 @@ export class APIEffect {
             }),
           ),
         );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType);
+        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+          endpointIds,
+          url: error.url || apiAction.options.url,
+          eventCode: error.status ? error.status + '' : '500',
+          message: 'Jetstream API request error',
+          error
+        });
         if (this.shouldRecursivelyDelete(requestType, apiAction)) {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
@@ -362,10 +382,10 @@ export class APIEffect {
     data,
     errorCheck: APIErrorCheck[],
   ): {
-      entities: NormalizedResponse;
-      totalResults: number;
-      totalPages: number;
-    } {
+    entities: NormalizedResponse;
+    totalResults: number;
+    totalPages: number;
+  } {
     let totalResults = 0;
     let totalPages = 0;
     const allEntities = Object.keys(data)
@@ -466,6 +486,9 @@ export class APIEffect {
     return paginationState
       ? {
         ...paginationState.params,
+        q: [
+          ...(paginationState.params.q || [])
+        ],
         page: paginationState.currentPage.toString(),
       }
       : {};
@@ -489,12 +512,12 @@ export class APIEffect {
     resData,
     apiAction: IRequestAction,
   ): {
-      resData;
-      entities;
-      totalResults;
-      totalPages;
-      errorsCheck: APIErrorCheck[];
-    } {
+    resData;
+    entities;
+    totalResults;
+    totalPages;
+    errorsCheck: APIErrorCheck[];
+  } {
     const errorsCheck = this.checkForErrors(resData, apiAction);
     let entities;
     let totalResults = 0;
@@ -544,14 +567,31 @@ export class APIEffect {
 
   private setRequestParams(
     requestParams: URLSearchParams,
-    params: { [key: string]: any },
+    params: PaginationParam,
   ) {
     if (params.hasOwnProperty('q')) {
-      // Convert q into a cf q string
-      params.qString = qParamsToString(params.q);
-      for (const q of params.qString) {
-        requestParams.append('q', q);
-      }
+      // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
+      // be overwritten in `params`
+
+      // Clear `requestParams` `q` and start afresh
+      const initialQParams = requestParams.getAll('q');
+      requestParams.delete('q');
+
+      // Loop through all the NEW params that we wish to keep
+      params.q.forEach(qParam => {
+        // Add new param we wish to keep
+        requestParams.append('q', qParamToString(qParam));
+        // Remove any initial params that have been `overwritten`. This won't be added again later on
+        const haveInitialParam = initialQParams.findIndex(qParamStr => qParam.key === qParamKeyFromString(qParamStr));
+        if (haveInitialParam >= 0) {
+          initialQParams.splice(haveInitialParam, 1);
+        }
+      });
+
+      // Add the rest of the initial params
+      initialQParams.forEach(qParamStr => requestParams.append('q', qParamStr));
+
+      // Remove from q from `params` so it's not added again below
       delete params.qString;
       delete params.q;
     }

@@ -11,12 +11,14 @@ import { first, filter, map } from 'rxjs/operators';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { DeployApplicationSource } from '../../../../../store/types/deploy-application.types';
+import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 
 @Injectable()
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {
   constructor(
     store: Store<AppState>,
     datePipe: DatePipe,
+    scmService: GitSCMService
   ) {
     super(store, datePipe);
     this.text.title = 'Select a commit';
@@ -29,15 +31,19 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
     });
 
     this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
-      map((appSource: DeployApplicationSource) => appSource.type.id === 'github' ? {
+      map((appSource: DeployApplicationSource) => {
+      return (appSource.type.id === 'github' || appSource.type.id === 'gitlab') ? {
+        scm: appSource.type.id as GitSCMType,
         projectName: appSource.projectName,
         sha: appSource.branch.name,
         commitSha: appSource.commit ? appSource.commit.sha : null
-      } : null),
+      } : null; }),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
       first()
     ).subscribe(fetchDetails => {
-      this.dataSource = new GithubCommitsDataSource(this.store, this, fetchDetails.projectName, fetchDetails.sha, fetchDetails.commitSha);
+      const scm = scmService.getSCM(fetchDetails.scm);
+      this.dataSource = new GithubCommitsDataSource(this.store,
+        this, scm, fetchDetails.projectName, fetchDetails.sha, fetchDetails.commitSha);
       this.initialised.next(true);
     });
   }

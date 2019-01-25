@@ -12,10 +12,10 @@
     <app-step title="Select Plan" [onNext]="selectPlan.onNext" [blocked]="initialisedService$ | async" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">
       <app-select-plan-step #selectPlan></app-select-plan-step>
     </app-step>
-    <app-step [title]="bindAppStepperText" *ngIf="modeService.viewDetail.showBindApp" [skip]="skipApps$ | async" [onNext]="bindApp.submit " [valid]="bindApp.validate | async" cancelButtonText="Cancel" finishButtonText="Bind">
+    <app-step [title]="bindAppStepperText" *ngIf="modeService.viewDetail.showBindApp" [skip]="skipApps$ | async" [onEnter]="bindApp.onEnter" [onNext]="bindApp.submit " [valid]="bindApp.validate | async" cancelButtonText="Cancel">
       <app-bind-apps-step #bindApp [boundAppId]="appId"></app-bind-apps-step>
     </app-step>
-    <app-step title="Service Instance" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter" [blocked]="!!(specifyDetails.serviceInstancesInit$  | async)" [valid]=" specifyDetails.validate | async " cancelButtonText="Cancel " nextButtonText="Create ">
+    <app-step title="Service Instance" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter" [blocked]="!!(specifyDetails.serviceInstancesInit$  | async)" [valid]="specifyDetails.validate | async " cancelButtonText="Cancel " nextButtonText="Create ">
       <app-specify-details-step [appId]="appId" #specifyDetails [showModeSelection]="!!appId "></app-specify-details-step>
     </app-step>
   </app-steppers>

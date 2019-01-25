@@ -17,6 +17,7 @@ export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
+export const SET_PAGINATION_MAX_REACHED = '[Pagination] Set max response reached';
 
 export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
   const key = `${type}-${id}`;
@@ -30,7 +31,7 @@ export class ClearPaginationOfType implements Action {
 }
 
 export class ClearPaginationOfEntity implements Action {
-  constructor(public entityKey: string, public entityGuid) {
+  constructor(public entityKey: string, public entityGuid, public paginationKey?: string) {
   }
   type = CLEAR_PAGINATION_OF_ENTITY;
 }
@@ -155,4 +156,13 @@ export class RemoveParams implements BasePaginatedAction {
   ) {
   }
   type = REMOVE_PARAMS;
+}
+
+export class PaginationMaxedResults implements Action {
+  type = SET_PAGINATION_MAX_REACHED;
+  constructor(
+    public maxReached: number,
+    public entityKey: string,
+    public paginationKey: string
+  ) { }
 }

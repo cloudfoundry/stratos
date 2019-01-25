@@ -1,3 +1,5 @@
+@import '../../../../sass/mixins';
+
 .metrics {
   &-url {
     font-size: 14px;
@@ -15,6 +17,7 @@
     }
   }
   &-metadata {
+    width: 100%;
     div {
       padding: 4px 0;
     }
@@ -25,4 +28,19 @@
   &-provision {
     margin-top: 24px;
   }
+  &-metadata__cols {
+    display: flex;
+    flex-direction: column;
+
+    @include breakpoint(tablet) {
+      flex-direction: row;
+    }
+  }
+  &-metadata__two-cols {
+    flex: 1;
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
 }
+
