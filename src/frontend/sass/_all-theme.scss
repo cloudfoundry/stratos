@@ -47,6 +47,7 @@
 @import './fonts';
 @import './ansi-colors';
 @import '../app/shared/components/schema-form/schema-form.component.theme';
+@import '../app/features/cloud-foundry/tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component.theme';
 // Defaults
 $side-nav-light-text: #fff;
 $side-nav-light-bg: #333;
@@ -124,6 +125,7 @@ $side-nav-light-active: #484848;
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
   @include app-multiline-title-theme($theme, $app-theme);
+  @include cf-admin-add-user-warning($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
