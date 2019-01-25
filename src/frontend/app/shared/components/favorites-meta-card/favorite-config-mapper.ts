@@ -1,10 +1,13 @@
-import { entityRelationMissingQuotaGuid } from './../../../store/helpers/entity-relations/entity-relations.spec';
 import { Observable } from 'rxjs';
-
 import { IRequestAction } from '../../../store/types/request.types';
-import { IFavoriteTypeInfo, UserFavorite, IFavoriteMetadata } from '../../../store/types/user-favorites.types';
-import { CardStatus } from '../../shared.types';
+import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite } from '../../../store/types/user-favorites.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { endpointSchemaKey } from '../../../store/helpers/entity-factory';
+
+export interface IFavoriteTypes {
+  type: string;
+  prettyName: string;
+}
 
 /**
  * [label, value]
@@ -26,7 +29,8 @@ interface IFavoriteMappers {
     mapper: TFavoriteMapperFunction<any>,
     prettyName: string,
     actionGenerator: TFavoriteActionGenerator<IFavoriteMetadata>
-    entityToMetadata: TEntityToMetadata<any, any>
+    entityToMetadata: TEntityToMetadata<any, any>,
+    favoriteInfo: IFavoriteTypeInfo
   };
 }
 
@@ -66,7 +70,8 @@ class FavoritesConfigMapper {
       mapper,
       prettyName,
       actionGenerator,
-      entityToMetadata
+      entityToMetadata,
+      favoriteInfo
     };
   }
   /**
@@ -103,6 +108,22 @@ class FavoritesConfigMapper {
   public getEntityMetadata<T extends IFavoriteMetadata, Y = any>(favorite: UserFavorite<T>, entity: Y) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] && this.mappers[mapperKey].entityToMetadata ? this.mappers[mapperKey].entityToMetadata(entity) : null;
+  }
+
+  /**
+   * For a given endpoint type, return the list of possible favorite types
+   * @param favorite
+   */
+  public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
+    return Object.values(this.mappers).reduce((types: IFavoriteTypes[], mapper) => {
+      if (mapper.favoriteInfo.endpointType === endpointType && mapper.favoriteInfo.entityType !== endpointSchemaKey) {
+        types.push({
+          type: mapper.favoriteInfo.entityType,
+          prettyName: mapper.prettyName
+        });
+      }
+      return types;
+    }, []);
   }
 
 }

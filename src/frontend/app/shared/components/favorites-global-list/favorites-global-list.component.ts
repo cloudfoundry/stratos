@@ -40,7 +40,6 @@ export class FavoritesGlobalListComponent implements OnInit {
     if (!entityGroups) {
       return entityGroups;
     }
-
     return entityGroups.map(group => {
       if (group.entities) {
         group.entities = group.entities.sort(this.sortFavoriteGroup);

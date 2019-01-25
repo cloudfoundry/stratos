@@ -7,12 +7,15 @@
   flex-direction: column;
   margin-bottom: 20px;
   padding-bottom: $bottom-space;
+  &__search-form {
+    padding-left: 5px;
+    padding-top: 1.25em;
+  }
   &__cards {
     display: grid;
     grid-column-gap: 10px;
     grid-row-gap: 10px;
     grid-template-columns: 1fr;
-    margin-top: $bottom-space;
     min-height: 0;
     min-width: 0;
     @include breakpoint(tablet) {

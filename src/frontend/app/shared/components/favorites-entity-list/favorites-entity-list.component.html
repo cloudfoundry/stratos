@@ -1,12 +1,29 @@
 <div *ngIf="!placeholder" class="favorite-entity-list">
-  <div class="favorite-entity-list__cards" *ngIf="limitedEntities && limitedEntities.length">
-    <app-favorites-meta-card *ngFor="let entity of limitedEntities" class="favorite-entity-list__card" [favoriteEntity]="entity"
-      [compact]="true" [endpointDisconnected]="endpointDisconnected"></app-favorites-meta-card>
-  </div>
-  <button class="favorite-entity-list__expand-button" *ngIf="_entities && _entities.length > minLimit" (click)="toggleExpand()"
+  <ng-container *ngIf="_entities.length > 0">
+    <form class="favorite-entity-list__search-form">
+      <mat-form-field>
+        <input matInput ngModel #nameChange="ngModel" name="favoriteName" placeholder="Name">
+      </mat-form-field>
+      <mat-form-field *ngIf="favoriteTypes.length > 0">
+        <mat-select (selectionChange)="typeChanged($event.value)" placeholder="Favorite Type">
+          <mat-option>
+          </mat-option>
+          <mat-option *ngFor="let favoriteType of favoriteTypes" [value]="favoriteType.type">
+            {{favoriteType.prettyName}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+    <div *ngIf="noResultsDueToFilter$ | async"> No favorites found for the current filters. </div>
+    <div class="favorite-entity-list__cards">
+      <app-favorites-meta-card *ngFor="let entity of (limitedEntities$ | async)" class="favorite-entity-list__card"
+        [favoriteEntity]="entity" [compact]="true" [endpointDisconnected]="endpointDisconnected"></app-favorites-meta-card>
+    </div>
+  </ng-container>
+  <button class="favorite-entity-list__expand-button" *ngIf="(searchedEntities$ | async).length > minLimit" (click)="toggleExpand()"
     mat-icon-button>
-    <mat-icon *ngIf="limit === null">expand_less</mat-icon>
-    <mat-icon *ngIf="limit !== null">expand_more</mat-icon>
+    <mat-icon *ngIf="(limitToggle$ | async) === null">expand_less</mat-icon>
+    <mat-icon *ngIf="(limitToggle$ | async) !== null">expand_more</mat-icon>
   </button>
 </div>
 

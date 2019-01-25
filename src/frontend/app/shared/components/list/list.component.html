@@ -2,7 +2,8 @@
   <mat-progress-bar color="primary" *ngIf="!(initialised$ | async) || (showProgressBar$ | async)" mode="indeterminate"></mat-progress-bar>
   <ng-container *ngIf="initialised$ | async">
     <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
-      <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
+      <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}"
+        class="list-component__header-card">
         <div class="list-component__header__left">
           <!-- List Title -->
           <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{
@@ -15,7 +16,8 @@
           <!-- Multi actions (those applied to selection) -->
           <div class="list-component__header__left--multi-actions" *ngIf="(dataSource.isSelecting$ | async)">
             <ng-container *ngFor="let action of multiActions">
-              <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
+              <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)"
+                [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
                 <mat-icon>{{action.icon}}</mat-icon>
               </button>
             </ng-container>
@@ -28,7 +30,8 @@
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <ng-container *ngFor="let multiFilterManager of multiFilterManagers; first as isFirst">
               <mat-form-field *ngIf="!isFirst || !(multiFilterManager.hasOneItem$ | async)" [floatLabel]="'never'">
-                <mat-select id="{{multiFilterManager.filterKey}}" matInput [(value)]="multiFilterManager.value" [disabled]="!(multiFilterManager.filterIsReady$ | async)" (selectionChange)="multiFilterManager.selectItem($event.value)">
+                <mat-select id="{{multiFilterManager.filterKey}}" matInput [(value)]="multiFilterManager.value"
+                  [disabled]="!(multiFilterManager.filterIsReady$ | async)" (selectionChange)="multiFilterManager.selectItem($event.value)">
                   <mat-option>{{ multiFilterManager.allLabel }}</mat-option>
                   <mat-option *ngFor="let selectItem of multiFilterManager.filterItems$ | async" [value]="selectItem.value">
                     {{selectItem.label}}
@@ -43,29 +46,34 @@
           <!-- Filter by text input -->
           <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
-              <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
+              <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)"
+                name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
             </mat-form-field>
           </div>
           <!-- Sort Button & Drop down -->
           <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
             <mat-form-field class="list-component__header__right-sort">
-              <mat-select name="sort-field" matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
+              <mat-select name="sort-field" matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false"
+                [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
                 <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                   {{column.headerCell()}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <button mat-icon-button (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='asc'">
+            <button mat-icon-button (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)"
+              *ngIf="headerSort.direction==='asc'">
               <mat-icon>sort</mat-icon>
             </button>
-            <button mat-icon-button (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='desc'">
+            <button mat-icon-button (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)"
+              *ngIf="headerSort.direction==='desc'">
               <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
             </button>
           </div>
           <!-- Global actions (those not applied to specific rows) -->
           <div *ngIf="!(isAddingOrSelecting$ | async) && globalActions?.length > 0">
             <ng-container *ngFor="let action of globalActions">
-              <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionGlobal(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
+              <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionGlobal(action)" [disabled]="!(action.enabled$ | async)"
+                matTooltip="{{action.description}}" matTooltipShowDelay="1000">
                 <mat-icon>{{action.icon}}</mat-icon>
               </button>
             </ng-container>
@@ -89,14 +97,17 @@
           </div>
           <!-- Select table or cards view button -->
           <div id="list-card-toggle" *ngIf="config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
-            <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(view$ | async)==='table'">
+            <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');"
+              *ngIf="(view$ | async)==='table'">
               <mat-icon>grid_on</mat-icon>
             </button>
-            <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(view$ | async)==='cards'">
+            <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');"
+              *ngIf="(view$ | async)==='cards'">
               <mat-icon>list</mat-icon>
             </button>
           </div>
-          <button id="app-list-refresh-button" mat-icon-button *ngIf="dataSource.refresh" [disabled]="(dataSource.isLoadingPage$ | async) || (isAddingOrSelecting$ | async)" (click)="refresh()">
+          <button id="app-list-refresh-button" mat-icon-button *ngIf="dataSource.refresh" [disabled]="(dataSource.isLoadingPage$ | async) || (isAddingOrSelecting$ | async)"
+            (click)="refresh()">
             <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
           </button>
         </div>
@@ -104,18 +115,23 @@
       </mat-card>
     </div>
     <div class="refresh-button__no-header" *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
-      <button id="app-list-refresh-button" mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+      <button id="app-list-refresh-button" mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async"
+        (click)="refresh()">
         <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
       </button>
     </div>
     <div class="list-component__body">
       <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
-        <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController" [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+        <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent"
+          [hidden]="!(hasRows$ | async)"></app-cards>
+        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions"
+          [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController"
+          [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
         </app-table>
       </div>
       <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
-        <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize" [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [length]="paginatorSettings.length">
+        <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize"
+          [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [length]="paginatorSettings.length">
         </mat-paginator>
       </mat-card>
     </div>
@@ -129,7 +145,8 @@
     <ng-template #defaultNoEntriesMaxedResults>
       <mat-card class="list-component__default-no-entries">
         <mat-card-content>
-          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. Please use the filters to reduce the number of results.'}}</div>
+          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. Please use the filters to
+            reduce the number of results.'}}</div>
         </mat-card-content>
       </mat-card>
     </ng-template>

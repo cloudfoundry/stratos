@@ -6,7 +6,7 @@ import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
 import { AppState } from '../store/app-state';
-import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
+import { entityFactory, userFavoritesSchemaKey, endpointSchemaKey } from '../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
 import { PaginationEntityState } from '../store/types/pagination.types';
@@ -130,8 +130,8 @@ export class UserFavoriteManager {
   }
 
   private hydrateGroup(favGroup: UserFavorite<IFavoriteMetadata>[]): IGroupedFavorites {
-    const endpointIndex = favGroup.findIndex(fav => fav.entityType === 'endpoint');
-    const endpointFav = favGroup.splice(endpointIndex, 1)[0] as UserFavorite<IEndpointFavMetadata>
+    const endpointIndex = favGroup.findIndex(fav => fav.entityType === endpointSchemaKey);
+    const endpointFav = favGroup.splice(endpointIndex, 1)[0] as UserFavorite<IEndpointFavMetadata>;
     const endpoint = this.mapToHydrated<IEndpointFavMetadata>(endpointFav);
     return {
       endpoint,
