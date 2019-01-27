@@ -64,18 +64,6 @@ function clean_deployments {
   # docker rmi $(docker images -q) -f > /dev/null 2>&1
 }
 
-function checkPCFDevStatus {
-  echo "Checking PCF Dev status"
-  FULL_STATUS=$(cf pcfdev status)
-  echo "$FULL_STATUS"
-
-  STATUS=$(echo "$FULL_STATUS" | head -n 1)
-  if [ "$STATUS" != "Running" ]; then
-    echo "PCF Dev is not running... aborting"
-    exit 1
-  fi
-}
-
 # Need TEST_CONFIG_URL to be set
 if [ -z "${TEST_CONFIG_URL}" ]; then
   echo "You must set TEST_CONFIG_URL to the URL for retrieving the test config (secrets) metadata"
@@ -100,10 +88,6 @@ CF_USER=${CF_USER}
 CF_PASSWORD=${CF_PASSWORD}
 
 echo ${CF_URL}
-
-if [ "${CF_URL}" == "https://api.local.pcfdev.io" ]; then
-  checkPCFDevStatus
-fi
 
 cf login -a ${CF_URL} --skip-ssl-validation -u ${CF_USER} -p ${CF_PASSWORD} -o e2e -s e2e
 cf buildpacks
