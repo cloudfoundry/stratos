@@ -21,39 +21,52 @@ export function userFavoriteGroupsReducer(state: IUserFavoritesGroupsState = {},
 function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
   const { favorites } = action;
   return favorites.reduce((favoriteGroups, favorite) => {
-    const { endpointId } = favorite;
-    favoriteGroups[endpointId] = addFavoriteToGroup(favoriteGroups[endpointId], favorite);
+    const { guid } = getEndpointFavorite(favorite);
+    favoriteGroups[guid] = addFavoriteToGroup(favoriteGroups[guid], favorite);
     return favoriteGroups;
   }, {} as IUserFavoritesGroupsState);
+}
+
+function getEndpointFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
+  if (favorite.entityType !== 'endpoint') {
+    const endpointFav = {
+      ...favorite
+    };
+    endpointFav.entityId = null;
+    endpointFav.entityType = 'endpoint';
+    endpointFav.guid = UserFavorite.buildFavoriteStoreEntityGuid(endpointFav);
+    return endpointFav;
+  }
+  return favorite;
 }
 
 
 
 function removeFavoriteFromGroup(state: IUserFavoritesGroupsState, action: RemoveUserFavoriteSuccessAction) {
   const { favorite } = action;
-  const { endpointId, entityId } = favorite;
-  const userGroup = state[endpointId] || getDefaultFavoriteGroup();
+  const endpointFavorite = getEndpointFavorite(favorite);
+  const userGroup = state[endpointFavorite.guid] || getDefaultFavoriteGroup();
   if (isEndpointTypeFavorite(favorite)) {
     if (!groupHasEntities(userGroup)) {
-      return removeGroup(state, endpointId);
+      return removeGroup(state, endpointFavorite.guid);
     }
     // The endpoint has been removed but dependant entities are still within the group
     // The group is now ethereal
     return {
       ...state,
-      [endpointId]: {
+      [endpointFavorite.guid]: {
         ...userGroup,
         ethereal: true
       }
-    }
+    };
   } else {
-    const entitiesIds = userGroup.entitiesIds.filter(id => id !== entityId);
+    const entitiesIds = userGroup.entitiesIds.filter(id => id !== favorite.guid);
     if (!entitiesIds.length && userGroup.ethereal) {
-      return removeGroup(state, endpointId);
+      return removeGroup(state, endpointFavorite.guid);
     }
     return {
       ...state,
-      [endpointId]: {
+      [endpointFavorite.guid]: {
         ...userGroup,
         entitiesIds
       }
@@ -61,9 +74,9 @@ function removeFavoriteFromGroup(state: IUserFavoritesGroupsState, action: Remov
   }
 }
 
-function removeGroup(state: IUserFavoritesGroupsState, endpointId: string) {
+function removeGroup(state: IUserFavoritesGroupsState, endpointGuid: string) {
   const {
-    [endpointId]: removedEndpoint,
+    [endpointGuid]: removedEndpoint,
     ...newState
   } = state;
   return newState;
@@ -75,21 +88,22 @@ function groupHasEntities(group: IUserFavoriteGroup) {
 
 function addEntityFavorite(favoriteGroups: IUserFavoritesGroupsState, action: SaveUserFavoriteAction) {
   const { favorite } = action;
-  const { endpointId } = favorite;
-  const group = favoriteGroups[endpointId];
+  const { guid } = getEndpointFavorite(favorite);
+  console.log(guid);
+  const group = favoriteGroups[guid];
   const newGroup = addFavoriteToGroup(group, favorite);
   return {
     ...favoriteGroups,
-    [endpointId]: newGroup
+    [guid]: newGroup
   };
 }
 
 function addFavoriteToGroup(_favoriteGroup: IUserFavoriteGroup = getDefaultFavoriteGroup(), favorite: UserFavorite<IFavoriteMetadata>) {
   const favoriteGroup = { ..._favoriteGroup };
-  const { entityId } = favorite;
+  const { guid } = favorite;
   const isEndpoint = isEndpointTypeFavorite(favorite);
-  if (entityId && !favoriteGroup.entitiesIds.includes(entityId)) {
-    favoriteGroup.entitiesIds.push(entityId);
+  if (!isEndpoint && guid && !favoriteGroup.entitiesIds.includes(guid)) {
+    favoriteGroup.entitiesIds.push(guid);
   }
   if (isEndpoint) {
     favoriteGroup.ethereal = false;

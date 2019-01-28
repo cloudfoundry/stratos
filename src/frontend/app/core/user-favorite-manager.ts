@@ -1,21 +1,16 @@
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { favoritesConfigMapper, TFavoriteMapperFunction } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { RemoveUserFavoriteAction } from '../store/actions/user-favourites-actions/remove-user-favorite-action';
-import { SaveUserFavoriteAction } from '../store/actions/user-favourites-actions/save-user-favorite-action';
-import { AppState } from '../store/app-state';
-import { entityFactory, userFavoritesSchemaKey, endpointSchemaKey } from '../store/helpers/entity-factory';
-import { endpointEntitiesSelector } from '../store/selectors/endpoint.selectors';
+import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
+import { AppState, IRequestEntityTypeState } from '../store/app-state';
+import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
+import { favoriteEntitiesSelector, favoriteGroupsSelector } from '../store/selectors/favorite-groups.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
-import { PaginationEntityState } from '../store/types/pagination.types';
-import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
+import { IUserFavoritesGroupsState } from '../store/types/favorite-groups.types';
+import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
-import { isEndpointTypeFavorite } from './user-favorite-helpers';
-interface IntermediateFavoritesGroup {
-  [endpointId: string]: UserFavorite<IFavoriteMetadata>[];
-}
 
 export interface IFavoriteEntity {
   type: string;
@@ -47,39 +42,12 @@ export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetada
 export class UserFavoriteManager {
   constructor(private store: Store<AppState>) { }
 
-  private groupIntermediateFavorites = (favorites: UserFavorite<IFavoriteMetadata>[]): UserFavorite<IFavoriteMetadata>[][] => {
-    const intermediateFavoritesGroup = favorites.reduce((
-      intermediate: IntermediateFavoritesGroup, favorite: UserFavorite<IFavoriteMetadata>
-    ) => {
-      const { endpointId } = favorite;
-      if (!intermediate[endpointId]) {
-        intermediate[endpointId] = [];
-      }
-      const isEndpoint = isEndpointTypeFavorite(favorite);
-      if (isEndpoint) {
-        intermediate[endpointId].unshift(favorite);
-      } else {
-        intermediate[endpointId].push(favorite);
-      }
-      return intermediate;
-    }, {} as IntermediateFavoritesGroup);
-
-    return Object.values(intermediateFavoritesGroup).reduce((favsArray, favs) => {
-      favsArray.push(favs);
-      return favsArray;
-    }, [] as UserFavorite<IFavoriteMetadata>[][]);
-  }
-
   private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
     const type = favorite.entityType;
     return {
       type,
       id: favorite.entityId || favorite.endpointId
     };
-  }
-
-  private getCurrentPagePagination(pagination: PaginationEntityState) {
-    return pagination.pageRequests[pagination.currentPage];
   }
 
   public getFavoritesMonitor() {
@@ -91,10 +59,11 @@ export class UserFavoriteManager {
   }
 
   public getAllFavorites() {
-    const paginationMonitor = this.getFavoritesMonitor();
-    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
-    return waitForFavorites$.pipe(
-      switchMap(() => paginationMonitor.currentPage$)
+    const favoriteGroups$ = this.store.select(favoriteGroupsSelector);
+    const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
+    return combineLatest(
+      favoriteGroups$,
+      favoriteEntities$
     );
   }
 
@@ -104,43 +73,32 @@ export class UserFavoriteManager {
 
   private getHydrateObservable() {
     return this.getAllFavorites().pipe(
-      switchMap(this.addEndpointsToHydrateList),
-      map(this.groupIntermediateFavorites),
-      map(this.getHydratedGroups)
+      map(([groups, favoriteEntities]) => this.getHydratedGroups(groups, favoriteEntities))
     );
   }
 
-  private getWaitForFavoritesObservable(paginationMonitor: PaginationMonitor<UserFavorite<IFavoriteMetadata>>) {
-    return paginationMonitor.pagination$.pipe(
-      map(this.getCurrentPagePagination),
-      filter(pageRequest => !!pageRequest),
-      tap(({ error }) => {
-        if (error) {
-          throw new Error('Could not fetch favorites');
-        }
-      }),
-      filter(({ busy }) => busy === false),
-    );
+  private getHydratedGroups = (
+    groups: IUserFavoritesGroupsState,
+    favoriteEntities: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
+  ): IGroupedFavorites[] => {
+    return Object.keys(groups).map(endpointGuid => this.hydrateGroup(groups[endpointGuid].entitiesIds, endpointGuid, favoriteEntities));
   }
 
-  private getHydratedGroups = (list: UserFavorite<IFavoriteMetadata>[][]): IGroupedFavorites[] => {
-    if (!list || !list.length) {
-      return null;
-    }
-    return list.map(favGroup => this.hydrateGroup(favGroup));
-  }
-
-  private hydrateGroup(favGroup: UserFavorite<IFavoriteMetadata>[]): IGroupedFavorites {
-    const endpointIndex = favGroup.findIndex(fav => fav.entityType === endpointSchemaKey);
-    const endpointFav = favGroup.splice(endpointIndex, 1)[0] as UserFavorite<IEndpointFavMetadata>;
+  private hydrateGroup(
+    favEntitiesGuid: string[],
+    endpointGuid: string,
+    favoriteEntities: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
+  ): IGroupedFavorites {
+    const endpointFav = favoriteEntities[endpointGuid] as UserFavorite<IEndpointFavMetadata>;
     const endpoint = this.mapToHydrated<IEndpointFavMetadata>(endpointFav);
     return {
       endpoint,
-      entities: favGroup.map(this.mapToHydrated),
+      entities: favEntitiesGuid.map(guid =>
+        this.mapToHydrated(favoriteEntities[guid])),
     };
   }
 
-  private mapToHydrated = <T extends IEndpointFavMetadata = IEndpointFavMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
+  private mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
     return {
       type: this.getTypeAndID(favorite).type,
       cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
@@ -149,48 +107,9 @@ export class UserFavoriteManager {
     };
   }
 
-  public addEndpointsToHydrateList = (favorites: UserFavorite<IFavoriteMetadata>[]) => {
-    const favoriteObservables$ = favorites.reduce((newFavorites: Observable<UserFavorite<IFavoriteMetadata>>[], favorite) => {
-      const hasEndpoint = this.hasEndpointAsFavorite(favorites, favorite);
-      if (!hasEndpoint) {
-        newFavorites.push(this.store.select(endpointEntitiesSelector).pipe(
-          map(endpoints => {
-            const endpoint = endpoints[favorite.endpointId];
-            return new UserFavoriteEndpoint(
-              favorite.endpointId,
-              favorite.endpointType,
-              endpoint
-            );
-          })
-        ));
-      }
-      return newFavorites;
-    }, []);
-    const currentFavs$ = observableOf(favorites);
-    if (!favoriteObservables$.length) {
-      return currentFavs$;
-    }
-    return combineLatest(currentFavs$, combineLatest(favoriteObservables$)).pipe(
-      map(([base, newFavs]) => [
-        ...base,
-        ...newFavs
-      ])
-    );
-
-  }
-
-  public hasEndpointAsFavorite(allFavorites: UserFavorite<IFavoriteMetadata>[], favoriteToFindEndpoint: UserFavorite<IFavoriteMetadata>) {
-    if (isEndpointTypeFavorite(favoriteToFindEndpoint)) {
-      return true;
-    }
-    return !!allFavorites.find(favorite => isEndpointTypeFavorite(favorite) && favorite.endpointId === favoriteToFindEndpoint.endpointId);
-  }
-
-
   public hydrateFavorite(favorite: UserFavorite<IFavoriteMetadata>): IFavoriteMetadata {
     return favorite.metadata;
   }
-
 
   public getIsFavoriteObservable(favorite: UserFavorite<IFavoriteMetadata>) {
     return this.store.select(
@@ -199,15 +118,6 @@ export class UserFavoriteManager {
   }
 
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-    this.getIsFavoriteObservable(favorite).pipe(
-      first(),
-      tap(isFav => {
-        if (isFav) {
-          this.store.dispatch(new RemoveUserFavoriteAction(favorite));
-        } else {
-          this.store.dispatch(new SaveUserFavoriteAction(favorite));
-        }
-      })
-    ).subscribe();
+    this.store.dispatch(new ToggleUserFavoriteAction(favorite));
   }
 }

@@ -17,7 +17,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
   set entities(favoriteEntities: IFavoriteEntity[]) {
     this._entities = favoriteEntities ? [...favoriteEntities] : favoriteEntities;
     this.entitiesSubject.next(favoriteEntities);
-    this.hasEntities = this._entities && this._entities.length > 0
+    this.hasEntities = this._entities && this._entities.length > 0;
   }
   @Input()
   public placeholder = false;
@@ -88,6 +88,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    console.log('init')
     const type$ = this.typeSubject.asObservable().pipe(startWith(null));
     const typesEntities$ = combineLatest(
       this.entities$,

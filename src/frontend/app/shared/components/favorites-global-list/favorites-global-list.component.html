@@ -4,15 +4,13 @@
   </div>
   <div *ngIf="favorites.error && !favorites.fetching">Could not fetch favorites</div>
   <div class="favorite-list" *ngIf="favorites.entityGroups as entityGroups">
-    <div *ngIf=" !favorites.error">
-      <div *ngFor="let favGroup of entityGroups">
-        <!-- <div *ngIf="favGroup && favGroup.endpoint"> -->
-        <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true" [endpointHasEntities]="favGroup.entities && favGroup.entities.length > 0"
-          [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
-        <app-favorites-entity-list class="favorite-list_entities" [endpointTypes]="favGroup.endpoint.favorite.endpointType"
-          [entities]="favGroup.entities"></app-favorites-entity-list>
-        <!-- </div> -->
-      </div>
+    <div *ngFor="let favGroup of entityGroups">
+      <!-- <div *ngIf="favGroup && favGroup.endpoint"> -->
+      <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true" [endpointHasEntities]="favGroup.entities && favGroup.entities.length > 0"
+        [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
+      <app-favorites-entity-list class="favorite-list_entities" [endpointTypes]="favGroup.endpoint.favorite.endpointType"
+        [entities]="favGroup.entities"></app-favorites-entity-list>
+      <!-- </div> -->
     </div>
   </div>
 </div>

@@ -29,6 +29,7 @@ export function getInitialTestStoreState(): AppState {
 function getDefaultInitialTestStoreState(): AppState {
 
   return {
+    userFavoritesGroups: {},
     auth: {
       loggedIn: true,
       loggingIn: false,

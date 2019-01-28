@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { mergeMap, switchMap, withLatestFrom, map, tap } from 'rxjs/operators';
+import { mergeMap, switchMap, withLatestFrom, map, tap, first } from 'rxjs/operators';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { GetUserFavoritesAction, GetUserFavoritesSuccessAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { SaveUserFavoriteAction } from '../actions/user-favourites-actions/save-user-favorite-action';
@@ -109,13 +109,14 @@ export class UserFavoritesEffect {
   );
 
   @Effect() toggleFavorite = this.actions$.ofType<ToggleUserFavoriteAction>(ToggleUserFavoriteAction.ACTION_TYPE).pipe(
-    switchMap(action =>
+    mergeMap(action =>
       this.userFavoriteManager.getIsFavoriteObservable(action.favorite).pipe(
-        tap(isFav => {
+        first(),
+        map(isFav => {
           if (isFav) {
-            this.store.dispatch(new RemoveUserFavoriteAction(action.favorite));
+            return new RemoveUserFavoriteAction(action.favorite);
           } else {
-            this.store.dispatch(new SaveUserFavoriteAction(action.favorite));
+            return new SaveUserFavoriteAction(action.favorite);
           }
         })
       )

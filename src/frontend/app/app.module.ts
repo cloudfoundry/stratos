@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
-import { combineLatest, debounceTime, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, withLatestFrom } from 'rxjs/operators';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
@@ -35,15 +35,16 @@ import { GetAllEndpoints } from './store/actions/endpoint.actions';
 import { GetOrganization } from './store/actions/organization.actions';
 import { RouterNav } from './store/actions/router.actions';
 import { GetSpace } from './store/actions/space.actions';
+import { UpdateUserFavoriteMetadataAction } from './store/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { AppState } from './store/app-state';
 import { applicationSchemaKey, endpointSchemaKey, organizationSchemaKey, spaceSchemaKey } from './store/helpers/entity-factory';
 import { getAPIRequestDataState } from './store/selectors/api.selectors';
 import { AppStoreModule } from './store/store.module';
 import { APIResource } from './store/types/api.types';
 import { EndpointModel } from './store/types/endpoint.types';
-import { IEndpointFavMetadata, IFavoriteMetadata } from './store/types/user-favorites.types';
+import { IRequestDataState } from './store/types/entity.types';
+import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './store/types/user-favorites.types';
 import { XSRFModule } from './xsrf.module';
-import { UpdateUserFavoriteMetadataAction } from './store/actions/user-favourites-actions/update-user-favorite-metadata-action';
 
 
 // Create action for router navigation. See
@@ -132,21 +133,33 @@ export class AppModule {
         withLatestFrom(allFavs$)
       )
       .subscribe(
-        ([entities, favorites]) => {
-          favorites.forEach(fav => {
-            const entity = entities[fav.entityType][fav.entityId || fav.endpointId];
-            if (entity) {
-              const newMetadata = favoritesConfigMapper.getEntityMetadata(fav, entity);
-              if (this.metadataHasChanged(fav.metadata, newMetadata)) {
-                this.store.dispatch(new UpdateUserFavoriteMetadataAction({
-                  ...fav,
-                  metadata: newMetadata
-                }));
-              }
+        ([entities, [favoriteGroups, favorites]]) => {
+          Object.keys(favoriteGroups).forEach(endpointId => {
+            const favoriteGroup = favoriteGroups[endpointId];
+            if (!favoriteGroup.ethereal) {
+              const endpointFavorite = favorites[endpointId];
+              this.syncFavorite(endpointFavorite, entities);
             }
+            favoriteGroup.entitiesIds.forEach(id => {
+              const endpointFavorite = favorites[id];
+              this.syncFavorite(endpointFavorite, entities);
+            });
           });
         }
       );
+  }
+
+  private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: IRequestDataState) {
+    const entity = entities[favorite.entityType][favorite.entityId];
+    if (entity) {
+      const newMetadata = favoritesConfigMapper.getEntityMetadata(favorite, entity);
+      if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
+        this.store.dispatch(new UpdateUserFavoriteMetadataAction({
+          ...favorite,
+          metadata: newMetadata
+        }));
+      }
+    }
   }
 
   private metadataHasChanged(oldMeta: IFavoriteMetadata, newMeta: IFavoriteMetadata) {
