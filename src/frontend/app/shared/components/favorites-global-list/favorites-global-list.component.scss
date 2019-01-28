@@ -1,4 +1,9 @@
 .favorite-list {
+  &__group {
+    border-bottom: 1px solid rgba(0, 0, 0, .2);
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+  }
   &__endpoint-card {
     margin-bottom: 10px;
     min-height: 200px;
