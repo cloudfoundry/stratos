@@ -12,6 +12,7 @@ import { isFavorite } from '../store/selectors/favorite.selectors';
 import { PaginationEntityState } from '../store/types/pagination.types';
 import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
+import { isEndpointTypeFavorite } from './user-favorite-helpers';
 interface IntermediateFavoritesGroup {
   [endpointId: string]: UserFavorite<IFavoriteMetadata>[];
 }
@@ -54,7 +55,7 @@ export class UserFavoriteManager {
       if (!intermediate[endpointId]) {
         intermediate[endpointId] = [];
       }
-      const isEndpoint = this.isEndpointType(favorite);
+      const isEndpoint = isEndpointTypeFavorite(favorite);
       if (isEndpoint) {
         intermediate[endpointId].unshift(favorite);
       } else {
@@ -179,15 +180,12 @@ export class UserFavoriteManager {
   }
 
   public hasEndpointAsFavorite(allFavorites: UserFavorite<IFavoriteMetadata>[], favoriteToFindEndpoint: UserFavorite<IFavoriteMetadata>) {
-    if (this.isEndpointType(favoriteToFindEndpoint)) {
+    if (isEndpointTypeFavorite(favoriteToFindEndpoint)) {
       return true;
     }
-    return !!allFavorites.find(favorite => this.isEndpointType(favorite) && favorite.endpointId === favoriteToFindEndpoint.endpointId);
+    return !!allFavorites.find(favorite => isEndpointTypeFavorite(favorite) && favorite.endpointId === favoriteToFindEndpoint.endpointId);
   }
 
-  private isEndpointType(favorite: UserFavorite<IFavoriteMetadata>) {
-    return !favorite.entityId;
-  }
 
   public hydrateFavorite(favorite: UserFavorite<IFavoriteMetadata>): IFavoriteMetadata {
     return favorite.metadata;
@@ -205,7 +203,7 @@ export class UserFavoriteManager {
       first(),
       tap(isFav => {
         if (isFav) {
-          this.store.dispatch(new RemoveUserFavoriteAction(favorite.guid));
+          this.store.dispatch(new RemoveUserFavoriteAction(favorite));
         } else {
           this.store.dispatch(new SaveUserFavoriteAction(favorite));
         }

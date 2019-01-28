@@ -24,7 +24,7 @@ export function deleteUserFavoriteMetadataReducer(
 ): IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> {
   if (action.type === RemoveUserFavoriteSuccessAction.ACTION_TYPE) {
     const {
-      [action.guid]: deletedFavorite,
+      [action.favorite.guid]: deletedFavorite,
       ...newState
     } = state;
     return newState;

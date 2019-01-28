@@ -24,12 +24,14 @@ export class FavoritesGlobalListComponent implements OnInit {
     const manager = new UserFavoriteManager(this.store);
     const monitor = manager.getFavoritesMonitor();
     this.favs$ = combineLatest(
-      manager.hydrateAllFavorites(),
+      manager.hydrateAllFavorites().pipe(
+        map(favs => this.sortFavoriteGroups(favs))
+      ),
       monitor.fetchingCurrentPage$,
       monitor.currentPageError$
     ).pipe(
-      map(([favs, fetching, error]) => ({
-        entityGroups: this.sortFavoriteGroups(favs),
+      map(([entityGroups, fetching, error]) => ({
+        entityGroups,
         fetching,
         error
       }))

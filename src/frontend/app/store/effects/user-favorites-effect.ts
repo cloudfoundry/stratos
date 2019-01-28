@@ -113,7 +113,7 @@ export class UserFavoritesEffect {
       this.userFavoriteManager.getIsFavoriteObservable(action.favorite).pipe(
         tap(isFav => {
           if (isFav) {
-            this.store.dispatch(new RemoveUserFavoriteAction(action.favorite.guid));
+            this.store.dispatch(new RemoveUserFavoriteAction(action.favorite));
           } else {
             this.store.dispatch(new SaveUserFavoriteAction(action.favorite));
           }
@@ -124,13 +124,14 @@ export class UserFavoritesEffect {
 
   @Effect({ dispatch: false }) removeFavorite$ = this.actions$.ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE).pipe(
     switchMap((action: RemoveUserFavoriteAction) => {
-      this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.guid));
+      const { guid } = action.favorite;
+      this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.favorite));
       this.store.dispatch(new PaginationRemoveIdAction(
-        action.guid,
+        guid,
         userFavoritesSchemaKey,
         userFavoritesPaginationKey
       ));
-      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`);
+      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${guid}`);
     })
   );
 

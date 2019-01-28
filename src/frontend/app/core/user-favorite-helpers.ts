@@ -1,8 +1,11 @@
-import { UserFavorite, UserFavoriteEndpoint, IFavoriteMetadata } from '../store/types/user-favorites.types';
-import { CfAPIResource } from './../store/types/api.types';
 import { EndpointModel } from '../store/types/endpoint.types';
-import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
-import { isFavorite } from '../store/selectors/favorite.selectors';
+import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from '../store/types/user-favorites.types';
+import { CfAPIResource } from './../store/types/api.types';
+
+export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
+  return !favorite.entityId;
+}
+
 
 export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, entityKey: string) {
   if (isCfEntity(entity as CfAPIResource)) {
@@ -35,3 +38,4 @@ function isEndpointEntity(endpoint: EndpointModel) {
 function isCfEntity(entity: CfAPIResource) {
   return entity && entity.entity.cfGuid && entity.metadata && entity.metadata.guid;
 }
+

@@ -12,12 +12,13 @@ import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/fa
 })
 export class FavoritesEntityListComponent implements AfterViewInit {
 
+
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
     this._entities = favoriteEntities ? [...favoriteEntities] : favoriteEntities;
     this.entitiesSubject.next(favoriteEntities);
+    this.hasEntities = this._entities && this._entities.length > 0
   }
-
   @Input()
   public placeholder = false;
 
@@ -26,20 +27,23 @@ export class FavoritesEntityListComponent implements AfterViewInit {
 
   @Input()
   set endpointTypes(types: string[] | string) {
-    if (Array.isArray(types)) {
-      this.favoriteTypes = types.reduce((allTypes, endpointType) => {
-        return [
-          ...allTypes,
-          ...favoritesConfigMapper.getAllTypesForEndpoint(endpointType)
-        ];
-      }, []);
-    } else {
-      this.favoriteTypes = favoritesConfigMapper.getAllTypesForEndpoint(types);
+    if (!this.favoriteTypes) {
+      if (Array.isArray(types)) {
+        this.favoriteTypes = types.reduce((allTypes, endpointType) => {
+          return [
+            ...allTypes,
+            ...favoritesConfigMapper.getAllTypesForEndpoint(endpointType)
+          ];
+        }, []);
+      } else {
+        this.favoriteTypes = favoritesConfigMapper.getAllTypesForEndpoint(types);
+      }
     }
   }
 
   @ViewChild('nameChange') public nameChange: NgModel;
 
+  public hasEntities: boolean;
   public typeSubject = new ReplaySubject<string>();
   private entitiesSubject = new ReplaySubject<IFavoriteEntity[]>();
   private limitToggleSubject = new ReplaySubject<number>();
@@ -50,7 +54,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
 
   public noResultsDueToFilter$: Observable<boolean>;
 
-  public favoriteTypes: IFavoriteTypes[] = [];
+  public favoriteTypes: IFavoriteTypes[] = null;
 
   // User to filter favorites
   public filterName: string;

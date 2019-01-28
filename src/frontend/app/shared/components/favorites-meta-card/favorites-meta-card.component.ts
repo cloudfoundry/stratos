@@ -20,7 +20,6 @@ import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
   styleUrls: ['./favorites-meta-card.component.scss']
 })
 export class FavoritesMetaCardComponent {
-
   @Input()
   public compact = false;
 
@@ -41,6 +40,12 @@ export class FavoritesMetaCardComponent {
   public status$: Observable<CardStatus>;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
+
+  /*
+   We use this to pass the favorite to the metacard, this dictates if we should show the favorite star or not.
+   We do not want to show the favorite star for endpoints that have favorite entities.
+  */
+  public metaFavorite: UserFavorite<IFavoriteMetadata>;
 
   public entityConfig: ComponentEntityMonitorConfig;
 
@@ -63,6 +68,8 @@ export class FavoritesMetaCardComponent {
       this.endpointConnected$ = endpoint$.pipe(map(endpoint => !!endpoint.user));
       const { cardMapper, favorite, prettyName } = favoriteEntity;
       this.favorite = favorite;
+      console.log(this.endpoint, this.endpointHasEntities);
+      this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName;
       this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
 
@@ -99,7 +106,7 @@ export class FavoritesMetaCardComponent {
   }
 
   private removeFavorite = () => {
-    this.store.dispatch(new RemoveUserFavoriteAction(this.favorite.guid));
+    this.store.dispatch(new RemoveUserFavoriteAction(this.favorite));
   }
 
   public toggleMoreError() {

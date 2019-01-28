@@ -1,4 +1,4 @@
-<app-meta-card [favorite]="favorite" [confirmFavoriteRemoval]="true" [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}"
+<app-meta-card [favorite]="metaFavorite" [confirmFavoriteRemoval]="true" [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}"
   [actionMenu]="config.menuItems" [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$"
   [entityConfig]="entityConfig">
   <app-meta-card-title>
