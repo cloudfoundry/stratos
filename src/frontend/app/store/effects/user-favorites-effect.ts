@@ -4,7 +4,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, switchMap, withLatestFrom, map, tap } from 'rxjs/operators';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
-import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
+import { GetUserFavoritesAction, GetUserFavoritesSuccessAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { SaveUserFavoriteAction } from '../actions/user-favourites-actions/save-user-favorite-action';
 import { AppState } from '../app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../helpers/entity-factory';
@@ -80,8 +80,6 @@ export class UserFavoritesEffect {
           ];
         })
       );
-
-
     })
   );
 
@@ -95,6 +93,7 @@ export class UserFavoritesEffect {
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
         map(favorites => {
+          this.store.dispatch(new GetUserFavoritesSuccessAction(favorites));
           return favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((mappedData, favorite) => {
             const { guid } = favorite;
             if (guid) {
