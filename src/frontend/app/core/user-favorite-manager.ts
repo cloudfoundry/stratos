@@ -6,7 +6,7 @@ import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
 import { AppState, IRequestEntityTypeState } from '../store/app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
-import { favoriteEntitiesSelector, favoriteGroupsSelector } from '../store/selectors/favorite-groups.selectors';
+import { favoriteEntitiesSelector, favoriteGroupsSelector, fetchingFavoritesSelector, errorFetchingFavoritesSelector } from '../store/selectors/favorite-groups.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
 import { IUserFavoritesGroups } from '../store/types/favorite-groups.types';
 import { PaginationEntityState } from '../store/types/pagination.types';
@@ -50,18 +50,8 @@ export class UserFavoriteManager {
     };
   }
 
-  public getFavoritesMonitor() {
-    return new PaginationMonitor<UserFavorite<IFavoriteMetadata>>(
-      this.store,
-      userFavoritesPaginationKey,
-      entityFactory(userFavoritesSchemaKey)
-    );
-  }
-
-
   public getAllFavorites() {
-    const paginationMonitor = this.getFavoritesMonitor();
-    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
+    const waitForFavorites$ = this.getWaitForFavoritesObservable();
     const favoriteGroups$ = this.store.select(favoriteGroupsSelector);
     const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
     const combined$ = combineLatest(
@@ -74,21 +64,18 @@ export class UserFavoriteManager {
       );
   }
 
-  private getWaitForFavoritesObservable(paginationMonitor: PaginationMonitor<UserFavorite<IFavoriteMetadata>>) {
-    return paginationMonitor.pagination$.pipe(
-      map(this.getCurrentPagePagination),
-      filter(pageRequest => !!pageRequest),
-      tap(({ error }) => {
+  private getWaitForFavoritesObservable() {
+    return combineLatest(
+      this.store.select(fetchingFavoritesSelector),
+      this.store.select(errorFetchingFavoritesSelector)
+    ).pipe(
+      tap(([fetching, error]) => {
         if (error) {
           throw new Error('Could not fetch favorites');
         }
       }),
-      filter(({ busy }) => busy === false),
+      filter(([fetching]) => fetching === false),
     );
-  }
-
-  private getCurrentPagePagination(pagination: PaginationEntityState) {
-    return pagination.pageRequests[pagination.currentPage];
   }
 
   public hydrateAllFavorites(): Observable<IGroupedFavorites[]> {

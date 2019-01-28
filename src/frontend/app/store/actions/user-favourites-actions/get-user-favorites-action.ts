@@ -19,3 +19,12 @@ export class GetUserFavoritesSuccessAction extends BaseUserFavoritesAction {
   }
 }
 
+export class GetUserFavoritesFailedAction extends BaseUserFavoritesAction {
+  static ACTION_TYPE = 'GET_USER_FAVORITES_FAILED';
+  constructor() {
+    super(
+      GetUserFavoritesFailedAction.ACTION_TYPE
+    );
+  }
+}
+

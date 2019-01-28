@@ -4,6 +4,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
 import { AppState } from '../../../store/app-state';
+import { fetchingFavoritesSelector, errorFetchingFavoritesSelector } from '../../../store/selectors/favorite-groups.selectors';
 
 interface IFavoritesInfo {
   fetching: boolean;
@@ -22,13 +23,13 @@ export class FavoritesGlobalListComponent implements OnInit {
 
   ngOnInit() {
     const manager = new UserFavoriteManager(this.store);
-    const monitor = manager.getFavoritesMonitor();
     this.favoriteGroups$ = manager.hydrateAllFavorites().pipe(
       map(favs => this.sortFavoriteGroups(favs))
     );
+
     this.favInfo$ = combineLatest(
-      monitor.fetchingCurrentPage$,
-      monitor.currentPageError$
+      this.store.select(fetchingFavoritesSelector),
+      this.store.select(errorFetchingFavoritesSelector)
     ).pipe(
       map(([fetching, error]) => ({
         fetching,

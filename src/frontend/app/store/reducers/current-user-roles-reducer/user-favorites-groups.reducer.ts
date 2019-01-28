@@ -6,7 +6,7 @@ import {
   IUserFavoritesGroups
 } from '../../types/favorite-groups.types';
 import { Action } from '@ngrx/store';
-import { GetUserFavoritesSuccessAction } from '../../actions/user-favourites-actions/get-user-favorites-action';
+import { GetUserFavoritesSuccessAction, GetUserFavoritesAction, GetUserFavoritesFailedAction } from '../../actions/user-favourites-actions/get-user-favorites-action';
 import { RemoveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteAction } from '../../actions/user-favourites-actions/save-user-favorite-action';
 import { isEndpointTypeFavorite, getEndpointFavorite } from '../../../core/user-favorite-helpers';
@@ -17,10 +17,27 @@ export function userFavoriteGroupsReducer(
   action: Action
 ): IUserFavoritesGroupsState {
   switch (action.type) {
+    case GetUserFavoritesAction.ACTION_TYPE:
+      return {
+        ...state,
+        busy: true,
+        error: false,
+        message: ''
+      };
     case GetUserFavoritesSuccessAction.ACTION_TYPE:
       return {
         ...state,
+        busy: false,
+        error: false,
+        message: '',
         groups: buildFavoritesGroups(action as GetUserFavoritesSuccessAction)
+      };
+    case GetUserFavoritesFailedAction.ACTION_TYPE:
+      return {
+        ...state,
+        busy: false,
+        error: true,
+        message: 'Failed to fetch favorites',
       };
     case RemoveUserFavoriteSuccessAction.ACTION_TYPE:
       return {

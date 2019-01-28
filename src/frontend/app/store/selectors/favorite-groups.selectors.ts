@@ -8,7 +8,18 @@ import { compose } from '@ngrx/store';
 export const favoriteEntitiesSelector = (state: AppState):
   IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData.userFavorites;
 
-export const favoriteGroupsSelector = (state: AppState): IUserFavoritesGroups => state.userFavoritesGroups.groups;
+
+export const favoriteGroupsStateSelector = (state: AppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
+
+export const favoriteGroupsFetchingSelector = (state: IUserFavoritesGroupsState): boolean => state.busy;
+
+export const favoriteGroupsErrorSelector = (state: IUserFavoritesGroupsState): boolean => state.error;
+
+export const favoriteGroupsSelector = compose(
+  (state: IUserFavoritesGroupsState): IUserFavoritesGroups => state.groups,
+  favoriteGroupsStateSelector
+);
+
 
 export const favoriteGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
   const endpointFavorite = getEndpointFavorite(favorite);
@@ -33,6 +44,17 @@ export function isFavoriteSelector(favorite: UserFavorite<IFavoriteMetadata>) {
   return compose(
     favoriteInGroupGroupSelector(favorite),
     favoriteGroupSelector(favorite),
-    favoriteGroupsSelector,
-  )
+    favoriteGroupsSelector
+  );
 }
+
+export const fetchingFavoritesSelector = compose(
+  favoriteGroupsFetchingSelector,
+  favoriteGroupsStateSelector
+);
+
+export const errorFetchingFavoritesSelector = compose(
+  favoriteGroupsErrorSelector,
+  favoriteGroupsStateSelector
+);
+
