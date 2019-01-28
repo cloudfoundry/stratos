@@ -31,6 +31,19 @@ export function getFavoriteFromEndpointEntity(endpoint: EndpointModel) {
   return null;
 }
 
+export function getEndpointFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
+  if (favorite.entityType !== 'endpoint') {
+    const endpointFav = {
+      ...favorite
+    };
+    endpointFav.entityId = null;
+    endpointFav.entityType = 'endpoint';
+    endpointFav.guid = UserFavorite.buildFavoriteStoreEntityGuid(endpointFav);
+    return endpointFav;
+  }
+  return favorite;
+}
+
 function isEndpointEntity(endpoint: EndpointModel) {
   return endpoint && endpoint.guid && endpoint.cnsi_type;
 }

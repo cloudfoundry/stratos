@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { map, filter, tap, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { favoritesConfigMapper, TFavoriteMapperFunction } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
@@ -8,16 +8,15 @@ import { AppState, IRequestEntityTypeState } from '../store/app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
 import { favoriteEntitiesSelector, favoriteGroupsSelector } from '../store/selectors/favorite-groups.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
-import { IUserFavoritesGroupsState } from '../store/types/favorite-groups.types';
+import { IUserFavoritesGroups } from '../store/types/favorite-groups.types';
+import { PaginationEntityState } from '../store/types/pagination.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
-import { PaginationEntityState } from '../store/types/pagination.types';
 
 export interface IFavoriteEntity {
   type: string;
   prettyName: string;
   cardMapper: TFavoriteMapperFunction<IFavoriteMetadata>;
-  entity: any;
   favorite: UserFavorite<IFavoriteMetadata>;
 }
 
@@ -103,7 +102,7 @@ export class UserFavoriteManager {
   }
 
   private getHydratedGroups = (
-    groups: IUserFavoritesGroupsState,
+    groups: IUserFavoritesGroups,
     favoriteEntities: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
   ): IGroupedFavorites[] => {
     return Object.keys(groups).map(endpointGuid => this.hydrateGroup(groups[endpointGuid].entitiesIds, endpointGuid, favoriteEntities));

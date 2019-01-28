@@ -1,19 +1,37 @@
-import { IUserFavoritesGroupsState, getDefaultFavoriteGroup, IUserFavoriteGroup } from '../../types/favorite-groups.types';
+import {
+  IUserFavoritesGroupsState,
+  getDefaultFavoriteGroup,
+  IUserFavoriteGroup,
+  getDefaultFavoriteGroupsState,
+  IUserFavoritesGroups
+} from '../../types/favorite-groups.types';
 import { Action } from '@ngrx/store';
 import { GetUserFavoritesSuccessAction } from '../../actions/user-favourites-actions/get-user-favorites-action';
 import { RemoveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteAction } from '../../actions/user-favourites-actions/save-user-favorite-action';
-import { isEndpointTypeFavorite } from '../../../core/user-favorite-helpers';
+import { isEndpointTypeFavorite, getEndpointFavorite } from '../../../core/user-favorite-helpers';
 import { UserFavorite, IFavoriteMetadata } from '../../types/user-favorites.types';
 
-export function userFavoriteGroupsReducer(state: IUserFavoritesGroupsState = {}, action: Action): IUserFavoritesGroupsState {
+export function userFavoriteGroupsReducer(
+  state: IUserFavoritesGroupsState = getDefaultFavoriteGroupsState(),
+  action: Action
+): IUserFavoritesGroupsState {
   switch (action.type) {
     case GetUserFavoritesSuccessAction.ACTION_TYPE:
-      return buildFavoritesGroups(action as GetUserFavoritesSuccessAction);
+      return {
+        ...state,
+        groups: buildFavoritesGroups(action as GetUserFavoritesSuccessAction)
+      };
     case RemoveUserFavoriteSuccessAction.ACTION_TYPE:
-      return removeFavoriteFromGroup(state, action as RemoveUserFavoriteSuccessAction);
+      return {
+        ...state,
+        groups: removeFavoriteFromGroup(state.groups, action as RemoveUserFavoriteSuccessAction)
+      };
     case SaveUserFavoriteAction.ACTION_TYPE:
-      return addEntityFavorite(state, action as SaveUserFavoriteAction);
+      return {
+        ...state,
+        groups: addEntityFavorite(state.groups, action as SaveUserFavoriteAction)
+      };
   }
   return state;
 }
@@ -24,25 +42,10 @@ function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
     const { guid } = getEndpointFavorite(favorite);
     favoriteGroups[guid] = addFavoriteToGroup(favoriteGroups[guid], favorite);
     return favoriteGroups;
-  }, {} as IUserFavoritesGroupsState);
+  }, {} as IUserFavoritesGroups);
 }
 
-function getEndpointFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-  if (favorite.entityType !== 'endpoint') {
-    const endpointFav = {
-      ...favorite
-    };
-    endpointFav.entityId = null;
-    endpointFav.entityType = 'endpoint';
-    endpointFav.guid = UserFavorite.buildFavoriteStoreEntityGuid(endpointFav);
-    return endpointFav;
-  }
-  return favorite;
-}
-
-
-
-function removeFavoriteFromGroup(state: IUserFavoritesGroupsState, action: RemoveUserFavoriteSuccessAction) {
+function removeFavoriteFromGroup(state: IUserFavoritesGroups, action: RemoveUserFavoriteSuccessAction): IUserFavoritesGroups {
   const { favorite } = action;
   const endpointFavorite = getEndpointFavorite(favorite);
   const userGroup = state[endpointFavorite.guid] || getDefaultFavoriteGroup();
@@ -74,7 +77,7 @@ function removeFavoriteFromGroup(state: IUserFavoritesGroupsState, action: Remov
   }
 }
 
-function removeGroup(state: IUserFavoritesGroupsState, endpointGuid: string) {
+function removeGroup(state: IUserFavoritesGroups, endpointGuid: string): IUserFavoritesGroups {
   const {
     [endpointGuid]: removedEndpoint,
     ...newState
@@ -86,7 +89,7 @@ function groupHasEntities(group: IUserFavoriteGroup) {
   return group.entitiesIds.length > 0;
 }
 
-function addEntityFavorite(favoriteGroups: IUserFavoritesGroupsState, action: SaveUserFavoriteAction) {
+function addEntityFavorite(favoriteGroups: IUserFavoritesGroups, action: SaveUserFavoriteAction): IUserFavoritesGroups {
   const { favorite } = action;
   const { guid } = getEndpointFavorite(favorite);
   const group = favoriteGroups[guid];

@@ -29,7 +29,12 @@ export function getInitialTestStoreState(): AppState {
 function getDefaultInitialTestStoreState(): AppState {
 
   return {
-    userFavoritesGroups: {},
+    userFavoritesGroups: {
+      busy: false,
+      error: false,
+      message: '',
+      groups: {}
+    },
     auth: {
       loggedIn: true,
       loggingIn: false,
