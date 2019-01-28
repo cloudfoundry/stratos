@@ -1,5 +1,5 @@
 <div *ngIf="!placeholder" class="favorite-entity-list">
-  <ng-container *ngIf="_entities.length > 0">
+  <ng-container *ngIf="_entities && _entities.length > 0">
     <form class="favorite-entity-list__search-form">
       <mat-form-field>
         <input matInput ngModel #nameChange="ngModel" name="favoriteName" placeholder="Name">
@@ -20,11 +20,14 @@
         [favoriteEntity]="entity" [compact]="true" [endpointDisconnected]="endpointDisconnected"></app-favorites-meta-card>
     </div>
   </ng-container>
-  <button class="favorite-entity-list__expand-button" *ngIf="(searchedEntities$ | async).length > minLimit" (click)="toggleExpand()"
-    mat-icon-button>
-    <mat-icon *ngIf="(limitToggle$ | async) === null">expand_less</mat-icon>
-    <mat-icon *ngIf="(limitToggle$ | async) !== null">expand_more</mat-icon>
-  </button>
+  <ng-container *ngIf="(searchedEntities$ | async) as searchedEntities">
+    <button class="favorite-entity-list__expand-button" *ngIf="searchedEntities.length > minLimit" (click)="toggleExpand()"
+      mat-icon-button>
+      <mat-icon *ngIf="(limitToggle$ | async) === null">expand_less</mat-icon>
+      <mat-icon *ngIf="(limitToggle$ | async) !== null">expand_more</mat-icon>
+    </button>
+  </ng-container>
+
 </div>
 
 <div *ngIf="placeholder" class="favorite-entity-list">

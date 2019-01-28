@@ -20,6 +20,7 @@ import {
   SET_PAGINATION_MAX_REACHED,
   SET_PARAMS,
   SET_RESULT_COUNT,
+  REMOVE_ID_FROM_PAGINATION,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -43,6 +44,7 @@ import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
+import { paginationRemoveId } from './pagination-reducer-remove-id';
 
 export const defaultClientPaginationPageSize = 9;
 
@@ -158,6 +160,10 @@ function paginate(action, state, updatePagination) {
 
   if (action.type === SET_PAGINATION_MAX_REACHED) {
     return paginationMaxReached(state, action);
+  }
+
+  if (action.type === REMOVE_ID_FROM_PAGINATION) {
+    return paginationRemoveId(state, action);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

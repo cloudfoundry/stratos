@@ -10,7 +10,6 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/labstack/echo"
-	"github.com/labstack/gommon/log"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -26,7 +25,6 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 	}
 	userGUID := c.Get("user_id").(string)
 	list, err := store.List(userGUID)
-	log.Warn(err)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
@@ -137,7 +135,6 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	favorite.GUID = buildFavoriteStoreEntityGuid(favorite)
 	favorite.UserGUID = userGUID
 	updatedFavorite, err := store.Save(favorite)
-
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,

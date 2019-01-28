@@ -41,7 +41,7 @@ export class MetaCardComponent {
   public favorite: UserFavorite<IFavoriteMetadata>;
 
   @Input()
-  public confirmFavoriteRemoval = true;
+  public confirmFavoriteRemoval = false;
 
   userFavoriteManager: UserFavoriteManager;
 

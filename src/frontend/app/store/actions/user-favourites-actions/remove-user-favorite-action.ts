@@ -8,3 +8,13 @@ export class RemoveUserFavoriteAction extends BaseUserFavoritesAction {
     );
   }
 }
+
+export class RemoveUserFavoriteSuccessAction extends BaseUserFavoritesAction {
+  static ACTION_TYPE = 'REMOVE_USER_FAVORITE_SUCCESS';
+  constructor(public guid: string) {
+    super(
+      RemoveUserFavoriteSuccessAction.ACTION_TYPE
+    );
+  }
+}
+

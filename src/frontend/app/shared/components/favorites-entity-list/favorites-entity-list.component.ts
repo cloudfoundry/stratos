@@ -56,7 +56,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
   public filterName: string;
   public filterType: string;
 
-  public _entities: IFavoriteEntity[];
+  public _entities: IFavoriteEntity[] = [];
 
   public limitedEntities: IFavoriteEntity[];
   public minLimit = 3;
@@ -102,18 +102,19 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     ).pipe(
       map(([entities, nameSearch]) => {
         if (!nameSearch) {
-          return entities || [];
+          return entities;
         }
         const searchableEntities = [...entities];
         return searchableEntities.filter(entity => entity.cardMapper(entity.favorite.metadata).name.search(nameSearch) !== -1);
       }),
-      tap(console.log)
+      map(searchEntities => searchEntities || [])
     );
     this.limitedEntities$ = combineLatest(
       this.searchedEntities$,
       this.limitToggle$
     ).pipe(
-      map(([entities, limit]) => this.limitEntities([...entities], limit))
+      map(([entities, limit]) => this.limitEntities([...entities], limit)),
+      map(limitedEntities => limitedEntities || [])
     );
 
     this.noResultsDueToFilter$ = combineLatest(

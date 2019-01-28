@@ -17,12 +17,15 @@ import {
   UpdateUserFavoriteMetadataSuccessAction
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
-import { RemoveUserFavoriteAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
+import { RemoveUserFavoriteAction, RemoveUserFavoriteSuccessAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
 import { ToggleUserFavoriteAction } from '../actions/user-favourites-actions/toggle-user-favorite-action';
 import { UserFavoriteManager } from '../../core/user-favorite-manager';
+import { PaginationRemoveIdAction } from '../actions/pagination.actions';
 
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
+
+
 @Injectable()
 export class UserFavoritesEffect {
 
@@ -69,7 +72,7 @@ export class UserFavoritesEffect {
 
           const pagintionAction = {
             ...apiAction,
-            paginationKey: 'userFavorites'
+            paginationKey: userFavoritesPaginationKey
           } as PaginatedAction;
 
           return [
@@ -87,7 +90,7 @@ export class UserFavoritesEffect {
       const apiAction = {
         entityKey: userFavoritesSchemaKey,
         type: action.type,
-        paginationKey: 'userFavorites'
+        paginationKey: userFavoritesPaginationKey
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
@@ -120,44 +123,25 @@ export class UserFavoritesEffect {
     )
   );
 
-  @Effect() removeFavorite$ = this.actions$.ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE).pipe(
-    withLatestFrom(
-      new PaginationMonitor<
-        UserFavorite<IFavoriteMetadata>
-      >(this.store, userFavoritesPaginationKey, entityFactory(userFavoritesSchemaKey)).currentPage$
-    ),
-    switchMap(([action, favorites]: [RemoveUserFavoriteAction, UserFavorite<IFavoriteMetadata>[]]) => {
-      const apiAction = {
-        entityKey: userFavoritesSchemaKey,
-        type: action.type,
-        paginationKey: 'userFavorites'
-      } as PaginatedAction;
-      this.store.dispatch(new StartRequestAction(apiAction));
-      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`).pipe(
-        map(() => {
-          return favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((mappedData, favorite) => {
-            const { guid } = favorite;
-            if (guid && guid !== action.guid) {
-              mappedData.entities[userFavoritesSchemaKey][guid] = favorite;
-              mappedData.result.push(guid);
-            }
-            return mappedData;
-          }, { entities: { [userFavoritesSchemaKey]: {} }, result: [] });
-        }),
-        map(mappedData => new WrapperRequestActionSuccess(mappedData, apiAction))
-      );
+  @Effect({ dispatch: false }) removeFavorite$ = this.actions$.ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE).pipe(
+    switchMap((action: RemoveUserFavoriteAction) => {
+      this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.guid));
+      this.store.dispatch(new PaginationRemoveIdAction(
+        action.guid,
+        userFavoritesSchemaKey,
+        userFavoritesPaginationKey
+      ));
+      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`);
     })
   );
 
-  @Effect() updateMetatdata$ = this.actions$.ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE).pipe(
+  @Effect() updateMetadata$ = this.actions$.ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE).pipe(
     mergeMap((action: UpdateUserFavoriteMetadataAction) => {
       return this.http.post<UserFavorite<IFavoriteMetadata>>(
         `${favoriteUrlPath}/${action.favorite.guid}/metadata`,
         action.favorite.metadata
       ).pipe(
-        map(() => {
-          return new UpdateUserFavoriteMetadataSuccessAction(action.favorite);
-        })
+        map(() => new UpdateUserFavoriteMetadataSuccessAction(action.favorite))
       );
     })
   );

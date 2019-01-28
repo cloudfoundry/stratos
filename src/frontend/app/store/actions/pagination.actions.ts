@@ -18,6 +18,7 @@ export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
 export const SET_PAGINATION_MAX_REACHED = '[Pagination] Set max response reached';
+export const REMOVE_ID_FROM_PAGINATION = '[Pagination] Remove id from pagination';
 
 export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
   const key = `${type}-${id}`;
@@ -166,3 +167,13 @@ export class PaginationMaxedResults implements Action {
     public paginationKey: string
   ) { }
 }
+
+export class PaginationRemoveIdAction implements Action {
+  type = REMOVE_ID_FROM_PAGINATION;
+  constructor(
+    public guid: string,
+    public entityKey: string,
+    public paginationKey: string
+  ) { }
+}
+
