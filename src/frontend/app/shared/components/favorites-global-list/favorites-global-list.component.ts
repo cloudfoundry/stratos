@@ -6,7 +6,6 @@ import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../.
 import { AppState } from '../../../store/app-state';
 
 interface IFavoritesInfo {
-  entityGroups: IGroupedFavorites[];
   fetching: boolean;
   error: boolean;
 }
@@ -17,21 +16,21 @@ interface IFavoritesInfo {
   styleUrls: ['./favorites-global-list.component.scss']
 })
 export class FavoritesGlobalListComponent implements OnInit {
-  public favs$: Observable<IFavoritesInfo>;
+  public favInfo$: Observable<IFavoritesInfo>;
+  public favoriteGroups$: Observable<IGroupedFavorites[]>;
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     const manager = new UserFavoriteManager(this.store);
     const monitor = manager.getFavoritesMonitor();
-    this.favs$ = combineLatest(
-      manager.hydrateAllFavorites().pipe(
-        map(favs => this.sortFavoriteGroups(favs))
-      ),
+    this.favoriteGroups$ = manager.hydrateAllFavorites().pipe(
+      map(favs => this.sortFavoriteGroups(favs))
+    );
+    this.favInfo$ = combineLatest(
       monitor.fetchingCurrentPage$,
       monitor.currentPageError$
     ).pipe(
-      map(([entityGroups, fetching, error]) => ({
-        entityGroups,
+      map(([fetching, error]) => ({
         fetching,
         error
       }))

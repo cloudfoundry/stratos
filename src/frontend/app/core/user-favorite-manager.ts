@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, filter, tap, switchMap } from 'rxjs/operators';
 import { favoritesConfigMapper, TFavoriteMapperFunction } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
@@ -11,6 +11,7 @@ import { isFavorite } from '../store/selectors/favorite.selectors';
 import { IUserFavoritesGroupsState } from '../store/types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
+import { PaginationEntityState } from '../store/types/pagination.types';
 
 export interface IFavoriteEntity {
   type: string;
@@ -58,13 +59,37 @@ export class UserFavoriteManager {
     );
   }
 
+
   public getAllFavorites() {
+    const paginationMonitor = this.getFavoritesMonitor();
+    const waitForFavorites$ = this.getWaitForFavoritesObservable(paginationMonitor);
     const favoriteGroups$ = this.store.select(favoriteGroupsSelector);
     const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
-    return combineLatest(
+    const combined$ = combineLatest(
       favoriteGroups$,
       favoriteEntities$
     );
+    return waitForFavorites$
+      .pipe(
+        switchMap(() => combined$)
+      );
+  }
+
+  private getWaitForFavoritesObservable(paginationMonitor: PaginationMonitor<UserFavorite<IFavoriteMetadata>>) {
+    return paginationMonitor.pagination$.pipe(
+      map(this.getCurrentPagePagination),
+      filter(pageRequest => !!pageRequest),
+      tap(({ error }) => {
+        if (error) {
+          throw new Error('Could not fetch favorites');
+        }
+      }),
+      filter(({ busy }) => busy === false),
+    );
+  }
+
+  private getCurrentPagePagination(pagination: PaginationEntityState) {
+    return pagination.pageRequests[pagination.currentPage];
   }
 
   public hydrateAllFavorites(): Observable<IGroupedFavorites[]> {

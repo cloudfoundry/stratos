@@ -12,7 +12,6 @@ import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/fa
 })
 export class FavoritesEntityListComponent implements AfterViewInit {
 
-
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
     this._entities = favoriteEntities ? [...favoriteEntities] : favoriteEntities;
