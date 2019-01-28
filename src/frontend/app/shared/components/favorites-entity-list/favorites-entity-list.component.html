@@ -1,7 +1,7 @@
 <div *ngIf="!placeholder" class="favorite-entity-list">
   <ng-container *ngIf="hasEntities">
     <form class="favorite-entity-list__search-form">
-      <mat-form-field>
+      <mat-form-field class="favorite-entity-list__name-search">
         <input matInput ngModel #nameChange="ngModel" name="favoriteName" placeholder="Name">
       </mat-form-field>
       <mat-form-field *ngIf="favoriteTypes.length > 0">
