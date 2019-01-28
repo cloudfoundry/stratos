@@ -68,7 +68,6 @@ export class FavoritesMetaCardComponent {
       this.endpointConnected$ = endpoint$.pipe(map(endpoint => !!endpoint.user));
       const { cardMapper, favorite, prettyName } = favoriteEntity;
       this.favorite = favorite;
-      console.log(this.endpoint, this.endpointHasEntities);
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName;
       this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));

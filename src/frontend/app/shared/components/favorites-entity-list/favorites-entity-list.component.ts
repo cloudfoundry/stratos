@@ -42,7 +42,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
 
   @ViewChild('nameChange') public nameChange: NgModel;
 
-  public hasEntities: boolean;
+  public hasEntities = false;
   public typeSubject = new ReplaySubject<string>();
   private entitiesSubject = new ReplaySubject<IFavoriteEntity[]>();
   private limitToggleSubject = new ReplaySubject<number>();
@@ -86,8 +86,11 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     }
   }
 
+  public trackByFavoriteId(index: number, entity: IFavoriteEntity) {
+    return entity.favorite.guid;
+  }
+
   ngAfterViewInit() {
-    console.log('init')
     const type$ = this.typeSubject.asObservable().pipe(startWith(null));
     const typesEntities$ = combineLatest(
       this.entities$,

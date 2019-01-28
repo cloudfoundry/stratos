@@ -89,7 +89,6 @@ function groupHasEntities(group: IUserFavoriteGroup) {
 function addEntityFavorite(favoriteGroups: IUserFavoritesGroupsState, action: SaveUserFavoriteAction) {
   const { favorite } = action;
   const { guid } = getEndpointFavorite(favorite);
-  console.log(guid);
   const group = favoriteGroups[guid];
   const newGroup = addFavoriteToGroup(group, favorite);
   return {

@@ -58,4 +58,8 @@ export class FavoritesGlobalListComponent implements OnInit {
     }
     return 0;
   }
+
+  public trackByEndpointId(index: number, group: IGroupedFavorites) {
+    return group.endpoint.favorite.guid;
+  }
 }
