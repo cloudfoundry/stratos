@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { mergeMap, switchMap, withLatestFrom, map, tap, first, catchError } from 'rxjs/operators';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { GetUserFavoritesAction, GetUserFavoritesSuccessAction, GetUserFavoritesFailedAction } from '../actions/user-favourites-actions/get-user-favorites-action';
-import { SaveUserFavoriteAction } from '../actions/user-favourites-actions/save-user-favorite-action';
+import { SaveUserFavoriteSuccessAction, SaveUserFavoriteAction } from '../actions/user-favourites-actions/save-user-favorite-action';
 import { AppState } from '../app-state';
 import { entityFactory, userFavoritesSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
@@ -37,49 +37,19 @@ export class UserFavoritesEffect {
 
   private userFavoriteManager = new UserFavoriteManager(this.store);
 
-  @Effect() saveFavorite$ = this.actions$.ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE).pipe(
-    withLatestFrom(
-      new PaginationMonitor<UserFavorite<IFavoriteMetadata>>(
-        this.store, userFavoritesPaginationKey,
-        entityFactory(userFavoritesSchemaKey)
-      ).currentPage$
-    ),
-    mergeMap(([action, favorites]: [SaveUserFavoriteAction, UserFavorite<IFavoriteMetadata>[]]) => {
-      const apiAction = {
-        entityKey: userFavoritesSchemaKey,
-        type: action.type,
-      } as IRequestAction;
-
-      this.store.dispatch(new StartRequestAction(apiAction));
-
+  @Effect() saveFavorite = this.actions$.ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE).pipe(
+    mergeMap(action => {
       return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
         mergeMap(newFavorite => {
-          const entities = {
-            [userFavoritesSchemaKey]: {
-              ...favorites.reduce((favObj, favoriteFromArray) => ({
-                ...favObj,
-                [UserFavorite.buildFavoriteStoreEntityGuid(favoriteFromArray)]: favoriteFromArray
-              }), {}),
-              [newFavorite.guid]: newFavorite
-            }
-          };
-
-          const mappedData = {
-            entities,
-            result: Object.keys(entities[userFavoritesSchemaKey]),
-            totalPages: 1
-          } as NormalizedResponse<UserFavorite<IFavoriteMetadata>>;
-
-          const pagintionAction = {
-            ...apiAction,
-            paginationKey: userFavoritesPaginationKey
-          } as PaginatedAction;
-
           return [
-            new WrapperRequestActionSuccess(mappedData, pagintionAction),
+            new SaveUserFavoriteSuccessAction(newFavorite)
           ];
         })
       );
+    }),
+    catchError(e => {
+      console.log(e)
+      return [];
     })
   );
 

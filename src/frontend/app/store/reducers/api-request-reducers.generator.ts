@@ -41,7 +41,7 @@ import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
 import { applicationAddRemoveReducer } from './application-add-remove-reducer';
-import { updateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
 import { IRequestDataState, IRequestState } from '../types/entity.types';
 import { Action } from '@ngrx/store';
 
@@ -152,7 +152,7 @@ export function requestDataReducer(state: IRequestDataState, action: Action) {
       userSpaceOrgReducer(false)
     ],
     [userFavoritesSchemaKey]: [
-      updateUserFavoriteMetadataReducer,
+      addOrUpdateUserFavoriteMetadataReducer,
       deleteUserFavoriteMetadataReducer
     ]
   };

@@ -12,3 +12,14 @@ export class SaveUserFavoriteAction extends BaseUserFavoritesAction {
     );
   }
 }
+
+export class SaveUserFavoriteSuccessAction extends BaseUserFavoritesAction {
+  static ACTION_TYPE = 'SAVE_USER_FAVORITE_SUCCESS';
+  constructor(
+    public favorite: UserFavorite<IFavoriteMetadata>
+  ) {
+    super(
+      SaveUserFavoriteSuccessAction.ACTION_TYPE
+    );
+  }
+}

@@ -141,8 +141,8 @@ export class AppModule {
               this.syncFavorite(endpointFavorite, entities);
             }
             favoriteGroup.entitiesIds.forEach(id => {
-              const endpointFavorite = favorites[id];
-              this.syncFavorite(endpointFavorite, entities);
+              const favorite = favorites[id];
+              this.syncFavorite(favorite, entities);
             });
           });
         }
@@ -150,14 +150,16 @@ export class AppModule {
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: IRequestDataState) {
-    const entity = entities[favorite.entityType][favorite.entityId || favorite.endpointId];
-    if (entity) {
-      const newMetadata = favoritesConfigMapper.getEntityMetadata(favorite, entity);
-      if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
-        this.store.dispatch(new UpdateUserFavoriteMetadataAction({
-          ...favorite,
-          metadata: newMetadata
-        }));
+    if (favorite) {
+      const entity = entities[favorite.entityType][favorite.entityId || favorite.endpointId];
+      if (entity) {
+        const newMetadata = favoritesConfigMapper.getEntityMetadata(favorite, entity);
+        if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
+          this.store.dispatch(new UpdateUserFavoriteMetadataAction({
+            ...favorite,
+            metadata: newMetadata
+          }));
+        }
       }
     }
   }

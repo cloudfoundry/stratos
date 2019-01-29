@@ -2,15 +2,17 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { favoritesConfigMapper, TFavoriteMapperFunction } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { ToggleUserFavoriteAction } from '../store/actions/user-favourites-actions/toggle-user-favorite-action';
 import { AppState, IRequestEntityTypeState } from '../store/app-state';
-import { entityFactory, userFavoritesSchemaKey } from '../store/helpers/entity-factory';
-import { favoriteEntitiesSelector, favoriteGroupsSelector, fetchingFavoritesSelector, errorFetchingFavoritesSelector } from '../store/selectors/favorite-groups.selectors';
+import {
+  errorFetchingFavoritesSelector,
+  favoriteEntitiesSelector,
+  favoriteGroupsSelector,
+  fetchingFavoritesSelector
+} from '../store/selectors/favorite-groups.selectors';
 import { isFavorite } from '../store/selectors/favorite.selectors';
 import { IUserFavoritesGroups } from '../store/types/favorite-groups.types';
-import { PaginationEntityState } from '../store/types/pagination.types';
-import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../store/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../store/types/user-favorites.types';
 import { IEndpointFavMetadata } from './../store/types/user-favorites.types';
 
 export interface IFavoriteEntity {
