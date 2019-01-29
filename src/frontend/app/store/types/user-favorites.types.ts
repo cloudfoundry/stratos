@@ -4,13 +4,6 @@ import { EndpointModel } from './endpoint.types';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
-export interface IEndpointFavMetadata extends IFavoriteMetadata {
-  guid: string;
-  address: string;
-  user: string;
-  admin: string;
-}
-
 /**
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */
@@ -22,8 +15,14 @@ export interface IFavoriteTypeInfo {
 export interface IFavoriteMetadata {
   [key: string]: string;
 }
+export interface IEndpointFavMetadata extends IFavoriteMetadata {
+  guid: string;
+  address: string;
+  user: string;
+  admin: string;
+}
 
-// Metadata is a json string when stored in the backend so we use this interface to 
+// Metadata is a json string when stored in the backend so we use this interface to
 // represent what is store in the backend.
 export interface BackendUserFavorite {
   entityId: string;

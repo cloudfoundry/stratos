@@ -114,7 +114,7 @@ export class UserFavoriteManager {
     if (!endpointFav) {
       return this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
-          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid)
+          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
           const endpointEntity = endpoints[endpointGuid];
           return new UserFavoriteEndpoint(
             endpointGuid,
