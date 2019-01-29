@@ -53,14 +53,6 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         field: 'entity.name'
       }
     },
-    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<IFavoriteMetadata> => {
-      return new UserFavorite(
-        row.entity.cfGuid,
-        'cf',
-        applicationSchemaKey,
-        row.entity.guid,
-      );
-    }),
     {
       columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent,
     },
@@ -112,6 +104,14 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       },
       cellFlex: '2'
     },
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<IFavoriteMetadata> => {
+      return new UserFavorite(
+        row.entity.cfGuid,
+        'cf',
+        applicationSchemaKey,
+        row.entity.guid,
+      );
+    }),
   ];
   viewType = ListViewTypes.BOTH;
   text = {

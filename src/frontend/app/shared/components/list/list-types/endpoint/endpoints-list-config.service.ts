@@ -240,13 +240,14 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
   ) {
-    this.columns.splice(1, 0, createTableColumnFavorite((row: EndpointModel): UserFavoriteEndpoint => {
-      return new UserFavoriteEndpoint(
+    const favoriteCell = createTableColumnFavorite(
+      (row: EndpointModel) => new UserFavoriteEndpoint(
         row.guid,
-        'cf',
+        row.cnsi_type,
         row
-      );
-    }));
+      )
+    );
+    this.columns.push(favoriteCell);
     this.dataSource = new EndpointsDataSource(
       this.store,
       this,

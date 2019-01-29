@@ -4,8 +4,8 @@ import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-fou
 import { TableCellFavoriteComponent } from './table-cell-favorite.component';
 
 describe('TableCellFavoriteComponent', () => {
-  let component: TableCellFavoriteComponent<any>;
-  let fixture: ComponentFixture<TableCellFavoriteComponent<any>>;
+  let component: TableCellFavoriteComponent<any, any>;
+  let fixture: ComponentFixture<TableCellFavoriteComponent<any, any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

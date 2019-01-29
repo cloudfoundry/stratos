@@ -36,14 +36,6 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       cellComponent: TableCellAppNameComponent,
       cellFlex: '1',
     },
-    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<ISpaceFavMetadata> => {
-      return new UserFavorite(
-        row.entity.cfGuid,
-        'cf',
-        applicationSchemaKey,
-        row.entity.guid,
-      );
-    }),
     {
       columnId: 'status',
       headerCell: () => 'Status',
@@ -74,6 +66,14 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       },
       cellFlex: '2'
     },
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<ISpaceFavMetadata> => {
+      return new UserFavorite(
+        row.entity.cfGuid,
+        'cf',
+        applicationSchemaKey,
+        row.entity.guid,
+      );
+    }),
   ]
 
   constructor(
