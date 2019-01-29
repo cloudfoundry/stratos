@@ -8,11 +8,15 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { UsersRolesExecuteChanges } from '../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 
 @Component({
   selector: 'app-invite-users',
   templateUrl: './invite-users.component.html',
-  styleUrls: ['./invite-users.component.scss']
+  styleUrls: ['./invite-users.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class InviteUsersComponent implements OnInit {
 
@@ -32,7 +36,10 @@ export class InviteUsersComponent implements OnInit {
   }
 
   createReturnUrl(activeRouteCfOrgSpace: ActiveRouteCfOrgSpace): string {
-    return !this.activeRouteCfOrgSpace.spaceGuid ? `/organizations/${activeRouteCfOrgSpace.orgGuid}/users` : `/spaces/${activeRouteCfOrgSpace.spaceGuid}/users`;
+    return `/cloud-foundry/${activeRouteCfOrgSpace.cfGuid}` +
+      !activeRouteCfOrgSpace.spaceGuid ?
+      `/organizations/${activeRouteCfOrgSpace.orgGuid}/users` :
+      `/spaces/${activeRouteCfOrgSpace.spaceGuid}/users`; // TODO: RC Test
   }
 
   startApply: StepOnNextFunction = () => {

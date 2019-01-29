@@ -9,9 +9,9 @@ import {
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { AppState } from '../../../../../store/app-state';
+import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
-import { CfUser } from '../../../../../store/types/user.types';
 
 @Injectable()
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
@@ -33,5 +33,15 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
       cfOrgService.org$,
       cfSpaceService.space$
     );
+
+    // TODO: RC Permissions (as per config shown in cf summary plus org manager/space manager)
+    this.getGlobalActions = () => [{
+      action: () => {
+        router.navigate([this.createManagerUsersUrl(`/users/invite`)]);
+      },
+      icon: 'add', // TODO: RC
+      label: 'Invite', // TODO: RC
+      description: 'Invite users to this organization and space'
+    }];
   }
 }

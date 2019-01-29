@@ -1,1 +1,18 @@
-<app-stacked-input-actions [state$]="state.asObservable()" (update)="updateUsers($event)"></app-stacked-input-actions>
+<div class="create-users">
+  <div class="create-users__intro">
+    Invite the following user/s to the organization `{{orgName$ | async}}`<span *ngIf="isSpace"> and space `{{spaceName$ | async}}`</span>.
+    An email will be sent to each user to confirm their address. User roles can be updated in the next step after the users have been
+    created and emails have been sent.
+  </div>
+  <div class="create-users__roles">
+    <div *ngIf="isSpace" class="create-users__roles__space">
+      Please select the user/s initial space role.
+      <mat-radio-group class="create-users__roles__space__radio-buttons" [(ngModel)]="spaceRole">
+        <mat-radio-button *ngFor="let season of spaceRoles" [value]="season.value">
+          {{season.label}}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+  </div>
+  <app-stacked-input-actions [state$]="state.asObservable()" (update)="updateUsers($event)"></app-stacked-input-actions>
+</div>
