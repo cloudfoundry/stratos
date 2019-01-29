@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { UserFavorite, IFavoriteMetadata } from '../../../../../store/types/user-favorites.types';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
+import { favoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
 
 export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata> {
   createUserFavorite: (entity: T) => UserFavorite<Y>;
@@ -16,6 +17,7 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
 export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends TableCellCustom<T> {
 
   public favorite: UserFavorite<Y>;
+  public canFavorite = false;
 
   private _config: TableCellFavoriteComponentConfig<T, Y>;
   @Input('config')
@@ -36,6 +38,7 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends 
   private createUserFavorite() {
     if (this.row && this.config) {
       this.favorite = this.config.createUserFavorite(this.row);
+      this.canFavorite = !!favoritesConfigMapper.getMapperFunction(this.favorite);
     }
   }
 }
@@ -48,7 +51,7 @@ export function createTableColumnFavorite<T, Y extends IFavoriteMetadata>(
   };
   return {
     columnId: 'favorite',
-    headerCell: () => 'Favorite',
+    headerCell: () => '',
     cellComponent: TableCellFavoriteComponent,
     cellFlex: '0 0 100px',
     cellConfig
