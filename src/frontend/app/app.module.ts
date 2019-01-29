@@ -150,7 +150,7 @@ export class AppModule {
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: IRequestDataState) {
-    const entity = entities[favorite.entityType][favorite.entityId];
+    const entity = entities[favorite.entityType][favorite.entityId || favorite.endpointId];
     if (entity) {
       const newMetadata = favoritesConfigMapper.getEntityMetadata(favorite, entity);
       if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
