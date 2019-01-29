@@ -33,9 +33,9 @@ export interface BackendUserFavorite {
   metadata: string;
 }
 
+const favoriteGuidSeparator = '-';
+
 export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavoriteTypeInfo {
-
-
   public guid: string;
   public metadata: T = null;
   constructor(
@@ -76,7 +76,11 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
         }
         return newArray;
       }, [])
-      .join('-');
+      .join(favoriteGuidSeparator);
+  }
+
+  static getEntityGuidFromFavoriteGuid(favoriteGuid: string) {
+    return favoriteGuid.split(favoriteGuidSeparator)[0];
   }
 }
 
