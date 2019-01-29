@@ -11,7 +11,7 @@ const gitLabAPIUrl = 'https://gitlab.com/api/v4';
 
 export class GitLabSCM implements GitSCM {
 
-  constructor(public http: Http) {}
+  constructor(public http: Http) { }
 
   getType(): GitSCMType {
     return 'gitlab';

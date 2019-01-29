@@ -35,7 +35,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
           ];
         }, []);
       } else {
-        this.favoriteTypes = favoritesConfigMapper.getAllTypesForEndpoint(types);
+        this.favoriteTypes = favoritesConfigMapper.getAllTypesForEndpoint(types) || [];
       }
     }
   }

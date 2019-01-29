@@ -20,7 +20,8 @@ export class EntityFavoriteStarComponent {
   @Input()
   set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     const name = favoritesConfigMapper.getPrettyTypeName(favorite);
-    this.confirmationDialogConfig.message = `Are you sure you would you like to unfavorite this ${name.toLocaleLowerCase()}?`;
+    this.confirmationDialogConfig.message =
+      `Are you sure you would you like to unfavorite this ${name ? name.toLocaleLowerCase() : 'favorite'}?`;
     this.isFavorite$ = this.userFavoriteManager.getIsFavoriteObservable(favorite);
     this._favorite = favorite;
   }
