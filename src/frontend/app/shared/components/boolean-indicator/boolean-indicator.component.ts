@@ -6,7 +6,8 @@ export enum BooleanIndicatorType {
   unlockedLocked = 'unlocked-locked',
   yesNo = 'yes-no',
   trueFalse = 'true-false',
-  healthyUnhealthy = 'healthy-unhealthy'
+  healthyUnhealthy = 'healthy-unhealthy',
+  succeededFailed = 'success-failed'
 }
 
 
@@ -32,10 +33,12 @@ export class BooleanIndicatorComponent {
     Enabled: 'check_circle',
     Healthy: 'check_circle',
     True: 'check_circle',
+    Succeeded: 'check_circle',
     Add: 'add_circle',
     No: 'highlight_off',
     Disabled: 'highlight_off',
     Unhealthy: 'highlight_off',
+    Failed: 'remove_circle',
     False: 'highlight_off',
     Remove: 'remove_circle',
     Locked: 'lock_outline',
@@ -52,7 +55,7 @@ export class BooleanIndicatorComponent {
     return this.capitalizeFirstLetter(value ? enabledText : disabledText);
   }
 
-  getTypeText = (s) => s.split('-');
+  getTypeText = (s: string) => s.split('-');
 
   capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 }

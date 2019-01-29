@@ -115,6 +115,10 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
+import {
+  StackedInputActionComponent,
+} from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
+import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -256,6 +260,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
     MultilineTitleComponent,
+    StackedInputActionsComponent,
+    StackedInputActionComponent,
   ],
   exports: [
     FormsModule,
@@ -350,7 +356,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
-    MetricsParentRangeSelectorComponent
+    MetricsParentRangeSelectorComponent,
+    StackedInputActionsComponent,
+    StackedInputActionComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,

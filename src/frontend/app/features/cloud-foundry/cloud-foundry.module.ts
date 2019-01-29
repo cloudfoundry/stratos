@@ -153,7 +153,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryRoutesComponent,
     UserInviteConfigurationDialogComponent,
     InviteUsersComponent,
-    InviteUsersCreateComponent
+    InviteUsersCreateComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

@@ -1,5 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+
+import {
+  StackedInputActionsState,
+  StackedInputActionsUpdate,
+} from '../../../../../shared/components/stacked-input-actions/stacked-input-actions.component';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 
 @Component({
   selector: 'app-invite-users-create',
@@ -8,9 +14,21 @@ import { Observable, of as observableOf } from 'rxjs';
 })
 export class InviteUsersCreateComponent implements OnInit, OnDestroy {
 
-  valid$: Observable<boolean> = observableOf(false);
+  valid$: Observable<boolean>;
+  stepValid = new BehaviorSubject<boolean>(false);
+  // state$: Observable<StackedInputActionsState[]>;
+  state = new BehaviorSubject<StackedInputActionsState[]>([]);
+  isSpace = false;
+  // createUserResults$: Observable<StackedInputActionsState[]>;
 
-  constructor() { }
+  constructor(private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+    this.valid$ = this.stepValid.asObservable();
+    this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid || true; // TODO: RC
+  }
+
+  updateUsers(users: StackedInputActionsUpdate) {
+    this.stepValid.next(users.valid);
+  }
 
   ngOnInit() {
   }
@@ -47,7 +65,8 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
 
   onNext = () => {
     // this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
-
+    // TODO: RC wire in invite service create user function to here
+    // TODO: RC what happens if some pass and some fail? Do we re-attempt the passed?
     return observableOf({ success: false });
   }
 
