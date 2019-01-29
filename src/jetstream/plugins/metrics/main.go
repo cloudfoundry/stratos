@@ -98,14 +98,16 @@ func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugi
 
 // AddAdminGroupRoutes adds the admin routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
-	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 	echoContext.GET("/metrics/kubernetes/:podName/:op", m.getPodMetrics)
 }
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
+
+	// Note: User needs to be an admin of the given Cloud Foundry to retrieve metrics
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
+	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
 func (m *MetricsSpecification) GetType() string {

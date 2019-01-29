@@ -182,7 +182,9 @@ export class CloudFoundryEndpointService {
     this.allApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
       switchMap(() => pagObs.pagination$),
       filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-      switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$)
+      switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$),
+      publishReplay(1),
+      refCount()
     );
 
     this.loadingApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
@@ -220,7 +222,8 @@ export class CloudFoundryEndpointService {
     return this.allApps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
-        const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
+        const spaces = org.entity.spaces || [];
+        const orgSpaces = spaces.map(s => s.metadata.guid);
         return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
     );

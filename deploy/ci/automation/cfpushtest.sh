@@ -143,11 +143,7 @@ fi
 
 set +e
 
-# Pause the PCF Dev instance for now
-sleep 5
-echo "Suspending PCF Dev"
-cf pcfdev suspend
-cf pcfdev status
+echo "All done"
 
 # Return exit code form the e2e tests
 exit $RET

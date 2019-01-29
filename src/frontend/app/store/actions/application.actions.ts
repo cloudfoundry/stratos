@@ -6,8 +6,7 @@ import { EntityInlineParentAction } from '../helpers/entity-relations/entity-rel
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { ICFAction } from '../types/request.types';
-import { CFStartAction } from '../types/request.types';
+import { CFStartAction, ICFAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';

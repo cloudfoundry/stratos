@@ -7,6 +7,7 @@ export interface CustomizationsMetadata {
   hasEula?: boolean;
   copyright?: string;
   logoText?: string;
+  aboutInfoComponent?: any;
   supportInfoComponent?: any;
 }
 

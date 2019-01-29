@@ -1,4 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
+import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import {
@@ -11,8 +12,9 @@ import {
   Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { first, publishReplay, refCount, tap, distinctUntilChanged, map, filter } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
+import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
 import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
@@ -29,8 +31,6 @@ import {
 } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { SortDirection } from '@angular/material';
-import { ListSort, ListFilter } from '../../../../store/actions/list.actions';
 
 
 export class DataFunctionDefinition {
