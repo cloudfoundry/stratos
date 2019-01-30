@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
@@ -28,7 +29,10 @@ import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-ser
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
 import { PageHeaderModule } from '../../page-header/page-header.module';
+import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { SteppersModule } from '../../stepper/steppers.module';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
@@ -63,12 +67,16 @@ describe('AddServiceInstanceComponent', () => {
         AppChipsComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
+        SchemaFormComponent,
         MultilineTitleComponent,
+        ServicePlanPublicComponent,
+        ServicePlanPriceComponent,
         FocusDirective
       ],
       imports: [
         PageHeaderModule,
         SteppersModule,
+        MaterialDesignFrameworkModule,
         // CoreModule,
         BaseTestModulesNoShared
       ],

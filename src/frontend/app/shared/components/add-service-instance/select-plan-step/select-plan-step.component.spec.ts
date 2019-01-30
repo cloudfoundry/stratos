@@ -7,6 +7,8 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { CardStatusComponent } from '../../cards/card-status/card-status.component';
 import { FocusDirective } from '../../focus.directive';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
@@ -23,6 +25,8 @@ describe('SelectPlanStepComponent', () => {
         SelectPlanStepComponent,
         CardStatusComponent,
         MetadataItemComponent,
+        ServicePlanPublicComponent,
+        ServicePlanPriceComponent,
         FocusDirective
       ],
       imports: [BaseTestModulesNoShared],

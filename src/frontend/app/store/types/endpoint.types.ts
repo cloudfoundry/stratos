@@ -45,6 +45,7 @@ export interface EndpointModel {
   metadata?: {
     metrics?: string;
     metrics_job?: string;
+    metrics_environment?: string;
     metrics_targets?: MetricsAPITargets;
   };
   system_shared_token: boolean;

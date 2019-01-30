@@ -68,7 +68,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.sub = this.applicationService.application$.pipe(
-      filter(app => app.app.entity),
+      filter(app => !!app.app.entity),
       take(1),
       map(app => app.app.entity)
     ).subscribe(app => {

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -28,9 +29,10 @@ const (
 )
 
 type MetricsProviderMetadata struct {
-	Type string `json:"type"`
-	URL  string `json:"url"`
-	Job  string `json:"job"`
+	Type        string `json:"type"`
+	URL         string `json:"url"`
+	Job         string `json:"job,omitempty"`
+	Environment string `json:"environment,omitempty"`
 }
 
 type MetricsMetadata struct {
@@ -38,11 +40,40 @@ type MetricsMetadata struct {
 	URL          string
 	Job          string
 	EndpointGUID string
+	Environment  string
 }
 
 type EndpointMetricsRelation struct {
 	metrics  *MetricsMetadata
 	endpoint *interfaces.ConnectedEndpoint
+}
+
+type PrometheusQueryResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string `json:"resultType"`
+		Result     []struct {
+			Metric struct {
+				Name           string `json:"__name__,omitempty"`
+				ApplicationID  string `json:"application_id,omitempty"`
+				BoshDeployment string `json:"bosh_deployment,omitempty"`
+				BoshJobID      string `json:"bosh_job_id,omitempty"`
+				BoshJobName    string `json:"bosh_job_name,omitempty"`
+				Environment    string `json:"environment,omitempty"`
+				Instance       string `json:"instance,omitempty"`
+				InstanceIndex  string `json:"instance_index,omitempty"`
+				Job            string `json:"job,omitempty"`
+				Origin         string `json:"origin,omitempty"`
+			} `json:"metric"`
+			Value []interface{} `json:"value"`
+		} `json:"result"`
+	} `json:"data"`
+}
+
+type MetricsAuth struct {
+	Type     string
+	Username string
+	Password string
 }
 
 // Init creates a new MetricsSpecification
@@ -67,14 +98,16 @@ func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugi
 
 // AddAdminGroupRoutes adds the admin routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
-	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 	echoContext.GET("/metrics/kubernetes/:podName/:op", m.getPodMetrics)
 }
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
+
+	// Note: User needs to be an admin of the given Cloud Foundry to retrieve metrics
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
+	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
 func (m *MetricsSpecification) GetType() string {
@@ -102,25 +135,34 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	log.Debug("Metrics Connect...")
 
 	connectType := ec.FormValue("connect_type")
-	if connectType != interfaces.AuthConnectTypeCreds {
-		return nil, false, errors.New("Only username/password is accepted for Metrics endpoints")
+	auth := &MetricsAuth{
+		Type: connectType,
 	}
 
-	username := ec.FormValue("username")
-	password := ec.FormValue("password")
-
-	if len(username) == 0 || len(password) == 0 {
-		return nil, false, errors.New("Need username and password")
+	switch connectType {
+	case interfaces.AuthConnectTypeCreds:
+		auth.Username = ec.FormValue("username")
+		auth.Password = ec.FormValue("password")
+		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
+			return nil, false, errors.New("Need username and password")
+		}
+	case interfaces.AuthConnectTypeNone:
+		auth.Username = "none"
+		auth.Password = "none"
+	default:
+		return nil, false, errors.New("Only username/password or no authentication is accepted for Metrics endpoints")
 	}
 
-	authString := fmt.Sprintf("%s:%s", username, password)
+	authString := fmt.Sprintf("%s:%s", auth.Username, auth.Password)
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
 	tr := &interfaces.TokenRecord{
 		AuthType:     interfaces.AuthTypeHttpBasic,
 		AuthToken:    base64EncodedAuthString,
-		RefreshToken: username,
+		RefreshToken: auth.Username,
 	}
+
+	log.Debug("Looking for Stratos metrics metadata resource....")
 
 	// Metadata indicates which Cloud Foundry/Kubernetes endpoints the metrics endpoint can supply data for
 	metricsMetadataEndpoint := fmt.Sprintf("%s/stratos", cnsiRecord.APIEndpoint)
@@ -130,12 +172,33 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		log.Errorf(msg, err)
 		return nil, false, fmt.Errorf(msg, err)
 	}
-
-	req.SetBasicAuth(username, password)
+	m.addAuth(req, auth)
 
 	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
 	res, err := h.Do(req)
-	if err != nil || res.StatusCode != http.StatusOK {
+
+	if err == nil && res.StatusCode == http.StatusNotFound {
+		log.Debug("Checking if this is a prometheus endpoint")
+		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
+		statusEndpoint := fmt.Sprintf("%s/api/v1/status/config", cnsiRecord.APIEndpoint)
+		req, err = http.NewRequest("GET", statusEndpoint, nil)
+		if err != nil {
+			msg := "Failed to create request for the Metrics Endpoint: %v"
+			log.Errorf(msg, err)
+			return nil, false, fmt.Errorf(msg, err)
+		}
+		m.addAuth(req, auth)
+
+		response, err := h.Do(req)
+		defer response.Body.Close()
+		if err != nil || response.StatusCode != http.StatusOK {
+			log.Errorf("Error performing http request - response: %v, error: %v", response, err)
+			return nil, false, interfaces.LogHTTPError(res, err)
+		}
+
+		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
+		return tr, false, nil
+	} else if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
 		return nil, false, interfaces.LogHTTPError(res, err)
 	}
@@ -146,6 +209,76 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	tr.Metadata = string(body)
 
 	return tr, false, nil
+}
+
+func (m *MetricsSpecification) addAuth(req *http.Request, auth *MetricsAuth) {
+	if auth.Type == interfaces.AuthConnectTypeCreds {
+		req.SetBasicAuth(auth.Username, auth.Password)
+	}
+}
+
+func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClient http.Client, auth *MetricsAuth) (string, error) {
+	basicMetricRequest := fmt.Sprintf("%s/api/v1/query?query=firehose_total_metrics_received", metricEndpoint)
+	req, err := http.NewRequest("GET", basicMetricRequest, nil)
+	if err != nil {
+		msg := "Failed to create request for the Metrics Endpoint: %v"
+		log.Errorf(msg, err)
+		return "", fmt.Errorf(msg, err)
+	}
+	m.addAuth(req, auth)
+	res, err := httpClient.Do(req)
+	defer res.Body.Close()
+	if err != nil || res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Errorf("Unexpected response: %v", err)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+
+	queryResponse := &PrometheusQueryResponse{}
+	err = json.Unmarshal(body, queryResponse)
+	if err != nil {
+		log.Errorf("Failed to unmarshal response: %v", err)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+	if len(queryResponse.Data.Result) == 0 {
+		log.Errorf("No series detecthed! No Firehose exporter currently connected")
+		return "", interfaces.LogHTTPError(res, err)
+	}
+
+	if len(queryResponse.Data.Result) > 1 {
+		log.Warnf("Multiple series detected, its possible multiple cloud-foundries are being monitored. Selecting the first one")
+	}
+
+	if queryResponse.Data.Result[0].Metric.Environment == "" {
+		log.Errorf("No environmnent detected in %v", queryResponse)
+		return "", interfaces.LogHTTPError(res, err)
+	}
+
+	environment := queryResponse.Data.Result[0].Metric.Environment
+	url := queryResponse.Data.Result[0].Metric.Environment
+	job := queryResponse.Data.Result[0].Metric.Job
+
+	// Ensure URL has wss:// prefix
+	if !strings.HasPrefix(url, "wss://") {
+		url = fmt.Sprintf("wss://%s", environment)
+	}
+
+	storeMetadata := &MetricsProviderMetadata{
+		Type:        "cf",
+		URL:         url,
+		Job:         job,
+		Environment: environment,
+	}
+
+	jsonMsg, err := json.Marshal(storeMetadata)
+	if err != nil {
+		return "", interfaces.LogHTTPError(res, err)
+	}
+	return string(jsonMsg), nil
 }
 
 // Init performs plugin initialization
@@ -198,6 +331,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 					info.Type = item.Type
 					info.URL = item.URL
 					info.Job = item.Job
+					info.Environment = item.Environment
 					log.Debugf("Metrics provider: %+v", info)
 					metricsProviders = append(metricsProviders, info)
 				}
@@ -215,11 +349,13 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
+				endpoint.Metadata["metrics_environment"] = provider.Environment
 			}
 			// For K8S
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
+				endpoint.Metadata["metrics_environment"] = ""
 			}
 		}
 	}
@@ -278,6 +414,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 					info.Type = item.Type
 					info.URL = item.URL
 					info.Job = item.Job
+					info.Environment = item.Environment
 					metricsProviders = append(metricsProviders, info)
 				}
 			}

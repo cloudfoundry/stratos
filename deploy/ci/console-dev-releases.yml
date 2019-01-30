@@ -6,14 +6,15 @@ resource_types:
   source:
     repository: ((docker-resource-image))
     tag: ((docker-resource-image-tag))
-
 resources:
+# Stratos Git Repository
 - name: stratos
   type: git
   source:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
+    # Match any Version 2 release (alpha, beta, rc) other than the actual release
     tag_filter: "2*-*"
 - name: helm-repo
   type: git
@@ -27,25 +28,25 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-jetstream
+    repository: ((docker-repository))/stratos-jetstream
 - name: postflight-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-postflight-job
+    repository: ((docker-repository))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-mariadb
+    repository: ((docker-repository))/stratos-mariadb
 - name: ui-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-registry))/((docker-organization))/stratos-console
+    repository: ((docker-repository))/stratos-console
 
 # Artifacts
 - name: image-tag

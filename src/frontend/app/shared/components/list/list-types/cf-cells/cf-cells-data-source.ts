@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
+import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../../../store/actions/metrics.actions';
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { IMetrics, IMetricVectorResult } from '../../../../../store/types/base-metric.types';
@@ -19,7 +19,7 @@ export class CfCellsDataSource
   static cellDeploymentPath = 'metric.bosh_deployment';
 
   constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
-    const action = new FetchCFMetricsPaginatedAction(
+    const action = new FetchCFCellMetricsPaginatedAction(
       cfGuid,
       cfGuid,
       new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),

@@ -8,8 +8,15 @@
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
-    <ng-container *ngTemplateOutlet="title.content"></ng-container>
-    <div *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
+    <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
+      <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
+        <ng-container *ngTemplateOutlet="title.content"></ng-container>
+      </div>
+      <div class="meta-card__header-container__title--with-icon__icon" *ngIf="statusIconByTitle">
+        <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+      </div>
+    </div>
+    <div class="meta-card__header-container__actions" *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
       <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu" [disabled]="isDeleting$ | async">
         <mat-icon>more_vert</mat-icon>
       </button>
@@ -22,7 +29,9 @@
         </ng-container>
       </mat-menu>
     </div>
-    <app-application-state-icon *ngIf="status$" [status]="status$ | async"></app-application-state-icon>
+    <ng-container *ngIf="!statusIconByTitle">
+      <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+    </ng-container>
   </mat-card-header>
   <mat-card-content>
     <div *ngFor="let metaItem of metaItems">
@@ -32,3 +41,6 @@
     </div>
   </mat-card-content>
 </mat-card>
+<ng-template #statusIcon>
+  <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async" matTooltip="{{statusIconTooltip}}"></app-application-state-icon>
+</ng-template>

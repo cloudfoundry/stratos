@@ -1,10 +1,10 @@
 <div class="summary">
   <app-tile-grid fit="true">
-    <app-tile-group  *ngIf="isBrokerAvailable$ | async; else noBrokerTile">
+    <app-tile-group *ngIf="isBrokerAvailable$ | async; else noBrokerTile">
       <app-tile>
         <app-service-summary-card></app-service-summary-card>
       </app-tile>
-      <app-tile >
+      <app-tile>
         <app-service-broker-card></app-service-broker-card>
       </app-tile>
     </app-tile-group>
@@ -20,7 +20,7 @@
         <app-card-number-metric [link]="serviceInstancesLink" icon="library_books" label="Instances" labelSingular="Instance" value="{{ (instances$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric icon="products" iconFont="stratos-icons" label="Service Plans" labelSingular="Service Plan" value="{{ ( servicePlans$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric [link]="servicePlansLink" icon="products" iconFont="stratos-icons" label="Service Plans" labelSingular="Service Plan" value="{{ ( servicePlans$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
     </app-tile-group>
     <app-tile-group>

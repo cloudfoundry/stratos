@@ -6,7 +6,7 @@
 <div class="confirm-dialog__enter-text" *ngIf="textToMatch">
   <span>Please type <b>{{textToMatch}}</b> to continue.</span>
   <mat-form-field>
-    <input (paste)="$event.preventDefault()" required matInput id="typeToConfirm" [(ngModel)]="matchValue" [pattern]="textToMatch">
+    <input (paste)="handlePaste($event)" required matInput id="typeToConfirm" [(ngModel)]="matchValue" [pattern]="textToMatch">
   </mat-form-field>
 </div>
 <div mat-dialog-actions class="confirm-dialog__actions">

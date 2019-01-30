@@ -86,8 +86,9 @@ export class DeployAppEffects {
               result: []
             } as NormalizedResponse;
 
+            const scmType = action.scm.getType();
             branches.forEach(b => {
-              const id = `${action.projectName}-${b.name}`;
+              const id = `${scmType}-${action.projectName}-${b.name}`;
               b.projectId = action.projectName;
               b.entityId = id;
               mappedData.entities[gitBranchesSchemaKey][id] = {
@@ -121,7 +122,7 @@ export class DeployAppEffects {
               entities: { [gitCommitSchemaKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.addCommit(mappedData, action.projectName, commit);
+            this.addCommit(mappedData, action.scm.getType(), action.projectName, commit);
             return [
               new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
             ];
@@ -149,7 +150,7 @@ export class DeployAppEffects {
               result: []
             } as NormalizedResponse;
             commits.forEach(commit => {
-              this.addCommit(mappedData, action.projectName, commit);
+              this.addCommit(mappedData, action.scm.getType(), action.projectName, commit);
             });
             return [
               new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
@@ -160,8 +161,8 @@ export class DeployAppEffects {
           ]));
       }));
 
-  addCommit(mappedData: NormalizedResponse, projectName: string, commit: GitCommit) {
-    const id = projectName + '-' + commit.sha;
+  addCommit(mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
+    const id = scmType + '-' + projectName + '-' + commit.sha;
     mappedData.entities[gitCommitSchemaKey][id] = {
       entity: commit,
       metadata: {}

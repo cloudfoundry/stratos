@@ -32,16 +32,23 @@
             <div class="metrics-metadata">
               <div>{{ svc.name }}</div>
               <div>{{ ep.metadata[svc.guid].type }}</div>
-              <app-metadata-item icon="link" label="Address">{{ svc.url }}</app-metadata-item>
-              <app-metadata-item icon="history" label="Prometheus Job">{{ svc.metadata.metrics_job || 'N/A' }}</app-metadata-item>
-              <div class="metrics-extra" *ngIf="svc.metadata && svc.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
-                <div *ngIf="jobDetails[svc.metadata.metrics_job]">
-                  <app-metadata-item icon="help_outline" label="Exporter Health">{{
-                    jobDetails[svc.metadata.metrics_job].health | uppercase }}</app-metadata-item>
-                  <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{
-                    jobDetails[svc.metadata.metrics_job].lastScrape | date:'medium' }}</app-metadata-item>
-                  <app-metadata-item icon="error_outline" label="Exporter Last Error">{{
-                    jobDetails[svc.metadata.metrics_job].lastError || 'None' }}</app-metadata-item>
+              <div class="metrics-metadata__cols">
+                <div class="metrics-metadata__two-cols">
+                  <app-metadata-item icon="link" label="Address">{{ svc.url }}</app-metadata-item>
+                  <app-metadata-item icon="history" label="Prometheus Job">{{ svc.metadata.metrics_job || 'N/A' }}</app-metadata-item>
+                  <app-metadata-item icon="history" label="Prometheus Environment">{{ svc.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
+                </div>
+                <div class="metrics-metadata__two-cols">
+                  <div class="metrics-extra" *ngIf="svc.metadata && svc.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
+                    <div *ngIf="jobDetails[svc.metadata.metrics_job]">
+                      <app-metadata-item icon="help_outline" label="Exporter Health">{{
+                        jobDetails[svc.metadata.metrics_job].health | uppercase }}</app-metadata-item>
+                      <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{
+                        jobDetails[svc.metadata.metrics_job].lastScrape | date:'medium' }}</app-metadata-item>
+                      <app-metadata-item icon="error_outline" label="Exporter Last Error">{{
+                        jobDetails[svc.metadata.metrics_job].lastError || 'None' }}</app-metadata-item>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -51,3 +58,5 @@
     </div>
   </div>
 </div>
+
+

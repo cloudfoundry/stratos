@@ -55,6 +55,7 @@ describe('CF - Top Level - ', () => {
 
       it('Walk Tabs', () => {
         cfPage.goToOrgTab();
+        cfPage.goToRoutesTab();
         cfPage.goToUsersTab();
         cfPage.goToFeatureFlagsTab();
         cfPage.goToBuildPacksTab();
@@ -96,6 +97,7 @@ describe('CF - Top Level - ', () => {
           if (totalOrgs <= 12) {
             cfPage.goToUsersTab();
           }
+          cfPage.goToRoutesTab();
           // cfPage.goToFirehoseTab();// Is not shown to non-admins
           cfPage.goToFeatureFlagsTab();
           cfPage.goToBuildPacksTab();

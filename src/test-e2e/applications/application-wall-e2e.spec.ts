@@ -7,10 +7,10 @@ import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
+import { FormComponent } from '../po/form.po';
 import { ListComponent } from '../po/list.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationsPage } from './applications.po';
-
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-app-wall-tests';
 
@@ -28,6 +28,10 @@ describe('Application Wall Tests -', () => {
   let baseAppName: string;
 
   const timeAllowed = 60000;
+
+  // When there's only one CF connected no CF filter is shown, hence we can't test the filter.
+  // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
+  const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
 
   function createAppNames(count: number): string[] {
     const appNames = [];
@@ -58,14 +62,14 @@ describe('Application Wall Tests -', () => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
     endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
 
-    browser.wait(
-      cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName, true)
+    return browser.wait(
+      cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, defaultCf, orgName, false)
         .then((org: APIResource<IOrganization>) => {
           const spaceName1 = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-1';
           const spaceName2 = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-2';
           return promise.all([
-            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, org.entity.name, spaceName1, defaultCf, true),
-            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, org.entity.name, spaceName2, defaultCf, true),
+            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, spaceName1, defaultCf, true),
+            cfHelper.addSpaceIfMissingForEndpointUsers(endpointGuid, org.metadata.guid, spaceName2, defaultCf, true),
           ]);
         })
         .then(([s1, s2]) => {
@@ -108,6 +112,21 @@ describe('Application Wall Tests -', () => {
     });
   }
 
+  function createFilterValues(cf: string, org: string) {
+    const values = {
+      [ApplicationsPage.FilterIds.org]: org
+    };
+    if (hasCfFilter) {
+      values[ApplicationsPage.FilterIds.cf] = cf;
+    }
+    return values;
+  }
+
+  function createPageSizeSelectId(): string {
+    // The ctrl is hidden inside a mat-paginator, the id will change depending on other selects on page
+    return hasCfFilter ? 'mat-select-4' : 'mat-select-3';
+  }
+
   function tearDown(orgName: string) {
     expect(orgName).not.toBeNull();
     browser.wait(cfHelper.deleteOrgIfExisting(endpointGuid, orgName));
@@ -123,14 +142,16 @@ describe('Application Wall Tests -', () => {
     cfHelper = new CFHelpers(e2eSetup);
   });
 
+
+
   describe('No Pages -', () => {
     const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-no-pages';
     beforeAll(() => {
-      setup(orgName, [], false);
+      return setup(orgName, [], false);
     });
 
     beforeAll(() => {
-      appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      appList.header.getMultiFilterForm().fill(createFilterValues(defaultCf.name, orgName));
     });
 
     it('Should show no entities message', () => {
@@ -171,11 +192,11 @@ describe('Application Wall Tests -', () => {
 
     beforeAll(() => {
       appNames = createAppNames(3);
-      setup(orgName, appNames, true);
+      return setup(orgName, appNames, true);
     }, timeAllowed);
 
     beforeAll(() => {
-      appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      appList.header.getMultiFilterForm().fill(createFilterValues(defaultCf.name, orgName));
       browser.wait(() => {
         return appList.getTotalResults().then(results => results === 3);
       });
@@ -255,7 +276,7 @@ describe('Application Wall Tests -', () => {
 
     beforeAll(() => {
       appList.header.clearSearchText();
-      appList.header.getMultiFilterForm().fill({ cf: defaultCf.name, org: orgName });
+      appList.header.getMultiFilterForm().fill(createFilterValues(defaultCf.name, orgName));
       browser.wait(() => {
         return appList.getTotalResults().then(results => results >= appNames.length);
       });
@@ -270,7 +291,7 @@ describe('Application Wall Tests -', () => {
         expect(appList.pagination.isPresent()).toBeTruthy();
 
         expect(appList.cards.getCardCount()).toBe(9);
-        expect(appList.pagination.getPageSize('mat-select-4')).toEqual('9');
+        expect(appList.pagination.getPageSize(createPageSizeSelectId())).toEqual('9');
         expect(appList.pagination.getTotalResults()).toBeGreaterThan(9);
 
         expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
@@ -308,7 +329,7 @@ describe('Application Wall Tests -', () => {
       });
 
       it('Change Page Size', () => {
-        appList.pagination.setPageSize('80', 'mat-select-4');
+        appList.pagination.setPageSize('80', createPageSizeSelectId());
         expect(appList.cards.getCardCount()).toBeGreaterThan(9);
 
         expect(appList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
@@ -316,7 +337,7 @@ describe('Application Wall Tests -', () => {
         expect(appList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
         expect(appList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
 
-        appList.pagination.setPageSize('9', 'mat-select-4');
+        appList.pagination.setPageSize('9', createPageSizeSelectId());
         expect(appList.cards.getCardCount()).toBe(9);
 
       });
@@ -330,12 +351,14 @@ describe('Application Wall Tests -', () => {
     }
 
     describe('CF/Org/Space Filters', () => {
-      let filters;
 
+      let filters: FormComponent;
       beforeAll(() => {
         filters = appList.header.getMultiFilterForm();
-        expect(filters.getText('cf')).toBe(defaultCf.name);
-        expect(filters.getText('org')).toBe(orgName);
+        if (hasCfFilter) {
+          expect(filters.getText(ApplicationsPage.FilterIds.cf)).toBe(defaultCf.name);
+        }
+        expect(filters.getText(ApplicationsPage.FilterIds.org)).toBe(orgName);
         expect(space1).toBeTruthy();
         expect(space2).toBeTruthy();
         expect(space1Apps).toBeTruthy();
@@ -387,13 +410,15 @@ describe('Application Wall Tests -', () => {
         checkApp(space2Apps[0]);
       });
 
-      it('Can change filter from CF to All CFs', () => {
-        // Default cf --> all
-        filters.fill({ cf: 'All' }, true);
-        expect(filters.getText('cf')).toBe(' ');
-        checkApp(space1Apps[0]);
-        checkApp(space2Apps[0]);
-      });
+      if (hasCfFilter) {
+        it('Can change filter from CF to All CFs', () => {
+          // Default cf --> all
+          filters.fill({ [ApplicationsPage.FilterIds.cf]: 'All' }, true);
+          expect(filters.getText(ApplicationsPage.FilterIds.cf)).toBe(' ');
+          checkApp(space1Apps[0]);
+          checkApp(space2Apps[0]);
+        });
+      }
     });
   });
 });

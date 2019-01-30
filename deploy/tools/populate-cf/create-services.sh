@@ -57,7 +57,7 @@ function createService {
   local ORG=$2
   local SPACE=$3
   export SERVICE_URL=$(cf app $APPNAME | grep routes: | awk '{print $2}')
-  let SPACE_ARGS=""
+  local SPACE_ARGS=""
   if [ ! -z $SPACE ]; then
     cf target -o $ORG -s $SPACE
     SPACE_ARGS="--space-scoped"
