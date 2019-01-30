@@ -6,6 +6,7 @@ import { CurrentUserPermissionsService } from '../../../../core/current-user-per
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { AppState } from '../../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { UserInviteService } from '../../user-invites/user-invite.service';
 import {
   CfUserListConfigService,
 } from './../../../../shared/components/list/list-types/cf-users/cf-user-list-config.service';
@@ -22,9 +23,10 @@ import { ListConfig } from './../../../../shared/components/list/list.component.
       cfUserService: CfUserService,
       router: Router,
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-      userPerms: CurrentUserPermissionsService
-    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+      userPerms: CurrentUserPermissionsService,
+      userInviteService: UserInviteService
+    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, userInviteService),
+    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService, UserInviteService]
   }]
 })
 export class CloudFoundryUsersComponent { }

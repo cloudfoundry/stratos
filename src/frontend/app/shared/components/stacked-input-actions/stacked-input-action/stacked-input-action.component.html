@@ -12,9 +12,9 @@
     </mat-form-field>
   </form>
   <div class="input-action__detail">
-    <mat-icon class="input-action__detail__remove" (click)="remove.emit()">indeterminate_check_box</mat-icon>
+    <mat-icon class="input-action__detail__remove" [ngClass]="{'disabled': emailFormControl.disabled}" (click)="!emailFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</mat-icon>
     <div *ngIf="state" class="input-action__detail__result">
-      <app-boolean-indicator *ngIf="state.result === result.SUCCEEDED || state.result === result.FAILED" [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed"></app-boolean-indicator>
+      <app-boolean-indicator *ngIf="state.result === result.SUCCEEDED || state.result === result.FAILED" [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false" [showText]="false"></app-boolean-indicator>
       {{ state.message }}
     </div>
   </div>

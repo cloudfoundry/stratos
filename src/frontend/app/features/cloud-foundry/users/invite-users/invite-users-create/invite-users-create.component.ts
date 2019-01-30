@@ -5,9 +5,6 @@ import { map } from 'rxjs/operators';
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import {
-  StackedInputActionResult,
-} from '../../../../../shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
-import {
   StackedInputActionsState,
   StackedInputActionsUpdate,
 } from '../../../../../shared/components/stacked-input-actions/stacked-input-actions.component';
@@ -26,14 +23,15 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 })
 export class InviteUsersCreateComponent implements OnInit, OnDestroy {
 
-  valid$: Observable<boolean>;
-  stepValid = new BehaviorSubject<boolean>(false);
-  state = new BehaviorSubject<StackedInputActionsState[]>([]);
-  orgName$: Observable<string>;
-  spaceName$: Observable<string>;
-  isSpace = false;
-  spaceRole: SpaceUserRoleNames = SpaceUserRoleNames.AUDITOR;
-  spaceRoles: { label: string, value: SpaceUserRoleNames }[] = [];
+  public valid$: Observable<boolean>;
+  public stepValid = new BehaviorSubject<boolean>(false);
+  public state = new BehaviorSubject<StackedInputActionsState[]>([]);
+  public orgName$: Observable<string>;
+  public spaceName$: Observable<string>;
+  public isSpace = false;
+  public spaceRole: SpaceUserRoleNames = SpaceUserRoleNames.AUDITOR;
+  public spaceRoles: { label: string, value: SpaceUserRoleNames }[] = [];
+  private users: StackedInputActionsUpdate;
 
   constructor(
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -54,6 +52,7 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
   }
 
   updateUsers(users: StackedInputActionsUpdate) {
+    this.users = users;
     this.stepValid.next(users.valid);
   }
 
@@ -99,31 +98,29 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
     //   }));
     // }
 
-    // TODO: RC align-center again
-    // TODO: RC block removing of row if processing
-    let iteration = 1;
-    setInterval(() => {
-      if (iteration % 3 === 0) {
-        this.state.next([{
-          key: '1',
-          result: StackedInputActionResult.FAILED,
-          message: 'FAILED'
-        }]);
-      } else if (iteration % 2 === 0) {
-        this.state.next([{
-          key: '1',
-          result: StackedInputActionResult.SUCCEEDED,
-          message: 'SUCCEEDED'
-        }]);
-      } else if (iteration % 1 === 0) {
-        this.state.next([{
-          key: '1',
-          result: StackedInputActionResult.PROCESSING,
-          message: 'PROCESSING'
-        }]);
-      }
-      iteration++;
-    }, 5000);
+    // let iteration = 1;
+    // setInterval(() => {
+    //   if (iteration % 3 === 0) {
+    //     this.state.next([{
+    //       key: '1',
+    //       result: StackedInputActionResult.FAILED,
+    //       message: 'FAILED'
+    //     }]);
+    //   } else if (iteration % 2 === 0) {
+    //     this.state.next([{
+    //       key: '1',
+    //       result: StackedInputActionResult.SUCCEEDED,
+    //       message: 'SUCCEEDED'
+    //     }]);
+    //   } else if (iteration % 1 === 0) {
+    //     this.state.next([{
+    //       key: '1',
+    //       result: StackedInputActionResult.PROCESSING,
+    //       message: 'PROCESSING'
+    //     }]);
+    //   }
+    //   iteration++;
+    // }, 5000);
   }
 
   onLeave = (isNext: boolean) => {
@@ -135,8 +132,9 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
 
   onNext = () => {
     // this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
-    // TODO: RC wire in invite service create user function to here
-    // TODO: RC what happens if some pass and some fail? Do we re-attempt the passed?
+    // TODO: RC wire in invite service create user function to here. See `users` and `state` for data from and to components
+    // TODO: RC wire in response to use this.store.dispatch(new UsersRolesSetUsers(this.activeRouteCfOrgSpace.cfGuid, users));
+    // TODO: RC what happens if some pass and some fail? Do we re-attempt the passed/automatically remove inputs/ignore on retry?
     return observableOf({ success: false });
   }
 

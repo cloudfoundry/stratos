@@ -16,13 +16,13 @@
           </app-metadata-item>
           <app-metadata-item icon="developer_mode" label="SSH Access">{{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available'}}</app-metadata-item>
           <app-metadata-item icon="email" label="User Invitation Support">
-            <div class="user-invites" *ngIf="(userInviteConfigured$ | async); else inviteNotConfigured">
-                Configured -  <button color="primary" mat-button (click)="deConfigureUserInvites()" [disabled]="userInviteBusy">Disable</button>
+            <div class="user-invites" *ngIf="(userInviteService.configured$ | async); else inviteNotConfigured">
+              Configured - <button color="primary" mat-button (click)="deConfigureUserInvites()" [disabled]="userInviteBusy">Disable</button>
             </div>
             <ng-template #inviteNotConfigured>
               <div class="user-invites">
-              Not Configured -  <button color="primary" mat-button (click)="configureUserInvites()">Configure</button>
-            </div>
+                Not Configured - <button color="primary" mat-button (click)="configureUserInvites()">Configure</button>
+              </div>
             </ng-template>
           </app-metadata-item>
         </div>

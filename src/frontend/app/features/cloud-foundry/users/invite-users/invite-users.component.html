@@ -1,6 +1,6 @@
 <app-page-header>Invite Users</app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
-  <app-step title="Create Users" [onLeave]="create.onLeave" [onEnter]="create.onEnter" [onNext]="create.onNext" [valid]="create.valid$ | async">
+  <app-step title="Create Users" [onLeave]="create.onLeave" [onEnter]="create.onEnter" [onNext]="create.onNext" [valid]="create.valid$ | async" [nextButtonText]="'Create'">
     <app-invite-users-create #create></app-invite-users-create>
   </app-step>
   <!-- //TODO: RC Only show next steps if we can get all user roles -->

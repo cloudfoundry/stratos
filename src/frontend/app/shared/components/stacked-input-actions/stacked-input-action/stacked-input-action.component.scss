@@ -16,13 +16,13 @@
     align-items: center;
     display: flex;
     margin-top: 20px;
-    > * {
-      // margin-right: 10px;
-    }
 
     &__remove {
       cursor: pointer;
-      // padding-left: 10px;
+      &.disabled {
+        cursor: default;
+        opacity: .5;
+      }
     }
 
     &__result {

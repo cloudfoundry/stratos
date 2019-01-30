@@ -42,7 +42,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy {
 
     this.subs.push(this.state$.subscribe(incState => {
       this.state = incState;
-      if (incState && incState.result === StackedInputActionResult.PROCESSING) {
+      if (incState && (incState.result === StackedInputActionResult.PROCESSING || incState.result === StackedInputActionResult.SUCCEEDED)) {
         this.emailFormControl.disable();
       } else {
         this.emailFormControl.enable();

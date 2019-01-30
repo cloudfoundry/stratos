@@ -1,14 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { tap, map, filter } from 'rxjs/operators';
-import { Subscription, Observable } from 'rxjs';
-import { EntityInfo, APIResource } from '../../../../store/types/api.types';
-import { ICfV2Info } from '../../../../core/cf-api.types';
-import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Observable, Subscription } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+
+import { ICfV2Info } from '../../../../core/cf-api.types';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
-  UserInviteConfigurationDialogComponent
+  UserInviteConfigurationDialogComponent,
 } from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -19,12 +20,10 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
 
-  userInviteConfigured$: Observable<boolean>;
-
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) { }
 
   description$: Observable<string>;
@@ -36,13 +35,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
       })
     );
     this.subs.push(obs$.subscribe());
-
-    this.userInviteConfigured$ = this.cfEndpointService.endpoint$.pipe(
-      filter(v => !!v.entity && !!v.entity.metadata),
-      map(v => {
-        return v.entity && v.entity.metadata['userInviteAllowed'] === 'true';
-      })
-    );
 
     this.description$ = this.cfEndpointService.info$.pipe(
       map(entity => this.getDescription(entity))

@@ -36,10 +36,15 @@ export class InviteUsersComponent implements OnInit {
   }
 
   createReturnUrl(activeRouteCfOrgSpace: ActiveRouteCfOrgSpace): string {
-    return `/cloud-foundry/${activeRouteCfOrgSpace.cfGuid}` +
-      !activeRouteCfOrgSpace.spaceGuid ?
-      `/organizations/${activeRouteCfOrgSpace.orgGuid}/users` :
-      `/spaces/${activeRouteCfOrgSpace.spaceGuid}/users`; // TODO: RC Test
+    let route = `/cloud-foundry/${activeRouteCfOrgSpace.cfGuid}`;
+    if (this.activeRouteCfOrgSpace.orgGuid) {
+      route += `/organizations/${activeRouteCfOrgSpace.orgGuid}`;
+      if (this.activeRouteCfOrgSpace.spaceGuid) {
+        route += `/spaces/${activeRouteCfOrgSpace.spaceGuid}`;
+      }
+    }
+    route += `/users`;
+    return route;
   }
 
   startApply: StepOnNextFunction = () => {

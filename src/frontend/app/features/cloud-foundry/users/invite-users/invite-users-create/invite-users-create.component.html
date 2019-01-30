@@ -1,8 +1,7 @@
 <div class="create-users">
   <div class="create-users__intro">
-    Invite the following user/s to the organization `{{orgName$ | async}}`<span *ngIf="isSpace"> and space `{{spaceName$ | async}}`</span>.
-    An email will be sent to each user to confirm their address. User roles can be updated in the next step after the users have been
-    created and emails have been sent.
+    <p>Invite the following user/s to the organization `{{orgName$ | async}}`<span *ngIf="isSpace"> and space `{{spaceName$ | async}}`</span>.</p>
+    <p>An email will be sent to each user to confirm their address. User roles can be updated in the next step.</p>
   </div>
   <div class="create-users__roles">
     <div *ngIf="isSpace" class="create-users__roles__space">
