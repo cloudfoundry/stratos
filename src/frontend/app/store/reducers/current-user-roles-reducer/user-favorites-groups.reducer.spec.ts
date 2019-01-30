@@ -3,7 +3,11 @@ import { UserFavorite, IEndpointFavMetadata } from '../../types/user-favorites.t
 import { SaveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/save-user-favorite-action';
 import { IUserFavoritesGroupsState, getDefaultFavoriteGroupsState } from '../../types/favorite-groups.types';
 import { deriveEndpointFavoriteFromFavorite } from '../../../core/user-favorite-helpers';
-import { GetUserFavoritesSuccessAction, GetUserFavoritesAction, GetUserFavoritesFailedAction } from '../../actions/user-favourites-actions/get-user-favorites-action';
+import {
+  GetUserFavoritesSuccessAction,
+  GetUserFavoritesAction,
+  GetUserFavoritesFailedAction
+} from '../../actions/user-favourites-actions/get-user-favorites-action';
 import { RemoveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/remove-user-favorite-action';
 const endpointFavorite = () => new UserFavorite<IEndpointFavMetadata>(
   'endpoint1',
@@ -45,7 +49,7 @@ const favorite3 = () => new UserFavorite<IEndpointFavMetadata>(
   'entity3'
 );
 
-fdescribe('userFavoritesReducer', () => {
+describe('userFavoritesReducer', () => {
   it(' [empty state] should add new favorite endpoint', () => {
     const endpointFav = endpointFavorite();
     const action = new SaveUserFavoriteSuccessAction(endpointFav);
