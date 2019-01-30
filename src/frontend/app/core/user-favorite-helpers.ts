@@ -31,7 +31,7 @@ export function getFavoriteFromEndpointEntity(endpoint: EndpointModel) {
   return null;
 }
 
-export function getEndpointFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
+export function deriveEndpointFavoriteFromFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
   if (favorite.entityType !== 'endpoint') {
     const endpointFav = {
       ...favorite

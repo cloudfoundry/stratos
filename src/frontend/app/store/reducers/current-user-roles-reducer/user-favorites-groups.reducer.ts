@@ -13,7 +13,7 @@ import {
 } from '../../actions/user-favourites-actions/get-user-favorites-action';
 import { RemoveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/remove-user-favorite-action';
 import { SaveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/save-user-favorite-action';
-import { isEndpointTypeFavorite, getEndpointFavorite } from '../../../core/user-favorite-helpers';
+import { isEndpointTypeFavorite, deriveEndpointFavoriteFromFavorite } from '../../../core/user-favorite-helpers';
 import { UserFavorite, IFavoriteMetadata } from '../../types/user-favorites.types';
 
 export function userFavoriteGroupsReducer(
@@ -60,7 +60,7 @@ export function userFavoriteGroupsReducer(
 function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
   const { favorites } = action;
   return favorites.reduce((favoriteGroups, favorite) => {
-    const { guid } = getEndpointFavorite(favorite);
+    const { guid } = deriveEndpointFavoriteFromFavorite(favorite);
     favoriteGroups[guid] = addFavoriteToGroup(favoriteGroups[guid], favorite);
     return favoriteGroups;
   }, {} as IUserFavoritesGroups);
@@ -68,7 +68,7 @@ function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
 
 function removeFavoriteFromGroup(state: IUserFavoritesGroups, action: RemoveUserFavoriteSuccessAction): IUserFavoritesGroups {
   const { favorite } = action;
-  const endpointFavorite = getEndpointFavorite(favorite);
+  const endpointFavorite = deriveEndpointFavoriteFromFavorite(favorite);
   const userGroup = state[endpointFavorite.guid] || getDefaultFavoriteGroup();
   if (isEndpointTypeFavorite(favorite)) {
     if (!groupHasEntities(userGroup)) {
@@ -112,7 +112,7 @@ function groupHasEntities(group: IUserFavoriteGroup) {
 
 function addEntityFavorite(favoriteGroups: IUserFavoritesGroups, action: SaveUserFavoriteSuccessAction): IUserFavoritesGroups {
   const { favorite } = action;
-  const { guid } = getEndpointFavorite(favorite);
+  const { guid } = deriveEndpointFavoriteFromFavorite(favorite);
   const group = favoriteGroups[guid];
   const newGroup = addFavoriteToGroup(group, favorite);
   return {

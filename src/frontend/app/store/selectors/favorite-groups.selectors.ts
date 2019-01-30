@@ -1,7 +1,7 @@
 import { AppState, IRequestEntityTypeState } from '../app-state';
 import { IUserFavoritesGroups, IUserFavoritesGroupsState, IUserFavoriteGroup } from '../types/favorite-groups.types';
 import { UserFavorite, IFavoriteMetadata } from '../types/user-favorites.types';
-import { getEndpointFavorite } from '../../core/user-favorite-helpers';
+import { deriveEndpointFavoriteFromFavorite } from '../../core/user-favorite-helpers';
 import { compose } from '@ngrx/store';
 
 
@@ -22,7 +22,7 @@ export const favoriteGroupsSelector = compose(
 
 
 export const favoriteGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
-  const endpointFavorite = getEndpointFavorite(favorite);
+  const endpointFavorite = deriveEndpointFavoriteFromFavorite(favorite);
   return (groups: IUserFavoritesGroups): IUserFavoriteGroup => {
     return groups[endpointFavorite.guid];
   };
