@@ -29,13 +29,16 @@ fi
 
 echo "Running Stratos All-in-one"
 
+CF=https://api.${CF_DOMAIN}
+UAA=$(curl -k -s $CF | jq -r .links.uaa.href)
+
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
 CONTAINER_ID=$(docker run \
 -d \
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
--e UAA_ENDPOINT='"${CF_DOMAIN}"' \
+-e UAA_ENDPOINT='"${UAA}"' \
 -e SKIP_SSL_VALIDATION='true' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
 $IMAGE)
