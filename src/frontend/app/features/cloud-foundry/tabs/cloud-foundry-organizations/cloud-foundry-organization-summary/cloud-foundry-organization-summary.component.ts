@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/app-state';
 import { goToAppWall } from '../../../cf.helpers';
@@ -27,7 +27,9 @@ export class CloudFoundryOrganizationSummaryComponent {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
-      cfEndpointService.hasAllApps$,
+      cfEndpointService.appsPagObs.fetchingEntities$.pipe(
+        filter(loading => !loading)
+      ),
       cfOrgService.allOrgUsers$,
       cfOrgService.appCount$
     ]).pipe(
