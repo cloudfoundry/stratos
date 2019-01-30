@@ -40,7 +40,7 @@ CONTAINER_ID=$(docker run \
 -d \
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
--e UAA_ENDPOINT='"${UAA}"' \
+-e UAA_ENDPOINT="${UAA}" \
 -e SKIP_SSL_VALIDATION='true' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
 $IMAGE)
