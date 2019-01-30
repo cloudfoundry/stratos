@@ -32,6 +32,8 @@ echo "Running Stratos All-in-one"
 CF=https://api.${CF_DOMAIN}
 UAA=$(curl -k -s $CF | jq -r .links.uaa.href)
 
+echo "Using UAA Endpoint: ${UAA}"
+
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
 CONTAINER_ID=$(docker run \
