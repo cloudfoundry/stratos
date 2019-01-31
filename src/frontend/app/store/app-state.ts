@@ -14,6 +14,7 @@ import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
 import { UsersRolesState } from './types/users-roles.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
+import { TRecentlyVisitedState } from './types/recently-visited.types';
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
 }
@@ -38,4 +39,5 @@ export interface AppState {
   internalEvents: InternalEventsState;
   currentUserRoles: ICurrentUserRolesState;
   userFavoritesGroups: IUserFavoritesGroupsState;
+  recentlyVisited: TRecentlyVisitedState;
 }

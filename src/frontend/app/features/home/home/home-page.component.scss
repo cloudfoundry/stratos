@@ -1,7 +1,10 @@
 .favorites-list {
-  flex: 60%;
+  flex: 2;
+  margin-right: 40px;
 }
-
+.recent-list {
+  flex: 1;
+}
 .stats-panel {
   flex: 40%;
   margin-left: 20px;

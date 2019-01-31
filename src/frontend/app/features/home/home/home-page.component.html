@@ -1,7 +1,13 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
 </app-page-header>
-<h2 class="home-page__header">Favorites</h2>
 <div class="home-page">
-  <app-favorites-global-list class="favorites-list"></app-favorites-global-list>
+  <div class="favorites-list">
+    <h2 class="home-page__header">Favorites</h2>
+    <app-favorites-global-list></app-favorites-global-list>
+  </div>
+  <div class="recent-list">
+    <h2 class="home-page__header">Recent</h2>
+    <app-recent-entities></app-recent-entities>
+  </div>
 </div>

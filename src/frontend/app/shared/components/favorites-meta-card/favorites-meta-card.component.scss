@@ -1,31 +1,11 @@
-@keyframes pulse
-{
-  0% {
-    background-color: #e0e0e0;
-  }
-  50% {
-    background-color: #909090;
-  }
-  100% {
-    background-color: #e0e0e0;
-  }
-}
-
 .fav-meta-card {
   min-height: 160px;
-  &__placeholder {
-    align-items: center;
-    animation: pulse 3s infinite;
-    animation-timing-function: ease-out;
-    display: flex;
-    justify-content: center;
-  }
   &__header-text {
     margin-top: 0;
   }
   &__type {
-    $type-height: 11px;
-    font-size: 10px;
+    $type-height: 20px;
+    font-size: 13px;
     line-height: $type-height;
     margin-top: -($type-height + 4px);
     opacity: .6;

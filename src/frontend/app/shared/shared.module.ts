@@ -147,6 +147,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
 
 @NgModule({
   imports: [
@@ -262,6 +263,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
     MultilineTitleComponent,
+    RecentEntitiesComponent,
   ],
   exports: [
     FormsModule,
@@ -358,7 +360,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
     FavoritesMetaCardComponent,
-    FavoritesGlobalListComponent
+    FavoritesGlobalListComponent,
+    RecentEntitiesComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

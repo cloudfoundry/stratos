@@ -1,10 +1,10 @@
-import { TRecentlyVisited } from '../../types/recently-visited.types';
+import { TRecentlyVisitedState } from '../../types/recently-visited.types';
 import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.reducer';
 
 export function recentlyVisitedReducer(
-  state: TRecentlyVisited = [],
+  state: TRecentlyVisitedState = [],
   action: AddRecentlyVisitedEntityAction
-): TRecentlyVisited {
+): TRecentlyVisitedState {
   if (action.type === AddRecentlyVisitedEntityAction.ACTION_TYPE) {
     return [
       action.recentlyVisited,

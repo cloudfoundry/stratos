@@ -46,10 +46,11 @@ export class PageHeaderComponent {
         endpointType: favorite.endpointType
       });
       if (mapperFunction) {
-        const mapper = mapperFunction(favorite.metadata);
+        const { name, routerLink } = mapperFunction(favorite.metadata);
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
-          name: mapper.name,
-          link: mapper.routerLink,
+          guid: favorite.guid,
+          name,
+          routerLink,
           prettyType,
           prettyEndpointType
         }));
