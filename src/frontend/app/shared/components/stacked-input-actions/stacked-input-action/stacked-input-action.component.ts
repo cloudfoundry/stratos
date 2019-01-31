@@ -37,7 +37,12 @@ export class StackedInputActionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subs.push(this.emailFormControl.valueChanges.subscribe((value) => {
-      this.update.emit({ value, valid: this.emailFormControl.valid });
+      // Set the valid state to the form valid state... unless we're processing and it's disabled and thus invalid
+      // If the state is processing the input will be disabled
+      this.update.emit({
+        value,
+        valid: this.state && this.state.result === StackedInputActionResult.PROCESSING || this.emailFormControl.valid
+      });
     }));
 
     this.subs.push(this.state$.subscribe(incState => {

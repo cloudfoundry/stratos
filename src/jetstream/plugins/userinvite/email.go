@@ -10,7 +10,7 @@ import (
 	// "net/http"
 	// "net/url"
 	"net/smtp"
-	"regexp"
+	// "regexp"
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -27,7 +27,7 @@ type EmailTemplateParams struct {
 }
 
 // SendEmail sends an invitation email to a user using the configured templates
-func (invite *UserInvite) SendEmail(emailAddress, inviteLink string, endpoint *interfaces.CNSIRecord) error {
+func (invite *UserInvite) SendEmail(emailAddress, inviteLink string, endpoint interfaces.CNSIRecord) error {
 	log.Debugf("User Invite: Sending Email to: %s", emailAddress)
 	mailHost := fmt.Sprintf("%s:%d", invite.Config.SMTP.Host, invite.Config.SMTP.Port)
 
