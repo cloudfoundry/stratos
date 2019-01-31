@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/labstack/echo"
@@ -22,7 +23,7 @@ type StatusResponse struct {
 	ClientID     string `json:"client_id"`
 }
 
-const WWW_AUTH_HEADER = "www-authenticate"
+const wwwAuthHeader = "www-authenticate"
 
 // Admin functions for managing User Invite credentials for a given Cloud Foundry
 
@@ -70,6 +71,29 @@ func (invite *UserInvite) configure(c echo.Context) error {
 	log.Debug("Configure Invite token")
 	cfGUID := c.Param("id")
 
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if len(clientID) == 0 || len(clientSecret) == 0 {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Invalid request - must specify client ID and client secret",
+			"Invalid request - must specify client ID and client secret",
+		)
+	}
+
+	err := invite.RefreshToken(cfGUID, clientID, clientSecret)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write([]byte("{\"status\": \"ok\"}"))
+	return nil
+}
+
+func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) error {
+
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
 	if err != nil {
@@ -89,16 +113,7 @@ func (invite *UserInvite) configure(c echo.Context) error {
 		)
 	}
 
-	clientID := c.FormValue("client_id")
-	clientSecret := c.FormValue("client_secret")
-
-	if len(clientID) == 0 || len(clientSecret) == 0 {
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Invalid request - must specify client ID and client secret",
-			"Invalid request - must specify client ID and client secret",
-		)
-	}
+	now := time.Now()
 
 	clientSecret = strings.TrimSpace(clientSecret)
 
@@ -133,7 +148,7 @@ func (invite *UserInvite) configure(c echo.Context) error {
 
 		// Try and get the error details form the WWW-Authenticate hehader
 		errMsg := "Error checking UAA Client"
-		data := parseAuthHeader(res.Header.Get(WWW_AUTH_HEADER))
+		data := parseAuthHeader(res.Header.Get(wwwAuthHeader))
 		if len(data["error_description"]) > 0 {
 			errMsg = fmt.Sprintf("Could not check Client: %s", data["error_description"])
 		}
@@ -173,10 +188,12 @@ func (invite *UserInvite) configure(c echo.Context) error {
 		)
 	}
 
+	duration := time.Duration(uaaResponse.ExpiresIn) * time.Second
+	expiry := now.Add(duration).Unix()
 	tokenRecord := &interfaces.TokenRecord{
 		RefreshToken: fmt.Sprintf("%s:%s", clientID, clientSecret),
 		AuthToken:    uaaResponse.AccessToken,
-		TokenExpiry:  int64(uaaResponse.ExpiresIn),
+		TokenExpiry:  expiry,
 		AuthType:     "uaa_client",
 	}
 
@@ -189,8 +206,6 @@ func (invite *UserInvite) configure(c echo.Context) error {
 		)
 	}
 
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"status\": \"ok\"}"))
 	return nil
 }
 
@@ -234,7 +249,7 @@ func (invite *UserInvite) remove(c echo.Context) error {
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
 	if err != nil {
 		// Could find the endpoint
-		return errors.New("Can not find enpoint")
+		return errors.New("Can not find endpoint")
 	}
 
 	if endpoint.CNSIType != "cf" {

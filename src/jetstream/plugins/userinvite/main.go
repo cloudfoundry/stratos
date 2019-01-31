@@ -58,7 +58,7 @@ func (userinvite *UserInvite) AddAdminGroupRoutes(echoGroup *echo.Group) {
 func (userinvite *UserInvite) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 	// User Info
-	echoGroup.Any("/invite/*", userinvite.invite)
+	echoGroup.POST("/invite/send/:id", userinvite.invite)
 }
 
 // Init performs plugin initialization
