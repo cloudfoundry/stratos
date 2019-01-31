@@ -43,6 +43,8 @@ function updateUser(
             ]
           }
         }, newUsers[userGuid] || existingUser);
+      } else {
+        newUsers[userGuid] = existingUser;
       }
     });
   }
