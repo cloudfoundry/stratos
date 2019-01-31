@@ -21,6 +21,7 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
+import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 
 export function logger(reducer) {
   // default, no options
@@ -44,7 +45,8 @@ export const appReducers = {
   manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
-  userFavoritesGroups: userFavoriteGroupsReducer
+  userFavoritesGroups: userFavoriteGroupsReducer,
+  recentlyVisited: recentlyVisitedReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];

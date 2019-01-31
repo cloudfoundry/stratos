@@ -16,7 +16,7 @@
           </ng-container>
         </div>
         <ng-content></ng-content>
-        <app-entity-favorite-star class="page-header__favorite" *ngIf="favorite" [favorite]="favorite">
+        <app-entity-favorite-star class="page-header__favorite" *ngIf="_favorite" [favorite]="_favorite">
         </app-entity-favorite-star>
         <div class="page-header__filler"></div>
         <div #extensionRef>

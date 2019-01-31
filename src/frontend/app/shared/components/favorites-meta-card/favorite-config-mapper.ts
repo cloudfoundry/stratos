@@ -26,7 +26,7 @@ export type TFavoriteMapperFunction<T extends IFavoriteMetadata> = (entity: T) =
 
 interface IFavoriteMappers {
   [key: string]: {
-    mapper: TFavoriteMapperFunction<any>,
+    mapper: TFavoriteMapperFunction<IFavoriteMetadata>,
     prettyName: string,
     actionGenerator: TFavoriteActionGenerator<IFavoriteMetadata>
     entityToMetadata: TEntityToMetadata<any, any>,
@@ -46,7 +46,7 @@ export interface IFavoriteActionGenerators {
 class FavoritesConfigMapper {
   private mapperKeySeparator = '-';
   private mappers: IFavoriteMappers = {};
-  private getMapperKeyFromFavoriteInfo(favoriteInfo: IFavoriteTypeInfo) {
+  public getMapperKeyFromFavoriteInfo(favoriteInfo: IFavoriteTypeInfo) {
     const { endpointType, entityType } = favoriteInfo;
     return [endpointType, entityType].join(this.mapperKeySeparator);
   }

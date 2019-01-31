@@ -11,6 +11,8 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { AddRecentlyVisitedEntityAction } from '../../../store/actions/recently-visited.reducer';
+import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-page-header',
@@ -21,6 +23,7 @@ export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
+  public _favorite: UserFavorite<IFavoriteMetadata>;
 
   @Input() hideSideNavButton = false;
 
@@ -34,7 +37,25 @@ export class PageHeaderComponent {
 
   @Input() showUnderFlow = false;
 
-  @Input() favorite: UserFavorite<IFavoriteMetadata>;
+  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+    if (favorite && (!this._favorite || (favorite.guid !== this._favorite.guid))) {
+      this._favorite = favorite;
+      const mapperFunction = favoritesConfigMapper.getMapperFunction(favorite);
+      const prettyType = favoritesConfigMapper.getPrettyTypeName(favorite);
+      const prettyEndpointType = favoritesConfigMapper.getPrettyTypeName({
+        endpointType: favorite.endpointType
+      });
+      if (mapperFunction) {
+        const mapper = mapperFunction(favorite.metadata);
+        this.store.dispatch(new AddRecentlyVisitedEntityAction({
+          name: mapper.name,
+          link: mapper.routerLink,
+          prettyType,
+          prettyEndpointType
+        }));
+      }
+    }
+  }
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;
