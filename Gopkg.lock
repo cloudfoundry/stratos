@@ -165,6 +165,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
+  name = "github.com/cf-stratos/mysqlstore"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
+
+[[projects]]
+  branch = "master"
   digest = "1:58927c45bfdcd6550e5f1ab008eeeb6951474a232afa1dc690583f26c5f92cbd"
   name = "github.com/charlievieth/fs"
   packages = ["."]
@@ -251,6 +259,14 @@
   packages = ["pkg/term/windows"]
   pruneopts = "UT"
   revision = "5271c7cb484d44a22b96709894080ea85c8eef14"
+
+[[projects]]
+  digest = "1:3cca54b89f4e60143570d3680cb09d76a59b1a27bbc179d7b175415fe5182356"
+  name = "github.com/domodwyer/mailyak"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "89444b05799b115121931b3b6bd05e820e69dc8b"
+  version = "v3.1.1"
 
 [[projects]]
   branch = "master"
@@ -350,14 +366,6 @@
   pruneopts = "UT"
   revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
   version = "v1.4.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
-  name = "github.com/cf-stratos/mysqlstore"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
 
 [[projects]]
   digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
@@ -747,16 +755,17 @@
     "code.cloudfoundry.org/cli/util",
     "code.cloudfoundry.org/cli/util/randomword",
     "github.com/antonlindstrom/pgstore",
+    "github.com/cf-stratos/mysqlstore",
     "github.com/cloudfoundry/noaa",
     "github.com/cloudfoundry/noaa/consumer",
     "github.com/cloudfoundry/noaa/errors",
     "github.com/cloudfoundry/sonde-go/events",
+    "github.com/domodwyer/mailyak",
     "github.com/go-sql-driver/mysql",
     "github.com/gorilla/context",
     "github.com/gorilla/securecookie",
     "github.com/gorilla/sessions",
     "github.com/gorilla/websocket",
-    "github.com/cf-stratos/mysqlstore",
     "github.com/kat-co/vala",
     "github.com/labstack/echo",
     "github.com/labstack/echo/engine",
