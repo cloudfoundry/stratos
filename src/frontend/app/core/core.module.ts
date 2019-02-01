@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
-import { ClickStopPropagationDirective } from './click-stop-propagation';
+import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { Customizations } from './customizations.types';
 import { DotContentComponent } from './dot-content/dot-content.component';
