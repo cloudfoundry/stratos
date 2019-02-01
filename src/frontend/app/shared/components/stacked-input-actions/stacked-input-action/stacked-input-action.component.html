@@ -2,7 +2,7 @@
 <div class="input-action">
   <form class="input-action__form stepper-form">
     <mat-form-field class="">
-      <input matInput placeholder="Email" [formControl]="emailFormControl">
+      <input matInput placeholder="Email" [formControl]="emailFormControl" #inputElement>
       <mat-error *ngIf="emailFormControl.hasError('email') && !emailFormControl.hasError('required')">
         Please enter a valid email address
       </mat-error>

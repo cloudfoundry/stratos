@@ -170,4 +170,10 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     safeUnsubscribe(...this.subs);
   }
 
+  onKeydown(event) {
+    if (event.key === 'Enter') {
+      this.addComponent();
+    }
+  }
+
 }

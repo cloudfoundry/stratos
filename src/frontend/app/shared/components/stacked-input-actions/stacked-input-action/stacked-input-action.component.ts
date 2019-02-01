@@ -1,4 +1,14 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 
@@ -23,7 +33,7 @@ export interface StackedInputActionUpdate {
   templateUrl: './stacked-input-action.component.html',
   styleUrls: ['./stacked-input-action.component.scss']
 })
-export class StackedInputActionComponent implements OnInit, OnDestroy {
+export class StackedInputActionComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @Input() stateIn$: Observable<StackedInputActionsState>;
   @Input() position: number;
@@ -32,6 +42,8 @@ export class StackedInputActionComponent implements OnInit, OnDestroy {
 
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();
+
+  @ViewChild('inputElement') inputElement: ElementRef;
 
   public result = StackedInputActionResult;
   public emailFormControl = new FormControl('', [Validators.required, Validators.email, this.uniqueValidator.bind(this)]);
@@ -84,6 +96,10 @@ export class StackedInputActionComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subs);
+  }
+
+  ngAfterViewInit() {
+    this.inputElement.nativeElement.focus();
   }
 
   uniqueValidator(control: FormControl) {

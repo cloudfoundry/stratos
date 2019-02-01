@@ -104,15 +104,6 @@ export class InviteUsersCreateComponent implements OnInit {
     });
     this.stateIn.next(processingState);
 
-    // TODO: RC REMOVE
-    // if (this.users.values[0].startsWith('bork')) {
-    //   this.users.values = {
-    //     0: 'sadsadsad',
-    //     1: 'test@test.com',
-    //     2: 'dsfdsf'
-    //   };
-    // }
-
     // Kick off the invites
     return this.userInviteService.invite(
       this.activeRouteCfOrgSpace.cfGuid,

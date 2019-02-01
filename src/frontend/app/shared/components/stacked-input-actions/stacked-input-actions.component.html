@@ -1,4 +1,4 @@
-<div class="stacked-input__inputs">
+<div class="stacked-input__inputs" (keydown)="onKeydown($event)">
   <div #inputs></div>
 </div>
 <button class="stacked-input__add" mat-button color="accent" (click)="addComponent()" [disabled]="disabled">
