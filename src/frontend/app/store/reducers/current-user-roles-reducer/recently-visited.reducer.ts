@@ -1,5 +1,5 @@
 import { TRecentlyVisitedState } from '../../types/recently-visited.types';
-import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.reducer';
+import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 
 export function recentlyVisitedReducer(
   state: TRecentlyVisitedState = [],

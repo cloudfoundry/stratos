@@ -122,7 +122,12 @@ function addEntityFavorite(favoriteGroups: IUserFavoritesGroups, action: SaveUse
 }
 
 function addFavoriteToGroup(_favoriteGroup: IUserFavoriteGroup = getDefaultFavoriteGroup(), favorite: UserFavorite<IFavoriteMetadata>) {
-  const favoriteGroup = { ..._favoriteGroup };
+  const favoriteGroup = {
+    ..._favoriteGroup,
+    entitiesIds: [
+      ..._favoriteGroup.entitiesIds
+    ]
+  };
   const { guid } = favorite;
   const isEndpoint = isEndpointTypeFavorite(favorite);
   if (!isEndpoint && guid && !favoriteGroup.entitiesIds.includes(guid)) {

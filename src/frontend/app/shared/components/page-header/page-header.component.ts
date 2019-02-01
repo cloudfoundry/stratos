@@ -11,7 +11,7 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { AddRecentlyVisitedEntityAction } from '../../../store/actions/recently-visited.reducer';
+import { AddRecentlyVisitedEntityAction } from '../../../store/actions/recently-visited.actions';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 
 @Component({
@@ -43,7 +43,8 @@ export class PageHeaderComponent {
       const mapperFunction = favoritesConfigMapper.getMapperFunction(favorite);
       const prettyType = favoritesConfigMapper.getPrettyTypeName(favorite);
       const prettyEndpointType = favoritesConfigMapper.getPrettyTypeName({
-        endpointType: favorite.endpointType
+        endpointType: favorite.endpointType,
+        entityType: 'endpoint'
       });
       if (mapperFunction) {
         const { name, routerLink } = mapperFunction(favorite.metadata);
@@ -52,7 +53,8 @@ export class PageHeaderComponent {
           name,
           routerLink,
           prettyType,
-          prettyEndpointType
+          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType,
+          favorite
         }));
       }
     }

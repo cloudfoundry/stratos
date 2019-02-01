@@ -1,0 +1,20 @@
+$spacing: 10px;
+.type-info {
+  font-size: 12px;
+  line-height: 20px;
+  opacity: .6;
+}
+.recent-entity {
+  align-items: center;
+  display: flex;
+  padding: $spacing 0;
+  & + & {
+    border-top: 1px solid rgba(0, 0, 0, .2);
+  }
+  &__favorite {
+    margin-left: auto;
+  }
+}
+.recent-entities {
+  margin: -($spacing) 0;
+}

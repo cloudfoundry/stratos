@@ -7,7 +7,7 @@
     $type-height: 20px;
     font-size: 13px;
     line-height: $type-height;
-    margin-top: -($type-height + 4px);
+    margin-top: -($type-height - 2px);
     opacity: .6;
   }
   &__missing {
