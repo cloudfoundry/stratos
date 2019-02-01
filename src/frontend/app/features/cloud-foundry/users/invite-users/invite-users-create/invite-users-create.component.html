@@ -1,6 +1,6 @@
 <div class="create-users">
   <div class="create-users__intro">
-    <p>Invite the following user/s to the organization `{{orgName$ | async}}`<span *ngIf="isSpace"> and space `{{spaceName$ | async}}`</span>.</p>
+    <p>Invite the following user/s to the organization `{{(org$ | async)?.entity.name}}`<span *ngIf="isSpace"> and space `{{(space$ | async)?.entity.name}}`</span>.</p>
     <p>An email will be sent to each user to confirm their address. User roles can be updated in the next step.</p>
   </div>
   <div class="create-users__roles">
@@ -13,5 +13,5 @@
       </mat-radio-group>
     </div>
   </div>
-  <app-stacked-input-actions [state$]="state.asObservable()" (update)="updateUsers($event)"></app-stacked-input-actions>
+  <app-stacked-input-actions [stateIn$]="stateIn.asObservable()" (stateOut)="stateOut($event)"></app-stacked-input-actions>
 </div>

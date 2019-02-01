@@ -1,14 +1,6 @@
 <app-page-header>Invite Users</app-page-header>
-<app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
-  <app-step title="Create Users" [onLeave]="create.onLeave" [onEnter]="create.onEnter" [onNext]="create.onNext" [valid]="create.valid$ | async" [nextButtonText]="'Create'">
+<app-steppers cancel="{{defaultCancelUrl}}">
+  <app-step title="Create Users" [onNext]="create.onNext" [valid]="create.valid$ | async" [finishButtonText]="'Invite'" [cancelButtonText]="create.madeChanges ? 'Close' : 'Cancel'">
     <app-invite-users-create #create></app-invite-users-create>
-  </app-step>
-  <!-- // TODO: RC Only show next steps if we can get all user roles -->
-  <!-- // TODO: RC update t'other use of blocked  -->
-  <app-step title="Update Roles" [blocked]="modify.blocked$ | async" [onLeave]="modify.onLeave" [onEnter]="modify.onEnter" [onNext]="modify.onNext" [valid]="modify.valid$ | async">
-    <app-manage-users-modify #modify></app-manage-users-modify>
-  </app-step>
-  <app-step title="Confirm Roles" [onEnter]="confirm.onEnter" [canClose]="!applyStarted" [disablePrevious]="applyStarted" [destructiveStep]="!applyStarted" [onNext]="startApply" [finishButtonText]="applyStarted ? 'Close' : 'Apply'">
-    <app-manage-users-confirm #confirm></app-manage-users-confirm>
   </app-step>
 </app-steppers>

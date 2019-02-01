@@ -161,7 +161,7 @@ export class UserInviteService {
     };
     return this.http.post(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
       map((response: UserInviteSendUaaResponse) => ({
-        error: false,
+        error: response.failed_invites.length > 0,
         ...response
       })),
       catchError(err => observableOf({

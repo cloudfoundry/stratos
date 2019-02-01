@@ -2,21 +2,25 @@
 <div class="input-action">
   <form class="input-action__form stepper-form">
     <mat-form-field class="">
-      <input matInput placeholder="Email" [formControl]="emailFormControl">
+      <input matInput placeholder="Email" [formControl]="emailFormControl" [appUnique]="otherEmails">
       <mat-error *ngIf="emailFormControl.hasError('email') && !emailFormControl.hasError('required')">
         Please enter a valid email address
       </mat-error>
       <mat-error *ngIf="emailFormControl.hasError('required')">
         Email is required
       </mat-error>
+      <mat-error *ngIf="emailFormControl.hasError('appUnique') && !emailFormControl.hasError('email')">
+        Email is not unique
+      </mat-error>
     </mat-form-field>
   </form>
   <div class="input-action__detail">
-    <mat-icon class="input-action__detail__remove" [ngClass]="{'disabled': emailFormControl.disabled}" (click)="!emailFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</mat-icon>
+    <div style="width: 24px;" *ngIf="showRemove">
+      <mat-icon class="input-action__detail__remove" [ngClass]="{'disabled': emailFormControl.disabled}" (click)="!emailFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</mat-icon>
+    </div>
     <div *ngIf="state" class="input-action__detail__result">
       <app-boolean-indicator *ngIf="state.result === result.SUCCEEDED || state.result === result.FAILED" [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false" [showText]="false"></app-boolean-indicator>
-      {{ state.message }}
+      <span>{{ state.message }}</span>
     </div>
   </div>
-
 </div>

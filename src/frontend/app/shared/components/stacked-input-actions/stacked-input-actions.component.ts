@@ -26,7 +26,7 @@ export interface StackedInputActionsState {
   message?: string;
 }
 
-export interface StackedInputActionsUpdate { values: string[]; valid: boolean; }
+export interface StackedInputActionsUpdate { values: { [key: string]: string }; valid: boolean; }
 
 @Component({
   selector: 'app-stacked-input-actions',
@@ -36,23 +36,25 @@ export interface StackedInputActionsUpdate { values: string[]; valid: boolean; }
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
-  @Input() state$: Observable<StackedInputActionsState[]>;
-  @Output() update = new EventEmitter<StackedInputActionsUpdate>();
+  @Input() stateIn$: Observable<StackedInputActionsState[]>;
+  @Output() stateOut = new EventEmitter<StackedInputActionsUpdate>();
 
 
   @ViewChild('inputs', { read: ViewContainerRef })
   inputs: ViewContainerRef;
 
   disabled = false;
+  private count = 0;
 
   private wrapperFactory: ComponentFactory<StackedInputActionComponent>;
   private components: {
     [key: number]: {
-      stateSubject: Subject<StackedInputActionsState>,
-      component: StackedInputActionComponent
+      stateIn: Subject<StackedInputActionsState>,
+      stackedAction: StackedInputActionComponent,
+      update: StackedInputActionUpdate
     }
   } = {};
-  private valueState: { [key: number]: StackedInputActionUpdate } = {};
+  // private valueState: { [key: number]: StackedInputActionUpdate } = {};
   private subs: Subscription[] = [];
 
   constructor(
@@ -62,52 +64,101 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(StackedInputActionComponent);
   }
 
-  add() {
+  addComponent() {
     const component = this.inputs.createComponent(this.wrapperFactory);
-    const index = this.inputs.length - 1;
+
     const stackedAction = component.instance;
-
+    // Track a unique key for the component and it's position in the stack
+    stackedAction.key = this.count++;
+    stackedAction.position = this.inputs.length - 1;
+    // Handle when the component wants to be removed
     this.subs.push(stackedAction.remove.subscribe(() => {
-      this.remove(index);
-      delete this.valueState[index];
-      this.emitValues();
+      this.removeComponent(stackedAction);
+      this.emitState();
     }));
-    this.subs.push(stackedAction.update.subscribe((update: StackedInputActionUpdate) => {
-      this.valueState[index] = update;
-      this.emitValues();
+    // Handle updates of state from the compnent
+    this.subs.push(stackedAction.stateOut.subscribe((update: StackedInputActionUpdate) => {
+      this.components[update.key].update = update;
+      this.emitState();
     }));
 
-    const state = new BehaviorSubject<StackedInputActionsState>(null);
-    stackedAction.state$ = state.asObservable();
+    // Track how we push state into the component
+    const stateIn = new BehaviorSubject<StackedInputActionsState>(null);
+    stackedAction.stateIn$ = stateIn.asObservable();
 
-    this.components[index] = {
-      stateSubject: state,
-      component: stackedAction
+    // Track them all together in one pot
+    this.components[stackedAction.key] = {
+      stateIn,
+      stackedAction,
+      update: null
     };
 
     this.cd.detectChanges();
+
+    // Ensure all components know their new position
+    this.updatePositions();
   }
 
-  emitValues() {
-    const values = Object.values(this.valueState);
-    this.update.emit(values ? {
-      values: values.map(value => value.value),
-      valid: values && values.length > 0 && !values.find(user => !user.valid)
-    } : {
-        values: [],
-        valid: false
-      });
+  emitState() {
+    const components = Object.values(this.components);
+    // Emit a list of values for all components that should be processed. This does not include succeeded components
+    const valuesToSubmit = components ? components.reduce((values, component) => {
+      if (!component.stackedAction.state || component.stackedAction.state.result !== StackedInputActionResult.SUCCEEDED) {
+        values[component.stackedAction.key] = component.update.value;
+      }
+      return values;
+    }, {}) : [];
+    // Values can be submitted if there's values and those values are valid
+    const valid = components && Object.keys(valuesToSubmit).length && components.length > 0 ?
+      !components.find(component => !component.update.valid) : false;
+    this.stateOut.emit({ values: valuesToSubmit, valid });
+    this.updateDupes();
   }
 
-  remove(index: number) {
-    this.inputs.remove(index);
+  removeComponent(stackedAction: StackedInputActionComponent) {
+    // Remove the visual component
+    this.inputs.remove(stackedAction.position);
+    // Remove the tracked component
+    delete this.components[stackedAction.key];
+    // Update all components with their new position
+    this.updatePositions();
+  }
+
+  private updatePositions() {
+    // Ensure all components know which position they are and whether they can be removed or not
+    const componentCount = this.inputs.length;
+    Object.values(this.components).sort((a, b) => a.stackedAction.key < b.stackedAction.key ? 1 : 0).forEach((component, position) => {
+      component.stackedAction.position = position;
+      component.stackedAction.showRemove = position > 0 || componentCount > 1;
+    });
+  }
+
+  private updateDupes() {
+    // TODO: RC
+    Object.entries(this.components).forEach(([key, component]) => {
+      // const dupe = Object.values(this.components).find(fComponent => key !== fComponent.stackedAction.key.toString() && component.update.value === fComponent.update.value);
+      // component.stateSubject.next({
+      //   key,
+      //   result: StackedInputActionResult.DUPLICATE,
+      //   message: Object.values(this.components).reduce((emails, rComponent) => {
+      //     if (component.stackedAction.key !== rComponent.stackedAction.key && rComponent.update.value) {
+      //       emails += rComponent.update.value + ',';
+      //     }
+      //     return emails;
+      //   }, '')
+      // });
+    });
   }
 
   ngOnInit() {
-    this.add();
-    this.subs.push(this.state$.subscribe(states => {
+    // Add the first component
+    this.addComponent();
+    // Push state change into their respective components
+    this.subs.push(this.stateIn$.subscribe(states => {
+      // Disable the 'add new' button
       this.disabled = !!states.find(state => state.result === StackedInputActionResult.PROCESSING);
-      states.forEach((state, index) => this.components[index].stateSubject.next(state));
+      // Push state
+      states.forEach((state, index) => this.components[state.key].stateIn.next(state));
     }));
   }
 
