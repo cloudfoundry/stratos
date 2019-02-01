@@ -1,18 +1,17 @@
 <mat-card>
   <div *ngIf="recentEntities$ | async as recentEntities">
     <div *ngIf="recentEntities && recentEntities.length > 0" class="recent-entities">
-      <div class="recent-entity" *ngFor="let entity of recentEntities">
+      <div class="recent-entity" *ngFor="let countedEntity of recentEntities">
         <div>
-          <a *ngIf="entity.routerLink as routerLink; else noLink" [routerLink]="routerLink">{{ entity.name }}</a>
+          <a *ngIf="countedEntity.entity.routerLink as routerLink; else noLink" [routerLink]="routerLink">{{
+            countedEntity.entity.name }}</a>
           <ng-template #noLink>
-            <div>{{ entity.name }}</div>
+            <div>{{ countedEntity.entity.name }}</div>
           </ng-template>
           <div class="type-info">
-            <span *ngIf="entity.prettyEndpointType">{{ entity.prettyEndpointType }} - </span>
-            <span>{{ entity.prettyType }}</span>
+            <span>{{ countedEntity.subText$ | async }}</span>
           </div>
         </div>
-        <app-entity-favorite-star class="recent-entity__favorite" *ngIf="entity.favorite" [favorite]="entity.favorite"></app-entity-favorite-star>
       </div>
     </div>
     <div *ngIf="!recentEntities || recentEntities.length === 0">
