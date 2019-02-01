@@ -24,6 +24,7 @@ export interface StackedInputActionsState {
   key: string;
   result: StackedInputActionResult;
   message?: string;
+  otherValues?: any;
 }
 
 export interface StackedInputActionsUpdate { values: { [key: string]: string }; valid: boolean; }
@@ -78,8 +79,11 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     }));
     // Handle updates of state from the compnent
     this.subs.push(stackedAction.stateOut.subscribe((update: StackedInputActionUpdate) => {
-      this.components[update.key].update = update;
-      this.emitState();
+      const hasChanges = Object.keys(update).filter(key => update[key] !== this.components[update.key].update).length;
+      if (hasChanges) {
+        this.components[update.key].update = update;
+        this.emitState();
+      }
     }));
 
     // Track how we push state into the component
@@ -112,7 +116,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     const valid = components && Object.keys(valuesToSubmit).length && components.length > 0 ?
       !components.find(component => !component.update.valid) : false;
     this.stateOut.emit({ values: valuesToSubmit, valid });
-    this.updateDupes();
+    this.updateOtherValues();
   }
 
   removeComponent(stackedAction: StackedInputActionComponent) {
@@ -133,20 +137,17 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateDupes() {
-    // TODO: RC
+  private updateOtherValues() {
+    // Ensure components are aware of each others values
     Object.entries(this.components).forEach(([key, component]) => {
-      // const dupe = Object.values(this.components).find(fComponent => key !== fComponent.stackedAction.key.toString() && component.update.value === fComponent.update.value);
-      // component.stateSubject.next({
-      //   key,
-      //   result: StackedInputActionResult.DUPLICATE,
-      //   message: Object.values(this.components).reduce((emails, rComponent) => {
-      //     if (component.stackedAction.key !== rComponent.stackedAction.key && rComponent.update.value) {
-      //       emails += rComponent.update.value + ',';
-      //     }
-      //     return emails;
-      //   }, '')
-      // });
+      component.stateIn.next({
+        key,
+        result: StackedInputActionResult.UPDATE_OTHER_VALUES,
+        otherValues: Object.values(this.components)
+          .filter(fComponent => component.stackedAction.key !== fComponent.stackedAction.key)
+          .map(mComponent => mComponent.update.value)
+          .filter(value => !!value && value.length)
+      });
     });
   }
 

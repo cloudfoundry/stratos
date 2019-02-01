@@ -259,10 +259,6 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
       filter(([existingRoles, newRoles, users, canEditRole]) => !!users.length && !!newRoles.orgGuid)
     ).subscribe(([existingRoles, newRoles, users, canEditRole]) => {
       this.orgGuid = newRoles.orgGuid;
-      if (this.role) {
-        console.log(existingRoles, newRoles);
-        // TODO: RC existingRoles needs to have newly assigned roles... this list comes from users in a pagination section...
-      }
       const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
         this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
       this.checked = checked;

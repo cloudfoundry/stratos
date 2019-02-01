@@ -24,10 +24,7 @@ export class InviteUsersComponent {
   defaultCancelUrl: string;
 
   constructor(
-    // private store: Store<AppState>,// TODO: RC remove?
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    // private cfUserService: CfUserService, // TODO: RC remove?
-    // private route: ActivatedRoute// TODO: RC remove?
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
   }
