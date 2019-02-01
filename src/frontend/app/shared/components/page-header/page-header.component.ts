@@ -53,6 +53,7 @@ export class PageHeaderComponent {
           name,
           routerLink,
           prettyType,
+          endpointId: favorite.endpointId,
           prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType,
           favorite
         }));

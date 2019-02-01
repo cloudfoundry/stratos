@@ -9,6 +9,7 @@ export interface IRecentlyVisitedEntity {
   name: string;
   prettyType: string;
   prettyEndpointType: string;
+  endpointId: string;
   routerLink?: string;
   favorite?: UserFavorite<IFavoriteMetadata>;
 }

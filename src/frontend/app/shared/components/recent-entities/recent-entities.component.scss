@@ -5,16 +5,23 @@ $spacing: 10px;
   opacity: .6;
 }
 .recent-entity {
-  align-items: center;
-  display: flex;
-  padding: $spacing 0;
+  outline: 0;
+  padding: $spacing;
   & + & {
-    border-top: 1px solid rgba(0, 0, 0, .2);
+    border-top: 1px solid rgba(0, 0, 0, .08);
   }
   &__favorite {
     margin-left: auto;
   }
+  &:focus,
+  &:hover {
+    background-color: rgba(0, 0, 0, .02);
+  }
 }
 .recent-entities {
   margin: -($spacing) 0;
+}
+
+.clickable {
+  cursor: pointer;
 }

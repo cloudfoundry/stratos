@@ -72,6 +72,7 @@ class CountedRecentEntity {
     const amount = modifier ? 1 * modifier : 1;
     this.count += amount;
   }
+
   constructor(readonly entity: IRecentlyVisitedEntityDated, private store: Store<AppState>) {
     if (entity.favorite) {
       if (isEndpointTypeFavorite(entity.favorite)) {
@@ -80,7 +81,7 @@ class CountedRecentEntity {
         this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
           map(endpoints => {
             if (Object.keys(endpoints).length > 1) {
-              return `${endpoints[entity.favorite.endpointId].name}  (${entity.prettyEndpointType}) - ${entity.prettyType}`
+              return `${entity.prettyType} - ${endpoints[entity.favorite.endpointId].name}  (${entity.prettyEndpointType})`;
             }
             return entity.prettyType;
           })
