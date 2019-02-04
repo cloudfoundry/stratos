@@ -1,3 +1,4 @@
+import { TruncatePipe } from './../core/truncate.pipe';
 import { NgModule } from '@angular/core';
 import { StoreModule, ActionReducerMap, ActionReducer } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';

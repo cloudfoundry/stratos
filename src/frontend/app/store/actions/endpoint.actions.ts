@@ -4,6 +4,7 @@ import { endpointSchemaKey } from '../helpers/entity-factory';
 import { EndpointModel, INewlyConnectedEndpointInfo, endpointListKey } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { EndpointType } from '../../core/extension/extension-types';
+import { NormalizedResponse } from '../types/api.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -74,7 +75,7 @@ export class GetAllEndpoints implements PaginatedAction {
 }
 
 export class GetAllEndpointsSuccess implements Action {
-  constructor(public payload: {}, public login = false) { }
+  constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) { }
   type = GET_ENDPOINTS_SUCCESS;
 }
 

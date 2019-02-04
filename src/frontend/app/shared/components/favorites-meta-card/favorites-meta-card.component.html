@@ -1,12 +1,10 @@
 <app-meta-card [favorite]="metaFavorite" [confirmFavoriteRemoval]="true" [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}"
   [actionMenu]="config.menuItems" [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$"
   [entityConfig]="entityConfig">
-  <app-meta-card-title>
-    <div class="fav-meta-card__header">
-      <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ name$ | async }}</h2>
-      <h3 class="fav-meta-card__header-text" *ngIf="compact">{{ name$ | async }}</h3>
-      <div class="fav-meta-card__type">{{ prettyName }}</div>
-    </div>
+  <app-meta-card-title class="fav-meta-card__header">
+    <h2 class="fav-meta-card__header-text" *ngIf="!compact">{{ name$ | async }}</h2>
+    <h3 class="fav-meta-card__header-text" *ngIf="compact">{{ name$ | async }}</h3>
+    <div class="fav-meta-card__type">{{ prettyName }}</div>
   </app-meta-card-title>
   <ng-container *ngFor="let line of config.lines">
     <app-meta-card-item *ngIf="line[1] | async as value">

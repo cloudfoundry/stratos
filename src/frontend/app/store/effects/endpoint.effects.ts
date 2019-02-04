@@ -68,7 +68,7 @@ export class EndpointsEffect {
           [endpointStoreNames.type]: {}
         },
         result: []
-      } as NormalizedResponse;
+      } as NormalizedResponse<EndpointModel>;
 
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];

@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { isEndpointTypeFavorite } from '../../../core/user-favorite-helpers';
 import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../store/selectors/recently-visitied.selectors';
-import { IRecentlyVisitedEntityDated } from '../../../store/types/recently-visited.types';
+import { IRecentlyVisitedEntity, IEntityHit, IRecentlyVisitedEntities } from '../../../store/types/recently-visited.types';
 import { AppState } from './../../../store/app-state';
 interface IRelevanceModifier {
   time: number;
@@ -38,7 +38,7 @@ class CountedRecentEntitiesManager {
     };
   }
 
-  private getModifier(recentEntity: IRecentlyVisitedEntityDated) {
+  private getModifier(recentEntity: IEntityHit) {
     if (recentEntity.date < this.relevanceModifiers.low.time) {
       return this.relevanceModifiers.low.modifier;
     }
@@ -48,17 +48,19 @@ class CountedRecentEntitiesManager {
     return this.relevanceModifiers.high.modifier;
   }
 
-  public addEntity(recentEntity: IRecentlyVisitedEntityDated) {
+  public addEntity(recentEntity: IEntityHit) {
     const modifier = this.getModifier(recentEntity);
     if (!this.countedRecentEntities[recentEntity.guid]) {
-      this.countedRecentEntities[recentEntity.guid] = new CountedRecentEntity(recentEntity, this.store);
+      this.countedRecentEntities[recentEntity.guid] = new CountedRecentEntity(recentEntity);
     }
     this.countedRecentEntities[recentEntity.guid].increment(modifier);
   }
-  public getStoredEntities(): CountedRecentEntity[] {
-    return Object.values(this.countedRecentEntities)
+
+  public getSortedEntities(entities: IRecentlyVisitedEntities): INormalizedRecent[] {
+    const sortedHits = Object.values(this.countedRecentEntities)
       .sort((countedA, countedB) => countedB.count - countedA.count)
       .map(counted => counted);
+    return sortedHits.map(entity => new INormalizedRecent(entities[entity.hit.guid], this.store));
   }
 }
 interface CountedRecentEntities {
@@ -72,8 +74,12 @@ class CountedRecentEntity {
     const amount = modifier ? 1 * modifier : 1;
     this.count += amount;
   }
+  constructor(readonly hit: IEntityHit) { }
+}
 
-  constructor(readonly entity: IRecentlyVisitedEntityDated, private store: Store<AppState>) {
+class INormalizedRecent {
+  public subText$: Observable<string>;
+  constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
     if (entity.favorite) {
       if (isEndpointTypeFavorite(entity.favorite)) {
         this.subText$ = observableOf(entity.prettyType);
@@ -90,7 +96,6 @@ class CountedRecentEntity {
     } else {
       this.subText$ = observableOf(`${entity.prettyEndpointType} - ${entity.prettyType}`);
     }
-
   }
 }
 
@@ -100,17 +105,18 @@ class CountedRecentEntity {
   styleUrls: ['./recent-entities.component.scss']
 })
 export class RecentEntitiesComponent {
-  public recentEntities$: Observable<CountedRecentEntity[]>;
+  public recentEntities$: Observable<INormalizedRecent[]>;
   constructor(store: Store<AppState>) {
 
     this.recentEntities$ = store.select(recentlyVisitedSelector).pipe(
       map(recentEntities => {
         const manager = new CountedRecentEntitiesManager(moment(recentEntities[0]), store);
-        recentEntities.forEach(recentEntity => {
+        recentEntities.hits.forEach(recentEntity => {
           manager.addEntity(recentEntity);
         });
-        return manager.getStoredEntities();
-      })
+        return manager.getSortedEntities(recentEntities.entities);
+      }),
+      tap(console.log)
     );
 
   }

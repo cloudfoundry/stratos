@@ -29,7 +29,10 @@ export function getInitialTestStoreState(): AppState {
 function getDefaultInitialTestStoreState(): AppState {
 
   return {
-    recentlyVisited: [],
+    recentlyVisited: {
+      entities: {},
+      hits: []
+    },
     userFavoritesGroups: {
       busy: false,
       error: false,

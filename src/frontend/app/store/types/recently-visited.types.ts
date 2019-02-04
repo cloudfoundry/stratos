@@ -1,5 +1,16 @@
 import { UserFavorite, IFavoriteMetadata } from './user-favorites.types';
-export type TRecentlyVisitedState = IRecentlyVisitedEntityDated[];
+
+export interface IEntityHit {
+  guid: string;
+  date: number;
+}
+export interface IRecentlyVisitedEntities {
+  [guid: string]: IRecentlyVisitedEntity;
+}
+export interface IRecentlyVisitedState {
+  entities: IRecentlyVisitedEntities;
+  hits: IEntityHit[];
+}
 
 export interface IRecentlyVisitedEntityDated extends IRecentlyVisitedEntity {
   date: number;
