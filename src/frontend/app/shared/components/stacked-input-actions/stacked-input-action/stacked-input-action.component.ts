@@ -19,7 +19,7 @@ export enum StackedInputActionResult {
   PROCESSING = 'PROCESSING',
   SUCCEEDED = 'SUCCEEDED',
   FAILED = 'FAILED',
-  UPDATE_OTHER_VALUES = 'UPDATE_OTHER_VALUES'
+  OTHER_VALUES_UPDATED = 'UPDATE_OTHER_VALUES'
 }
 
 export interface StackedInputActionUpdate {
@@ -82,7 +82,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterView
           this.state = incState;
           this.emailFormControl.enable();
           break;
-        case StackedInputActionResult.UPDATE_OTHER_VALUES:
+        case StackedInputActionResult.OTHER_VALUES_UPDATED:
           const oldValues = this.otherValues || [];
           this.otherValues = incState.otherValues;
           if (!this.compare(oldValues, this.otherValues)) {

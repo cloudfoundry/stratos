@@ -63,12 +63,12 @@ export class UserInviteService {
     cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    // TODO: RC Should all users be allowed to configure?
+    // TODO: RC Should all users be allowed to see and configure?
     // waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
     //   map(cf => cf.global.isAdmin) <--- for admin
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v.entity && !!v.entity.metadata),
-      map(v => v.entity && v.entity.metadata['userInviteAllowed'] === 'true'), // TODO: add to typing
+      map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
     );
   }
 

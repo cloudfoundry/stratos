@@ -142,7 +142,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     Object.entries(this.components).forEach(([key, component]) => {
       component.stateIn.next({
         key,
-        result: StackedInputActionResult.UPDATE_OTHER_VALUES,
+        result: StackedInputActionResult.OTHER_VALUES_UPDATED,
         otherValues: Object.values(this.components)
           .filter(fComponent => component.stackedAction.key !== fComponent.stackedAction.key)
           .map(mComponent => mComponent.update.value)

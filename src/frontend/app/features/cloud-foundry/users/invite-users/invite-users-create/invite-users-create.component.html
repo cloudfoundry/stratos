@@ -1,7 +1,7 @@
 <div class="create-users">
   <div class="create-users__intro">
     <p>Invite the following user/s to the organization `{{(org$ | async)?.entity.name}}`<span *ngIf="isSpace"> and space `{{(space$ | async)?.entity.name}}`</span>.</p>
-    <p>An email will be sent to each user to confirm their address. User roles can be updated in the next step.</p>
+    <p>A verification email will be sent to each user containing a link for them to activate their account and set a password. User/s roles can still be updated before activation in the usual way.</p>
   </div>
   <div class="create-users__roles">
     <div *ngIf="isSpace" class="create-users__roles__space">
