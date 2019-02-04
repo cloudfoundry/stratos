@@ -22,7 +22,7 @@ describe('StackedInputActionsComponent', () => {
       providers: [{
         provide: ActiveRouteCfOrgSpace,
         useFactory: () => new BaseCfOrgSpaceRouteMock(testSCFGuid)
-      }, ]
+      }]
     })
       .compileComponents();
   }));
@@ -30,7 +30,7 @@ describe('StackedInputActionsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionsComponent);
     component = fixture.componentInstance;
-    component.stateIn$ = observableOf(null);
+    component.stateIn$ = observableOf([]);
     fixture.detectChanges();
   });
 

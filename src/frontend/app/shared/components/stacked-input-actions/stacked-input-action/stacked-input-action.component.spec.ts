@@ -8,7 +8,7 @@ import {
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { testSCFGuid } from '../../../../test-framework/store-test-helper';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
-import { StackedInputActionComponent } from './stacked-input-action.component';
+import { StackedInputActionComponent, StackedInputActionResult } from './stacked-input-action.component';
 
 describe('StackedInputActionComponent', () => {
   let component: StackedInputActionComponent;
@@ -29,7 +29,10 @@ describe('StackedInputActionComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
     component = fixture.componentInstance;
-    component.stateIn$ = observableOf(null);
+    component.stateIn$ = observableOf({
+      key: 'string',
+      result: StackedInputActionResult.OTHER_VALUES_UPDATED
+    });
     fixture.detectChanges();
   });
 
