@@ -1,5 +1,6 @@
 import { Observable, of as observableOf } from 'rxjs';
 
+import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
 import { GetAllSpaceUsers } from '../store/actions/space.actions';
 
 export class CloudFoundrySpaceServiceMock {
@@ -45,3 +46,8 @@ export class CloudFoundrySpaceServiceMock {
   apps$ = observableOf([]);
   appCount$ = observableOf(0);
 }
+
+export const getCfSpaceServiceMock = {
+  provide: CloudFoundrySpaceService,
+  useClass: CloudFoundrySpaceServiceMock
+};

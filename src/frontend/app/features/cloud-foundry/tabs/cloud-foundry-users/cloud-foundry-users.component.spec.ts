@@ -1,7 +1,10 @@
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { UserInviteService } from '../../user-invites/user-invite.service';
 import { CloudFoundryUsersComponent } from './cloud-foundry-users.component';
 
 describe('CloudFoundryUsersComponent', () => {
@@ -15,7 +18,11 @@ describe('CloudFoundryUsersComponent', () => {
         ...BaseTestModules
       ],
       providers: [
-        ActiveRouteCfOrgSpace
+        ActiveRouteCfOrgSpace,
+        UserInviteService,
+        HttpClient,
+        HttpHandler,
+        CloudFoundryEndpointService
       ]
     })
       .compileComponents();

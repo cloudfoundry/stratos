@@ -1,3 +1,4 @@
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -7,7 +8,6 @@ import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
 import { UserInviteService } from '../features/cloud-foundry/user-invites/user-invite.service';
 import {
   ApplicationStateIconComponent,
@@ -35,7 +35,6 @@ import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
-import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
@@ -45,9 +44,12 @@ export const cfEndpointServiceProviderDeps = [
   CfUserService,
   PaginationMonitorFactory,
   EntityMonitorFactory,
-  UserInviteService
+  UserInviteService,
+  HttpClient,
+  HttpHandler,
+  CloudFoundryEndpointService
 ];
-class BaseCFMock {
+export class BaseCfOrgSpaceRouteMock {
   orgGuid: string;
   spaceGuid: string;
   cfGuid: string;
@@ -61,10 +63,13 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
   return [
     {
       provide: ActiveRouteCfOrgSpace,
-      useFactory: () => new BaseCFMock(guid)
+      useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
     },
     CfUserServiceTestProvider,
-    CloudFoundryEndpointService
+    CloudFoundryEndpointService,
+    UserInviteService,
+    HttpClient,
+    HttpHandler
   ];
 }
 
@@ -120,11 +125,6 @@ export const BaseTestModulesNoShared = [
   HttpModule
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
-
-export const getCfSpaceServiceMock = {
-  provide: CloudFoundrySpaceService,
-  useClass: CloudFoundrySpaceServiceMock
-};
 
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,

@@ -1,5 +1,10 @@
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
+import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
+import { UserInviteService } from '../../../user-invites/user-invite.service';
 import { InviteUsersCreateComponent } from './invite-users-create.component';
 
 describe('InviteUsersCreateComponent', () => {
@@ -8,9 +13,18 @@ describe('InviteUsersCreateComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InviteUsersCreateComponent ]
+      declarations: [InviteUsersCreateComponent],
+      imports: [...BaseTestModules],
+      providers: [
+        ActiveRouteCfOrgSpace,
+        CloudFoundryEndpointService,
+        UserInviteService,
+        HttpClient,
+        HttpHandler
+      ]
+
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
