@@ -28,6 +28,9 @@ export interface StackedInputActionUpdate {
   valid: boolean;
 }
 
+/**
+ * Individual email input field meant to be stacked amongst others of same type in a . Used in conjunction with StackedInputActionsComponent
+ */
 @Component({
   selector: 'app-stacked-input-action',
   templateUrl: './stacked-input-action.component.html',

@@ -1,4 +1,3 @@
-<!-- // TODO: rc generic validation OR change name -->
 <div class="input-action">
   <form class="input-action__form stepper-form">
     <mat-form-field class="">
@@ -15,12 +14,10 @@
     </mat-form-field>
   </form>
   <div class="input-action__detail">
-    <div style="width: 24px;" *ngIf="showRemove">
-      <mat-icon class="input-action__detail__remove" [ngClass]="{'disabled': emailFormControl.disabled}" (click)="!emailFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</mat-icon>
-    </div>
-    <div *ngIf="state" class="input-action__detail__result">
-      <app-boolean-indicator *ngIf="state.result === result.SUCCEEDED || state.result === result.FAILED" [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false" [showText]="false"></app-boolean-indicator>
+    <mat-icon *ngIf="showRemove" class="input-action__detail__remove" [ngClass]="{'disabled': emailFormControl.disabled}" (click)="!emailFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</mat-icon>
+    <ng-container *ngIf="state && result && (state.result === result.SUCCEEDED || state.result === result.FAILED)" class="input-action__detail__result">
+      <app-boolean-indicator [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false" [showText]="false"></app-boolean-indicator>
       <span>{{ state.message }}</span>
-    </div>
+    </ng-container>
   </div>
 </div>

@@ -15,17 +15,17 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
 
 const { proxyAPIVersion } = environment;
 
-export interface UserInviteResponse {
+export interface UserInviteBaseResponse {
   error: boolean;
   errorMessage?: string;
 }
 
-export interface UserInviteSendUaaResponse {
-  failed_invites: UserInviteSendUaaSectionResponse[];
-  new_invites: UserInviteSendUaaSectionResponse[];
+export interface UserInviteResponseUaa {
+  failed_invites: UserInviteResponseUaaSection[];
+  new_invites: UserInviteResponseUaaSection[];
 }
 
-export interface UserInviteSendUaaSectionResponse {
+export interface UserInviteResponseUaaSection {
   email: string;
   errorCode: string;
   errorMessage: string;
@@ -34,7 +34,7 @@ export interface UserInviteSendUaaSectionResponse {
   userid: string;
 }
 
-export interface UserInviteSendResponse extends UserInviteResponse, UserInviteSendUaaResponse {
+export interface UserInviteSendResponse extends UserInviteBaseResponse, UserInviteResponseUaa {
 }
 
 export enum UserInviteSendSpaceRoles {
@@ -43,7 +43,7 @@ export enum UserInviteSendSpaceRoles {
   manager = 'manager'
 }
 
-interface UserInviteSendRequest {
+interface UserInviteSend {
   org: string;
   space: string;
   spaceRoles: { [spaceRole: string]: boolean };
@@ -72,7 +72,7 @@ export class UserInviteService {
     );
   }
 
-  configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteResponse> {
+  configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
     const formData: FormData = new FormData();
     formData.append('client_id', clientID);
     formData.append('client_secret', clientSecret);
@@ -110,7 +110,7 @@ export class UserInviteService {
     return obs$;
   }
 
-  unconfigure(cfGUID: string): Observable<UserInviteResponse> {
+  unconfigure(cfGUID: string): Observable<UserInviteBaseResponse> {
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     return this.http.delete(url).pipe(
       map(v => {
@@ -151,7 +151,7 @@ export class UserInviteService {
 
   invite(cfGuid: string, orgGuid: string, spaceGuid: string, spaceRole: UserInviteSendSpaceRoles, emails: string[]):
     Observable<UserInviteSendResponse> {
-    const users: UserInviteSendRequest = {
+    const users: UserInviteSend = {
       org: orgGuid,
       space: spaceGuid,
       spaceRoles: {
@@ -160,7 +160,7 @@ export class UserInviteService {
       emails
     };
     return this.http.post(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
-      map((response: UserInviteSendUaaResponse) => ({
+      map((response: UserInviteResponseUaa) => ({
         error: response.failed_invites.length > 0,
         ...response
       })),

@@ -1,21 +1,22 @@
 .input-action {
   align-items: center;
   display: flex;
-  // flex-direction: row;
 
-   > *, &__detail > *, &__detail__result app-boolean-indicator { // TODO: RC flatten
-    margin-right: 10px;
-   }
+  $margin: 10px;
 
   &__form {
     align-items: center;
     flex: 1;
     flex-direction: row;
+    margin-right: $margin;
   }
   &__detail {
     align-items: center;
     display: flex;
     margin-top: 20px;
+    > * {
+      margin-right: $margin;
+    }
 
     &__remove {
       cursor: pointer;
@@ -25,13 +26,8 @@
       }
     }
 
-    &__result {
-      align-items: center;
-      display: flex;
-      app-boolean-indicator {
-        // margin-right: 10px;
-      }
+    app-boolean-indicator {
+      width: 20px;
     }
   }
-
 }

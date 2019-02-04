@@ -29,6 +29,9 @@ export interface StackedInputActionsState {
 
 export interface StackedInputActionsUpdate { values: { [key: string]: string }; valid: boolean; }
 
+/**
+ * Host for a collection of StackedInputActionComponent components
+ */
 @Component({
   selector: 'app-stacked-input-actions',
   templateUrl: './stacked-input-actions.component.html',
@@ -55,7 +58,6 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       update: StackedInputActionUpdate
     }
   } = {};
-  // private valueState: { [key: number]: StackedInputActionUpdate } = {};
   private subs: Subscription[] = [];
 
   constructor(

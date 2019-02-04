@@ -48,9 +48,6 @@ import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
-
 interface Org { metadata: { guid: string }; }
 interface CfUserWithWarning extends CfUser {
   showWarning: boolean;

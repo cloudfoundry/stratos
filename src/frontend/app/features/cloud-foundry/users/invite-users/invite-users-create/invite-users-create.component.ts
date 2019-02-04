@@ -96,7 +96,7 @@ export class InviteUsersCreateComponent implements OnInit {
 
     // Mark all as processing
     const processingState: StackedInputActionsState[] = [];
-    Object.entries(this.users.values).forEach(([key, value]) => {
+    Object.keys(this.users.values).forEach(key => {
       processingState.push({
         key,
         result: StackedInputActionResult.PROCESSING,
@@ -113,10 +113,10 @@ export class InviteUsersCreateComponent implements OnInit {
       Object.values(this.users.values)).pipe(
         map(res => {
           if (!res.error && res.failed_invites.length === 0) {
-            // Clear all paginations of type users for this endpoint
+            // Success! Clear all paginations of type users such that lists can be refetched with new user.s
             this.store.dispatch(new ClearPaginationOfType(cfUserSchemaKey));
           } else if (res.failed_invites.length > 0) {
-            // Push failures back into components
+            // One or more failed. Push failures back into components
             const newState: StackedInputActionsState[] = [];
             Object.entries(this.users.values).forEach(([key, email]) => {
               // Update failed users
@@ -139,14 +139,14 @@ export class InviteUsersCreateComponent implements OnInit {
                 });
                 return;
               }
-              // Can't find user for unknown reason, set to failed to can try again
+              // Can't find user for unknown reason, set to failed so it can be tried again
               newState.push({
                 key,
                 result: StackedInputActionResult.FAILED,
                 message: 'No response for user found'
               });
             });
-            // We've just come from a valid state, so this should be valid again
+            // We've just come from a valid state, so form should be valid again
             this.stepValid.next(true);
             this.stateIn.next(newState);
             res.errorMessage = 'Failed to invite one or more users. Please address per user message and try again';
