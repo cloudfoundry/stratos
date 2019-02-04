@@ -9,6 +9,7 @@ import {
   CLEAR_PAGINATION_OF_ENTITY,
   CLEAR_PAGINATION_OF_TYPE,
   CREATE_PAGINATION,
+  REMOVE_ID_FROM_PAGINATION,
   REMOVE_PARAMS,
   RESET_PAGINATION,
   SET_CLIENT_FILTER,
@@ -17,10 +18,9 @@ import {
   SET_INITIAL_PARAMS,
   SET_PAGE,
   SET_PAGE_BUSY,
-  SET_PAGINATION_MAX_REACHED,
   SET_PARAMS,
   SET_RESULT_COUNT,
-  REMOVE_ID_FROM_PAGINATION,
+  UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -31,6 +31,7 @@ import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-o
 import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { paginationMaxReached } from './pagination-reducer-max-reached';
+import { paginationRemoveId } from './pagination-reducer-remove-id';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
@@ -44,7 +45,6 @@ import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
-import { paginationRemoveId } from './pagination-reducer-remove-id';
 
 export const defaultClientPaginationPageSize = 9;
 
@@ -158,7 +158,7 @@ function paginate(action, state, updatePagination) {
     return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
   }
 
-  if (action.type === SET_PAGINATION_MAX_REACHED) {
+  if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action);
   }
 

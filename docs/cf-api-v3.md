@@ -17,10 +17,11 @@ Previously...
 - When fetching an entity, any referenced child entity or list of entities were omitted. To have them included the property name was
   provided in an `include-relations` parameter. The covered direct child entities and children of that child entity
 - Lists of entities that were bigger than 50 were simply omitted.
+
 Now, from my understanding, ...
 - Child entities (single or lists) are referenced by guid in the parent's `relationships` section
   - Pagination of lists is only proposed - https://github.com/cloudfoundry/cc-api-v3-style-guide#proposal-pagination-of-related-resources
-- Child entities are also listed, with by url to fetch (like the old `<property>_url` property), in the `links` section.
+- Child entities are also listed, with a url to fetch (like the old `<property>_url` property), in the `links` section.
 - An `include` parameter can be supplied which will add an `included` section to the entity
 - An entity in the `included` section is in the same format as the parent
 - `include` has very limited implementation
@@ -129,8 +130,8 @@ Then Stratos should either ..
   - One by one?
   - All together once v2 parity is reached?
 - Will duplicated `include`ed entities only appear once in a top level (entity or pagination) `included`? For example..conceptually..
-  - Fetch an application, the application's space, the application's routes and application routes spaces in a single request
-  - If the application space appeared in the route's space, would it only appear once in the application `included`... or appear twice (once 
+  - Fetch an application, the application's space, the application's routes and application routes spaces all in a single request
+  - If the application's space appeared in the route's space, would it only appear once in the application's`included` section... or appear twice (once 
     in application `included` and again in route `included`)?
 - The style guide references a way to fetch one to many relationships as `/v3/apps/:app_guid/relationships/routes` (https://github.com/cloudfoundry/cc-api-v3-style-guide#viewing-1)
   - This doesn't seem to work (404), is it yet to be implemented?

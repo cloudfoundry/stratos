@@ -43,7 +43,6 @@ import {
 import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
-import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -201,7 +200,6 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     ListComponent,
     ...listCardComponents,
     ...listTableComponents,
-    CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
     FileInputComponent,
@@ -302,7 +300,6 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     DialogConfirmComponent,
     CardAppUptimeComponent,
     ListComponent,
-    CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
     FileInputComponent,

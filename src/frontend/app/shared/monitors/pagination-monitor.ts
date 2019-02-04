@@ -11,16 +11,12 @@ import {
   publishReplay,
   refCount,
   withLatestFrom,
-  tap,
 } from 'rxjs/operators';
 
-import {
-  getAPIRequestDataState,
-  selectEntities,
-} from '../../store/selectors/api.selectors';
-import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { AppState } from '../../store/app-state';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
+import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 
 export class PaginationMonitor<T = any> {
@@ -70,14 +66,6 @@ export class PaginationMonitor<T = any> {
   }
 
   /**
-   * Does the current page have an error.
-   * @param pagination
-   */
-  private hasError(pagination: PaginationEntityState) {
-    return pagination && this.getCurrentPageRequestInfo(pagination).error;
-  }
-
-  /**
    * Gets the request info for the current page.
    * @param pagination
    */
@@ -90,7 +78,7 @@ export class PaginationMonitor<T = any> {
       !pagination.pageRequests[pagination.currentPage]
     ) {
       return {
-        busy: false,
+        busy: true,
         error: false,
         message: '',
       };
@@ -147,7 +135,7 @@ export class PaginationMonitor<T = any> {
     return pagination$.pipe(
       // Improve efficiency
       observeOn(asapScheduler),
-      filter(pagination => this.hasPage(pagination)),
+      filter(pagination => this.hasPage(pagination) && !pagination.currentlyMaxed),
       distinctUntilChanged(this.isPageSameIsh),
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
