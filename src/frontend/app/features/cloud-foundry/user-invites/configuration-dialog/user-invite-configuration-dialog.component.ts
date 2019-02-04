@@ -1,21 +1,19 @@
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
-import { environment } from '../../../../../environments/environment';
-import { UserInviteService } from '../user-invite.service';
-import { tap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
+import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
+import { UserInviteService } from '../user-invite.service';
 
 
 @Component({
-  selector: 'app-user-invite-configurattion-dialog',
+  selector: 'app-user-invite-configuration-dialog',
   templateUrl: './user-invite-configuration-dialog.component.html',
   styleUrls: ['./user-invite-configuration-dialog.component.scss']
 })
-export class UserInviteConfigurationDialogComponent implements OnDestroy {
+export class UserInviteConfigurationDialogComponent {
   connecting$: Observable<boolean>;
   connectingError$: Observable<boolean>;
   fetchingInfo$: Observable<boolean>;
@@ -52,29 +50,21 @@ export class UserInviteConfigurationDialogComponent implements OnDestroy {
       clientID: ['', Validators.required],
       clientSecret: ['', Validators.required],
     });
-
-    // this.setupObservables();
-    // this.setupSubscriptions();
   }
 
   submit() {
     this.userInviteService.configure(
       this.data.guid,
       this.endpointForm.value.clientID,
-      this.endpointForm.value.clientSecret).pipe(
-      tap(v => {
-        console.log('****GOT VALUE');
-        console.log(v);
-      })
-    ).subscribe((v: any) => {
-      console.log(v);
-      if (v.error) {
-        this.snackBar.open(v.errorMessage);
-      } else {
-        this.dialogRef.close();
-      }
-    });
+      this.endpointForm.value.clientSecret)
+      .pipe(
+        first()
+      ).subscribe((v: any) => {
+        if (v.error) {
+          this.snackBar.open(v.errorMessage);
+        } else {
+          this.dialogRef.close();
+        }
+      });
   }
-
-  ngOnDestroy() {}
 }

@@ -28,9 +28,11 @@ import {
 import { IOrganization } from '../../../../../core/cf-api.types';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
+/* tslint:disable:max-line-length */
 import {
   TableCellRoleOrgSpaceComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
+/* tslint:enable:max-line-length */
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';

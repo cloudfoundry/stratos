@@ -68,33 +68,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterView
     }));
 
     // Handle change of state from outside
-    this.subs.push(this.stateIn$.subscribe(incState => {
-
-      if (!incState) {
-        this.state = incState;
-        this.emailFormControl.enable();
-        return;
-      }
-      switch (incState.result) {
-        case StackedInputActionResult.PROCESSING:
-        case StackedInputActionResult.SUCCEEDED:
-          this.state = incState;
-          this.emailFormControl.disable();
-          break;
-        case StackedInputActionResult.FAILED:
-          this.state = incState;
-          this.emailFormControl.enable();
-          break;
-        case StackedInputActionResult.OTHER_VALUES_UPDATED:
-          const oldValues = this.otherValues || [];
-          this.otherValues = incState.otherValues;
-          if (!this.compare(oldValues, this.otherValues)) {
-            // Force validation
-            this.emailFormControl.setValue(this.emailFormControl.value);
-          }
-          break;
-      }
-    }));
+    this.subs.push(this.stateIn$.subscribe(this.handleStateIn.bind(this)));
   }
 
   ngOnDestroy(): void {
@@ -125,6 +99,33 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterView
     }
 
     return a.filter((aString) => b.find(bString => aString === bString)).length === a.length;
+  }
+
+  private handleStateIn(incState: StackedInputActionsState) {
+    if (!incState) {
+      this.state = incState;
+      this.emailFormControl.enable();
+      return;
+    }
+    switch (incState.result) {
+      case StackedInputActionResult.PROCESSING:
+      case StackedInputActionResult.SUCCEEDED:
+        this.state = incState;
+        this.emailFormControl.disable();
+        break;
+      case StackedInputActionResult.FAILED:
+        this.state = incState;
+        this.emailFormControl.enable();
+        break;
+      case StackedInputActionResult.OTHER_VALUES_UPDATED:
+        const oldValues = this.otherValues || [];
+        this.otherValues = incState.otherValues;
+        if (!this.compare(oldValues, this.otherValues)) {
+          // Force validation
+          this.emailFormControl.setValue(this.emailFormControl.value);
+        }
+        break;
+    }
   }
 
 }
