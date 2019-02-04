@@ -280,9 +280,12 @@ export class CfUserService {
               }))
             );
           } else {
-            return observableOf({
+            return observableOf<PaginationObservables<APIResource<CfUser>>>({
               pagination$: observableOf(null),
-              entities$: observableOf(null)
+              entities$: observableOf(null),
+              hasEntities$: observableOf(false),
+              totalEntities$: observableOf(0),
+              fetchingEntities$: observableOf(false),
             });
           }
         }),

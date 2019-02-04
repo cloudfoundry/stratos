@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -30,7 +30,10 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
@@ -58,10 +61,7 @@ export class CloudFoundryEndpointService {
   hasSSHAccess$: Observable<boolean>;
   totalMem$: Observable<number>;
   paginationSubscription: any;
-  allApps$: Observable<APIResource<IApp>[]>;
-  hasAllApps$: Observable<boolean>;
-  loadingApps$: Observable<boolean>;
-  totalApps$: Observable<number>;
+  appsPagObs: PaginationObservables<APIResource<IApp>>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
   info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
@@ -172,34 +172,12 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObservables() {
-
-    const pagObs = getPaginationObservables<APIResource<IApp>>({
+    const paginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey));
+    this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
-      paginationMonitor: this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey))
+      paginationMonitor
     });
-
-    this.allApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
-      switchMap(() => pagObs.pagination$),
-      filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-      switchMap(pagination => pagination.maxedResults ? observableOf(null) : pagObs.entities$),
-      publishReplay(1),
-      refCount()
-    );
-
-    this.loadingApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
-      switchMap(() => pagObs.pagination$),
-      filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[pagination.currentPage]),
-      map(pagination => pagination.pageRequests[pagination.currentPage].busy)
-    );
-
-    this.hasAllApps$ = this.allApps$.pipe(
-      map((allApps: APIResource<IApp>[]) => !!allApps)
-    );
-
-    this.totalApps$ = pagObs.pagination$.pipe(
-      map(pag => pag.totalResults)
-    );
   }
 
   private constructSecondaryObservable() {
@@ -209,7 +187,7 @@ export class CloudFoundryEndpointService {
         p.entity.entity.app_ssh_host_key_fingerprint &&
         p.entity.entity.app_ssh_oauth_client))
     );
-    this.totalMem$ = this.allApps$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
+    this.totalMem$ = this.appsPagObs.entities$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
 
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')
@@ -219,7 +197,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
-    return this.allApps$.pipe(
+    return this.appsPagObs.entities$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
         const spaces = org.entity.spaces || [];
@@ -230,7 +208,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getAppsInSpaceViaAllApps(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
-    return this.allApps$.pipe(
+    return this.appsPagObs.entities$.pipe(
       filter(allApps => !!allApps),
       map(apps => {
         return apps.filter(a => a.entity.space_guid === space.metadata.guid);

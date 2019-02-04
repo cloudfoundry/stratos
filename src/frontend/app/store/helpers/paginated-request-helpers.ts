@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
-import { PaginationMaxedResults } from '../actions/pagination.actions';
+import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
 import { CFResponse } from '../types/api.types';
 
@@ -127,10 +127,12 @@ export function flattenPagination<T, C>(
     first(),
     mergeMap(firstResData => {
       const allResults = flattener.getTotalResults(firstResData);
-      // If we have too many results only return basic first page information
-      if (maxCount && allResults > maxCount) {
-        store.dispatch(new PaginationMaxedResults(allResults, entityKey, paginationKey));
-        return forkJoin([flattener.clearResults(firstResData, allResults)]);
+      if (maxCount) {
+        store.dispatch(new UpdatePaginationMaxedState(maxCount, allResults, entityKey, paginationKey));
+        if (allResults > maxCount) {
+          // If we have too many results only return basic first page information
+          return forkJoin([flattener.clearResults(firstResData, allResults)]);
+        }
       }
       // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
       // Make those requests
