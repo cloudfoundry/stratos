@@ -1,3 +1,4 @@
+import { map } from 'rxjs/operators';
 import { IRecentlyVisitedState, IRecentlyVisitedEntities, IEntityHit, IRecentlyVisitedEntity } from '../../types/recently-visited.types';
 import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import {
@@ -27,7 +28,13 @@ export function recentlyVisitedReducer(
       return cleanRecentsList(state, [removeEndpointAction.guid]);
     case GET_ENDPOINTS_SUCCESS:
       const getAllAction = action as GetAllEndpointsSuccess;
-      return cleanRecentsList(state, getAllAction.payload.result, true);
+      const connectedIds = Object.values(getAllAction.payload.entities.endpoint).reduce((ids, endpoint) => {
+        if (endpoint.user) {
+          ids.push(endpoint.guid);
+        }
+        return ids;
+      }, []);
+      return cleanRecentsList(state, connectedIds, true);
   }
   return state;
 }
@@ -64,18 +71,26 @@ function trimRecent(hits: IEntityHit[]) {
   return hits;
 }
 
-function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids?: string[], completeList = false): IRecentlyVisitedState {
+function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids?: string[], inclusive = false): IRecentlyVisitedState {
   const isInList = endpointIdIsInList();
+  if (endpointGuids && !endpointGuids.length) {
+    return inclusive ? {
+      entities: {},
+      hits: []
+    } : state;
+  }
   if (!endpointGuids) {
     endpointGuids = state.hits.map(hit => hit.guid);
-    completeList = true;
+    inclusive = true;
   }
   const entities = Object.keys(state.entities).reduce((reducedRecents, currentRecentGuid) => {
     const currentRecent = state.entities[currentRecentGuid];
-    if (isInList(currentRecent, endpointGuids)) {
-      if (completeList) {
-        reducedRecents[currentRecentGuid] = currentRecent;
-      }
+    const inList = isInList(currentRecent, endpointGuids);
+    if (
+      (!inList && !inclusive) ||
+      (inList && inclusive)
+    ) {
+      reducedRecents[currentRecentGuid] = currentRecent;
     }
     return reducedRecents;
   }, {});
