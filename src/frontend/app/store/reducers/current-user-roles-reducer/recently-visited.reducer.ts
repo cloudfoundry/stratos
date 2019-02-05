@@ -1,5 +1,10 @@
-import { map } from 'rxjs/operators';
-import { IRecentlyVisitedState, IRecentlyVisitedEntities, IEntityHit, IRecentlyVisitedEntity } from '../../types/recently-visited.types';
+import {
+  IRecentlyVisitedState,
+  IRecentlyVisitedEntities,
+  IEntityHit,
+  IRecentlyVisitedEntity,
+  IRecentlyVisitedEntityDated
+} from '../../types/recently-visited.types';
 import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import {
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -10,13 +15,15 @@ import {
 } from '../../actions/endpoint.actions';
 import { Action } from '@ngrx/store';
 
-const MAX_RECENT_COUNT = 200;
+const MAX_RECENT_COUNT = 100;
+
+const getDefaultState = () => ({
+  entities: {},
+  hits: []
+});
 
 export function recentlyVisitedReducer(
-  state: IRecentlyVisitedState = {
-    entities: {},
-    hits: []
-  },
+  state: IRecentlyVisitedState = getDefaultState(),
   action: Action
 ): IRecentlyVisitedState {
   switch (action.type) {
@@ -49,39 +56,42 @@ function addNewHit(state: IRecentlyVisitedState, action: AddRecentlyVisitedEntit
     newHit,
     ...trimRecent(state.hits),
   ];
-  if (!entities[newHit.guid]) {
-    return {
-      entities: {
-        ...entities,
-        [newHit.guid]: action.recentlyVisited
-      },
-      hits
-    };
-  }
-  return {
-    entities,
+  const newEntities = getEntities(entities, newHit, action.recentlyVisited);
+  const newState = {
+    entities: newEntities,
     hits
   };
+  return shouldTrim(state.hits) ? cleanEntities(newState) : newState;
+}
+
+function getEntities(entities: IRecentlyVisitedEntities, newHit: IEntityHit, recentlyVisited: IRecentlyVisitedEntityDated) {
+  if (!entities[newHit.guid]) {
+    return {
+      ...entities,
+      [newHit.guid]: recentlyVisited
+    };
+  }
+  return entities;
 }
 
 function trimRecent(hits: IEntityHit[]) {
-  if (hits.length > MAX_RECENT_COUNT) {
+  if (shouldTrim(hits)) {
     return hits.slice(0, MAX_RECENT_COUNT - 1);
   }
   return hits;
 }
 
+function shouldTrim(hits: IEntityHit[]) {
+  return hits.length >= MAX_RECENT_COUNT;
+}
+
 function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids?: string[], inclusive = false): IRecentlyVisitedState {
   const isInList = endpointIdIsInList();
-  if (endpointGuids && !endpointGuids.length) {
-    return inclusive ? {
-      entities: {},
-      hits: []
-    } : state;
-  }
   if (!endpointGuids) {
-    endpointGuids = state.hits.map(hit => hit.guid);
-    inclusive = true;
+    return state;
+  }
+  if (!endpointGuids.length) {
+    return inclusive ? getDefaultState() : state;
   }
   const entities = Object.keys(state.entities).reduce((reducedRecents, currentRecentGuid) => {
     const currentRecent = state.entities[currentRecentGuid];
@@ -103,6 +113,21 @@ function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids?: string[]
   return {
     entities,
     hits
+  };
+}
+
+function cleanEntities(state: IRecentlyVisitedState) {
+  const entities = Object.keys(state.entities).reduce((reducedRecents, currentRecentGuid) => {
+    const currentRecent = state.entities[currentRecentGuid];
+    const hasHit = state.hits.find(hit => hit.guid === currentRecentGuid);
+    if (hasHit) {
+      reducedRecents[currentRecentGuid] = currentRecent;
+    }
+    return reducedRecents;
+  }, {});
+  return {
+    entities,
+    hits: state.hits
   };
 }
 
