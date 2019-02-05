@@ -50,7 +50,8 @@ describe('CF - Top Level - ', () => {
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(`${defaultCf.creds.admin.username} (Administrator)`);
-        expect(cfPage.isUserInviteIsConfigured(true)).toBeFalsy();
+        expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
+        expect(cfPage.canConfigureUserInvite()).toBeTruthy();
       });
 
       it('Walk Tabs', () => {
@@ -86,7 +87,8 @@ describe('CF - Top Level - ', () => {
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
-        expect(cfPage.isUserInviteIsConfigured(false)).toBeFalsy();
+        expect(cfPage.isUserInviteConfigured(false)).toBeFalsy();
+        expect(cfPage.canConfigureUserInvite()).toBeFalsy();
       });
 
       it('Walk Tabs', () => {

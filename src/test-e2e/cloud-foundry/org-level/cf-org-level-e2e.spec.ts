@@ -3,10 +3,10 @@ import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CFPage } from '../../po/cf-page.po';
 import { ListComponent } from '../../po/list.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
-import { MetaCardTitleType } from '../../po/meta-card.po';
 
 describe('CF - Org Level - ', () => {
 

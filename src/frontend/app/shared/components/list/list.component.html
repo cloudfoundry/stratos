@@ -63,7 +63,7 @@
             </button>
           </div>
           <!-- Global actions (those not applied to specific rows) -->
-          <div *ngIf="!(isAddingOrSelecting$ | async) && globalActions?.length > 0">
+          <div *ngIf="!(isAddingOrSelecting$ | async) && globalActions?.length > 0" class="list-component__header__right-globals">
             <ng-container *ngFor="let action of globalActions">
               <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionGlobal(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
                 <mat-icon>{{action.icon}}</mat-icon>
