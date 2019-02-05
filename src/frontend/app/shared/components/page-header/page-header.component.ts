@@ -50,12 +50,14 @@ export class PageHeaderComponent {
         const { name, routerLink } = mapperFunction(favorite.metadata);
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
+          entityType: favorite.entityType,
+          endpointType: favorite.endpointType,
+          entityId: favorite.entityId,
           name,
           routerLink,
           prettyType,
           endpointId: favorite.endpointId,
-          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType,
-          favorite
+          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType
         }));
       }
     }

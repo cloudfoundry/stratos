@@ -45,6 +45,8 @@ import { EndpointModel } from './store/types/endpoint.types';
 import { IRequestDataState } from './store/types/entity.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './store/types/user-favorites.types';
 import { XSRFModule } from './xsrf.module';
+import { recentlyVisitedSelector } from './store/selectors/recently-visitied.selectors';
+import { SetRecentlyVisitedEntityAction } from './store/actions/recently-visited.actions';
 
 
 // Create action for router navigation. See
@@ -127,26 +129,46 @@ export class AppModule {
     this.registerCfFavoriteMappers();
     this.userFavoriteManager = new UserFavoriteManager(store);
     const allFavs$ = this.userFavoriteManager.getAllFavorites();
-    this.store.select(getAPIRequestDataState)
-      .pipe(
-        debounceTime(2000),
-        withLatestFrom(allFavs$)
-      )
-      .subscribe(
-        ([entities, [favoriteGroups, favorites]]) => {
-          Object.keys(favoriteGroups).forEach(endpointId => {
-            const favoriteGroup = favoriteGroups[endpointId];
-            if (!favoriteGroup.ethereal) {
-              const endpointFavorite = favorites[endpointId];
-              this.syncFavorite(endpointFavorite, entities);
-            }
-            favoriteGroup.entitiesIds.forEach(id => {
-              const favorite = favorites[id];
-              this.syncFavorite(favorite, entities);
-            });
+    const recents$ = this.store.select(recentlyVisitedSelector);
+    const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));
+    debouncedApiRequestData$.pipe(
+      withLatestFrom(allFavs$)
+    ).subscribe(
+      ([entities, [favoriteGroups, favorites]]) => {
+        Object.keys(favoriteGroups).forEach(endpointId => {
+          const favoriteGroup = favoriteGroups[endpointId];
+          if (!favoriteGroup.ethereal) {
+            const endpointFavorite = favorites[endpointId];
+            this.syncFavorite(endpointFavorite, entities);
+          }
+          favoriteGroup.entitiesIds.forEach(id => {
+            const favorite = favorites[id];
+            this.syncFavorite(favorite, entities);
           });
-        }
-      );
+        });
+      }
+    );
+
+    debouncedApiRequestData$.pipe(
+      withLatestFrom(recents$)
+    ).subscribe(
+      ([entities, recents]) => {
+        Object.values(recents.entities).forEach(recentEntity => {
+          const mapper = favoritesConfigMapper.getMapperFunction(recentEntity);
+          if (entities[recentEntity.entityType] && entities[recentEntity.entityType][recentEntity.entityId]) {
+            const entity = entities[recentEntity.entityType][recentEntity.entityId];
+            const entityToMetadata = favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
+            const name = mapper(entityToMetadata).name;
+            if (name && name !== recentEntity.name) {
+              this.store.dispatch(new SetRecentlyVisitedEntityAction({
+                ...recentEntity,
+                name
+              }));
+            }
+          }
+        });
+      }
+    );
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: IRequestDataState) {

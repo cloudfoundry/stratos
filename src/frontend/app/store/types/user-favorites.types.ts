@@ -9,7 +9,7 @@ export const userFavoritesPaginationKey = 'userFavorites';
  */
 export interface IFavoriteTypeInfo {
   endpointType: string;
-  entityType?: string;
+  entityType: string;
 }
 
 export interface IFavoriteMetadata {

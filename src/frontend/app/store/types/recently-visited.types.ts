@@ -1,4 +1,4 @@
-import { UserFavorite, IFavoriteMetadata } from './user-favorites.types';
+import { IFavoriteTypeInfo } from './user-favorites.types';
 
 export interface IEntityHit {
   guid: string;
@@ -15,12 +15,12 @@ export interface IRecentlyVisitedState {
 export interface IRecentlyVisitedEntityDated extends IRecentlyVisitedEntity {
   date: number;
 }
-export interface IRecentlyVisitedEntity {
+export interface IRecentlyVisitedEntity extends IFavoriteTypeInfo {
   guid: string;
   name: string;
+  entityId: string;
   prettyType: string;
   prettyEndpointType: string;
   endpointId: string;
   routerLink?: string;
-  favorite?: UserFavorite<IFavoriteMetadata>;
 }

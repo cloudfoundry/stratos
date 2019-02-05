@@ -5,7 +5,7 @@ import {
   IRecentlyVisitedEntity,
   IRecentlyVisitedEntityDated
 } from '../../types/recently-visited.types';
-import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
+import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import {
   DISCONNECT_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
@@ -29,6 +29,15 @@ export function recentlyVisitedReducer(
   switch (action.type) {
     case AddRecentlyVisitedEntityAction.ACTION_TYPE:
       return addNewHit(state, action as AddRecentlyVisitedEntityAction);
+    case SetRecentlyVisitedEntityAction.ACTION_TYPE:
+      const setAction = action as SetRecentlyVisitedEntityAction;
+      return {
+        hits: state.hits,
+        entities: {
+          ...state.entities,
+          [setAction.recentlyVisited.guid]: setAction.recentlyVisited
+        }
+      };
     case DISCONNECT_ENDPOINTS_SUCCESS:
     case UNREGISTER_ENDPOINTS_SUCCESS:
       const removeEndpointAction = action as DisconnectEndpoint;

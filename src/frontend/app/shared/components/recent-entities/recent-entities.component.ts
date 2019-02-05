@@ -8,6 +8,7 @@ import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.sele
 import { recentlyVisitedSelector } from '../../../store/selectors/recently-visitied.selectors';
 import { IRecentlyVisitedEntity, IEntityHit, IRecentlyVisitedState } from '../../../store/types/recently-visited.types';
 import { AppState } from './../../../store/app-state';
+import { endpointSchemaKey } from '../../../store/helpers/entity-factory';
 interface IRelevanceModifier {
   time: number;
   modifier: number;
@@ -125,21 +126,18 @@ class RenderableRecent {
   public mostRecentHit: moment.Moment;
   public subText$: Observable<string>;
   constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
-    if (entity.favorite) {
-      if (isEndpointTypeFavorite(entity.favorite)) {
-        this.subText$ = observableOf(entity.prettyType);
-      } else {
-        this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
-          map(endpoints => {
-            if (Object.keys(endpoints).length > 1) {
-              return `${entity.prettyType} - ${endpoints[entity.favorite.endpointId].name}  (${entity.prettyEndpointType})`;
-            }
-            return entity.prettyType;
-          })
-        );
-      }
+    console.log(entity.entityType);
+    if (entity.entityType === endpointSchemaKey) {
+      this.subText$ = observableOf(entity.prettyType);
     } else {
-      this.subText$ = observableOf(`${entity.prettyEndpointType} - ${entity.prettyType}`);
+      this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
+        map(endpoints => {
+          if (Object.keys(endpoints).length > 1) {
+            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}  (${entity.prettyEndpointType})`;
+          }
+          return entity.prettyType;
+        })
+      );
     }
   }
 }

@@ -23,11 +23,6 @@ import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
 import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
-import { localStorageSync } from 'ngrx-store-localstorage';
-
-export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return localStorageSync({ keys: ['recentlyVisited'], rehydrate: true })(reducer);
-}
 
 export function logger(reducer) {
   // default, no options
@@ -55,14 +50,13 @@ export const appReducers = {
   recentlyVisited: recentlyVisitedReducer
 } as ActionReducerMap<{}>;
 
-const metaReducers = [localStorageSyncReducer];
+const metaReducers = [];
 if (!environment.production) {
   metaReducers.push(storeFreeze);
   if (environment.logEnableConsoleActions) {
     metaReducers.push(logger);
   }
 }
-
 
 const store = StoreModule.forRoot(
   appReducers,
