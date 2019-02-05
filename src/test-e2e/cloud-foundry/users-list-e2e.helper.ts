@@ -119,7 +119,8 @@ export function setupCfUserTableTests(
 
     beforeAll(() => {
       usersTable.waitUntilShown();
-      usersTable.header.waitUntilShown();
+      usersTable.waitForNoLoadingIndicator();
+      usersTable.header.waitUntilShown('User table header');
       usersTable.header.setSearchText(userName);
       expect(usersTable.getTotalResults()).toBe(1);
 
