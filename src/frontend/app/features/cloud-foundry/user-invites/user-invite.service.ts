@@ -71,11 +71,8 @@ export class UserInviteService {
       map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
     );
     this.canConfigure$ = waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
-      map(cf => {
-        console.log(cf.global.isAdmin);
-        return cf.global.isAdmin;
-      })
-    )
+      map(cf => cf.global.isAdmin)
+    );
   }
 
   configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
