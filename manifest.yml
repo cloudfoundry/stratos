@@ -6,6 +6,7 @@ applications:
     timeout: 180
     buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2
     health-check-type: port
+    instances: 2
 #    env:
 # Override CF API endpoint URL inferred from VCAP_APPLICATION env 
 #       CF_API_URL: https://CLOUD_FOUNDRY_API_ENDPOINT
