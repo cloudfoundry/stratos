@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, filter } from 'rxjs/operators';
 import { isEndpointTypeFavorite } from '../../../core/user-favorite-helpers';
 import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../store/selectors/recently-visitied.selectors';
-import { IRecentlyVisitedEntity, IEntityHit, IRecentlyVisitedEntities } from '../../../store/types/recently-visited.types';
+import { IRecentlyVisitedEntity, IEntityHit, IRecentlyVisitedState } from '../../../store/types/recently-visited.types';
 import { AppState } from './../../../store/app-state';
 interface IRelevanceModifier {
   time: number;
@@ -20,8 +20,14 @@ interface IRelevanceModifiers {
 class CountedRecentEntitiesManager {
   private countedRecentEntities: CountedRecentEntities = {};
   private relevanceModifiers: IRelevanceModifiers;
+  private renderableRecents: {
+    [guid: string]: RenderableRecent
+  };
 
-  constructor(mostRecentTime: moment.Moment, private store: Store<AppState>) {
+  constructor(recentState: IRecentlyVisitedState, private store: Store<AppState>) {
+    const { entities, hits } = recentState;
+    const mostRecentTime = hits[0] ? moment(hits[0].date) : moment();
+
     this.relevanceModifiers = {
       high: {
         time: mostRecentTime.subtract(30, 'minute').unix(),
@@ -36,6 +42,26 @@ class CountedRecentEntitiesManager {
         modifier: 1
       }
     };
+
+    this.renderableRecents = Object.keys(entities).reduce((renderableRecents, recentGuid) => {
+      renderableRecents[recentGuid] = new RenderableRecent(entities[recentGuid], store);
+      return renderableRecents;
+    }, {});
+
+    this.addHits(hits);
+  }
+
+  private addHits(hits: IEntityHit[]) {
+    hits.forEach(hit => {
+      this.addHit(hit);
+    });
+    Object.keys(this.renderableRecents).forEach(
+      guid => {
+        if (this.countedRecentEntities[guid]) {
+          this.renderableRecents[guid].mostRecentHit = moment(this.countedRecentEntities[guid].mostRecentHitUnix);
+        }
+      }
+    )
   }
 
   private getModifier(recentEntity: IEntityHit) {
@@ -48,19 +74,27 @@ class CountedRecentEntitiesManager {
     return this.relevanceModifiers.high.modifier;
   }
 
-  public addEntity(recentEntity: IEntityHit) {
+  public addHit(recentEntity: IEntityHit) {
     const modifier = this.getModifier(recentEntity);
     if (!this.countedRecentEntities[recentEntity.guid]) {
       this.countedRecentEntities[recentEntity.guid] = new CountedRecentEntity(recentEntity);
     }
-    this.countedRecentEntities[recentEntity.guid].increment(modifier);
+    this.countedRecentEntities[recentEntity.guid].applyHit(recentEntity, modifier);
   }
 
-  public getSortedEntities(entities: IRecentlyVisitedEntities): INormalizedRecent[] {
+  private sort(sortKey: 'count' | 'mostRecentHitUnix' = 'count') {
     const sortedHits = Object.values(this.countedRecentEntities)
-      .sort((countedA, countedB) => countedB.count - countedA.count)
+      .sort((countedA, countedB) => countedB[sortKey] - countedA[sortKey])
       .map(counted => counted);
-    return sortedHits.map(entity => new INormalizedRecent(entities[entity.hit.guid], this.store));
+    return sortedHits.map(entity => this.renderableRecents[entity.guid]);
+  }
+
+  public getFrecentEntities(): RenderableRecent[] {
+    return this.sort();
+  }
+
+  public getRecentEntities(): RenderableRecent[] {
+    return this.sort('mostRecentHitUnix');
   }
 }
 interface CountedRecentEntities {
@@ -68,16 +102,27 @@ interface CountedRecentEntities {
 }
 
 class CountedRecentEntity {
-  public subText$: Observable<string>;
   public count = 0;
-  public increment(modifier?: number) {
+  public mostRecentHitUnix: number;
+  public guid: string;
+  private checkAndSetDate(date: number) {
+    if (!this.mostRecentHitUnix || date > this.mostRecentHitUnix) {
+      this.mostRecentHitUnix = date;
+    }
+  }
+  public applyHit(hit: IEntityHit, modifier?: number) {
     const amount = modifier ? 1 * modifier : 1;
     this.count += amount;
+    this.checkAndSetDate(hit.date);
   }
-  constructor(readonly hit: IEntityHit) { }
+  constructor(hit: IEntityHit) {
+    this.guid = hit.guid;
+    this.checkAndSetDate(hit.date);
+  }
 }
 
-class INormalizedRecent {
+class RenderableRecent {
+  public mostRecentHit: moment.Moment;
   public subText$: Observable<string>;
   constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
     if (entity.favorite) {
@@ -105,19 +150,24 @@ class INormalizedRecent {
   styleUrls: ['./recent-entities.component.scss']
 })
 export class RecentEntitiesComponent {
-  public recentEntities$: Observable<INormalizedRecent[]>;
+  public recentEntities$: Observable<RenderableRecent[]>;
+  public frecentEntities$: Observable<RenderableRecent[]>;
+  public hasHits$: Observable<boolean>;
   constructor(store: Store<AppState>) {
-
-    this.recentEntities$ = store.select(recentlyVisitedSelector).pipe(
-      map(recentEntities => {
-        const manager = new CountedRecentEntitiesManager(moment(recentEntities[0]), store);
-        recentEntities.hits.forEach(recentEntity => {
-          manager.addEntity(recentEntity);
-        });
-        return manager.getSortedEntities(recentEntities.entities);
-      }),
+    const recemntEntities$ = store.select(recentlyVisitedSelector);
+    this.hasHits$ = recemntEntities$.pipe(
+      map(recentEntities => !!recentEntities.hits && recentEntities.hits.length > 0)
+    );
+    const entitiesManager$ = recemntEntities$.pipe(
+      filter(recentEntities => !!recentEntities.hits && recentEntities.hits.length > 0),
+      map(recentEntities => new CountedRecentEntitiesManager(recentEntities, store)),
+    );
+    this.frecentEntities$ = entitiesManager$.pipe(
+      map(manager => manager.getFrecentEntities()),
       tap(console.log)
     );
-
+    this.recentEntities$ = entitiesManager$.pipe(
+      map(manager => manager.getRecentEntities())
+    );
   }
 }

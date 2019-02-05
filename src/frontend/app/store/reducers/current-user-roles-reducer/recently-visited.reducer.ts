@@ -9,7 +9,7 @@ import {
 } from '../../actions/endpoint.actions';
 import { Action } from '@ngrx/store';
 
-const MAX_RECENT_COUNT = 500;
+const MAX_RECENT_COUNT = 200;
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = {
@@ -38,7 +38,6 @@ function addNewHit(state: IRecentlyVisitedState, action: AddRecentlyVisitedEntit
     guid: action.recentlyVisited.guid,
     date: action.recentlyVisited.date
   } as IEntityHit;
-
   const hits = [
     newHit,
     ...trimRecent(state.hits),
@@ -82,7 +81,7 @@ function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids?: string[]
   }, {});
   const hits = state.hits.reduce((reducedHits, hit) => {
     if (idExistsInEntityList(hit.guid, entities)) {
-      reducedHits.push(idExistsInEntityList);
+      reducedHits.push(hit);
     }
     return reducedHits;
   }, []);

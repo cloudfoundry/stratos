@@ -18,10 +18,11 @@ $spacing: 10px;
     background-color: rgba(0, 0, 0, .02);
   }
 }
-.recent-entities {
-  margin: -($spacing) 0;
-}
 
 .clickable {
   cursor: pointer;
+}
+
+.time {
+  padding-left: 5px;
 }
