@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, tap, filter } from 'rxjs/operators';
-import { isEndpointTypeFavorite } from '../../../core/user-favorite-helpers';
 import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../store/selectors/recently-visitied.selectors';
 import { IRecentlyVisitedEntity, IEntityHit, IRecentlyVisitedState } from '../../../store/types/recently-visited.types';
@@ -18,6 +17,46 @@ interface IRelevanceModifiers {
   medium: IRelevanceModifier;
   low: IRelevanceModifier;
 }
+
+class RenderableRecent {
+  public mostRecentHit: moment.Moment;
+  public subText$: Observable<string>;
+  constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
+    if (entity.entityType === endpointSchemaKey) {
+      this.subText$ = observableOf(entity.prettyType);
+    } else {
+      this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
+        map(endpoints => {
+          if (Object.keys(endpoints).length > 1) {
+            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}  (${entity.prettyEndpointType})`;
+          }
+          return entity.prettyType;
+        })
+      );
+    }
+  }
+}
+
+class CountedRecentEntity {
+  public count = 0;
+  public mostRecentHitUnix: number;
+  public guid: string;
+  private checkAndSetDate(date: number) {
+    if (!this.mostRecentHitUnix || date > this.mostRecentHitUnix) {
+      this.mostRecentHitUnix = date;
+    }
+  }
+  public applyHit(hit: IEntityHit, modifier?: number) {
+    const amount = modifier ? 1 * modifier : 1;
+    this.count += amount;
+    this.checkAndSetDate(hit.date);
+  }
+  constructor(hit: IEntityHit) {
+    this.guid = hit.guid;
+    this.checkAndSetDate(hit.date);
+  }
+}
+
 class CountedRecentEntitiesManager {
   private countedRecentEntities: CountedRecentEntities = {};
   private relevanceModifiers: IRelevanceModifiers;
@@ -62,7 +101,7 @@ class CountedRecentEntitiesManager {
           this.renderableRecents[guid].mostRecentHit = moment(this.countedRecentEntities[guid].mostRecentHitUnix);
         }
       }
-    )
+    );
   }
 
   private getModifier(recentEntity: IEntityHit) {
@@ -100,46 +139,6 @@ class CountedRecentEntitiesManager {
 }
 interface CountedRecentEntities {
   [entityId: string]: CountedRecentEntity;
-}
-
-class CountedRecentEntity {
-  public count = 0;
-  public mostRecentHitUnix: number;
-  public guid: string;
-  private checkAndSetDate(date: number) {
-    if (!this.mostRecentHitUnix || date > this.mostRecentHitUnix) {
-      this.mostRecentHitUnix = date;
-    }
-  }
-  public applyHit(hit: IEntityHit, modifier?: number) {
-    const amount = modifier ? 1 * modifier : 1;
-    this.count += amount;
-    this.checkAndSetDate(hit.date);
-  }
-  constructor(hit: IEntityHit) {
-    this.guid = hit.guid;
-    this.checkAndSetDate(hit.date);
-  }
-}
-
-class RenderableRecent {
-  public mostRecentHit: moment.Moment;
-  public subText$: Observable<string>;
-  constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
-    console.log(entity.entityType);
-    if (entity.entityType === endpointSchemaKey) {
-      this.subText$ = observableOf(entity.prettyType);
-    } else {
-      this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
-        map(endpoints => {
-          if (Object.keys(endpoints).length > 1) {
-            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}  (${entity.prettyEndpointType})`;
-          }
-          return entity.prettyType;
-        })
-      );
-    }
-  }
 }
 
 @Component({
