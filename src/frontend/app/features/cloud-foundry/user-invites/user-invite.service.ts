@@ -10,6 +10,7 @@ import { CurrentUserPermissions } from '../../../core/current-user-permissions.c
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { GetSystemInfo } from '../../../store/actions/system.actions';
 import { AppState } from '../../../store/app-state';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -55,21 +56,26 @@ export class UserInviteService {
 
   configured$: Observable<boolean>;
   enabled$: Observable<boolean>;
+  canConfigure$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
     cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    // TODO: RC Should all users be allowed to see and configure?
-    // waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
-    //   map(cf => cf.global.isAdmin) <--- for admin
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v.entity && !!v.entity.metadata),
       map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
     );
+    this.canConfigure$ = waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
+      map(cf => {
+        console.log(cf.global.isAdmin);
+        return cf.global.isAdmin;
+      })
+    )
   }
 
   configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {

@@ -16,14 +16,19 @@
           </app-metadata-item>
           <app-metadata-item icon="developer_mode" label="SSH Access">{{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available'}}</app-metadata-item>
           <app-metadata-item icon="email" label="User Invitation Support">
-            <div class="user-invites" *ngIf="(userInviteService.configured$ | async); else inviteNotConfigured">
-              Configured - <button color="primary" mat-button (click)="deConfigureUserInvites()" [disabled]="userInviteBusy">Disable</button>
+            <div class="user-invites">
+              <ng-container *ngIf="(userInviteService.canConfigure$ | async) else cannotConfigure">
+                <ng-container *ngIf="(userInviteService.configured$ | async); else inviteNotConfigured">
+                  Configured - <button color="primary" mat-button (click)="deConfigureUserInvites()" [disabled]="userInviteBusy">Disable</button>
+                </ng-container>
+                <ng-template #inviteNotConfigured>
+                  Not Configured - <button color="primary" mat-button (click)="configureUserInvites()">Configure</button>
+                </ng-template>
+              </ng-container>
+              <ng-template #cannotConfigure>
+                {{ (userInviteService.configured$ | async) ? 'Enabled' : 'Disabled' }}
+              </ng-template>
             </div>
-            <ng-template #inviteNotConfigured>
-              <div class="user-invites">
-                Not Configured - <button color="primary" mat-button (click)="configureUserInvites()">Configure</button>
-              </div>
-            </ng-template>
           </app-metadata-item>
         </div>
       </div>
