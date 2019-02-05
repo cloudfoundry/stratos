@@ -64,7 +64,6 @@
     "hammerjs": "^2.0.8",
     "js-yaml": "^3.11.0",
     "moment": "^2.22.2",
-    "ngrx-store-localstorage": "^7.0.0",
     "ngrx-store-logger": "^0.2.1",
     "ngx-moment": "^3.1.0",
     "normalizr": "^3.2.3",
