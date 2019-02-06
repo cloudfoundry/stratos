@@ -134,12 +134,15 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     this.assignMultiConfig();
 
+    console.warn('cf user init: Starting: ', activeRouteCfOrgSpace.cfGuid);
+
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+      tap(cf => console.warn('cf user init: have cf: ', cf)),
       switchMap(cf => // `cf` needed to create the second observable
         combineLatest(
-          observableOf(cf),
-          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space))),
-          userInviteService.canShowInviteUser(activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
+          observableOf(cf).pipe(tap(cf => console.warn('cf user init: cf: ', cf))),
+          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space))).pipe(tap(space => console.warn('cf user init: space: ', space))),
+          userInviteService.canShowInviteUser(activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid).pipe(tap(invite => console.warn('cf user init: canInvite: ', invite))),
         )
       ),
       tap(([cf, action, showInviteUser]) => {

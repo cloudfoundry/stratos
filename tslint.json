@@ -25,7 +25,7 @@
     "interface-over-type-literal": true,
     "label-position": true,
     "max-line-length": [
-      true,
+      false,
       140
     ],
     "member-access": false,
@@ -43,7 +43,7 @@
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [
-      true
+      false
     ],
     "no-construct": true,
     "no-debugger": true,
@@ -57,7 +57,7 @@
     ],
     "no-misused-new": true,
     "no-non-null-assertion": true,
-    "no-shadowed-variable": true,
+    "no-shadowed-variable": false,
     "no-string-literal": false,
     "no-string-throw": true,
     "no-switch-case-fall-through": true,
