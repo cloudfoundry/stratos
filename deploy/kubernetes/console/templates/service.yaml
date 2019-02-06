@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
     app.kubernetes.io/component: "console-ext-service"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-  name: "{{ .Release.Name }}-ext"
+  name: "{{ .Release.Name }}-ui-ext"
 spec:
   selector:
     app: "{{ .Release.Name }}"
@@ -66,9 +66,13 @@ spec:
     protocol: TCP
     targetPort: 443
     {{- if .Values.console.service -}}
-    {{- if .Values.console.service.nodePort }}
+    {{- if and .Values.console.service.nodePort (eq .Values.console.service.type "NodePort") }}
     nodePort: {{ .Values.console.service.nodePort }}
     {{ end }}
+    {{- end }}
+    # If upgrading from earlier version then make sure NodePort is not set
+    {{- if and .Release.IsUpgrade (ne .Values.console.service.type "NodePort") }}
+    nodePort:
     {{- end }}
 ---
 apiVersion: v1
