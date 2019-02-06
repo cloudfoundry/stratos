@@ -27,7 +27,7 @@ There are number of set up steps to execute first.
    ```
 
    > Note - In the dev world use [tophfr/mailcatcher](https://hub.docker.com/r/tophfr/mailcatcher/) in place of an actual SMTP server
-   > (`docker run -d -p 1025:25 1080:80 tophfr/mailcatcher` will bring up image, access the UI via `http://localhost:1080` and use the `config.properties` from above)
+   > (`docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher` will bring up image, access the UI via `http://localhost:1080` and use the `config.properties` from above)
 
 2) Update the default email templates
 

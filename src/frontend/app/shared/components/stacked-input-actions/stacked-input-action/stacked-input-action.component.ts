@@ -1,5 +1,5 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -36,7 +36,7 @@ export interface StackedInputActionUpdate {
   templateUrl: './stacked-input-action.component.html',
   styleUrls: ['./stacked-input-action.component.scss']
 })
-export class StackedInputActionComponent implements OnInit, OnDestroy, AfterViewInit {
+export class StackedInputActionComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @Input() stateIn$: Observable<StackedInputActionsState>;
   @Input() position: number;
@@ -75,7 +75,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterView
     safeUnsubscribe(...this.subs);
   }
 
-  ngAfterViewInit() {
+  ngAfterContentInit() {
     this.inputElement.nativeElement.focus();
   }
 
