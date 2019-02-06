@@ -68,10 +68,10 @@ spec:
     {{- if .Values.console.service -}}
     {{- if and .Values.console.service.nodePort (eq .Values.console.service.type "NodePort") }}
     nodePort: {{ .Values.console.service.nodePort }}
-    {{ end }}
+    {{ else if .Release.IsUpgrade }}
+    nodePort:
     {{- end }}
-    # If upgrading from earlier version then make sure NodePort is not set
-    {{- if and .Release.IsUpgrade (ne .Values.console.service.type "NodePort") }}
+    {{ else if .Release.IsUpgrade }}
     nodePort:
     {{- end }}
 ---
