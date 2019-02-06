@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Params, RouterStateSnapshot } from '@angular/router';
+import { Params, RouterStateSnapshot, RouteReuseStrategy } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
@@ -47,6 +47,7 @@ import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './store/t
 import { XSRFModule } from './xsrf.module';
 import { recentlyVisitedSelector } from './store/selectors/recently-visitied.selectors';
 import { SetRecentlyVisitedEntityAction } from './store/actions/recently-visited.actions';
+import { CustomReuseStrategy } from './route-reuse-stragegy';
 
 
 // Create action for router navigation. See
@@ -110,7 +111,8 @@ export class CustomRouterStateSerializer
     ExtensionService,
     DynamicExtensionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-    { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
+    { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
+    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
   ],
   bootstrap: [AppComponent]
 })

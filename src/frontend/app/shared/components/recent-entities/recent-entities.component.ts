@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
@@ -147,6 +147,9 @@ interface CountedRecentEntities {
   styleUrls: ['./recent-entities.component.scss']
 })
 export class RecentEntitiesComponent {
+  @Input()
+  public history = false;
+
   public recentEntities$: Observable<RenderableRecent[]>;
   public frecentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
@@ -161,7 +164,6 @@ export class RecentEntitiesComponent {
     );
     this.frecentEntities$ = entitiesManager$.pipe(
       map(manager => manager.getFrecentEntities()),
-      tap(console.log)
     );
     this.recentEntities$ = entitiesManager$.pipe(
       map(manager => manager.getRecentEntities())

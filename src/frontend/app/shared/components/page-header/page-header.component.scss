@@ -6,6 +6,9 @@ $bottom-index: $top-index - 1;
   $breadcrumb-padding: 3px;
   position: relative;
   z-index: $top-index;
+  &__history {
+    padding: 0 20px 20px;
+  }
   &__nav-toggle-wrapper {
     margin-right: 20px;
   }

@@ -7,26 +7,17 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MomentModule } from 'ngx-moment';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
-
 import { CoreModule } from '../core/core.module';
-import {
-  ApplicationInstanceChartComponent,
-} from '../features/applications/application/application-instance-chart/application-instance-chart.component';
-import {
-  AddServiceInstanceComponent,
-} from './components/add-service-instance/add-service-instance/add-service-instance.component';
+import { ApplicationInstanceChartComponent } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AddServiceInstanceComponent } from './components/add-service-instance/add-service-instance/add-service-instance.component';
 import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
 import { NoServicePlansComponent } from './components/add-service-instance/no-service-plans/no-service-plans.component';
 import { SelectPlanStepComponent } from './components/add-service-instance/select-plan-step/select-plan-step.component';
 import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
-import {
-  SpecifyDetailsStepComponent,
-} from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import { SpecifyDetailsStepComponent } from './components/add-service-instance/specify-details-step/specify-details-step.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
-import {
-  ApplicationStateIconComponent,
-} from './components/application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconComponent } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
@@ -37,22 +28,16 @@ import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/card-cf-org-usage.component';
-import {
-  CardCfOrgUserDetailsComponent,
-} from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { CardCfOrgUserDetailsComponent } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
 import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
-import {
-  CompactServiceInstanceCardComponent,
-} from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
+import { CompactServiceInstanceCardComponent } from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
 import { ServiceBrokerCardComponent } from './components/cards/service-broker-card/service-broker-card.component';
-import {
-  ServiceRecentInstancesCardComponent,
-} from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
+import { ServiceRecentInstancesCardComponent } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
@@ -62,9 +47,7 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
-import {
-  CreateApplicationStep1Component,
-} from './components/create-application/create-application-step1/create-application-step1.component';
+import { CreateApplicationStep1Component } from './components/create-application/create-application-step1/create-application-step1.component';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
@@ -87,23 +70,17 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import {
-  TableCellRequestMonitorIconComponent,
-} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { TableCellRequestMonitorIconComponent } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
-import {
-  EventTabActorIconPipe,
-} from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { EventTabActorIconPipe } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
-import {
-  MetricsParentRangeSelectorComponent,
-} from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
@@ -125,9 +102,7 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
-import {
-  UploadProgressIndicatorComponent,
-} from './components/upload-progress-indicator/upload-progress-indicator.component';
+import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
@@ -146,7 +121,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
+
 
 @NgModule({
   imports: [
@@ -159,7 +134,6 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     CdkTableModule,
     NgxChartsModule,
     MaterialDesignFrameworkModule,
-    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -261,7 +235,6 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
     MultilineTitleComponent,
-    RecentEntitiesComponent,
   ],
   exports: [
     FormsModule,
@@ -357,8 +330,7 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
     FavoritesMetaCardComponent,
-    FavoritesGlobalListComponent,
-    RecentEntitiesComponent
+    FavoritesGlobalListComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

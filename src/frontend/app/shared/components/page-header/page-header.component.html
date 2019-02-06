@@ -31,6 +31,15 @@
         ">
           |
         </span>
+        <button *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="history">
+          <mat-icon class="page-header__nav-toggle">history</mat-icon>
+        </button>
+        <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">
+          <div class="page-header__history">
+            <h3>History</h3>
+            <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
+          </div>
+        </mat-menu>
         <button *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="menu">
           <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
         </button>

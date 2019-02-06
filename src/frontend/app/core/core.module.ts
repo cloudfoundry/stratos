@@ -24,16 +24,21 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
+import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
+import { MomentModule } from 'ngx-moment';
 
 
 @NgModule({
   imports: [
-    MDAppModule
+    MDAppModule,
+    RouterModule,
+    MomentModule
   ],
   exports: [
     MDAppModule,
     RouterModule,
     FormsModule,
+    MomentModule,
     ReactiveFormsModule,
     LogOutDialogComponent,
     TruncatePipe,
@@ -45,7 +50,8 @@ import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favor
     DotContentComponent,
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
-    EntityFavoriteStarComponent
+    EntityFavoriteStarComponent,
+    RecentEntitiesComponent
   ],
   providers: [
     AuthGuardService,
@@ -71,7 +77,8 @@ import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favor
     DotContentComponent,
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
-    EntityFavoriteStarComponent
+    EntityFavoriteStarComponent,
+    RecentEntitiesComponent
   ],
   entryComponents: [
     LogOutDialogComponent

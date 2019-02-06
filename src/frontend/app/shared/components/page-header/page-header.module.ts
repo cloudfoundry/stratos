@@ -1,3 +1,4 @@
+import { RecentEntitiesComponent } from './../recent-entities/recent-entities.component';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../core/core.module';
@@ -15,7 +16,7 @@ import { ExtensionButtonsComponent } from '../extension-buttons/extension-button
     ExtensionButtonsComponent,
     PageSubheaderComponent,
     PageHeaderComponent,
-    PageHeaderEventsComponent,
+    PageHeaderEventsComponent
   ],
   exports: [
     ExtensionButtonsComponent,
