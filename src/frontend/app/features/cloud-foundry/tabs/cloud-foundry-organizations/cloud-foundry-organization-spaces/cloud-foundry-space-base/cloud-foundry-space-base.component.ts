@@ -80,8 +80,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   private deleteRedirectSub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
-  public favorite: UserFavorite<ISpaceFavMetadata>;
-
+  public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -90,11 +89,13 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
   ) {
+    this.favorite$ = cfSpaceService.space$.pipe(
+      map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey))
+    );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)
     );
     this.name$ = cfSpaceService.space$.pipe(
-      tap(space => this.favorite = getFavoriteFromCfEntity(space.entity, spaceSchemaKey)),
       map(space => space.entity.entity.name),
       first()
     );
