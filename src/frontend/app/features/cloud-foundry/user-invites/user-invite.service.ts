@@ -67,8 +67,9 @@ export class UserInviteService {
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.configured$ = cfEndpointService.endpoint$.pipe(
-      filter(v => !!v.entity && !!v.entity.metadata),
-      map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
+      filter(v => !!v && !!v.entity),
+      // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
+      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
     this.canConfigure$ = waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
       map(cf => cf.global.isAdmin)
