@@ -131,7 +131,6 @@ export class CloudFoundryEndpointService {
     this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.getAllAppsAction = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
-    console.warn('CloudFoundryEndpointService: cfEndpointEntityService: cfGuid: ', this.cfGuid);
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       endpointSchemaKey,
       entityFactory(endpointSchemaKey),

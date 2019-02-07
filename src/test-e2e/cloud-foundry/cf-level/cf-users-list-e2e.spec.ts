@@ -1,7 +1,7 @@
 import { CfUserTableTestLevel, setupCfUserTableTests } from '../users-list-e2e.helper';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 
-fdescribe('Cf Users List -', () => {
+describe('Cf Users List -', () => {
   setupCfUserTableTests(CfUserTableTestLevel.Cf, (cfGuid) => {
     const cfPage = CfTopLevelPage.forEndpoint(cfGuid);
     cfPage.navigateTo();

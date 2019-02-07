@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, filter, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -67,19 +67,8 @@ export class UserInviteService {
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.configured$ = cfEndpointService.endpoint$.pipe(
-      tap(v => {
-        if (!v) {
-          console.warn('UserInviteService: configured: no v');
-        } else if (!v.entity) {
-          console.warn('UserInviteService: configured: no v.entity');
-        } else if (!v.entity.metadata) {
-          console.warn('UserInviteService: configured: no v.entity.metadata');
-        }
-      }),
-      filter(v => !!v && !!v.entity),
-      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true'),
-      // filter(v => !!v.entity && !!v.entity.metadata),
-      // map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
+      filter(v => !!v.entity && !!v.entity.metadata),
+      map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
     );
     this.canConfigure$ = waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
       map(cf => cf.global.isAdmin)
@@ -151,13 +140,13 @@ export class UserInviteService {
     // Can only invite someone to an org or space
     return !orgGuid ? observableOf(false) : waitForCFPermissions(this.store, cfGuid).pipe(
       switchMap(() => combineLatest(
-        this.configured$.pipe(tap(configured => console.warn('canShowInviteUser: configured: ', configured))),
+        this.configured$,
         this.currentUserPermissionsService.can(
           spaceGuid ? CurrentUserPermissions.SPACE_CHANGE_ROLES : CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
           cfGuid,
           orgGuid,
           spaceGuid
-        ).pipe(tap(can => console.warn('canShowInviteUser: can: ', can))),
+        )
       )),
       map(([configured, canChangeRoles]) => !!configured && !!canChangeRoles)
     );

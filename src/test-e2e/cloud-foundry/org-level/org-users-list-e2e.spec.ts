@@ -1,7 +1,7 @@
 import { CfUserTableTestLevel, setupCfUserTableTests } from '../users-list-e2e.helper';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 
-fdescribe('Org Users List -', () => {
+describe('Org Users List -', () => {
   setupCfUserTableTests(CfUserTableTestLevel.Org, (cfGuid, orgGuid) => {
     const orgPage = CfOrgLevelPage.forEndpoint(cfGuid, orgGuid);
     orgPage.navigateTo();

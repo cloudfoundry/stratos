@@ -11,7 +11,7 @@ import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 import { ManagerUsersPage } from './manage-users-page.po';
 import { setUpTestOrgSpaceE2eTest } from './users-list-e2e.helper';
 
-fdescribe('Manage Users Stepper', () => {
+describe('Manage Users Stepper', () => {
 
   const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-manage-users';
 
