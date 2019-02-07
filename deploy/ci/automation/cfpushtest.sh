@@ -31,10 +31,10 @@ if [ "$1" == "mysql" ]; then
     sleep 2
   done
 
-  mysql -u root -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
-  mysql -u root -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'$HOST' IDENTIFIED BY '$PASSWORD';"
-  mysql -u root -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'$HOST';"
-  mysql -u root -pstratos -h $HOST -e "FLUSH PRIVILEGES;"
+  mysql -uroot -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
+  mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'$HOST' IDENTIFIED BY '$PASSWORD';"
+  mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'$HOST';"
+  mysql -uroot -pstratos -h $HOST -e "FLUSH PRIVILEGES;"
 fi
 
 if [ "$1" == "pgsql" ]; then
