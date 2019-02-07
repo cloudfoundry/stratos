@@ -33,6 +33,18 @@ import { ActionState } from '../api-request-reducer/types';
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
   entities$: Observable<T[]>;
+  /**
+   * Convenience observable on !!entities
+   */
+  hasEntities$: Observable<boolean>;
+  /**
+   * Convenience observable on pagination totalResults (note - not entities.length. In maxed world this can be different)
+   */
+  totalEntities$: Observable<number>;
+  /**
+   * Equate to current page fetching observable
+   */
+  fetchingEntities$: Observable<boolean>;
 }
 
 export function qParamsToString(params: QParam[]): string[] {
@@ -161,7 +173,7 @@ function shouldFetchLocalList(
   }
 
   // Should a maxed local list be refetched?
-  if (pagination.maxedResults) {
+  if (pagination.maxedMode) {
     const paramsChanged = prevPagination && paginationParamsString(prevPagination.params) !== paginationParamsString(pagination.params);
     return invalidOrMissingPage || paramsChanged;
   }
@@ -246,7 +258,16 @@ function getObservables<T = any>(
     ),
     entities$: entities$.pipe(
       distinctUntilChanged()
-    )
+    ),
+    hasEntities$: entities$.pipe(
+      map(entities => !!entities),
+      // Entities will never fire in the event of a maxed list, so ensure we start with something
+      startWith(false)
+    ),
+    totalEntities$: pagination$.pipe(
+      map(pag => pag.totalResults),
+    ),
+    fetchingEntities$: paginationMonitor.fetchingCurrentPage$
   };
 }
 

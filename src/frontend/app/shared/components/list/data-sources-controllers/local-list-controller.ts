@@ -1,6 +1,6 @@
 import { combineLatest, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { DataFunction } from './list-data-source';
@@ -49,16 +49,14 @@ export class LocalListController<T = any> {
       cleanPagination$,
       cleanPage$
     ).pipe(
+      // If currentlyMaxed is set the entities list contains junk, so don't continue
+      filter(([paginationEntity, entities]) => !paginationEntity.currentlyMaxed),
       map(([paginationEntity, entities]) => {
         this.pageSplitCache = null;
         if (!entities || !entities.length) {
           return { paginationEntity, entities: [] };
         }
-        // If this list has a max entities count configured and we've exceeded that don't apply local filtering
-        // (the entities collection is junk)
-        const isMaxedResults = paginationEntity.maxedResults && entities.length >=
-          paginationEntity.params['results-per-page'] ? true : false;
-        if (dataFunctions && dataFunctions.length && !isMaxedResults) {
+        if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);

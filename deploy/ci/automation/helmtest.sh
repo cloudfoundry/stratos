@@ -162,6 +162,25 @@ helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set console
 waitForHelmRelease
 checkVersion console-0.1.0
 
+deleteRelease
+
+# Upgrade test using --reuse-values
+
+# Install latest version first
+log "Testing Upgrade using --reuse-values"
+log "Installing latest release"
+helm install ${HELM_REPO_NAME}/console --name ${NAME} --namespace ${NAMESPACE}
+
+# Wait for the chart to deploy and be ready
+waitForHelmRelease
+
+log "Upgrading using --reuse-values"
+helm upgrade ${NAME} ${HELM_TMP}/console --recreate-pods --debug --reuse-values
+
+waitForHelmRelease
+# Should have used same values as before
+checkVersion console-0.2.0
+
 # All okay
 deleteRelease
 
