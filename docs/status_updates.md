@@ -9,7 +9,7 @@ We are looking to release 2.3.0 next week having completed testing.
 Work has otherwise continued on four tracks:
 
 - Closing out existing PRs
-- Finishing a first version of the USer Favourites feature
+- Finishing a first version of the User Favourites feature
 - Finishing a first version of the User Invitation feature
 - Improving test automation
 
@@ -17,7 +17,7 @@ Work has otherwise continued on four tracks:
 
 This week:
 
-- Published a release candidate for Stratos 2.3.0. As soon as QA have tested and signed off, we will release
+- Published a release candidate for Stratos 2.3.0 which we continue to test
 - Worked to update a few outstanding PRs - we are aiming to close out some of the remaining PRs this sprint, ahead of a re-org of our front-end code to better support extensions to Stratos in the future
 - Continued to refine the User Favourites feature
 - Worked to add the ability to invite a user into a Cloud Foundry organisation
