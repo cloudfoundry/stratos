@@ -92,13 +92,12 @@ func (invite *UserInvite) configure(c echo.Context) error {
 	return nil
 }
 
-func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) error {
-
+func (invite *UserInvite) checkEndpoint(cfGUID string) (interfaces.CNSIRecord, error) {
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
 	if err != nil {
 		// Could find the endpoint
-		return interfaces.NewHTTPShadowError(
+		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Can not find enpoint",
 			"Can not find enpoint: %s", cfGUID,
@@ -106,13 +105,17 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) er
 	}
 
 	if endpoint.CNSIType != "cf" {
-		return interfaces.NewHTTPShadowError(
+		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Not a Cloud Foundry endpoint",
 			"Not a Cloud Foundry endpoint: %s", cfGUID,
 		)
 	}
 
+	return endpoint, nil
+}
+
+func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint interfaces.CNSIRecord) (interfaces.TokenRecord, error) {
 	now := time.Now()
 
 	clientSecret = strings.TrimSpace(clientSecret)
@@ -133,7 +136,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) er
 	if err != nil {
 		msg := "Failed to create request for UAA: %v"
 		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
 	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation)
@@ -153,7 +156,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) er
 			errMsg = fmt.Sprintf("Could not check Client: %s", data["error_description"])
 		}
 
-		return interfaces.NewHTTPShadowError(
+		return interfaces.TokenRecord{}, interfaces.NewHTTPShadowError(
 			res.StatusCode,
 			errMsg,
 			errMsg,
@@ -171,7 +174,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) er
 		if err := json.Unmarshal([]byte(uaaResponse), authError); err == nil {
 			errMessage = errMessage + " - " + authError.ErrorDescription
 		}
-		return interfaces.NewHTTPShadowError(
+		return interfaces.TokenRecord{}, interfaces.NewHTTPShadowError(
 			res.StatusCode,
 			errMessage,
 			errMessage+" %v+", err,
@@ -181,7 +184,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) er
 	var uaaResponse interfaces.UAAResponse
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&uaaResponse); err != nil {
-		return interfaces.NewHTTPShadowError(
+		return interfaces.TokenRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Error parsing response from UAA",
 			"Error parsing response from UAA: %v+", err,
@@ -190,14 +193,27 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) er
 
 	duration := time.Duration(uaaResponse.ExpiresIn) * time.Second
 	expiry := now.Add(duration).Unix()
-	tokenRecord := &interfaces.TokenRecord{
+	return interfaces.TokenRecord{
 		RefreshToken: fmt.Sprintf("%s:%s", clientID, clientSecret),
 		AuthToken:    uaaResponse.AccessToken,
 		TokenExpiry:  expiry,
 		AuthType:     "uaa_client",
+	}, nil
+}
+
+func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) error {
+
+	endpoint, err := invite.checkEndpoint(cfGUID)
+	if err != nil {
+		return err
 	}
 
-	err = invite.portalProxy.SaveEndpointToken(cfGUID, UserInviteUserID, *tokenRecord)
+	tokenRecord, err := invite.refreshToken(clientID, clientSecret, endpoint)
+	if err != nil {
+		return err
+	}
+
+	err = invite.portalProxy.SaveEndpointToken(cfGUID, UserInviteUserID, tokenRecord)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,

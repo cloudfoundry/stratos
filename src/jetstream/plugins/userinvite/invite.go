@@ -58,7 +58,6 @@ type UserInviteResponse struct {
 func (invite *UserInvite) invite(c echo.Context) error {
 	log.Debug("Invite User")
 	cfGUID := c.Param("id")
-	userGUID := c.Get("user_id").(string)
 
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
@@ -92,10 +91,29 @@ func (invite *UserInvite) invite(c echo.Context) error {
 
 	// TODO: Check user has correct permissions before making the call to the UAA
 
+	inviteResponse, err := invite.processUserInvites(c, endpoint, userInviteRequest)
+	if err != nil {
+		return err
+	}
+
+	// Send back the response to the client
+	jsonString, err := json.Marshal(inviteResponse)
+	if err != nil {
+		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
+	}
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+	return nil
+}
+
+func (invite *UserInvite) processUserInvites(c echo.Context, endpoint interfaces.CNSIRecord, userInviteRequest *UserInviteReq) (*UserInviteResponse, error) {
+	cfGUID := c.Param("id")
+	userGUID := c.Get("user_id").(string)
+
 	// Make request to UAA to create users and invite links
 	inviteResponse, err := invite.UAAUserInvite(c, endpoint, userInviteRequest)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Loop through each user and:
@@ -106,51 +124,51 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	failedInvites := inviteResponse.FailedInvites
 
 	for _, user := range inviteResponse.NewInvites {
-		log.Debugf("Creating CF User for: %s", user.Email)
-		// Create the user in Cloud Foundry
-		cfError, err := invite.CreateCloudFoundryUser(cfGUID, userGUID, user.UserID)
-		if err != nil {
-			failedInvites = append(failedInvites, updateUserInviteRecordForError(user, "Failed to create user in Cloud Foundry", cfError))
+		userErr, err := invite.processUserInvite(cfGUID, userGUID, userInviteRequest, user, endpoint)
+		if err == true {
+			failedInvites = append(failedInvites, userErr)
 		} else {
-			// User created - add the user to org
-			cfError, err = invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org)
-			if err != nil {
-				failedInvites = append(failedInvites, updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError))
-			} else {
-				// Finally, add the user to the space, if one was specified
-				if len(userInviteRequest.Space) > 0 {
-					cfError, err = invite.AssociateSpaceRoles(cfGUID, userGUID, user.UserID, userInviteRequest)
-					if err != nil {
-						failedInvites = append(failedInvites, updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError))
-					}
-				}
-				if err == nil {
-					// Send the email
-					err = invite.SendEmail(user.Email, user.InviteLink, endpoint)
-					if err != nil {
-						user.Success = false
-						user.ErrorMessage = err.Error()
-						user.ErrorCode = "Stratos-EmailSendFailure"
-						failedInvites = append(failedInvites, user)
-					} else {
-						newInvites = append(newInvites, user)
-					}
-				}
-			}
+			newInvites = append(newInvites, user)
 		}
 	}
 
 	inviteResponse.NewInvites = newInvites
 	inviteResponse.FailedInvites = failedInvites
+	return inviteResponse, nil
+}
 
-	// Send back the response to the client
-	jsonString, err := json.Marshal(inviteResponse)
+func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteRequest *UserInviteReq, user UserInviteUser, endpoint interfaces.CNSIRecord) (UserInviteUser, bool) {
+	log.Debugf("Creating CF User for: %s", user.Email)
+	// Create the user in Cloud Foundry
+	cfError, err := invite.CreateCloudFoundryUser(cfGUID, userGUID, user.UserID)
 	if err != nil {
-		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
+		return updateUserInviteRecordForError(user, "Failed to create user in Cloud Foundry", cfError), true
+	} else {
+		// User created - add the user to org
+		cfError, err = invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org)
+		if err != nil {
+			return updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError), true
+		} else {
+			// Finally, add the user to the space, if one was specified
+			if len(userInviteRequest.Space) > 0 {
+				cfError, err = invite.AssociateSpaceRoles(cfGUID, userGUID, user.UserID, userInviteRequest)
+				if err != nil {
+					return updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError), true
+				}
+			}
+			if err == nil {
+				// Send the email
+				err = invite.SendEmail(user.Email, user.InviteLink, endpoint)
+				if err != nil {
+					user.Success = false
+					user.ErrorMessage = err.Error()
+					user.ErrorCode = "Stratos-EmailSendFailure"
+					return user, true
+				}
+			}
+		}
 	}
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	return UserInviteUser{}, false
 }
 
 // UAAUserInvite makes the request to the UAA to create accounts and invite links
