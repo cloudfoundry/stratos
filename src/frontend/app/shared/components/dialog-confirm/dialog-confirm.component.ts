@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
+import { environment } from '../../../../environments/environment';
 import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.config';
 
 @Component({
@@ -23,6 +24,12 @@ export class DialogConfirmComponent {
 
   onNoClick(): void {
     this.dialogRef.close();
+  }
+
+  handlePaste($event) {
+    if (environment.production) {
+      $event.preventDefault();
+    }
   }
 
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
@@ -18,7 +18,9 @@ export class CloudFoundrySpaceSummaryComponent {
     public cfSpaceService: CloudFoundrySpaceService
   ) {
     this.detailsLoading$ = combineLatest([
-      cfEndpointService.hasAllApps$,
+      cfEndpointService.appsPagObs.fetchingEntities$.pipe(
+        filter(loading => !loading)
+      ),
       cfSpaceService.appCount$,
       cfSpaceService.allSpaceUsers$
     ]).pipe(

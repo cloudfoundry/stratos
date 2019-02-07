@@ -10,7 +10,7 @@
     <app-meta-card-key>Applications</app-meta-card-key>
     <app-meta-card-value>{{ appCount$ | async }}</app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="(cfEndpointService.hasAllApps$ | async) !== false; else noInstanceCount">
+  <app-meta-card-item *ngIf="(cfEndpointService.appsPagObs.hasEntities$ | async) !== false; else noInstanceCount">
     <app-meta-card-key>App Instances</app-meta-card-key>
     <app-meta-card-value>
       <ng-container *ngIf="appInstancesLimit; else noAppInstancesLimit">{{appInstancesCount }} / {{ appInstancesLimit | infinityPipe }}</ng-container>
@@ -30,7 +30,7 @@
       <ng-template #noServiceInstancesLimit>{{ serviceInstancesCount }}</ng-template>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="(cfEndpointService.hasAllApps$ | async) !== false; else noMemoryTotal">
+  <app-meta-card-item *ngIf="(cfEndpointService.appsPagObs.hasEntities$ | async) !== false; else noMemoryTotal">
     <app-meta-card-key>Memory</app-meta-card-key>
     <app-meta-card-value>
       <ng-container *ngIf="memoryLimit; else noMemoryLimit">{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}</ng-container>
