@@ -38,7 +38,7 @@ export class PaginationMonitor<T = any> {
   public pagination$: Observable<PaginationEntityState>;
 
 
-  public currentPageIds$: Observable<string>;
+  public currentPageIds$: Observable<string[]>;
 
   constructor(
     private store: Store<AppState>,
