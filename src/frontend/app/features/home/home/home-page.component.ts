@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
-import { AppState } from '../../../store/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { endpointListKey } from '../../../store/types/endpoint.types';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { EndpointsService } from '../../../core/endpoints.service';
+import { AppState } from '../../../store/app-state';
 
 @Component({
   selector: 'app-home-page',
@@ -12,10 +11,14 @@ import { Observable } from 'rxjs';
   styleUrls: ['./home-page.component.scss']
 })
 export class HomePageComponent {
-  public allEndpointIds$: Observable<string>;
+  public allEndpointIds$: Observable<string[]>;
+  public haveRegistered$: Observable<boolean>;
 
-  constructor(store: Store<AppState>) {
-    this.allEndpointIds$ = new PaginationMonitor(store, endpointListKey, entityFactory(endpointSchemaKey)).currentPageIds$;
+  constructor(endpointsService: EndpointsService, store: Store<AppState>) {
+    this.allEndpointIds$ = endpointsService.endpoints$.pipe(
+      map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+    );
+    this.haveRegistered$ = endpointsService.haveRegistered$;
   }
 }
 
