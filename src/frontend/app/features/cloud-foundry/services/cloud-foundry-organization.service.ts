@@ -6,7 +6,7 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
-import { getStartedAppInstanceCount, getEntityFlattenedList } from '../../../core/cf.helpers';
+import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -153,11 +153,11 @@ export class CloudFoundryOrganizationService {
 
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
 
-    this.appCount$ = this.cfEndpointService.hasAllApps$.pipe(
+    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
 
-    this.loadingApps$ = this.cfEndpointService.loadingApps$;
+    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
   }
 
   private countExistingApps(): Observable<number> {
