@@ -31,7 +31,7 @@
         ">
           |
         </span>
-        <button *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="history">
+        <button *ngIf="showHistory" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="history">
           <mat-icon class="page-header__nav-toggle">history</mat-icon>
         </button>
         <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">

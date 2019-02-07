@@ -37,6 +37,8 @@ export class PageHeaderComponent {
 
   @Input() showUnderFlow = false;
 
+  @Input() showHistory = true;
+
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this._favorite || (favorite.guid !== this._favorite.guid))) {
       this._favorite = favorite;

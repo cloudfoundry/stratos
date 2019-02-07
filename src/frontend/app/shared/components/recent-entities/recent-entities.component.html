@@ -40,8 +40,9 @@
         <ng-template #noLink>
           <div>{{ countedEntity.entity.name }}</div>
         </ng-template>
-        <span class="type-info time" *ngIf="countedEntity.mostRecentHit"> {{
-          countedEntity.mostRecentHit | amTimeAgo }}</span>
+        <div class="type-info" *ngIf="countedEntity.mostRecentHit">
+          {{ countedEntity.mostRecentHit | amTimeAgo }}
+        </div>
         <div class="type-info">
           <span>{{ countedEntity.subText$ | async }}</span>
         </div>

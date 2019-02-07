@@ -1,4 +1,6 @@
+import { AppComponent } from './app.component';
 import { ActivatedRouteSnapshot, RouteReuseStrategy, DetachedRouteHandle } from '@angular/router';
+import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 
 
 export class CustomReuseStrategy extends RouteReuseStrategy {
@@ -8,6 +10,8 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle { return null; }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-    return (future.routeConfig === curr.routeConfig) && future.params === curr.routeConfig;
+    const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;
+    const isAppComp = curr.component === AppComponent && future.component === AppComponent;
+    return isDashboard || isAppComp;
   }
 }
