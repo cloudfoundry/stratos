@@ -8,6 +8,8 @@ import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { GetSystemInfo } from '../../../store/actions/system.actions';
 import { AppState } from '../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -64,7 +66,8 @@ export class UserInviteService {
     private snackBar: MatSnackBar,
     cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private confirmDialog: ConfirmationDialogService,
   ) {
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
@@ -99,41 +102,41 @@ export class UserInviteService {
         });
       })
     );
-    // obs$.subscribe(
-    //   data => console.log(data),
-    //   err => {
-    //     console.log(err);
-    //     // Snackbar
-    //     let message = 'Failed to configure User Invitation';
-    //     if (err && err.error && err.error.error) {
-    //       message = err.error.error;
-    //     }
-    //     this.snackBar.open(message);
-    //   }
-    // );
     return obs$;
   }
 
-  unconfigure(cfGUID: string): Observable<UserInviteBaseResponse> {
-    const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
-    return this.http.delete(url).pipe(
-      map(v => {
-        this.store.dispatch(new GetSystemInfo());
-        return {
-          error: false
-        };
-      }),
-      catchError(err => {
-        let message = 'Failed to configure User Invitation';
-        if (err && err.error && err.error.error) {
-          message = err.error.error;
-        }
-        return observableOf({
-          error: true,
-          errorMessage: message
-        });
-      })
+  unconfigure(cfGUID: string) {
+    const confirmation = new ConfirmationDialogConfig(
+      'Disable User Invitations',
+      `Are you sure you want to disable user invitation support?`,
+      'Disable'
     );
+    this.confirmDialog.open(confirmation, () => {
+      const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
+      this.http.delete(url).pipe(
+        map(v => {
+          this.store.dispatch(new GetSystemInfo());
+          return {
+            error: false,
+            errorMessage: ''
+          };
+        }),
+        catchError(err => {
+          let message = 'Failed to configure User Invitation';
+          if (err && err.error && err.error.error) {
+            message = err.error.error;
+          }
+          return observableOf({
+            error: true,
+            errorMessage: message
+          });
+        })
+      ).subscribe(res => {
+        if (res.error) {
+          this.snackBar.open(res.errorMessage, 'Close');
+        }
+      });
+    });
 
   }
 
