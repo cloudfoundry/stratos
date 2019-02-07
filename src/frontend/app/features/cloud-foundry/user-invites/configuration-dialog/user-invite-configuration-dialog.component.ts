@@ -61,7 +61,7 @@ export class UserInviteConfigurationDialogComponent {
         first()
       ).subscribe((v: any) => {
         if (v.error) {
-          this.snackBar.open(v.errorMessage);
+          this.snackBar.open(v.errorMessage, 'Close');
         } else {
           this.dialogRef.close();
         }
