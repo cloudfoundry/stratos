@@ -575,7 +575,7 @@ func TestVerifySession(t *testing.T) {
 		contentType := header.Get("Content-Type")
 
 		Convey("Should have expected contentType", func() {
-			So(contentType, ShouldEqual, "application/json; charset=utf-8")
+			So(contentType, ShouldEqual, "application/json; charset=UTF-8")
 		})
 
 		var expectedScopes = "\"scopes\":[\"openid\",\"scim.read\",\"cloud_controller.admin\",\"uaa.user\",\"cloud_controller.read\",\"password.write\",\"routing.router_groups.read\",\"cloud_controller.write\",\"doppler.firehose\",\"scim.write\"]"

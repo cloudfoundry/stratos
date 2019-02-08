@@ -25,7 +25,6 @@ import (
 	"github.com/cf-stratos/mysqlstore"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 	log "github.com/sirupsen/logrus"
@@ -564,6 +563,8 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
 
 	// Root level middleware
 	if !isUpgrade {
@@ -596,7 +597,11 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
-	var engine *standard.Server
+	if isUpgrade {
+		go stopEchoWhenUpgraded(e)
+	}
+
+	var engineErr error
 	address := config.TLSAddress
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
@@ -604,22 +609,16 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 			return err
 		}
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine = standard.WithTLS(address, certFile, certKeyFile)
-
+		engineErr = e.StartTLS(address, certFile, certKeyFile)
 	} else {
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine = standard.New(address)
+		engineErr = e.Start(address)
 	}
 
-	if isUpgrade {
-		go stopEchoWhenUpgraded(engine)
-	}
-
-	engineErr := e.Run(engine)
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
-			log.Warnf("Failed to start HTTP/S server", engineErr)
+			log.Warnf("Failed to start HTTP/S server: %v+", engineErr)
 		}
 	}
 
@@ -787,7 +786,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
 		e.Group("", middleware.Gzip()).Static("/", staticDir)
-		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
+		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
 		log.Info("Serving static UI resources")
 	}
 }
@@ -801,7 +800,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 		}
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
-		if strings.Index(c.Request().URI(), "/pp") != 0 && code == 404 {
+		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
 			c.File(path.Join(staticDir, "index.html"))
 		}
 
@@ -849,7 +848,7 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *standard.Server) {
+func stopEchoWhenUpgraded(e *echo.Echo) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}

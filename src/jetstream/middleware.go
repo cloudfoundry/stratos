@@ -10,7 +10,6 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -72,7 +71,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// Don't log an error if we are verifying the session, as a failure is not an error
-		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
+		isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
 		if isVerify {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
@@ -87,15 +86,15 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		log.Debug("xsrfMiddleware")
 
 		// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
-		if c.Request().Method() == "GET" || c.Request().Method() == "HEAD" {
+		if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
 			return h(c)
 		}
 		errMsg := "Failed to get stored XSRF token from user session"
 		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
 		if err == nil {
 			// Check the token against the header
-			if c.Request().Header().Contains(XSRFTokenHeader) {
-				requestToken := c.Request().Header().Get(XSRFTokenHeader)
+			requestToken := c.Request().Header.Get(XSRFTokenHeader)
+			if len(requestToken) > 0 {
 				if compareTokens(requestToken, token) {
 					return h(c)
 				}
@@ -123,7 +122,7 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("sessionCleanupMiddleware")
 		err := h(c)
-		req := c.Request().(*standard.Request).Request
+		req := c.Request()
 		context.Clear(req)
 
 		return err
@@ -134,7 +133,7 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("urlCheckMiddleware")
-		requestPath := c.Request().URL().Path()
+		requestPath := c.Request().URL.Path
 		if strings.Contains(requestPath, "../") {
 			err := "Invalid path"
 			return interfaces.NewHTTPShadowError(

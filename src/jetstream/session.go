@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,7 +28,7 @@ func (e *SessionValueNotFound) Error() string {
 
 func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 	log.Debug("getSession")
-
+	req := c.Request()
 	// If we have already got the session, it will be available on the echo Context
 	session := c.Get(JetStreamSessionContextKey)
 	if session != nil {
@@ -40,7 +39,6 @@ func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 		}
 	}
 
-	req := c.Request().(*standard.Request).Request
 	s, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err == nil {
 		log.Warn("Got session from session store... storing in context")
@@ -119,7 +117,7 @@ func (p *portalProxy) WriteSession(c echo.Context) error {
 func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) error {
 	// Update the cached session and mark that it has been updated
 
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	res := c.Response().(*standard.Response).ResponseWriter
 
 	err := p.SessionStore.Save(req, res, session)
