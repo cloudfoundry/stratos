@@ -129,7 +129,6 @@ func setSessionExpiresOn(session *sessions.Session) {
 		}
 	}
 	session.Values["expires_on"] = expiresOn
-	log.Warn(session)
 }
 
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
