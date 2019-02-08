@@ -1,20 +1,23 @@
 .app-code-block {
-  min-height: 44px;
   padding: 10px 20px;
   position: relative;
-  &__pre {
-    white-space: pre-line;
+  &__content {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    justify-content: center;
+    margin-right: 20px; // Prevent text overlapping copy button
   }
-  pre {
-    margin: 0;
-    white-space: pre-line;
-    word-wrap: break-word;
+  &__pre {
+   // For wrapped PRE, vertical padding is already on the PRE element, so remove it here
+    padding: 0 20px;
   }
   &__copied-div,
   &__copy-icon {
     position: absolute;
     right: 10px;
-    top: 10px;
+    top: 6px;
     transition: opacity 250ms linear;
   }
   &__copied-div {

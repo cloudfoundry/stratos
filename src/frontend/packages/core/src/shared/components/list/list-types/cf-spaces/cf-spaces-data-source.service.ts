@@ -10,13 +10,12 @@ import {
   createEntityRelationKey
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
-  applicationSchemaKey,
+  entityFactory,
   organizationSchemaKey,
   serviceInstancesSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  entityFactory,
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
 
@@ -24,7 +23,6 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
     const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [
-      createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
       createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
       createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
     ]);

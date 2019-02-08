@@ -1,4 +1,4 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
 
 import { CFResponse, createEmptyCfResponse } from '../../frontend/app/store/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -6,10 +6,10 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
-import { MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
+const until = protractor.ExpectedConditions;
 
 export class ServicesHelperE2E {
 
@@ -93,9 +93,32 @@ export class ServicesHelperE2E {
 
       this.setServiceInstanceDetail();
 
-      this.createServiceInstance.stepper.next();
+      this.createInstanceAttempt(0, 3, serviceName);
     });
   }
+
+  createInstanceAttempt = (retryNumber: number, maxRetries: number, serviceName: string) => {
+    this.createServiceInstance.stepper.next();
+    browser.wait(until.or(
+      until.invisibilityOf(this.createServiceInstance.stepper.nextButton()),
+      this.createServiceInstance.stepper.canNext.bind(this.createServiceInstance.stepper)
+    ), 10000);
+
+    this.createServiceInstance.stepper.canNext().then(canNext => {
+      if (canNext) {
+        const attemptsLeft = maxRetries - retryNumber;
+        if (!!attemptsLeft) {
+          e2e.log(`Failed to create service instance '${this.serviceInstanceName}' of type '${serviceName}'.
+           Attempting ${attemptsLeft} more time/s`);
+          browser.sleep(1000);
+          this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName);
+        } else {
+          fail(`Failed to create service instance after ${maxRetries} retries`);
+        }
+      }
+    });
+  }
+
   canBindAppStep = (): promise.Promise<boolean> => {
     return this.cfHelper.fetchDefaultSpaceGuid(true)
       .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(CFHelpers.cachedDefaultCfGuid, spaceGuid))
@@ -139,8 +162,8 @@ export class ServicesHelperE2E {
 
   setServiceSelection = (serviceName: string, expectFailure = false) => {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
-    expect(this.createServiceInstance.stepper.canNext()).toBeFalsy();
     this.createServiceInstance.stepper.waitForStep('Select Service');
+    this.createServiceInstance.stepper.waitForStepNotBusy();
     this.createServiceInstance.stepper.setService(serviceName, expectFailure);
     if (!expectFailure) {
       expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
@@ -173,16 +196,32 @@ export class ServicesHelperE2E {
     let cfGuid: string;
     return getCfCnsi.then(guid => {
       cfGuid = guid;
-      return this.fetchServicesInstances(cfGuid);
+      return this.fetchServicesInstances(cfGuid).catch(failure => {
+        if (failure && failure.error && failure.error.statusCode === 404) {
+          const emptyRes: CFResponse = {
+            next_url: '',
+            prev_url: '',
+            resources: [],
+            total_pages: 0,
+            total_results: 0
+          };
+          return emptyRes;
+        }
+        throw failure;
+      });
     }).then(response => {
       const services = response.resources;
       const serviceInstances = services.filter(serviceInstance => {
         return serviceInstanceNames.findIndex(name => name === serviceInstance.entity.name) >= 0;
       });
       return serviceInstances.length ?
-        promise.all(serviceInstances.map(serviceInstance => this.deleteServiceInstance(cfGuid, serviceInstance.metadata.guid))) :
+        promise.all(serviceInstances.map(serviceInstance => this.cleanUpService(cfGuid, serviceInstance.metadata.guid))) :
         promise.fullyResolved(createEmptyCfResponse());
     });
+  }
+
+  private cleanUpService(cfGuid: string, serviceGuid: string): promise.Promise<any> {
+    return this.deleteServiceInstance(cfGuid, serviceGuid).catch(e => e2e.log(`Ignoring failed service instance delete: ${e}`));
   }
 
   getServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true) {

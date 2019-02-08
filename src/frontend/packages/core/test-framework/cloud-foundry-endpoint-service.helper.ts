@@ -1,4 +1,4 @@
-import { Http, HttpModule } from '@angular/http';
+import { HttpModule, Http } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
@@ -27,6 +27,7 @@ import {
 import { MetaCardTitleComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { CardStatusComponent } from '../src/shared/components/cards/card-status/card-status.component';
 import { MetaCardValueComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MultilineTitleComponent } from '../../../app/shared/components/multiline-title/multiline-title.component';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -109,8 +110,6 @@ export const BaseTestModulesNoShared = [
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 
-export const getBaseProviders = [createBasicStoreModule()];
-
 export const getCfSpaceServiceMock = {
   provide: CloudFoundrySpaceService,
   useClass: CloudFoundrySpaceServiceMock
@@ -118,4 +117,4 @@ export const getCfSpaceServiceMock = {
 
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
-  MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent];
+  MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];

@@ -1,11 +1,12 @@
-import { CoreModule } from '../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-
 import { ApplicationBaseComponent } from './application-base.component';
+import { CoreModule } from '../../../core/core.module';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+
+
 
 describe('ApplicationBaseComponent', () => {
   let component: ApplicationBaseComponent;

@@ -22,11 +22,12 @@ html {
 
 .inline-icon {
   display: inline-block;
+
   &__form {
-    position: absolute;
-    right: -20px;
-    top: 0;
     margin-left: 8px;
+    position: absolute;
+    right: -25px;
+    top: 0;
   }
 }
 

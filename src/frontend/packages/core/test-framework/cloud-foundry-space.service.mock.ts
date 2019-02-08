@@ -40,6 +40,8 @@ export class CloudFoundrySpaceServiceMock {
       }
 
     });
-  allSpaceUsers = {};
+  allSpaceUsers$ = observableOf([]);
   allowSsh$ = observableOf('false');
+  apps$ = observableOf([]);
+  appCount$ = observableOf(0);
 }

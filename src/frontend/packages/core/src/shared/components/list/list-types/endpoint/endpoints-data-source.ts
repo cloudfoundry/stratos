@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { pairwise, tap } from 'rxjs/operators';
+import { pairwise, tap, withLatestFrom, map } from 'rxjs/operators';
 
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
@@ -35,7 +35,7 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       endpointSchemaKey,
       EndpointRowStateSetUpManager
     );
-    const eventSub = EndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager);
+    const eventSub = EndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
     const config = EndpointsDataSource.getEndpointConfig(
       store,
       action,
@@ -82,13 +82,24 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       refresh
     };
   }
-  static monitorEvents(internalEventMonitorFactory: InternalEventMonitorFactory, rowStateManager: TableRowStateManager) {
+  static monitorEvents(
+    internalEventMonitorFactory: InternalEventMonitorFactory,
+    rowStateManager: TableRowStateManager,
+    store: Store<AppState>
+  ) {
     const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
     return eventMonitor.hasErroredOverTime().pipe(
-      tap(errored => errored.forEach(id => rowStateManager.updateRowState(id, {
-        error: true,
-        message: `We've been having trouble communicating with this endpoint`
-      }))),
+      withLatestFrom(store.select(endpointEntitiesSelector)),
+      tap(([errored, endpoints]) => errored.forEach(id => {
+        if (endpoints[id].connectionStatus === 'connected') {
+          rowStateManager.updateRowState(id, {
+            error: true,
+            message: `We've been having trouble communicating with this endpoint`
+          });
+        }
+      }
+      )),
+      map(([errored]) => errored),
       pairwise(),
       tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
         if (!newErrored.find(newId => newId === oldId)) {

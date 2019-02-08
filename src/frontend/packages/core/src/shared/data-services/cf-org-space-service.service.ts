@@ -1,7 +1,18 @@
-import { Injectable, OnDestroy, Optional } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 
@@ -14,10 +25,30 @@ import { createEntityRelationKey } from '../../../../store/src/helpers/entity-re
 import { organizationSchemaKey, spaceSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import {
   getPaginationObservables,
-  getCurrentPageRequestInfo
+  getCurrentPageRequestInfo,
+  spreadPaginationParams
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { PaginatedAction, QParam, PaginationParam } from '../../../../store/src/types/pagination.types';
+import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
+import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
+import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
+
+export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
+  return {
+    key: key,
+    label: label,
+    ...cfOrgSpaceItem,
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+      return entities.map(entity => ({
+        label: entity.name,
+        item: entity,
+        value: entity.guid
+      }));
+    })),
+  };
+}
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
@@ -57,6 +88,51 @@ export const initCfOrgSpaceService = (store: Store<AppState>,
       }
     })
   );
+};
+
+export const createCfOrSpaceMultipleFilterFn = (
+  store: Store<AppState>,
+  action: PaginatedAction,
+  setQParam: (setQ: QParam, qs: QParam[]) => boolean) => {
+  return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
+    if (!changes.length) {
+      return;
+    }
+
+    const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
+    const startingOrgGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const startingSpaceGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    const qChanges = changes.reduce((qs: QParam[], change) => {
+      switch (change.key) {
+        case 'cf':
+          action.endpointGuid = change.value;
+          setQParam(new QParam('organization_guid', '', ' IN '), qs);
+          setQParam(new QParam('space_guid', '', ' IN '), qs);
+          break;
+        case 'org':
+          setQParam(new QParam('organization_guid', change.value, ' IN '), qs);
+          break;
+        case 'space':
+          setQParam(new QParam('space_guid', change.value, ' IN '), qs);
+          break;
+      }
+      return qs;
+    }, spreadPaginationParams(params).q || []);
+
+    const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
+    const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
+    if (cfGuidChanged && !orgChanged && !spaceChanged) {
+      store.dispatch(new ResetPagination(action.entityKey, action.paginationKey));
+    } else if (orgChanged || spaceChanged) {
+      const newParams = spreadPaginationParams(params);
+      newParams.q = qChanges;
+      store.dispatch(new SetParams(action.entityKey, action.paginationKey, newParams, true, true));
+    }
+  };
 };
 
 
@@ -136,10 +212,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createCf() {
+    const list$ = this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+      // Ensure we have endpoints
+      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
+      publishReplay(1),
+      refCount(),
+    );
     this.cf = {
-      list$: this.store.select(endpointsRegisteredEntitiesSelector).pipe(
-        // Ensure we have endpoints
-        filter(endpoints => endpoints && !!Object.keys(endpoints).length),
+      list$: list$.pipe(
         // Filter out non-cf endpoints
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
         // Ensure we have at least one connected cf
@@ -154,9 +234,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
         first(),
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
-        })
+        }),
       ),
-      loading$: this.allOrgsLoading$,
+      loading$: list$.pipe(
+        map(cfs => !cfs)
+      ),
       select: new BehaviorSubject(undefined)
     };
   }
@@ -232,23 +314,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors() {
-    // Automatically select the cf on first load given the select mode setting
-    this.cf.list$.pipe(
-      first(),
-      tap(cfs => {
-        // if (this.cf.select.getValue()) {
-        //   return;
-        // }
-
-        if (!!cfs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.selectSet(this.cf.select, cfs[0].guid);
-        }
-      })
-    ).subscribe();
-
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(undefined),
       distinctUntilChanged(),

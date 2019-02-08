@@ -1,9 +1,9 @@
-import { E2EConfigCloudFoundry } from '../e2e.types';
 import { browser, promise } from 'protractor';
 
 import { IApp, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
 import { APIResource } from '../../frontend/app/store/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
+import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
@@ -23,7 +23,7 @@ export class ApplicationE2eHelper {
   static createApplicationName = (isoTime?: string, postFix?: string): string =>
     E2EHelpers.createCustomName(customAppLabel + (postFix || ''), isoTime).toLowerCase()
   static createRouteName = (isoTime?: string): string =>
-    E2EHelpers.createCustomName('route-' + customAppLabel, isoTime).toLowerCase().replace(/[-:.]+/g, '')
+    CFHelpers.cleanRouteHost(E2EHelpers.createCustomName('route-' + customAppLabel, isoTime).toLowerCase())
 
   /**
    * Get default sanitized URL name for App
@@ -154,20 +154,23 @@ export class ApplicationE2eHelper {
           return promise.rejected(errorString);
         });
 
-        const cfRequestHelper = this.cfRequestHelper;
-
         // Delete app
         return deps.then(() => this.cfHelper.basicDeleteApp(cfGuid, app.metadata.guid)).then(() => {
           e2e.debugLog(`'${app.entity.name}': Successfully deleted.`);
         });
       })
-      .catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
+      .catch(err => {
+        /* tslint:disable:no-console*/
+        console.log(`Failed to delete app or associated dependencies: ${err}`);
+        /* tslint:enable:no-console*/
+        fail();
+      });
   }
 
   createApp(cfGuid: string, orgName: string, spaceName: string, appName: string, endpoint: E2EConfigCloudFoundry) {
     return browser.driver.wait(
       this.cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, endpoint, orgName)
-        .then(org => this.cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, org.entity.name, spaceName, endpoint))
+        .then(org => this.cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, spaceName, endpoint))
         .then(space => {
           expect(space).not.toBeNull();
           return promise.all([

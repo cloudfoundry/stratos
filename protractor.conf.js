@@ -10,6 +10,7 @@ const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
+const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -22,6 +23,7 @@ const E2E_REPORT_FOLDER = process.env['E2E_REPORT_FOLDER'] || './e2e-reports/' +
 var fs = require('fs');
 var path = require('path');
 var yaml = require('js-yaml');
+var browserstackHelper = require('./src/test-e2e/browserstack-helper.js');
 
 const secretsPath = path.join(__dirname, SECRETS_FILE)
 if (!fs.existsSync(secretsPath)) {
@@ -50,9 +52,36 @@ if (process.env.STRATOS_SCRIPTS_TIMEOUT) {
 
 // Allow test report to show relative times of tests
 const specReporterCustomProcessors = [];
-if (process.env.STRATOS_E2E_LOG_TIME) {
+let showTimesInReport = false;
+if (process.env.STRATOS_E2E_LOG_TIME || browserstackHelper.isConfigured()) {
   specReporterCustomProcessors.push(timeReporterPlugin);
+  showTimesInReport = true;
 }
+
+const excludeTests = [
+  '!./src/test-e2e/login/*-sso-e2e.spec.ts',
+  '!' + checkSuiteGlob
+]
+
+const fullSuite = globby.sync([
+  './src/test-e2e/**/*-e2e.spec.ts',
+])
+
+const longSuite = globby.sync([
+  './src/test-e2e/application/application-delete-e2e.spec.ts',
+  './src/test-e2e/application/application-deploy-e2e.spec.ts',
+  './src/test-e2e/application/application-deploy-local-e2e.spec.ts',
+  './src/test-e2e/marketplace/**/*-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/cf-level/cf-users-list-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/org-level/org-users-list-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
+])
+
+const fullMinusLongSuite = globby.sync([
+  ...fullSuite,
+  ...longSuite.map(file => '!' + file),
+])
 
 exports.config = {
   allScriptsTimeout: timeout,
@@ -63,12 +92,19 @@ exports.config = {
   // Suites - use globby to give us more control over included test specs
   suites: {
     e2e: globby.sync([
-      './src/test-e2e/**/*-e2e.spec.ts',
-      '!./src/test-e2e/login/*-sso-e2e.spec.ts',
-      '!' + checkSuiteGlob
+      ...fullSuite,
+      ...excludeTests
+    ]),
+    longSuite: globby.sync([
+      ...longSuite,
+      ...excludeTests
+    ]),
+    fullMinusLongSuite: globby.sync([
+      ...fullMinusLongSuite,
+      ...excludeTests
     ]),
     sso: globby.sync([
-      './src/test-e2e/**/*-e2e.spec.ts',
+      ...fullSuite,
       '!./src/test-e2e/login/login-e2e.spec.ts',
       '!' + checkSuiteGlob
     ]),
@@ -108,11 +144,15 @@ exports.config = {
     }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
-        displayStacktrace: true
+        displayStacktrace: true,
       },
       customProcessors: specReporterCustomProcessors
     }));
     jasmine.getEnv().addReporter(skipPlugin.reporter());
+    if (showTimesInReport) {
+      browserReporterPlugin.install(jasmine, browser);
+      jasmine.getEnv().addReporter(browserReporterPlugin.reporter());
+    }
   }
 };
 
@@ -120,4 +160,9 @@ exports.config = {
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
 if (headless) {
   exports.config.capabilities.chromeOptions.args = ['--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox'];
+}
+
+// Browserstack support
+if (browserstackHelper.isConfigured()) {
+  exports.config = browserstackHelper.configure(exports.config);
 }

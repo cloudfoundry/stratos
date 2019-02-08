@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { ISpace } from '../../../../../core/cf-api.types';
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
@@ -8,8 +9,6 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { ISpace } from '../../../../../core/cf-api.types';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
@@ -46,10 +45,8 @@ export class CfSpacesListConfigService implements IListConfig<APIResource> {
 
   constructor(
     private store: Store<AppState>,
-    private cfOrgService: CloudFoundryOrganizationService,
-    private confirmDialog: ConfirmationDialogService
+    cfOrgService: CloudFoundryOrganizationService,
   ) {
-
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 

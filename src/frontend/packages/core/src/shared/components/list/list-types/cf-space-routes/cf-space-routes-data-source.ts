@@ -1,9 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { SpaceRouteDataSourceHelper } from './cf-space-route-row-state.helper';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import {
@@ -13,15 +10,16 @@ import {
 import {
   applicationSchemaKey,
   domainSchemaKey,
-  entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
+import { CfRoutesDataSourceBase } from '../../../../../../../../app/shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { IRoute } from '../../../../../core/cf-api.types';
 
-export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
 
-  cfGuid: string;
+export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {
 
   constructor(
     store: Store<AppState>,
@@ -35,21 +33,8 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
     ], true, false);
     action.initialParams['order-direction-field'] = 'creation';
-    const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
-      store,
-      paginationKey
-    );
-    super({
-      store,
-      action: action,
-      schema: entityFactory(routeSchemaKey),
-      getRowUniqueId: getRowMetadata,
-      paginationKey: action.paginationKey,
-      isLocal: false,
-      listConfig,
-      rowsState: rowStateManager.observable,
-      destroy: () => sub.unsubscribe()
-    });
-    this.cfGuid = cfGuid;
+    super(store, listConfig, cfGuid, action, false);
   }
+
 }
+

@@ -1,27 +1,24 @@
-
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { EntityService } from '../../../../core/entity-service';
+
+import { safeUnsubscribe } from '../../../../core/utils.service';
+import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService, ApplicationData } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
-import {
-  getTabsFromExtensions,
-  StratosTabType,
-  StratosActionMetadata,
-  getActionsFromExtensions,
-  StratosActionType
-} from '../../../../core/extension/extension-service';
+
 import { entityFactory, applicationSchemaKey, appStatsSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -32,6 +29,14 @@ import { ResetPagination } from '../../../../../../store/src/actions/pagination.
 import { RestageApplication } from '../../../../../../store/src/actions/application.actions';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import {
+  StratosActionMetadata,
+  getActionsFromExtensions,
+  StratosActionType,
+  getTabsFromExtensions,
+  StratosTabType
+} from '../../../../core/extension/extension-service';
+import { GitSCMService, GitSCMType } from '../../../../../../../app/shared/data-services/scm/scm.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -48,6 +53,11 @@ const appRestartConfirmation = new ConfirmationDialogConfig(
   'Restart Application',
   'Are you sure you want to restart this Application?',
   'Restart'
+);
+const appRestageConfirmation = new ConfirmationDialogConfig(
+  'Restage Application',
+  'Are you sure you want to restage this Application?',
+  'Restage'
 );
 
 @Component({
@@ -71,7 +81,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    scmService: GitSCMService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -90,17 +102,24 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-    this.applicationService.applicationStratProject$
-      .pipe(first())
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
-        ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
-      });
+
+    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid, space.metadata.guid)
+      ),
+      map(can => !can)
+    );
+
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'instances', label: 'Instances' },
+      { link: 'routes', label: 'Routes' },
+      { link: 'log-stream', label: 'Log Stream' },
+      { link: 'services', label: 'Services' },
+      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events' }
+    ];
+
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks.push({
@@ -112,28 +131,43 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+
+    // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
+    this.stratosProjectSub = this.applicationService.applicationStratProject$
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
+        ) {
+          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
+          const scm = scmService.getSCM(gitscm as GitSCMType);
+
+          // Add tab or update existing tab
+          const tab = this.tabLinks.find(t => t.link === 'gitscm');
+          if (!tab) {
+            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+          } else {
+            tab.label = scm.getLabel();
+          }
+        }
+      });
   }
+
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
+  stratosProjectSub: Subscription;
   autoRefreshString = 'auto-refresh';
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] || { busy: false }
   ));
 
-  tabLinks: ISubHeaderTabs[] = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'instances', label: 'Instances' },
-    { link: 'routes', label: 'Routes' },
-    { link: 'log-stream', label: 'Log Stream' },
-    { link: 'services', label: 'Services' },
-    { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
-  ];
+  tabLinks: ISubHeaderTabs[];
 
   private getBreadcrumbs(
     application: IApp,
@@ -165,6 +199,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
           { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances` }
+        ]
+      },
+      {
+        key: 'space-routes',
+        breadcrumbs: [
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/routes` }
         ]
       },
       {
@@ -202,13 +243,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ];
   }
 
-  private startStopApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
+  private confirmAndPollForState(
+    confirmConfig: ConfirmationDialogConfig,
+    onConfirm: (appData: ApplicationData) => void,
+    updateKey: string,
+    requiredAppState: string,
+    onSuccess: () => void) {
     this.applicationService.application$.pipe(
       first(),
       tap(appData => {
         this.confirmDialog.open(confirmConfig, () => {
-          // Once the state changes always make a request to app stats via [AppMetadataTypes.STATS] below
-          this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity);
+          onConfirm(appData);
           this.pollEntityService(updateKey, requiredAppState).pipe(
             first(),
           ).subscribe(onSuccess);
@@ -217,8 +262,18 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ).subscribe();
   }
 
+  private updateApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
+    this.confirmAndPollForState(
+      confirmConfig,
+      appData => this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity),
+      updateKey,
+      requiredAppState,
+      onSuccess
+    );
+  }
+
   stopApplication() {
-    this.startStopApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
+    this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
       // On app reaching the 'STOPPED' state clear the app's stats pagination section
       const { cfGuid, appGuid } = this.applicationService;
       this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
@@ -227,7 +282,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   restageApplication() {
     const { cfGuid, appGuid } = this.applicationService;
-    this.store.dispatch(new RestageApplication(appGuid, cfGuid));
+    this.confirmAndPollForState(
+      appRestageConfirmation,
+      () => this.store.dispatch(new RestageApplication(appGuid, cfGuid)),
+      'starting',
+      'STARTED',
+      () => { }
+    );
   }
 
   pollEntityService(state, stateString): Observable<any> {
@@ -241,7 +302,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   startApplication() {
-    this.startStopApp(appStartConfirmation, 'starting', 'STARTED', () => { });
+    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => { });
   }
 
   private dispatchAppStats = () => {
@@ -337,7 +398,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.appSub$.unsubscribe();
-    this.entityServiceAppRefresh$.unsubscribe();
+    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$, this.stratosProjectSub);
   }
 }

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+
 import { ApplicationStateService } from './application-state.service';
 
 
@@ -64,8 +65,9 @@ describe('ApplicationStateService', () => {
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Offline while Updating');
-      expect(Object.keys(res.actions).length).toBe(1);
+      expect(Object.keys(res.actions).length).toBe(2);
       expect(res.actions.delete).toBe(true);
+      expect(res.actions.start).toBe(true);
     });
 
     it('Incomplete app', function () {

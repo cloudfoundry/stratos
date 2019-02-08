@@ -8,10 +8,10 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import {
   ApplicationStateData,
   ApplicationStateService,
-  CardStatus,
 } from '../../../application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { CardStatus } from '../../../../shared.types';
 
 
 @Component({

@@ -8,11 +8,11 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GithubCommit } from '../../../../../../../store/src/types/github.types';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { GitCommit } from '../../../../../../../../app/store/types/git.types';
 
 @Injectable()
-export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GithubCommit>> {
+export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GitCommit>> {
   protected dataSource: GithubCommitsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
@@ -20,7 +20,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
     noEntries: 'There are no commits'
   };
 
-  protected columns: ITableColumn<APIResource<GithubCommit>>[] = [
+  protected columns: ITableColumn<APIResource<GitCommit>>[] = [
     {
       columnId: 'message',
       headerCell: () => 'Message',

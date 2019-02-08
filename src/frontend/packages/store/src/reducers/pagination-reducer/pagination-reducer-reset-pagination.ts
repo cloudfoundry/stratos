@@ -1,5 +1,6 @@
+import { PaginationEntityState } from './../../types/pagination.types';
 import { PaginationState } from '../../types/pagination.types';
-export function paginationResetPagination(state: PaginationState, action) {
+export function paginationResetPagination(state: PaginationState, action): PaginationState {
   if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
     return state;
   }
@@ -10,13 +11,10 @@ export function paginationResetPagination(state: PaginationState, action) {
       ...newState[action.entityKey][action.paginationKey],
       ids: {},
       pageRequests: {},
-      fetching: false,
       pageCount: 0,
       currentPage: 1,
-      totalResults: 0,
-      error: false,
-      message: ''
-    }
+      totalResults: 0
+    } as PaginationEntityState
   };
   return {
     ...newState,

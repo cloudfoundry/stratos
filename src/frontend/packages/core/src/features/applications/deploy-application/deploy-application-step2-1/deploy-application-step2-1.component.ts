@@ -14,9 +14,9 @@ import { first, map, tap } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { GithubCommit } from '../../../../../../store/src/types/github.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { SetDeployCommit } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { GitCommit } from '../../../../../../../app/store/types/git.types';
 
 @Component({
   selector: 'app-deploy-application-step2-1',
@@ -29,7 +29,7 @@ import { SetDeployCommit } from '../../../../../../store/src/actions/deploy-appl
 export class DeployApplicationStep21Component {
 
   validate: Observable<boolean>;
-  selectedCommit$: Observable<APIResource<GithubCommit>>;
+  selectedCommit$: Observable<APIResource<GitCommit>>;
 
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;

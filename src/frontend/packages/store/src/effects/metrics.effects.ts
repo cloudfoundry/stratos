@@ -33,19 +33,17 @@ export class MetricsEffect {
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
-      const apiAction = {
-        ...action,
-      } as IRequestAction;
-      this.store.dispatch(new StartRequestAction(apiAction));
+      const { guid } = action;
+      this.store.dispatch(new StartRequestAction(action));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
-            [action.metricId]: {
+            [guid]: {
               query: action.query,
-              queryType: action.queryType,
+              windowValue: action.windowValue,
               data: metric.data
             }
           } : {};
@@ -54,17 +52,22 @@ export class MetricsEffect {
               entities: {
                 [metricSchemaKey]: metricObject
               },
-              result: [action.metricId]
+              result: [guid]
             },
-            apiAction
+            action
           );
         })
       ).pipe(catchError(errObservable => {
         return [
           new WrapperRequestActionFailed(
             errObservable.message,
-            apiAction,
-            'fetch'
+            action,
+            'fetch', {
+              endpointIds: [action.endpointGuid],
+              url: errObservable.url || fullUrl,
+              eventCode: errObservable.status ? errObservable.status + '' : '500',
+              message: 'Metric request error',
+            }
           )
         ];
       }));

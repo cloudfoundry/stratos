@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfRoute } from '../../../../../../../../store/src/types/route.types';
 

@@ -32,6 +32,7 @@ import {
 } from '../../../../../store/src/helpers/entity-factory';
 import { GetSpace, GetAllSpaceUsers } from '../../../../../store/src/actions/space.actions';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { createQuotaDefinition } from './cloud-foundry-organization.service';
 
 const noQuotaDefinition = (orgGuid: string) => ({
   entity: {
@@ -60,6 +61,8 @@ export class CloudFoundrySpaceService {
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
+  appCount$: Observable<number>;
+  loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   allSpaceUsers$: Observable<APIResource<CfUser>[]>;
   usersPaginationKey: string;
@@ -70,8 +73,7 @@ export class CloudFoundrySpaceService {
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfEndpointService: CloudFoundryEndpointService
-
+    private cfEndpointService: CloudFoundryEndpointService,
   ) {
 
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
@@ -80,6 +82,10 @@ export class CloudFoundrySpaceService {
     this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
 
     this.initialiseObservables();
+  }
+
+  public fetchApps() {
+    this.cfEndpointService.fetchApps();
   }
 
   private initialiseObservables() {
@@ -103,7 +109,6 @@ export class CloudFoundrySpaceService {
     this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
-          createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
           createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
           createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
           createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
@@ -139,7 +144,7 @@ export class CloudFoundrySpaceService {
       if (q.entity.entity.space_quota_definition) {
         return q.entity.entity.space_quota_definition;
       } else {
-        return noQuotaDefinition(this.orgGuid);
+        return createQuotaDefinition(this.orgGuid);
       }
     }));
 
@@ -160,10 +165,7 @@ export class CloudFoundrySpaceService {
 
   private initialiseAppObservables() {
     this.apps$ = this.space$.pipe(
-      map(s => {
-        return s.entity.entity.apps;
-      }),
-      filter(apps => !!apps)
+      switchMap(space => this.cfEndpointService.getAppsInSpaceViaAllApps(space.entity))
     );
 
     this.appInstances$ = this.apps$.pipe(
@@ -174,6 +176,26 @@ export class CloudFoundrySpaceService {
       map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
     );
 
+    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+      switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
+    );
 
+    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+  }
+
+  private countExistingApps(): Observable<number> {
+    return this.apps$.pipe(
+      map(apps => apps.length)
+    );
+  }
+
+  private fetchAppCount(): Observable<number> {
+    return CloudFoundryEndpointService.fetchAppCount(
+      this.store,
+      this.paginationMonitorFactory,
+      this.activeRouteCfOrgSpace.cfGuid,
+      this.activeRouteCfOrgSpace.orgGuid,
+      this.activeRouteCfOrgSpace.spaceGuid
+    );
   }
 }

@@ -3,6 +3,7 @@ import { browser } from 'protractor';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
@@ -11,14 +12,14 @@ import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 
 describe('CF - Manage Organizations and Spaces', () => {
 
-  const testOrgName = e2e.helper.getCustomerOrgSpaceLabel(null, 'org');
-  const testSpaceName = e2e.helper.getCustomerOrgSpaceLabel(null, 'space');
+  const testOrgName = e2e.helper.getCustomOrgSpaceLabel(null, 'org');
+  const testOrg2Name = e2e.helper.getCustomOrgSpaceLabel(null, 'org2');
+  const testSpaceName = e2e.helper.getCustomOrgSpaceLabel(null, 'space');
   let endpointGuid;
 
   let cloudFoundry: CfTopLevelPage;
 
   let cfHelper: CFHelpers;
-  const listComponent = new ListComponent();
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
@@ -44,7 +45,10 @@ describe('CF - Manage Organizations and Spaces', () => {
     cloudFoundry.waitForPageOrChildPage();
   });
 
-  afterAll(() => cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName));
+  afterAll(() => Promise.all([
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrgName),
+    cfHelper.deleteOrgIfExisting(endpointGuid, testOrg2Name)
+  ]));
 
   it('Should validate org name', () => {
     const cardView = cloudFoundry.goToOrgView();
@@ -91,7 +95,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.waitUntilShown();
 
     // Delete the org
-    cardView.cards.waitForCardByTitle(testOrgName).then(card => {
+    cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(card => {
       card.openActionMenu().then(menu => {
         menu.clickItem('Delete');
         ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', testOrgName);
@@ -117,73 +121,78 @@ describe('CF - Manage Organizations and Spaces', () => {
     });
   });
 
-  it('Should create and delete space', () => {
-    expect(testOrgName).toBeDefined();
-    expect(testSpaceName).toBeDefined();
+  describe('Long running tests - ', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
 
-    const ep = e2e.secrets.getDefaultCFEndpoint();
-    browser.driver.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, ep, testOrgName));
+    it('Should create and delete space', () => {
+      expect(testOrgName).toBeDefined();
+      expect(testSpaceName).toBeDefined();
 
-    // Go to org tab
-    const cardView = cloudFoundry.goToOrgView();
-    const list = new ListComponent();
-    list.refresh();
-    cardView.cards.findCardByTitle(testOrgName).then(org => {
-      org.click();
+      const ep = e2e.secrets.getDefaultCFEndpoint();
+      browser.driver.wait(cfHelper.addOrgIfMissingForEndpointUsers(endpointGuid, ep, testOrgName));
 
-      cloudFoundry.subHeader.clickItem('Spaces');
-      cardView.cards.waitUntilShown();
-      list.refresh();
+      // Go to org tab
+      const cardView = cloudFoundry.goToOrgView();
+      const list = new ListComponent();
+      list.header.refresh();
+      cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
+        org.click();
 
-      // Add space
-      // Click the add button to add a space
-      cloudFoundry.header.clickIconButton('add');
+        cloudFoundry.subHeader.clickItem('Spaces');
+        cardView.cards.waitUntilShown();
+        list.header.refresh();
 
-      const modal = new StepperComponent();
-      modal.getStepperForm().fill({
-        'spacename': testSpaceName
-      });
-      expect(modal.canNext()).toBeTruthy();
-      modal.next();
+        // Add space
+        // Click the add button to add a space
+        cloudFoundry.header.clickIconButton('add');
 
-      cloudFoundry.subHeader.clickItem('Spaces');
-      cardView.cards.waitUntilShown();
+        const modal = new StepperComponent();
+        modal.getStepperForm().fill({
+          'spacename': testSpaceName
+        });
+        expect(modal.canNext()).toBeTruthy();
+        modal.next();
 
-      // Get the card for the space
-      cardView.cards.findCardByTitle(testSpaceName).then(space => {
-        space.openActionMenu().then(menu => {
-          menu.clickItem('Delete');
-          ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
-          cardView.cards.getCardCount().then(c => {
-            expect(c).toBe(0);
+        cloudFoundry.subHeader.clickItem('Spaces');
+        cardView.cards.waitUntilShown();
+
+        // Get the card for the space
+        cardView.cards.findCardByTitle(testSpaceName).then((space: MetaCard) => {
+          space.openActionMenu().then(menu => {
+            menu.clickItem('Delete');
+            ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', testSpaceName);
+            cardView.cards.getCardCount().then(c => {
+              expect(c).toBe(0);
+            });
           });
         });
       });
-    });
+    }, timeout);
   });
 
-  xit('Should create an org and a space', () => {
+  it('Should create an org and a space', () => {
     const cardView = cloudFoundry.goToOrgView();
 
     // Click the add button to add an organization
     cloudFoundry.header.clickIconButton('add');
     const modal = new StepperComponent();
     modal.getStepperForm().fill({
-      'orgname': testOrgName
+      'orgname': testOrg2Name
     });
-    expect(modal.canNext()).toBeTruthy();
+    modal.waitUntilCanNext('Create');
     modal.next();
 
     cardView.cards.waitUntilShown();
 
     // Go to the org and create a space
-    cardView.cards.findCardByTitle(testOrgName).then(org => {
+    cardView.cards.findCardByTitle(testOrg2Name, MetaCardTitleType.CUSTOM, true).then(org => {
       org.click();
 
       cloudFoundry.subHeader.clickItem('Spaces');
       cardView.cards.waitUntilShown();
       const list = new ListComponent();
-      list.refresh();
+      list.header.refresh();
 
       // Add space
       // Click the add button to add a space

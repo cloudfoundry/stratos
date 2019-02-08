@@ -24,8 +24,6 @@ export class DetachAppsComponent implements OnDestroy {
   public selectedApps = new EventEmitter<APIResource<IServiceBinding>[]>();
   selectedSub: Subscription;
   constructor(private config: ListConfig<APIResource>) {
-    const dataSource = this.config.getDataSource();
-
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selectedApps) => {
         this.selectedApps.emit(Array.from(selectedApps.values()));

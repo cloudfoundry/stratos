@@ -7,7 +7,7 @@ import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl, EndpointTypeHelper } from '../../endpoint-helpers';
+import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.types';
@@ -15,6 +15,7 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { entityFactory, endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { EndpointTypeConfig } from '../../../../../../../app/core/extension/extension-types';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
@@ -50,6 +51,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   showAdvancedFields = false;
   clientRedirectURI: string;
+
+  endpointTypeSupportsSSO = false;
 
   constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
@@ -127,8 +130,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     this.setAdvancedFields(endpoint);
   }
 
-  // Only show the Client ID and Client Secret fields if the endpoint type if Cloud Foundry
-  setAdvancedFields(endpoint: EndpointTypeHelper) {
+  // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
+  setAdvancedFields(endpoint: EndpointTypeConfig) {
     this.showAdvancedFields = endpoint.value === 'cf';
+
+    // Only allow SSL if the endpoint type isCloud Foundry
+    this.endpointTypeSupportsSSO = endpoint.value === 'cf';
   }
 }

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, map, switchMap, first } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -20,11 +20,10 @@ import {
   entityFactory,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-  serviceSchemaKey
 } from '../../../../../../../../store/src/helpers/entity-factory';
 import { GetServiceInstance } from '../../../../../../../../store/src/actions/service-instances.actions';
-import { GetService } from '../../../../../../../../store/src/actions/service.actions';
 import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
+import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 
 
 
@@ -90,13 +89,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     ).waitForEntity$;
 
     this.service$ = this.serviceInstance$.pipe(
-      switchMap(o => this.entityServiceFactory.create<APIResource<IService>>(
-        serviceSchemaKey,
-        entityFactory(serviceSchemaKey),
-        o.entity.entity.service_guid,
-        new GetService(o.entity.entity.service_guid, this.appService.cfGuid),
-        true
-      ).waitForEntity$),
+      switchMap(o => getCfService(o.entity.entity.service_guid, this.appService.cfGuid, this.entityServiceFactory).waitForEntity$),
       filter(service => !!service)
     );
 

@@ -11,22 +11,21 @@ export enum MetricsChartTypes {
   LINE = 'line'
 }
 
+export type YAxisTickFormattingFunc = (label: string) => string;
 interface IMetricsChartConfig {
   chartType: MetricsChartTypes;
-  showLegend?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
   autoScale?: boolean;
   yAxisTicks?: any[];
-  yAxisTickFormatting?: (label: string) => string;
+  yAxisTickFormatting?: YAxisTickFormattingFunc;
 }
 
 export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
-  showLegend = true;
   xAxisLabel?: string;
   yAxisLabel?: string;
   autoScale = true; // This should be on by default
   yAxisTicks?: any[];
-  yAxisTickFormatting?: (label: string) => string;
+  yAxisTickFormatting?: YAxisTickFormattingFunc;
 }

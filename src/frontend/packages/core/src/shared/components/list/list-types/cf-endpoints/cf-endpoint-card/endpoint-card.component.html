@@ -1,4 +1,4 @@
-<app-meta-card class="endpoint-card" [routerLink]="['/cloud-foundry', row.guid]" [status$]="status$">
+<app-meta-card class="endpoint-card" [routerLink]="getRouterPath(row)" [status$]="status$">
   <app-meta-card-title>{{ row.name }}</app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Address</app-meta-card-key>

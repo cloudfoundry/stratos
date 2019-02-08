@@ -6,7 +6,9 @@ import { combineLatest, filter, first, map, publishReplay, refCount, switchMap }
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
+  filterEntitiesByGuid,
   isOrgAuditor,
   isOrgBillingManager,
   isOrgManager,
@@ -15,10 +17,8 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions,
-  filterEntitiesByGuid,
 } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
 import { environment } from '../../environments/environment.prod';
 import {
   PaginationObservables,
@@ -210,6 +210,12 @@ export class CfUserService {
       this.populatedArray(this.filterByOrg(orgGuid, user.spaces));
   }
 
+  hasSpaceRoles(user: CfUser, spaceGuid: string): boolean {
+    return this.populatedArray(filterEntitiesByGuid(spaceGuid, user.audited_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.managed_spaces)) ||
+      this.populatedArray(filterEntitiesByGuid(spaceGuid, user.spaces));
+  }
+
   getUserRoleInOrg = (
     userGuid: string,
     orgGuid: string,
@@ -274,9 +280,12 @@ export class CfUserService {
               }))
             );
           } else {
-            return observableOf({
+            return observableOf<PaginationObservables<APIResource<CfUser>>>({
               pagination$: observableOf(null),
-              entities$: observableOf(null)
+              entities$: observableOf(null),
+              hasEntities$: observableOf(false),
+              totalEntities$: observableOf(0),
+              fetchingEntities$: observableOf(false),
             });
           }
         }),

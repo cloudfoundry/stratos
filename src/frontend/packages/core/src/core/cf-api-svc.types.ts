@@ -57,6 +57,7 @@ export interface IServicePlan {
   description: string;
   service_guid: string;
   extra: string; // stringified IServiceExtra
+  extraTyped?: IServicePlanExtra;
   unique_id: string;
   public: boolean;
   bindable: number | boolean;
@@ -66,12 +67,36 @@ export interface IServicePlan {
   service?: APIResource<IService>;
   guid?: string;
   cfGuid?: string;
+  schemas?: ServicePlanSchemas;
+}
+
+export interface ServicePlanSchemas {
+  service_instance: ServicePlanSchema;
+  service_binding: ServicePlanSchema;
+}
+
+export interface ServicePlanSchema {
+  create?: {
+    parameters: object
+  };
+  update?: {
+    parameters: object
+  };
 }
 
 export interface IServicePlanExtra {
   displayName: string;
   bullets: string[];
+  costs: IServicePlanCost[];
 }
+
+export interface IServicePlanCost {
+  amount: {
+    [key: string]: number;
+  };
+  unit: string;
+}
+
 export interface IService {
   label: string;
   description: string;

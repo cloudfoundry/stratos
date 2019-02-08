@@ -172,10 +172,10 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 ## Advanced Topics
 ### Using a Load Balancer
-If your Kubernetes deployment supports automatic configuration of a load balancer (e.g. Google Container Engine), specify the parameters `useLb=true` when installing.
+If your Kubernetes deployment supports automatic configuration of a load balancer (e.g. Google Container Engine), specify the parameters `console.service.type=LoadBalancer` when installing.
 
 ```
-helm install stratos/console --namespace=console --name my-console --set useLb=true
+helm install stratos/console --namespace=console --name my-console --set console.service.type=LoadBalancer
 ```
 
 ### Specifying an External IP
@@ -183,7 +183,7 @@ helm install stratos/console --namespace=console --name my-console --set useLb=t
 If the kubernetes cluster supports external IPs for services (see [ Service External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)), then the following arguments can be provided. In this following example the dashboard will be available at `https://192.168.100.100:5000`.
 
 ```
-helm install stratos/console --namespace=console --name my-console --set console.externalIP=192.168.100.100 console.port=5000
+helm install stratos/console --namespace=console --name my-console --set console.service.externalIPs={192.168.100.100} --set console.service.servicePort=5000
 ```
 
 ### Upgrading your deployment
@@ -351,32 +351,3 @@ Install
 ```
 helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
 ```
-
-### Enabled Metrics
-
-[Stratos Metrics](https://github.com/suse/stratos-metrics) can be deployed as part of the Stratos helm chart. The following override file will configure the Metrics component to fetch metrics from a PCF Dev instance.
-
-Save the following to a file called `values.yaml`
-```
-consoleVersion: 2.0.0
-metrics:
-    enabled: true
-    env:
-        CLUSTER_ADMIN_PASSWORD: admin
-        UAA_CF_IDENTITY_ZONE: uaa
-        DOMAIN: local.pcfdev.io
-        UAA_ADMIN_CLIENT_SECRET: admin-client-secret
-        UAA_HOST: uaa.local.pcfdev.io
-        UAA_PORT: 443
-        DOPPLER_PORT: 443
-    firehoseExporter:
-        noIdentityZone: true
-```
-
-Deploy Stratos with Metrics enabled
-```
-$ helm install ./console -f values.yaml --name console --namespace stratos
-
-```
-
-The metrics endpoint will be available as `https://console-metrics-nginx`. This can registered as an endpoint in Stratos as a `Metrics` type.

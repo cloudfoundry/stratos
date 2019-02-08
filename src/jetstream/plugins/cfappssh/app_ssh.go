@@ -28,6 +28,9 @@ const (
 
 	// Inactivity timeout
 	inActivityTimeout = 10 * time.Second
+
+	md5FingerprintLength          = 47 // inclusive of space between bytes
+	base64Sha256FingerprintLength = 43
 )
 
 // Allow connections from any Origin
@@ -188,8 +191,17 @@ func sendSSHError(format string, a ...interface{}) error {
 
 func sshHostKeyChecker(fingerprint string) ssh.HostKeyCallback {
 	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-		if fingerprint == ssh.FingerprintLegacyMD5(key) {
-			return nil
+		switch len(fingerprint) {
+		case base64Sha256FingerprintLength:
+			if fmt.Sprintf("SHA256:%s", fingerprint) == ssh.FingerprintSHA256(key) {
+				return nil
+			}
+		case md5FingerprintLength:
+			if fingerprint == ssh.FingerprintLegacyMD5(key) {
+				return nil
+			}
+		default:
+			return errors.New("Unsupported host key fingerprint format")
 		}
 		return errors.New("Host key fingerprint is incorrect")
 	}

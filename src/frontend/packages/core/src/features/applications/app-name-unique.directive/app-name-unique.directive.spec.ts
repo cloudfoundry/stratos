@@ -13,6 +13,7 @@ import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
 import { AppStoreModule } from '../../../../../store/src/store.module';
 import { AppState } from '../../../../../store/src/app-state';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { ExtensionService } from '../../../core/extension/extension-service';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -29,6 +30,7 @@ describe('AppNameUniqueDirective', () => {
         HttpModule,
       ],
       providers: [
+        ExtensionService,
         {
           provide: ConnectionBackend,
           useClass: MockBackend

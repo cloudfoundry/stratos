@@ -1,15 +1,10 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { mergeMap, tap, switchMap, catchError, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
-
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { GetSystemInfo } from '../actions/system.actions';
-import { AppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import {
   InvalidSession,
@@ -22,13 +17,13 @@ import {
   LogoutFailed,
   LogoutSuccess,
   RESET_AUTH,
+  RESET_SSO_AUTH,
   ResetAuth,
+  ResetSSOAuth,
   SESSION_INVALID,
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
-  ResetSSOAuth,
-  RESET_SSO_AUTH,
 } from './../actions/auth.actions';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 
@@ -42,10 +37,7 @@ export class AuthEffect {
 
   constructor(
     private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-    private router: Router,
-    public dialog: MatDialog
+    private actions$: Actions
   ) { }
 
   @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN).pipe(
@@ -131,7 +123,7 @@ export class AuthEffect {
     }));
 
   @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.ofType<ResetSSOAuth>(RESET_SSO_AUTH).pipe(
-    tap((action) => {
+    tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       const returnUrl = encodeURI(window.location.origin);
       window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');

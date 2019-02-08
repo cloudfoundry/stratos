@@ -1,18 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
-import { IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
+import { IApp } from '../../../../core/cf-api.types';
 import {
   appDataSort,
-  CloudFoundryEndpointService
+  CloudFoundryEndpointService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
-
 
 const RECENT_ITEMS_COUNT = 10;
 
@@ -23,39 +21,35 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
+  @Input() allApps$: Observable<APIResource<IApp>[]>;
+  @Input() loading$: Observable<boolean>;
+  @Output() refresh = new EventEmitter<any>();
+
   constructor(
     private store: Store<AppState>,
-    private cfEndpointService: CloudFoundryEndpointService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    public cfEndpointService: CloudFoundryEndpointService,
   ) { }
 
-  apps$: Observable<APIResource<ISpace>[]>;
+  apps$: Observable<APIResource<IApp>[]>;
 
   ngOnInit() {
-    this.apps$ = this.cfEndpointService.orgs$.pipe(
-      map((orgs: APIResource<IOrganization>[]) => {
-        return orgs.filter((org) => !this.activeRouteCfOrgSpace.orgGuid ||
-          !!this.activeRouteCfOrgSpace.orgGuid && org.metadata.guid === this.activeRouteCfOrgSpace.orgGuid);
-      }),
-      map((orgs: APIResource<IOrganization>[]) => {
-        return [].concat(...orgs.map((org) => org.entity.spaces ? org.entity.spaces : []));
-      }),
-      map((spaces: APIResource<ISpace>[]) => {
-        return spaces.filter((space) => !this.activeRouteCfOrgSpace.spaceGuid ||
-          !!this.activeRouteCfOrgSpace.spaceGuid && space.metadata.guid === this.activeRouteCfOrgSpace.spaceGuid);
-      }),
-      map((spaces: APIResource<ISpace>[]) => {
-        return [].concat(...spaces.map((space) => space.entity.apps)).slice(0, RECENT_ITEMS_COUNT).sort(appDataSort);
-      }),
-      first(),
-      tap(apps => {
-        apps.forEach(app => {
-          if (app.entity.state === 'STARTED') {
-            this.store.dispatch(new GetAppStatsAction(app.metadata.guid, this.activeRouteCfOrgSpace.cfGuid));
-          }
-        });
-      })
+    this.apps$ = this.allApps$.pipe(
+      map(allApps => this.processApps(allApps))
     );
+  }
+
+  private processApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
+    if (!apps) {
+      return apps;
+    }
+
+    const recentApps = [].concat(apps).sort(appDataSort).slice(0, RECENT_ITEMS_COUNT);
+    recentApps.forEach(app => {
+      if (app.entity.state === 'STARTED') {
+        this.store.dispatch(new GetAppStatsAction(app.metadata.guid, this.cfEndpointService.cfGuid));
+      }
+    });
+    return recentApps;
   }
 
 }

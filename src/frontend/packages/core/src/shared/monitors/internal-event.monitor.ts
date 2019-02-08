@@ -4,7 +4,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
 import { InternalEventSubjectState, InternalEventsState, InternalEventSeverity } from '../../../../store/src/types/internal-events.types';
 
-export function newNonnAngularInterval(ngZone: NgZone, intervalTime: number) {
+export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {
     let intervalTimer;
     let counter = 0;
@@ -12,7 +12,7 @@ export function newNonnAngularInterval(ngZone: NgZone, intervalTime: number) {
       clearInterval(intervalTimer);
       counter = 0;
     });
-    // Start the interval timer outsidse of angular
+    // Start the interval timer outside of angular
     ngZone.runOutsideAngular(() => {
       intervalTimer = setInterval(() => {
         ngZone.run(() => {
@@ -64,7 +64,7 @@ export class InternalEventMonitor {
 
 
   public hasErroredOverTime(minutes = 5) {
-    const interval$ = newNonnAngularInterval(this.ngZone, 30000).pipe(
+    const interval$ = newNonAngularInterval(this.ngZone, 30000).pipe(
       startWith(-1)
     );
     return combineLatest(this.events$, interval$).pipe(

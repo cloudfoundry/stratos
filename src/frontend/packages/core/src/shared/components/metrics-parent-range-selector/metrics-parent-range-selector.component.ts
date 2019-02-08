@@ -35,7 +35,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
     }
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.metricId,
+      action.guid,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
@@ -46,11 +46,12 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
           const oldAction = chart.metricsConfig.metricsAction;
           chart.metricsAction = {
             ...oldAction,
+            queryType: newAction.queryType,
             query: {
               ...oldAction.query,
               params: newAction.query.params
             },
-            queryType: newAction.queryType
+            windowValue: newAction.windowValue
           };
         });
       }

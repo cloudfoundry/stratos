@@ -2,6 +2,7 @@ import { browser } from 'protractor';
 
 import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
@@ -10,6 +11,8 @@ import { ServicesWallPage } from './services-wall.po';
 describe('Marketplace', () => {
   let setup: E2ESetup;
   const servicesWall = new ServicesWallPage();
+  const timeout = 60000;
+
   beforeAll(() => {
     setup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -22,13 +25,11 @@ describe('Marketplace', () => {
     let servicesHelperE2E: ServicesHelperE2E;
     let marketplaceSummaryPage: MarketplaceSummaryPage;
     const serviceName = e2e.secrets.getDefaultCFEndpoint().services.publicService.name;
-    beforeAll((done) => {
-      init(setup, serviceName).then(res => {
-        servicesHelperE2E = res.servicesHelper;
-        marketplaceSummaryPage = res.summaryPage;
-        done();
-      });
-    });
+    beforeAll(() => init(setup, serviceName).then(res => {
+      servicesHelperE2E = res.servicesHelper;
+      marketplaceSummaryPage = res.summaryPage;
+
+    }));
 
     beforeEach(() => {
       marketplaceSummaryPage.navigateTo();
@@ -39,75 +40,78 @@ describe('Marketplace', () => {
       expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
     });
 
-    it('- should be able to create a new service instance', () => {
-      createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+    describe('Long running test', () => {
+      extendE2ETestTime(timeout);
+      it('- should be able to create a new service instance', () => {
+        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+      }, timeout);
     });
-    afterAll((done) => {
-      servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-    });
+
+    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
   });
 
   describe('Create Private Service Instance', () => {
     let servicesHelperE2E: ServicesHelperE2E;
     let marketplaceSummaryPage: MarketplaceSummaryPage;
     const serviceName = e2e.secrets.getDefaultCFEndpoint().services.privateService.name;
-    beforeAll((done) => {
-      init(setup, serviceName).then(res => {
-        servicesHelperE2E = res.servicesHelper;
-        marketplaceSummaryPage = res.summaryPage;
-        done();
-      });
-    });
+    beforeAll(() => init(setup, serviceName).then(res => {
+      servicesHelperE2E = res.servicesHelper;
+      marketplaceSummaryPage = res.summaryPage;
+    }));
 
     beforeEach(() => {
       marketplaceSummaryPage.navigateTo();
       marketplaceSummaryPage.waitForPage();
-
     });
+
     it('- should have an Add Service Instance button', () => {
       expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
     });
 
-    it('- should be able to create a new service instance', () => {
-      createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+    describe('Long running test', () => {
+      extendE2ETestTime(timeout);
+      it('- should be able to create a new service instance', () => {
+        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+      }, timeout);
     });
-    afterAll((done) => {
-      servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-    });
+
+    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
   });
 
   describe('Create Space Scoped Service Instance', () => {
     let servicesHelperE2E: ServicesHelperE2E;
     let marketplaceSummaryPage: MarketplaceSummaryPage;
     const serviceName = e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name;
-    beforeAll((done) => {
-      init(setup, serviceName).then(res => {
-        servicesHelperE2E = res.servicesHelper;
-        marketplaceSummaryPage = res.summaryPage;
-        done();
-      });
-    });
+    beforeAll(() => init(setup, serviceName).then(res => {
+      servicesHelperE2E = res.servicesHelper;
+      marketplaceSummaryPage = res.summaryPage;
+    }));
 
     beforeEach(() => {
       marketplaceSummaryPage.navigateTo();
       marketplaceSummaryPage.waitForPage();
-
     });
+
     it('- should have an Add Service Instance button', () => {
       expect(marketplaceSummaryPage.getAddServiceInstanceButton().isPresent()).toBeTruthy();
     });
 
-    it('- should be able to create a new service instance', () => {
-      createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+    describe('Long running test', () => {
+      extendE2ETestTime(timeout);
+      it('- should be able to create a new service instance', () => {
+        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+      }, timeout);
     });
-    afterAll((done) => {
-      servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName).then(() => done());
-    });
+
+    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
   });
 });
 
-function createService(marketplaceSummaryPage: MarketplaceSummaryPage,
-  servicesHelperE2E: ServicesHelperE2E, serviceName: string, servicesWall: ServicesWallPage) {
+function createService(
+  marketplaceSummaryPage: MarketplaceSummaryPage,
+  servicesHelperE2E: ServicesHelperE2E,
+  serviceName: string,
+  servicesWall: ServicesWallPage) {
   const button = marketplaceSummaryPage.header.getIconButton('add');
   expect(button).toBeDefined();
   button.then(bt => bt.click());

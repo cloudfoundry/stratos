@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { ResetPagination } from '../actions/pagination.actions';
+import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { RouteEvents, UnmapRoute } from '../actions/route.actions';
 import { AppState } from '../app-state';
 import { routeSchemaKey } from '../helpers/entity-factory';
@@ -15,14 +14,17 @@ export class RouteEffect {
 
   constructor(
     private actions$: Actions,
-    private router: Router,
     private store: Store<AppState>
   ) { }
 
   @Effect({ dispatch: false })
   unmapEffect$ = this.actions$.ofType<APISuccessOrFailedAction>(RouteEvents.UNMAP_ROUTE_SUCCESS).pipe(
-    map((action: APISuccessOrFailedAction) =>
-    this.store.dispatch( new ResetPagination(routeSchemaKey, `application-${(action.apiAction as UnmapRoute).appGuid}`))
-    )
- );
+    map((action: APISuccessOrFailedAction) => {
+      const unmapAction: UnmapRoute = action.apiAction as UnmapRoute;
+      if (unmapAction.clearPaginationKey) {
+        // Remove the route from the specified pagination list
+        this.store.dispatch(new ClearPaginationOfEntity(routeSchemaKey, action.apiAction.guid, unmapAction.clearPaginationKey));
+      }
+    })
+  );
 }

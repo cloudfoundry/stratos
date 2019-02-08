@@ -10,6 +10,7 @@ import {
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
 
 @Injectable()
 export class CfOrgUsersListConfigService extends CfUserListConfigService {
@@ -21,7 +22,14 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
-    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfOrgService.org$);
+    super(
+      store,
+      cfUserService,
+      router,
+      activeRouteCfOrgSpace,
+      userPerms,
+      (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
+      cfOrgService.org$
+    );
   }
-
 }

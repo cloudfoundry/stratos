@@ -52,7 +52,7 @@ const (
 // Source exchange messages
 const (
 	SOURCE_REQUIRED MessageType = iota + 30000
-	SOURCE_GITHUB
+	SOURCE_GITSCM
 	SOURCE_FOLDER
 	SOURCE_FILE
 	SOURCE_FILE_DATA
@@ -94,29 +94,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	// We use a simple protocol to get the source to use for cf push and any cf push cli overrides
 
-	// Send a message to the client to say that we are awaiting application overrides
-	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
-
-	// Wait for a message from the client
-	log.Debug("Waiting for app overrides from client")
-
-	msgOverrides := SocketMessage{}
-	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
-		log.Errorf("Error reading JSON: %v+", err)
-		return err
-	}
-
-	if msgOverrides.Type != OVERRIDES_SUPPLIED {
-		log.Errorf("Expected app deploy override but received event with type: %v", msgOverrides.Type)
-		return errors.New("Expected app deploy override message but received another type")
-	}
-
-	log.Debugf("Overrides: %v+", msgOverrides)
-	overrides := pushapp.CFPushAppOverrides{}
-	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
-		log.Errorf("Error marshalling json: %v+", err)
-		return err
-	}
+	// Ask for source first, then overrides - to support the case that local file/folder source is uploaded first before overrides are avialable
 
 	// Send a message to the client to say that we are awaiting source details
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
@@ -141,8 +119,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	// Get the source, depending on the source type
 	switch msg.Type {
-	case SOURCE_GITHUB:
-		stratosProject, appDir, err = getGitHubSource(clientWebSocket, tempDir, msg)
+	case SOURCE_GITSCM:
+		stratosProject, appDir, err = getGitSCMSource(clientWebSocket, tempDir, msg)
 	case SOURCE_FOLDER:
 		stratosProject, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
 	case SOURCE_GITURL:
@@ -153,6 +131,30 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	if err != nil {
 		log.Errorf("Failed to fetch source: %v+", err)
+		return err
+	}
+
+	// Send a message to the client to say that we are awaiting application overrides
+	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
+
+	// Wait for a message from the client
+	log.Debug("Waiting for app overrides from client")
+
+	msgOverrides := SocketMessage{}
+	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
+		log.Errorf("Error reading JSON: %v+", err)
+		return err
+	}
+
+	if msgOverrides.Type != OVERRIDES_SUPPLIED {
+		log.Errorf("Expected app deploy override but received event with type: %v", msgOverrides.Type)
+		return errors.New("Expected app deploy override message but received another type")
+	}
+
+	log.Debugf("Overrides: %v+", msgOverrides)
+	overrides := pushapp.CFPushAppOverrides{}
+	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
+		log.Errorf("Error marshalling json: %v+", err)
 		return err
 	}
 
@@ -356,21 +358,20 @@ func getArchiverFor(filePath string) archiver.Archiver {
 	return nil
 }
 
-func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
+func getGitSCMSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
 	var (
 		err error
 	)
 
-	// The msg data is JSON for the GitHub info
-	info := GitHubSourceInfo{}
+	// The msg data is JSON for the GitSCM info
+	info := GitSCMSourceInfo{}
 	if err = json.Unmarshal([]byte(msg.Message), &info); err != nil {
 		return StratosProject{}, tempDir, err
 	}
 
-	info.Url = fmt.Sprintf("https://github.com/%s", info.Project)
-	log.Debugf("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, info.Url)
+	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, info.URL)
 	cloneDetails := CloneDetails{
-		Url:    info.Url,
+		Url:    info.URL,
 		Branch: info.Branch,
 		Commit: info.CommitHash,
 	}

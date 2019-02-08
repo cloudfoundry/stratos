@@ -39,7 +39,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    this.cfGuid = activatedRoute.snapshot.params.cfId;
+    this.cfGuid = activatedRoute.snapshot.params.endpointId;
   }
 
   ngOnInit() {

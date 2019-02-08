@@ -1,25 +1,26 @@
 
 import { pairwise } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { endpointColumns } from '../endpoint/endpoints-list-config.service';
-import { CFEndpointsDataSource } from './cf-endpoints-data-source';
-import { CfEndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
 import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
 import { selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { AppState } from '../../../../../../../store/src/app-state';
+import {
+  BaseEndpointsDataSource
+} from '../../../../../../../../app/shared/components/list/list-types/cf-endpoints/base-endpoints-data-source';
+import { EndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
-  dataSource: CFEndpointsDataSource;
+  dataSource: BaseEndpointsDataSource;
   viewType = ListViewTypes.CARD_ONLY;
-  cardComponent = CfEndpointCardComponent;
+  cardComponent = EndpointCardComponent;
   text = {
     title: '',
     filter: 'Filter Endpoints',
@@ -44,13 +45,12 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   }
 
   constructor(
-    private store: Store<AppState>,
-    private dialog: MatDialog
+    private store: Store<AppState>
   ) {
     this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';
     });
-    this.dataSource = new CFEndpointsDataSource(this.store, this);
+    this.dataSource = new BaseEndpointsDataSource(this.store, this, 'cf');
   }
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];

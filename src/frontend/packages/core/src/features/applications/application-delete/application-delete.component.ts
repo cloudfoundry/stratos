@@ -16,10 +16,10 @@ import {
 } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import {
   TableCellRouteComponent,
-} from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
+} from '../../../shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
 import {
   TableCellTCPRouteComponent,
-} from '../../../shared/components/list/list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
+} from '../../../shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import {
   AppServiceBindingDataSource,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
@@ -37,7 +37,7 @@ import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.fa
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../application.service';
-import { GetAllApplications, GetApplication, DeleteApplication } from '../../../../../store/src/actions/application.actions';
+import { GetApplication, DeleteApplication } from '../../../../../store/src/actions/application.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
@@ -48,10 +48,8 @@ import {
   applicationSchemaKey,
   entityFactory,
   routeSchemaKey,
-  serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
 } from '../../../../../store/src/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 
 
 @Component({

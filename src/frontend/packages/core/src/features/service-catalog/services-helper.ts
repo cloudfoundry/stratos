@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, first, share, switchMap } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
 
 import {
   IService,
@@ -9,16 +9,29 @@ import {
   IServiceInstance,
   IServicePlan,
   IServicePlanVisibility,
+  IServicePlanExtra,
 } from '../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { AppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { serviceInstancesSchemaKey, entityFactory, servicePlanSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import {
+  serviceInstancesSchemaKey,
+  entityFactory,
+  servicePlanSchemaKey,
+  serviceBrokerSchemaKey,
+  serviceSchemaKey
+} from '../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { GetServiceInstances } from '../../../../store/src/actions/service-instances.actions';
-import { GetServicePlansForService } from '../../../../store/src/actions/service.actions';
+import { GetServicePlansForService, GetService } from '../../../../store/src/actions/service.actions';
+import { ServicePlanAccessibility } from './services.service';
+import { CardStatus } from '../../shared/shared.types';
+import { safeStringToObj } from '../../core/utils.service';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { EntityService } from '../../core/entity-service';
+import { GetServiceBroker } from '../../../../store/src/actions/service-broker.actions';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
@@ -41,38 +54,25 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   return svcAvailability;
 };
 
-export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };
-
-export const getServiceJsonParams = (params: any): {} => {
-  let prms = params;
-  try {
-    prms = JSON.parse(params) || null;
-  } catch (e) {
-    prms = null;
-  }
-  return prms;
-};
-
-
 export const isMarketplaceMode = (activatedRoute: ActivatedRoute) => {
   const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!serviceId && !!cfId;
 };
 
 export const isAppServicesMode = (activatedRoute: ActivatedRoute) => {
   const id = getIdFromRoute(activatedRoute, 'id');
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!id && !!cfId;
 };
 export const isServicesWallMode = (activatedRoute: ActivatedRoute) => {
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !cfId;
 };
 
 export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
   const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
-  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!cfId && !!serviceInstanceId;
 };
 
@@ -109,4 +109,93 @@ export const getServicePlans = (
           .entities$.pipe(share(), first());
       }
     }));
+};
+
+export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra }): string =>
+  plan.extraTyped && plan.extraTyped.displayName ? plan.extraTyped.displayName : plan.name;
+
+export const getServicePlanAccessibility = (
+  servicePlan: APIResource<IServicePlan>,
+  servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>,
+  serviceBroker$: Observable<APIResource<IServiceBroker>>): Observable<ServicePlanAccessibility> => {
+  if (servicePlan.entity.public) {
+    return observableOf({
+      isPublic: true,
+      guid: servicePlan.metadata.guid
+    });
+  }
+  const safeServiceBroker$ = serviceBroker$.pipe(filter(sb => !!sb));
+  const safeServicePlanVisibilities$ = servicePlanVisibilities$.pipe(filter(spv => !!spv));
+  return safeServiceBroker$.pipe(
+    combineLatest(safeServicePlanVisibilities$),
+    map(([serviceBroker, allServicePlanVisibilities]) => getSvcAvailability(servicePlan, serviceBroker, allServicePlanVisibilities))
+  );
+};
+
+export const getServicePlanAccessibilityCardStatus = (
+  servicePlan: APIResource<IServicePlan>,
+  servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>,
+  serviceBroker$: Observable<APIResource<IServiceBroker>>): Observable<CardStatus> => {
+  return getServicePlanAccessibility(servicePlan, servicePlanVisibilities$, serviceBroker$).pipe(
+    map((servicePlanAccessibility: ServicePlanAccessibility) => {
+      if (servicePlanAccessibility.isPublic) {
+        return CardStatus.OK;
+      } else if (servicePlanAccessibility.spaceScoped || servicePlanAccessibility.hasVisibilities) {
+        return CardStatus.WARNING;
+      } else {
+        return CardStatus.ERROR;
+      }
+    }),
+    first()
+  );
+};
+
+/*
+* Show service plan costs if the object is in the open service broker format, otherwise ignore them
+*/
+export const canShowServicePlanCosts = (servicePlan: APIResource<IServicePlan>): boolean => {
+  if (!servicePlan || servicePlan.entity.free) {
+    return false;
+  }
+  const extra = servicePlan.entity.extraTyped;
+  return !!extra && !!extra.costs && !!extra.costs[0] && !!extra.costs[0].amount;
+};
+
+export const populateServicePlanExtraTyped = (servicePlan: APIResource<IServicePlan>): APIResource<IServicePlan> => {
+  if (servicePlan.entity.extraTyped) {
+    return servicePlan;
+  }
+  return {
+    ...servicePlan,
+    entity: {
+      ...servicePlan.entity,
+      extraTyped: servicePlan.entity.extra ? safeStringToObj<IServicePlanExtra>(servicePlan.entity.extra) : null
+    }
+  };
+};
+
+export const getServiceBroker = (
+  serviceBrokerGuid: string,
+  cfGuid: string,
+  entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
+  return entityServiceFactory.create<APIResource<IServiceBroker>>(
+    serviceBrokerSchemaKey,
+    entityFactory(serviceBrokerSchemaKey),
+    serviceBrokerGuid,
+    new GetServiceBroker(serviceBrokerGuid, cfGuid),
+    false
+  );
+};
+
+export const getCfService = (
+  serviceGuid: string,
+  cfGuid: string,
+  entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IService>> => {
+  return entityServiceFactory.create<APIResource<IService>>(
+    serviceSchemaKey,
+    entityFactory(serviceSchemaKey),
+    serviceGuid,
+    new GetService(serviceGuid, cfGuid),
+    true
+  );
 };

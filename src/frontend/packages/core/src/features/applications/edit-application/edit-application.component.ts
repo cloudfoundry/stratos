@@ -15,6 +15,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
 import { AppMetadataTypes } from '../../../../../store/src/actions/app-metadata.actions';
 
+
 @Component({
   selector: 'app-edit-application',
   templateUrl: './edit-application.component.html',
@@ -69,7 +70,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.sub = this.applicationService.application$.pipe(
-      filter(app => app.app.entity),
+      filter(app => !!app.app.entity),
       take(1),
       map(app => app.app.entity)
     ).subscribe(app => {

@@ -2,6 +2,7 @@ import { of as observableOf } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';

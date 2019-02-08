@@ -2,6 +2,7 @@ import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { MetaCard } from '../po/meta-card.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
@@ -24,6 +25,9 @@ describe('Edit Service Instance', () => {
       .getInfo();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
   });
+
+  const timeout = 100000;
+  extendE2ETestTime(timeout);
 
   beforeEach(() => {
     servicesWall.sideNav.goto(SideNavMenuItem.Services);
@@ -58,7 +62,7 @@ describe('Edit Service Instance', () => {
           servicesHelperE2E.createServiceInstance.stepper.waitUntilNotShown();
         });
       }).catch(e => fail(e));
-  });
+  }, timeout);
 
   it('- should have edited service instance', () => {
     servicesWall.waitForPage();

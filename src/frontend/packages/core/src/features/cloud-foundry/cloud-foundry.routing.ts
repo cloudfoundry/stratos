@@ -66,9 +66,10 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { DynamicExtenstionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
 import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import { StratosActionType } from '../../core/extension/extension-service';
+import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 
 /* tslint:enable:max-line-length */
 const usersRoles = [
@@ -94,7 +95,7 @@ const cloudFoundry: Routes = [{
   component: CloudFoundryComponent
 },
 {
-  path: ':cfId',
+  path: ':endpointId',
   children: [
     {
       path: 'add-org',
@@ -182,9 +183,13 @@ const cloudFoundry: Routes = [{
               component: CloudFoundrySecurityGroupsComponent
             },
             {
+              path: 'routes',
+              component: CloudFoundryRoutesComponent
+            },
+            {
               path: '**',
               component: PageNotFoundComponentComponent,
-              canActivate: [DynamicExtenstionRoutes],
+              canActivate: [DynamicExtensionRoutes],
               data: {
                 stratosRouteGroup: 'cfTabs'
               }
@@ -249,7 +254,7 @@ const cloudFoundry: Routes = [{
                 {
                   path: '**',
                   component: PageNotFoundComponentComponent,
-                  canActivate: [DynamicExtenstionRoutes],
+                  canActivate: [DynamicExtensionRoutes],
                   data: {
                     stratosRouteGroup: 'cfOrgTabs'
                   }
@@ -292,7 +297,7 @@ const cloudFoundry: Routes = [{
                 {
                   path: '**',
                   component: PageNotFoundComponentComponent,
-                  canActivate: [DynamicExtenstionRoutes],
+                  canActivate: [DynamicExtensionRoutes],
                   data: {
                     stratosRouteGroup: 'cfSpaceTabs'
                   }
@@ -305,7 +310,7 @@ const cloudFoundry: Routes = [{
     {
       path: '**',
       component: PageNotFoundComponentComponent,
-      canActivate: [DynamicExtenstionRoutes],
+      canActivate: [DynamicExtensionRoutes],
       data: {
         stratosRouteGroup: StratosActionType.CloudFoundry
       }

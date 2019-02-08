@@ -48,9 +48,9 @@ export function entityServiceFactory(
 
 export function getGuids(type?: string) {
   return (activatedRoute: ActivatedRoute) => {
-    const { id, cfId } = activatedRoute.snapshot.params;
+    const { id, endpointId } = activatedRoute.snapshot.params;
     if (type) {
-      return cfId;
+      return endpointId;
     }
     return id;
   };

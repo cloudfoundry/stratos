@@ -7,7 +7,7 @@ import { IListConfig } from '../../list.component.types';
 import { IMetricVectorResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig, FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
 import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfCellsDataSource
@@ -19,7 +19,7 @@ export class CfCellsDataSource
   static cellDeploymentPath = 'metric.bosh_deployment';
 
   constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
-    const action = new FetchCFMetricsPaginatedAction(
+    const action = new FetchCFCellMetricsPaginatedAction(
       cfGuid,
       cfGuid,
       new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),

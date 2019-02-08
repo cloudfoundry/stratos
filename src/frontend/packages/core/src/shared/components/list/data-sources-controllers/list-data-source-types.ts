@@ -2,8 +2,9 @@ import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+import { PaginationEntityState, PaginatedAction, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
+import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 
 export interface AppEvent {
   actee_name: string;
@@ -48,6 +49,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
     entities: T[],
     paginationState: PaginationEntityState
   ) => T[])[];
+  action: PaginatedAction;
   entityKey: string;
   paginationKey: string;
 
@@ -57,6 +59,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
   isLoadingPage$: Observable<boolean>;
+
+  maxedResults$: Observable<boolean>;
+  filter$: Observable<ListFilter>;
+  sort$: Observable<ListSort>;
 
   editRow: T; // Edit items - remove once ng-content can exist in md-table
 
@@ -72,11 +78,22 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
   destroy();
+  /**
+   * Set's data source specific text filter param
+   */
+  setFilterParam(filterParam: string, pag: PaginationEntityState);
+  /**
+   * Gets data source specific text filter param
+   */
   getFilterFromParams(pag: PaginationEntityState): string;
-  setFilterParam(filter: string, pag: PaginationEntityState);
+  /**
+   * Set's data source specific multi filter properties. Only applicable in maxedResult world
+   */
+  setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam);
   refresh();
 
   updateMetricsAction(newAction: MetricsAction);
+
 }
 
 export type getRowUniqueId<T> = (T) => string;
@@ -103,3 +120,8 @@ export const getDefaultRowState = (): RowState => ({
   deleting: false,
   message: null
 });
+
+export interface ListPaginationMultiFilterChange {
+  key: string;
+  value: string;
+}

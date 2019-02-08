@@ -1,19 +1,18 @@
-
-import { of as observableOf, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { AppSummary, AppStat } from '../../store/src/types/app-metadata.types';
+import { AppStat } from '../../store/src/types/app-metadata.types';
 import {
   EnvVarStratosProject,
   ApplicationEnvVarsHelper
 } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
-import { ISpace } from '../src/core/cf-api.types';
+import { ISpace, IApp, IAppSummary } from '../src/core/cf-api.types';
 import { AppState } from '../../store/src/app-state';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { Observable, of as observableOf } from 'rxjs';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -46,7 +45,12 @@ export class ApplicationServiceMock {
     },
     fetching: false
   } as ApplicationData));
-  appSummary$: Observable<EntityInfo<AppSummary>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
+  app$: Observable<EntityInfo<APIResource<IApp>>> = observableOf({
+    entity: { entity: {} }
+  } as EntityInfo<APIResource<IApp>>);
+  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
+    entityRequestInfo: { fetching: false }
+  } as EntityInfo<APIResource<IAppSummary>>);
   appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });

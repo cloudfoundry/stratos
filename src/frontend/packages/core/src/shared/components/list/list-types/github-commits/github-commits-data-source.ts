@@ -4,13 +4,14 @@ import { of as observableOf } from 'rxjs';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GithubCommit } from '../../../../../../../store/src/types/github.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
-import { EntitySchema, githubCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { EntitySchema, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { GitCommit } from '../../../../../../../../app/store/types/git.types';
+import { GitSCM } from '../../../../../../../../app/shared/data-services/scm/scm';
 
 
-export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
+export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
   store: Store<AppState>;
 
   /**
@@ -23,12 +24,13 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
    */
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<APIResource<GithubCommit>>,
+    listConfig: IListConfig<APIResource<GitCommit>>,
+    scm: GitSCM,
     projectName: string,
     sha: string,
     commitSha?: string,
   ) {
-    const action = new FetchCommits(projectName, sha);
+    const action = new FetchCommits(scm, projectName, sha);
     const paginationKey = action.paginationKey;
     const rowsState = observableOf(commitSha ? {
       [commitSha]: {
@@ -38,7 +40,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
     super({
       store,
       action,
-      schema: new EntitySchema(githubCommitSchemaKey),
+      schema: new EntitySchema(gitCommitSchemaKey),
       getRowUniqueId: object => object.entity.sha,
       paginationKey,
       isLocal: true,

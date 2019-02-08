@@ -1,5 +1,6 @@
-import { by, element, browser, protractor, promise } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
 import { ElementFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
 
@@ -22,8 +23,12 @@ export class StepperComponent extends Component {
     super(locator);
   }
 
+  nextButton(): ElementFinder {
+    return this.locator.element(by.id('stepper_next'));
+  }
+
   next() {
-    return this.locator.element(by.id('stepper_next')).click();
+    return this.nextButton().click();
   }
 
   cancel() {
@@ -72,6 +77,11 @@ export class StepperComponent extends Component {
   waitForStep(stepName: string) {
     const lastActiveHeader = this.locator.all(by.css('.steppers__header.steppers__header--active')).last();
     return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
+  }
+
+  // Wait until step is not busy
+  waitForStepNotBusy() {
+    return browser.wait(until.not(until.presenceOf(this.locator.element(by.css('.steppers__header--busy')))));
   }
 
   isStepDisabled(stepName: string): promise.Promise<boolean> {

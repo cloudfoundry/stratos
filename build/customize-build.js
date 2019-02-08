@@ -23,6 +23,7 @@
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
   gulp.task('customize', function (cb) {
+    doShowVersions()
     doCustomize(false);
     doGenerateIndexHtml(true);
     cb();
@@ -47,6 +48,17 @@
     storeGitRepositoryMetadata();
     cb();
   });
+
+  function doShowVersions() {
+    console.log('Node Version: ' + process.versions.node || 'N/A');
+    try {
+      var response = execSync('npm --v');
+      var npmVersion = response.toString().trim();
+      console.log('NPM Version : ' + npmVersion || 'N/A');
+    } catch (e) {
+      console.log('NPM Version : N/A');
+    }
+  }
 
   function doCustomize(forceDefaults, reset) {
     var msg = !forceDefaults ? 'Checking for and applying customizations' : 'Removing customizations and applying defaults';

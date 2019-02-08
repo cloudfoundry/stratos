@@ -28,11 +28,13 @@
       <input matInput id="client_secret" name="client_secret" ngModel #clientSecretField="ngModel" placeholder="Client Secret">
     </mat-form-field>
   </div>
-  <mat-checkbox matInput name="ssoAllowed" #ssoAllowedField="ngModel" ngModel>Allow SSO login to this endpoint</mat-checkbox>
-  <div *ngIf="!!ssoAllowedField.value">
-    <p>
-      Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.
-    </p>
-    <pre>{{clientRedirectURI}}</pre>
+  <div *ngIf="endpointTypeSupportsSSO" class="create-endpoint__sso">
+    <mat-checkbox matInput name="ssoAllowed" #ssoAllowedField="ngModel" ngModel>Allow SSO login to this endpoint</mat-checkbox>
+    <div *ngIf="!!ssoAllowedField.value">
+      <p>
+        Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.
+      </p>
+      <pre>{{clientRedirectURI}}</pre>
+    </div>
   </div>
 </form>

@@ -1,7 +1,9 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
+import { CurrentUserPermissionsService } from '../../../../../../../core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../shared/components/confirmation-dialog.service';
 import {
   CfAppRoutesListConfigService,
@@ -15,6 +17,7 @@ import { APIResource } from '../../../../../../../../../store/src/types/api.type
 import { FetchAllDomains } from '../../../../../../../../../store/src/actions/domains.actions';
 import { getPaginationObservables } from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { entityFactory, domainSchemaKey } from '../../../../../../../../../store/src/helpers/entity-factory';
+import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-routes-tab',
@@ -26,11 +29,15 @@ import { entityFactory, domainSchemaKey } from '../../../../../../../../../store
       useFactory: (
         store: Store<AppState>,
         appService: ApplicationService,
-        confirmDialog: ConfirmationDialogService) => {
-        return new CfAppRoutesListConfigService(store, appService, confirmDialog);
+        confirmDialog: ConfirmationDialogService,
+        datePipe: DatePipe,
+        cups: CurrentUserPermissionsService
+      ) => {
+        return new CfAppRoutesListConfigService(store, appService, confirmDialog, datePipe, cups);
       },
-      deps: [Store, ApplicationService, ConfirmationDialogService]
-    }
+      deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
+    },
+    CfOrgSpaceDataService
   ]
 })
 export class RoutesTabComponent implements OnInit {

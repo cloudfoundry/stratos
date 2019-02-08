@@ -220,7 +220,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (index === this.currentIndex) {
       return true;
     }
-    if (index < 0 || index > this.steps.length) {
+    if (index < 0 || index >= this.steps.length) {
       return false;
     }
     if (index < this.currentIndex) {

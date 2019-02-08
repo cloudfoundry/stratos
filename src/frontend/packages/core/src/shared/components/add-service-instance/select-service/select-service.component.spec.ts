@@ -21,6 +21,7 @@ import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-ser
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { SelectServiceComponent } from './select-service.component';
+import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
 
 describe('SelectServiceComponent', () => {
   let component: SelectServiceComponent;
@@ -42,7 +43,8 @@ describe('SelectServiceComponent', () => {
         BooleanIndicatorComponent,
         AppChipsComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        MultilineTitleComponent
       ],
       imports: [...BaseTestModulesNoShared],
       providers: [

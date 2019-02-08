@@ -1,11 +1,10 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
-import { map, first, tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
-import { CardStatus } from './../../application-state/application-state.service';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { AppMetadataTypes } from '../../../../../../store/src/actions/app-metadata.actions';
 
@@ -38,8 +37,8 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     );
   }
 
-  private currentCount: 0;
-  public editCount: 0;
+  private currentCount = 0;
+  public editCount = 0;
 
   private sub: Subscription;
 

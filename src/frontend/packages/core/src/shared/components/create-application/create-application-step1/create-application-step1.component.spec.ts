@@ -9,6 +9,7 @@ import { CreateApplicationStep1Component } from './create-application-step1.comp
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
+import { FocusDirective } from '../../focus.directive';
 
 describe('CreateApplicationStep1Component', () => {
   let component: CreateApplicationStep1Component;
@@ -18,7 +19,7 @@ describe('CreateApplicationStep1Component', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateApplicationStep1Component],
+      declarations: [CreateApplicationStep1Component, FocusDirective],
       imports: [
         CommonModule,
         CoreModule,

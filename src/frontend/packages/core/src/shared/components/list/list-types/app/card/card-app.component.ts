@@ -9,11 +9,10 @@ import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/
 
 import {
   ApplicationStateData,
-  ApplicationStateService,
-  CardStatus,
+  ApplicationStateService
 } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ComponentEntityMonitorConfig, CardStatus } from '../../../../../shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, applicationSchemaKey, endpointSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';

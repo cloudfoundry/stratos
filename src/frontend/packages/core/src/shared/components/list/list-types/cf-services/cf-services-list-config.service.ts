@@ -1,15 +1,12 @@
-
-import { of as observableOf, BehaviorSubject, Observable } from 'rxjs';
-
-import { map, first } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, of as observableOf } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/endpoints.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';
+import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { IListConfig, IListMultiFilterConfig, ListViewTypes } from '../../list.component.types';
-import { createListFilterConfig } from '../../list.helper';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
 import { ITableColumn } from '../../list-table/table.types';
@@ -78,7 +75,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       select: new BehaviorSubject(undefined)
     };
     this.multiFilterConfigs = [
-      createListFilterConfig('cf', 'Cloud Foundry', this.cf),
+      createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cf),
     ];
   }
 

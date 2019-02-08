@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
-
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { map, pairwise } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -9,9 +10,9 @@ import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import {
+  getEndpointUsername,
   getFullEndpointApiUrl,
   getNameForEndpointType,
-  getEndpointUsername,
 } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
@@ -24,8 +25,6 @@ import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
-import { map, pairwise } from 'rxjs/operators';
-import { combineLatest, Observable } from 'rxjs';
 import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
 import { UnregisterEndpoint, DisconnectEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
@@ -148,7 +147,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       this.confirmDialog.open(confirmation, () => {
         this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
         this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-          this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+          this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
           this.store.dispatch(new GetSystemInfo());
         });
       });
@@ -232,9 +231,9 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   constructor(
     private store: Store<AppState>,
     private dialog: MatDialog,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory,
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
   ) {

@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, tap, share, publishReplay, refCount } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
@@ -19,9 +19,9 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace, ActiveRouteCfCell } from './cf-page.types';
 import { AppState } from '../../../../store/src/app-state';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
-import { applicationSchemaKey, endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { PaginationEntityState, PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { ICfRolesState } from '../../../../store/src/types/current-user-roles.types';
 import {
@@ -29,6 +29,8 @@ import {
 } from '../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { selectEntities } from '../../../../store/src/selectors/api.selectors';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 
 export interface IUserRole<T> {
@@ -176,7 +178,7 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
 
 export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({
-    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
     spaceGuid: getIdFromRoute(activatedRoute, 'spaceId')
   });
@@ -184,7 +186,7 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
 
 export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {
   return ({
-    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     cellId: getIdFromRoute(activatedRoute, 'cellId'),
   });
 }
@@ -267,3 +269,54 @@ export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolea
 export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
 }
+
+export function createFetchTotalResultsPagKey(standardActionKey: string): string {
+  return standardActionKey + '-totalResults';
+}
+
+export function fetchTotalResults(
+  action: PaginatedAction,
+  store: Store<AppState>,
+  paginationMonitorFactory: PaginationMonitorFactory
+): Observable<number> {
+
+  action.paginationKey = createFetchTotalResultsPagKey(action.paginationKey);
+  action.initialParams['results-per-page'] = 1;
+  action.flattenPagination = false;
+
+  const pagObs = getPaginationObservables({
+    store,
+    action,
+    paginationMonitor: paginationMonitorFactory.create(
+      action.paginationKey,
+      entityFactory(action.entityKey)
+    )
+  });
+  // Ensure the request is made by sub'ing to the entities observable
+  pagObs.entities$.pipe(
+    first(),
+  ).subscribe();
+
+  return pagObs.pagination$.pipe(
+    filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
+    map(pag => pag.totalResults)
+  );
+}
+
+export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
+  if (!!paginationState.maxedMode) {
+    return entities;
+  }
+
+  // Filter by cf/org/space
+  const cfGuid = paginationState.clientPagination.filter.items['cf'];
+  const orgGuid = paginationState.clientPagination.filter.items['org'];
+  const spaceGuid = paginationState.clientPagination.filter.items['space'];
+  return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
+    const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+    const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+    return validCF && validOrg && validSpace;
+  });
+};

@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { ApplicationService } from '../../../../application.service';
 import { MetricsConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../../store/src/types/metric.types';
-import { MetricsChartHelpers } from '../../../../../../shared/components/metrics-chart/metrics.component.helpers';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig, FetchApplicationChartMetricsAction } from '../../../../../../../../store/src/actions/metrics.actions';
+import { ApplicationService } from '../../../../application.service';
+import { getMetricsChartConfigBuilder, ChartDataTypes } from '../../../../../../shared/components/metrics-chart/metrics.component.helpers';
 
 @Component({
   selector: 'app-metrics-tab',
@@ -17,56 +17,36 @@ export class MetricsTabComponent {
     MetricsConfig<IMetricMatrixResult<IMetricApplication>>,
     MetricsLineChartConfig
   ][];
-  private buildChartConfig(yLabel: string) {
-    const lineChartConfig = new MetricsLineChartConfig();
-    lineChartConfig.xAxisLabel = 'Time';
-    lineChartConfig.yAxisLabel = yLabel;
-    return lineChartConfig;
-  }
   constructor(public applicationService: ApplicationService) {
-
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Instance ${result.metric.instance_index}`);
     this.instanceMetricConfigs = [
-      [
-        {
-          getSeriesName: result => `Instance ${result.metric.instance_index}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          metricsAction: new FetchApplicationMetricsAction(
-            applicationService.appGuid,
-            applicationService.cfGuid,
-            new MetricQueryConfig('firehose_container_metric_cpu_percentage')
-          )
-        },
-        this.buildChartConfig('CPU Usage (%)')
-      ],
-      [
-        {
-          getSeriesName: result => `Instance ${result.metric.instance_index}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),
-          metricsAction: new FetchApplicationMetricsAction(
-            applicationService.appGuid,
-            applicationService.cfGuid,
-            new MetricQueryConfig('firehose_container_metric_memory_bytes')
-          )
-        },
-        this.buildChartConfig('Memory Usage (MB)')
-      ],
-      [
-        {
-          getSeriesName: result => `Instance ${result.metric.instance_index}`,
-          mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-          sort: MetricsChartHelpers.sortBySeriesName,
-          mapSeriesItemValue: (bytes) => (bytes / 1000000).toFixed(2),
-          metricsAction: new FetchApplicationMetricsAction(
-            applicationService.appGuid,
-            applicationService.cfGuid,
-            new MetricQueryConfig('firehose_container_metric_disk_bytes')
-          )
-        },
-        this.buildChartConfig('Disk Usage (MB)')
-      ]
+      chartConfigBuilder(
+        new FetchApplicationChartMetricsAction(
+          applicationService.appGuid,
+          applicationService.cfGuid,
+          new MetricQueryConfig('firehose_container_metric_cpu_percentage')
+        ),
+        'CPU Usage (%)',
+        ChartDataTypes.CPU_PERCENT
+      ),
+      chartConfigBuilder(
+        new FetchApplicationChartMetricsAction(
+          applicationService.appGuid,
+          applicationService.cfGuid,
+          new MetricQueryConfig('firehose_container_metric_memory_bytes')
+        ),
+        'Memory Usage (MB)',
+        ChartDataTypes.BYTES
+      ),
+      chartConfigBuilder(
+        new FetchApplicationChartMetricsAction(
+          applicationService.appGuid,
+          applicationService.cfGuid,
+          new MetricQueryConfig('firehose_container_metric_disk_bytes')
+        ),
+        'Disk Usage (MB)',
+        ChartDataTypes.BYTES
+      )
     ];
 
   }

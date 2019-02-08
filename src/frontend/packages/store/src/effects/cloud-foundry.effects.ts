@@ -33,8 +33,9 @@ export class CloudFoundryEffects {
       const requestArgs = {
         headers: headers
       };
+      const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/v2/info`, requestArgs)
+        .get(url, requestArgs)
         .pipe(
           mergeMap(response => {
             const info = response.json();
@@ -53,8 +54,14 @@ export class CloudFoundryEffects {
               new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(err.message, apiAction, actionType)
+          catchError(error => [
+            new WrapperRequestActionFailed(error.message, apiAction, actionType, {
+              endpointIds: [action.cfGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Cloud Foundry Info request error',
+              error
+            })
           ])
         );
     })

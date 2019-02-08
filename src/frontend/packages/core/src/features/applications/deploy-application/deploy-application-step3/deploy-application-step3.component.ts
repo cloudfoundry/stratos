@@ -10,6 +10,7 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
+import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
   CfAppsDataSource,
   createGetAllAppAction,
@@ -47,14 +48,22 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    snackBar: MatSnackBar,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
+    private snackBar: MatSnackBar,
+    public cfOrgSpaceService: CfOrgSpaceDataService
   ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
+    this.valid$ = observableOf(false);
+    this.closeable$ = observableOf(false);
+  }
+
+  private initDeployer() {
+    this.deploySub = this.deployer.status$.pipe(
+      filter(status => status.deploying),
+    ).subscribe();
+
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
-    ).subscribe(status => snackBar.open(status.errorMsg, 'Dismiss'));
+    ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
 
     const appGuid$ = this.deployer.applicationGuid$.pipe(
       filter((appGuid) => appGuid !== null),
@@ -78,35 +87,48 @@ export class DeployApplicationStep3Component implements OnDestroy {
           return validated || status.error;
         })
       );
-    this.initDeployer();
-  }
-
-  private initDeployer() {
-    this.deploySub = this.deployer.status$.pipe(
-      filter(status => status.deploying),
-    ).subscribe();
   }
 
   private destroyDeployer() {
-    this.deploySub.unsubscribe();
-    this.errorSub.unsubscribe();
-    this.validSub.unsubscribe();
+    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub);
   }
 
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
     this.destroyDeployer();
-    this.deployer.close();
+    if (this.deployer) {
+      if (!this.deployer.deploying) {
+        this.deployer.close();
+      } else {
+        this.setupCompletionNotification();
+      }
+    }
+  }
+
+  private setupCompletionNotification() {
+    this.deployer.status$.pipe(
+      filter(status => !status.deploying),
+      first()
+    ).subscribe(status => {
+      if (status.error) {
+        this.snackBar.open(status.errorMsg, 'Dismiss');
+      } else {
+        const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
+        ref.onAction().subscribe(() => { this.goToAppSummary(); });
+      }
+      this.deployer.close();
+    });
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
-      // Kill off the deployer we created in out constructor and use the one supplied to us
-      this.destroyDeployer();
       this.deployer = fsDeployer;
-      this.initDeployer();
+    } else {
+      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService);
     }
+
+    this.initDeployer();
 
     // Start deploying
     this.deployer.open();
@@ -119,14 +141,18 @@ export class DeployApplicationStep3Component implements OnDestroy {
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
+    this.goToAppSummary();
+    return observableOf({ success: true });
+  }
+
+  goToAppSummary() {
     // Take user to applications
     const { cfGuid } = this.deployer;
-    this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     if (this.appGuid) {
       this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
       // Ensure the application package_state is correct
       this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
+      this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }
-    return observableOf({ success: true });
   }
 }

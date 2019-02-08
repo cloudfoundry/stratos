@@ -1,4 +1,4 @@
-<app-intro-screen class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
+<app-intro-screen id="app-login-page" class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
   <mat-card class="login__card">
     <app-stratos-title></app-stratos-title>
     <div class="login__body">
@@ -13,12 +13,12 @@
           <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
         </form>
       </div>
-      <div class="login__loading">
+      <div id="login__loading" class="login__loading">
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       </div>
     </div>
   </mat-card>
-  <div class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
+  <div id="login-error-message" class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
     {{ message }}
   </div>
 </app-intro-screen>

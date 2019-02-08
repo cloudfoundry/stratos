@@ -6,21 +6,13 @@ import {
   BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
+  MetadataCardTestComponents,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../application-state/application-state-icon/application-state-icon.component';
-import { ApplicationStateIconPipe } from '../../../../application-state/application-state-icon/application-state-icon.pipe';
-import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
-import { MetaCardComponent } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
+
 import { CfOrgCardComponent } from './cf-org-card.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -31,9 +23,7 @@ describe('CfOrgCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, MetaCardComponent, MetaCardItemComponent,
-        MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
-        MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent],
+      declarations: [CfOrgCardComponent, MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
       providers: [
         PaginationMonitorFactory,

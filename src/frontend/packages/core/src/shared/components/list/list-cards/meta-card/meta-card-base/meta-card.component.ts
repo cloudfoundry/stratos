@@ -1,10 +1,9 @@
-
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { CardStatus } from '../../../../application-state/application-state.service';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
@@ -16,6 +15,7 @@ export interface MetaCardMenuItem {
   can?: Observable<boolean>;
   disabled?: Observable<boolean>;
 }
+
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
@@ -31,6 +31,13 @@ export class MetaCardComponent {
 
   @Input()
   status$: Observable<CardStatus>;
+
+  @Input()
+  statusIcon = true;
+  @Input()
+  statusIconByTitle = false;
+  @Input()
+  statusIconTooltip: string;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
