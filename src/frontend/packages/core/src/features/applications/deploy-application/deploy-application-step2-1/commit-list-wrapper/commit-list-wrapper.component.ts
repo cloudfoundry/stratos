@@ -8,16 +8,10 @@ import {
   GithubCommitsListConfigServiceDeploy,
 } from '../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
-<<<<<<< HEAD:src/frontend/packages/core/src/features/applications/deploy-application/deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component.ts
 import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GithubCommit } from '../../../../../../../store/src/types/github.types';
-=======
-import { AppState } from '../../../../../store/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
-import { GitCommit } from '../../../../../store/types/git.types';
-import { GitSCMService } from '../../../../../shared/data-services/scm/scm.service';
->>>>>>> v2-master:src/frontend/app/features/applications/deploy-application/deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component.ts
+import { GitSCMService } from '../../../../../../../../app/shared/data-services/scm/scm.service';
+import { GitCommit } from '../../../../../../../../app/store/types/git.types';
 
 @Component({
   selector: 'app-commit-list-wrapper',

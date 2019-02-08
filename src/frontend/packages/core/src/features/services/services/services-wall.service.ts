@@ -11,6 +11,7 @@ import { createEntityRelationPaginationKey } from '../../../../../store/src/help
 import { serviceSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { GetAllServices } from '../../../../../store/src/actions/service.actions';
+import { GetAllServicesForSpace } from '../../../../../store/src/actions/space.actions';
 
 @Injectable()
 export class ServicesWallService {
