@@ -173,9 +173,7 @@ func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteR
 
 // UAAUserInvite makes the request to the UAA to create accounts and invite links
 func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSIRecord, uaaInviteReq *UserInviteReq) (*UserInviteResponse, error) {
-
 	log.Debug("Requesting invite links from UAA")
-	log.Info(endpoint.GUID)
 
 	// See if we can get a token for the invite user
 	token, ok := invite.portalProxy.GetCNSITokenRecord(endpoint.GUID, UserInviteUserID)
@@ -198,7 +196,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 	expTime := time.Unix(token.TokenExpiry, 0)
 	expTime = expTime.Add(time.Second * -10)
 	if expTime.Before(time.Now()) {
-		err := invite.RefreshToken(endpoint.GUID, client[0], client[1])
+		_, _, err := invite.RefreshToken(endpoint.GUID, client[0], client[1])
 		if err != nil {
 			return nil, err
 		}
@@ -259,7 +257,9 @@ func (invite *UserInvite) CreateCloudFoundryUser(cnsiGUID, userID, newUserGUID s
 	body := fmt.Sprintf("{\"guid\": \"%s\"}", newUserGUID)
 	headers := make(http.Header, 0)
 	headers.Set("Content-Type", "application/json")
-	res, err := invite.portalProxy.DoProxySingleRequest(cnsiGUID, userID, "POST", "/v2/users", headers, []byte(body))
+
+	// Need to make the request as the privileged user, not the requesting user - cloud_controller.admin scope required
+	res, err := invite.portalProxy.DoProxySingleRequest(cnsiGUID, UserInviteUserID, "POST", "/v2/users", headers, []byte(body))
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func (invite *UserInvite) AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUI
 	}
 
 	if res.StatusCode != http.StatusCreated {
-		return parseCFError(res.Response), errors.New(fmt.Sprintf("Failed to associate user with Space Role (%s)", roleName))
+		return parseCFError(res.Response), fmt.Errorf(fmt.Sprintf("Failed to associate user with Space Role (%s)", roleName))
 	}
 
 	return nil, nil

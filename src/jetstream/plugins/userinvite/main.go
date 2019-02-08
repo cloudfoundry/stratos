@@ -20,6 +20,9 @@ const UserInviteUserID = "00000000-1111-2222-3333-444444444455"
 // UserInvitePluginConfigSetting is config value send back to the client to indicate if user invite is enabled
 const UserInvitePluginConfigSetting = "userInvitationsEnabled"
 
+// UAAClientAuthType is the Auth Type for client id/client secret
+const UAAClientAuthType = "uaa-client"
+
 // Init creates a new UserInvite
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	init := &UserInvite{portalProxy: portalProxy}
@@ -70,5 +73,10 @@ func (userinvite *UserInvite) Init() error {
 	}
 
 	userinvite.portalProxy.GetConfig().PluginConfig[UserInvitePluginConfigSetting] = "true"
+
+	userinvite.portalProxy.AddAuthProvider(UAAClientAuthType, interfaces.AuthProvider{
+		Handler:  userinvite.doUAAClientAuthFlow,
+		UserInfo: userinvite.getCNSIUserFromUAAClientToken,
+	})
 	return nil
 }
