@@ -875,6 +875,7 @@ func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) er
 
 func (p *portalProxy) verifySession(c echo.Context) error {
 	log.Debug("verifySession")
+	log.Warn("verifySession")
 
 	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
 	if err != nil {

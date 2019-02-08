@@ -567,6 +567,8 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 
 	// Root level middleware
 	if !isUpgrade {
+		// Middleware to write the session after the route has processed the request
+		//e.Use(p.sessionWriteMiddleware)
 		e.Use(sessionCleanupMiddleware)
 	}
 	customLoggerConfig := middleware.LoggerConfig{
