@@ -2,6 +2,17 @@
 
 Weekly status updates are published here.
 
+## 8 February 2019
+
+Release 2.3.0 is all ready to go and we will publish this on Monday.
+
+Otherwise, we've been working on:
+
+- Finishing a first version of the User Favourites feature
+- Finishing a first version of the User Invitation feature
+- Investigating possible security issue: https://github.com/cloudfoundry-incubator/stratos/issues/3385
+- Updates to our extensions approach 
+
 ## 1 February 2019
 
 We are looking to release 2.3.0 next week having completed testing.
