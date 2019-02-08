@@ -107,6 +107,7 @@ func main() {
 	isUpgrading := isConsoleUpgrading()
 
 	if isUpgrading {
+		log.Info("Stratos upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
 		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
 	}
 	// Grab the Console Version from the executable
