@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -15,6 +14,7 @@ const (
 	jetstreamSessionName              = "console-session"
 	JetStreamSessionContextKey        = "jetstream-session"
 	JetStreamSessionContextUpdatedKey = "jetstream-session-updated"
+	jetStreamSessionHookInstalled     = "jetstream-session-hook-installed"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
@@ -33,15 +33,12 @@ func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 	session := c.Get(JetStreamSessionContextKey)
 	if session != nil {
 		if sess, ok := session.(*sessions.Session); ok {
-			log.Warn("Found session on context: " + sess.ID)
-			log.Warn(sess.Values)
 			return sess, nil
 		}
 	}
 
 	s, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err == nil {
-		log.Warn("Got session from session store... storing in context")
 		c.Set(JetStreamSessionContextKey, s)
 	}
 	return s, err
@@ -83,70 +80,40 @@ func (p *portalProxy) GetSessionStringValue(c echo.Context, key string) (string,
 	return intf.(string), nil
 }
 
-// Used by middleware to store the session and add the cookie
-// This is called only once per request to avoid duplication
-func (p *portalProxy) WriteSession(c echo.Context) error {
-	sessionModifed := c.Get(JetStreamSessionContextUpdatedKey)
-	if sessionModifed == nil {
-		// Session not modified, so nothing to do
-		return nil
-	}
-
-	sessionIntf := c.Get(JetStreamSessionContextKey)
-	if sessionIntf != nil {
-		if session, ok := sessionIntf.(*sessions.Session); ok {
-			log.Warn("Writing session: " + session.ID)
-
-			req := c.Request().(*standard.Request).Request
-			res := c.Response().(*standard.Response).ResponseWriter
-
-			expiresOn := time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
-			session.Values["expires_on"] = expiresOn
-			c.Set(JetStreamSessionContextKey, session)
-
-			// We saved the session, so remove the update key so we don't save it again
-			err := p.SessionStore.Save(req, res, session)
-			c.Set(JetStreamSessionContextUpdatedKey, nil)
-			return err
-		}
-	}
-
-	return errors.New("Could not find modified session to save in the Context")
-}
-
 func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) error {
 	// Update the cached session and mark that it has been updated
 
-	req := c.Request()
-	res := c.Response().(*standard.Response).ResponseWriter
+	// We're not calling the real session save, so we need to set the session expiry ourselves
+	setSessionExpiresOn(session)
 
-	err := p.SessionStore.Save(req, res, session)
-	if err == nil {
-		log.Warn("Session saved okay")
-		log.Warn(session)
-		// Saved it okay
-		session.IsNew = false
-		setSessionExpiresOn(session)
-	}
-
-	c.Response().
-	
-
-	// Update the session on the context to indicate that the session is not new
 	c.Set(JetStreamSessionContextKey, session)
-	return err
+	c.Set(JetStreamSessionContextUpdatedKey, true)
+	// Session was updated, so we need to Save and write the cookie when we are done
+	p.registerSessionWriterHook(c)
+	return nil
 }
 
-func dedupCookies(c echo.Context) {
-	// if c.Response().Header().Contains("Set-Cookie") {
-	// 	header := c.Response().Header().Get("Set-Cookie")
-	// 	c.Response().Header().Del("Set-Cookie")
-	// 	c.Response().Header().Set("Set-Cookie", header)
-	// }
+func (p *portalProxy) registerSessionWriterHook(c echo.Context) {
+	if c.Get(jetStreamSessionHookInstalled) == nil {
+		c.Set(jetStreamSessionHookInstalled, true)
+		c.Response().Before(p.writeSesstionHook(c))
+	}
+}
 
-	// Cookies
-	for _, cookie := range c.Cookies() {
-		log.Warn(cookie.Name() + " " + cookie.Value())
+// Save and write the session cookie if needed
+// This is called only once per request to avoid duplication
+func (p *portalProxy) writeSesstionHook(c echo.Context) func() {
+	return func() {
+		// Has the seession been modified and need saving?
+		sessionModifed := c.Get(JetStreamSessionContextUpdatedKey)
+		if sessionModifed != nil {
+			sessionIntf := c.Get(JetStreamSessionContextKey)
+			if sessionIntf != nil {
+				if session, ok := sessionIntf.(*sessions.Session); ok {
+					p.SessionStore.Save(c.Request(), c.Response().Writer, session)
+				}
+			}
+		}
 	}
 }
 

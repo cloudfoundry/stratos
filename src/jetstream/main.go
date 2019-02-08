@@ -155,6 +155,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	for _, configPlugin := range interfaces.StratosConfigPlugins {
+		configPlugin(&portalConfig)
+	}
+
 	// Initialize session store for Gorilla sessions
 	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
 	if err != nil {
@@ -568,8 +572,6 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 
 	// Root level middleware
 	if !isUpgrade {
-		// Middleware to write the session after the route has processed the request
-		//e.Use(p.sessionWriteMiddleware)
 		e.Use(sessionCleanupMiddleware)
 	}
 	customLoggerConfig := middleware.LoggerConfig{

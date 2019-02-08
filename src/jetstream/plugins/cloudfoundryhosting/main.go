@@ -34,6 +34,23 @@ type CFHosting struct {
 	endpointType string
 }
 
+// Package initialization
+func init() {
+	interfaces.RegisterStratosConfigPlugin(ConfigInit)
+}
+
+// ConfigInit updates the config if needed
+func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
+	// Make sure we use a different Session Secret per App Instance
+	if config.IsSet("CF_INSTANCE_INDEX") {
+		appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
+		if err == nil {
+			jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
+			log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
+		}
+	}
+}
+
 // Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &CFHosting{portalProxy: portalProxy}, nil

@@ -123,7 +123,7 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 	if err != nil {
 		return errors.New("Could not find session user_id")
 	}
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	// User must be an admin of the Cloud Foundry
 	// Check each in the list and if any is not, then return an error
 	canAccessMetrics := true

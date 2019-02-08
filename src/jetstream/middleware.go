@@ -219,13 +219,3 @@ func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		return h(c)
 	}
 }
-
-func (p *portalProxy) sessionWriteMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		log.Warn("Session Write middleware")
-		err := h(c)
-		// Save the modified session and send the cookie, if required
-		p.WriteSession(c)
-		return err
-	}
-}
