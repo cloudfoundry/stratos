@@ -221,7 +221,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
-		upgrade := c.Request().Header.Get("Sec-Websocket-Key")
+		upgrade := c.Request().Header.Get("Upgrade")
 		webSocketKey := c.Request().Header.Get("Sec-Websocket-Key")
 
 		if len(upgrade) > 0 && len(webSocketKey) > 0 {
