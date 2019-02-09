@@ -1,5 +1,6 @@
 package interfaces
 
+// StratosPlugin is the interface for a Jetstream plugin
 type StratosPlugin interface {
 	Init() error
 	GetMiddlewarePlugin() (MiddlewarePlugin, error)
@@ -7,13 +8,13 @@ type StratosPlugin interface {
 	GetRoutePlugin() (RoutePlugin, error)
 }
 
-// StratosConfigPlugin is the function signature for the config plugin function
-type StratosConfigPlugin func(*PortalConfig)
+// JetstreamConfigInit is the function signature for the config plugin init function
+type JetstreamConfigInit func(*PortalConfig)
 
-// StratosConfigPlugins is the array of config plugins
-var StratosConfigPlugins []StratosConfigPlugin
+// JetstreamConfigPlugins is the array of config plugins
+var JetstreamConfigPlugins []JetstreamConfigInit
 
-// RegisterStratosConfigPlugin registers a new config plugin
-func RegisterStratosConfigPlugin(plugin StratosConfigPlugin) {
-	StratosConfigPlugins = append(StratosConfigPlugins, plugin)
+// RegisterJetstreamConfigPlugin registers a new config plugin
+func RegisterJetstreamConfigPlugin(plugin JetstreamConfigInit) {
+	JetstreamConfigPlugins = append(JetstreamConfigPlugins, plugin)
 }

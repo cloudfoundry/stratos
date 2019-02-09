@@ -12,9 +12,8 @@ import (
 const (
 	// Default cookie name/cookie name prefix
 	jetstreamSessionName              = "console-session"
-	JetStreamSessionContextKey        = "jetstream-session"
-	JetStreamSessionContextUpdatedKey = "jetstream-session-updated"
-	jetStreamSessionHookInstalled     = "jetstream-session-hook-installed"
+	jetStreamSessionContextKey        = "jetstream-session"
+	jetStreamSessionContextUpdatedKey = "jetstream-session-updated"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
@@ -30,7 +29,7 @@ func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 	log.Debug("getSession")
 	req := c.Request()
 	// If we have already got the session, it will be available on the echo Context
-	session := c.Get(JetStreamSessionContextKey)
+	session := c.Get(jetStreamSessionContextKey)
 	if session != nil {
 		if sess, ok := session.(*sessions.Session); ok {
 			return sess, nil
@@ -39,7 +38,7 @@ func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 
 	s, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err == nil {
-		c.Set(JetStreamSessionContextKey, s)
+		c.Set(jetStreamSessionContextKey, s)
 	}
 	return s, err
 }
@@ -84,20 +83,17 @@ func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) err
 	// Update the cached session and mark that it has been updated
 
 	// We're not calling the real session save, so we need to set the session expiry ourselves
-	setSessionExpiresOn(session)
+	expiresOn := time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
+	session.Values["expires_on"] = expiresOn
 
-	c.Set(JetStreamSessionContextKey, session)
-	c.Set(JetStreamSessionContextUpdatedKey, true)
-	// Session was updated, so we need to Save and write the cookie when we are done
-	p.registerSessionWriterHook(c)
-	return nil
-}
-
-func (p *portalProxy) registerSessionWriterHook(c echo.Context) {
-	if c.Get(jetStreamSessionHookInstalled) == nil {
-		c.Set(jetStreamSessionHookInstalled, true)
+	// If this is the first time we have updated the session, register the session writer hook
+	if c.Get(jetStreamSessionContextUpdatedKey) == nil {
 		c.Response().Before(p.writeSesstionHook(c))
 	}
+
+	c.Set(jetStreamSessionContextKey, session)
+	c.Set(jetStreamSessionContextUpdatedKey, true)
+	return nil
 }
 
 // Save and write the session cookie if needed
@@ -105,30 +101,14 @@ func (p *portalProxy) registerSessionWriterHook(c echo.Context) {
 func (p *portalProxy) writeSesstionHook(c echo.Context) func() {
 	return func() {
 		// Has the seession been modified and need saving?
-		sessionModifed := c.Get(JetStreamSessionContextUpdatedKey)
-		if sessionModifed != nil {
-			sessionIntf := c.Get(JetStreamSessionContextKey)
-			if sessionIntf != nil {
-				if session, ok := sessionIntf.(*sessions.Session); ok {
-					p.SessionStore.Save(c.Request(), c.Response().Writer, session)
-				}
+		sessionModifed := c.Get(jetStreamSessionContextUpdatedKey)
+		sessionIntf := c.Get(jetStreamSessionContextKey)
+		if sessionModifed != nil && sessionIntf != nil {
+			if session, ok := sessionIntf.(*sessions.Session); ok {
+				p.SessionStore.Save(c.Request(), c.Response().Writer, session)
 			}
 		}
 	}
-}
-
-func setSessionExpiresOn(session *sessions.Session) {
-	var expiresOn time.Time
-	exOn := session.Values["expires_on"]
-	if exOn == nil {
-		expiresOn = time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
-	} else {
-		expiresOn = exOn.(time.Time)
-		if expiresOn.Sub(time.Now().Add(time.Second*time.Duration(session.Options.MaxAge))) < 0 {
-			expiresOn = time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
-		}
-	}
-	session.Values["expires_on"] = expiresOn
 }
 
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {

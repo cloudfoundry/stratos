@@ -26,6 +26,7 @@ const (
 	cfSessionCookieName    = "JSESSIONID"
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 	SkipAutoRegister       = "SKIP_AUTO_REGISTER"
+	SQLiteProviderName     = "sqlite"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -36,13 +37,15 @@ type CFHosting struct {
 
 // Package initialization
 func init() {
-	interfaces.RegisterStratosConfigPlugin(ConfigInit)
+	interfaces.RegisterJetstreamConfigPlugin(ConfigInit)
 }
 
 // ConfigInit updates the config if needed
 func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
-	// Make sure we use a different Session Secret per App Instance
-	if config.IsSet("CF_INSTANCE_INDEX") {
+	// Make sure we use a different Session Secret per App Instance IF using SQLite
+	// Since this is not a shared database across application instances
+	isSQLite := jetstreamConfig.DatabaseProviderName == SQLiteProviderName
+	if isSQLite && config.IsSet("CF_INSTANCE_INDEX") {
 		appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
 		if err == nil {
 			jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex

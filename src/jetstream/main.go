@@ -107,7 +107,7 @@ func main() {
 	isUpgrading := isConsoleUpgrading()
 
 	if isUpgrading {
-		log.Info("Stratos upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
+		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
 		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
 	}
 	// Grab the Console Version from the executable
@@ -156,7 +156,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _, configPlugin := range interfaces.StratosConfigPlugins {
+	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
 		configPlugin(&portalConfig)
 	}
 
@@ -707,7 +707,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
-	// Callback is use dby both login to Stratos and login to an Endpoint
+	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
@@ -855,6 +855,6 @@ func stopEchoWhenUpgraded(e *echo.Echo) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}
-	log.Info("Stratos upgrade has completed! Shutting down Upgrade web server instance")
+	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
 }
