@@ -43,7 +43,7 @@ func (c *KubernetesSpecification) extractCerts(ec echo.Context) (*KubeCertAuth, 
 
 	kubeCertAuth := &KubeCertAuth{}
 
-	bodyReader := ec.Request().Body()
+	bodyReader := ec.Request().Body
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bodyReader)
 	body := buf.String()

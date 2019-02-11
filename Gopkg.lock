@@ -422,14 +422,6 @@
   version = "v1.4.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
-  name = "github.com/cf-stratos/mysqlstore"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
-
-[[projects]]
   digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
@@ -719,9 +711,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a1a1abedfdfaeac675547fbf03a213f558c111575785d5d57616b697fdb1caf3"
+  digest = "1:69c4965199908d025f33e26d37aee6ec275110b8ce6bfaf85529e8def870c7ba"
   name = "golang.org/x/crypto"
   packages = [
+    "acme",
+    "acme/autocert",
     "curve25519",
     "ed25519",
     "ed25519/internal/edwards25519",
