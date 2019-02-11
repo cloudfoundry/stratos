@@ -9,9 +9,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/context"
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -218,50 +216,6 @@ func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
 
-		return h(c)
-	}
-}
-
-func (p *portalProxy) cloudFoundryMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Check that we are on HTTPS - redirect if not
-		proto := c.Request().Header.Get("X-Forwarded-Proto")
-		if len(proto) > 0 {
-			if proto != "https" {
-				redirect := fmt.Sprintf("https://%s%s", c.Request().Host, c.Request().RequestURI)
-				return c.Redirect(301, redirect)
-			}
-			return h(c)
-		}
-
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"X-Forwarded-Proto not found and is required",
-			"X-Forwarded-Proto not found and is required",
-		)
-	}
-}
-
-// For cloud foundry session affinity
-// Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
-func (p *portalProxy) cloudFoundrySessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Make sure there is a JSESSIONID cookie set to the session ID
-		session, err := p.GetSession(c)
-		if err == nil {
-			// We have a session
-			guid, err := p.GetSessionValue(c, cfSessionCookieName)
-			if err != nil || guid == nil {
-				guid = uuid.NewV4().String()
-				session.Values[cfSessionCookieName] = guid
-				p.SaveSession(c, session)
-			}
-			sessionGUID := fmt.Sprintf("%s", guid)
-			// Set the JSESSIONID coolie for Cloud Foundry session affinity
-			w := c.Response().Writer
-			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
-			http.SetCookie(w, cookie)
-		}
 		return h(c)
 	}
 }

@@ -27,6 +27,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -41,11 +42,12 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary     = 10
-	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
-	UpgradeVolume       = "UPGRADE_VOLUME"
-	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
-	VCapApplication     = "VCAP_APPLICATION"
+	TimeoutBoundary      = 10
+	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
+	UpgradeVolume        = "UPGRADE_VOLUME"
+	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	VCapApplication      = "VCAP_APPLICATION"
+	defaultSessionSecret = "wheeee!"
 )
 
 var appVersion string
@@ -107,6 +109,7 @@ func main() {
 	isUpgrading := isConsoleUpgrading()
 
 	if isUpgrading {
+		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
 		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
 	}
 	// Grab the Console Version from the executable
@@ -153,6 +156,23 @@ func main() {
 	// Wait for Database Schema to be initialized (or exit if this times out)
 	if err = datastore.WaitForMigrations(databaseConnectionPool); err != nil {
 		log.Fatal(err)
+	}
+
+	// Before any changes it, log that we detected a non-default session store secret, so we can tell it has been set from the log
+	if portalConfig.SessionStoreSecret != defaultSessionSecret {
+		log.Info("Session Store Secret detected okay")
+	}
+
+	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
+		configPlugin(&portalConfig)
+	}
+
+	if portalConfig.SessionStoreSecret == defaultSessionSecret {
+		// The Session store secret needs to be set for secure cookies to work properly
+		// We should not be using the default value - this indicates that it has not been set by the user
+		// So for saftey, set a random value
+		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
+		portalConfig.SessionStoreSecret = uuid.NewV4().String()
 	}
 
 	// Initialize session store for Gorilla sessions
@@ -702,7 +722,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
-	// Callback is use dby both login to Stratos and login to an Endpoint
+	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
@@ -850,6 +870,6 @@ func stopEchoWhenUpgraded(e *echo.Echo) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}
-	log.Info("Stratos upgrade has completed! Shutting down Upgrade web server instance")
+	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
 }
