@@ -786,6 +786,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Group("", middleware.Gzip()).Static("/", staticDir)
 		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
 		log.Info("Serving static UI resources")
+	} else {
+		// Not serving UI - use V2 Error compatability error handler
+		e.HTTPErrorHandler = echoV2DefaultHTTPErrorHandler
 	}
 }
 
@@ -800,10 +803,43 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
 		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
 			c.File(path.Join(staticDir, "index.html"))
+			// Let the default handler handle it
+			defaultHandler(err, c)
+		} else {
+			// Use V2 Error compatability error handler
+			echoV2DefaultHTTPErrorHandler(err, c)
 		}
+	}
+}
 
-		// Let the default handler handle it
-		defaultHandler(err, c)
+// EchoV2DefaultHTTPErrorHandler ensurews we get V2 error behaviour
+// i.e. no wrapping in 'message' JSON object
+func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	msg := http.StatusText(code)
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+		if msgStr, ok := he.Message.(string); ok {
+			msg = msgStr
+		} else {
+			msg = he.Error()
+		}
+		if he.Internal != nil {
+			err = fmt.Errorf("%v, %v", err, he.Internal)
+		}
+	}
+
+	// Send response
+	if !c.Response().Committed {
+		if c.Request().Method == http.MethodHead { // Issue #608
+			c.NoContent(code)
+		} else {
+			c.String(code, msg)
+		}
+	}
+
+	if err != nil {
+		c.Logger().Error(err)
 	}
 }
 
