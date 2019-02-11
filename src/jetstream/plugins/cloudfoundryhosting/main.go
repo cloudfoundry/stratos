@@ -11,7 +11,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -27,12 +26,52 @@ const (
 	cfSessionCookieName    = "JSESSIONID"
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 	SkipAutoRegister       = "SKIP_AUTO_REGISTER"
+	SQLiteProviderName     = "sqlite"
+	defaultSessionSecret   = "wheeee!"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+}
+
+// Package initialization
+func init() {
+	interfaces.RegisterJetstreamConfigPlugin(ConfigInit)
+}
+
+// ConfigInit updates the config if needed
+func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
+	// Check we are deployed in Cloud Foundry
+	if !config.IsSet(VCapApplication) {
+		return
+	}
+	isSQLite := jetstreamConfig.DatabaseProviderName == SQLiteProviderName
+	// If session secret is default, make sure we change it
+	if jetstreamConfig.SessionStoreSecret == defaultSessionSecret {
+		if isSQLite {
+			// If SQLIte - create a random value to use, since each app instance has its own DB
+			// and sessions should not be accessible across different instances
+			jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
+		}
+		// If not SQLite then we are using a shared DB
+		// Just drop through and we'll later use a random value and log a warning
+		// This means each instance has a different session secret - this is not a problem
+		// due to session affinity - it means if the instance a user is bound to goes away, their session
+		// will also be lost and they will need to log in again
+	} else {
+		// Else, if not default and is SQLlite - add the App Index to the secret
+		// This makes sure we use a different Session Secret per App Instance IF using SQLite
+		// Since this is not a shared database across application instances
+		if isSQLite && config.IsSet("CF_INSTANCE_INDEX") {
+			appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
+			if err == nil {
+				jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
+				log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
+			}
+		}
+	}
 }
 
 // Init creates a new CFHosting plugin
@@ -183,7 +222,7 @@ func (ch *CFHosting) Init() error {
 			log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
 			ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
 		} else {
-			log.Info("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
+			log.Infof("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
 		}
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
@@ -202,17 +241,19 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
-		if c.Request().Header().Contains("Upgrade") &&
-			c.Request().Header().Contains("Sec-Websocket-Key") {
+		upgrade := c.Request().Header.Get("Upgrade")
+		webSocketKey := c.Request().Header.Get("Sec-Websocket-Key")
+
+		if len(upgrade) > 0 && len(webSocketKey) > 0 {
 			log.Infof("Not redirecting this request")
 			return h(c)
 		}
 
 		// Check that we are on HTTPS - redirect if not
-		if c.Request().Header().Contains("X-Forwarded-Proto") {
-			proto := c.Request().Header().Get("X-Forwarded-Proto")
+		proto := c.Request().Header.Get("X-Forwarded-Proto")
+		if len(proto) > 0 {
 			if proto != "https" {
-				redirect := fmt.Sprintf("https://%s%s", c.Request().Host(), c.Request().URI())
+				redirect := fmt.Sprintf("https://%s%s", c.Request().Host, c.Request().RequestURI)
 				return c.Redirect(301, redirect)
 			}
 			return h(c)
@@ -243,7 +284,7 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			}
 			sessionGUID := fmt.Sprintf("%s", guid)
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity
-			w := c.Response().(*standard.Response).ResponseWriter
+			w := c.Response().Writer
 			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
 			http.SetCookie(w, cookie)
 		}

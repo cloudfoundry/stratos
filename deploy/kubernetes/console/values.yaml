@@ -20,7 +20,8 @@ console:
   backendLogLevel: info
   ssoLogin: false
   ssoOptions:
-
+  # Session Store Secret
+  sessionStoreSecret:
   # Stratos Services
   service:
     annotations: []
