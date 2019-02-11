@@ -158,6 +158,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Before any changes it, log that we detected a non-default session store secret, so we can tell it has been set from the log
+	if portalConfig.SessionStoreSecret != defaultSessionSecret {
+		log.Info("Session Store Secret detected okay")
+		portalConfig.SessionStoreSecret = uuid.NewV4().String()
+	}
+
 	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
 		configPlugin(&portalConfig)
 	}
