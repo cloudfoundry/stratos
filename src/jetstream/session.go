@@ -6,7 +6,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,7 +25,7 @@ func (e *SessionValueNotFound) Error() string {
 
 func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 	log.Debug("getSession")
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	return p.SessionStore.Get(req, p.SessionCookieName)
 }
 
@@ -68,8 +67,8 @@ func (p *portalProxy) GetSessionStringValue(c echo.Context, key string) (string,
 }
 
 func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) error {
-	req := c.Request().(*standard.Request).Request
-	res := c.Response().(*standard.Response).ResponseWriter
+	req := c.Request()
+	res := c.Response().Writer
 
 	expiresOn := time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
 	session.Values["expires_on"] = expiresOn
@@ -80,7 +79,7 @@ func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) err
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
 	log.Debug("setSessionValues")
 
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	session, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err != nil {
 		return err
@@ -96,7 +95,7 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error {
 	log.Debug("unsetSessionValues")
 
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	session, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err != nil {
 		return err
@@ -110,8 +109,8 @@ func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error
 func (p *portalProxy) clearSession(c echo.Context) error {
 	log.Debug("clearSession")
 
-	req := c.Request().(*standard.Request).Request
-	res := c.Response().(*standard.Response).ResponseWriter
+	req := c.Request()
+	res := c.Response().Writer
 	session, err := p.SessionStore.Get(req, p.SessionCookieName)
 	if err != nil {
 		return err
