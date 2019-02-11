@@ -27,7 +27,7 @@ import {
 import { MetaCardTitleComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { CardStatusComponent } from '../src/shared/components/cards/card-status/card-status.component';
 import { MetaCardValueComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../app/shared/components/multiline-title/multiline-title.component';
+import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,

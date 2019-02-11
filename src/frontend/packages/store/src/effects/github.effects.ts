@@ -10,7 +10,7 @@ import { gitRepoSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
-import { GitSCMService, GitSCMType } from '../../../../app/shared/data-services/scm/scm.service';
+import { GitSCMService, GitSCMType } from '../../../core/src/shared/data-services/scm/scm.service';
 
 
 @Injectable()

@@ -11,7 +11,7 @@ import { selectUpdateInfo } from '../../../../../../../store/src/selectors/api.s
 import { AppState } from '../../../../../../../store/src/app-state';
 import {
   BaseEndpointsDataSource
-} from '../../../../../../../../app/shared/components/list/list-types/cf-endpoints/base-endpoints-data-source';
+} from './base-endpoints-data-source';
 import { EndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
 
 @Injectable()

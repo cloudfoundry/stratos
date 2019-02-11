@@ -16,7 +16,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { SetDeployCommit } from '../../../../../../store/src/actions/deploy-applications.actions';
-import { GitCommit } from '../../../../../../../app/store/types/git.types';
+import { GitCommit } from '../../../../../../store/src/types/git.types';
 
 @Component({
   selector: 'app-deploy-application-step2-1',

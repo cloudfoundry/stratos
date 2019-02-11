@@ -38,7 +38,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
-import { EndpointType } from '../../../../app/core/extension/extension-types';
+import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 

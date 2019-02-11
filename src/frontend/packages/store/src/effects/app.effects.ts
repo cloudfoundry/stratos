@@ -3,15 +3,13 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
-import { endpointHasMetrics } from '../../features/endpoints/endpoint-helpers';
-import {
-  createAppInstancesMetricAction,
-} from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 import { GetAppSummaryAction } from '../actions/app-metadata.actions';
 import { ASSIGN_ROUTE_SUCCESS } from '../actions/application-service-routes.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
 import { AppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
+import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
+import { createAppInstancesMetricAction } from '../../../core/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 
 
 @Injectable()

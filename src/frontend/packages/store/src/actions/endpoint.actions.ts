@@ -4,7 +4,7 @@ import { endpointSchemaKey } from '../helpers/entity-factory';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CloudFoundryService } from '../../../core/src/shared/data-services/cloud-foundry.service';
-import { EndpointType } from '../../../../app/core/extension/extension-types';
+import { EndpointType } from '../../../core/src/core/extension/extension-types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';

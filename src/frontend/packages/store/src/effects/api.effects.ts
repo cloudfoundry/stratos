@@ -52,7 +52,7 @@ import {
 } from './recursive-entity-delete.effect';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { LoggerService } from '../../../core/src/core/logger.service';
-import { isJetStreamError } from '../../../../app/core/jetstream.helpers';
+import { isJetStreamError } from '../../../core/src/jetstream.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';

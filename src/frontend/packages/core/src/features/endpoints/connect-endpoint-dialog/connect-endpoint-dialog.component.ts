@@ -26,7 +26,7 @@ import { selectUpdateInfo, selectRequestInfo, selectEntity } from '../../../../.
 import { EndpointsEffect } from '../../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../../store/src/effects/system.effects';
 import { ConnectEndpoint } from '../../../../../store/src/actions/endpoint.actions';
-import { EndpointAuthTypeConfig, IAuthForm, EndpointType, IEndpointAuthComponent } from '../../../../../../app/core/extension/extension-types';
+import { EndpointAuthTypeConfig, IAuthForm, EndpointType, IEndpointAuthComponent } from '../../../core/extension/extension-types';
 import { EndpointsService } from '../../../core/endpoints.service';
 
 

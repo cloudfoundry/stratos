@@ -14,9 +14,9 @@ import {
   spaceSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
-import { CfRoutesDataSourceBase } from '../../../../../../../../app/shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { IRoute } from '../../../../../core/cf-api.types';
+import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 
 
 export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {

@@ -3,8 +3,6 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-import { ExtensionService } from '../../core/extension/extension-service';
-import { registerAPIRequestEntity } from '../reducers/api-request-reducers.generator';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';

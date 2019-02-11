@@ -14,6 +14,7 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {

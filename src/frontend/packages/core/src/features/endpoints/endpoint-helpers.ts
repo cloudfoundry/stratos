@@ -5,16 +5,15 @@ import { Validators } from '@angular/forms';
 
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { EndpointTypeConfig, EndpointAuthTypeConfig, EndpointType } from '../../../../../app/core/extension/extension-types';
-import {
-  CredentialsAuthFormComponent
-} from '../../../../../app/features/endpoints/connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import { SSOAuthFormComponent } from '../../../../../app/features/endpoints/connect-endpoint-dialog/auth-forms/sso-auth-form.component';
-import { NoneAuthFormComponent } from '../../../../../app/features/endpoints/connect-endpoint-dialog/auth-forms/none-auth-form.component';
+import { EndpointTypeConfig, EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
+
 import { AppState } from '../../../../store/src/app-state';
 import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { ExtensionService } from '../../core/extension/extension-service';
+import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';

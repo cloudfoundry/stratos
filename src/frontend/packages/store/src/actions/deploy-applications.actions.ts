@@ -5,7 +5,7 @@ import { GitAppDetails, SourceType, OverrideAppDetails } from '../types/deploy-a
 import { GitBranch, GitCommit } from '../types/git.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
-import { GitSCM } from '../../shared/data-services/scm/scm';
+import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';

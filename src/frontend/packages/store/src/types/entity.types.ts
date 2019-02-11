@@ -42,7 +42,7 @@ import {
   IServiceBroker,
 } from '../../../core/src/core/cf-api-svc.types';
 import { IFeatureFlag, IApp, IStack, ISpace, IOrganization, IRoute, IDomain, ISecurityGroup } from '../../../core/src/core/cf-api.types';
-import { GitBranch, GitCommit } from '../../../../app/store/types/git.types';
+import { GitBranch, GitCommit } from './git.types';
 
 export interface IRequestDataState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<EndpointModel>;

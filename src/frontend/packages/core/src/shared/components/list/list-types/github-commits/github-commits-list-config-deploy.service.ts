@@ -9,7 +9,7 @@ import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table
 import { AppState } from '../../../../../../../store/src/app-state';
 import { DeployApplicationSource } from '../../../../../../../store/src/types/deploy-application.types';
 import { selectApplicationSource } from '../../../../../../../store/src/selectors/deploy-application.selector';
-import { GitSCMService, GitSCMType } from '../../../../../../../../app/shared/data-services/scm/scm.service';
+import { GitSCMType, GitSCMService } from '../../../../data-services/scm/scm.service';
 
 @Injectable()
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {

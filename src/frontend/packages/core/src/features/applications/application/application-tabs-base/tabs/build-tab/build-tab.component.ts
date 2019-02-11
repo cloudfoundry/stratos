@@ -6,8 +6,8 @@ import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { EntityInfo, APIResource } from '../../../../../../../../store/src/types/api.types';
-import { GitSCMService, GitSCMType } from '../../../../../../../../../app/shared/data-services/scm/scm.service';
 import { IAppSummary } from '../../../../../../core/cf-api.types';
+import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 

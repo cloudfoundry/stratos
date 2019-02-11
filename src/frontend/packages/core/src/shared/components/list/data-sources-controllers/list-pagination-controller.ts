@@ -17,7 +17,7 @@ import {
   SetClientFilter
 } from '../../../../../../store/src/actions/pagination.actions';
 import { defaultClientPaginationPageSize } from '../../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
-import { leaveZone, enterZone } from '../../../../../../../app/core/leaveEnterAngularZone';
+import { leaveZone, enterZone } from '../../../../leaveEnterAngularZone';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;

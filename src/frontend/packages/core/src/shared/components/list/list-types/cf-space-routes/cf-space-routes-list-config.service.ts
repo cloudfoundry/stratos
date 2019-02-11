@@ -12,7 +12,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { CfRoutesListConfigBase } from '../../../../../../../../app/shared/components/list/list-types/cf-routes/cf-routes-list-config-base';
+import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 
 @Injectable()
 export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase implements IListConfig<APIResource> {

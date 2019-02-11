@@ -17,7 +17,7 @@ import { getPaginationObservables } from '../../../../../../store/src/reducers/p
 import { GetAllAppsInSpace } from '../../../../../../store/src/actions/space.actions';
 import { SetCreateServiceInstanceApp } from '../../../../../../store/src/actions/create-service-instance.actions';
 import { pathGet, safeUnsubscribe } from '../../../../core/utils.service';
-import { SchemaFormConfig } from '../../../../../../../app/shared/components/schema-form/schema-form.component';
+import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 
 @Component({
   selector: 'app-bind-apps-step',

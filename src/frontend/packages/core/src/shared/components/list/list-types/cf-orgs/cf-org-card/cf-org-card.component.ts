@@ -26,7 +26,7 @@ import { AppState } from '../../../../../../../../store/src/app-state';
 import { createUserRoleInOrg } from '../../../../../../../../store/src/types/user.types';
 import { entityFactory, organizationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { OrgQuotaHelper } from '../../../../../../../../../app/features/cloud-foundry/services/cloud-foundry-organization-quota';
+import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
 import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 
 

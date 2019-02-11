@@ -15,7 +15,7 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { entityFactory, endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
-import { EndpointTypeConfig } from '../../../../../../../app/core/extension/extension-types';
+import { EndpointTypeConfig } from '../../../../core/extension/extension-types';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/

@@ -13,7 +13,7 @@
   var replace = require('replace-in-file');
   var execSync = require('child_process').execSync;
 
-  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/misc/custom/custom.yaml');
+  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/packages/core/src/misc/custom/custom.yaml');
   const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
   const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
   const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
@@ -107,7 +107,7 @@
       try {
         const existingLink = fs.readlinkSync(destFile);
         fs.unlinkSync(destFile);
-      } catch (e) {}
+      } catch (e) { }
 
       if (!reset) {
         fs.symlinkSync(srcFile, destFile);
@@ -132,7 +132,7 @@
 
   // Copy the correct custom module to either import the supplied custom module or provide an empty module
   function doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/src/misc/custom');
     const destFile = path.join(baseFolder, 'app/custom-import.module.ts');
     const customModuleFile = path.join(baseFolder, 'app/custom/custom.module.ts');
     const customRoutingModuleFile = path.join(baseFolder, 'app/custom/custom-routing.module.ts');

@@ -25,9 +25,9 @@ import { RouterNav } from '../../../../../../../store/src/actions/router.actions
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
-import { GitCommit } from '../../../../../../../../app/store/types/git.types';
-import { GitSCM } from '../../../../../../../../app/shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../../../../../app/shared/data-services/scm/scm.service';
+import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { GitSCM } from '../../../../data-services/scm/scm';
+import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {

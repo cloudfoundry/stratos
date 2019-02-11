@@ -18,7 +18,8 @@ import {
 } from '../../../../../../../store/src/helpers/entity-factory';
 import {
   CfAppRoutesListConfigServiceBase
-} from '../../../../../../../../app/shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
+} from './cf-app-routes-list-config-base';
+import { IListConfig } from '../../list.component.types';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {

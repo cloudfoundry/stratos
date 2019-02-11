@@ -49,8 +49,8 @@ import { selectUpdateInfo, selectRequestInfo } from '../../../../../../store/src
 import { serviceInstancesSchemaKey, serviceBindingSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { CreateServiceBinding } from '../../../../../../store/src/actions/service-bindings.actions';
-import { SchemaFormConfig } from '../../../../../../../app/shared/components/schema-form/schema-form.component';
 import { pathGet, safeStringToObj } from '../../../../core/utils.service';
+import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 
 
 const enum FormMode {

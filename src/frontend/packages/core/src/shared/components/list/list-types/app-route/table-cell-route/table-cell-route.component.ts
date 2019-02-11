@@ -22,8 +22,13 @@ export class TableCellRouteComponent<T> extends TableCellCustom<T>
   }
 
   ngOnInit() {
-    const domain = this.row && this.row.entity ? this.row.entity.domain : null;
-    this.routeUrl = getRoute(this.row, false, false, domain);
-    this.isRouteTCP = isTCPRoute(this.row);
+    if (this.row && this.row.entity) {
+      this.routeUrl = getRoute(this.row.entity.port, this.row.entity.host, this.row.entity.path, false, false, this.row.entity.path);
+      this.isRouteTCP = isTCPRoute(this.row);
+    } else {
+      this.routeUrl = '-';
+      this.isRouteTCP = false;
+    }
+
   }
 }

@@ -8,7 +8,7 @@ import {
   serviceInstancesSchemaKey
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
-import { getEndpointSchemeKeys } from '../../../core/extension/extension-service';
+import { getEndpointSchemeKeys } from '../../../../core/src/core/extension/extension-service';
 
 export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
   return entityKeys.reduce((prevState, entityKey) => {

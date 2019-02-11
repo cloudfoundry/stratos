@@ -15,7 +15,7 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { UserService } from './user.service';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { endpointHealthChecks, EndpointHealthCheck } from '../../../../app/core/endpoints-health-checks';
+import { endpointHealthChecks, EndpointHealthCheck } from '../../endpoints-health-checks';
 
 
 @Injectable()

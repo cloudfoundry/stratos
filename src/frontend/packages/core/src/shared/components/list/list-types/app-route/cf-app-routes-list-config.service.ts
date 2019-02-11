@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { take } from 'rxjs/operators';
 import {
   CfAppRoutesListConfigServiceBase
-} from '../../../../../../../../app/shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
+} from './cf-app-routes-list-config-base';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';

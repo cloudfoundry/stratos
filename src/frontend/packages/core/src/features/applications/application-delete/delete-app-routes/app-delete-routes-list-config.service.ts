@@ -12,7 +12,7 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
   CfAppRoutesListConfigServiceBase
-} from '../../../../../../../app/shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
+} from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
 
 @Injectable()

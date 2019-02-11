@@ -31,7 +31,7 @@ import {
   ProjectExists,
   ProjectFetchFail,
 } from '../actions/deploy-applications.actions';
-import { GitCommit } from '../../../../app/store/types/git.types';
+import { GitCommit } from '../types/git.types';
 
 export function createFailedGithubRequestMessage(error) {
   const response = parseHttpPipeError(error);

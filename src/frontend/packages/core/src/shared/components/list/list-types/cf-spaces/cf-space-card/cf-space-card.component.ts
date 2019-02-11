@@ -29,7 +29,7 @@ import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.t
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { SpaceQuotaHelper } from '../../../../../../../../../app/features/cloud-foundry/services/cloud-foundry-space-quota';
+import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
 
 
 @Component({

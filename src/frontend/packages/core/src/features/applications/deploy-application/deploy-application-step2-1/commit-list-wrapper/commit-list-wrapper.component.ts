@@ -10,8 +10,8 @@ import {
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GitSCMService } from '../../../../../../../../app/shared/data-services/scm/scm.service';
-import { GitCommit } from '../../../../../../../../app/store/types/git.types';
+import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { GitSCMService } from '../../../../../shared/data-services/scm/scm.service';
 
 @Component({
   selector: 'app-commit-list-wrapper',

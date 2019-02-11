@@ -28,7 +28,7 @@ import {
   userHasRole,
   userListUserVisibleKey,
   UserListUsersVisible
-} from '../../../../../../../../app/shared/components/list/list-types/cf-users/cf-user-list-helpers';
+} from './cf-user-list-helpers';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';

@@ -11,7 +11,7 @@ import { entityFactory, cfUserSchemaKey } from '../../../../../../../store/src/h
 import {
   UserListUsersVisible,
   userListUserVisibleKey
-} from '../../../../../../../../app/shared/components/list/list-types/cf-users/cf-user-list-helpers';
+} from './cf-user-list-helpers';
 
 function createUserVisibilityFilter(userHasRoles: (user: CfUser) => boolean):
   (entities: APIResource<CfUser>[], paginationState: PaginationEntityState) => APIResource<CfUser>[] {

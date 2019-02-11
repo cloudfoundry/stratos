@@ -7,8 +7,8 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
 import { EntitySchema, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { GitCommit } from '../../../../../../../../app/store/types/git.types';
-import { GitSCM } from '../../../../../../../../app/shared/data-services/scm/scm';
+import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { GitSCM } from '../../../../data-services/scm/scm';
 
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {

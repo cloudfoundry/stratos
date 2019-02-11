@@ -31,9 +31,9 @@ import { getPaginationObservables } from '../../../../../../store/src/reducers/p
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
-import { GitCommit, GitRepo } from '../../../../../../../app/store/types/git.types';
-import { GitSCM } from '../../../../../../../app/shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../../../../app/shared/data-services/scm/scm.service';
+import { GitCommit, GitRepo } from '../../../../../../store/src/types/git.types';
+import { GitSCM } from '../../../../shared/data-services/scm/scm';
+import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 
 @Component({
   selector: 'app-deploy-application-step2',

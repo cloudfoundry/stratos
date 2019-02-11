@@ -6,6 +6,7 @@ import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
 import { CheckProjectExists } from '../../../../../store/src/actions/deploy-applications.actions';
+import { GitSCMService, GitSCMType } from '../../../shared/data-services/scm/scm.service';
 
 
 interface GithubProjectExistsResponse {

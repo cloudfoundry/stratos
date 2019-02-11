@@ -15,7 +15,7 @@ import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permi
 import { CloseSideNav, ChangeSideNavMode, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { EndpointHealthCheck } from '../../../../../../app/core/endpoints-health-checks';
+import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 
 @Component({

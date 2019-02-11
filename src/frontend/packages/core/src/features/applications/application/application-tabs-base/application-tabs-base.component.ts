@@ -36,7 +36,7 @@ import {
   getTabsFromExtensions,
   StratosTabType
 } from '../../../../core/extension/extension-service';
-import { GitSCMService, GitSCMType } from '../../../../../../../app/shared/data-services/scm/scm.service';
+import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
