@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gorilla/context"
 	"github.com/labstack/echo"
@@ -76,6 +77,19 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
 		}
+
+		// Clear any session cookie
+		cookie := new(http.Cookie)
+		cookie.Name = p.SessionCookieName
+		cookie.Value = ""
+		cookie.Expires = time.Now().Add(-24 * time.Hour)
+		cookie.Domain = p.SessionStoreOptions.Domain
+		cookie.HttpOnly = p.SessionStoreOptions.HttpOnly
+		cookie.Secure = p.SessionStoreOptions.Secure
+		cookie.Path = p.SessionStoreOptions.Path
+		cookie.MaxAge = 0
+		c.SetCookie(cookie)
+
 		return handleSessionError(p.Config, c, err, isVerify, "User session could not be found")
 	}
 }
