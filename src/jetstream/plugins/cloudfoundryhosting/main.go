@@ -54,25 +54,12 @@ func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
 			// If SQLIte - create a random value to use, since each app instance has its own DB
 			// and sessions should not be accessible across different instances
 			jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
-		} else {
-			// Shared DB, so the session secret must be the same for all instances
-			// The user should not be using the default value in this case, so warn them
-			// and use a value that all app instances can generate the same - but the user should
-			// really set their own value
-			log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value in the application manifest")
-
-			// Use the App ID and Space ID of the console
-			var appData interfaces.VCapApplicationData
-			vCapApp, _ := config.GetValue(VCapApplication)
-			err := json.Unmarshal([]byte(vCapApp), &appData)
-			if err == nil {
-				// Set a value based on the app id and space
-				jetstreamConfig.SessionStoreSecret = fmt.Sprintf("%s_%s", appData.SpaceID, appData.ApplicationID)
-			} else {
-				// Set a random value so that we don't use the default - note that this will prevent multiple app instances workiing correcrtly
-				jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
-			}
 		}
+		// If not SQLite then we are using a shared DB
+		// Just drop through and we'll later use a random value and log a warning
+		// This means each instance has a different session secret - this is not a problem
+		// due to session affinity - it means if the instance a user is bound to goes away, their session
+		// will also be lost and they will need to log in again
 	} else {
 		// Else, if not default and is SQLlite - add the App Index to the secret
 		// This makes sure we use a different Session Secret per App Instance IF using SQLite
