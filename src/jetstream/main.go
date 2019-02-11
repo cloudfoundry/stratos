@@ -27,6 +27,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -41,11 +42,12 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary     = 10
-	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
-	UpgradeVolume       = "UPGRADE_VOLUME"
-	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
-	VCapApplication     = "VCAP_APPLICATION"
+	TimeoutBoundary      = 10
+	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
+	UpgradeVolume        = "UPGRADE_VOLUME"
+	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	VCapApplication      = "VCAP_APPLICATION"
+	defaultSessionSecret = "wheeee!"
 )
 
 var appVersion string
@@ -158,6 +160,14 @@ func main() {
 
 	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
 		configPlugin(&portalConfig)
+	}
+
+	if portalConfig.SessionStoreSecret == defaultSessionSecret {
+		// The Session store secret needs to be set for secure cookies to work properly
+		// We should not be using the default value - this indicates that it has not been set by the user
+		// So for saftey, set a random value
+		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
+		portalConfig.SessionStoreSecret = uuid.NewV4().String()
 	}
 
 	// Initialize session store for Gorilla sessions

@@ -27,6 +27,7 @@ const (
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 	SkipAutoRegister       = "SKIP_AUTO_REGISTER"
 	SQLiteProviderName     = "sqlite"
+	defaultSessionSecret   = "wheeee!"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -42,14 +43,46 @@ func init() {
 
 // ConfigInit updates the config if needed
 func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
-	// Make sure we use a different Session Secret per App Instance IF using SQLite
-	// Since this is not a shared database across application instances
+	// Check we are deployed in Cloud Foundry
+	if !config.IsSet(VCapApplication) {
+		return
+	}
 	isSQLite := jetstreamConfig.DatabaseProviderName == SQLiteProviderName
-	if isSQLite && config.IsSet("CF_INSTANCE_INDEX") {
-		appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
-		if err == nil {
-			jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
-			log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
+	// If session secret is default, make sure we change it
+	if jetstreamConfig.SessionStoreSecret == defaultSessionSecret {
+		if isSQLite {
+			// If SQLIte - create a random value to use, since each app instance has its own DB
+			// and sessions should not be accessible across different instances
+			jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
+		} else {
+			// Shared DB, so the session secret must be the same for all instances
+			// The user should not be using the default value in this case, so warn them
+			// and use a value that all app instances can generate the same - but the user should
+			// really set their own value
+			log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value in the application manifest")
+
+			// Use the App ID and Space ID of the console
+			var appData interfaces.VCapApplicationData
+			vCapApp, _ := config.GetValue(VCapApplication)
+			err := json.Unmarshal([]byte(vCapApp), &appData)
+			if err == nil {
+				// Set a value based on the app id and space
+				jetstreamConfig.SessionStoreSecret = fmt.Sprintf("%s_%s", appData.SpaceID, appData.ApplicationID)
+			} else {
+				// Set a random value so that we don't use the default - note that this will prevent multiple app instances workiing correcrtly
+				jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
+			}
+		}
+	} else {
+		// Else, if not default and is SQLlite - add the App Index to the secret
+		// This makes sure we use a different Session Secret per App Instance IF using SQLite
+		// Since this is not a shared database across application instances
+		if isSQLite && config.IsSet("CF_INSTANCE_INDEX") {
+			appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
+			if err == nil {
+				jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
+				log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
+			}
 		}
 	}
 }
