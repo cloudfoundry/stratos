@@ -135,6 +135,12 @@ spec:
           value: "{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
           value: key
+        - name: SESSION_STORE_SECRET
+          {{- if .Values.console.sessionStoreSecret }}
+          value: {{ .Values.console.sessionStoreSecret | quote }}
+          {{- else }}
+          value: {{ randAlphaNum 64 | quote }}
+          {{- end }}          
         {{- if .Values.consoleCert }}
         - name: CONSOLE_CERT
           value: | 

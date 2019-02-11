@@ -26,12 +26,52 @@ const (
 	cfSessionCookieName    = "JSESSIONID"
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 	SkipAutoRegister       = "SKIP_AUTO_REGISTER"
+	SQLiteProviderName     = "sqlite"
+	defaultSessionSecret   = "wheeee!"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+}
+
+// Package initialization
+func init() {
+	interfaces.RegisterJetstreamConfigPlugin(ConfigInit)
+}
+
+// ConfigInit updates the config if needed
+func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
+	// Check we are deployed in Cloud Foundry
+	if !config.IsSet(VCapApplication) {
+		return
+	}
+	isSQLite := jetstreamConfig.DatabaseProviderName == SQLiteProviderName
+	// If session secret is default, make sure we change it
+	if jetstreamConfig.SessionStoreSecret == defaultSessionSecret {
+		if isSQLite {
+			// If SQLIte - create a random value to use, since each app instance has its own DB
+			// and sessions should not be accessible across different instances
+			jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
+		}
+		// If not SQLite then we are using a shared DB
+		// Just drop through and we'll later use a random value and log a warning
+		// This means each instance has a different session secret - this is not a problem
+		// due to session affinity - it means if the instance a user is bound to goes away, their session
+		// will also be lost and they will need to log in again
+	} else {
+		// Else, if not default and is SQLlite - add the App Index to the secret
+		// This makes sure we use a different Session Secret per App Instance IF using SQLite
+		// Since this is not a shared database across application instances
+		if isSQLite && config.IsSet("CF_INSTANCE_INDEX") {
+			appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
+			if err == nil {
+				jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
+				log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
+			}
+		}
+	}
 }
 
 // Init creates a new CFHosting plugin
@@ -201,7 +241,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
-		upgrade := c.Request().Header.Get("Sec-Websocket-Key")
+		upgrade := c.Request().Header.Get("Upgrade")
 		webSocketKey := c.Request().Header.Get("Sec-Websocket-Key")
 
 		if len(upgrade) > 0 && len(webSocketKey) > 0 {

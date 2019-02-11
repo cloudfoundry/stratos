@@ -777,7 +777,6 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		log.Warnf("%v+", err)
 		return nil, interfaces.LogHTTPError(res, err)
 	}
 
