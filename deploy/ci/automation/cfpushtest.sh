@@ -31,6 +31,7 @@ if [ "$1" == "mysql" ]; then
     sleep 2
   done
 
+  echo "Creating database and setting permissions..."
   mysql -uroot -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
   mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'$HOST' IDENTIFIED BY '$PASSWORD';"
   mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'$HOST';"
@@ -58,6 +59,7 @@ if [ -n "${DB_TYPE}" ]; then
   echo "Creating user provided service for the database..."
   echo "Database Server: ${HOST}:${PORT}"
   cf cups ${DB} -p "'${CONFIG}'"
+  echo ${CONFIG}
 fi
 
 set -e
@@ -113,25 +115,27 @@ if [ $RET -ne 0 ]; then
   echo "Push failed... showing recent log of the Stratos app"
   cf logs console --recent
   set -e
+else
+  # Push was okay, so we can prepare and run E2E tests
+  rm -rf node_modules
+  npm install
+
+  # Clean the E2E reports folder
+  rm -rf ./e2e-reports
+  mkdir -p ./e2e-reports
+  export E2E_REPORT_FOLDER=./e2e-reports
+
+  # Run the E2E tests
+  "$DIRPATH/runandrecord.sh" https://console.${CF_DOMAIN} ${SUITE}
+  RET=$?
+
+  # If we had test failures then copy console log to reports folder
+  if [ $RET -ne 0 ]; then
+    cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
+  fi 
 fi
 
-rm -rf node_modules
-npm install
-
-# Clean the E2E reports folder
-rm -rf ./e2e-reports
-mkdir -p ./e2e-reports
-export E2E_REPORT_FOLDER=./e2e-reports
-
-# Run the E2E tests
-"$DIRPATH/runandrecord.sh" https://console.${CF_DOMAIN} ${SUITE}
-RET=$?
-
-# If we had test failures then copy console log to reports folder
-if [ $RET -ne 0 ]; then
-  cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
-fi 
-
+# Clean up
 rm $MANIFEST
 
 # Stop the database server
