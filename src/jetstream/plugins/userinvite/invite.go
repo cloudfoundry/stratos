@@ -71,7 +71,7 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	}
 
 	// Check we can unmarshall the request
-	body, err := ioutil.ReadAll(c.Request().Body())
+	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
@@ -353,12 +353,12 @@ func updateUserInviteRecordForError(user UserInviteUser, msg string, cfError *CF
 
 func getReturnURL(c echo.Context) string {
 	// Return URL is base URL of the request
-	returnURL := c.Request().Header().Get("origin")
+	returnURL := c.Request().Header.Get("origin")
 	if len(returnURL) == 0 {
-		if c.Request().IsTLS() {
-			returnURL = fmt.Sprintf("https://%s", c.Request().Host())
+		if c.Request().TLS != nil {
+			returnURL = fmt.Sprintf("https://%s", c.Request().Host)
 		} else {
-			returnURL = fmt.Sprintf("http://%s", c.Request().Host())
+			returnURL = fmt.Sprintf("http://%s", c.Request().Host)
 		}
 	}
 	return returnURL
