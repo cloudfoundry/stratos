@@ -53,9 +53,12 @@ DB=stratos-${DB_TYPE}
 cf delete -f -r console
 cf ds -f $DB
 
-CONFIG='{"dbname":"'$DB_NAME'","name":"'$DB_NAME'","username":"'$USERNAME'","password":"'$PASSWORD'","uri":"'${DB_TYPE}'://database","port":"'$PORT'","hostname":"'$HOST'"}'
-echo "Creating user provided service for the database..."
-cf cups ${DB} -p "'${CONFIG}'"
+if [ -n "${DB_TYPE}" ]; then
+  CONFIG='{"dbname":"'$DB_NAME'","name":"'$DB_NAME'","username":"'$USERNAME'","password":"'$PASSWORD'","uri":"'${DB_TYPE}'://database","port":"'$PORT'","hostname":"'$HOST'"}'
+  echo "Creating user provided service for the database..."
+  echo "Database Server: ${HOST}:${PORT}"
+  cf cups ${DB} -p "'${CONFIG}'"
+fi
 
 set -e
 
@@ -95,6 +98,9 @@ if [ "$2" == "prebuild" ]; then
   npm install
   npm run prebuild-ui
 fi
+
+# If the push fails, we want to continue and show the logs
+set +e
 
 # Push Stratos to the Cloud Foundry
 cf push -f $MANIFEST
