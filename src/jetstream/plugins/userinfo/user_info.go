@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,7 +32,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	path := c.Path()
 
 	// Now get the URL of the request and remove the path to give the path of the API that is being requested
-	target := c.Request().URL().Path()
+	target := c.Request().URL.Path
 	target = target[(len(path) - 1):]
 	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
 
@@ -43,7 +42,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	}
 
 	// Check for custom header - if present, verify the user's password before making the request
-	password := c.Request().Header().Get("x-stratos-password")
+	password := c.Request().Header.Get("x-stratos-password")
 	if len(password) > 0 {
 		// Need to verify the user's login
 		err := userInfo.portalProxy.RefreshUAALogin(username, password, false)
@@ -72,7 +71,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	// If we have the user's password, log them in again
 	// This is used when the API call that is being made revokes the current access and refresh tokens
 	if len(password) > 0 {
-		newPassword := c.Request().Header().Get("x-stratos-password-new")
+		newPassword := c.Request().Header.Get("x-stratos-password-new")
 		if len(newPassword) > 0 {
 			password = newPassword
 		}
@@ -88,7 +87,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	return nil
 }
 
-func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq engine.Request) (stausCode int, body []byte, err error) {
+func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq *http.Request) (stausCode int, body []byte, err error) {
 	// Proxy the request to the UAA on behalf of the user
 	log.Debugf("doAPIRequest: %s", url)
 
@@ -101,7 +100,7 @@ func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq e
 	var res *http.Response
 	var req *http.Request
 
-	req, err = http.NewRequest(echoReq.Method(), url, echoReq.Body())
+	req, err = http.NewRequest(echoReq.Method, url, echoReq.Body)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -123,9 +122,10 @@ func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq e
 	return res.StatusCode, data, err
 }
 
-func fwdHeaders(uaaReq engine.Request, req *http.Request) {
+func fwdHeaders(uaaReq *http.Request, req *http.Request) {
 	log.Debug("fwdHeaders")
-	for _, k := range uaaReq.Header().Keys() {
+
+	for k, headers := range uaaReq.Header {
 		switch {
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
@@ -134,7 +134,9 @@ func fwdHeaders(uaaReq engine.Request, req *http.Request) {
 
 		// Forwarding everything else
 		default:
-			req.Header[k] = []string{uaaReq.Header().Get(k)}
+			for _, h := range headers {
+				req.Header.Add(k, h)
+			}
 		}
 	}
 }

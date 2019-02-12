@@ -41,6 +41,13 @@ export class SnackBarComponent extends Component {
     });
   }
 
+  messageContains(expected: string): promise.Promise<boolean> {
+    return this.locator.getText().then(actual => {
+      return actual.indexOf(expected) !== -1;
+    });
+  }
+
+
   getMessage(): promise.Promise<string> {
     return this.locator.getText();
   }

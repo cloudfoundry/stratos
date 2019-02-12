@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -64,7 +63,7 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 		req.UserGUID = userGUID
 		req.ResultGUID = metric.endpoint.GUID
 		req.EndpointGUID = metric.metrics.EndpointGUID
-		req.Method = c.Request().Method()
+		req.Method = c.Request().Method
 
 		addQueries := queries
 		if len(addQueries) > 0 {
@@ -114,7 +113,7 @@ func makePrometheusRequestURI(c echo.Context, prometheusOp string, modify string
 }
 
 func getEchoURL(c echo.Context) url.URL {
-	u := c.Request().URL().(*standard.URL).URL
+	u := c.Request().URL
 	return *u
 }
 
@@ -124,7 +123,7 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 	if err != nil {
 		return errors.New("Could not find session user_id")
 	}
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	// User must be an admin of the Cloud Foundry
 	// Check each in the list and if any is not, then return an error
 	canAccessMetrics := true
@@ -205,7 +204,7 @@ func (m *MetricsSpecification) getCloudFoundryCellMetrics(c echo.Context) error 
 		return errors.New("Unsupported prometheus query")
 	}
 
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	return m.makePrometheusRequest(c, cnsiList, "")
 }

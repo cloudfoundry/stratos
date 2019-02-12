@@ -186,7 +186,7 @@ func sendSSHError(format string, a ...interface{}) error {
 	} else {
 		log.Errorf("App SSH Error: "+format, a)
 	}
-	return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf(format, a))
+	return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf(format, a...))
 }
 
 func sshHostKeyChecker(fingerprint string) ssh.HostKeyCallback {
