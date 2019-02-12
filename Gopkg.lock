@@ -408,19 +408,15 @@
   revision = "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
 
 [[projects]]
-  digest = "1:09b4b26f6837dbb21698726ccaa6eccae9ab822485726a2a09a9d123cb1ba4d1"
+  digest = "1:0c2ca8699f9332007af8f9ee882cb2e93c7acfe6e67df4e8529aade9c548bc88"
   name = "github.com/labstack/echo"
   packages = [
     ".",
-    "context",
-    "engine",
-    "engine/standard",
-    "log",
     "middleware",
   ]
   pruneopts = "UT"
-  revision = "e08070379af60f5b9c0fb5bb2d1527ba9624fe43"
-  version = "v2.2.0"
+  revision = "2e9f4ea4e010fa328318107ba074b1b72381c571"
+  version = "v3.3.7"
 
 [[projects]]
   digest = "1:568171fc14a3d819b112c3e219d351ea7b05e8dad7935c4168c6b3373244a686"
@@ -643,9 +639,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a1a1abedfdfaeac675547fbf03a213f558c111575785d5d57616b697fdb1caf3"
+  digest = "1:69c4965199908d025f33e26d37aee6ec275110b8ce6bfaf85529e8def870c7ba"
   name = "golang.org/x/crypto"
   packages = [
+    "acme",
+    "acme/autocert",
     "curve25519",
     "ed25519",
     "ed25519/internal/edwards25519",
@@ -660,12 +658,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:290b8002a96a5f5c1bd8316884f6e2414f5fb1e46a22bbd5a1ff0d45dc944cb3"
+  digest = "1:7427036b6d926b3d1fa0773771820735b35554a98296f1074df440ee30a97296"
   name = "golang.org/x/net"
-  packages = [
-    "context",
-    "websocket",
-  ]
+  packages = ["websocket"]
   pruneopts = "UT"
   revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
 
@@ -768,8 +763,6 @@
     "github.com/gorilla/websocket",
     "github.com/kat-co/vala",
     "github.com/labstack/echo",
-    "github.com/labstack/echo/engine",
-    "github.com/labstack/echo/engine/standard",
     "github.com/labstack/echo/middleware",
     "github.com/mattn/go-sqlite3",
     "github.com/mholt/archiver",
