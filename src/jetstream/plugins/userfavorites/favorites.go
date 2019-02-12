@@ -79,7 +79,7 @@ func (uf *UserFavorites) setMetadata(c echo.Context) error {
 		return errors.New("Invalid favorite GUID")
 	}
 	req := c.Request()
-	body, _ := ioutil.ReadAll(req.Body())
+	body, _ := ioutil.ReadAll(req.Body)
 	userGUID := c.Get("user_id").(string)
 	// Unmarshal
 	var msg map[string]interface{}
@@ -114,7 +114,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	userGUID := c.Get("user_id").(string)
 
 	req := c.Request()
-	body, _ := ioutil.ReadAll(req.Body())
+	body, _ := ioutil.ReadAll(req.Body)
 
 	favorite := userfavoritesstore.UserFavoriteRecord{}
 	err = json.Unmarshal(body, &favorite)
