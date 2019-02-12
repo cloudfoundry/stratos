@@ -12,7 +12,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 
 	"gopkg.in/yaml.v2"
@@ -203,7 +202,7 @@ func (p *KubernetesSpecification) parseKubeConfig(kubeConfigData []byte) (*KubeC
 
 func (p *KubernetesSpecification) FetchKubeConfigTokenOIDC(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 
 	// Need to extract the parameters from the request body
 	defer req.Body.Close()
@@ -251,7 +250,7 @@ func (p *KubernetesSpecification) FetchKubeConfigTokenOIDC(cnsiRecord interfaces
 
 func (p *KubernetesSpecification) FetchKubeConfigTokenAKS(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 
 	// Need to extract the parameters from the request body
 	defer req.Body.Close()
