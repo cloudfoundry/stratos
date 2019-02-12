@@ -225,11 +225,12 @@ func (ch *CFHosting) Init() error {
 			log.Infof("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
 		}
 
-		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
-		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-			SpaceGUID: appData.SpaceID,
-			AppGUID:   appData.ApplicationID,
+		// Store the space and id of the Console application - we can use these to prevent stop/delete in the front-end
+		if (ch.portalProxy.GetConfig().CloudFoundryInfo == nil) {
+		    ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{}
 		}
+		ch.portalProxy.GetConfig().CloudFoundryInfo.SpaceGUID = appData.SpaceID
+		ch.portalProxy.GetConfig().CloudFoundryInfo.AppGUID = appData.ApplicationID
 
 		log.Info("All done for Cloud Foundry deployment")
 	}

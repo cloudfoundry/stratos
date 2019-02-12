@@ -74,8 +74,14 @@ export class UserInviteService {
       // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
       map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
-    this.canConfigure$ = waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
-      map(cf => cf.global.isAdmin)
+
+    this.canConfigure$ = combineLatest(
+      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
+      this.store.select('auth')
+    ).pipe(
+      map(([cf, auth]) =>
+        cf.global.isAdmin &&
+        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );
   }
 
@@ -141,12 +147,12 @@ export class UserInviteService {
   }
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
-    // Can only invite someone to an org or space
+    // Can only invite someone to an org or space and user must be admin or org manager
     return !orgGuid ? observableOf(false) : waitForCFPermissions(this.store, cfGuid).pipe(
       switchMap(() => combineLatest(
         this.configured$,
         this.currentUserPermissionsService.can(
-          spaceGuid ? CurrentUserPermissions.SPACE_CHANGE_ROLES : CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
+          CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
           cfGuid,
           orgGuid,
           spaceGuid

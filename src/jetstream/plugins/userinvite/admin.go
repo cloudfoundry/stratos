@@ -20,7 +20,7 @@ type StatusResponse struct {
 
 const wwwAuthHeader = "www-authenticate"
 const scimInviteScope = "scim.invite"
-const cloudControlerAdminScope = "cloud_controller.admin"
+const cloudControllerAdminScope = "cloud_controller.admin"
 
 // Admin functions for managing User Invite credentials for a given Cloud Foundry
 
@@ -86,7 +86,7 @@ func (invite *UserInvite) configure(c echo.Context) error {
 
 	// Check the required scopes are present
 	scopes := strings.Split(uaaRecord.Scope, " ")
-	if !arrayContainsString(scopes, scimInviteScope) || !arrayContainsString(scopes, cloudControlerAdminScope) {
+	if !arrayContainsString(scopes, scimInviteScope) || !arrayContainsString(scopes, cloudControllerAdminScope) {
 		// Doesn't have the scopes needed
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,

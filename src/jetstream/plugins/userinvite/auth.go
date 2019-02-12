@@ -33,7 +33,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*
 		return nil, nil, interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Unable to save user invite token",
-			"Unable to save user invite toke: %v+", err,
+			"Unable to save user invite token: %v+", err,
 		)
 	}
 

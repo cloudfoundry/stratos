@@ -28,6 +28,7 @@ func (pp *portalProxy) loadPlugins() {
 		{"cloudfoundryhosting", cloudfoundryhosting.Init},
 		{"metrics", metrics.Init},
 		{"userinfo", userinfo.Init},
+		// userinvite depends on cloudfoundry & cloudfoundryhosting
 		{"userinvite", userinvite.Init},
 	} {
 		plugin, err := p.Init(pp)

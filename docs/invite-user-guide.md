@@ -35,12 +35,13 @@ There are number of set up steps to execute first.
 
 3) Create/Locate a UAA client with required scopes
 
-   Stratos uses a pre-configured UAA client to invite the UAA user and create the CF user. In needs both `scim.invite` and `// TODO: UPDATE`
+   Stratos uses a pre-configured UAA client to invite the UAA user and create the CF user. In needs both `scim.invite` and `cloud_controller.admin`
    To manually create such a user using the UAA CLI the following command can be used
 
    ```
-   uaac client add stratos-invite --scope scim.invite `// TODO: UPDATE` --authorized_grant_types client_credentials --authorities scim.invite -s password
+   uaac client add stratos-invite --scope scim.invite,cloud_controller.admin --authorized_grant_types client_credentials --authorities scim.invite,cloud_controller.admin -s password
    ```
+   > Note - Include the uaa scope if required
 
    In the above example the client id is `stratos-invite` and client secret `password`
 
@@ -48,5 +49,13 @@ There are number of set up steps to execute first.
    1) Navigate to the Cloud Foundry Summary page of the required CF
    2) Use the `Configure` button in the `User Invitation Support` section
    3) Supply the client id and secret and click `Configure`
+
+   >Note - If the console has been deployed via `cf push` this step can be skipped by supply the same client id and secret as above but via
+   the following environment variables
+
+   ```
+   INVITE_USER_CLIENT_ID
+   INVITE_USER_CLIENT_SECRET
+   ```
 
 At this point CF administrators, organization managers and space managers should be able to invite a user via the Organization/Space Users table
