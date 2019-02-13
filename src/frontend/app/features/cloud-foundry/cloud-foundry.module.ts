@@ -99,6 +99,7 @@ import {
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { CloudFoundryInviteUserLinkComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 
 @NgModule({
   imports: [
@@ -154,6 +155,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     UserInviteConfigurationDialogComponent,
     InviteUsersComponent,
     InviteUsersCreateComponent,
+    CloudFoundryInviteUserLinkComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

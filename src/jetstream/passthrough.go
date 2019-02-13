@@ -12,8 +12,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -34,7 +32,7 @@ type PassthroughError struct {
 
 func getEchoURL(c echo.Context) url.URL {
 	log.Debug("getEchoURL")
-	u := c.Request().URL().(*standard.URL).URL
+	u := c.Request().URL
 
 	// dereference so we get a copy
 	return *u
@@ -43,7 +41,7 @@ func getEchoURL(c echo.Context) url.URL {
 func getEchoHeaders(c echo.Context) http.Header {
 	log.Debug("getEchoHeaders")
 	h := make(http.Header)
-	originalHeader := c.Request().Header().(*standard.Header).Header
+	originalHeader := c.Request().Header
 	for k, v := range originalHeader {
 		if k == "Cookie" {
 			continue
@@ -74,12 +72,12 @@ func getPortalUserGUID(c echo.Context) (string, error) {
 	return portalUserGUIDIntf.(string), nil
 }
 
-func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
+func getRequestParts(c echo.Context) (*http.Request, []byte, error) {
 	log.Debug("getRequestParts")
 	var body []byte
 	var err error
 	req := c.Request()
-	if bodyReader := req.Body(); bodyReader != nil {
+	if bodyReader := req.Body; bodyReader != nil {
 		if body, err = ioutil.ReadAll(bodyReader); err != nil {
 			return nil, nil, errors.New("Failed to read request body")
 		}
@@ -212,8 +210,8 @@ func (p *portalProxy) proxy(c echo.Context) error {
 
 func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*interfaces.CNSIRequest, error) {
 	log.Debug("proxy")
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
-	shouldPassthrough := "true" == c.Request().Header().Get("x-cap-passthrough")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
+	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -242,12 +240,12 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 	// send the request to each CNSI
 	done := make(chan *interfaces.CNSIRequest)
 	for _, cnsi := range cnsiList {
-		cnsiRequest, buildErr := p.buildCNSIRequest(cnsi, portalUserGUID, req.Method(), uri, body, header)
+		cnsiRequest, buildErr := p.buildCNSIRequest(cnsi, portalUserGUID, req.Method, uri, body, header)
 		if buildErr != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 		}
 		// Allow the host part of the API URL to be overridden
-		apiHost := c.Request().Header().Get("x-cap-api-host")
+		apiHost := c.Request().Header.Get("x-cap-api-host")
 		// Don't allow any '.' chars in the api name
 		if apiHost != "" && !strings.ContainsAny(apiHost, ".") {
 			// Add trailing . for when we replace
@@ -331,7 +329,7 @@ func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUr
 }
 
 func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*interfaces.CNSIRequest) error {
-	shouldPassthrough := "true" == c.Request().Header().Get("x-cap-passthrough")
+	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 
 	var cnsiList []string
 	for k := range responses {

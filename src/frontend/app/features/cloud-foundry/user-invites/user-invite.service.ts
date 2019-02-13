@@ -8,6 +8,8 @@ import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { GetSystemInfo } from '../../../store/actions/system.actions';
 import { AppState } from '../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -64,14 +66,22 @@ export class UserInviteService {
     private snackBar: MatSnackBar,
     cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private confirmDialog: ConfirmationDialogService,
   ) {
     this.configured$ = cfEndpointService.endpoint$.pipe(
-      filter(v => !!v.entity && !!v.entity.metadata),
-      map(v => v.entity && v.entity.metadata.userInviteAllowed === 'true'),
+      filter(v => !!v && !!v.entity),
+      // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
+      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
-    this.canConfigure$ = waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid).pipe(
-      map(cf => cf.global.isAdmin)
+
+    this.canConfigure$ = combineLatest(
+      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
+      this.store.select('auth')
+    ).pipe(
+      map(([cf, auth]) =>
+        cf.global.isAdmin &&
+        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );
   }
 
@@ -98,51 +108,51 @@ export class UserInviteService {
         });
       })
     );
-    // obs$.subscribe(
-    //   data => console.log(data),
-    //   err => {
-    //     console.log(err);
-    //     // Snackbar
-    //     let message = 'Failed to configure User Invitation';
-    //     if (err && err.error && err.error.error) {
-    //       message = err.error.error;
-    //     }
-    //     this.snackBar.open(message);
-    //   }
-    // );
     return obs$;
   }
 
-  unconfigure(cfGUID: string): Observable<UserInviteBaseResponse> {
-    const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
-    return this.http.delete(url).pipe(
-      map(v => {
-        this.store.dispatch(new GetSystemInfo());
-        return {
-          error: false
-        };
-      }),
-      catchError(err => {
-        let message = 'Failed to configure User Invitation';
-        if (err && err.error && err.error.error) {
-          message = err.error.error;
-        }
-        return observableOf({
-          error: true,
-          errorMessage: message
-        });
-      })
+  unconfigure(cfGUID: string) {
+    const confirmation = new ConfirmationDialogConfig(
+      'Disable User Invitations',
+      `Are you sure you want to disable user invitation support?`,
+      'Disable'
     );
+    this.confirmDialog.open(confirmation, () => {
+      const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
+      this.http.delete(url).pipe(
+        map(v => {
+          this.store.dispatch(new GetSystemInfo());
+          return {
+            error: false,
+            errorMessage: ''
+          };
+        }),
+        catchError(err => {
+          let message = 'Failed to configure User Invitation';
+          if (err && err.error && err.error.error) {
+            message = err.error.error;
+          }
+          return observableOf({
+            error: true,
+            errorMessage: message
+          });
+        })
+      ).subscribe(res => {
+        if (res.error) {
+          this.snackBar.open(res.errorMessage, 'Close');
+        }
+      });
+    });
 
   }
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
-    // Can only invite someone to an org or space
+    // Can only invite someone to an org or space and user must be admin or org manager
     return !orgGuid ? observableOf(false) : waitForCFPermissions(this.store, cfGuid).pipe(
       switchMap(() => combineLatest(
         this.configured$,
         this.currentUserPermissionsService.can(
-          spaceGuid ? CurrentUserPermissions.SPACE_CHANGE_ROLES : CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
+          CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
           cfGuid,
           orgGuid,
           spaceGuid

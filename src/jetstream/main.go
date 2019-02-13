@@ -17,6 +17,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -25,9 +26,9 @@ import (
 	"github.com/cf-stratos/mysqlstore"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -42,11 +43,12 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary     = 10
-	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
-	UpgradeVolume       = "UPGRADE_VOLUME"
-	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
-	VCapApplication     = "VCAP_APPLICATION"
+	TimeoutBoundary      = 10
+	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
+	UpgradeVolume        = "UPGRADE_VOLUME"
+	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	VCapApplication      = "VCAP_APPLICATION"
+	defaultSessionSecret = "wheeee!"
 )
 
 var appVersion string
@@ -108,6 +110,7 @@ func main() {
 	isUpgrading := isConsoleUpgrading()
 
 	if isUpgrading {
+		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
 		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
 	}
 	// Grab the Console Version from the executable
@@ -154,6 +157,23 @@ func main() {
 	// Wait for Database Schema to be initialized (or exit if this times out)
 	if err = datastore.WaitForMigrations(databaseConnectionPool); err != nil {
 		log.Fatal(err)
+	}
+
+	// Before any changes it, log that we detected a non-default session store secret, so we can tell it has been set from the log
+	if portalConfig.SessionStoreSecret != defaultSessionSecret {
+		log.Info("Session Store Secret detected okay")
+	}
+
+	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
+		configPlugin(&portalConfig)
+	}
+
+	if portalConfig.SessionStoreSecret == defaultSessionSecret {
+		// The Session store secret needs to be set for secure cookies to work properly
+		// We should not be using the default value - this indicates that it has not been set by the user
+		// So for saftey, set a random value
+		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
+		portalConfig.SessionStoreSecret = uuid.NewV4().String()
 	}
 
 	// Initialize session store for Gorilla sessions
@@ -571,6 +591,8 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
 
 	// Root level middleware
 	if !isUpgrade {
@@ -601,7 +623,11 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
-	var engine *standard.Server
+	if isUpgrade {
+		go stopEchoWhenUpgraded(e)
+	}
+
+	var engineErr error
 	address := config.TLSAddress
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
@@ -609,22 +635,16 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 			return err
 		}
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine = standard.WithTLS(address, certFile, certKeyFile)
-
+		engineErr = e.StartTLS(address, certFile, certKeyFile)
 	} else {
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine = standard.New(address)
+		engineErr = e.Start(address)
 	}
 
-	if isUpgrade {
-		go stopEchoWhenUpgraded(engine)
-	}
-
-	engineErr := e.Run(engine)
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
-			log.Warnf("Failed to start HTTP/S server", engineErr)
+			log.Warnf("Failed to start HTTP/S server: %v+", engineErr)
 		}
 	}
 
@@ -710,7 +730,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
-	// Callback is use dby both login to Stratos and login to an Endpoint
+	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
@@ -790,9 +810,41 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
 		e.Group("", middleware.Gzip()).Static("/", staticDir)
-		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
+		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
 		log.Info("Serving static UI resources")
+	} else {
+		// Not serving UI - use V2 Error compatability error handler
+		e.HTTPErrorHandler = echoV2DefaultHTTPErrorHandler
 	}
+}
+
+func (p *portalProxy) AddLoginHook(priority int, function interfaces.LoginHookFunc) error {
+	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, interfaces.LoginHook{
+		Priority: priority,
+		Function: function,
+	})
+	return nil
+}
+
+func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
+	hooks := p.GetConfig().LoginHooks
+	sort.SliceStable(hooks, func(i, j int) bool {
+		return hooks[i].Priority < hooks[j].Priority
+	})
+
+	erred := false
+	for _, hook := range hooks {
+		err := hook.Function(c)
+		if err != nil {
+			erred = true
+			log.Errorf("Failed to execute log in hook: %v", err)
+		}
+	}
+
+	if erred {
+		return fmt.Errorf("Failed to execute one or more login hooks")
+	}
+	return nil
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
@@ -804,12 +856,45 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 		}
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
-		if strings.Index(c.Request().URI(), "/pp") != 0 && code == 404 {
+		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
 			c.File(path.Join(staticDir, "index.html"))
+			// Let the default handler handle it
+			defaultHandler(err, c)
+		} else {
+			// Use V2 Error compatability error handler
+			echoV2DefaultHTTPErrorHandler(err, c)
 		}
+	}
+}
 
-		// Let the default handler handle it
-		defaultHandler(err, c)
+// EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
+// i.e. no wrapping in 'message' JSON object
+func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	msg := http.StatusText(code)
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+		if msgStr, ok := he.Message.(string); ok {
+			msg = msgStr
+		} else {
+			msg = he.Error()
+		}
+		if he.Internal != nil {
+			err = fmt.Errorf("%v, %v", err, he.Internal)
+		}
+	}
+
+	// Send response
+	if !c.Response().Committed {
+		if c.Request().Method == http.MethodHead { // Issue #608
+			c.NoContent(code)
+		} else {
+			c.String(code, msg)
+		}
+	}
+
+	if err != nil {
+		c.Logger().Error(err)
 	}
 }
 
@@ -852,10 +937,10 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *standard.Server) {
+func stopEchoWhenUpgraded(e *echo.Echo) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}
-	log.Info("Stratos upgrade has completed! Shutting down Upgrade web server instance")
+	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
 }

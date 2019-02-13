@@ -66,4 +66,7 @@ type PortalProxy interface {
 	// Tokens - lower-level access
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
 	DeleteEndpointToken(cnsiGUID string, userGUID string) error
+
+	AddLoginHook(priority int, function LoginHookFunc) error
+	ExecuteLoginHooks(c echo.Context) error
 }

@@ -15,6 +15,7 @@ import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framewo
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { CfOrgUsersListConfigService } from './cf-org-users-list-config.service';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
 describe('CfOrgUsersListConfigService', () => {
   beforeEach(() => {
@@ -29,7 +30,8 @@ describe('CfOrgUsersListConfigService', () => {
         UserInviteService,
         HttpClient,
         HttpHandler,
-        CloudFoundryEndpointService
+        CloudFoundryEndpointService,
+        ConfirmationDialogService
       ],
       imports: [...BaseTestModulesNoShared]
     });

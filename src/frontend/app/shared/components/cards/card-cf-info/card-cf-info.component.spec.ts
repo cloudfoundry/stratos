@@ -7,6 +7,8 @@ import {
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { CardCfInfoComponent } from './card-cf-info.component';
+import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 
 describe('CardCfInfoComponent', () => {
   let component: CardCfInfoComponent;
@@ -16,7 +18,7 @@ describe('CardCfInfoComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CardCfInfoComponent, MetadataItemComponent, BooleanIndicatorComponent],
         imports: [...BaseTestModulesNoShared],
-        providers: [generateTestCfEndpointService()]
+        providers: [generateTestCfEndpointService(), UserInviteService, ConfirmationDialogService]
       }).compileComponents();
     })
   );

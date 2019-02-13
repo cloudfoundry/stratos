@@ -26,7 +26,7 @@ describe('StackedInputActionComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(() => {
+  beforeEach(async(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
     component = fixture.componentInstance;
     component.stateIn$ = observableOf({
@@ -34,7 +34,7 @@ describe('StackedInputActionComponent', () => {
       result: StackedInputActionResult.OTHER_VALUES_UPDATED
     });
     fixture.detectChanges();
-  });
+  }));
 
   it('should create', async(() => {
     expect(component).toBeTruthy();

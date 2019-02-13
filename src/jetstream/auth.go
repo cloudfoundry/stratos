@@ -17,7 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -57,7 +56,7 @@ func (p *portalProxy) getUAAIdentityEndpoint() string {
 }
 
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	originalCookie := req.Header.Get("Cookie")
 	cleanCookie := p.EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
 	req.Header.Set("Cookie", cleanCookie)
@@ -238,7 +237,7 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 	sessionValues["exp"] = u.TokenExpiry
 
 	// Ensure that login disregards cookies from the request
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	req.Header.Set("Cookie", "")
 	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return nil, err
@@ -254,11 +253,9 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	if p.Config.LoginHook != nil {
-		err = p.Config.LoginHook(c)
-		if err != nil {
-			log.Warn("Login hook failed", err)
-		}
+	err = p.ExecuteLoginHooks(c)
+	if err != nil {
+		log.Warnf("Login hooks failed: %v", err)
 	}
 
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
@@ -641,7 +638,7 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 
 func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
-	if c.Request().Method() == http.MethodGet {
+	if c.Request().Method == http.MethodGet {
 		code := c.QueryParam("code")
 		state := c.QueryParam("state")
 		// If this is login for a CNSI, then the redirect URL is slightly different
@@ -761,7 +758,6 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		log.Warnf("%v+", err)
 		return nil, interfaces.LogHTTPError(res, err)
 	}
 
@@ -986,8 +982,8 @@ func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
 	expiryDuration := expiry.Sub(time.Now())
 
 	// Subtract time now to get the duration add this to the time provided by the client
-	if c.Request().Header().Contains(ClientRequestDateHeader) {
-		clientDate := c.Request().Header().Get(ClientRequestDateHeader)
+	clientDate := c.Request().Header.Get(ClientRequestDateHeader)
+	if len(clientDate) > 0 {
 		clientDateInt, err := strconv.ParseInt(clientDate, 10, 64)
 		if err == nil {
 			clientDateInt += int64(expiryDuration.Seconds())
