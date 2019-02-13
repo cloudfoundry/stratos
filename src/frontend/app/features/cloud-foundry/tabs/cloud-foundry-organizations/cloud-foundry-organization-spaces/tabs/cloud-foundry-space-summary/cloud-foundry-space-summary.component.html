@@ -11,7 +11,7 @@
         <app-tile>
           <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps" icon="apps" label="Applications" labelSingular="Application" value="{{ cfSpaceService.appCount$ | async }}"></app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="cfEndpointService.hasAllApps$ | async">
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfSpaceService.appInstances$ | async) }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.app_instance_limit}}"></app-card-number-metric>
         </app-tile>
         <app-tile>
@@ -26,7 +26,7 @@
         <app-tile>
           <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances" iconFont="stratos-icons" icon="service" label="Service Instances" value="{{ (cfSpaceService.serviceInstances$ | async)?.length }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.total_services }}"></app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="cfEndpointService.hasAllApps$ | async">
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="memory" label="Memory Usage" units="mb" value="{{ (cfSpaceService.totalMem$ | async) }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.memory_limit }}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>

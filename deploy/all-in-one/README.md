@@ -8,6 +8,18 @@ You will need to have installed Docker, see:
 
 * [Docker](https://docs.docker.com/engine/installation/)
 
+## Note regarding the Stratos Session Store Secret
+
+Stratos uses a secret to protect the Session cookie it uses to identify users. By default it will generate a random value for this secret.
+
+We recommend configuring an alphanumeric secret of your choice by setting the `SESSION_STORE_SECRET` environment variable.
+
+This can be done by adding the following to the docker run command shown in the section below:
+
+```
+-e SESSION_STORE_SECRET=<alphanumeric secret>
+```
+
 ## Building the container:
 
 To build the container, change directory to the root of the project and open a command prompt:
@@ -34,6 +46,8 @@ https://localhost:4443
 You will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials.
 
 ## Pushing the All-In-One Docker Image to Cloud Foundry
+
+> Note: We recommend setting the session store secret - please use a manifest file for this and set the `SESSION_STORE_SECRET` environment variable.
 
 The All-In-One Docker Image can be pushed to Cloud Foundry.
 

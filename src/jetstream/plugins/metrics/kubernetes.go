@@ -14,7 +14,7 @@ func (m *MetricsSpecification) getPodMetrics(c echo.Context) error {
 
 	prometheusOp := c.Param("op")
 	// podId := c.Param("podId")
-	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	// get the user
 	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")

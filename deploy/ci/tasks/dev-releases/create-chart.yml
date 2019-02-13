@@ -44,7 +44,7 @@ run:
       fi
 
       # Update Helm Repository
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${VERSION}/
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${RELEASE_VERSION}/
       cp index.yaml ${HELM_REPO}
       cd ${HELM_REPO}
       setupAndPushChange
