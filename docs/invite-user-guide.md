@@ -41,6 +41,7 @@ There are number of set up steps to execute first.
    ```
    uaac client add stratos-invite --scope scim.invite,cloud_controller.admin --authorized_grant_types client_credentials --authorities scim.invite,cloud_controller.admin -s password
    ```
+
    > Note - Include the uaa scope if required
 
    In the above example the client id is `stratos-invite` and client secret `password`
@@ -50,12 +51,12 @@ There are number of set up steps to execute first.
    2) Use the `Configure` button in the `User Invitation Support` section
    3) Supply the client id and secret and click `Configure`
 
-   >Note - If the console has been deployed via `cf push` this step can be skipped by supply the same client id and secret as above but via
-   the following environment variables
+   > Note - If the console has been deployed via `cf push` this step can be skipped by supply the same client id and secret as above but via
+   > the following environment variables
 
    ```
    INVITE_USER_CLIENT_ID
    INVITE_USER_CLIENT_SECRET
    ```
 
-At this point CF administrators, organization managers and space managers should be able to invite a user via the Organization/Space Users table
+At this point CF administrators and organization managers should be able to invite a user via the Organization and Space Users tabs
