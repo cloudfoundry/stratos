@@ -24,6 +24,21 @@ type CFError struct {
 	Code        int    `json:"code"`
 }
 
+// RetrieveOrgRolesResponse is the response from the CF GET Org Roles API
+type RetrieveOrgRolesResponse struct {
+	TotalResults int                `json:"total_results"`
+	Resources    []OrgRolesResponse `json:"resources"`
+}
+
+type OrgRolesResponse struct {
+	Metadata struct {
+		GUID string `json:"guid"`
+	} `json:"metadata"`
+	Entity struct {
+		OrgRoles []string `json:"organization_roles"`
+	} `json:"entity"`
+}
+
 // UserInviteReq is the payload that is POSTed to request user invites to be generated
 type UserInviteReq struct {
 	Org        string `json:"org"`
@@ -36,10 +51,12 @@ type UserInviteReq struct {
 	Emails []string `json:"emails"`
 }
 
+// UAAUserInviteReq is the structure to send to the UAA Invite Users API
 type UAAUserInviteReq struct {
 	Emails []string `json:"emails"`
 }
 
+// UserInviteUser is the individual response from the UAA Invite Users API
 type UserInviteUser struct {
 	Email        string `json:"email"`
 	UserID       string `json:"userid"`
@@ -49,10 +66,13 @@ type UserInviteUser struct {
 	InviteLink   string `json:"inviteLink"`
 }
 
+// UserInviteResponse is the response from the UAA Invite Users API
 type UserInviteResponse struct {
 	NewInvites    []UserInviteUser `json:"new_invites"`
 	FailedInvites []UserInviteUser `json:"failed_invites"`
 }
+
+const orgManagerRoleName = "org_manager"
 
 // Send an invite
 func (invite *UserInvite) invite(c echo.Context) error {
@@ -77,8 +97,7 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	}
 
 	userInviteRequest := &UserInviteReq{}
-	err = json.Unmarshal(body, userInviteRequest)
-	if err != nil {
+	if err = json.Unmarshal(body, userInviteRequest); err != nil {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
 	}
 
@@ -87,9 +106,15 @@ func (invite *UserInvite) invite(c echo.Context) error {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - no email addresses provided")
 	}
 
-	// TODO: Quick validation of email addresses
+	// Must provide an Orgs
+	if len(userInviteRequest.Org) == 0 {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - no org provided")
+	}
 
-	// TODO: Check user has correct permissions before making the call to the UAA
+	// Check user has correct permissions before making the call to the UAA
+	if err = invite.checkPermissions(c, endpoint, userInviteRequest); err != nil {
+		return interfaces.NewHTTPError(http.StatusUnauthorized, "You are not authorized to invite users")
+	}
 
 	inviteResponse, err := invite.processUserInvites(c, endpoint, userInviteRequest)
 	if err != nil {
@@ -140,32 +165,31 @@ func (invite *UserInvite) processUserInvites(c echo.Context, endpoint interfaces
 func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteRequest *UserInviteReq, user UserInviteUser, endpoint interfaces.CNSIRecord) (UserInviteUser, bool) {
 	log.Debugf("Creating CF User for: %s", user.Email)
 	// Create the user in Cloud Foundry
-	cfError, err := invite.CreateCloudFoundryUser(cfGUID, userGUID, user.UserID)
-	if err != nil {
+	if cfError, err := invite.CreateCloudFoundryUser(cfGUID, userGUID, user.UserID); err != nil {
 		return updateUserInviteRecordForError(user, "Failed to create user in Cloud Foundry", cfError), true
-	} else {
-		// User created - add the user to org
-		cfError, err = invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org)
+	}
+
+	// User created - add the user to org
+	cfError, err := invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org)
+	if cfError, err := invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org); err != nil {
+		return updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError), true
+	}
+
+	// Finally, add the user to the space, if one was specified
+	if len(userInviteRequest.Space) > 0 {
+		cfError, err = invite.AssociateSpaceRoles(cfGUID, userGUID, user.UserID, userInviteRequest)
 		if err != nil {
 			return updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError), true
-		} else {
-			// Finally, add the user to the space, if one was specified
-			if len(userInviteRequest.Space) > 0 {
-				cfError, err = invite.AssociateSpaceRoles(cfGUID, userGUID, user.UserID, userInviteRequest)
-				if err != nil {
-					return updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError), true
-				}
-			}
-			if err == nil {
-				// Send the email
-				err = invite.SendEmail(user.Email, user.InviteLink, endpoint)
-				if err != nil {
-					user.Success = false
-					user.ErrorMessage = err.Error()
-					user.ErrorCode = "Stratos-EmailSendFailure"
-					return user, true
-				}
-			}
+		}
+	}
+	if err == nil {
+		// Send the email
+		if err = invite.SendEmail(user.Email, user.InviteLink, endpoint); err != nil {
+			user.Success = false
+			user.ErrorMessage = "Unable to send invitation email to user"
+			log.Warnf("Could not send user invite email: %v", err)
+			user.ErrorCode = "Stratos-EmailSendFailure"
+			return user, true
 		}
 	}
 	return UserInviteUser{}, false
@@ -244,8 +268,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 	}
 
 	inviteResponse := &UserInviteResponse{}
-	err = json.Unmarshal(body, inviteResponse)
-	if err != nil {
+	if err = json.Unmarshal(body, inviteResponse); err != nil {
 		return nil, interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to request invites for users")
 	}
 
@@ -276,7 +299,7 @@ func (invite *UserInvite) CreateCloudFoundryUser(cnsiGUID, userID, newUserGUID s
 	return nil, nil
 }
 
-// AssociateUserWithOrg will make the CF API call to associate the given user with the given ord
+// AssociateUserWithOrg will make the CF API call to associate the given user with the given org
 func (invite *UserInvite) AssociateUserWithOrg(cnsiGUID, userID, newUserGUID, orgGUID string) (*CFError, error) {
 	url := fmt.Sprintf("/v2/organizations/%s/users/%s", orgGUID, newUserGUID)
 	res, err := invite.portalProxy.DoProxySingleRequest(cnsiGUID, userID, "PUT", url, nil, nil)
@@ -294,22 +317,19 @@ func (invite *UserInvite) AssociateUserWithOrg(cnsiGUID, userID, newUserGUID, or
 // AssociateSpaceRoles will make the CF API call to associate the correct space roles for the user
 func (invite *UserInvite) AssociateSpaceRoles(cnsiGUID, userID, newUserGUID string, inviteRequest *UserInviteReq) (*CFError, error) {
 	if inviteRequest.SpaceRoles.Auditor {
-		cfError, err := invite.AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, inviteRequest.Space, "auditors")
-		if err != nil {
+		if cfError, err := invite.AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, inviteRequest.Space, "auditors"); err != nil {
 			return cfError, err
 		}
 	}
 
 	if inviteRequest.SpaceRoles.Manager {
-		cfError, err := invite.AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, inviteRequest.Space, "managers")
-		if err != nil {
+		if cfError, err := invite.AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, inviteRequest.Space, "managers"); err != nil {
 			return cfError, err
 		}
 	}
 
 	if inviteRequest.SpaceRoles.Developer {
-		cfError, err := invite.AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, inviteRequest.Space, "developers")
-		if err != nil {
+		if cfError, err := invite.AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, inviteRequest.Space, "developers"); err != nil {
 			return cfError, err
 		}
 	}
@@ -334,8 +354,7 @@ func (invite *UserInvite) AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUI
 
 func parseCFError(response []byte) *CFError {
 	cfError := &CFError{}
-	err := json.Unmarshal(response, cfError)
-	if err != nil {
+	if err := json.Unmarshal(response, cfError); err != nil {
 		return nil
 	}
 	return cfError
@@ -362,4 +381,46 @@ func getReturnURL(c echo.Context) string {
 		}
 	}
 	return returnURL
+}
+
+// Check that the user has permissions required - i.e. is an Org Manager of the Org
+func (invite *UserInvite) checkPermissions(c echo.Context, endpoint interfaces.CNSIRecord, userInviteRequest *UserInviteReq) error {
+	cfGUID := c.Param("id")
+	userGUID := c.Get("user_id").(string)
+
+	// Get the User information for the endpoint connection
+	cfUser, ok := invite.portalProxy.GetCNSIUser(cfGUID, userGUID)
+	if !ok {
+		return errors.New("Can not find endpoint user")
+	}
+
+	if cfUser.Admin {
+		// Admins can always invite users
+		return nil
+	}
+
+	// User needs to be an admin or an Org Manager
+	// Get the org name - if the user does not have access to the org, this API call won't succeed
+	url := fmt.Sprintf("/v2/organizations/%s/user_roles?q=user_guid:%s", userInviteRequest.Org, cfUser.GUID)
+	res, err := invite.portalProxy.DoProxySingleRequest(cfGUID, userGUID, "GET", url, nil, nil)
+	if err != nil {
+		return errors.New("Could not get user's roles in org")
+	}
+
+	orgResponse := RetrieveOrgRolesResponse{}
+	if err = json.Unmarshal(res.Response, &orgResponse); err != nil {
+		return errors.New("Could not decode response while trying to determine user's org roles")
+	}
+
+	if orgResponse.TotalResults != 1 {
+		return errors.New("Too many results returned while trying to determine org roles for the user")
+	}
+
+	orgRoles := orgResponse.Resources[0]
+	isOrgManager := arrayContainsString(orgRoles.Entity.OrgRoles, orgManagerRoleName)
+	if !isOrgManager {
+		return errors.New("User is not an org manager")
+	}
+
+	return nil
 }

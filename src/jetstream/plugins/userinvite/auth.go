@@ -18,7 +18,6 @@ import (
 )
 
 // RefreshToken will refresh the token for the client
-
 func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*interfaces.UAAResponse, *interfaces.TokenRecord, error) {
 	endpoint, err := invite.checkEndpoint(cfGUID)
 	if err != nil {
@@ -30,8 +29,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*
 		return nil, nil, err
 	}
 
-	err = invite.portalProxy.SaveEndpointToken(cfGUID, UserInviteUserID, *tokenRecord)
-	if err != nil {
+	if err = invite.portalProxy.SaveEndpointToken(cfGUID, UserInviteUserID, *tokenRecord); err != nil {
 		return nil, nil, interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Unable to save user invite token",
@@ -39,7 +37,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*
 		)
 	}
 
-	return uaaRecord, tokenRecord, err
+	return uaaRecord, tokenRecord, nil
 }
 
 func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint interfaces.CNSIRecord) (*interfaces.UAAResponse, *interfaces.TokenRecord, error) {
