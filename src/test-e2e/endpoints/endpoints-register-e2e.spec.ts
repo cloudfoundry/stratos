@@ -155,7 +155,7 @@ describe('Endpoints', () => {
         expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
         /* tslint:disable-line:max-line-length*/
         expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"'))
-        .toBeTruthy();
+          .toBeTruthy();
       });
 
       it('Successful register', () => {

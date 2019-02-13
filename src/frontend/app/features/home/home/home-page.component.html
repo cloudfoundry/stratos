@@ -2,7 +2,7 @@
   <h1>Home</h1>
 </app-page-header>
 <div class="home-page" *ngIf="haveRegistered$ | async ; else noEndpoints">
-  <div class="favorites-list">
+  <div id="homepage-favorites-list" class="favorites-list">
     <h2 class="home-page__header">Favorites</h2>
     <app-favorites-global-list></app-favorites-global-list>
   </div>

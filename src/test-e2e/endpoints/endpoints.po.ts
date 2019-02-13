@@ -1,7 +1,8 @@
-import { browser, by, element } from 'protractor';
+import { FavoritesStarMock } from '../po/favorites/favorite-star.po';
+
+import { browser, by, element, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 
-import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent, ListTableComponent } from '../po/list.po';
 import { Page } from '../po/page.po';
@@ -13,34 +14,48 @@ export class EndpointsTable extends ListTableComponent {
     super(locator);
   }
 
-  getEndpointData(row: ElementFinder) {
-    // Get all of the columns
-    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then((data: string[]) => {
-      return {
-        name: data[0],
-        connected: data[1] === 'cloud_done',
-        type: data[2],
-        user: data[3],
-        isAdmin: data[4].indexOf('Yes') !== -1,
-        url: data[5],
-        favorite: data[6]
-      } as EndpointMetadata;
-    });
+  async getEndpointData(row: ElementFinder) {
+    const allRows = row.all(by.tagName('app-table-cell') as ElementFinder);
+    const favoriteCell = allRows.get(6);
+    const favElement = favoriteCell.element(`app-table-cell-favorite app-table-cell-favorite ${FavoritesStarMock.BASE_CLASS_SELECTOR}`);
+    console.log(await favElement.getText());
+    const favorite = new FavoritesStarMock(
+      favElement
+    );
+    const data = {
+      name: await allRows.get(0).getText(),
+      connected: await allRows.get(1).getText() === 'cloud_done',
+      type: await allRows.get(2).getText(),
+      user: await allRows.get(3).getText(),
+      isAdmin: (await allRows.get(4).getText()).indexOf('Yes') !== -1,
+      url: await allRows.get(5).getText(),
+      favorite
+    } as EndpointMetadata;
+    return data;
   }
 
-  getAllData() {
-    return this.getRows().map(row => this.getEndpointData(row));
+
+  async getAllData() {
+    const rows = await this.getRows() as ElementFinder[];
+    const endpointRows = await promise.all(rows.map(row => this.getEndpointData(row)));
+
+    return endpointRows;
   }
 
-  getRowForEndpoint(name: string) {
-    return this.getAllData().then(data => {
-      const index = data.findIndex((ep: E2EEndpointConfig) => ep.name === name);
-      return this.getRows().get(index);
-    });
+  async getRowForEndpoint(name: string) {
+    const data = await this.getAllData();
+    const index = data.findIndex(ep => ep.name === name);
+    return this.getRows().get(index);
   }
 
-  getEndpointDataForEndpoint(name: string) {
-    return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
+  async getEndpointDataForEndpoint(name: string) {
+    const allData = await this.getAllData();
+    return allData.find((d: EndpointMetadata) => d.name === name);
+  }
+
+  async setEndpointAsFavorite(name: string) {
+    const data = await this.getEndpointDataForEndpoint(name);
+    data.favorite.set();
   }
 
   openActionMenu(row: ElementFinder) {
@@ -126,5 +141,6 @@ export interface EndpointMetadata {
   user: string;
   isAdmin: boolean;
   connected: boolean;
+  favorite: FavoritesStarMock;
 }
 

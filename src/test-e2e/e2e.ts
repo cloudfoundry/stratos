@@ -63,7 +63,7 @@ export class E2E {
     /* tslint:disable:no-console*/
     protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
     /* tslint:disable */
-  }  
+  }
 }
 
 /**
@@ -195,34 +195,28 @@ export class E2ESetup {
     return userType === ConsoleUserType.admin ? this.adminReq : this.userReq;
   }
 
-  private doSetup() {
-    const p = promise.fulfilled(true);
-
+  private async doSetup() {
     // Create the sessions neeed
     if (this.needAdminSession) {
-      p.then(() => this.createSession(this.adminReq, ConsoleUserType.admin));
+      await this.createSession(this.adminReq, ConsoleUserType.admin);
     }
 
     if (this.needUserSession) {
-      p.then(() => this.createSession(this.userReq, ConsoleUserType.user));
+      await this.createSession(this.userReq, ConsoleUserType.user);
     }
 
-    this.setupOps.forEach(op => {
-      p.then(() => protractor.promise.controlFlow().execute(() => op.bind(this)()));
+    this.setupOps.forEach(async op => {
+      await protractor.promise.controlFlow().execute(() => op.bind(this)());
     });
-
-    return promise;
   }
 
   private addSetupOp(fn: Function, desc?: string) {
-    const that = this;
     this.setupOps.push(() => protractor.promise.controlFlow().execute(() => {
       E2E.debugLog(desc || 'Performing setup op');
       return fn();
     }));
     return this;
   }
-
 }
 
 /**
