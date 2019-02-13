@@ -161,6 +161,11 @@ export class CfUserService {
     });
   }
 
+  /**
+   * Get the space roles for a user
+   * @param user
+   * @param spaces Only fetch roles for these specific spaces. If missing fetch roles for all spaces
+   */
   getSpaceRolesFromUser(user: CfUser, spaces?: APIResource<ISpace>[]): IUserPermissionInSpace[] {
     const res: IUserPermissionInSpace[] = [];
     const spaceGuids = new Set<string>();
