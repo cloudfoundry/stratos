@@ -7,8 +7,11 @@ import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
-import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
+import {
+  canUpdateOrgSpaceRoles,
+  createCfOrgSpaceSteppersUrl,
+  waitForCFPermissions,
+} from '../../../../../features/cloud-foundry/cf.helpers';
 import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
@@ -105,16 +108,13 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Manage roles`,
   };
 
-  protected createManagerUsersUrl(stepperPath: string = `/users/manage`): string {
-    let route = `/cloud-foundry/${this.cfUserService.activeRouteCfOrgSpace.cfGuid}`;
-    if (this.activeRouteCfOrgSpace.orgGuid) {
-      route += `/organizations/${this.activeRouteCfOrgSpace.orgGuid}`;
-      if (this.activeRouteCfOrgSpace.spaceGuid) {
-        route += `/spaces/${this.activeRouteCfOrgSpace.spaceGuid}`;
-      }
-    }
-    route += stepperPath;
-    return route;
+  protected createManagerUsersUrl(): string {
+    return createCfOrgSpaceSteppersUrl(
+      this.cfUserService.activeRouteCfOrgSpace.cfGuid,
+      `/users/manage`,
+      this.activeRouteCfOrgSpace.orgGuid,
+      this.activeRouteCfOrgSpace.spaceGuid
+    );
   }
 
   constructor(
@@ -123,7 +123,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
-    userInviteService: UserInviteService,
     userHasRoles: (user: CfUser) => boolean = defaultUserHasRoles,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
@@ -139,13 +138,10 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         combineLatest(
           observableOf(cf),
           (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space))),
-          userInviteService.canShowInviteUser(activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
         )
       ),
-      tap(([cf, action, showInviteUser]) => {
+      tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
-
-        this.assignGlobalConfig(showInviteUser);
 
         this.initialiseMultiFilter(action);
       }),
@@ -255,19 +251,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.orgGuid,
     this.activeRouteCfOrgSpace.orgGuid && !this.activeRouteCfOrgSpace.spaceGuid ?
       CurrentUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
-
-  private assignGlobalConfig = (showInviteUsers: boolean) => {
-    if (showInviteUsers) {
-      this.getGlobalActions = () => [{
-        action: () => {
-          this.router.navigate([this.createManagerUsersUrl(`/users/invite`)]);
-        },
-        icon: 'add',
-        label: 'Invite',
-        description: 'Invite users to this organization' + this.activeRouteCfOrgSpace.spaceGuid ? ' and space' : ''
-      }];
-    }
-  }
 
   getColumns = () => this.columns;
   getGlobalActions = () => [];

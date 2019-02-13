@@ -10,6 +10,9 @@ import {
 import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import {
+  CloudFoundryInviteUserLinkComponent,
+} from '../../../cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 import { CloudFoundrySpaceUsersComponent } from './cloud-foundry-space-users.component';
 
 describe('CloudFoundrySpaceUsersComponent', () => {
@@ -18,7 +21,7 @@ describe('CloudFoundrySpaceUsersComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceUsersComponent],
+      declarations: [CloudFoundrySpaceUsersComponent, CloudFoundryInviteUserLinkComponent],
       imports: [...BaseTestModules],
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },

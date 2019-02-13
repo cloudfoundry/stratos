@@ -7,7 +7,6 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
 import { AppState } from '../../../../../store/app-state';
 import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
@@ -22,15 +21,13 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     cfUserService: CfUserService,
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    userPerms: CurrentUserPermissionsService,
-    userInviteService: UserInviteService) {
+    userPerms: CurrentUserPermissionsService) {
     super(
       store,
       cfUserService,
       router,
       activeRouteCfOrgSpace,
       userPerms,
-      userInviteService,
       (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
       cfOrgService.org$
     );
