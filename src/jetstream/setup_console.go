@@ -77,12 +77,12 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 					return interfaces.NewHTTPShadowError(
 						http.StatusBadRequest,
 						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting",
-						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting", err)
+						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting: %v+", err)
 				}
 				return interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Could not connect to the UAA - check UAA Endpoint URL",
-					"Could not connect to the UAA - check UAA Endpoint URL", err)
+					"Could not connect to the UAA - check UAA Endpoint URL: %v+", err)
 			}
 		}
 		return interfaces.NewHTTPShadowError(
@@ -252,7 +252,7 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 		return func(c echo.Context) error {
 			isSetupRequest := false
 
-			requestURLPath := c.Request().URL().Path()
+			requestURLPath := c.Request().URL.Path
 
 			// When running in Cloud Foundry or in the combined Docker container URL path starts with /pp
 			inCFMode, _ := regexp.MatchString("^/pp", requestURLPath)
