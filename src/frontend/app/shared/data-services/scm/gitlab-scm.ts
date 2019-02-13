@@ -1,8 +1,7 @@
 import { GitSCM, SCMIcon } from './scm';
 import { Observable, of as observableOf } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
 import { map } from 'rxjs/operators';
-import { Http } from '@angular/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GitSCMType } from './scm.service';
 import { Md5 } from 'ts-md5/dist/md5';
 import { GitRepo, GitCommit, GitBranch } from '../../../store/types/git.types';
@@ -11,7 +10,7 @@ const gitLabAPIUrl = 'https://gitlab.com/api/v4';
 
 export class GitLabSCM implements GitSCM {
 
-  constructor(public http: Http) {}
+  constructor(public httpClient: HttpClient) {}
 
   getType(): GitSCMType {
     return 'gitlab';
@@ -31,14 +30,13 @@ export class GitLabSCM implements GitSCM {
   getRepository(projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
-    let obs$ = this.http.get(`${gitLabAPIUrl}/users/${parts[0]}/projects?search=${parts[1]}`);
+    let obs$ = this.httpClient.get(`${gitLabAPIUrl}/users/${parts[0]}/projects?search=${parts[1]}`);
     if (parts.length !== 2) {
       obs$ = observableOf(null);
     }
 
     return obs$.pipe(
-      map((response: any) => {
-        const data = response.json();
+      map((data: any) => {
         if (data.length !== 1) {
           throw new HttpErrorResponse({
             status: 404
@@ -51,9 +49,8 @@ export class GitLabSCM implements GitSCM {
 
   getBranches(projectName: string): Observable<GitBranch[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return this.http.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`).pipe(
-      map(response => {
-        const data = response.json();
+    return this.httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`).pipe(
+      map((data: any) => {
         const branches = [];
         data.forEach(b => {
           const nb = { ...b };
@@ -67,19 +64,19 @@ export class GitLabSCM implements GitSCM {
 
   getCommit(projectName: string, commitSha: string): Observable<GitCommit> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return this.http.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`).pipe(
-      map(response => {
-        return this.convertCommit(projectName, response.json());
+    return this.httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`).pipe(
+      map(data => {
+        return this.convertCommit(projectName, data);
       })
     );
   }
 
   getCommits(projectName: string, commitSha: string): Observable<GitCommit[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return this.http.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`).pipe(
-      map(response => {
+    return this.httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`).pipe(
+      map((data: any) => {
         const commits = [];
-        response.json().forEach(c => commits.push(this.convertCommit(projectName, c)));
+        data.forEach(c => commits.push(this.convertCommit(projectName, c)));
         return commits;
       })
     );
@@ -103,9 +100,8 @@ export class GitLabSCM implements GitSCM {
     if (prjParts.length > 1) {
       url = `${gitLabAPIUrl}/users/${prjParts[0]}/projects?search=${prjParts[1]}`;
     }
-    return this.http.get(url).pipe(
-      map(response => response.json()),
-      map(repos => {
+    return this.httpClient.get(url).pipe(
+      map((repos: any) => {
         return repos.map(item => item.path_with_namespace);
       })
     );
