@@ -33,8 +33,8 @@ if [ "$1" == "mysql" ]; then
 
   echo "Creating database and setting permissions..."
   mysql -uroot -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
-  mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'$HOST' IDENTIFIED BY '$PASSWORD';"
-  mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'$HOST';"
+  mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@% IDENTIFIED BY '$PASSWORD';"
+  mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME@%;"
   mysql -uroot -pstratos -h $HOST -e "FLUSH PRIVILEGES;"
 fi
 
