@@ -2,12 +2,14 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, tap, filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
+
+import { endpointSchemaKey } from '../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../store/selectors/recently-visitied.selectors';
-import { IRecentlyVisitedEntity, IEntityHit, IRecentlyVisitedState } from '../../../store/types/recently-visited.types';
+import { IEntityHit, IRecentlyVisitedEntity, IRecentlyVisitedState } from '../../../store/types/recently-visited.types';
 import { AppState } from './../../../store/app-state';
-import { endpointSchemaKey } from '../../../store/helpers/entity-factory';
+
 interface IRelevanceModifier {
   time: number;
   modifier: number;
@@ -154,11 +156,11 @@ export class RecentEntitiesComponent {
   public frecentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
   constructor(store: Store<AppState>) {
-    const recemntEntities$ = store.select(recentlyVisitedSelector);
-    this.hasHits$ = recemntEntities$.pipe(
+    const recentEntities$ = store.select(recentlyVisitedSelector);
+    this.hasHits$ = recentEntities$.pipe(
       map(recentEntities => !!recentEntities.hits && recentEntities.hits.length > 0)
     );
-    const entitiesManager$ = recemntEntities$.pipe(
+    const entitiesManager$ = recentEntities$.pipe(
       filter(recentEntities => !!recentEntities.hits && recentEntities.hits.length > 0),
       map(recentEntities => new CountedRecentEntitiesManager(recentEntities, store)),
     );

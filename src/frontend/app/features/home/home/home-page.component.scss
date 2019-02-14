@@ -1,6 +1,10 @@
+@import '../../../../sass/mixins';
+
 .favorites-list {
   flex: 2;
-  margin-right: 40px;
+  @include breakpoint(tablet) {
+    margin-right: 40px;
+  }
 }
 .recent-list {
   flex: 1;
@@ -13,7 +17,12 @@
 
 .home-page {
   display: flex;
+  flex-direction: column;
   &__header {
     margin-top: 0;
+  }
+
+  @include breakpoint(tablet) {
+    flex-direction: row;
   }
 }

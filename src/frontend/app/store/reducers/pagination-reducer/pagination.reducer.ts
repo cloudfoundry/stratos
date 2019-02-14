@@ -9,7 +9,6 @@ import {
   CLEAR_PAGINATION_OF_ENTITY,
   CLEAR_PAGINATION_OF_TYPE,
   CREATE_PAGINATION,
-  REMOVE_ID_FROM_PAGINATION,
   REMOVE_PARAMS,
   RESET_PAGINATION,
   SET_CLIENT_FILTER,
@@ -31,7 +30,6 @@ import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-o
 import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { paginationMaxReached } from './pagination-reducer-max-reached';
-import { paginationRemoveId } from './pagination-reducer-remove-id';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
@@ -160,10 +158,6 @@ function paginate(action, state, updatePagination) {
 
   if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action);
-  }
-
-  if (action.type === REMOVE_ID_FROM_PAGINATION) {
-    return paginationRemoveId(state, action);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

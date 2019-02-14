@@ -1,11 +1,10 @@
-import { RecentEntitiesComponent } from './../recent-entities/recent-entities.component';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../core/core.module';
-import { PageHeaderComponent } from './page-header.component';
+import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
 import { PageSubheaderComponent } from '../page-subheader/page-subheader.component';
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
-import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
+import { PageHeaderComponent } from './page-header.component';
 
 
 @NgModule({

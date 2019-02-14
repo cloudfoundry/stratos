@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { RemoveUserFavoriteAction } from '../../../store/actions/user-favourites-actions/remove-user-favorite-action';
 import { AppState } from '../../../store/app-state';
@@ -11,6 +12,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../../store/types/user-favor
 import { CardStatus, ComponentEntityMonitorConfig } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
 
@@ -58,6 +60,7 @@ export class FavoritesMetaCardComponent {
   public endpointConnected$: Observable<boolean>;
   public name$: Observable<string>;
   public routerLink$: Observable<string>;
+  public actions$: Observable<MetaCardMenuItem[]>;
 
   @Input()
   set favoriteEntity(favoriteEntity: IFavoriteEntity) {
@@ -66,6 +69,9 @@ export class FavoritesMetaCardComponent {
         map(endpoints => endpoints[favoriteEntity.favorite.endpointId])
       );
       this.endpointConnected$ = endpoint$.pipe(map(endpoint => !!endpoint.user));
+      this.actions$ = this.endpointConnected$.pipe(
+        map(connected => connected ? this.config.menuItems : [])
+      );
       const { cardMapper, favorite, prettyName } = favoriteEntity;
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;

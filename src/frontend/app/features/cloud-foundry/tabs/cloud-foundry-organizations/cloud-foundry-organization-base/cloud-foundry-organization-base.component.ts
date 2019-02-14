@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
+import { IOrgFavMetadata } from '../../../../../cf-favourite-types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import {
   getActionsFromExtensions,
@@ -20,7 +21,6 @@ import { UserFavorite } from '../../../../../store/types/user-favorites.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { IOrgFavMetadata } from '../../../../../cf-favourite-types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -68,7 +68,6 @@ export class CloudFoundryOrganizationBaseComponent {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
-    // private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.schema = entityFactory(organizationSchemaKey);
     this.favorite$ = cfOrgService.org$.pipe(
@@ -82,19 +81,9 @@ export class CloudFoundryOrganizationBaseComponent {
     );
     this.breadcrumbs$ = this.getBreadcrumbs();
 
-    // this.canUpdateRoles$ = this.getUpdatePermissionsObservable();
-
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
   }
-
-  // private getUpdatePermissionsObservable() {
-  //   return canUpdateOrgSpaceRoles(
-  //     this.currentUserPermissionsService,
-  //     this.cfOrgService.cfGuid,
-  //     this.cfOrgService.orgGuid,
-  //     CurrentUserPermissionsChecker.ALL_SPACES);
-  // }
 
   private getBreadcrumbs() {
     return this.cfEndpointService.endpoint$.pipe(

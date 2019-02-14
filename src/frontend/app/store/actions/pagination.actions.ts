@@ -168,13 +168,3 @@ export class UpdatePaginationMaxedState implements Action {
     public paginationKey: string
   ) { }
 }
-
-export class PaginationRemoveIdAction implements Action {
-  type = REMOVE_ID_FROM_PAGINATION;
-  constructor(
-    public guid: string,
-    public entityKey: string,
-    public paginationKey: string
-  ) { }
-}
-

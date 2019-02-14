@@ -3,20 +3,27 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
+
 import { environment } from '../../../environments/environment';
 import { UserFavoriteManager } from '../../core/user-favorite-manager';
-import { PaginationRemoveIdAction } from '../actions/pagination.actions';
+import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import {
   GetUserFavoritesAction,
   GetUserFavoritesFailedAction,
-  GetUserFavoritesSuccessAction
+  GetUserFavoritesSuccessAction,
 } from '../actions/user-favourites-actions/get-user-favorites-action';
-import { RemoveUserFavoriteAction, RemoveUserFavoriteSuccessAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
-import { SaveUserFavoriteAction, SaveUserFavoriteSuccessAction } from '../actions/user-favourites-actions/save-user-favorite-action';
+import {
+  RemoveUserFavoriteAction,
+  RemoveUserFavoriteSuccessAction,
+} from '../actions/user-favourites-actions/remove-user-favorite-action';
+import {
+  SaveUserFavoriteAction,
+  SaveUserFavoriteSuccessAction,
+} from '../actions/user-favourites-actions/save-user-favorite-action';
 import { ToggleUserFavoriteAction } from '../actions/user-favourites-actions/toggle-user-favorite-action';
 import {
   UpdateUserFavoriteMetadataAction,
-  UpdateUserFavoriteMetadataSuccessAction
+  UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { AppState } from '../app-state';
 import { userFavoritesSchemaKey } from '../helpers/entity-factory';
@@ -98,11 +105,7 @@ export class UserFavoritesEffect {
     switchMap((action: RemoveUserFavoriteAction) => {
       const { guid } = action.favorite;
       this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.favorite));
-      this.store.dispatch(new PaginationRemoveIdAction(
-        guid,
-        userFavoritesSchemaKey,
-        userFavoritesPaginationKey
-      ));
+      this.store.dispatch(new ClearPaginationOfEntity(userFavoritesSchemaKey, guid, userFavoritesPaginationKey));
       return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${guid}`);
     })
   );
