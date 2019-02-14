@@ -1,7 +1,9 @@
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { ListView } from '../../../store/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ActionState } from './../../../store/reducers/api-request-reducer/types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
@@ -128,7 +130,7 @@ export class ListConfig<T> implements IListConfig<T> {
 export interface IBaseListAction<T> {
   icon?: string;
   label: string;
-  description: string;
+  description?: string;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
@@ -148,9 +150,66 @@ export interface IMultiListAction<T> extends IOptionalAction<T> {
    *
    * @memberof IMultiListAction
    */
-  action: (items: T[]) => boolean;
+  action: (items: T[]) => boolean | Observable<ActionState>;
 }
 
 export interface IGlobalListAction<T> extends IOptionalAction<T> {
   action: () => void;
+}
+
+export class MultiFilterManager<T> {
+  public filterIsReady$: Observable<boolean>;
+  public filterItems$: Observable<IListMultiFilterConfigItem[]>;
+  public hasItems$: Observable<boolean>;
+  public hasOneItem$: Observable<boolean>;
+  public value: string;
+
+  public filterKey: string;
+  public allLabel: string;
+
+  constructor(
+    public multiFilterConfig: IListMultiFilterConfig,
+    dataSource: IListDataSource<T>,
+  ) {
+    this.filterKey = this.multiFilterConfig.key;
+    this.allLabel = multiFilterConfig.allLabel || 'All';
+    this.filterItems$ = this.getItemObservable(multiFilterConfig);
+    this.hasOneItem$ = this.filterItems$.pipe(map(items => items.length === 1));
+    this.hasItems$ = this.filterItems$.pipe(map(items => !!items.length));
+    this.filterIsReady$ = this.getReadyObservable(multiFilterConfig, dataSource, this.hasItems$);
+  }
+
+  private getReadyObservable(
+    multiFilterConfig: IListMultiFilterConfig,
+    dataSource: IListDataSource<T>,
+    hasItems$: Observable<boolean>
+  ) {
+    return combineLatest(
+      dataSource.isLoadingPage$,
+      multiFilterConfig.loading$,
+      hasItems$,
+    ).pipe(
+      map(([fetchingListPage, fetchingFilter, hasItems]) => (!fetchingListPage && !fetchingFilter) && hasItems),
+      startWith(false)
+    );
+  }
+
+  private getItemObservable(multiFilterConfig: IListMultiFilterConfig) {
+    return multiFilterConfig.list$.pipe(
+      map(list => list ? list : [])
+    );
+  }
+
+  public applyValue(multiFilters: {}) {
+    const value = multiFilters[this.multiFilterConfig.key];
+    if (value) {
+      this.value = value;
+      this.selectItem(value);
+    }
+  }
+
+  public selectItem(itemValue: string) {
+    this.multiFilterConfig.select.next(itemValue);
+    this.value = itemValue;
+  }
 }

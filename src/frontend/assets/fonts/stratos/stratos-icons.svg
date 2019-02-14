@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 <metadata>
-Created by FontForge 20180321 at Fri Nov 23 09:57:20 2018
+Created by FontForge 20180321 at Mon Jan  7 15:21:00 2019
  By Neil MacDougall
 </metadata>
 <defs>
@@ -18,7 +18,7 @@ Created by FontForge 20180321 at Fri Nov 23 09:57:20 2018
     bbox="-0.595506 -64 512 448"
     underline-thickness="25"
     underline-position="-76"
-    unicode-range="U+005F-F12C"
+    unicode-range="U+005F-F12D"
   />
 <missing-glyph horiz-adv-x="187" 
 d="M17 0v341h136v-341h-136zM34 17h102v307h-102v-307z" />
@@ -68,6 +68,9 @@ d="M352 54q22 -25 2 -45q-17 -17 -36 -4q-10 7 -15 18q-14 36 -36 95q-5 13 4.5 18t1
 t7.5 -3t3.5 -7v-32h213v426zM213 256q6 0 11 -3t8 -8t3 -10q0 -9 -6.5 -15.5t-15.5 -6.5q-4 0 -8 2t-7 4.5t-4.5 6.5t-1.5 9q0 8 6.5 14.5t14.5 6.5zM213 384q62 0 106 -43.5t44 -105.5q0 -63 -45 -107q-9 11 -12 15q-12 16 -30 16q-16 0 -26 -14q-10 -15 -3 -34l8 -20
 q-21 -6 -42 -6q-62 0 -105.5 44t-43.5 106t43.5 105.5t105.5 43.5zM159.5 323.5q20.5 12.5 45.5 13.5l2 17q-30 -1 -55.5 -16.5t-40.5 -41.5l16 -6q12 21 32.5 33.5zM177 295q10 6 22 9l3 17q-18 -2 -33.5 -11.5t-25.5 -24.5l16 -6q8 10 18 16zM256 235q0 11 -5.5 21
 t-15.5 15.5t-22 5.5q-17 0 -29.5 -12.5t-12.5 -30t12.5 -30t30 -12.5t30 12.5t12.5 30.5z" />
+    <glyph glyph-name="docker" unicode="docker" 
+d="M103 79q11 0 19.5 8t8.5 19t-8 18.5t-20 7.5t-20 -7.5t-8 -18.5t8.5 -19t19.5 -8zM444 224h1q34 9 61 -7l6 -4l-4 -7q-19 -38 -75 -35q-34 -82 -103 -122.5t-161 -40.5q-105 0 -151 77v1l-5 9q-16 36 -12 76l1 8h342q20 0 36 5q3 1 9 4l8 4q-9 13 -11 33q-3 31 13 49l5 7
+l7 -6q29 -22 33 -51zM274 245v0v-52h-52v52h52zM274 310v-52h-52v52h52zM274 376v-52h-52v52h52zM337 245v0v-52h-52v52h52zM145 245v0v-52h-52v52h52zM210 245v0v-52h-52v52h52zM81 245h1v-52h-52v52h51zM210 310v0v-52h-52v52h52zM145 310v0v-52h-51v52h51z" />
     <glyph glyph-name="file_system" unicode="file_system" horiz-adv-x="384" 
 d="M235 171q-6 0 -11 2.5t-8 7.5t-3 11v21h-106v-149h106v21q0 9 6.5 15.5t15.5 6.5h42l22 -22h64q8 0 14.5 -6t6.5 -15v-64q0 -9 -6.5 -15t-14.5 -6h-128q-9 0 -15.5 6t-6.5 15v21h-149v278h-43q-8 0 -14.5 6t-6.5 15v85q0 9 6.5 15.5t14.5 6.5h43l21 -22h64q9 0 15.5 -6
 t6.5 -15v-64q0 -9 -6.5 -15t-15.5 -6h-42v-43h106v21q0 9 6.5 15.5t15.5 6.5h42l22 -22h64q8 0 14.5 -6t6.5 -15v-64q0 -9 -6.5 -15t-14.5 -6h-128z" />

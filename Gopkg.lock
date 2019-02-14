@@ -11,19 +11,20 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:662a18ecf55317daa51ea75dd49cdc936b768019ae80e1c448decc5fe6065fc1"
+  digest = "1:d1a104572273cfb58e801812704dca4fe2eab80f3b0144592a722a76c280c598"
   name = "code.cloudfoundry.org/bytefmt"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b31f603f5e1e047fdb38584e1a922dcc5c4de5c8"
+  revision = "2aa6f33b730c79971cfc3c742f279195b0abc627"
 
 [[projects]]
-  digest = "1:95368efa1b6348643bd59673f8400a2e9fe4743a443aefa70eeba3d038ed5f57"
+  digest = "1:6b6b9c5802d5189427d564f6b7334195cf03f3a62e0187dcf2144938959431f1"
   name = "code.cloudfoundry.org/cli"
   packages = [
     "actor/actionerror",
     "api/cloudcontroller/ccerror",
     "api/cloudcontroller/ccv2/constant",
+    "api/cloudcontroller/ccversion",
     "api/plugin/pluginerror",
     "api/uaa",
     "api/uaa/constant",
@@ -87,7 +88,6 @@
     "cf/util/json",
     "command",
     "command/translatableerror",
-    "command/v2/constant",
     "i18n/resources",
     "plugin",
     "plugin/models",
@@ -103,9 +103,9 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "9048c6b553bb90bdd92d4156d7e6a54b82a45e72"
+  revision = "07673feb94139e99a874c5cfd0e1d30f044f4236"
   source = "github.com/cloudfoundry/cli"
-  version = "v6.38.0"
+  version = "v6.40.0"
 
 [[projects]]
   branch = "master"
@@ -164,6 +164,14 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:d689318918dac8435731a16f090349f48f3758a3dbe5f967e913185bf264abaf"
+  name = "github.com/cloudfoundry-community/go-cfenv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f920e9562d5f951cbf11785728f67258c38a10d0"
+  version = "v1.17.0"
+  
+[[projects]]
   branch = "master"
   digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
   name = "github.com/cf-stratos/mysqlstore"
@@ -178,14 +186,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "7dc373669fa10ddf827c37c595dee30a2f001be9"
-
-[[projects]]
-  digest = "1:d689318918dac8435731a16f090349f48f3758a3dbe5f967e913185bf264abaf"
-  name = "github.com/cloudfoundry-community/go-cfenv"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f920e9562d5f951cbf11785728f67258c38a10d0"
-  version = "v1.17.0"
 
 [[projects]]
   digest = "1:24fc51072bca32204c162b79ede835505b3c5c5cce4e2e0cd6184ff2376486c9"
@@ -205,7 +205,7 @@
     "system",
   ]
   pruneopts = "UT"
-  revision = "407dd7546455f1a0a50feba2dcaef0ae88da1810"
+  revision = "15c556314b68953d0449541ded010b033767c805"
 
 [[projects]]
   branch = "master"
@@ -213,7 +213,7 @@
   name = "github.com/cloudfoundry/cli-plugin-repo"
   packages = ["web"]
   pruneopts = "UT"
-  revision = "c64574b2524fa39aea71f3561eb676a16b0e10f8"
+  revision = "df01f0e47f7106ac57c8ce6a7fd995219a6e86c0"
 
 [[projects]]
   branch = "master"
@@ -245,12 +245,12 @@
   revision = "250da0e0e68ce3367b4302f34218f6c064eb9559"
 
 [[projects]]
-  digest = "1:ec52d81d56e55d307da2d3dfc97ab952f9cec61d7df839ba5dd464ec08f9759e"
+  digest = "1:ec66ad050342a3573ed2f5a4337d51b4c6d5d2a717cc6c9ecf86b081235a5759"
   name = "github.com/cyphar/filepath-securejoin"
   packages = ["."]
   pruneopts = "UT"
-  revision = "06bda8370f45268db985f7af15732444d94ed51c"
-  version = "v0.2.1"
+  revision = "a261ee33d7a517f054effbf451841abaafe3e0fd"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
@@ -262,11 +262,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:082ee114ca248ab34396a2c1ec493fdf805578f987983dc9aa35f8557f2c7c5a"
+  digest = "1:0d5be6ec5f68e0cfa173b77a51294f4129f70db80995a738c6f399a7393b3af4"
   name = "github.com/docker/docker"
   packages = ["pkg/term/windows"]
   pruneopts = "UT"
-  revision = "678d4b3a6d4cd7824d26592090b4dec507ce4bc2"
+  revision = "5271c7cb484d44a22b96709894080ea85c8eef14"
 
 [[projects]]
   branch = "master"
@@ -285,11 +285,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fe91229bde1db1679a05aa7bda00b7b0edb50e411d834347be5be783d7d6c462"
+  digest = "1:ae7af28895023cc60b0c04e7c9e236ff04a0dfbe8bc4c4d9be8c86aad3fc4fcd"
   name = "github.com/fatih/color"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2d684516a8861da43017284349b7e303e809ac21"
+  revision = "3f9d52f7176a6927daacff70a3e8d1dc2025c53e"
 
 [[projects]]
   digest = "1:adea5a94903eb4384abef30f3d878dc9ff6b6b5b0722da25b82e5169216dfb61"
@@ -313,11 +313,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:4a0c6bb4805508a6287675fac876be2ac1182539ca8a32468d8128882e9d5009"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
+
+[[projects]]
+  branch = "master"
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
   name = "github.com/google/go-querystring"
   packages = ["query"]
   pruneopts = "UT"
-  revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
+  revision = "44c6ddd0a2342c386950e880b658017258da92fc"
 
 [[projects]]
   branch = "master"
@@ -325,7 +333,7 @@
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   pruneopts = "UT"
-  revision = "0892b62f0d9fb5857760c3cfca837207185117ee"
+  revision = "0766667cb4d1cfb8d5fde1fe210ae41ead3cf589"
 
 [[projects]]
   digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
@@ -344,28 +352,20 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:0fe783ea0c04c7d13f7c55d8f74b01b17e18a8320e7deecf578b41ef99b27205"
+  digest = "1:e5bf52fd66a2e984b57b4c0f2c4ee024ed749a19886246240629998dc0cf31ce"
   name = "github.com/gorilla/sessions"
   packages = ["."]
   pruneopts = "UT"
-  revision = "03b6f63cc43ef9c7240a635a5e22b13180e822b8"
-  version = "v1.1.1"
+  revision = "f57b7e2d29c6211d16ffa52a0998272f75799030"
+  version = "v1.1.3"
 
 [[projects]]
-  digest = "1:43dd08a10854b2056e615d1b1d22ac94559d822e1f8b6fcc92c1a1057e85188e"
+  digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
   name = "github.com/gorilla/websocket"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
-  version = "v1.2.0"
-
-[[projects]]
-  digest = "1:8a405d0a20ac737ccd3e0ac52537887de704be70e03cc33038f4eb5a73fb3eda"
-  name = "github.com/govau/cf-common"
-  packages = ["env"]
-  pruneopts = "UT"
-  revision = "f85526034745406f35121d889ab195dc307037c2"
-  version = "v0.0.6"
+  revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
+  version = "v1.4.0"
 
 [[projects]]
   digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
@@ -392,6 +392,14 @@
   revision = "43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b"
 
 [[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
   branch = "master"
   digest = "1:c1046169c43b3993cf00edc6fd4a85472badea8497010f883fa7008802d55389"
   name = "github.com/kylelemons/go-gypsy"
@@ -400,19 +408,15 @@
   revision = "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
 
 [[projects]]
-  digest = "1:09b4b26f6837dbb21698726ccaa6eccae9ab822485726a2a09a9d123cb1ba4d1"
+  digest = "1:0c2ca8699f9332007af8f9ee882cb2e93c7acfe6e67df4e8529aade9c548bc88"
   name = "github.com/labstack/echo"
   packages = [
     ".",
-    "context",
-    "engine",
-    "engine/standard",
-    "log",
     "middleware",
   ]
   pruneopts = "UT"
-  revision = "e08070379af60f5b9c0fb5bb2d1527ba9624fe43"
-  version = "v2.2.0"
+  revision = "2e9f4ea4e010fa328318107ba074b1b72381c571"
+  version = "v3.3.7"
 
 [[projects]]
   digest = "1:568171fc14a3d819b112c3e219d351ea7b05e8dad7935c4168c6b3373244a686"
@@ -424,19 +428,19 @@
     "random",
   ]
   pruneopts = "UT"
-  revision = "d6898124de917583f5ff5592ef931d1dfe0ddc05"
-  version = "0.2.6"
+  revision = "2a618302b929cc20862dda3aa6f02f64dbe740dd"
+  version = "v0.2.7"
 
 [[projects]]
-  branch = "master"
-  digest = "1:37ce7d7d80531b227023331002c0d42b4b4b291a96798c82a049d03a54ba79e4"
+  digest = "1:8ef506fc2bb9ced9b151dafa592d4046063d744c646c1bbe801982ce87e4bc24"
   name = "github.com/lib/pq"
   packages = [
     ".",
     "oid",
   ]
   pruneopts = "UT"
-  revision = "90697d60dd844d5ef6ff15135d0203f65d2f53b8"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -457,7 +461,7 @@
     "jwriter",
   ]
   pruneopts = "UT"
-  revision = "03f2033d19d5860aef995fe360ac7d395cd8ce65"
+  revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -468,12 +472,12 @@
   version = "v0.0.9"
 
 [[projects]]
-  digest = "1:d4d17353dbd05cb52a2a52b7fe1771883b682806f68db442b436294926bbfafb"
+  digest = "1:0981502f9816113c9c8c4ac301583841855c8cf4da8c72f696b3ebedf6d0e4e5"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
-  version = "v0.0.3"
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
 
 [[projects]]
   branch = "master"
@@ -492,20 +496,12 @@
   version = "v1.9.0"
 
 [[projects]]
-  digest = "1:e05db7d2d85e06b7973561483c4accb8fa67037ff851c69641d9c281b4c36102"
+  digest = "1:d6f988e7296cebe16d9c405b73bee34da871b382f7438c811279614a725239ae"
   name = "github.com/mholt/archiver"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cdc68dd1f170b8dfc1a0d2231b5bb0967ed67006"
-  version = "v2.0"
-
-[[projects]]
-  digest = "1:53bc4cd4914cd7cd52139990d5170d6dc99067ae31c56530621b18b35fc30318"
-  name = "github.com/mitchellh/mapstructure"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
-  version = "v1.1.2"
+  revision = "de0d89e255e17c8d75a40122055763e743ab0593"
+  version = "v2.1"
 
 [[projects]]
   digest = "1:53f34ba558b7948cb4324bff6c11b6c876a915d2a1ba9486d0c4f2e87841c3ff"
@@ -531,6 +527,17 @@
   version = "1.0.0"
 
 [[projects]]
+  digest = "1:e39a5ee8fcbec487f8fc68863ef95f2b025e0739b0e4aa55558a2b4cf8f0ecf0"
+  name = "github.com/pierrec/lz4"
+  packages = [
+    ".",
+    "internal/xxh32",
+  ]
+  pruneopts = "UT"
+  revision = "635575b42742856941dbc767b44905bb9ba083f6"
+  version = "v2.0.7"
+
+[[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -547,12 +554,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
+  digest = "1:3f53e9e4dfbb664cd62940c9c4b65a2171c66acd0b7621a1a6b8e78513525a52"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
@@ -592,12 +599,12 @@
   version = "v0.5.4"
 
 [[projects]]
-  branch = "master"
   digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
   name = "github.com/valyala/bytebufferpool"
   packages = ["."]
   pruneopts = "UT"
   revision = "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -632,9 +639,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:10e257965f5774c1ef03b258130a6caa8dddbfe03041f69d7c16a00463dece62"
+  digest = "1:69c4965199908d025f33e26d37aee6ec275110b8ce6bfaf85529e8def870c7ba"
   name = "golang.org/x/crypto"
   packages = [
+    "acme",
+    "acme/autocert",
     "curve25519",
     "ed25519",
     "ed25519/internal/edwards25519",
@@ -645,29 +654,26 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "de0752318171da717af4ce24d0a2e8626afaeb11"
+  revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
 
 [[projects]]
   branch = "master"
-  digest = "1:290b8002a96a5f5c1bd8316884f6e2414f5fb1e46a22bbd5a1ff0d45dc944cb3"
+  digest = "1:7427036b6d926b3d1fa0773771820735b35554a98296f1074df440ee30a97296"
   name = "golang.org/x/net"
-  packages = [
-    "context",
-    "websocket",
-  ]
+  packages = ["websocket"]
   pruneopts = "UT"
-  revision = "c39426892332e1bb5ec0a434a079bf82f5d30c54"
+  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
 
 [[projects]]
   branch = "master"
-  digest = "1:26ec91f56010c7c9f74630771a35f12f07f3c1d077455ae6611fe58b21433146"
+  digest = "1:f5aa274a0377f85735edc7fedfb0811d3cbc20af91633797cb359e29c3272271"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "14742f9018cd6651ec7364dc6ee08af0baaa1031"
+  revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
 
 [[projects]]
   branch = "master"
@@ -682,15 +688,15 @@
     "unicode/cldr",
   ]
   pruneopts = "UT"
-  revision = "6e3c4e7365ddcc329f090f96e4348398f6310088"
+  revision = "4d1c5fb19474adfe9562c9847ba425e7da817e81"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
   name = "google.golang.org/appengine"
   packages = ["cloudsql"]
   pruneopts = "UT"
-  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
-  version = "v1.1.0"
+  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:4e21fb0d17b9da61f6fbc44efd88db46b37a95d2970ca242fb1e8d7e8cdff900"
@@ -701,12 +707,12 @@
   version = "v1.1.3"
 
 [[projects]]
-  digest = "1:d8cd4f14785b5ae65100524a29ebba8b9dfc5401020fe7504f80b438bb8e8e0d"
+  digest = "1:50ec2f81389fbc7a1e496e1d1dc07adfe080fd15e015e9ba0e08ddaf1d4635ef"
   name = "gopkg.in/cheggaaa/pb.v1"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2af8bbdea9e99e83b3ac400d8f6b6d1b8cbbf338"
-  version = "v1.0.25"
+  revision = "007b75a044e968336a69a6c0c617251ab62ac14c"
+  version = "v1.0.26"
 
 [[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
@@ -745,7 +751,6 @@
     "code.cloudfoundry.org/cli/util/randomword",
     "github.com/antonlindstrom/pgstore",
     "github.com/cf-stratos/mysqlstore",
-    "github.com/cloudfoundry-community/go-cfenv",
     "github.com/cloudfoundry/noaa",
     "github.com/cloudfoundry/noaa/consumer",
     "github.com/cloudfoundry/noaa/errors",
@@ -755,11 +760,8 @@
     "github.com/gorilla/securecookie",
     "github.com/gorilla/sessions",
     "github.com/gorilla/websocket",
-    "github.com/govau/cf-common/env",
     "github.com/kat-co/vala",
     "github.com/labstack/echo",
-    "github.com/labstack/echo/engine",
-    "github.com/labstack/echo/engine/standard",
     "github.com/labstack/echo/middleware",
     "github.com/mattn/go-sqlite3",
     "github.com/mholt/archiver",

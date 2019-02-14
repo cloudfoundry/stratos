@@ -55,7 +55,7 @@ export function setUpTestOrgSpaceUserRoles(
   return cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, defaultCf, orgName)
     .then(org => {
       orgGuid = org.metadata.guid;
-      return cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, orgName, spaceName, defaultCf, true);
+      return cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, spaceName, defaultCf, true);
     })
     .then(space => spaceGuid = space.metadata.guid)
     .then(() => cfHelper.addOrgUserRole(cfGuid, orgGuid, userName))

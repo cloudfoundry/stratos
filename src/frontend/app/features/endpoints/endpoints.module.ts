@@ -9,6 +9,7 @@ import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
 
 @NgModule({
   imports: [
@@ -21,12 +22,14 @@ import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-a
     EndpointsPageComponent,
     ConnectEndpointDialogComponent,
     CredentialsAuthFormComponent,
-    SSOAuthFormComponent
+    SSOAuthFormComponent,
+    NoneAuthFormComponent
   ],
   entryComponents: [
     ConnectEndpointDialogComponent,
     CredentialsAuthFormComponent,
-    SSOAuthFormComponent
+    SSOAuthFormComponent,
+    NoneAuthFormComponent
   ]
 })
 export class EndpointsModule { }

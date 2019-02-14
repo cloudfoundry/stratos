@@ -482,7 +482,7 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 
 	if len(cloneDetails.Branch) == 0 {
 		err := errors.New("No branch supplied")
-		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.Branch, cloneDetails.Url, err)
+		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.Url, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
 		return "", err
 	}

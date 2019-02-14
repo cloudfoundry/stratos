@@ -19,7 +19,7 @@ export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
       clearInterval(intervalTimer);
       counter = 0;
     });
-    // Start the interval timer outsidse of angular
+    // Start the interval timer outside of angular
     ngZone.runOutsideAngular(() => {
       intervalTimer = setInterval(() => {
         ngZone.run(() => {

@@ -1,6 +1,5 @@
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
@@ -13,7 +12,6 @@ describe('Application Delete', function () {
   let appWall: ApplicationsPage;
   let applicationE2eHelper: ApplicationE2eHelper;
   let cfGuid, app;
-  let cfHelper: CFHelpers;
   let testAppName;
 
   beforeAll(() => {
@@ -26,7 +24,6 @@ describe('Application Delete', function () {
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
-    cfHelper = new CFHelpers(setup);
   });
 
   beforeEach(() => nav.goto(SideNavMenuItem.Applications));
@@ -76,7 +73,7 @@ describe('Application Delete', function () {
       expect(appWall.isActivePage()).toBeTruthy();
 
       // We created the app after the wall loaded, so refresh to make sure app wall shows the new app
-      appWall.appList.refresh();
+      appWall.appList.header.refresh();
 
       appWall.appList.header.setSearchText(testAppName);
       expect(appWall.appList.getTotalResults()).toBe(1);

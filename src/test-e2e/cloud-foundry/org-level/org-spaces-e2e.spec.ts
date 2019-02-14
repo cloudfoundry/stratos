@@ -38,7 +38,6 @@ describe('Org Spaces List -', () => {
         return cfHelper.addSpaceIfMissingForEndpointUsers(
           endpointGuid,
           org.metadata.guid,
-          org.entity.name,
           name,
           defaultCf,
           true);
@@ -50,7 +49,6 @@ describe('Org Spaces List -', () => {
     return promise.all(spaceNames.map(name => cfHelper.addSpaceIfMissingForEndpointUsers(
       endpointGuid,
       org.metadata.guid,
-      org.entity.name,
       name,
       defaultCf,
       true)));
@@ -107,8 +105,6 @@ describe('Org Spaces List -', () => {
     beforeAll(() => {
       setup(orgName, [], false);
     });
-
-    beforeEach(navToOrgSpaces);
 
     it('Should show no entities message', () => {
       expect(spaceList.isDisplayed()).toBeTruthy();

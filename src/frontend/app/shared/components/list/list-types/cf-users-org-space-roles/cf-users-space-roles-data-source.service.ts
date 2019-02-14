@@ -31,12 +31,17 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntity: (spaces$) => CfRolesService.filterEditableOrgOrSpace<ISpace>(userPerms, false, spaces$),
-      transformEntities: [(entities: APIResource[], paginationState: PaginationEntityState) => {
-        return entities.filter(e => {
-          const validSpace = !(spaceGuid && spaceGuid !== e.metadata.guid);
-          return validSpace;
-        });
-      }],
+      transformEntities: [
+        {
+          type: 'filter',
+          field: 'entity.name'
+        },
+        (entities: APIResource[], paginationState: PaginationEntityState) => {
+          return entities.filter(e => {
+            const validSpace = !(spaceGuid && spaceGuid !== e.metadata.guid);
+            return validSpace;
+          });
+        }],
       listConfig
     });
   }

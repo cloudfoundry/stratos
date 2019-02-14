@@ -13,6 +13,7 @@ import { MatDialogModule } from '@angular/material';
 import { MockBackend } from '@angular/http/testing';
 import { HttpModule, Http, ConnectionBackend } from '@angular/http';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
+import { ExtensionService } from '../../../core/extension/extension-service';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -29,6 +30,7 @@ describe('AppNameUniqueDirective', () => {
         HttpModule,
       ],
       providers: [
+        ExtensionService,
         {
           provide: ConnectionBackend,
           useClass: MockBackend

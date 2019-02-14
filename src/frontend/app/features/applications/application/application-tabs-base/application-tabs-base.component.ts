@@ -1,38 +1,39 @@
-import { CfUserService } from './../../../../shared/data-services/cf-user.service';
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, tap, withLatestFrom, startWith, switchMap } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { EntityService } from '../../../../core/entity-service';
+import {
+  getActionsFromExtensions,
+  getTabsFromExtensions,
+  StratosActionMetadata,
+  StratosActionType,
+  StratosTabType,
+} from '../../../../core/extension/extension-service';
+import { safeUnsubscribe } from '../../../../core/utils.service';
+import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
+import { RestageApplication } from '../../../../store/actions/application.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
+import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
-import { ApplicationService, ApplicationData } from '../../application.service';
+import { ApplicationData, ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { RestageApplication } from '../../../../store/actions/application.actions';
-import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
-import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
-import {
-  getTabsFromExtensions,
-  StratosTabType,
-  StratosActionMetadata,
-  getActionsFromExtensions,
-  StratosActionType
-} from '../../../../core/extension/extension-service';
-import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { GitSCMService, GitSCMType } from './../../../../shared/data-services/scm/scm.service';
 
 
@@ -101,15 +102,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       first()
     );
 
-    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
-      if (hasMetrics) {
-        this.tabLinks.push({
-          link: 'metrics',
-          label: 'Metrics'
-        });
-      }
-    });
-
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
       switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.metadata.guid)
@@ -127,11 +119,20 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'events', label: 'Events' }
     ];
 
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+      if (hasMetrics) {
+        this.tabLinks.push({
+          link: 'metrics',
+          label: 'Metrics'
+        });
+      }
+    });
+
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
 
-    this.applicationService.applicationStratProject$
-      .pipe(first())
+    // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
+    this.stratosProjectSub = this.applicationService.applicationStratProject$
       .subscribe(stratProject => {
         if (
           stratProject &&
@@ -140,7 +141,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         ) {
           const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
           const scm = scmService.getSCM(gitscm as GitSCMType);
-          this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+
+          // Add tab or update existing tab
+          const tab = this.tabLinks.find(t => t.link === 'gitscm');
+          if (!tab) {
+            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel() });
+          } else {
+            tab.label = scm.getLabel();
+          }
         }
       });
   }
@@ -151,6 +159,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
+  stratosProjectSub: Subscription;
   autoRefreshString = 'auto-refresh';
 
   autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
@@ -388,7 +397,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.appSub$.unsubscribe();
-    this.entityServiceAppRefresh$.unsubscribe();
+    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$, this.stratosProjectSub);
   }
 }

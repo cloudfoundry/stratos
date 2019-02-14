@@ -9,6 +9,12 @@
     <app-meta-card-value>{{ (cfSpaceService.quotaDefinition$ | async)?.entity.name }}</app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
+    <app-meta-card-key>Provision Paid Services</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no"></app-boolean-indicator>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>SSH Access</app-meta-card-key>
     <app-meta-card-value>{{ allowSshStatus$ | async }}</app-meta-card-value>
   </app-meta-card-item>

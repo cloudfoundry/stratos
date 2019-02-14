@@ -109,7 +109,7 @@ func upRun(args []string) {
 
 	err = datastore.ApplyMigrations(conf, db)
 	if err != nil {
-		log.Fatal("Migration failed", err)
+		log.Fatal("Migration failed! ", err)
 	}
 }
 

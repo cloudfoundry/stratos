@@ -6,7 +6,7 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
-import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
+import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -14,7 +14,6 @@ import { GetAllOrgUsers, GetOrganization } from '../../../store/actions/organiza
 import { DeleteSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
-  applicationSchemaKey,
   cfUserSchemaKey,
   domainSchemaKey,
   entityFactory,
@@ -36,6 +35,18 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
+export const createQuotaDefinition = (orgGuid: string): APIResource<IQuotaDefinition> => ({
+  entity: {
+    memory_limit: -1,
+    app_instance_limit: -1,
+    instance_memory_limit: -1,
+    name: 'None assigned',
+    organization_guid: orgGuid,
+    total_services: -1,
+    total_routes: -1
+  },
+  metadata: null
+});
 
 @Injectable()
 export class CloudFoundryOrganizationService {
@@ -50,6 +61,8 @@ export class CloudFoundryOrganizationService {
   spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
+  appCount$: Observable<number>;
+  loadingApps$: Observable<boolean>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   allOrgUsers$: Observable<APIResource<CfUser>[]>;
   usersPaginationKey: string;
@@ -60,8 +73,7 @@ export class CloudFoundryOrganizationService {
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfEndpointService: CloudFoundryEndpointService
-
+    private cfEndpointService: CloudFoundryEndpointService,
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
@@ -74,6 +86,10 @@ export class CloudFoundryOrganizationService {
     this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
   }
 
+  public fetchApps() {
+    this.cfEndpointService.fetchApps();
+  }
+
   private initialiseObservables() {
     this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
@@ -83,7 +99,6 @@ export class CloudFoundryOrganizationService {
           createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
           createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
           createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-          createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
@@ -128,13 +143,36 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseAppObservables() {
-    this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
+    this.apps$ = this.org$.pipe(
+      switchMap(org => this.cfEndpointService.getAppsInOrgViaAllApps(org.entity))
+    );
     this.appInstances$ = this.apps$.pipe(
       filter($apps => !!$apps),
       map(getStartedAppInstanceCount)
     );
 
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
+
+    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+      switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
+    );
+
+    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+  }
+
+  private countExistingApps(): Observable<number> {
+    return this.apps$.pipe(
+      map(apps => apps.length)
+    );
+  }
+
+  private fetchAppCount(): Observable<number> {
+    return CloudFoundryEndpointService.fetchAppCount(
+      this.store,
+      this.paginationMonitorFactory,
+      this.activeRouteCfOrgSpace.cfGuid,
+      this.activeRouteCfOrgSpace.orgGuid
+    );
   }
 
   private initialiseOrgObservables() {
@@ -158,12 +196,7 @@ export class CloudFoundryOrganizationService {
     );
   }
 
-  private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {
-    return map(entities => {
-      const allInstances = entities
-        .map(s => s.entity[property])
-        .filter(s => !!s);
-      return [].concat.apply([], allInstances);
-    });
+  private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {
+    return map(entities => getEntityFlattenedList(property, entities));
   }
 }

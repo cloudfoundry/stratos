@@ -14,7 +14,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
@@ -72,7 +71,7 @@ const mockURLString = "http://localhost:9999/some/fake/url/"
 
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
-	ctx := e.NewContext(standard.NewRequest(req, nil), standard.NewResponse(res, nil))
+	ctx := e.NewContext(req, res)
 
 	return e, ctx
 }

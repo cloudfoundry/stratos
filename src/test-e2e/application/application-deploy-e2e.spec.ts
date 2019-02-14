@@ -4,6 +4,7 @@ import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
@@ -14,7 +15,6 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CFPage } from '../po/cf-page.po';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -211,7 +211,7 @@ describe('Application Deploy -', function () {
   describe('Tab Tests -', () => {
 
     beforeAll(() => {
-      // Should be deployed, no web-socket open, so we can wait for angular agiain
+      // Should be deployed, no web-socket open, so we can wait for angular again
       browser.waitForAngularEnabled(true);
 
       expect(appDetails.cfGuid).toBeDefined();
@@ -225,6 +225,7 @@ describe('Application Deploy -', function () {
       const appVariables = new ApplicationPageVariablesTab(appDetails.cfGuid, appDetails.appGuid);
       appVariables.goToVariablesTab();
 
+      // Existing env var
       expect(appVariables.list.empty.getDefault().isPresent()).toBeFalsy();
       expect(appVariables.list.table.getRows().count()).toBe(1);
       expect(appVariables.list.table.getCell(0, 1).getText()).toBe('STRATOS_PROJECT');
@@ -340,11 +341,11 @@ describe('Application Deploy -', function () {
       expect(route).not.toBeNull();
       expect(route.length).toBeGreaterThan(testAppName.length);
       const randomRouteStyleAppName = testAppName.replace(/[\.:]/g, '');
-      expect(route.startsWith(randomRouteStyleAppName)).toBeTruthy();
+      expect(route.startsWith(randomRouteStyleAppName.substring(0, randomRouteStyleAppName.length - 11), 7)).toBeTruthy();
     });
     appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
       expect(tcpRoute).not.toBeNull();
-      expect(tcpRoute).toBe('No');
+      expect(tcpRoute).toBe('highlight_off');
     });
   });
 

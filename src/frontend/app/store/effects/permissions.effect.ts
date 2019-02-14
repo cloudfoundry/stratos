@@ -31,14 +31,13 @@ import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.sel
 import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 
-class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFlattener<CFResponse> {
+class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 
   constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {
     super(httpClient, requestOptions, url, 'page');
   }
-  public getTotalPages = (res: CFResponse<any>) => {
-    return res.total_pages;
-  }
+  public getTotalPages = (res: CFResponse) => res.total_pages;
+
   public mergePages = (res: CFResponse[]) => {
     const firstRes = res.shift();
     const final = res.reduce((finalRes, currentRes) => {
@@ -50,6 +49,8 @@ class PermissionFlattener extends BaseHttpClientFetcher implements IPaginationFl
     }, firstRes);
     return final;
   }
+  public getTotalResults = (res: CFResponse): number => res.total_results;
+  public clearResults = (res: CFResponse) => observableOf(res);
 }
 
 interface CfsRequestState {
@@ -79,7 +80,7 @@ function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpC
     url,
     params
   );
-  return flattenPagination(get$, new PermissionFlattener(httpClient, url, params)).pipe(
+  return flattenPagination(store, get$, new PermissionFlattener(httpClient, url, params)).pipe(
     map(data => {
       store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;

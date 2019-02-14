@@ -25,5 +25,12 @@
   text: ''
 }"></app-no-content-message>
 </ng-template>
-<app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
+
+<ng-template #noEntriesMaxedResults>
+  <app-no-content-message [icon]="'apps'" [firstLine]="'There are too many applications to show'" [secondLine]="{
+    text: 'Please use the the Cloud Foundry, Organization or Space filters'
+  }"></app-no-content-message>
+</ng-template>
+
+<app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" [noEntriesMaxedResults]="noEntriesMaxedResults" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
 </app-list>

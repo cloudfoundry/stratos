@@ -10,8 +10,9 @@ import { selectEntities } from '../../store/selectors/api.selectors';
 import { EndpointModel } from './../../store/types/endpoint.types';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import { EndpointType, EndpointAuthTypeConfig } from '../../core/extension/extension-types';
+import { EndpointType, EndpointAuthTypeConfig, EndpointTypeConfig } from '../../core/extension/extension-types';
 import { ExtensionService } from '../../core/extension/extension-service';
+import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -22,15 +23,6 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
-export interface EndpointTypeConfig {
-  value: EndpointType;
-  label: string;
-  urlValidation?: string;
-  allowTokenSharing?: boolean;
-  icon?: string;
-  iconFont?: string;
-  authTypes?: string[];
-}
 
 export interface EndpointIcon {
   name: string;
@@ -43,12 +35,14 @@ const endpointTypes: EndpointTypeConfig[] = [
     label: 'Cloud Foundry',
     urlValidation: urlValidationExpression,
     icon: 'cloud_foundry',
-    iconFont: 'stratos-icons'
+    iconFont: 'stratos-icons',
+    homeLink: (guid) => ['/cloud-foundry', guid]
   },
   {
     value: 'metrics',
     label: 'Metrics',
-    allowTokenSharing: true
+    allowTokenSharing: true,
+    homeLink: (guid) => ['/endpoints/metrics', guid]
   },
 ];
 
@@ -69,6 +63,13 @@ let endpointAuthTypes: EndpointAuthTypeConfig[] = [
     form: {},
     types: new Array<EndpointType>('cf'),
     component: SSOAuthFormComponent
+  },
+  {
+    name: 'No Authentication',
+    value: 'none',
+    form: {},
+    types: new Array<EndpointType>('metrics'),
+    component: NoneAuthFormComponent
   },
 ];
 

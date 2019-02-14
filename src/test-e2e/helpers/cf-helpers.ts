@@ -1,6 +1,6 @@
 import { promise } from 'protractor';
 
-import { IApp, IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
+import { IApp, IDomain, IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { CfUser } from '../../frontend/app/store/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -19,6 +19,10 @@ export class CFHelpers {
 
   constructor(public e2eSetup: E2ESetup) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
+  }
+
+  static cleanRouteHost(host: string): string {
+    return host.replace(/[-:.]+/g, '');
   }
 
   private assignAdminAndUserGuids(cnsiGuid: string, endpoint: E2EConfigCloudFoundry): promise.Promise<any> {
@@ -44,7 +48,9 @@ export class CFHelpers {
     return this.assignAdminAndUserGuids(guid, endpoint).then(() => {
       expect(CFHelpers.cachedNonAdminGuid).not.toBeNull();
       expect(CFHelpers.cachedAdminGuid).not.toBeNull();
-      return this.addOrgIfMissing(guid, testOrgName, CFHelpers.cachedAdminGuid, CFHelpers.cachedNonAdminGuid);
+      return skipExistsCheck ?
+        this.baseAddOrg(guid, testOrgName) :
+        this.addOrgIfMissing(guid, testOrgName, CFHelpers.cachedAdminGuid, CFHelpers.cachedNonAdminGuid);
     });
   }
 
@@ -78,27 +84,26 @@ export class CFHelpers {
   }
 
   addSpaceIfMissingForEndpointUsers(
-    cnsiGuid,
-    orgGuid,
-    orgName,
-    spaceName,
+    cnsiGuid: string,
+    orgGuid: string,
+    spaceName: string,
     endpoint: E2EConfigCloudFoundry,
     skipExistsCheck = false,
   ): promise.Promise<APIResource<ISpace>> {
     return this.assignAdminAndUserGuids(cnsiGuid, endpoint).then(() => {
       expect(CFHelpers.cachedNonAdminGuid).not.toBeNull();
       return skipExistsCheck ?
-        this.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, CFHelpers.cachedNonAdminGuid) :
-        this.addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, CFHelpers.cachedNonAdminGuid);
+        this.baseAddSpace(cnsiGuid, orgGuid, spaceName, CFHelpers.cachedNonAdminGuid) :
+        this.addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, CFHelpers.cachedNonAdminGuid);
 
     });
   }
 
-  addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
+  addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
       .then(function (space) {
-        return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, userGuid);
+        return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, spaceName, userGuid);
       });
   }
 
@@ -119,7 +124,7 @@ export class CFHelpers {
   deleteSpaceIfExisting(cnsiGuid: string, orgGuid: string, spaceName: string) {
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName).then(space => {
       if (space) {
-        return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'spaces/' + space.metadata.guid);
+        return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'spaces/' + space.metadata.guid + '?recursive=true&async=false');
       }
     });
   }
@@ -209,7 +214,7 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
   }
 
-  baseAddSpace(cnsiGuid, orgGuid, orgName, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
+  baseAddSpace(cnsiGuid: string, orgGuid: string, spaceName: string, userGuid: string): promise.Promise<APIResource<ISpace>> {
     const cfRequestHelper = this.cfRequestHelper;
     return cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces',
       {
@@ -224,8 +229,23 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
   }
 
+  addRoute(cnsiGuid: string, spaceGuid: string, domainGuid: string, host: string, port?: number, path?: string)
+    : promise.Promise<APIResource<IRoute>> {
+    return this.cfRequestHelper.sendCfPost<APIResource<IRoute>>(cnsiGuid, 'routes', {
+      domain_guid: domainGuid,
+      space_guid: spaceGuid,
+      host,
+      port,
+      path
+    });
+  }
+
   fetchAppRoutes(cnsiGuid: string, appGuid: string): promise.Promise<APIResource<IRoute>[]> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, `apps/${appGuid}/routes`).then(res => res.resources);
+  }
+
+  fetchDomains(cnsiGuid: string): promise.Promise<APIResource<IDomain>[]> {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, `shared_domains`).then(res => res.resources);
   }
 
   updateDefaultCfOrgSpace = (): promise.Promise<any> => {
@@ -268,7 +288,6 @@ export class CFHelpers {
           this.addSpaceIfMissingForEndpointUsers(
             CFHelpers.cachedDefaultCfGuid,
             CFHelpers.cachedDefaultOrgGuid,
-            e2e.secrets.getDefaultCFEndpoint().testOrg,
             e2e.secrets.getDefaultCFEndpoint().testSpace,
             e2e.secrets.getDefaultCFEndpoint()
           )
