@@ -151,10 +151,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).subscribe();
 
     const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
-      // Update result count after local filtering so it matches the size of the filtered entities collection
-      // (except if we've maxed out results where the totalResults is miss-matched with entities collection)
-      const newLength = paginationEntity.maxedResults && entities.length >= paginationEntity.params['results-per-page'] ?
-        paginationEntity.maxedResults : entities.length;
+      // if (paginationEntity.currentlyMaxed) {
+      //   // If we're currently maxed the entities are junk, don't try to update total counts
+      //   return;
+      // }
+      const newLength = entities.length;
       if (
         paginationEntity.ids[paginationEntity.currentPage] &&
         (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
@@ -174,12 +175,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.filter$ = this.createFilterObservable();
 
     this.maxedResults$ = !!this.action.flattenPaginationMax ?
-      combineLatest(this.pagination$, this.filter$).pipe(
+      this.pagination$.pipe(
+        map(pagination => pagination.currentlyMaxed),
         distinctUntilChanged(),
-        map(([pagination, filters]) => {
-          const totalResults = this.isLocal ? pagination.clientPagination.totalResults : pagination.totalResults;
-          return this.action.flattenPaginationMax < totalResults;
-        }),
       ) : observableOf(false);
   }
 

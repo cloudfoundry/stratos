@@ -2,6 +2,38 @@
 
 Weekly status updates are published here.
 
+## 8 February 2019
+
+Release 2.3.0 is all ready to go and we will publish this on Monday.
+
+Otherwise, we've been working on:
+
+- Finishing a first version of the User Favourites feature
+- Finishing a first version of the User Invitation feature
+- Investigating possible security issue: https://github.com/cloudfoundry-incubator/stratos/issues/3385
+- Updates to our extensions approach 
+
+## 1 February 2019
+
+We are looking to release 2.3.0 next week having completed testing.
+
+Work has otherwise continued on four tracks:
+
+- Closing out existing PRs
+- Finishing a first version of the User Favourites feature
+- Finishing a first version of the User Invitation feature
+- Improving test automation
+
+## 25 January 2019
+
+This week:
+
+- Published a release candidate for Stratos 2.3.0 which we continue to test
+- Worked to update a few outstanding PRs - we are aiming to close out some of the remaining PRs this sprint, ahead of a re-org of our front-end code to better support extensions to Stratos in the future
+- Continued to refine the User Favourites feature
+- Worked to add the ability to invite a user into a Cloud Foundry organisation
+- Continued to improve the reliability of automated deployment tests in Jenkins
+
 ## 18 January 2019
 
 We created a test release of 2.3.0 and identified a number of issues to be resolved for release.

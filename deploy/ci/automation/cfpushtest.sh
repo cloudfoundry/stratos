@@ -22,7 +22,7 @@ if [ "$1" == "mysql" ]; then
   PORT=3306
   echo "Using MYSQL database"
   echo "Starting MySQL Database..."
-  docker kill $(docker ps -q --filter "ancestor=mysql:latest")
+  killDockerContainer "mysql:latest"
   DB_DOCKER_PID=$(docker run -d -p $PORT:3306 --env MYSQL_ROOT_PASSWORD=stratos mysql:latest --default-authentication-plugin=mysql_native_password)
   echo "Waiting for mysql"
   until mysql -h $HOST -uroot -pstratos -e "SHOW DATABASES;" &> /dev/null
@@ -31,10 +31,12 @@ if [ "$1" == "mysql" ]; then
     sleep 2
   done
 
+  echo ""
+
   echo "Creating database and setting permissions..."
   mysql -uroot -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
-  mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@% IDENTIFIED BY '$PASSWORD';"
-  mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME@%;"
+  mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'%' IDENTIFIED BY '$PASSWORD';"
+  mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'%';"
   mysql -uroot -pstratos -h $HOST -e "FLUSH PRIVILEGES;"
 fi
 
@@ -43,8 +45,10 @@ if [ "$1" == "pgsql" ]; then
   PORT=5432
   echo "Using Postgres database"
   echo "Starting Postgres Database..."
-  docker kill $(docker ps -q --filter "ancestor=postgres:latest")
-  DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=stratos --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
+  killDockerContainer "postgres:latest"
+  USERNAME=stratos_pgsql
+  PASSWORD=stratos_pgsql_passw0rd
+  DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=${PASSWORD} --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
 fi
 
 DB=stratos-${DB_TYPE}

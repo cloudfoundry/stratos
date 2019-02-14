@@ -14,7 +14,7 @@
         <app-tile>
           <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application" value="{{ cfOrgService.appCount$ | async }}"></app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="cfEndpointService.hasAllApps$ | async">
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfOrgService.appInstances$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
         </app-tile>
         <app-tile>
@@ -31,7 +31,7 @@
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="service" label="Service Instances" value="{{ (cfOrgService.serviceInstances$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="cfEndpointService.hasAllApps$ | async">
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="memory" label="Memory Usage" units="mb" value="{{ (cfOrgService.totalMem$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
