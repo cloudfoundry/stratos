@@ -46,7 +46,9 @@ if [ "$1" == "pgsql" ]; then
   echo "Using Postgres database"
   echo "Starting Postgres Database..."
   killDockerContainer "postgres:latest"
-  DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=stratos --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
+  USERNAME=stratos_pgsql
+  PASSWORD=stratos_pgsql_passw0rd
+  DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=${PASSWORD} --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
 fi
 
 DB=stratos-${DB_TYPE}
