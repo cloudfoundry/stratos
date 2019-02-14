@@ -8,8 +8,9 @@ export class FavoritesStarMock extends Component {
   }
 
   public async isFavorite() {
-    const favoriteIcon = this.finder.element('mat-icon');
+    const favoriteIcon = this.finder;
     const icon = await favoriteIcon.getText();
+    console.log(icon)
     return icon === 'star';
   }
 

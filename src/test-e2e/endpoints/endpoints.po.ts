@@ -16,11 +16,9 @@ export class EndpointsTable extends ListTableComponent {
 
   async getEndpointData(row: ElementFinder) {
     const allRows = row.all(by.tagName('app-table-cell') as ElementFinder);
-    const favoriteCell = allRows.get(6);
-    const favElement = favoriteCell.element(`app-table-cell-favorite app-table-cell-favorite ${FavoritesStarMock.BASE_CLASS_SELECTOR}`);
-    console.log(await favElement.getText());
+    const star = await allRows.get(6).getWebElement();
     const favorite = new FavoritesStarMock(
-      favElement
+      element(star)
     );
     const data = {
       name: await allRows.get(0).getText(),
@@ -55,7 +53,7 @@ export class EndpointsTable extends ListTableComponent {
 
   async setEndpointAsFavorite(name: string) {
     const data = await this.getEndpointDataForEndpoint(name);
-    data.favorite.set();
+    await data.favorite.set();
   }
 
   openActionMenu(row: ElementFinder) {
