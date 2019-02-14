@@ -188,7 +188,8 @@ func (ch *CFHosting) Init() error {
 		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
 		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
 
-		// Not set in the environment and failed to read from the Secrets file TODO is this necessary to set here?
+		// Not set in the environment and failed to read from the Secrets file
+		// CHECK is this necessary to set here?
 		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = ch.portalProxy.Env().MustBool("SKIP_SSL_VALIDATION")
 
 		// Save to Console DB

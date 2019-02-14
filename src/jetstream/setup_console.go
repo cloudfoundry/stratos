@@ -152,7 +152,9 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	consoleConfig := new(interfaces.ConsoleConfig)
 
 	consoleConfig.ConsoleClient = p.Env().MustString("CONSOLE_CLIENT")
-	consoleConfig.ConsoleClientSecret = p.Env().String("CONSOLE_CLIENT_SECRET", "") // Special case, mostly this is blank, so assume its blank (TODO - stop this incorrect assumption)
+	// Special case, mostly this is blank, so assume its blank
+	// CHECK: Can we handle this better?
+	consoleConfig.ConsoleClientSecret = p.Env().String("CONSOLE_CLIENT_SECRET", "")
 	consoleConfig.ConsoleAdminScope = p.Env().MustString("CONSOLE_ADMIN_SCOPE")
 	consoleConfig.SkipSSLValidation = p.Env().MustBool("SKIP_SSL_VALIDATION")
 
