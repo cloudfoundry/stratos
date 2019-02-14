@@ -3,7 +3,7 @@ import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, timer as observableTimer, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, take, tap, withLatestFrom, switchMap, startWith, pairwise } from 'rxjs/operators';
+import { filter, map, take, tap, withLatestFrom, switchMap, startWith, pairwise, catchError } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -302,6 +302,7 @@ export class DeployApplicationStep2Component
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(name)),
+      catchError(_e => observableOf(null)),
       tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
     );
   }
