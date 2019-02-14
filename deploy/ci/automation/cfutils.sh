@@ -13,6 +13,18 @@ done <<< "$ORGS"
 
 }
 
+function killDockerContainer {
+  local ANCESTOR=$1
+  local ID=$(docker ps -q --filter "ancestor=${ANCESTOR}")
+
+  if [ "${ID}" != "" ]; then
+    echo "Killing docker container: ${ID}"
+    docker kill ${ID}
+  else
+    echo "No existing running container: ${ANCESTOR}"
+  fi
+}
+
 # Any test run could have been aborted, leaving remnants - clean them up
 function clean_deployments {
   echo "Stopping any MySQL Database"
