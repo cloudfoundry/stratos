@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -41,9 +42,10 @@ func init() {
 }
 
 // ConfigInit updates the config if needed
-func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
+func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig) {
+
 	// Check we are deployed in Cloud Foundry
-	if !config.IsSet(VCapApplication) {
+	if !envLookup.IsSet(VCapApplication) {
 		return
 	}
 	isSQLite := jetstreamConfig.DatabaseProviderName == SQLiteProviderName
@@ -63,9 +65,9 @@ func ConfigInit(jetstreamConfig *interfaces.PortalConfig) {
 		// Else, if not default and is SQLlite - add the App Index to the secret
 		// This makes sure we use a different Session Secret per App Instance IF using SQLite
 		// Since this is not a shared database across application instances
-		if isSQLite && config.IsSet("CF_INSTANCE_INDEX") {
-			appInstanceIndex, err := config.GetValue("CF_INSTANCE_INDEX")
-			if err == nil {
+		if isSQLite && envLookup.IsSet("CF_INSTANCE_INDEX") {
+			appInstanceIndex, ok := envLookup.Lookup("CF_INSTANCE_INDEX")
+			if ok {
 				jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
 				log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
 			}

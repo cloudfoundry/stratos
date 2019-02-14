@@ -195,7 +195,7 @@ func main() {
 	}
 
 	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
-		configPlugin(&portalConfig)
+		configPlugin(envLookup, &portalConfig)
 	}
 
 	if portalConfig.SessionStoreSecret == defaultSessionSecret {
@@ -922,7 +922,7 @@ func isConsoleUpgrading(env *env.VarSet) bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *standard.Server, env *env.VarSet) {
+func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 	for isConsoleUpgrading(env) {
 		time.Sleep(1 * time.Second)
 	}

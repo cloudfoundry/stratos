@@ -137,13 +137,16 @@ func NewSecretsDirLookup(secretsDir string) env.Lookup {
 		name = strings.ToLower(strings.Replace(name, "_", "-", -1))
 		filename := filepath.Join(secretsDir, name)
 
-		contents, err := ioutil.ReadFile(filename)
-		if err != nil {
-			log.Warnf("Error reading secrets file: %s, %s", filename, err)
-			return "", false
+		if _, err := os.Stat(filename); err == nil {
+			contents, err := ioutil.ReadFile(filename)
+			if err != nil {
+				log.Warnf("Error reading secrets file: %s, %s", filename, err)
+				return "", false
+			}
+			return strings.TrimSpace(string(contents)), true
 		}
-
-		return strings.TrimSpace(string(contents)), true
+		// File does not exist
+		return "", false
 	}
 }
 

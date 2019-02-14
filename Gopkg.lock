@@ -368,6 +368,22 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:8a405d0a20ac737ccd3e0ac52537887de704be70e03cc33038f4eb5a73fb3eda"
+  name = "github.com/govau/cf-common"
+  packages = ["env"]
+  pruneopts = "UT"
+  revision = "f85526034745406f35121d889ab195dc307037c2"
+  version = "v0.0.6"
+
+[[projects]]
+  digest = "1:53bc4cd4914cd7cd52139990d5170d6dc99067ae31c56530621b18b35fc30318"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
+  version = "v1.1.2"  
+
+[[projects]]
   digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
