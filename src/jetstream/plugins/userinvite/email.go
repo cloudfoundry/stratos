@@ -1,16 +1,10 @@
 package userinvite
 
 import (
-	// "encoding/json"
 	"bytes"
 	"errors"
 	"fmt"
-
-	// "io/ioutil"
-	// "net/http"
-	// "net/url"
 	"net/smtp"
-	// "regexp"
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -82,7 +76,7 @@ func (invite *UserInvite) SendEmail(emailAddress, inviteLink string, endpoint in
 		if err == nil {
 			mail.Subject(subject.String())
 		} else {
-			log.Warn("User Invite: Failed to render the Subject template: %s", err.Error())
+			log.Warnf("User Invite: Failed to render the Subject template: %s", err.Error())
 		}
 	}
 
