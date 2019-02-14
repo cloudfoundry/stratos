@@ -1,4 +1,4 @@
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { inject, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { AppState } from '../../../store/app-state';
 import { GitSCMService } from '../../../shared/data-services/scm/scm.service';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 
 describe('GithubProjectExistsDirective', () => {
@@ -19,7 +20,8 @@ describe('GithubProjectExistsDirective', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
-        HttpModule
+        HttpClientModule,
+        HttpClientTestingModule
       ],
       providers: [
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }

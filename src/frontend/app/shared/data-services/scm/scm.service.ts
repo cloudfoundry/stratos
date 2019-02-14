@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { GitLabSCM } from './gitlab-scm';
 import { GitHubSCM } from './github-scm';
 import { GITHUB_API_URL } from '../../../core/github.helpers';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { GitSCM } from './scm';
 
 // Supported Git SCM providers
@@ -19,12 +19,12 @@ export class GitSCMService {
   private scms: GitSCMs;
 
   constructor(
-    private http: Http,
+    private httpClient: HttpClient,
     @Inject(GITHUB_API_URL) private gitHubURL: string
   ) {
     const scmArray = [
-      new GitHubSCM(this.http, gitHubURL),
-      new GitLabSCM(this.http)
+      new GitHubSCM(this.httpClient, gitHubURL),
+      new GitLabSCM(this.httpClient)
     ];
 
     this.scms = scmArray.reduce((obj, item) => {
