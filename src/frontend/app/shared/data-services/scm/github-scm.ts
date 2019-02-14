@@ -1,13 +1,14 @@
-import { GitSCM, SCMIcon } from './scm';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
-import { GitRepo, GitCommit, GitBranch } from '../../../store/types/git.types';
 
 export class GitHubSCM implements GitSCM {
 
-  constructor(public httpClient: HttpClient, public gitHubURL: string) {}
+  constructor(public httpClient: HttpClient, public gitHubURL: string) { }
 
   getType(): GitSCMType {
     return 'github';
@@ -29,7 +30,7 @@ export class GitHubSCM implements GitSCM {
   }
 
   getBranches(projectName: string): Observable<GitBranch[]> {
-    return this.httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches`) as  Observable<GitBranch[]>;
+    return this.httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches`) as Observable<GitBranch[]>;
   }
 
   getCommit(projectName: string, commitSha: string): Observable<GitCommit> {
@@ -54,9 +55,9 @@ export class GitHubSCM implements GitSCM {
 
   getMatchingRepositories(projectName: string): Observable<string[]> {
     const prjParts = projectName.split('/');
-    let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name`;
+    let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name+fork:true`;
     if (prjParts.length > 1) {
-      url = `${this.gitHubURL}/search/repositories?q=${prjParts[1]}+in:name+user:${prjParts[0]}`;
+      url = `${this.gitHubURL}/search/repositories?q=${prjParts[1]}+in:name+fork:true+user:${prjParts[0]}`;
     }
     return this.httpClient.get(url).pipe(
       filter((repos: any) => !!repos.items),
