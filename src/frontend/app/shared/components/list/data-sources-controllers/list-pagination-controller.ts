@@ -1,5 +1,4 @@
 import { NgZone } from '@angular/core';
-import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
@@ -166,7 +165,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         ));
       }
 
-      if (paginationEntityState.maxedResults) {
+      if (paginationEntityState.maxedMode) {
         this.dataSource.setMultiFilter(changes, paginationEntityState.params);
       }
 

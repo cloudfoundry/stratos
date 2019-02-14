@@ -17,9 +17,9 @@ import {
   SET_INITIAL_PARAMS,
   SET_PAGE,
   SET_PAGE_BUSY,
-  SET_PAGINATION_MAX_REACHED,
   SET_PARAMS,
   SET_RESULT_COUNT,
+  UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -156,7 +156,7 @@ function paginate(action, state, updatePagination) {
     return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
   }
 
-  if (action.type === SET_PAGINATION_MAX_REACHED) {
+  if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action);
   }
 

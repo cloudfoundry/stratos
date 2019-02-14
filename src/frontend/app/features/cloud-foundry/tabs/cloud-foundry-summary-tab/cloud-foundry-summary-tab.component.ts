@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/app-state';
 import { goToAppWall } from '../../cf.helpers';
@@ -21,7 +21,9 @@ export class CloudFoundrySummaryTabComponent {
       goToAppWall(store, cfEndpointService.cfGuid);
     };
     this.detailsLoading$ = combineLatest([
-      cfEndpointService.hasAllApps$,
+      cfEndpointService.appsPagObs.fetchingEntities$.pipe(
+        filter(loading => !loading)
+      ),
       cfEndpointService.users$
     ]).pipe(
       map(() => false),
