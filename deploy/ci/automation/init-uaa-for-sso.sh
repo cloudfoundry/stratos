@@ -8,7 +8,7 @@ if [ -z "${UAA_ENDPOINT}" ]; then
 fi
 
 echo "Using UAA Endpoint: ${UAA_ENDPOINT}"
-uaac target ${UAA} --skip-ssl-validation
+uaac target ${UAA_ENDPOINT} --skip-ssl-validation
 uaac token client get admin -s ${ADMIN_CLIENT_SECRET}
 
 uaac client update cf --redirect_uri=https://console.${CF_DOMAIN}/pp/v1/auth/sso_login_callback
