@@ -6,7 +6,7 @@ CF=https://api.${CF_DOMAIN}
 UAA=$(curl -k -s $CF | jq -r .links.uaa.href)
 echo "Using UAA Endpoint: ${UAA}"
 
-uaac target ${UAA}
+uaac target ${UAA} --skip-ssl-validation
 uaac token client get admin -s ${ADMIN_CLIENT_SECRET}
 
 uaac client update cf --redirect_uri=https://console.${CF_DOMAIN}/pp/v1/auth/sso_login_callback
