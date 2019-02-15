@@ -11,8 +11,7 @@ import { TableCellSelectComponent } from './table-cell-select/table-cell-select.
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { ITableColumn } from './table.types';
 
-
-const tableColumnSelect = {
+const tableColumnSelect: ITableColumn<any> = {
   columnId: 'select',
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
@@ -20,7 +19,7 @@ const tableColumnSelect = {
   cellFlex: '0 0 60px'
 };
 
-const tableColumnAction = {
+const tableColumnAction: ITableColumn<any> = {
   columnId: 'actions',
   headerCell: () => '',
   cellComponent: TableCellActionsComponent,

@@ -1,16 +1,17 @@
-import { GitSCM, SCMIcon } from './scm';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { GitSCMType } from './scm.service';
 import { Md5 } from 'ts-md5/dist/md5';
-import { GitRepo, GitCommit, GitBranch } from '../../../store/types/git.types';
+
+import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitSCM, SCMIcon } from './scm';
+import { GitSCMType } from './scm.service';
 
 const gitLabAPIUrl = 'https://gitlab.com/api/v4';
 
 export class GitLabSCM implements GitSCM {
 
-  constructor(public httpClient: HttpClient) {}
+  constructor(public httpClient: HttpClient) { }
 
   getType(): GitSCMType {
     return 'gitlab';

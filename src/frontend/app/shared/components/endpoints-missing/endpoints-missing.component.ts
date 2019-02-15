@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith, tap } from 'rxjs/operators';
@@ -11,7 +11,9 @@ import { EndpointsService } from '../../../core/endpoints.service';
   templateUrl: './endpoints-missing.component.html',
   styleUrls: ['./endpoints-missing.component.scss']
 })
-export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
+export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnInit {
+
+  @Input() showToolbarHint = true;
 
   noContent$: Observable<{ firstLine: string; secondLine: { text: string; }; }>;
   snackBarText = {
@@ -21,9 +23,7 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
 
   noneRegisteredText = {
     firstLine: 'There are no registered endpoints',
-    toolbarLink: {
-      text: 'Register an endpoint'
-    },
+    toolbarLink: null,
     secondLine: {
       text: 'Use the Endpoints view to register'
     },
@@ -39,7 +39,13 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
   private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
   constructor(private snackBar: MatSnackBar, public endpointsService: EndpointsService) { }
-
+  ngOnInit() {
+    if (this.showToolbarHint) {
+      this.noneRegisteredText.toolbarLink = {
+        text: 'Register an endpoint'
+      };
+    }
+  }
   ngAfterViewInit() {
     this.noContent$ = observableCombineLatest(
       this.endpointsService.haveRegistered$,

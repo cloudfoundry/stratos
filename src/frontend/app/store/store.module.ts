@@ -29,6 +29,7 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { UsersEffects } from './effects/users.effects';
 import { AppReducersModule } from './reducers.module';
+import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { AppStoreExtensionsModule } from './store.extensions.module';
 
@@ -66,6 +67,7 @@ import { AppStoreExtensionsModule } from './store.extensions.module';
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
+      UserFavoritesEffect
     ])
   ]
 })

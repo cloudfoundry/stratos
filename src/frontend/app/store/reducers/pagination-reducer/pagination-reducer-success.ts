@@ -6,7 +6,7 @@ export function paginationSuccess(state: PaginationEntityState, action): Paginat
   totalResults = totalResults || (response ? response.result.length : state.totalResults);
   totalPages = totalPages || (response ? response.totalPages : state.pageCount);
   const page = apiAction.pageNumber || state.currentPage;
-  const pageResult = result || (response ? response.result : state[page]);
+  const pageResult = result || (response ? response.result : state.ids[page]);
 
   return {
     ...state,

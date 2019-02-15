@@ -35,6 +35,8 @@ import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationData, ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
 import { GitSCMService, GitSCMType } from './../../../../shared/data-services/scm/scm.service';
+import { UserFavorite } from './../../../../store/types/user-favorites.types';
+import { IAppFavMetadata } from '../../../../cf-favourite-types';
 
 
 // Confirmation dialogs
@@ -68,6 +70,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   public appState$: Observable<ApplicationStateData>;
+
+  public favorite$ = this.applicationService.app$.pipe(
+    filter(app => !!app),
+    map(app => new UserFavorite<IAppFavMetadata, APIResource<IApp>>(
+      this.applicationService.cfGuid,
+      'cf',
+      applicationSchemaKey,
+      this.applicationService.appGuid,
+      app.entity
+    ))
+  );
+
+
   isBusyUpdating$: Observable<{ updating: boolean }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);

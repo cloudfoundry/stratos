@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, mergeMap, tap } from 'rxjs/operators';
+import { catchError, mergeMap, tap, debounce, debounceTime } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -41,6 +41,7 @@ import {
 import { EndpointType } from '../../core/extension/extension-types';
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 
 
 @Injectable()
@@ -67,7 +68,7 @@ export class EndpointsEffect {
           [endpointStoreNames.type]: {}
         },
         result: []
-      } as NormalizedResponse;
+      } as NormalizedResponse<EndpointModel>;
 
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];
@@ -122,8 +123,6 @@ export class EndpointsEffect {
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
         action.body,
-      ).pipe(
-        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -144,8 +143,6 @@ export class EndpointsEffect {
         null,
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
-      ).pipe(
-        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -166,8 +163,6 @@ export class EndpointsEffect {
         'delete',
         [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
         action.endpointType
-      ).pipe(
-        tap(() => this.clearEndpointInternalEvents(action.guid))
       );
     }));
 
@@ -206,7 +201,7 @@ export class EndpointsEffect {
     }
     return message;
   }
-  private getEndpointUpdateAction(guid, type, updatingKey) {
+  private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
     return {
       entityKey: endpointStoreNames.type,
       guid,
@@ -245,12 +240,20 @@ export class EndpointsEffect {
         if (actionStrings[0]) {
           actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
         }
+
         if (apiActionType === 'delete') {
           actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+          actions.push(new GetUserFavoritesAction());
         }
+
         if (apiActionType === 'create') {
           actions.push(new GetSystemInfo());
         }
+
+        if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
+          actions.push(this.clearEndpointInternalEvents(apiAction.guid));
+        }
+
         actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
         return actions;
       }
@@ -267,14 +270,12 @@ export class EndpointsEffect {
   }
 
   private clearEndpointInternalEvents(guid: string) {
-    this.store.dispatch(
-      new SendClearEventAction(
-        endpointSchemaKey,
-        guid,
-        {
-          clean: true
-        }
-      )
+    return new SendClearEventAction(
+      endpointSchemaKey,
+      guid,
+      {
+        clean: true
+      }
     );
   }
 }

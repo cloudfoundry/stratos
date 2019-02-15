@@ -1,4 +1,4 @@
-<app-page-header [tabs]="tabLinks">
+<app-page-header [tabs]="tabLinks" [favorite]="favorite$ | async">
   <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
     <button mat-icon-button name="add-org" *ngIf="canAddOrg$ | async" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
