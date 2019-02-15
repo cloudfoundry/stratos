@@ -2,10 +2,12 @@
 
 echo "Configuring UAA for SSO"
 
-CF=https://api.${CF_DOMAIN}
-UAA=$(curl -k -s $CF | jq -r .links.uaa.href)
-echo "Using UAA Endpoint: ${UAA}"
+if [ -z "${UAA_ENDPOINT}" ]; then
+  echo "UAA_ENDPOINT environment variable not set"
+  exit 1
+fi
 
+echo "Using UAA Endpoint: ${UAA_ENDPOINT}"
 uaac target ${UAA} --skip-ssl-validation
 uaac token client get admin -s ${ADMIN_CLIENT_SECRET}
 
