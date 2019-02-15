@@ -35,7 +35,7 @@ export interface PaginationEntityState {
   currentPage: number;
   totalResults: number;
   pageCount: number;
-  ids: { [id: string]: string[] };
+  ids: { [id: number]: string[] };
   params: PaginationParam;
   pageRequests: {
     [pageNumber: string]: ActionState

@@ -1,7 +1,7 @@
 import { CreatePagination } from '../../actions/pagination.actions';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
-import { getDefaultPaginationEntityState } from './pagination.reducer';
 import { PaginationState } from '../../types/pagination.types';
+import { getDefaultPaginationEntityState } from './pagination-reducer.helper';
 
 describe('CreatePaginationActionReducer', () => {
   const entityKey = 'entityKey';
@@ -39,9 +39,9 @@ describe('CreatePaginationActionReducer', () => {
     const paginationKey = 'newPaginationKey';
     const ids = {
       7: [
-        1,
-        435,
-        6546456
+        '1',
+        '435',
+        '6546456'
       ]
     };
     const pageRequests = {
