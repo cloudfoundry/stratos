@@ -1,0 +1,5 @@
+<mat-form-field>
+  <mat-select placeholder="Select" (selectionChange)="selectionChange($event)" [value]="initialSelection">
+    <mat-option *ngFor="let option of options" [value]="option.key">{{option.label}}</mat-option>
+  </mat-select>
+</mat-form-field>

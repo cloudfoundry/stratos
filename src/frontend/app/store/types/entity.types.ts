@@ -36,6 +36,7 @@ import {
   spaceSchemaKey,
   stackSchemaKey,
   userFavoritesSchemaKey,
+  usesProvidedServiceInstance,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -43,7 +44,7 @@ import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
 import { GitBranch, GitCommit } from './git.types';
 import { SystemInfo } from './system.types';
-import { UserFavorite, IFavoriteMetadata } from './user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 import { CfUser } from './user.types';
 
 export interface IRequestDataState extends IRequestTypeState {
@@ -127,5 +128,6 @@ export const defaultCfEntitiesState = {
   [metricSchemaKey]: {},
   [servicePlanVisibilitySchemaKey]: {},
   [serviceBrokerSchemaKey]: {},
-  [userFavoritesSchemaKey]: {}
+  [userFavoritesSchemaKey]: {},
+  [usesProvidedServiceInstance]: []
 };

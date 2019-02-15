@@ -1,0 +1,39 @@
+<form class="stepper-form" [formGroup]="formGroup">
+  <mat-form-field>
+    <input matInput class="" formControlName="name" placeholder="Name" required>
+    <!-- // TODO: RC can user provided services have same name as non-up -->
+    <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
+      A service instance with this name already exists. Please enter a different one.
+    </mat-error>
+    <mat-error *ngIf="formGroup.controls.name?.hasError('maxlength')">
+      A service instance name cannot exceed 50 characters.
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput formControlName="url" type="url" required placeholder="User Service URL">
+    <mat-error *ngIf="formGroup.controls.url?.hasError('pattern')">Invalid URL</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput class="" formControlName="syslogDrainUrl" placeholder="Syslog Drain Url">
+  </mat-form-field>
+  <mat-form-field class="stepper-form__tags">
+    <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
+      <!-- [selectable]="tagsSelectable" [removable]="tagsRemovable"-->
+      <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" (removed)="removeTag(tag)">
+        {{tag.label}}
+        <!-- *ngIf="tagsRemovable" -->
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <!-- [matChipInputAddOnBlur]="tagsAddOnBlur" -->
+      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        (matChipInputTokenEnd)="addTag($event)" />
+    </mat-chip-list>
+  </mat-form-field>
+  <mat-form-field class="">
+    <textarea matInput formControlName="credentials" placeholder="Credentials" matAutosizeMinRows="2"
+      matAutosizeMaxRows="5"></textarea>
+    <mat-error *ngIf="formGroup.controls.credentials.hasError('notValidJson')">
+      Not valid JSON. Please specify a valid JSON Object // TODO: RC valid key pairs no arrays/nesting
+    </mat-error>
+  </mat-form-field>
+</form>

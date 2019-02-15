@@ -69,6 +69,14 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   bindAppStepperText = 'Bind App (Optional)';
   appId: string;
   public inMarketplaceMode: boolean;
+  public tileSelected: number = null;
+  public tileSelectorConfig = [{
+    key: 0,
+    label: 'Service'
+  }, {
+    key: 1,
+    label: 'User Provided Service'
+  }];
 
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
