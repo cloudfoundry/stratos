@@ -2,6 +2,16 @@
 
 Weekly status updates are published here.
 
+## 15 February 2019
+
+This week:
+
+- 2.3.0 was Released!
+- The user Favourites feature has been reviewed and merged
+- We continue to fix and merge many of the outstanding PRs around User Favourites and Scalability
+- We spent half a day reviewing our next steps to re-structure the front-end code as part of our work towards the next phase of extensibility.
+- We continue to improve the suite of automated deployment tests that run continuosuly
+
 ## 8 February 2019
 
 Release 2.3.0 is all ready to go and we will publish this on Monday.
