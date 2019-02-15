@@ -10,9 +10,16 @@ During the invite process
 
 > Note - The user will not be able to log in without first setting their password, however CF admins, organization managers and space managers will still be able to set roles for the user
 
+### Development SMTP server
+ To run locally, we recommend using [tophfr/mailcatcher](https://hub.docker.com/r/tophfr/mailcatcher/) in place of an actual SMTP server.
+
+ To install mailcatcher via docker, use the following command: `docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher`. Once mailcatcher is installed, continue to follow the instructions below.
+
 ## Set up
 
 There are number of set up steps to execute first.
+
+ 
 
 1) Supply SMTP server details for Jetstream to use to send out verification email. This can be done via the usual environment variable
    approach or in the dev world in the config.properties file. The config settings, with example values, are as follows
@@ -25,9 +32,6 @@ There are number of set up steps to execute first.
    SMTP_USER=
    TEMPLATE_DIR=./templates
    ```
-
-   > Note - In the dev world use [tophfr/mailcatcher](https://hub.docker.com/r/tophfr/mailcatcher/) in place of an actual SMTP server
-   > (`docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher` will bring up image, access the UI via `http://localhost:1080` and use the `config.properties` from above)
 
 2) Update the default email templates
 
