@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -149,18 +150,45 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Repository) (*interfaces.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
-	consoleConfig := new(interfaces.ConsoleConfig)
-
-	consoleConfig.ConsoleClient = p.Env().MustString("CONSOLE_CLIENT")
-	// Special case, mostly this is blank, so assume its blank
-	// CHECK: Can we handle this better?
-	consoleConfig.ConsoleClientSecret = p.Env().String("CONSOLE_CLIENT_SECRET", "")
-	consoleConfig.ConsoleAdminScope = p.Env().MustString("CONSOLE_ADMIN_SCOPE")
-	consoleConfig.SkipSSLValidation = p.Env().MustBool("SKIP_SSL_VALIDATION")
-
 	var err error
-	if consoleConfig.UAAEndpoint, err = url.Parse(p.Env().MustString("UAA_ENDPOINT")); err != nil {
+
+	consoleConfig := new(interfaces.ConsoleConfig)
+	uaaEndpoint, found := p.Env().Lookup("UAA_ENDPOINT")
+	if !found {
+		return consoleConfig, errors.New("UAA_Endpoint not found")
+	}
+
+	consoleClient, found := p.Env().Lookup("CONSOLE_CLIENT")
+	if !found {
+		return consoleConfig, errors.New("CONSOLE_CLIENT not found")
+	}
+
+	consoleClientSecret, found := p.Env().Lookup("CONSOLE_CLIENT_SECRET")
+	if err != nil {
+		// Special case, mostly this is blank, so assume its blank
+		consoleClientSecret = ""
+	}
+
+	consoleAdminScope, found := p.Env().Lookup("CONSOLE_ADMIN_SCOPE")
+	if !found {
+		return consoleConfig, errors.New("CONSOLE_ADMIN_SCOPE not found")
+	}
+
+	skipSslValidation, found := p.Env().Lookup("SKIP_SSL_VALIDATION")
+	if !found {
+		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
+	}
+
+	if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
+	}
+
+	consoleConfig.ConsoleAdminScope = consoleAdminScope
+	consoleConfig.ConsoleClient = consoleClient
+	consoleConfig.ConsoleClientSecret = consoleClientSecret
+	consoleConfig.SkipSSLValidation, err = strconv.ParseBool(skipSslValidation)
+	if err != nil {
+		return consoleConfig, fmt.Errorf("Invalid value for Skip SSL Validation property %v", err)
 	}
 
 	err = p.SaveConsoleConfig(consoleConfig, consoleRepo)

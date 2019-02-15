@@ -166,6 +166,12 @@ func (n notFoundErr) Error() string {
 
 // NewConfigFileLookup - Load the configuration values in the specified config file if it exists
 func NewConfigFileLookup(path string) env.Lookup {
+
+	// Check if the config file exists
+	if _, err := os.Stat(path); err != nil {
+		return env.NoopLookup
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
 		log.Warn("Error reading configuration file, ignoring this file: ", err)
