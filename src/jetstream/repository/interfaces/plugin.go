@@ -1,5 +1,9 @@
 package interfaces
 
+import (
+	"github.com/govau/cf-common/env"
+)
+
 // StratosPlugin is the interface for a Jetstream plugin
 type StratosPlugin interface {
 	Init() error
@@ -9,7 +13,7 @@ type StratosPlugin interface {
 }
 
 // JetstreamConfigInit is the function signature for the config plugin init function
-type JetstreamConfigInit func(*PortalConfig)
+type JetstreamConfigInit func(*env.VarSet, *PortalConfig)
 
 // JetstreamConfigPlugins is the array of config plugins
 var JetstreamConfigPlugins []JetstreamConfigInit

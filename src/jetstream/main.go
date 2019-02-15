@@ -23,7 +23,9 @@ import (
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
+	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
@@ -74,6 +76,32 @@ func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 	log.Info("Graceful shut down complete")
 }
 
+// getEnvironmentLookup return a search path for configuration settings
+func getEnvironmentLookup() *env.VarSet {
+	// Make environment lookup
+	envLookup := env.NewVarSet()
+
+	// Environment variables directly set trump all others
+	envLookup.AppendSource(os.LookupEnv)
+
+	// If running in CloudFoundry, fallback to a user provided service (if set)
+	cfApp, err := cfenv.Current()
+	if err == nil {
+		envLookup.AppendSource(env.NewLookupFromUPS(cfApp, os.Getenv("CF_UPS_NAME")))
+	}
+
+	// Fallback to a "config.properties" files in our directory
+	envLookup.AppendSource(config.NewConfigFileLookup("./config.properties"))
+
+	// Fall back to "default.config.properties" in our directory
+	envLookup.AppendSource(config.NewConfigFileLookup("./default.config.properties"))
+
+	// Fallback to individual files in the "/etc/secrets" directory
+	envLookup.AppendSource(config.NewSecretsDirLookup("/etc/secrets"))
+
+	return envLookup
+}
+
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 	log.SetOutput(os.Stdout)
@@ -87,15 +115,18 @@ func main() {
 	// Register time.Time in gob
 	gob.Register(time.Time{})
 
+	// Create common method for looking up config
+	envLookup := getEnvironmentLookup()
+
 	// Check to see if we are running as the database migrator
-	if migrateDatabase() {
+	if migrateDatabase(envLookup) {
 		// End execution
 		return
 	}
 
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig
-	portalConfig, err := loadPortalConfig(portalConfig)
+	portalConfig, err := loadPortalConfig(portalConfig, envLookup)
 	if err != nil {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
@@ -106,11 +137,11 @@ func main() {
 	}
 
 	log.Info("Configuration loaded.")
-	isUpgrading := isConsoleUpgrading()
+	isUpgrading := isConsoleUpgrading(envLookup)
 
 	if isUpgrading {
 		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
+		start(portalConfig, &portalProxy{env: envLookup}, &setupMiddleware{}, true)
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
@@ -129,7 +160,7 @@ func main() {
 
 	// Load database configuration
 	var dc datastore.DatabaseConfig
-	dc, err = loadDatabaseConfig(dc)
+	dc, err = loadDatabaseConfig(dc, envLookup)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -143,7 +174,7 @@ func main() {
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = initConnPool(dc)
+	databaseConnectionPool, err = initConnPool(dc, envLookup)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -164,7 +195,7 @@ func main() {
 	}
 
 	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
-		configPlugin(&portalConfig)
+		configPlugin(envLookup, &portalConfig)
 	}
 
 	if portalConfig.SessionStoreSecret == defaultSessionSecret {
@@ -176,7 +207,7 @@ func main() {
 	}
 
 	// Initialize session store for Gorilla sessions
-	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
+	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry, envLookup)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -195,7 +226,7 @@ func main() {
 	log.Info("Session store initialized.")
 
 	// Setup the global interface for the proxy
-	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions)
+	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
@@ -285,7 +316,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 
 func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
 	// For SSO, override the value loaded from the config file, so that this is what we use
-	if !config.IsSet("SSO_LOGIN") {
+	if !portalProxy.Env().IsSet("SSO_LOGIN") {
 		portalProxy.Config.SSOLogin = configuration.UseSSO
 	}
 }
@@ -335,11 +366,11 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 	return key, nil
 }
 
-func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
+func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	log.Debug("initConnPool")
 
 	// initialize the database connection pool
-	pool, err := datastore.GetConnection(dc)
+	pool, err := datastore.GetConnection(dc, env)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +401,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, *sessions.Options, error) {
+func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
@@ -422,16 +453,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	return sessionStore, sessionStore.Options, err
 }
 
-func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, error) {
+func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	// Load config.properties if it exists, otherwise look for default.config.properties
-	err := config.LoadConfigFile("./config.properties")
-	if os.IsNotExist(err) {
-		config.LoadConfigFile("./default.config.properties")
-	}
-
-	if err := config.Load(&pc); err != nil {
+	if err := config.Load(&pc, env.Lookup); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
 	}
 
@@ -448,17 +473,17 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	return pc, nil
 }
 
-func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
+func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
 
-	parsedDBConfig, err := datastore.ParseCFEnvs(&dc)
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dc, env)
 	if err != nil {
 		return dc, errors.New("Could not parse Cloud Foundry Services environment")
 	}
 
 	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
-	} else if err := config.Load(&dc); err != nil {
+	} else if err := config.Load(&dc, env.Lookup); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
@@ -508,7 +533,7 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options) *portalProxy {
+func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
 	log.Debug("newPortalProxy")
 
 	// Generate cookie name - avoids issues if the cookie domain is changed
@@ -531,6 +556,7 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 		AuthProviders:          make(map[string]interfaces.AuthProvider),
+		env:                    env,
 	}
 
 	// Initialize built-in auth providers
@@ -615,14 +641,14 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	if !isUpgrade {
 		e.Use(errorLoggingMiddleware)
 	}
-	e.Use(retryAfterUpgradeMiddleware)
+	e.Use(bindToEnv(retryAfterUpgradeMiddleware, p.Env()))
 
 	if !isUpgrade {
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
 	if isUpgrade {
-		go stopEchoWhenUpgraded(e)
+		go stopEchoWhenUpgraded(e, p.Env())
 	}
 
 	var engineErr error
@@ -706,7 +732,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.EchoMiddleware)
 	}
 
-	staticDir, staticDirErr := getStaticFiles()
+	staticDir, staticDirErr := getStaticFiles(p.Env().String("UI_PATH", "./ui"))
 
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
@@ -869,13 +895,7 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 	}
 }
 
-func getStaticFiles() (string, error) {
-
-	uiFolder, _ := config.GetValue("UI_PATH")
-	if len(uiFolder) == 0 {
-		uiFolder = "./ui"
-	}
-
+func getStaticFiles(uiFolder string) (string, error) {
 	dir, err := filepath.Abs(uiFolder)
 	if err == nil {
 		// Check if folder exists
@@ -887,13 +907,13 @@ func getStaticFiles() (string, error) {
 	return "", errors.New("UI folder not found")
 }
 
-func isConsoleUpgrading() bool {
+func isConsoleUpgrading(env *env.VarSet) bool {
 
-	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
-	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+	upgradeVolume, noUpgradeVolumeOK := env.Lookup(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameOK := env.Lookup(UpgradeLockFileName)
 
 	// If any of those properties are not set, consider Console is running in a non-upgradeable environment
-	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+	if !noUpgradeVolumeOK || !noUpgradeLockFileNameOK {
 		return false
 	}
 
@@ -908,8 +928,8 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *echo.Echo) {
-	for isConsoleUpgrading() {
+func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
+	for isConsoleUpgrading(env) {
 		time.Sleep(1 * time.Second)
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
