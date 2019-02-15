@@ -264,7 +264,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesGlobalListComponent,
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
-
+    MultilineTitleComponent
   ],
   exports: [
     FormsModule,
@@ -362,7 +362,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     StackedInputActionsComponent,
     StackedInputActionComponent,
     FavoritesMetaCardComponent,
-    FavoritesGlobalListComponent
+    FavoritesGlobalListComponent,
+    MultilineTitleComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
