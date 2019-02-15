@@ -31,11 +31,11 @@ export interface PaginationClientPagination {
   totalResults: number;
 }
 
-export class PaginationEntityState {
-  currentPage = 0;
-  totalResults = 0;
-  pageCount = 0;
-  ids = {};
+export interface PaginationEntityState {
+  currentPage: number;
+  totalResults: number;
+  pageCount: number;
+  ids: { [id: string]: string[] };
   params: PaginationParam;
   pageRequests: {
     [pageNumber: string]: ActionState
