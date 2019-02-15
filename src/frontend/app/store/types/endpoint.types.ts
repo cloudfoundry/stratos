@@ -4,6 +4,7 @@ import { MetricsAPITargets } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 
+export const endpointListKey = 'endpoint-list';
 export interface INewlyConnectedEndpointInfo {
   account: string;
   admin: boolean;

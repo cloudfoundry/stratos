@@ -243,6 +243,12 @@ func main() {
 	log.Info("Unable to start Stratos JetStream backend")
 
 }
+
+// GetDatabaseConnection makes db connection available to plugins
+func (portalProxy *portalProxy) GetDatabaseConnection() *sql.DB {
+	return portalProxy.DatabaseConnectionPool
+}
+
 func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {
 
 	addSetupMiddleware := new(setupMiddleware)

@@ -5,7 +5,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { MomentModule } from 'ngx-moment';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
@@ -74,6 +73,9 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
+import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
+import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
@@ -148,6 +150,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
+
 @NgModule({
   imports: [
     CommonModule,
@@ -159,7 +162,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CdkTableModule,
     NgxChartsModule,
     MaterialDesignFrameworkModule,
-    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -257,9 +259,12 @@ import { UserPermissionDirective } from './user-permission.directive';
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
-    MultilineTitleComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
+    FavoritesGlobalListComponent,
+    FavoritesMetaCardComponent,
+    FavoritesEntityListComponent,
+
   ],
   exports: [
     FormsModule,
@@ -356,11 +361,13 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
+    FavoritesMetaCardComponent,
+    FavoritesGlobalListComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
-    NoServicePlansComponent
+    NoServicePlansComponent,
   ],
   providers: [
     ListConfig,
@@ -373,6 +380,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    MetricsRangeSelectorService,
     GitSCMService,
     MetricsRangeSelectorService
   ]

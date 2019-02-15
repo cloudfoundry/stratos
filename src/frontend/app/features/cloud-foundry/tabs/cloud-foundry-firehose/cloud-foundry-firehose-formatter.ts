@@ -2,11 +2,10 @@
  * Formats log messages from the Cloud Foundry firehose
  */
 
-import { AnsiColorizer} from '../../../../shared/components/log-viewer/ansi-colorizer';
+import { AnsiColorizer } from '../../../../shared/components/log-viewer/ansi-colorizer';
 import { LoggerService } from '../../../../core/logger.service';
 import { UtilsService } from '../../../../core/utils.service';
 import * as moment from 'moment';
-import { Injectable } from '@angular/core';
 import { HTTP_METHODS, FireHoseItem } from './cloud-foundry-firehose.types';
 
 /* eslint-disable no-control-regex */
@@ -29,7 +28,7 @@ export class CloudFoundryFirehoseFormatter {
 
   private colorizer = new AnsiColorizer();
 
-  constructor(private logService: LoggerService, private utils: UtilsService) {}
+  constructor(private logService: LoggerService, private utils: UtilsService) { }
 
   // Enable or disable all filters
   public showAll(all: boolean) {

@@ -3,13 +3,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { IServicePlan } from '../../../../../core/cf-api-svc.types';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { getServicePlanName } from '../../../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../list-table/table.types';
 import { defaultPaginationPageSizeOptionsTable, IListConfig, ListViewTypes } from '../../list.component.types';

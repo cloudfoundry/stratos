@@ -29,19 +29,21 @@ fi
 
 echo "Running Stratos All-in-one"
 
+CF=https://api.${CF_DOMAIN}
+UAA=$(curl -k -s $CF | jq -r .links.uaa.href)
+
+echo "Using UAA Endpoint: ${UAA}"
+
 # Run the all-in-one Stratos
 # Configure env to use the UAA provided by PCF dev
 CONTAINER_ID=$(docker run \
 -d \
 -p 5443:443 \
 -e CONSOLE_CLIENT='cf' \
--e UAA_ENDPOINT='https://login.local.pcfdev.io' \
+-e UAA_ENDPOINT="${UAA}" \
 -e SKIP_SSL_VALIDATION='true' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
 $IMAGE)
-
-# Get the E2E config
-curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 
 # Need node modules to run the tests
 rm -rf node_modules

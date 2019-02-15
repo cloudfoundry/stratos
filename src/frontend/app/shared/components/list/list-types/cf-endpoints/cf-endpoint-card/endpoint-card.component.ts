@@ -5,6 +5,8 @@ import { getEndpointTypes, getFullEndpointApiUrl } from '../../../../../../featu
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../../shared.types';
 import { CardCell } from '../../../list.types';
+import { getFavoriteFromCfEntity, getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
+import { UserFavoriteEndpoint } from '../../../../../../store/types/user-favorites.types';
 
 
 @Component({
@@ -19,13 +21,15 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public status$ = new ReplaySubject<CardStatus>();
 
   @Input()
-  row: EndpointModel;
+  public row: EndpointModel;
+  public favorite: UserFavoriteEndpoint;
 
   constructor() {
     super();
   }
 
   ngOnInit() {
+    this.favorite = getFavoriteFromEndpointEntity(this.row);
     this.status$.next(this.mapStatus(this.row));
   }
 

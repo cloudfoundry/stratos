@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 
@@ -58,6 +59,8 @@ type PortalProxy interface {
 	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 
+	// Database Connection
+	GetDatabaseConnection() *sql.DB
 	AddAuthProvider(name string, provider AuthProvider)
 	GetAuthProvider(name string) AuthProvider
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)

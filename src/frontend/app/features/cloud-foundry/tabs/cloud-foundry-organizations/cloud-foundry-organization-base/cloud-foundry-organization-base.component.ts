@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
+import { IOrgFavMetadata } from '../../../../../cf-favourite-types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import {
   getActionsFromExtensions,
@@ -11,10 +12,12 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../core/extension/extension-service';
+import { getFavoriteFromCfEntity } from '../../../../../core/user-favorite-helpers';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { UserFavorite } from '../../../../../store/types/user-favorites.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -60,18 +63,30 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
+  public favorite$: Observable<UserFavorite<IOrgFavMetadata>>;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
   ) {
     this.schema = entityFactory(organizationSchemaKey);
-
+    this.favorite$ = cfOrgService.org$.pipe(
+      first(),
+      map(org => getFavoriteFromCfEntity(org.entity, organizationSchemaKey))
+    );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
       filter(name => !!name),
       first()
     );
-    this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.getBreadcrumbs();
+
+    // Add any tabs from extensions
+    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
+  }
+
+  private getBreadcrumbs() {
+    return this.cfEndpointService.endpoint$.pipe(
       map(endpoint => ([
         {
           breadcrumbs: [
@@ -84,9 +99,5 @@ export class CloudFoundryOrganizationBaseComponent {
       ])),
       first()
     );
-
-    // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
   }
-
 }

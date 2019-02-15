@@ -8,10 +8,9 @@ import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
 import { ToggleHeaderEvent } from '../../../../store/actions/dashboard-actions';
 import { AppState } from '../../../../store/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
-import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { EndpointModel } from '../../../../store/types/endpoint.types';
+import { EndpointModel, endpointListKey } from '../../../../store/types/endpoint.types';
 
 
 @Component({
@@ -42,7 +41,6 @@ export class PageHeaderEventsComponent implements OnInit {
 
   constructor(
     private internalEventMonitorFactory: InternalEventMonitorFactory,
-    public cloudFoundryService: CloudFoundryService,
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>
   ) {
@@ -62,7 +60,7 @@ export class PageHeaderEventsComponent implements OnInit {
     }
     if (this.endpointIds$) {
       const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store, CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)
+        this.store, endpointListKey, entityFactory(endpointSchemaKey)
       );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
       this.errorMessage$ = combineLatest(

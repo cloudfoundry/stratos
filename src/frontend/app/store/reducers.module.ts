@@ -1,5 +1,6 @@
+import { TruncatePipe } from './../core/truncate.pipe';
 import { NgModule } from '@angular/core';
-import { StoreModule, ActionReducerMap } from '@ngrx/store';
+import { StoreModule, ActionReducerMap, ActionReducer } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
@@ -20,6 +21,8 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
+import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
+import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 
 export function logger(reducer) {
   // default, no options
@@ -43,15 +46,18 @@ export const appReducers = {
   manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
+  userFavoritesGroups: userFavoriteGroupsReducer,
+  recentlyVisited: recentlyVisitedReducer
 } as ActionReducerMap<{}>;
 
-let metaReducers = [];
+const metaReducers = [];
 if (!environment.production) {
-  metaReducers = [storeFreeze];
+  metaReducers.push(storeFreeze);
   if (environment.logEnableConsoleActions) {
     metaReducers.push(logger);
   }
 }
+
 const store = StoreModule.forRoot(
   appReducers,
   {

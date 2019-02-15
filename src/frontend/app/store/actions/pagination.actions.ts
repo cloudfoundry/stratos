@@ -17,6 +17,7 @@ export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
+export const REMOVE_ID_FROM_PAGINATION = '[Pagination] Remove id from pagination';
 export const UPDATE_MAXED_STATE = '[Pagination] Update maxed state';
 
 export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
