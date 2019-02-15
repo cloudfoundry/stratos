@@ -1,7 +1,7 @@
 # Associate a Cloud Foundry database service
 
 As described in the standard `cf push` instructions [here](../README.md) the console when deployed via `cf push`
- does not contain any way to persist date over application restarts and db entries such as registered endpoints
+ does not contain any way to persist data over application restarts and db entries such as registered endpoints
  and user tokens are lost. To resolve this a Cloud Foundry db service can be bound to the console. Run through 
  the steps below to implement.
 

@@ -125,9 +125,9 @@ export class StartRequestAction extends RequestAction {
   }
 }
 
-export class WrapperRequestActionSuccess extends RequestSuccessAction implements ISuccessRequestAction {
+export class WrapperRequestActionSuccess<T = any> extends RequestSuccessAction implements ISuccessRequestAction {
   constructor(
-    public response: NormalizedResponse,
+    public response: NormalizedResponse<T>,
     public apiAction: IRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public totalResults?: number,

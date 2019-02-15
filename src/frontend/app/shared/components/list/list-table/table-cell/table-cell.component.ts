@@ -28,8 +28,6 @@ import {
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
-import { TableCellRouteComponent } from '../../list-types/cf-routes/table-cell-route/table-cell-route.component';
-import { TableCellTCPRouteComponent } from '../../list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import {
   TableCellEditVariableComponent,
 } from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
@@ -56,6 +54,8 @@ import {
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../../list-types/cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+import { TableCellRouteComponent } from '../../list-types/cf-routes/table-cell-route/table-cell-route.component';
+import { TableCellTCPRouteComponent } from '../../list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
@@ -109,6 +109,7 @@ import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-c
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
+import { TableCellFavoriteComponent } from '../table-cell-favorite/table-cell-favorite.component';
 import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
 import {
   TableCellRequestMonitorIconComponent,
@@ -162,7 +163,8 @@ export const listTableCells = [
   TableCellEndpointIsAdminComponent,
   TableCellAServicePlanPublicComponent,
   TableCellAServicePlanPriceComponent,
-  TableCellAServicePlanExtrasComponent
+  TableCellAServicePlanExtrasComponent,
+  TableCellFavoriteComponent
 ];
 
 @Component({

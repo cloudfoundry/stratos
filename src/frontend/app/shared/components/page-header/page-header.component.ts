@@ -1,3 +1,4 @@
+import { UserFavorite, IFavoriteMetadata } from './../../../store/types/user-favorites.types';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -10,6 +11,8 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { AddRecentlyVisitedEntityAction } from '../../../store/actions/recently-visited.actions';
+import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-page-header',
@@ -20,6 +23,7 @@ export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
+  public _favorite: UserFavorite<IFavoriteMetadata>;
 
   @Input() hideSideNavButton = false;
 
@@ -32,6 +36,34 @@ export class PageHeaderComponent {
   tabs: ISubHeaderTabs[];
 
   @Input() showUnderFlow = false;
+
+  @Input() showHistory = true;
+
+  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+    if (favorite && (!this._favorite || (favorite.guid !== this._favorite.guid))) {
+      this._favorite = favorite;
+      const mapperFunction = favoritesConfigMapper.getMapperFunction(favorite);
+      const prettyType = favoritesConfigMapper.getPrettyTypeName(favorite);
+      const prettyEndpointType = favoritesConfigMapper.getPrettyTypeName({
+        endpointType: favorite.endpointType,
+        entityType: 'endpoint'
+      });
+      if (mapperFunction) {
+        const { name, routerLink } = mapperFunction(favorite.metadata);
+        this.store.dispatch(new AddRecentlyVisitedEntityAction({
+          guid: favorite.guid,
+          entityType: favorite.entityType,
+          endpointType: favorite.endpointType,
+          entityId: favorite.entityId,
+          name,
+          routerLink,
+          prettyType,
+          endpointId: favorite.endpointId,
+          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType
+        }));
+      }
+    }
+  }
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;

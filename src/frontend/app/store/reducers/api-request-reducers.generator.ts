@@ -25,6 +25,7 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   userProfileSchemaKey,
+  userFavoritesSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -40,6 +41,9 @@ import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
 import { applicationAddRemoveReducer } from './application-add-remove-reducer';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
+import { IRequestDataState, IRequestState } from '../types/entity.types';
+import { Action } from '@ngrx/store';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -109,13 +113,14 @@ const entities = [
   userProfileSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceBrokerSchemaKey,
+  userFavoritesSchemaKey
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {
   entities.push(schemaKey);
 }
 
-export function requestReducer(state, action) {
+export function requestReducer(state: IRequestState, action: Action) {
   const baseRequestReducer = requestReducerFactory(entities, requestActions);
   const extraReducers = {
     [appStatsSchemaKey]: [appStatsReducer]
@@ -123,7 +128,7 @@ export function requestReducer(state, action) {
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
-export function requestDataReducer(state, action) {
+export function requestDataReducer(state: IRequestDataState, action: Action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
@@ -145,6 +150,10 @@ export function requestDataReducer(state, action) {
       updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)
+    ],
+    [userFavoritesSchemaKey]: [
+      addOrUpdateUserFavoriteMetadataReducer,
+      deleteUserFavoriteMetadataReducer
     ]
   };
 

@@ -1,4 +1,4 @@
-<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$" [entityConfig]="entityConfig">
+<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$" [entityConfig]="entityConfig" [favorite]="favorite" [statusIcon]="false">
   <app-meta-card-title>
     <app-multiline-title>{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>
@@ -18,7 +18,8 @@
   <app-meta-card-item *ngIf="multipleConnectedEndpoints$ | async; else singleEndpoint">
     <app-meta-card-key>CF/Org/Space</app-meta-card-key>
     <app-meta-card-value>
-      {{endpointName$ | async }}/{{ row.entity.space.entity.organization.entity.name }}/{{ row.entity.space.entity.name }}
+      {{endpointName$ | async }}/{{ row.entity.space.entity.organization.entity.name }}/{{ row.entity.space.entity.name
+      }}
     </app-meta-card-value>
   </app-meta-card-item>
   <ng-template #singleEndpoint>

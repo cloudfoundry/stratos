@@ -4,6 +4,7 @@ import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { EndpointType } from '../../core/extension/extension-types';
 
+export const endpointListKey = 'endpoint-list';
 export interface INewlyConnectedEndpointInfo {
   account: string;
   admin: boolean;

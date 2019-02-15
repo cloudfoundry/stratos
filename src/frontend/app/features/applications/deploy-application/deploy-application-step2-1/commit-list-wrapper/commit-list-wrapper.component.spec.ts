@@ -5,9 +5,9 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
-import { HttpModule, Http, ConnectionBackend } from '@angular/http';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../core/github.helpers';
-import { MockBackend } from '@angular/http/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;
@@ -21,16 +21,12 @@ describe('CommitListWrapperComponent', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
-        HttpModule
+        HttpClientModule,
+        HttpClientTestingModule
       ],
       providers: [
         DatePipe,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        Http,
-        {
-          provide: ConnectionBackend,
-          useClass: MockBackend
-        }
       ]
     })
       .compileComponents();

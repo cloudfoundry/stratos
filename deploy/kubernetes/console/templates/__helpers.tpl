@@ -16,20 +16,30 @@ This will do the following:
 4. Check for new Console External IPS
 */}}
 {{- define "service.externalIPs" -}}
-{{- if .Values.kube.external_ip -}}
+{{- if .Values.kube.external_ip }}
+  externalIPs:
 {{- printf "\n - %s" .Values.kube.external_ip | indent 3 -}}
-{{- else if .Values.console.externalIP -}}
+{{- printf "\n" -}}
+{{- else if .Values.console.externalIP }}
+  externalIPs:
 {{- printf "\n - %s" .Values.console.externalIP | indent 3 -}}
-{{- else if .Values.kube.external_ips -}}
+{{- printf "\n" -}}
+{{- else if .Values.kube.external_ips }}
+  externalIPs:
 {{- range .Values.kube.external_ips -}}
-{{ printf "\n- %s" . | indent 4 -}}
+{{- printf "\n- %s" . | indent 4 -}}
 {{- end -}}
-{{- else if .Values.console.service.externalIPs -}}
+{{- printf "\n" -}}
+{{- else if .Values.console.service -}}
+{{- if .Values.console.service.externalIPs }}
+  externalIPs:
 {{- range .Values.console.service.externalIPs -}}
-{{ printf "\n- %s" . | indent 4 -}}
+{{ printf "\n- %s" . | indent 4 }}
+{{- end -}}
+{{- printf "\n" -}}
 {{- end -}}
 {{- end -}}
-{{- end -}}
+{{ end }}
 
 
 {{/*
@@ -51,7 +61,11 @@ Service type:
 {{- if or .Values.useLb .Values.services.loadbalanced -}}
 LoadBalancer
 {{- else -}}
-{{- printf "%s" .Values.console.service.type -}}
+{{- if .Values.console.service -}}
+{{- default "ClusterIP" .Values.console.service.type -}}
+{{- else -}}
+ClusterIP
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -63,6 +77,10 @@ Service port:
 {{- if and .Values.kube.external_ips .Values.kube.external_console_https_port -}}
 {{ printf "%v" .Values.kube.external_console_https_port }}
 {{- else -}}
-{{ .Values.console.service.servicePort }}
+{{- if .Values.console.service -}}
+{{ default 443 .Values.console.service.servicePort}}
+{{- else -}}
+443
+{{- end -}}
 {{- end -}}
 {{- end -}}

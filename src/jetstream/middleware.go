@@ -7,12 +7,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gorilla/context"
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -74,11 +72,24 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// Don't log an error if we are verifying the session, as a failure is not an error
-		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
+		isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
 		if isVerify {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
 		}
+
+		// Clear any session cookie
+		cookie := new(http.Cookie)
+		cookie.Name = p.SessionCookieName
+		cookie.Value = ""
+		cookie.Expires = time.Now().Add(-24 * time.Hour)
+		cookie.Domain = p.SessionStoreOptions.Domain
+		cookie.HttpOnly = p.SessionStoreOptions.HttpOnly
+		cookie.Secure = p.SessionStoreOptions.Secure
+		cookie.Path = p.SessionStoreOptions.Path
+		cookie.MaxAge = 0
+		c.SetCookie(cookie)
+
 		return handleSessionError(p.Config, c, err, isVerify, "User session could not be found")
 	}
 }
@@ -89,15 +100,15 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		log.Debug("xsrfMiddleware")
 
 		// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
-		if c.Request().Method() == "GET" || c.Request().Method() == "HEAD" {
+		if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
 			return h(c)
 		}
 		errMsg := "Failed to get stored XSRF token from user session"
 		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
 		if err == nil {
 			// Check the token against the header
-			if c.Request().Header().Contains(XSRFTokenHeader) {
-				requestToken := c.Request().Header().Get(XSRFTokenHeader)
+			requestToken := c.Request().Header.Get(XSRFTokenHeader)
+			if len(requestToken) > 0 {
 				if compareTokens(requestToken, token) {
 					return h(c)
 				}
@@ -125,7 +136,7 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("sessionCleanupMiddleware")
 		err := h(c)
-		req := c.Request().(*standard.Request).Request
+		req := c.Request()
 		context.Clear(req)
 
 		return err
@@ -136,7 +147,7 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("urlCheckMiddleware")
-		requestPath := c.Request().URL().Path()
+		requestPath := c.Request().URL.Path
 		if strings.Contains(requestPath, "../") {
 			err := "Invalid path"
 			return interfaces.NewHTTPShadowError(
@@ -219,50 +230,6 @@ func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
 
-		return h(c)
-	}
-}
-
-func (p *portalProxy) cloudFoundryMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Check that we are on HTTPS - redirect if not
-		if c.Request().Header().Contains("X-Forwarded-Proto") {
-			proto := c.Request().Header().Get("X-Forwarded-Proto")
-			if proto != "https" {
-				redirect := fmt.Sprintf("https://%s%s", c.Request().Host(), c.Request().URI())
-				return c.Redirect(301, redirect)
-			}
-			return h(c)
-		}
-
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"X-Forwarded-Proto not found and is required",
-			"X-Forwarded-Proto not found and is required",
-		)
-	}
-}
-
-// For cloud foundry session affinity
-// Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
-func (p *portalProxy) cloudFoundrySessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Make sure there is a JSESSIONID cookie set to the session ID
-		session, err := p.GetSession(c)
-		if err == nil {
-			// We have a session
-			guid, err := p.GetSessionValue(c, cfSessionCookieName)
-			if err != nil || guid == nil {
-				guid = uuid.NewV4().String()
-				session.Values[cfSessionCookieName] = guid
-				p.SaveSession(c, session)
-			}
-			sessionGUID := fmt.Sprintf("%s", guid)
-			// Set the JSESSIONID coolie for Cloud Foundry session affinity
-			w := c.Response().(*standard.Response).ResponseWriter
-			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
-			http.SetCookie(w, cookie)
-		}
 		return h(c)
 	}
 }
