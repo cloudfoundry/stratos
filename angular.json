@@ -5,7 +5,7 @@
   "projects": {
     "stratos": {
       "root": "",
-      "sourceRoot": "src/frontend",
+      "sourceRoot": "src/frontend/packages",
       "projectType": "application",
       "architect": {
         "build": {
@@ -19,7 +19,7 @@
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "assets": [
               "src/frontend/packages/core/assets",
-              "src/frontend/packages/core/src/favicon.ico"
+              "src/frontend/packages/core/favicon.ico"
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.scss",
@@ -146,8 +146,8 @@
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [
-              "src/frontend/packages/core/src/favicon.ico",
-              "src/frontend/packages/core/src/assets"
+              "src/frontend/packages/core/favicon.ico",
+              "src/frontend/packages/core/assets"
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.css"
