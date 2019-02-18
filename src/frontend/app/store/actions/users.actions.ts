@@ -48,40 +48,16 @@ export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 export const GET_CF_USERS_AS_NON_ADMIN = '[Users] Get cf users by org ';
 export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org success';
 
-const createGetAllUsersPaginationKey = cfGuid => createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-const createGetUsersInitialParams = () => ({
-  page: 1,
-  'results-per-page': 100,
-  'order-direction': 'desc',
-  'order-direction-field': 'username',
-});
-
-export class GetAllUsersAsNonAdmin implements PaginatedAction, EntityInlineParentAction {
-  type = GET_CF_USERS_AS_NON_ADMIN;
-  paginationKey: string;
-  actions: string[] = [];
-  entity = [entityFactory(cfUserSchemaKey)];
-  entityKey = cfUserSchemaKey;
-  populateMissing = false;
-  includeRelations: string[] = createDefaultUserRelations();
-  constructor(
-    public cfGuid: string,
-    public skipValidation = false
-  ) {
-    this.skipValidation = true;
-    this.paginationKey = createGetAllUsersPaginationKey(cfGuid);
-  }
-  initialParams = createGetUsersInitialParams();
-}
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  isGetAllUsersAsAdmin = true;
   paginationKey: string;
   constructor(
     public endpointGuid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
-    this.paginationKey = createGetAllUsersPaginationKey(endpointGuid);
+    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';
@@ -90,8 +66,17 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
   options: RequestOptions;
-  initialParams = createGetUsersInitialParams();
+  initialParams = {
+    page: 1,
+    'results-per-page': 60,
+    'order-direction': 'desc',
+    'order-direction-field': 'username',
+  };
   flattenPagination = true;
+  flattenPaginationMax = 61;
+  static is(action: PaginatedAction): boolean {
+    return !!action['isGetAllUsersAsAdmin'];
+  }
 }
 
 export class GetCFUser extends CFStartAction implements IRequestAction {

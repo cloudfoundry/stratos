@@ -23,7 +23,7 @@
       </app-tile-group>
       <app-tile-group>
         <app-tile>
-          <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{(cfOrgService.allOrgUsers$ | async)?.length}}"></app-card-number-metric>
+          <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{(cfOrgService.usersCount$ | async)}}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric icon="domain" label="Private Domains" value="{{ (cfOrgService.privateDomains$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_private_domains}}"></app-card-number-metric>

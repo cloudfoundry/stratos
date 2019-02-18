@@ -17,7 +17,6 @@ import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 
-
 @Component({
   selector: 'app-manage-users-select',
   templateUrl: './manage-users-select.component.html',

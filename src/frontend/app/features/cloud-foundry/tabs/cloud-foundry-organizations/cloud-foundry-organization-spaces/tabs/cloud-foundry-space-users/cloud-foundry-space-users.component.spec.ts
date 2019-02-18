@@ -8,6 +8,7 @@ import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framewor
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundrySpaceUsersComponent } from './cloud-foundry-space-users.component';
 
 describe('CloudFoundrySpaceUsersComponent', () => {
@@ -16,7 +17,7 @@ describe('CloudFoundrySpaceUsersComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceUsersComponent],
+      declarations: [CloudFoundrySpaceUsersComponent, CfAdminAddUserWarningComponent],
       imports: [...BaseTestModules],
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },

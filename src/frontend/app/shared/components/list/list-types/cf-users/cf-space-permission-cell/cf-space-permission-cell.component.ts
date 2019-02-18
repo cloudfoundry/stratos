@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -13,13 +13,7 @@ import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
-import {
-  CfUser,
-  CfUserRoleParams,
-  IUserPermissionInSpace,
-  SpaceUserRoleNames,
-} from '../../../../../../store/types/user.types';
-import { UserRoleLabels } from '../../../../../../store/types/users-roles.types';
+import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
@@ -44,22 +38,28 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     super(store, confirmDialog, cfUserService);
 
     const spaces$: Observable<APIResource<ISpace>[]> = this.config$.pipe(switchMap(config => config.spaces$));
+    const isOrgLevel$: Observable<boolean> = this.config$.pipe(map(config => config.isOrgLevel));
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),
       this.config$.pipe(switchMap(config => config.org$)),
-      spaces$
+      spaces$,
+      isOrgLevel$
     ).pipe(
-      switchMap(([user, org, spaces]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[]]) => {
-        const permissionList = this.createPermissions(user, spaces && spaces.length ? spaces : null);
+      switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
+        const permissionList = this.createPermissions(user, isOrgLevel, spaces && spaces.length ? spaces : null);
         // If we're showing spaces from multiple orgs prefix the org name to the space name
         return org ? observableOf(this.getChipConfig(permissionList)) : this.prefixOrgName(permissionList);
       })
     );
 
-    this.missingRoles$ = spaces$.pipe(
-      // If we're at the space level (we have the space) we don't need to show the missing warning (at the org level we guarantee to show
-      // all roles for that space)
-      filter(space => !space || space.length !== 1),
+    this.missingRoles$ = isOrgLevel$.pipe(
+      // If we're at the space level (we have the space) we don't need to show the missing warning
+      switchMap(isOrgLevel => isOrgLevel ? this.createMissingRoles(spaces$) : observableOf(null))
+    );
+  }
+
+  private createMissingRoles(spaces$: Observable<APIResource<ISpace>[]>): Observable<boolean> {
+    return spaces$.pipe(
       // Switch to using the user entity
       switchMap(() => this.userEntity),
       map(user => user.missingRoles || { space: [] }),
@@ -99,14 +99,15 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
   }
 
-  private createPermissions(row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
+  private createPermissions(row: APIResource<CfUser>, isOrgLevel = true, spaces?:
+    APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
     const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity, spaces);
     return arrayHelper.flatten<ICellPermissionList<SpaceUserRoleNames>>(
-      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row, spaces))
+      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row, isOrgLevel))
     );
   }
 
-  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>, spaces?: APIResource<ISpace>[]) {
+  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>, isOrgLevel = true) {
     return getSpaceRoles(spacePerms.permissions).map(perm => {
       const updatingKey = RemoveUserRole.generateUpdatingKey(
         perm.key,
@@ -114,7 +115,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       );
       return {
         ...perm,
-        name: !spaces || spaces.length > 1 ? spacePerms.name : '',
+        name: isOrgLevel ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
