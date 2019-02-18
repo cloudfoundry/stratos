@@ -13,9 +13,9 @@
   var replace = require('replace-in-file');
   var execSync = require('child_process').execSync;
 
-  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/packages/core/src/misc/custom/custom.yaml');
-  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
-  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
+  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/custom.yaml');
+  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/index.html');
+  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/packages/core/src/index.html');
   const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
   const GIT_FOLDER = path.resolve(__dirname, '../.git');
   const GIT_METADATA = path.resolve(__dirname, '../.stratos-git-metadata.json');
@@ -74,7 +74,7 @@
       process.exit(1);
     }
 
-    const baseFolder = path.resolve(__dirname, '../src/frontend');
+    const baseFolder = path.resolve(__dirname, '../src/frontend/packages/core');
     const customBaseFolder = path.resolve(__dirname, '../custom-src/frontend');
     doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
     doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
@@ -88,7 +88,8 @@
   };
 
   function doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
+    // This is where we find the default files, if there are no customizations
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
     // Symlink custom files
     Object.keys(customConfig.files).forEach(file => {
       const dest = customConfig.files[file];
@@ -119,8 +120,14 @@
   function doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
     // Symlink custom app folders if they are present
     customConfig.folders.forEach(folder => {
-      var destFolder = path.join(baseFolder, folder);
-      var srcFolder = path.join(customBaseFolder, folder);
+      var parts = folder.split(':')
+      var src = parts[0];
+      var dest = src;
+      if (parts.length > 1) {
+        dest = parts[1];
+      }
+      var destFolder = path.join(baseFolder, dest);
+      var srcFolder = path.join(customBaseFolder, src);
       if (fs.existsSync(destFolder)) {
         fs.unlinkSync(destFolder);
       }
@@ -132,10 +139,13 @@
 
   // Copy the correct custom module to either import the supplied custom module or provide an empty module
   function doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/src/misc/custom');
-    const destFile = path.join(baseFolder, 'app/custom-import.module.ts');
-    const customModuleFile = path.join(baseFolder, 'app/custom/custom.module.ts');
-    const customRoutingModuleFile = path.join(baseFolder, 'app/custom/custom-routing.module.ts');
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
+    console.log(baseFolder);
+    const destFile = path.join(baseFolder, 'src/custom-import.module.ts');
+    const customModuleFile = path.join(baseFolder, 'src/custom/custom.module.ts');
+    const customRoutingModuleFile = path.join(baseFolder, 'src/custom/custom-routing.module.ts');
+
+    console.log(customModuleFile);
 
     // Delete the existing file if it exists
     if (fs.existsSync(destFile)) {
