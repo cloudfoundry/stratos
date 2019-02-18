@@ -13,6 +13,8 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import { sortStringify } from '../../../../core/src/core/utils.service';
+import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
@@ -27,8 +29,6 @@ import {
   QParam,
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { sortStringify } from '../../../../core/src/core/utils.service';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -337,5 +337,33 @@ export function spreadPaginationParams(params: PaginationParam): PaginationParam
       newQ.push({ ...qP });
       return newQ;
     }, []) : null
+  };
+}
+
+export const defaultClientPaginationPageSize = 9;
+
+const defaultPaginationEntityState: PaginationEntityState = {
+  pageCount: 0,
+  currentPage: 1,
+  totalResults: 0,
+  ids: {},
+  pageRequests: {
+  },
+  params: {
+  },
+  clientPagination: {
+    pageSize: defaultClientPaginationPageSize,
+    currentPage: 1,
+    filter: {
+      string: '',
+      items: {}
+    },
+    totalResults: 0
+  }
+};
+
+export function getDefaultPaginationEntityState(): PaginationEntityState {
+  return {
+    ...defaultPaginationEntityState
   };
 }

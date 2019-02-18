@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/src/app-state';
-import { Observable, combineLatest } from 'rxjs';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { goToAppWall } from '../../cf.helpers';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
+
+import { AppState } from '../../../../../../store/src/app-state';
+import { goToAppWall } from '../../cf.helpers';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-summary-tab',
@@ -20,10 +21,10 @@ export class CloudFoundrySummaryTabComponent {
       goToAppWall(store, cfEndpointService.cfGuid);
     };
     this.detailsLoading$ = combineLatest([
+      // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfEndpointService.users$
     ]).pipe(
       map(() => false),
       startWith(true)

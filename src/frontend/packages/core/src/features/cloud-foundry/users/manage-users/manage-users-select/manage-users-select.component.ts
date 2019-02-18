@@ -3,6 +3,10 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
+import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
 import {
   CfSelectUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
@@ -12,11 +16,6 @@ import { EntityMonitorFactory } from '../../../../../shared/monitors/entity-moni
 import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { CfUser } from '../../../../../../../store/src/types/user.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
-
 
 @Component({
   selector: 'app-manage-users-select',

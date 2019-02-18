@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../store/src/app-state';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -27,11 +27,10 @@ export class CloudFoundryOrganizationSummaryComponent {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
+      // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfOrgService.allOrgUsers$,
-      cfOrgService.appCount$
     ]).pipe(
       map(() => false),
       startWith(true)

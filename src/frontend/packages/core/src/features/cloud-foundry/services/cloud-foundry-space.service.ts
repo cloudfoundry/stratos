@@ -3,6 +3,21 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { GetSpace } from '../../../../../store/src/actions/space.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceQuotaSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+} from '../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
 import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
@@ -12,40 +27,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { CfUser, SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../store/src/app-state';
-import {
-  createEntityRelationPaginationKey,
-  createEntityRelationKey
-} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  spaceSchemaKey,
-  applicationSchemaKey,
-  serviceInstancesSchemaKey,
-  spaceQuotaSchemaKey,
-  serviceBindingSchemaKey,
-  routeSchemaKey,
-  entityFactory,
-  spaceWithOrgKey,
-  cfUserSchemaKey
-} from '../../../../../store/src/helpers/entity-factory';
-import { GetSpace, GetAllSpaceUsers } from '../../../../../store/src/actions/space.actions';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { createQuotaDefinition } from './cloud-foundry-organization.service';
-
-const noQuotaDefinition = (orgGuid: string) => ({
-  entity: {
-    memory_limit: -1,
-    app_instance_limit: -1,
-    instance_memory_limit: -1,
-    name: 'None assigned',
-    organization_guid: orgGuid,
-    total_services: -1,
-    total_routes: -1
-  },
-  metadata: null
-});
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -64,8 +46,7 @@ export class CloudFoundrySpaceService {
   appCount$: Observable<number>;
   loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  allSpaceUsers$: Observable<APIResource<CfUser>[]>;
-  usersPaginationKey: string;
+  usersCount$: Observable<number | null>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -79,7 +60,6 @@ export class CloudFoundrySpaceService {
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
 
     this.initialiseObservables();
   }
@@ -103,6 +83,7 @@ export class CloudFoundrySpaceService {
       map(u => getSpaceRolesString(u))
     );
 
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
   }
 
   private initialiseSpaceObservables() {
@@ -116,8 +97,9 @@ export class CloudFoundrySpaceService {
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
-          // We're only interested in fetching space roles via the space request for non-admins. This is the only way to guarantee the roles
-          // are present for all users associated with the space
+          // We're only interested in fetching space roles via the space request for non-admins.
+          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
+          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
           relations.push(
             createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.DEVELOPER),
             createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.MANAGER),
@@ -147,20 +129,6 @@ export class CloudFoundrySpaceService {
         return createQuotaDefinition(this.orgGuid);
       }
     }));
-
-    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
-        return getPaginationObservables({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            this.usersPaginationKey,
-            entityFactory(cfUserSchemaKey)
-          )
-        }).entities$;
-      })
-    );
   }
 
   private initialiseAppObservables() {

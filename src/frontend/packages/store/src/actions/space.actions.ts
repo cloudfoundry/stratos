@@ -1,7 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import {
   applicationSchemaKey,
+  domainSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceInstancesSchemaKey,
@@ -10,7 +12,6 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  domainSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -23,7 +24,6 @@ import { getActions } from './action.helper';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -216,6 +216,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     includeRelations?: string[]) {
     super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
     this.options.url = `spaces/${guid}/user_roles`;
+    this.flattenPaginationMax = 600;
   }
   actions = getActions('Spaces', 'List all user roles');
 }

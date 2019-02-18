@@ -1,10 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
+  CfAdminAddUserWarningComponent,
+} from '../../../../../../../../app/features/cloud-foundry/tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
+import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import {
+  CloudFoundryOrganizationServiceMock,
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationUsersComponent } from './cloud-foundry-organization-users.component';
 
@@ -14,7 +19,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryOrganizationUsersComponent],
+      declarations: [CloudFoundryOrganizationUsersComponent, CfAdminAddUserWarningComponent],
       imports: [...BaseTestModules],
       providers: [
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },

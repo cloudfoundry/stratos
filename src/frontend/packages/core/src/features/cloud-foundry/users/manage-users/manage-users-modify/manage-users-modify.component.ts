@@ -26,6 +26,15 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import { UsersRolesSetOrg } from '../../../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import {
+  selectUsersRolesOrgGuid,
+  selectUsersRolesPicked,
+  selectUsersRolesRoles,
+} from '../../../../../../../store/src/selectors/users-roles.selector';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser, OrgUserRoleNames } from '../../../../../../../store/src/types/user.types';
 import { IOrganization } from '../../../../../core/cf-api.types';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
@@ -39,11 +48,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
-import { CfUser, OrgUserRoleNames } from '../../../../../../../store/src/types/user.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { selectUsersRolesOrgGuid, selectUsersRolesPicked, selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
-import { UsersRolesSetOrg } from '../../../../../../../store/src/actions/users-roles.actions';
+
 /* tslint:enable:max-line-length */
 
 interface Org { metadata: { guid: string }; }

@@ -3,43 +3,42 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
+import { GetAllApplications } from '../../../../../store/src/actions/application.actions';
+import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
+import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
+import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../../../../store/src/actions/organization.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import {
+  cfInfoSchemaKey,
+  domainSchemaKey,
+  endpointSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CfApplicationState } from '../../../../../store/src/types/application.types';
+import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
+import { QParam } from '../../../../../store/src/types/pagination.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { CfUser } from '../../../../../store/src/types/user.types';
-import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
-import { GetAllOrganizations, DeleteOrganization } from '../../../../../store/src/actions/organization.actions';
-import {
-  createEntityRelationPaginationKey,
-  createEntityRelationKey
-} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  endpointSchemaKey,
-  organizationSchemaKey,
-  spaceSchemaKey,
-  domainSchemaKey,
-  quotaDefinitionSchemaKey,
-  privateDomainsSchemaKey,
-  serviceInstancesSchemaKey,
-  routeSchemaKey,
-  entityFactory,
-  cfInfoSchemaKey
-} from '../../../../../store/src/helpers/entity-factory';
-import { AppState } from '../../../../../store/src/app-state';
-import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import {
-  getPaginationObservables,
-  PaginationObservables
-} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { CfApplicationState } from '../../../../../store/src/types/application.types';
-import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
-import { GetAllApplications } from '../../../../../store/src/actions/application.actions';
-import { QParam } from '../../../../../store/src/types/pagination.types';
 import { fetchTotalResults } from '../cf.helpers';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
@@ -62,7 +61,7 @@ export class CloudFoundryEndpointService {
   totalMem$: Observable<number>;
   paginationSubscription: any;
   appsPagObs: PaginationObservables<APIResource<IApp>>;
-  users$: Observable<APIResource<CfUser>[]>;
+  usersCount$: Observable<number | null>;
   orgs$: Observable<APIResource<IOrganization>[]>;
   info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
   cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
@@ -162,21 +161,21 @@ export class CloudFoundryEndpointService {
       )
     }, true).entities$;
 
-    this.users$ = this.cfUserService.getUsers(this.cfGuid);
-
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
-    this.constructAppObservables();
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid);
+
+    this.constructAppObs();
 
     this.fetchDomains();
   }
 
-  constructAppObservables() {
-    const paginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey));
+  constructAppObs() {
+    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey));
     this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
-      paginationMonitor
+      paginationMonitor: appPaginationMonitor
     });
   }
 

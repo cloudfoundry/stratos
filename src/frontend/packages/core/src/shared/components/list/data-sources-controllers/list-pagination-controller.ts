@@ -4,20 +4,20 @@ import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
 
+import { ListFilter, ListPagination, ListSort } from '../../../../../../store/src/actions/list.actions';
+import {
+  AddParams,
+  SetClientFilter,
+  SetClientPage,
+  SetClientPageSize,
+  SetPage,
+} from '../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { defaultClientPaginationPageSize } from '../../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
+import { PaginationClientFilter, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';
-import { ListPagination, ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
-import { PaginationEntityState, PaginationClientFilter } from '../../../../../../store/src/types/pagination.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import {
-  SetClientPage,
-  SetPage,
-  SetClientPageSize,
-  AddParams,
-  SetClientFilter
-} from '../../../../../../store/src/actions/pagination.actions';
-import { defaultClientPaginationPageSize } from '../../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
-import { leaveZone, enterZone } from '../../../../leaveEnterAngularZone';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;

@@ -3,6 +3,14 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
+import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
+import { GetAllUsersAsAdmin } from '../../../../../../../store/src/actions/users.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -20,18 +28,7 @@ import {
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
-import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { CfUser } from '../../../../../../../store/src/types/user.types';
-import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import {
-  userHasRole,
-  userListUserVisibleKey,
-  UserListUsersVisible
-} from './cf-user-list-helpers';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
-import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { userHasRole, UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
 
 const defaultUserHasRoles: (user: CfUser) => boolean = (user: CfUser): boolean => {
   return userHasRole(user, 'organizations') ||
@@ -134,19 +131,28 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     this.assignColumnConfig(org$, space$);
 
-    this.assignMultiConfig();
-
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(cf => // `cf` needed to create the second observable
+      switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space)))
+          cfUserService.createPaginationAction(
+            cf.global.isAdmin,
+            activeRouteCfOrgSpace.cfGuid,
+            activeRouteCfOrgSpace.orgGuid,
+            activeRouteCfOrgSpace.spaceGuid)
         )
       ),
       tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
-        this.initialiseMultiFilter(action);
+        // Only show the filter (show users with/without roles) if the list of users can actually contain users without roles
+        if (GetAllUsersAsAdmin.is(action)) {
+          this.assignMultiConfig();
+          this.initialiseMultiFilter(action);
+        } else {
+          this.multiFilterConfigs = [];
+        }
+
       }),
       map(([cf, action]) => cf && cf.state.initialised)
     );
@@ -211,6 +217,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     };
     this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
       org$: safeOrg$,
+      isOrgLevel: !space$,
       spaces$: safeSpaces$
     };
   }

@@ -3,9 +3,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { GetAllUsersAsAdmin } from '../../../../../../store/src/actions/users.actions';
+import { AppState } from '../../../../../../store/src/app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { GetAllUsersAsAdmin } from '../../../../store/actions/users.actions';
-import { AppState } from '../../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { waitForCFPermissions } from '../../cf.helpers';
 

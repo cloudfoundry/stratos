@@ -3,7 +3,45 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { IApp, IOrganization, ISpace, IAppSummary } from '../../core/cf-api.types';
+import {
+  AppMetadataTypes,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from '../../../../store/src/actions/app-metadata.actions';
+import {
+  GetApplication,
+  UpdateApplication,
+  UpdateExistingApplication,
+} from '../../../../store/src/actions/application.actions';
+import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { AppState } from '../../../../store/src/app-state';
+import {
+  appEnvVarsSchemaKey,
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  routeSchemaKey,
+  serviceBindingSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+  stackSchemaKey,
+} from '../../../../store/src/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
+import {
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectEntity, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import { AppStat } from '../../../../store/src/types/app-metadata.types';
+import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { IApp, IAppSummary, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -11,6 +49,7 @@ import {
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../shared/entity.tokens';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import {
@@ -18,37 +57,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { GetApplication, UpdateExistingApplication, UpdateApplication } from '../../../../store/src/actions/application.actions';
-import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  applicationSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-  stackSchemaKey,
-  serviceBindingSchemaKey,
-  domainSchemaKey,
-  organizationSchemaKey,
-  entityFactory,
-  appSummarySchemaKey,
-  appStatsSchemaKey,
-  spaceWithOrgKey,
-  appEnvVarsSchemaKey
-} from '../../../../store/src/helpers/entity-factory';
-import { EntityInfo, APIResource } from '../../../../store/src/types/api.types';
-import { AppState } from '../../../../store/src/app-state';
-import { GetAppSummaryAction, GetAppStatsAction, AppMetadataTypes } from '../../../../store/src/actions/app-metadata.actions';
-import { AppStat } from '../../../../store/src/types/app-metadata.types';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import {
-  PaginationObservables,
-  getPaginationObservables,
-  getCurrentPageRequestInfo
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetSpace } from '../../../../store/src/actions/space.actions';
-import { selectEntity, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { rootUpdatingKey, ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
+
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -287,7 +296,7 @@ export class ApplicationService {
       refCount());
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.pipe(map(
-      ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
+      ev => !!(getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage])
     ), startWith(false), publishReplay(1), refCount());
 
     this.isFetchingStats$ = this.appStatsFetching$.pipe(map(
@@ -339,3 +348,4 @@ export class ApplicationService {
     return this.store.select(actionState).pipe(filter(item => !item.busy));
   }
 }
+
