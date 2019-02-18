@@ -10,22 +10,41 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage-istanbul-reporter'),
-      require('@angular-devkit/build-angular/plugins/karma')
+      require('karma-spec-reporter'),
+      require('@angular-devkit/build-angular/plugins/karma'),
+      require('../../../../build/karma.test.reporter.js')
     ],
     client: {
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
+      captureConsole: true,
+      jasmine: {
+        random: false
+      }
     },
     coverageIstanbulReporter: {
       dir: require('path').join(__dirname, '../../../../coverage'),
-      reports: ['html', 'lcovonly'],
+      reports: ['html', 'lcovonly', 'json'],
       fixWebpackSourcePaths: true
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['spec', 'kjhtml', 'stratos'],
+    specReporter: {
+      suppressSkipped: true, // skip result of skipped tests
+    },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false
+    browsers: process.env.HEADLESS ? ['StratosChromeHeadless'] : ['Chrome'],
+    customLaunchers: {
+      StratosChromeHeadless: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
+    singleRun: process.env.CI_ENV ? true : false,
+    files: [{
+      pattern: './src/**/*.spec.ts',
+      watched: false
+    }],
   });
 };
