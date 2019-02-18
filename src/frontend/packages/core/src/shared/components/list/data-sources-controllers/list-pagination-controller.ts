@@ -13,7 +13,9 @@ import {
   SetPage,
 } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { defaultClientPaginationPageSize } from '../../../../../../store/src/reducers/pagination-reducer/pagination.reducer';
+import {
+  defaultClientPaginationPageSize,
+} from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationClientFilter, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
