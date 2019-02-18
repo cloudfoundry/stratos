@@ -2,13 +2,11 @@
   margin-bottom: 12px;
   padding: 6px 24px;
 
-  mat-card-content {
+  &__text {
+    padding-right: 5px;
+  }
+  &__content {
     align-items: baseline;
     display: flex;
-    padding-top: 3px;
-
-    & > div {
-      padding-right: 5px;
-    }
   }
 }
