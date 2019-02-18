@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CoreModule } from '../../../../../../core/core.module';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { ListCfRoute } from '../cf-routes-data-source-base';

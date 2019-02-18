@@ -1,33 +1,37 @@
 import {
   Component,
-  Inject,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  ViewContainerRef,
   ComponentFactoryResolver,
   ComponentRef,
-  Type
+  Inject,
+  OnDestroy,
+  OnInit,
+  Type,
+  ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, map, pairwise, startWith, switchMap, distinctUntilChanged, tap } from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
-
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { endpointStoreNames, EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
+import { ConnectEndpoint } from '../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
-import { selectUpdateInfo, selectRequestInfo, selectEntity } from '../../../../../store/src/selectors/api.selectors';
+import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../../store/src/effects/system.effects';
-import { ConnectEndpoint } from '../../../../../store/src/actions/endpoint.actions';
-import { EndpointAuthTypeConfig, IAuthForm, EndpointType, IEndpointAuthComponent } from '../../../core/extension/extension-types';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../core/endpoints.service';
+import {
+  EndpointAuthTypeConfig,
+  EndpointType,
+  IAuthForm,
+  IEndpointAuthComponent,
+} from '../../../core/extension/extension-types';
+import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
 
 
 @Component({
@@ -285,6 +289,8 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.fetchSub.unsubscribe();
     this.connectingSub.unsubscribe();
-    this.authFormComponentRef.destroy();
+    if (this.authFormComponentRef) {
+      this.authFormComponentRef.destroy();
+    }
   }
 }

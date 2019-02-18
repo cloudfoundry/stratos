@@ -1,13 +1,15 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { CommitListWrapperComponent } from './commit-list-wrapper.component';
 import { CommonModule, DatePipe } from '@angular/common';
-import { CoreModule } from '../../../../../core/core.module';
-import { SharedModule } from '../../../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { HttpModule, Http, ConnectionBackend } from '@angular/http';
-import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../core/github.helpers';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ConnectionBackend, Http, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
+
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../../../core/core.module';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/github.helpers';
+import { SharedModule } from '../../../../../shared/shared.module';
+import { CommitListWrapperComponent } from './commit-list-wrapper.component';
 
 describe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;
@@ -21,7 +23,9 @@ describe('CommitListWrapperComponent', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
-        HttpModule
+        HttpModule,
+        HttpClientModule,
+        HttpClientTestingModule
       ],
       providers: [
         DatePipe,
