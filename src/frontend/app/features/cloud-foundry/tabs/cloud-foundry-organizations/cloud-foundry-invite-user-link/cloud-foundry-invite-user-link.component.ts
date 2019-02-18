@@ -44,7 +44,7 @@ export class CloudFoundryInviteUserLinkComponent implements OnInit {
       first(),
       map(canInvite => canInvite ? {
         url: createCfOrgSpaceSteppersUrl(cfGuid, '/users/invite', orgGuid, spaceGuid),
-        text: `You can invite users to this ${spaceGuid ? 'space' : 'organization'} by email`
+        text: `You can invite users to this ${spaceGuid ? 'space' : 'organization'} via email.`
       } : null)
     );
   }
