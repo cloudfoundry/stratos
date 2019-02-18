@@ -13,8 +13,8 @@
         <app-tile>
           <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="(cfEndpointService.users$ | async)?.length">
-          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
+        <app-tile *ngIf="(cfEndpointService.usersCount$ | async)">
+          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{ (cfEndpointService.usersCount$ | async) }}"></app-card-number-metric>
         </app-tile>
         <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="memory" units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>

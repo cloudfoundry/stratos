@@ -9,7 +9,7 @@ export function paginationMaxReached(state: PaginationState, action): Pagination
   }
 
   const { currentlyMaxed: oldCurrentlyMaxed, maxedMode: oldMaxedMode } = state[maxAction.entityKey][maxAction.paginationKey];
-  const newCurrentlyMaxed = maxAction.allEntities >= maxAction.max;
+  const newCurrentlyMaxed = maxAction.allEntities > maxAction.max;
   const newMaxedMode = oldCurrentlyMaxed || newCurrentlyMaxed;
   // If we previously weren't in maxed mode and still aren't then don't continue. Note - Once a list enters maxed mode it cannot go back
   if (!oldMaxedMode && !newMaxedMode) {

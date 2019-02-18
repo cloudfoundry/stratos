@@ -1,12 +1,12 @@
 import { SortDirection } from '@angular/material';
 import { Action } from '@ngrx/store';
+import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer.helper';
 
-import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination.reducer';
 
 export class ListPagination {
-  public totalResults ? = 0;
-  public pageSize ? = defaultClientPaginationPageSize;
-  public pageIndex ? = 0;
+  public totalResults = 0;
+  public pageSize = defaultClientPaginationPageSize;
+  public pageIndex = 0;
 }
 
 export class ListSort {
@@ -29,11 +29,11 @@ export const ListStateActionTypes = {
 export type ListView = 'table' | 'cards';
 
 export class SetListStateAction implements Action {
-  constructor(public key: string, public view: ListView) {}
+  constructor(public key: string, public view: ListView) { }
   type = ListStateActionTypes.SET;
 }
 
 export class SetListViewAction implements Action {
-  constructor(public key: string, public view: ListView) {}
+  constructor(public key: string, public view: ListView) { }
   type = ListStateActionTypes.SET_VIEW;
 }

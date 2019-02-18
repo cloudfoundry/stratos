@@ -282,6 +282,7 @@ export function fetchTotalResults(
   action.paginationKey = createFetchTotalResultsPagKey(action.paginationKey);
   action.initialParams['results-per-page'] = 1;
   action.flattenPagination = false;
+  action['includeRelations'] = [];
 
   const pagObs = getPaginationObservables({
     store,
@@ -298,6 +299,7 @@ export function fetchTotalResults(
 
   return pagObs.pagination$.pipe(
     filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
+    first(),
     map(pag => pag.totalResults)
   );
 }

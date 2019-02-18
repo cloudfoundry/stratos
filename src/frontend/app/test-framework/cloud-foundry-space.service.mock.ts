@@ -1,11 +1,9 @@
 import { Observable, of as observableOf } from 'rxjs';
 
 import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
-import { GetAllSpaceUsers } from '../store/actions/space.actions';
 
 export class CloudFoundrySpaceServiceMock {
 
-  allSpaceUsersAction = new GetAllSpaceUsers('guid', 'guid-key', 'guid', true);
   space$: Observable<any> = observableOf(
     {
       entity: {
@@ -41,7 +39,6 @@ export class CloudFoundrySpaceServiceMock {
       }
 
     });
-  allSpaceUsers$ = observableOf([]);
   allowSsh$ = observableOf('false');
   apps$ = observableOf([]);
   appCount$ = observableOf(0);

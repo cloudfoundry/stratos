@@ -2,7 +2,6 @@ import { e2e, E2ESetup } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CFPage } from '../../po/cf-page.po';
-import { ListComponent } from '../../po/list.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 
@@ -91,20 +90,14 @@ describe('CF - Top Level - ', () => {
 
       it('Walk Tabs', () => {
         cfPage.goToOrgTab();
-        const orgs = new ListComponent();
-        orgs.waitUntilShown();
-        orgs.getTotalResults().then(totalOrgs => {
-          if (totalOrgs <= 12) {
-            cfPage.goToUsersTab();
-          }
-          cfPage.goToRoutesTab();
-          // cfPage.goToFirehoseTab();// Is not shown to non-admins
-          cfPage.goToFeatureFlagsTab();
-          cfPage.goToBuildPacksTab();
-          cfPage.goToStacksTab();
-          cfPage.goToSecurityGroupsTab();
-          cfPage.goToSummaryTab();
-        });
+        // cfPage.goToUsersTab();// Is not shown to non-admins
+        cfPage.goToRoutesTab();
+        // cfPage.goToFirehoseTab();// Is not shown to non-admins
+        cfPage.goToFeatureFlagsTab();
+        cfPage.goToBuildPacksTab();
+        cfPage.goToStacksTab();
+        cfPage.goToSecurityGroupsTab();
+        cfPage.goToSummaryTab();
       });
     });
   });

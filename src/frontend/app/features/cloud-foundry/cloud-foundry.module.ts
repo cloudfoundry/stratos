@@ -28,6 +28,7 @@ import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-
 import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
   CloudFoundryCellAppsComponent,
@@ -45,6 +46,9 @@ import { CloudFoundryCellService } from './tabs/cloud-foundry-cells/cloud-foundr
 import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
+import {
+  CloudFoundryInviteUserLinkComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
@@ -99,7 +103,6 @@ import {
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { CloudFoundryInviteUserLinkComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 
 @NgModule({
   imports: [
@@ -156,6 +159,7 @@ import { CloudFoundryInviteUserLinkComponent } from './tabs/cloud-foundry-organi
     InviteUsersComponent,
     InviteUsersCreateComponent,
     CloudFoundryInviteUserLinkComponent,
+    CfAdminAddUserWarningComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

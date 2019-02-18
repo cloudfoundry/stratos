@@ -14,6 +14,7 @@ import {
 } from '../../../../../features/cloud-foundry/cf.helpers';
 import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
+import { GetAllUsersAsAdmin } from '../../../../../store/actions/users.actions';
 import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { CfUser } from '../../../../../store/types/user.types';
@@ -131,19 +132,28 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     this.assignColumnConfig(org$, space$);
 
-    this.assignMultiConfig();
-
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(cf => // `cf` needed to create the second observable
+      switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space))),
+          cfUserService.createPaginationAction(
+            cf.global.isAdmin,
+            activeRouteCfOrgSpace.cfGuid,
+            activeRouteCfOrgSpace.orgGuid,
+            activeRouteCfOrgSpace.spaceGuid)
         )
       ),
       tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
-        this.initialiseMultiFilter(action);
+        // Only show the filter (show users with/without roles) if the list of users can actually contain users without roles
+        if (GetAllUsersAsAdmin.is(action)) {
+          this.assignMultiConfig();
+          this.initialiseMultiFilter(action);
+        } else {
+          this.multiFilterConfigs = [];
+        }
+
       }),
       map(([cf, action]) => cf && cf.state.initialised)
     );
@@ -208,6 +218,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     };
     this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
       org$: safeOrg$,
+      isOrgLevel: !space$,
       spaces$: safeSpaces$
     };
   }
