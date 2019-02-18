@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
+
+import { GitBranch, GitCommit, GitRepo } from '../../../../../store/src/types/git.types';
 import { GitSCMType } from './scm.service';
-import { GitRepo, GitBranch, GitCommit } from '../../../../../store/src/types/git.types';
 
 export interface SCMIcon {
   iconName: string;
@@ -19,4 +20,5 @@ export interface GitSCM {
   getCloneURL(projectName: string): string;
   getCommitURL(projectName: string, commitSha: string): string;
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): string;
+  getMatchingRepositories(projectName: string): Observable<string[]>;
 }

@@ -2,8 +2,9 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { AppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { AppState } from '../../../store/app-state';
 
 @Component({
   selector: 'app-home-page',

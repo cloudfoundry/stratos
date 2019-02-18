@@ -4,39 +4,43 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { delay, filter, first, map, mergeMap, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
+import {
+  AppMetadataTypes,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from '../../../../../../store/src/actions/app-metadata.actions';
+import { RestageApplication } from '../../../../../../store/src/actions/application.actions';
+import { ResetPagination } from '../../../../../../store/src/actions/pagination.actions';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
+import { IAppFavMetadata } from '../../../../cf-favourite-types';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { EntityService } from '../../../../core/entity-service';
-
+import {
+  getActionsFromExtensions,
+  getTabsFromExtensions,
+  StratosActionMetadata,
+  StratosActionType,
+  StratosTabType,
+} from '../../../../core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
-import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
-import { ApplicationService, ApplicationData } from '../../application.service';
-import { EndpointsService } from './../../../../core/endpoints.service';
-
-import { entityFactory, applicationSchemaKey, appStatsSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
-import { ResetPagination } from '../../../../../../store/src/actions/pagination.actions';
-import { RestageApplication } from '../../../../../../store/src/actions/application.actions';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import {
-  StratosActionMetadata,
-  getActionsFromExtensions,
-  StratosActionType,
-  getTabsFromExtensions,
-  StratosTabType
-} from '../../../../core/extension/extension-service';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
+import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
+import { ApplicationData, ApplicationService } from '../../application.service';
+import { EndpointsService } from './../../../../core/endpoints.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -69,6 +73,18 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
   public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   public appState$: Observable<ApplicationStateData>;
+
+  public favorite$ = this.applicationService.app$.pipe(
+    filter(app => !!app),
+    map(app => new UserFavorite<IAppFavMetadata, APIResource<IApp>>(
+      this.applicationService.cfGuid,
+      'cf',
+      applicationSchemaKey,
+      this.applicationService.appGuid,
+      app.entity
+    ))
+  );
+
   isBusyUpdating$: Observable<{ updating: boolean }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);

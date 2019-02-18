@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../core/cf-api.types';
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
-import { ITableColumn } from '../../list-table/table.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfSpacesListConfigService implements IListConfig<APIResource> {

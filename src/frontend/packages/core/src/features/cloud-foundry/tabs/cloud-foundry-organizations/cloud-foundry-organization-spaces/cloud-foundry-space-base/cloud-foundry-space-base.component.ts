@@ -3,6 +3,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import {
   getActionsFromExtensions,
@@ -11,20 +16,16 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/extension/extension-service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
+import { environment } from '../../../../../../environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
-
-import { canUpdateOrgSpaceRoles, getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-
-import { environment } from '../../../../../../environments/environment.prod';
-import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
-import { AppState } from '../../../../../../../../store/src/app-state';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -79,6 +80,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   private deleteRedirectSub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
+  public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -87,6 +89,9 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
   ) {
+    this.favorite$ = cfSpaceService.space$.pipe(
+      map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey))
+    );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)
     );

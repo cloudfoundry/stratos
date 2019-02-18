@@ -6,17 +6,17 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { MetricsService } from '../../metrics/services/metrics-service';
-import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
+import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
+import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
+import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
+import { AppState } from '../../../../../store/src/app-state';
+import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
+import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
+import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { AppState } from '../../../../../store/src/app-state';
-import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
-import { CloseSideNav, ChangeSideNavMode, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
-import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
-import { EndpointsService } from '../../../core/endpoints.service';
-import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
-import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
+
 
 @Component({
   selector: 'app-dashboard-base',
@@ -29,11 +29,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   constructor(
     public pageHeaderService: PageHeaderService,
     private store: Store<AppState>,
-    private eventWatcherService: EventWatcherService,
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private metricsService: MetricsService,
     private endpointsService: EndpointsService,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
@@ -63,6 +61,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
     );
     this.dispatchRelations();
+    this.store.dispatch(new GetUserFavoritesAction());
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(

@@ -11,6 +11,7 @@ import { AuthEffect } from './effects/auth.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
+import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { GithubEffects } from './effects/github.effects';
 import { MetricsEffect } from './effects/metrics.effects';
@@ -25,12 +26,11 @@ import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
+import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { UsersEffects } from './effects/users.effects';
 import { AppReducersModule } from './reducers.module';
-import { UserFavoritesEffect } from './effects/user-favorites-effect';
-import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { AppStoreExtensionsModule } from './store.extensions.module';
 
 @NgModule({

@@ -1,10 +1,10 @@
 import { Action } from '@ngrx/store';
 
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CloudFoundryService } from '../../../core/src/shared/data-services/cloud-foundry.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { NormalizedResponse } from '../types/api.types';
+import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -56,7 +56,7 @@ export interface AuthParamsToken {
 export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 
 export class GetAllEndpoints implements PaginatedAction {
-  public static storeKey = CloudFoundryService.EndpointList;
+  public static storeKey = endpointListKey;
   constructor(public login = false) { }
   entityKey = endpointSchemaKey;
   paginationKey = GetAllEndpoints.storeKey;
@@ -75,7 +75,7 @@ export class GetAllEndpoints implements PaginatedAction {
 }
 
 export class GetAllEndpointsSuccess implements Action {
-  constructor(public payload: {}, public login = false) { }
+  constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) { }
   type = GET_ENDPOINTS_SUCCESS;
 }
 

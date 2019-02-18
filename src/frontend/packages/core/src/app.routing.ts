@@ -1,4 +1,3 @@
-import { of as observableOf } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
@@ -6,19 +5,18 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
+import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
+import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
+import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
-import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
-import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
-import { environment } from './environments/environment';
-import { CustomRoutingImportModule } from './custom-import.module';
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: 'applications', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
@@ -29,19 +27,18 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'dashboard', component: HomePageComponent,
+        path: 'home', component: HomePageComponent,
         data: {
           stratosNavigation: {
-            text: 'Dashboard',
-            matIcon: 'assessment',
-            // Experimental - only show in development
-            hidden: observableOf(environment.production),
+            text: 'Home',
+            matIcon: 'home',
             position: 10
           }
         }
       },
       {
-        path: 'applications', loadChildren: './features/applications/applications.module#ApplicationsModule',
+        path: 'applications',
+        loadChildren: './features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             text: 'Applications',
@@ -120,7 +117,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes),
+    RouterModule.forRoot(appRoutes, { onSameUrlNavigation: 'reload' }),
     CustomRoutingImportModule,
   ]
 })

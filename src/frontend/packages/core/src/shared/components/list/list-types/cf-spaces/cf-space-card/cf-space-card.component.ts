@@ -3,10 +3,18 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -16,6 +24,7 @@ import {
   CloudFoundryOrganizationService,
   createQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
@@ -24,13 +33,6 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
-import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
-
 
 @Component({
   selector: 'app-cf-space-card',
@@ -53,6 +55,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
+  favorite: UserFavorite<ISpaceFavMetadata>;
   spaceStatus$: Observable<CardStatus>;
 
   constructor(
@@ -72,6 +75,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, entityFactory(spaceSchemaKey));
     this.orgGuid = this.cfOrgService.orgGuid;
+    this.favorite = getFavoriteFromCfEntity(this.row, spaceSchemaKey);
     this.cardMenu = [
       {
         label: 'Edit',

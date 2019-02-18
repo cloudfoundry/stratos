@@ -2,16 +2,20 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { ISpaceFavMetadata } from '../../../../../cf-favourite-types';
 import { IApp } from '../../../../../core/cf-api.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { defaultPaginationPageSizeOptionsTable, IListConfig, ListViewTypes } from '../../list.component.types';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
@@ -62,6 +66,14 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       },
       cellFlex: '2'
     },
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<ISpaceFavMetadata> => {
+      return new UserFavorite(
+        row.entity.cfGuid,
+        'cf',
+        applicationSchemaKey,
+        row.entity.guid,
+      );
+    }),
   ]
 
   constructor(

@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../core/core.module';
 import { appReducers } from '../../../../../../store/src/reducers.module';
-import { CreateApplicationStep1Component } from './create-application-step1.component';
+import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../../core/core.module';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
-import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 import { FocusDirective } from '../../focus.directive';
+import { CreateApplicationStep1Component } from './create-application-step1.component';
 
 describe('CreateApplicationStep1Component', () => {
   let component: CreateApplicationStep1Component;
@@ -31,7 +32,16 @@ describe('CreateApplicationStep1Component', () => {
           }
         )
       ],
-      providers: [CfOrgSpaceDataService, PaginationMonitorFactory]
+      providers: [CfOrgSpaceDataService, PaginationMonitorFactory, {
+        provide: ActivatedRoute,
+        useValue: {
+          root: {
+            snapshot: {
+              queryParams: { endpointGuid: null },
+            }
+          }
+        }
+      }]
     })
       .compileComponents();
   }));

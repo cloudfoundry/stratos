@@ -1,23 +1,23 @@
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { appReducers } from '../../../../../../../../store/src/reducers.module';
+import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { endpointStoreNames } from '../../../../../../../../store/src/types/endpoint.types';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../../core/core.module';
+import { GITHUB_API_URL } from '../../../../../../core/github.helpers';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../shared/shared.module';
-import { appReducers } from '../../../../../../../../store/src/reducers.module';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
-import { AppStoreModule } from '../../../../../../../../store/src/store.module';
-import { endpointStoreNames } from '../../../../../../../../store/src/types/endpoint.types';
-import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { HttpModule, Http, ConnectionBackend } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
-import { GITHUB_API_URL } from '../../../../../../core/github.helpers';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
@@ -41,18 +41,14 @@ describe('BuildTabComponent', () => {
             initialState
           }
         ),
-        HttpModule
+        HttpClientModule,
+        HttpClientTestingModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         AppStoreModule,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        Http,
-        {
-          provide: ConnectionBackend,
-          useClass: MockBackend
-        },
         { provide: GITHUB_API_URL, useValue: null }
       ]
     })

@@ -1,4 +1,3 @@
-import { ListSort } from './../../../../../../store/src/actions/list.actions';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material';
 import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
@@ -6,13 +5,14 @@ import { tap } from 'rxjs/operators';
 
 import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { ListSort } from './../../../../../../store/src/actions/list.actions';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { ITableColumn } from './table.types';
 
 
-const tableColumnSelect = {
+const tableColumnSelect: ITableColumn<any> = {
   columnId: 'select',
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
@@ -20,7 +20,7 @@ const tableColumnSelect = {
   cellFlex: '0 0 60px'
 };
 
-const tableColumnAction = {
+const tableColumnAction: ITableColumn<any> = {
   columnId: 'actions',
   headerCell: () => '',
   cellComponent: TableCellActionsComponent,

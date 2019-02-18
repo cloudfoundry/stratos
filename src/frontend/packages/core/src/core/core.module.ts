@@ -1,7 +1,9 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { MomentModule } from 'ngx-moment';
 
+import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
@@ -10,6 +12,7 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
 import { Customizations } from './customizations.types';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
+import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
 import { EntityServiceFactory } from './entity-service-factory.service';
 import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { InfinityPipe } from './infinity.pipe';
@@ -23,9 +26,6 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
-import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
-import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
-import { MomentModule } from 'ngx-moment';
 
 
 @NgModule({

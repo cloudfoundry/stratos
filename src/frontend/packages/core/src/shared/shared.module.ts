@@ -354,7 +354,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
     FavoritesMetaCardComponent,
-    FavoritesGlobalListComponent
+    FavoritesGlobalListComponent,
+
   ],
   entryComponents: [
     DialogConfirmComponent,

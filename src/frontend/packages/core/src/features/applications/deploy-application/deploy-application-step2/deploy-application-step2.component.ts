@@ -2,38 +2,44 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+  timer as observableTimer,
+} from 'rxjs';
+import { catchError, filter, map, pairwise, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { GitBranch } from '../../../../../../store/src/types/github.types';
-import { SourceType, GitAppDetails } from '../../../../../../store/src/types/deploy-application.types';
-import { AppState } from '../../../../../../store/src/app-state';
 import {
   FetchBranchesForProject,
   FetchCommit,
+  ProjectDoesntExist,
   SaveAppDetails,
   SetAppSourceDetails,
   SetBranch,
   SetDeployBranch,
-  ProjectDoesntExist,
 } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
-  selectSourceType,
-  selectProjectExists,
   selectDeployBranchName,
   selectNewProjectCommit,
-  selectPEProjectName
+  selectPEProjectName,
+  selectProjectExists,
+  selectSourceType,
 } from '../../../../../../store/src/selectors/deploy-application.selector';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { GitAppDetails, SourceType } from '../../../../../../store/src/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../store/src/types/git.types';
+import { GitBranch } from '../../../../../../store/src/types/github.types';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -76,6 +82,11 @@ export class DeployApplicationStep2Component
   sourceTypeNeedsUpload$: Observable<boolean>;
 
   scm: GitSCM;
+
+  // We don't have any repositories to suggest initially - need user to start typing
+  suggestedRepos$: Observable<string[]>;
+
+  cachedSuggestions = {};
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
@@ -275,6 +286,32 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(setInitialSourceType$.subscribe());
     this.subscriptions.push(setSourceTypeModel$.subscribe());
     this.subscriptions.push(setProjectName.subscribe());
+
+    this.suggestedRepos$ = this.sourceSelectionForm.valueChanges.pipe(
+      map(form => form.projectName),
+      startWith(''),
+      pairwise(),
+      filter(([oldName, newName]) => oldName !== newName),
+      switchMap(([oldName, newName]) => this.updateSuggestedRepositories(newName))
+    );
+  }
+
+  updateSuggestedRepositories(name: string): Observable<string[]> {
+    if (!name || name.length < 3) {
+      return observableOf([] as string[]);
+    }
+
+    const cacheName = this.scm.getType() + ':' + name;
+    if (this.cachedSuggestions[cacheName]) {
+      return observableOf(this.cachedSuggestions[cacheName]);
+    }
+
+    return observableTimer(500).pipe(
+      take(1),
+      switchMap(() => this.scm.getMatchingRepositories(name)),
+      catchError(_e => observableOf(null)),
+      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
+    );
   }
 
   setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));

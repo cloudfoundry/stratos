@@ -3,15 +3,25 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { entityFactory, organizationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { createUserRoleInOrg } from '../../../../../../../../store/src/types/user.types';
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
+import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
@@ -20,14 +30,6 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
-import { createUserRoleInOrg } from '../../../../../../../../store/src/types/user.types';
-import { entityFactory, organizationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
-import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 
 
 @Component({
@@ -48,6 +50,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
+  public favorite: UserFavorite<IFavoriteMetadata>;
   public orgStatus$: Observable<CardStatus>;
 
   constructor(
@@ -86,6 +89,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       }),
       map(u => getOrgRolesString(u)),
     );
+
+    this.favorite = getFavoriteFromCfEntity(this.row, organizationSchemaKey);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))

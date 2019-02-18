@@ -4,8 +4,15 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { IApp } from '../../../../../core/cf-api.types';
 import { UtilsService } from '../../../../../core/utils.service';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CardAppComponent } from './card/card-app.component';
@@ -17,9 +24,6 @@ import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/tab
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
 
 @Injectable()
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
@@ -56,7 +60,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
 
   }
   appsDataSource: CfAppsDataSource;
-  columns: Array<ITableColumn<APIResource>> = [
+  columns: Array<ITableColumn<APIResource<IApp>>> = [
     {
       columnId: 'name', headerCell: () => 'Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: {
         type: 'sort',
@@ -115,6 +119,14 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       },
       cellFlex: '2'
     },
+    createTableColumnFavorite((row: APIResource<IApp>): UserFavorite<IFavoriteMetadata> => {
+      return new UserFavorite(
+        row.entity.cfGuid,
+        'cf',
+        applicationSchemaKey,
+        row.entity.guid,
+      );
+    }),
   ];
   viewType = ListViewTypes.BOTH;
   text = {

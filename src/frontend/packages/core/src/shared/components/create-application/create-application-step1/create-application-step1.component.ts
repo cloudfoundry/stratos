@@ -1,16 +1,19 @@
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of as observableOf } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { SetCFDetails } from '../../../../../../store/src/actions/create-applications-page.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import {
+  getSpacesFromOrgWithRole,
+} from '../../../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
-import { AppState } from '../../../../../../store/src/app-state';
-import { SetCFDetails } from '../../../../../../store/src/actions/create-applications-page.actions';
-import { getSpacesFromOrgWithRole } from '../../../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -23,7 +26,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   isMarketplaceMode: boolean;
   constructor(
     private store: Store<AppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    public route: ActivatedRoute
   ) { }
 
   public spaces$: Observable<ISpace[]>;
@@ -50,6 +54,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
+    if (this.route.root.snapshot.queryParams.endpointGuid) {
+      this.cfOrgSpaceService.cf.select.next(this.route.root.snapshot.queryParams.endpointGuid);
+    }
     this.spaces$ = this.getSpacesFromPermissions();
     this.hasOrgs$ = this.cfOrgSpaceService.org.list$.pipe(
       map(o => o && o.length > 0)

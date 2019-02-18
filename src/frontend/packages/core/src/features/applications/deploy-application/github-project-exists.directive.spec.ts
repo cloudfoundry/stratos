@@ -1,15 +1,16 @@
-import { HttpModule } from '@angular/http';
-import { Store } from '@ngrx/store';
-import { inject, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { CoreModule } from '../../../core/core.module';
-import { SharedModule } from '../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { AppState } from '../../../../../store/src/app-state';
-import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
-import { GitSCMService } from '../../../../../../app/shared/data-services/scm/scm.service';
-import { GithubProjectExistsDirective } from './github-project-exists.directive';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { inject, TestBed } from '@angular/core/testing';
+import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../../../store/src/app-state';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../core/github.helpers';
+import { GitSCMService } from '../../../shared/data-services/scm/scm.service';
+import { SharedModule } from '../../../shared/shared.module';
+import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
 describe('GithubProjectExistsDirective', () => {
   beforeEach(() => {
@@ -19,7 +20,8 @@ describe('GithubProjectExistsDirective', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
-        HttpModule
+        HttpClientModule,
+        HttpClientTestingModule
       ],
       providers: [
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }

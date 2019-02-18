@@ -12,11 +12,12 @@ import {
   refCount,
   withLatestFrom,
 } from 'rxjs/operators';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+
 import { AppState } from '../../../../store/src/app-state';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { selectEntities, getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
+import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 
 
 export class PaginationMonitor<T = any> {
@@ -36,6 +37,9 @@ export class PaginationMonitor<T = any> {
    * All the information about the current pagination selection.
    */
   public pagination$: Observable<PaginationEntityState>;
+
+
+  public currentPageIds$: Observable<string[]>;
 
   constructor(
     private store: Store<AppState>,
@@ -95,6 +99,7 @@ export class PaginationMonitor<T = any> {
       schema.key,
       paginationKey,
     );
+    this.currentPageIds$ = this.createPagIdObservable(this.pagination$);
     this.currentPage$ = this.createPageObservable(this.pagination$, schema);
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
     this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
@@ -108,6 +113,15 @@ export class PaginationMonitor<T = any> {
     return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
       distinctUntilChanged(),
       filter(pag => !!pag),
+    );
+  }
+
+  private createPagIdObservable(
+    pagination$: Observable<PaginationEntityState>
+  ) {
+    return pagination$.pipe(
+      distinctUntilChanged(this.isPageSameIsh),
+      map(pagination => pagination.ids[pagination.currentPage] || [])
     );
   }
 

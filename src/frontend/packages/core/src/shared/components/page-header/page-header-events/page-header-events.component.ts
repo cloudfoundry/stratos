@@ -1,18 +1,17 @@
-
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { map, filter, distinctUntilChanged } from 'rxjs/operators';
-
-import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
-import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/src/app-state';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+
 import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
+import { AppState } from '../../../../../../store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
-import { Observable, of as observableOf, combineLatest } from 'rxjs';
+import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+
 
 @Component({
   selector: 'app-page-header-events',
@@ -42,7 +41,6 @@ export class PageHeaderEventsComponent implements OnInit {
 
   constructor(
     private internalEventMonitorFactory: InternalEventMonitorFactory,
-    public cloudFoundryService: CloudFoundryService,
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>
   ) {
@@ -62,7 +60,7 @@ export class PageHeaderEventsComponent implements OnInit {
     }
     if (this.endpointIds$) {
       const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store, CloudFoundryService.EndpointList, entityFactory(endpointSchemaKey)
+        this.store, endpointListKey, entityFactory(endpointSchemaKey)
       );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
       this.errorMessage$ = combineLatest(

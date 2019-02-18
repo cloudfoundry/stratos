@@ -3,14 +3,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
-import { UserFavorite, IFavoriteMetadata } from '../../../../../../store/types/user-favorites.types';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { AppState } from './../../../../../../store/app-state';
 
 
 export interface MetaCardMenuItem {

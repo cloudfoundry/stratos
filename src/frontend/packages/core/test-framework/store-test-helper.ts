@@ -1,14 +1,14 @@
 import { ModuleWithProviders } from '@angular/core';
-
 import { StoreModule } from '@ngrx/store';
+
 import { AppState } from '../../store/src/app-state';
-import { createUserRoleInOrg } from '../../store/src/types/user.types';
-import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
+import { addEntityToCache, EntitySchema } from '../../store/src/helpers/entity-factory';
 import { appReducers } from '../../store/src/reducers.module';
-import { getEntitiesFromExtensions } from '../src/core/extension/extension-service';
-import { EntitySchema, addEntityToCache } from '../../store/src/helpers/entity-factory';
-import { defaultCfEntitiesState } from '../../store/src/types/entity.types';
 import { registerAPIRequestEntity } from '../../store/src/reducers/api-request-reducers.generator';
+import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
+import { defaultCfEntitiesState } from '../../store/src/types/entity.types';
+import { createUserRoleInOrg } from '../../store/src/types/user.types';
+import { getEntitiesFromExtensions } from '../src/core/extension/extension-service';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -28,6 +28,16 @@ export function getInitialTestStoreState(): AppState {
 function getDefaultInitialTestStoreState(): AppState {
 
   return {
+    recentlyVisited: {
+      entities: {},
+      hits: []
+    },
+    userFavoritesGroups: {
+      busy: false,
+      error: false,
+      message: '',
+      groups: {}
+    },
     auth: {
       loggedIn: true,
       loggingIn: false,
@@ -298,6 +308,7 @@ function getDefaultInitialTestStoreState(): AppState {
       },
       stack: {},
       space: {},
+      userFavorites: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -649,6 +660,7 @@ function getDefaultInitialTestStoreState(): AppState {
       featureFlag: {},
       securityRule: {},
       buildpack: {},
+      userFavorites: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3896,6 +3908,7 @@ function getDefaultInitialTestStoreState(): AppState {
       space_quota_definition: {},
     },
     requestData: {
+      userFavorites: {},
       servicePlanVisibility: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {

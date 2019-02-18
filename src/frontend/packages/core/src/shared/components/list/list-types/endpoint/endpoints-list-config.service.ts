@@ -4,6 +4,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
+import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
+import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
+import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
+import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { UserFavoriteEndpoint } from '../../../../../../../store/src/types/user-favorites.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import {
@@ -19,21 +27,13 @@ import { InternalEventMonitorFactory } from '../../../../monitors/internal-event
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
+import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-
-import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
-import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
-import { UnregisterEndpoint, DisconnectEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
-import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
-import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
-import { selectUpdateInfo, selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { AppState } from '../../../../../../../store/src/app-state';
-
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
   return getNameForEndpointType(endpoint.cnsi_type);
@@ -190,7 +190,9 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private globalActions = [];
 
-  columns = endpointColumns;
+  columns = [
+    ...endpointColumns
+  ];
   isLocal = true;
   dataSource: EndpointsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
@@ -237,6 +239,14 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService
   ) {
+    const favoriteCell = createTableColumnFavorite(
+      (row: EndpointModel) => new UserFavoriteEndpoint(
+        row.guid,
+        row.cnsi_type,
+        row
+      )
+    );
+    this.columns.push(favoriteCell);
     this.dataSource = new EndpointsDataSource(
       this.store,
       this,

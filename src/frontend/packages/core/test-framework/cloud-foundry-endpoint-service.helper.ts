@@ -1,33 +1,44 @@
-import { HttpModule, Http } from '@angular/http';
+import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
+
+import { AppState } from '../../store/src/app-state';
+import { CoreModule } from '../src/core/core.module';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
+import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundrySpaceService } from '../src/features/cloud-foundry/services/cloud-foundry-space.service';
+import {
+  ApplicationStateIconComponent,
+} from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconPipe,
+} from '../src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
+import { CardStatusComponent } from '../src/shared/components/cards/card-status/card-status.component';
+import { MetaCardComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import {
+  MetaCardItemComponent,
+} from '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import {
+  MetaCardKeyComponent,
+} from '../src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import {
+  MetaCardTitleComponent,
+} from '../src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import {
+  MetaCardValueComponent,
+} from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
+import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
+import { CfUserService } from '../src/shared/data-services/cf-user.service';
+import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
+import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { SharedModule } from '../src/shared/shared.module';
 import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../src/shared/data-services/cf-user.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
-import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
-import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { AppState } from '../../store/src/app-state';
-import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { CoreModule } from '../src/core/core.module';
-import { SharedModule } from '../src/shared/shared.module';
-import { CloudFoundrySpaceService } from '../src/features/cloud-foundry/services/cloud-foundry-space.service';
-import { MetaCardComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { ApplicationStateIconPipe } from '../src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  ApplicationStateIconComponent
-} from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import { MetaCardTitleComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { CardStatusComponent } from '../src/shared/components/cards/card-status/card-status.component';
-import { MetaCardValueComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -89,15 +100,11 @@ export function generateTestCfServiceProvider() {
     provide: CloudFoundryService,
     useFactory: (
       store: Store<AppState>,
-      paginationMonitorFactory: PaginationMonitorFactory
     ) => {
-      const appService = new CloudFoundryService(
-        store,
-        paginationMonitorFactory
-      );
+      const appService = new CloudFoundryService(store);
       return appService;
     },
-    deps: [Store, PaginationMonitorFactory]
+    deps: [Store]
   };
 }
 

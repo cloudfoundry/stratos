@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { first, map, startWith } from 'rxjs/operators';
 
+import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -15,6 +14,9 @@ import {
   StratosTabType,
 } from '../../../core/extension/extension-service';
 import { environment } from '../../../environments/environment.prod';
+import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
@@ -36,11 +38,24 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
+  public favorite$: Observable<UserFavoriteEndpoint>;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     endpointsService: EndpointsService
   ) {
+
+    this.favorite$ = endpointsService.endpoints$.pipe(
+      first(),
+      map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
+      map(endpoint => new UserFavoriteEndpoint(
+        this.cfEndpointService.cfGuid,
+        'cf',
+        endpoint
+      ))
+    );
+
     const firehoseHidden$ = this.currentUserPermissionsService
       .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));

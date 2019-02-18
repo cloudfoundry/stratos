@@ -1,9 +1,12 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { getFullEndpointApiUrl, getEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
-import { CardCell } from '../../../list.types';
+
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
+import { getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
+import { getEndpointTypes, getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { CardStatus } from '../../../../../shared.types';
+import { CardCell } from '../../../list.types';
 
 
 @Component({
@@ -18,13 +21,15 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public status$ = new ReplaySubject<CardStatus>();
 
   @Input()
-  row: EndpointModel;
+  public row: EndpointModel;
+  public favorite: UserFavoriteEndpoint;
 
   constructor() {
     super();
   }
 
   ngOnInit() {
+    this.favorite = getFavoriteFromEndpointEntity(this.row);
     this.status$.next(this.mapStatus(this.row));
   }
 
