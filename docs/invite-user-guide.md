@@ -10,7 +10,8 @@ During the invite process the following actions will occur:
 
 > Note - The user *will not* be able to log in without first setting their password but CF admins, organization managers and space managers *will* be able to set roles for the user.
 
-### Development SMTP server
+## Development SMTP server
+
  To run locally, we recommend using [mailcatcher](https://mailcatcher.me/) in place of an actual SMTP server.
 
  To install mailcatcher via docker, use the following command: `docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher`. Once mailcatcher is installed, continue to follow the instructions below.
@@ -56,7 +57,5 @@ There are number of set up steps to execute first:
    1) Navigate to the Cloud Foundry Summary page of the required CF.
    2) Use the `Configure` button in the `User Invitation Support` section.
    3) Supply the uaa client id and secret and click `Configure`
-
-   
 
 Once all of the steps have been completed, CF administrators and organization managers will be able to invite users via the Organization and Space pages under the 'Users' tab.
