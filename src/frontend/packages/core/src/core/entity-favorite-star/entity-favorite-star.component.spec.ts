@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
-import { BaseTestModulesNoShared } from '../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
+import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 
 describe('EntityFavoriteStarComponent', () => {
   let component: EntityFavoriteStarComponent;

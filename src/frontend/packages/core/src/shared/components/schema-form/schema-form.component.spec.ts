@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
-import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SchemaFormComponent } from './schema-form.component';
 
 describe('BindServiceAppFormComponent', () => {

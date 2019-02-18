@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../../core/core.module';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ServicePlanPriceComponent } from '../../../../service-plan-price/service-plan-price.component';
 import { TableCellAServicePlanPriceComponent } from './table-cell-service-plan-price.component';
 

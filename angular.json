@@ -66,27 +66,7 @@
           "options": {
             "browserTarget": "stratos:build"
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "preserveSymlinks": true,
-            "sourceMap": false,
-            "main": "src/frontend/test.ts",
-            "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/frontend/polyfills.ts",
-            "tsConfig": "src/frontend/tsconfig.spec.json",
-            "scripts": [],
-            "styles": [
-              "src/frontend/styles.scss",
-              "node_modules/xterm/dist/xterm.css"
-            ],
-            "assets": [
-              "src/frontend/assets",
-              "src/frontend/favicon.ico"
-            ]
-          }
-        },
+        }
       }
     },
     "stratos-e2e": {

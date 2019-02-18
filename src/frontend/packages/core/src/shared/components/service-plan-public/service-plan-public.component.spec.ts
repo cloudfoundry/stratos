@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
-import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
 

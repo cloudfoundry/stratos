@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { APIResource } from '../../../../../../store/types/api.types';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 import { TableCellRouteComponent } from './table-cell-route.component';
 

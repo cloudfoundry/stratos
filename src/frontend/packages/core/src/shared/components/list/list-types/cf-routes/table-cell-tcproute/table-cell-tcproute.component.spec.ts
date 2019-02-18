@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/core.module';
-import { APIResource } from '../../../../../../store/types/api.types';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute.component';

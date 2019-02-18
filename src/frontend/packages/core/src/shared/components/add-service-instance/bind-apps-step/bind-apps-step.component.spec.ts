@@ -1,12 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
-import { BindAppsStepComponent } from './bind-apps-step.component';
-import { SchemaFormComponent } from '../../../../../../../app/shared/components/schema-form/schema-form.component';
+
 import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { CsiGuidsService } from '../csi-guids.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { SchemaFormComponent } from '../../schema-form/schema-form.component';
+import { CsiGuidsService } from '../csi-guids.service';
+import { BindAppsStepComponent } from './bind-apps-step.component';
 
 
 describe('BindAppsStepComponent', () => {

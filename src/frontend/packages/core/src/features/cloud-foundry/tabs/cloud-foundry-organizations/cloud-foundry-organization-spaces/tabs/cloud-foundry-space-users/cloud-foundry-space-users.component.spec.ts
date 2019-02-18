@@ -1,8 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  CfAdminAddUserWarningComponent,
-} from '../../../../../../../../../../app/features/cloud-foundry/tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
@@ -11,6 +8,7 @@ import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-frame
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundrySpaceUsersComponent } from './cloud-foundry-space-users.component';
 
 describe('CloudFoundrySpaceUsersComponent', () => {
