@@ -38,12 +38,10 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-                }
-              ]
+              "fileReplacements": [{
+                "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+              }]
             }
           }
         },
@@ -89,20 +87,6 @@
             ]
           }
         },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "typeCheck": true,
-            "format": "stylish",
-            "tsConfig": [
-              "src/frontend/tsconfig.app.json",
-              "src/frontend/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
       }
     },
     "stratos-e2e": {
@@ -156,12 +140,10 @@
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
-                {
-                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-                }
-              ],
+              "fileReplacements": [{
+                "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+              }],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
