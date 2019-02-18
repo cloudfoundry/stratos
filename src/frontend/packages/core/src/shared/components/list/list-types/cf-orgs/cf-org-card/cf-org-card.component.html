@@ -1,4 +1,4 @@
-<app-meta-card class="org-card" [clickAction]="goToSummary" [status$]="orgStatus$" [entityConfig]="entityConfig" [actionMenu]="cardMenu" [statusIconByTitle]="true" [statusIconTooltip]="'Org near or at quota limits'">
+<app-meta-card class="org-card" [clickAction]="goToSummary" [status$]="orgStatus$" [entityConfig]="entityConfig" [actionMenu]="cardMenu" [statusIconByTitle]="true" [statusIconTooltip]="'Org near or at quota limits'" [favorite]="favorite">
   <app-meta-card-title class="org-card__title">
     <app-multiline-title class="org-card__title-link">{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>

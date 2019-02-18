@@ -1,10 +1,12 @@
 package interfaces
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 )
 
@@ -41,6 +43,7 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
+	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 
 	// UAA Token
@@ -58,6 +61,8 @@ type PortalProxy interface {
 	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string) (*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 
+	// Database Connection
+	GetDatabaseConnection() *sql.DB
 	AddAuthProvider(name string, provider AuthProvider)
 	GetAuthProvider(name string) AuthProvider
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)

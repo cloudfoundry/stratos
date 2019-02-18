@@ -1,4 +1,4 @@
-<app-meta-card class="space-card" [clickAction]="goToSummary" [status$]="spaceStatus$" [entityConfig]="entityConfig" [actionMenu]="cardMenu" [statusIconByTitle]="true" [statusIconTooltip]="'Space near or at quota limits'">
+<app-meta-card class="space-card" [clickAction]="goToSummary" [status$]="spaceStatus$" [entityConfig]="entityConfig" [actionMenu]="cardMenu" [statusIconByTitle]="true" [statusIconTooltip]="'Space near or at quota limits'" [favorite]="favorite">
   <app-meta-card-title class="space-card__title">
     <app-multiline-title class="space-card__title-link">{{ row.entity.name }}</app-multiline-title>
   </app-meta-card-title>

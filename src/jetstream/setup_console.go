@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -77,12 +76,12 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 					return interfaces.NewHTTPShadowError(
 						http.StatusBadRequest,
 						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting",
-						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting", err)
+						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting: %v+", err)
 				}
 				return interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Could not connect to the UAA - check UAA Endpoint URL",
-					"Could not connect to the UAA - check UAA Endpoint URL", err)
+					"Could not connect to the UAA - check UAA Endpoint URL: %v+", err)
 			}
 		}
 		return interfaces.NewHTTPShadowError(
@@ -151,30 +150,32 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Repository) (*interfaces.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
+	var err error
+
 	consoleConfig := new(interfaces.ConsoleConfig)
-	uaaEndpoint, err := config.GetValue("UAA_ENDPOINT")
-	if err != nil {
+	uaaEndpoint, found := p.Env().Lookup("UAA_ENDPOINT")
+	if !found {
 		return consoleConfig, errors.New("UAA_Endpoint not found")
 	}
 
-	consoleClient, err := config.GetValue("CONSOLE_CLIENT")
-	if err != nil {
+	consoleClient, found := p.Env().Lookup("CONSOLE_CLIENT")
+	if !found {
 		return consoleConfig, errors.New("CONSOLE_CLIENT not found")
 	}
 
-	consoleClientSecret, err := config.GetValue("CONSOLE_CLIENT_SECRET")
+	consoleClientSecret, found := p.Env().Lookup("CONSOLE_CLIENT_SECRET")
 	if err != nil {
 		// Special case, mostly this is blank, so assume its blank
 		consoleClientSecret = ""
 	}
 
-	consoleAdminScope, err := config.GetValue("CONSOLE_ADMIN_SCOPE")
-	if err != nil {
+	consoleAdminScope, found := p.Env().Lookup("CONSOLE_ADMIN_SCOPE")
+	if !found {
 		return consoleConfig, errors.New("CONSOLE_ADMIN_SCOPE not found")
 	}
 
-	skipSslValidation, err := config.GetValue("SKIP_SSL_VALIDATION")
-	if err != nil {
+	skipSslValidation, found := p.Env().Lookup("SKIP_SSL_VALIDATION")
+	if !found {
 		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
 	}
 
@@ -252,7 +253,7 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 		return func(c echo.Context) error {
 			isSetupRequest := false
 
-			requestURLPath := c.Request().URL().Path()
+			requestURLPath := c.Request().URL.Path
 
 			// When running in Cloud Foundry or in the combined Docker container URL path starts with /pp
 			inCFMode, _ := regexp.MatchString("^/pp", requestURLPath)

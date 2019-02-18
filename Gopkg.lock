@@ -164,6 +164,22 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:d689318918dac8435731a16f090349f48f3758a3dbe5f967e913185bf264abaf"
+  name = "github.com/cloudfoundry-community/go-cfenv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f920e9562d5f951cbf11785728f67258c38a10d0"
+  version = "v1.17.0"
+  
+[[projects]]
+  branch = "master"
+  digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
+  name = "github.com/cf-stratos/mysqlstore"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
+
+[[projects]]
   branch = "master"
   digest = "1:58927c45bfdcd6550e5f1ab008eeeb6951474a232afa1dc690583f26c5f92cbd"
   name = "github.com/charlievieth/fs"
@@ -352,12 +368,20 @@
   version = "v1.4.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:17f3f1af41a68b23365d83146a3504eccd759394f50a393b37ce16d9b88c4d3b"
-  name = "github.com/cf-stratos/mysqlstore"
+  digest = "1:8a405d0a20ac737ccd3e0ac52537887de704be70e03cc33038f4eb5a73fb3eda"
+  name = "github.com/govau/cf-common"
+  packages = ["env"]
+  pruneopts = "UT"
+  revision = "f85526034745406f35121d889ab195dc307037c2"
+  version = "v0.0.6"
+
+[[projects]]
+  digest = "1:53bc4cd4914cd7cd52139990d5170d6dc99067ae31c56530621b18b35fc30318"
+  name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   pruneopts = "UT"
-  revision = "304308519d1355852f92cd88b31153c8a9a4e4db"
+  revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
+  version = "v1.1.2"  
 
 [[projects]]
   digest = "1:3bd786388cca2f0e8945a27ec836863f76762fd85da7e6da428c5a6801c6822d"
@@ -400,19 +424,15 @@
   revision = "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
 
 [[projects]]
-  digest = "1:09b4b26f6837dbb21698726ccaa6eccae9ab822485726a2a09a9d123cb1ba4d1"
+  digest = "1:0c2ca8699f9332007af8f9ee882cb2e93c7acfe6e67df4e8529aade9c548bc88"
   name = "github.com/labstack/echo"
   packages = [
     ".",
-    "context",
-    "engine",
-    "engine/standard",
-    "log",
     "middleware",
   ]
   pruneopts = "UT"
-  revision = "e08070379af60f5b9c0fb5bb2d1527ba9624fe43"
-  version = "v2.2.0"
+  revision = "2e9f4ea4e010fa328318107ba074b1b72381c571"
+  version = "v3.3.7"
 
 [[projects]]
   digest = "1:568171fc14a3d819b112c3e219d351ea7b05e8dad7935c4168c6b3373244a686"
@@ -635,9 +655,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a1a1abedfdfaeac675547fbf03a213f558c111575785d5d57616b697fdb1caf3"
+  digest = "1:69c4965199908d025f33e26d37aee6ec275110b8ce6bfaf85529e8def870c7ba"
   name = "golang.org/x/crypto"
   packages = [
+    "acme",
+    "acme/autocert",
     "curve25519",
     "ed25519",
     "ed25519/internal/edwards25519",
@@ -652,12 +674,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:290b8002a96a5f5c1bd8316884f6e2414f5fb1e46a22bbd5a1ff0d45dc944cb3"
+  digest = "1:7427036b6d926b3d1fa0773771820735b35554a98296f1074df440ee30a97296"
   name = "golang.org/x/net"
-  packages = [
-    "context",
-    "websocket",
-  ]
+  packages = ["websocket"]
   pruneopts = "UT"
   revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
 
@@ -747,6 +766,7 @@
     "code.cloudfoundry.org/cli/util",
     "code.cloudfoundry.org/cli/util/randomword",
     "github.com/antonlindstrom/pgstore",
+    "github.com/cf-stratos/mysqlstore",
     "github.com/cloudfoundry/noaa",
     "github.com/cloudfoundry/noaa/consumer",
     "github.com/cloudfoundry/noaa/errors",
@@ -756,11 +776,8 @@
     "github.com/gorilla/securecookie",
     "github.com/gorilla/sessions",
     "github.com/gorilla/websocket",
-    "github.com/cf-stratos/mysqlstore",
     "github.com/kat-co/vala",
     "github.com/labstack/echo",
-    "github.com/labstack/echo/engine",
-    "github.com/labstack/echo/engine/standard",
     "github.com/labstack/echo/middleware",
     "github.com/mattn/go-sqlite3",
     "github.com/mholt/archiver",
