@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
+import { CustomImportModule } from '../../custom-import.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -27,6 +28,7 @@ import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-
 import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
   CloudFoundryCellAppsComponent,
@@ -77,6 +79,7 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
 } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
@@ -91,8 +94,6 @@ import {
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { CustomImportModule } from '../../custom-import.module';
-import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 
 @NgModule({
   imports: [
@@ -145,6 +146,7 @@ import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-f
     UsersRolesSelectComponent,
     UsersRolesConfirmComponent,
     CloudFoundryRoutesComponent,
+    CfAdminAddUserWarningComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

@@ -18,11 +18,10 @@ export class CloudFoundrySpaceSummaryComponent {
     public cfSpaceService: CloudFoundrySpaceService
   ) {
     this.detailsLoading$ = combineLatest([
+      // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfSpaceService.appCount$,
-      cfSpaceService.allSpaceUsers$
     ]).pipe(
       map(() => false),
       startWith(true)
