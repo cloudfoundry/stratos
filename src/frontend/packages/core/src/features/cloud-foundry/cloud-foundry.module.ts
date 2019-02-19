@@ -47,6 +47,9 @@ import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-fou
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
+  CloudFoundryInviteUserLinkComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
+import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
 import {
@@ -86,6 +89,12 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import {
+  UserInviteConfigurationDialogComponent,
+} from './user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteService } from './user-invites/user-invite.service';
+import { InviteUsersCreateComponent } from './users/invite-users/invite-users-create/invite-users-create.component';
+import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
 import { UsersRolesModifyComponent } from './users/manage-users/manage-users-modify/manage-users-modify.component';
@@ -146,6 +155,10 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     UsersRolesSelectComponent,
     UsersRolesConfirmComponent,
     CloudFoundryRoutesComponent,
+    UserInviteConfigurationDialogComponent,
+    InviteUsersComponent,
+    InviteUsersCreateComponent,
+    CloudFoundryInviteUserLinkComponent,
     CfAdminAddUserWarningComponent,
   ],
   providers: [
@@ -162,7 +175,12 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
     CfRolesService,
-    CloudFoundryCellService
+    CloudFoundryCellService,
+    UserInviteService,
   ],
+  entryComponents: [
+    UserInviteConfigurationDialogComponent
+  ]
+
 })
 export class CloudFoundryModule { }

@@ -269,6 +269,14 @@
   revision = "5271c7cb484d44a22b96709894080ea85c8eef14"
 
 [[projects]]
+  digest = "1:3cca54b89f4e60143570d3680cb09d76a59b1a27bbc179d7b175415fe5182356"
+  name = "github.com/domodwyer/mailyak"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "89444b05799b115121931b3b6bd05e820e69dc8b"
+  version = "v3.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:988cfde37f089c50ba1ac8a1032c3f81d2ac0359e1872093b946a30139665eb6"
   name = "github.com/dsnet/compress"
@@ -771,6 +779,7 @@
     "github.com/cloudfoundry/noaa/consumer",
     "github.com/cloudfoundry/noaa/errors",
     "github.com/cloudfoundry/sonde-go/events",
+    "github.com/domodwyer/mailyak",
     "github.com/go-sql-driver/mysql",
     "github.com/gorilla/context",
     "github.com/gorilla/securecookie",

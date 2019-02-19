@@ -1,5 +1,5 @@
-import { Directive, forwardRef, Input } from '@angular/core';
-import { Validator, AbstractControl, NG_VALIDATORS, NG_ASYNC_VALIDATORS } from '@angular/forms';
+import { Directive, Input } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
 
 @Directive({
   selector: '[appUnique]',
