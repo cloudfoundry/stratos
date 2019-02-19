@@ -17,6 +17,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -249,11 +250,18 @@ func main() {
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
+	initedPlugins := make(map[string]interfaces.StratosPlugin)
+
 	// Initialise general plugins
-	for _, plugin := range portalProxy.Plugins {
-		plugin.Init()
+	for name, plugin := range portalProxy.Plugins {
+		if err = plugin.Init(); err == nil {
+			initedPlugins[name] = plugin
+		} else {
+			log.Infof("Plugin %s is disabled: %s", name, err.Error())
+		}
 	}
 
+	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
 
 	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
@@ -813,13 +821,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
-		if err != nil {
-			// Plugin doesn't implement an Endpoint Plugin interface, skip
-			continue
+		if err == nil {
+			// Plugin supports endpoint plugin
+			endpointType := endpointPlugin.GetType()
+			adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 		}
-
-		endpointType := endpointPlugin.GetType()
-		adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 
 		routePlugin, err := plugin.GetRoutePlugin()
 		if err == nil {
@@ -844,6 +850,35 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	}
 }
 
+func (p *portalProxy) AddLoginHook(priority int, function interfaces.LoginHookFunc) error {
+	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, interfaces.LoginHook{
+		Priority: priority,
+		Function: function,
+	})
+	return nil
+}
+
+func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
+	hooks := p.GetConfig().LoginHooks
+	sort.SliceStable(hooks, func(i, j int) bool {
+		return hooks[i].Priority < hooks[j].Priority
+	})
+
+	erred := false
+	for _, hook := range hooks {
+		err := hook.Function(c)
+		if err != nil {
+			erred = true
+			log.Errorf("Failed to execute log in hook: %v", err)
+		}
+	}
+
+	if erred {
+		return fmt.Errorf("Failed to execute one or more login hooks")
+	}
+	return nil
+}
+
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
 func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
@@ -864,7 +899,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 	}
 }
 
-// EchoV2DefaultHTTPErrorHandler ensurews we get V2 error behaviour
+// EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
 func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError

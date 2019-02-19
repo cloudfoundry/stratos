@@ -36,7 +36,7 @@ Please be aware of the following when running Stratos in a production environmen
 
 #### Configure a Session Store Secret
 
-Stratos uses a Session Store Secret to protect the user session cookie. We recommend that you set your own value for this secret - chosing an alphanumeric string of your choice.
+Stratos uses a Session Store Secret to protect the user session cookie. We recommend that you set your own value for this secret - choosing an alphanumeric string of your choice.
 
 You can configure this secret by editing the application manifest and adding to the `env` section, e.g.
 
@@ -47,6 +47,21 @@ applications:
   env:
     SESSION_STORE_SECRET: <your session store secret here>
 ```
+
+#### Pre-configure UAA client used for user invites
+
+> You can skip this step and configure any CFs invite clients via the Stratos UI.
+
+ To set the UAA client for user invites, supply the client id and client secret as environment variables as shown below:
+
+  ```
+  INVITE_USER_CLIENT_ID=<UAA_CLIENT_ID>
+  INVITE_USER_CLIENT_SECRET=<UAA_CLIENT_SECRET>
+  ```
+
+This will set the the UAA client and UAA secret used to invite users for the default CF only.
+
+See the [invite users guide](../../docs/invite-user-guide.md) for more information about user invites in Stratos.
 
 #### Use of the Default Embedded SQLite Database
 

@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { UserInviteService } from '../user-invites/user-invite.service';
 
 function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
   return {
@@ -16,6 +17,7 @@ function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
   styleUrls: ['./cloud-foundry-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
+    UserInviteService,
     CfUserService,
     CloudFoundryEndpointService,
   ]
