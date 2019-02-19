@@ -1,8 +1,9 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { UserFavorite, IFavoriteMetadata } from './../../../store/types/user-favorites.types';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Logout } from '../../../store/actions/auth.actions';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../store/types/internal-events.types';
@@ -11,6 +12,8 @@ import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { TabNavService } from '../../../tab-nav.service';
+import { AddRecentlyVisitedEntityAction } from '../../../store/actions/recently-visited.actions';
+import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-page-header',
@@ -22,6 +25,7 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
+  public _favorite: UserFavorite<IFavoriteMetadata>;
 
   @Input() hideSideNavButton = false;
 
@@ -54,6 +58,34 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   private _tabs: ISubHeaderTabs[];
 
   @Input() showUnderFlow = false;
+
+  @Input() showHistory = true;
+
+  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+    if (favorite && (!this._favorite || (favorite.guid !== this._favorite.guid))) {
+      this._favorite = favorite;
+      const mapperFunction = favoritesConfigMapper.getMapperFunction(favorite);
+      const prettyType = favoritesConfigMapper.getPrettyTypeName(favorite);
+      const prettyEndpointType = favoritesConfigMapper.getPrettyTypeName({
+        endpointType: favorite.endpointType,
+        entityType: 'endpoint'
+      });
+      if (mapperFunction) {
+        const { name, routerLink } = mapperFunction(favorite.metadata);
+        this.store.dispatch(new AddRecentlyVisitedEntityAction({
+          guid: favorite.guid,
+          entityType: favorite.entityType,
+          endpointType: favorite.endpointType,
+          entityId: favorite.entityId,
+          name,
+          routerLink,
+          prettyType,
+          endpointId: favorite.endpointId,
+          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType
+        }));
+      }
+    }
+  }
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;

@@ -63,14 +63,16 @@ export class CfTopLevelPage extends CFPage {
     return this.waitForMetaDataItemComponent('Account Username');
   }
 
-  waitForAdministrator(): MetaDataItemComponent {
-    return this.waitForMetaDataItemComponent('Administrator');
-  }
-
   private waitForMetaDataItemComponent(label: string): MetaDataItemComponent {
     const comp = MetaDataItemComponent.withLabel(element(by.css('app-cloud-foundry-summary-tab')), label);
     comp.waitUntilShown();
     return comp;
+  }
+
+  isUserInviteIsConfigured(isAdmin: boolean = true): promise.Promise<boolean> {
+    return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value =>
+      isAdmin ? value.startsWith('Configured') : value.startsWith('Enabled')
+    );
   }
 
   goToSummaryTab() {
@@ -79,6 +81,10 @@ export class CfTopLevelPage extends CFPage {
 
   goToOrgTab() {
     return this.goToTab('Organizations', 'organizations');
+  }
+
+  goToRoutesTab() {
+    return this.goToTab('Routes', 'routes');
   }
 
   goToUsersTab() {

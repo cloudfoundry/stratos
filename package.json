@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
@@ -45,6 +45,7 @@
     "@angular/common": "^6.1.1",
     "@angular/compiler": "^6.1.1",
     "@angular/core": "^6.1.1",
+    "@angular/flex-layout": "^6.0.0-beta.16",
     "@angular/forms": "^6.1.1",
     "@angular/http": "^6.1.1",
     "@angular/material": "^6.1.0",
@@ -70,6 +71,7 @@
     "rxjs": "^6.2.0",
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "~6.0.0",
+    "stratos-angular6-json-schema-form": "1.0.3",
     "ts-md5": "^1.2.4",
     "web-animations-js": "^2.3.1",
     "xterm": "^3.5.0",

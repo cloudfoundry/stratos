@@ -22,7 +22,7 @@ import { ListConfig } from './../../../../shared/components/list/list.component.
       cfUserService: CfUserService,
       router: Router,
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-      userPerms: CurrentUserPermissionsService
+      userPerms: CurrentUserPermissionsService,
     ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
     deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
   }]

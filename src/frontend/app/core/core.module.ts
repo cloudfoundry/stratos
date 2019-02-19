@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
-import { ClickStopPropagationDirective } from './click-stop-propagation';
+import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { Customizations } from './customizations.types';
 import { DotContentComponent } from './dot-content/dot-content.component';
@@ -24,15 +24,22 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { PortalModule } from '@angular/cdk/portal';
+import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
+import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
+import { MomentModule } from 'ngx-moment';
+
 
 @NgModule({
   imports: [
-    MDAppModule
+    MDAppModule,
+    RouterModule,
+    MomentModule
   ],
   exports: [
     MDAppModule,
     RouterModule,
     FormsModule,
+    MomentModule,
     ReactiveFormsModule,
     LogOutDialogComponent,
     TruncatePipe,
@@ -44,7 +51,9 @@ import { PortalModule } from '@angular/cdk/portal';
     DotContentComponent,
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
-    PortalModule
+    PortalModule,
+    EntityFavoriteStarComponent,
+    RecentEntitiesComponent
   ],
   providers: [
     AuthGuardService,
@@ -69,7 +78,9 @@ import { PortalModule } from '@angular/cdk/portal';
     ClickStopPropagationDirective,
     DotContentComponent,
     ButtonBlurOnClickDirective,
-    PageNotFoundComponentComponent
+    PageNotFoundComponentComponent,
+    EntityFavoriteStarComponent,
+    RecentEntitiesComponent
   ],
   entryComponents: [
     LogOutDialogComponent

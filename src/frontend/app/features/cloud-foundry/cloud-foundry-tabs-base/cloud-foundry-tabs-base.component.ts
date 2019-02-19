@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, first } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -14,6 +14,7 @@ import {
   StratosTabType,
 } from '../../../core/extension/extension-service';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
+import { UserFavoriteEndpoint } from '../../../store/types/user-favorites.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { canUpdateOrgSpaceRoles } from '../cf.helpers';
 
@@ -40,18 +41,31 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
+  public favorite$: Observable<UserFavoriteEndpoint>;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     endpointsService: EndpointsService
   ) {
+
+    this.favorite$ = endpointsService.endpoints$.pipe(
+      first(),
+      map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
+      map(endpoint => new UserFavoriteEndpoint(
+        this.cfEndpointService.cfGuid,
+        'cf',
+        endpoint
+      ))
+    );
+
     const firehoseHidden$ = this.currentUserPermissionsService
       .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
-    const usersHidden$ = cfEndpointService.users$.pipe(
-      startWith(null),
-      map(users => !users)
+    const usersHidden$ = cfEndpointService.usersCount$.pipe(
+      map(count => !count),
+      startWith(true),
     );
 
     const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
@@ -67,6 +81,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         label: 'Cells',
         hidden: cellsHidden$
       },
+      { link: 'routes', label: 'Routes' },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',

@@ -1,0 +1,5 @@
+You have been invited to Cloud Foundry!
+
+Use the link below:
+
+{{ .InviteLink }}

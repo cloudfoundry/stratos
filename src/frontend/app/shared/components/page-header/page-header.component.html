@@ -17,6 +17,8 @@
             </ng-container>
           </div>
           <ng-content></ng-content>
+          <app-entity-favorite-star class="page-header__favorite" *ngIf="_favorite" [favorite]="_favorite">
+          </app-entity-favorite-star>
           <div class="page-header__filler"></div>
           <div #extensionRef>
             <app-extension-buttons *ngIf="actionsKey" [type]="actionsKey"></app-extension-buttons>
@@ -30,6 +32,15 @@
         ">
             |
           </span>
+          <button *ngIf="showHistory" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="history">
+            <mat-icon class="page-header__nav-toggle">history</mat-icon>
+          </button>
+          <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">
+            <div class="page-header__history">
+              <h3>Recent</h3>
+              <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
+            </div>
+          </mat-menu>
           <button *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="menu">
             <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
           </button>
@@ -41,20 +52,19 @@
                   <div class="page-header__username-subtext">user</div>
                   <div>{{ username$ | async }}</div>
                 </div>
-              </div>
-              <div *ngIf="!logoutOnly">
-                <button mat-menu-item routerLink="/about">
-                  <span>About</span>
+                <div *ngIf="!logoutOnly">
+                  <button mat-menu-item routerLink="/about">
+                    <span>About</span>
+                  </button>
+                  <button mat-menu-item routerLink="/user-profile">
+                    <span>Profile</span>
+                  </button>
+                  <div class="page-header__menu-separator"></div>
+                </div>
+                <button mat-menu-item (click)="logout()">
+                  <span>Logout</span>
                 </button>
-                <button mat-menu-item routerLink="/user-profile">
-                  <span>Profile</span>
-                </button>
-                <div class="page-header__menu-separator"></div>
               </div>
-              <button mat-menu-item (click)="logout()">
-                <span>Logout</span>
-              </button>
-            </div>
           </mat-menu>
         </mat-toolbar>
       </div>

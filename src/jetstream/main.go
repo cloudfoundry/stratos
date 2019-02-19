@@ -17,17 +17,20 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
+	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
@@ -42,11 +45,12 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary     = 10
-	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
-	UpgradeVolume       = "UPGRADE_VOLUME"
-	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
-	VCapApplication     = "VCAP_APPLICATION"
+	TimeoutBoundary      = 10
+	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
+	UpgradeVolume        = "UPGRADE_VOLUME"
+	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	VCapApplication      = "VCAP_APPLICATION"
+	defaultSessionSecret = "wheeee!"
 )
 
 var appVersion string
@@ -73,6 +77,32 @@ func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 	log.Info("Graceful shut down complete")
 }
 
+// getEnvironmentLookup return a search path for configuration settings
+func getEnvironmentLookup() *env.VarSet {
+	// Make environment lookup
+	envLookup := env.NewVarSet()
+
+	// Environment variables directly set trump all others
+	envLookup.AppendSource(os.LookupEnv)
+
+	// If running in CloudFoundry, fallback to a user provided service (if set)
+	cfApp, err := cfenv.Current()
+	if err == nil {
+		envLookup.AppendSource(env.NewLookupFromUPS(cfApp, os.Getenv("CF_UPS_NAME")))
+	}
+
+	// Fallback to a "config.properties" files in our directory
+	envLookup.AppendSource(config.NewConfigFileLookup("./config.properties"))
+
+	// Fall back to "default.config.properties" in our directory
+	envLookup.AppendSource(config.NewConfigFileLookup("./default.config.properties"))
+
+	// Fallback to individual files in the "/etc/secrets" directory
+	envLookup.AppendSource(config.NewSecretsDirLookup("/etc/secrets"))
+
+	return envLookup
+}
+
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 	log.SetOutput(os.Stdout)
@@ -86,15 +116,18 @@ func main() {
 	// Register time.Time in gob
 	gob.Register(time.Time{})
 
+	// Create common method for looking up config
+	envLookup := getEnvironmentLookup()
+
 	// Check to see if we are running as the database migrator
-	if migrateDatabase() {
+	if migrateDatabase(envLookup) {
 		// End execution
 		return
 	}
 
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig
-	portalConfig, err := loadPortalConfig(portalConfig)
+	portalConfig, err := loadPortalConfig(portalConfig, envLookup)
 	if err != nil {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
@@ -105,10 +138,11 @@ func main() {
 	}
 
 	log.Info("Configuration loaded.")
-	isUpgrading := isConsoleUpgrading()
+	isUpgrading := isConsoleUpgrading(envLookup)
 
 	if isUpgrading {
-		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
+		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
+		start(portalConfig, &portalProxy{env: envLookup}, &setupMiddleware{}, true)
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
@@ -127,7 +161,7 @@ func main() {
 
 	// Load database configuration
 	var dc datastore.DatabaseConfig
-	dc, err = loadDatabaseConfig(dc)
+	dc, err = loadDatabaseConfig(dc, envLookup)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,7 +175,7 @@ func main() {
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = initConnPool(dc)
+	databaseConnectionPool, err = initConnPool(dc, envLookup)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -156,8 +190,25 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Before any changes it, log that we detected a non-default session store secret, so we can tell it has been set from the log
+	if portalConfig.SessionStoreSecret != defaultSessionSecret {
+		log.Info("Session Store Secret detected okay")
+	}
+
+	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
+		configPlugin(envLookup, &portalConfig)
+	}
+
+	if portalConfig.SessionStoreSecret == defaultSessionSecret {
+		// The Session store secret needs to be set for secure cookies to work properly
+		// We should not be using the default value - this indicates that it has not been set by the user
+		// So for saftey, set a random value
+		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
+		portalConfig.SessionStoreSecret = uuid.NewV4().String()
+	}
+
 	// Initialize session store for Gorilla sessions
-	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
+	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry, envLookup)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -176,7 +227,7 @@ func main() {
 	log.Info("Session store initialized.")
 
 	// Setup the global interface for the proxy
-	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions)
+	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
@@ -199,11 +250,18 @@ func main() {
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
+	initedPlugins := make(map[string]interfaces.StratosPlugin)
+
 	// Initialise general plugins
-	for _, plugin := range portalProxy.Plugins {
-		plugin.Init()
+	for name, plugin := range portalProxy.Plugins {
+		if err = plugin.Init(); err == nil {
+			initedPlugins[name] = plugin
+		} else {
+			log.Infof("Plugin %s is disabled: %s", name, err.Error())
+		}
 	}
 
+	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
 
 	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
@@ -216,6 +274,12 @@ func main() {
 	log.Info("Unable to start Stratos JetStream backend")
 
 }
+
+// GetDatabaseConnection makes db connection available to plugins
+func (portalProxy *portalProxy) GetDatabaseConnection() *sql.DB {
+	return portalProxy.DatabaseConnectionPool
+}
+
 func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {
 
 	addSetupMiddleware := new(setupMiddleware)
@@ -260,7 +324,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 
 func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
 	// For SSO, override the value loaded from the config file, so that this is what we use
-	if !config.IsSet("SSO_LOGIN") {
+	if !portalProxy.Env().IsSet("SSO_LOGIN") {
 		portalProxy.Config.SSOLogin = configuration.UseSSO
 	}
 }
@@ -310,11 +374,11 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 	return key, nil
 }
 
-func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
+func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	log.Debug("initConnPool")
 
 	// initialize the database connection pool
-	pool, err := datastore.GetConnection(dc)
+	pool, err := datastore.GetConnection(dc, env)
 	if err != nil {
 		return nil, err
 	}
@@ -345,7 +409,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, *sessions.Options, error) {
+func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
@@ -397,16 +461,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	return sessionStore, sessionStore.Options, err
 }
 
-func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, error) {
+func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	// Load config.properties if it exists, otherwise look for default.config.properties
-	err := config.LoadConfigFile("./config.properties")
-	if os.IsNotExist(err) {
-		config.LoadConfigFile("./default.config.properties")
-	}
-
-	if err := config.Load(&pc); err != nil {
+	if err := config.Load(&pc, env.Lookup); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
 	}
 
@@ -423,17 +481,17 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	return pc, nil
 }
 
-func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
+func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
 
-	parsedDBConfig, err := datastore.ParseCFEnvs(&dc)
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dc, env)
 	if err != nil {
 		return dc, errors.New("Could not parse Cloud Foundry Services environment")
 	}
 
 	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
-	} else if err := config.Load(&dc); err != nil {
+	} else if err := config.Load(&dc, env.Lookup); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
@@ -483,7 +541,7 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options) *portalProxy {
+func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
 	log.Debug("newPortalProxy")
 
 	// Generate cookie name - avoids issues if the cookie domain is changed
@@ -506,6 +564,7 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
 		AuthProviders:          make(map[string]interfaces.AuthProvider),
+		env:                    env,
 	}
 
 	// Initialize built-in auth providers
@@ -564,6 +623,8 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
 
 	// Root level middleware
 	if !isUpgrade {
@@ -588,13 +649,17 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	if !isUpgrade {
 		e.Use(errorLoggingMiddleware)
 	}
-	e.Use(retryAfterUpgradeMiddleware)
+	e.Use(bindToEnv(retryAfterUpgradeMiddleware, p.Env()))
 
 	if !isUpgrade {
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
-	var engine *standard.Server
+	if isUpgrade {
+		go stopEchoWhenUpgraded(e, p.Env())
+	}
+
+	var engineErr error
 	address := config.TLSAddress
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
@@ -602,22 +667,16 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 			return err
 		}
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine = standard.WithTLS(address, certFile, certKeyFile)
-
+		engineErr = e.StartTLS(address, certFile, certKeyFile)
 	} else {
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine = standard.New(address)
+		engineErr = e.Start(address)
 	}
 
-	if isUpgrade {
-		go stopEchoWhenUpgraded(engine)
-	}
-
-	engineErr := e.Run(engine)
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
-			log.Warnf("Failed to start HTTP/S server", engineErr)
+			log.Warnf("Failed to start HTTP/S server: %v+", engineErr)
 		}
 	}
 
@@ -681,7 +740,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.Use(middlewarePlugin.EchoMiddleware)
 	}
 
-	staticDir, staticDirErr := getStaticFiles()
+	staticDir, staticDirErr := getStaticFiles(p.Env().String("UI_PATH", "./ui"))
 
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
@@ -703,7 +762,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
-	// Callback is use dby both login to Stratos and login to an Endpoint
+	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
@@ -762,13 +821,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
-		if err != nil {
-			// Plugin doesn't implement an Endpoint Plugin interface, skip
-			continue
+		if err == nil {
+			// Plugin supports endpoint plugin
+			endpointType := endpointPlugin.GetType()
+			adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 		}
-
-		endpointType := endpointPlugin.GetType()
-		adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 
 		routePlugin, err := plugin.GetRoutePlugin()
 		if err == nil {
@@ -785,9 +842,41 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
 		e.Group("", middleware.Gzip()).Static("/", staticDir)
-		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
+		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
 		log.Info("Serving static UI resources")
+	} else {
+		// Not serving UI - use V2 Error compatability error handler
+		e.HTTPErrorHandler = echoV2DefaultHTTPErrorHandler
 	}
+}
+
+func (p *portalProxy) AddLoginHook(priority int, function interfaces.LoginHookFunc) error {
+	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, interfaces.LoginHook{
+		Priority: priority,
+		Function: function,
+	})
+	return nil
+}
+
+func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
+	hooks := p.GetConfig().LoginHooks
+	sort.SliceStable(hooks, func(i, j int) bool {
+		return hooks[i].Priority < hooks[j].Priority
+	})
+
+	erred := false
+	for _, hook := range hooks {
+		err := hook.Function(c)
+		if err != nil {
+			erred = true
+			log.Errorf("Failed to execute log in hook: %v", err)
+		}
+	}
+
+	if erred {
+		return fmt.Errorf("Failed to execute one or more login hooks")
+	}
+	return nil
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
@@ -799,22 +888,49 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 		}
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
-		if strings.Index(c.Request().URI(), "/pp") != 0 && code == 404 {
+		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
 			c.File(path.Join(staticDir, "index.html"))
+			// Let the default handler handle it
+			defaultHandler(err, c)
+		} else {
+			// Use V2 Error compatability error handler
+			echoV2DefaultHTTPErrorHandler(err, c)
 		}
-
-		// Let the default handler handle it
-		defaultHandler(err, c)
 	}
 }
 
-func getStaticFiles() (string, error) {
-
-	uiFolder, _ := config.GetValue("UI_PATH")
-	if len(uiFolder) == 0 {
-		uiFolder = "./ui"
+// EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
+// i.e. no wrapping in 'message' JSON object
+func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	msg := http.StatusText(code)
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+		if msgStr, ok := he.Message.(string); ok {
+			msg = msgStr
+		} else {
+			msg = he.Error()
+		}
+		if he.Internal != nil {
+			err = fmt.Errorf("%v, %v", err, he.Internal)
+		}
 	}
 
+	// Send response
+	if !c.Response().Committed {
+		if c.Request().Method == http.MethodHead { // Issue #608
+			c.NoContent(code)
+		} else {
+			c.String(code, msg)
+		}
+	}
+
+	if err != nil {
+		c.Logger().Error(err)
+	}
+}
+
+func getStaticFiles(uiFolder string) (string, error) {
 	dir, err := filepath.Abs(uiFolder)
 	if err == nil {
 		// Check if folder exists
@@ -826,13 +942,13 @@ func getStaticFiles() (string, error) {
 	return "", errors.New("UI folder not found")
 }
 
-func isConsoleUpgrading() bool {
+func isConsoleUpgrading(env *env.VarSet) bool {
 
-	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
-	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+	upgradeVolume, noUpgradeVolumeOK := env.Lookup(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameOK := env.Lookup(UpgradeLockFileName)
 
 	// If any of those properties are not set, consider Console is running in a non-upgradeable environment
-	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+	if !noUpgradeVolumeOK || !noUpgradeLockFileNameOK {
 		return false
 	}
 
@@ -847,10 +963,10 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *standard.Server) {
-	for isConsoleUpgrading() {
+func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
+	for isConsoleUpgrading(env) {
 		time.Sleep(1 * time.Second)
 	}
-	log.Info("Stratos upgrade has completed! Shutting down Upgrade web server instance")
+	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
 }

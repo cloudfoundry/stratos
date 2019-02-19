@@ -1,7 +1,9 @@
+import { CreatePagination, ResetPagination, ClearPaginationOfType, ClearPaginationOfEntity } from './../../actions/pagination.actions';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS,
+  EndpointAction,
 } from '../../actions/endpoint.actions';
 import {
   ADD_PARAMS,
@@ -19,16 +21,17 @@ import {
   SET_PAGE_BUSY,
   SET_PARAMS,
   SET_RESULT_COUNT,
+  UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
-import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
 import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
+import { paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
@@ -41,37 +44,19 @@ import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
-import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
+import { getActionKey, getActionType, getPaginationKeyFromAction, getDefaultPaginationEntityState } from './pagination-reducer.helper';
+import { Action } from '@ngrx/store';
 
-export const defaultClientPaginationPageSize = 9;
 
-const defaultPaginationEntityState: PaginationEntityState = {
-  pageCount: 0,
-  currentPage: 1,
-  totalResults: 0,
-  ids: {},
-  pageRequests: {
-  },
-  params: {
-  },
-  clientPagination: {
-    pageSize: defaultClientPaginationPageSize,
-    currentPage: 1,
-    filter: {
-      string: '',
-      items: {}
-    },
-    totalResults: 0
-  }
-};
 
-export function getDefaultPaginationEntityState(): PaginationEntityState {
-  return {
-    ...defaultPaginationEntityState
-  };
+
+
+// Initialized when all entity types have been registered
+export let defaultPaginationState = {};
+
+export function setDefaultPaginationState(state: any) {
+  defaultPaginationState = state;
 }
-
-export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
@@ -113,41 +98,44 @@ export function createPaginationReducer(types: [string, string, string]) {
 }
 
 function paginationReducer(updatePagination, types) {
-  const [requestType, successType, failureType] = types;
   return function (state, action) {
     state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
   };
 }
 
-function paginate(action, state, updatePagination) {
+function paginate(action: Action, state: PaginationState, updatePagination) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
   }
 
   if (action.type === CREATE_PAGINATION) {
-    return createNewPaginationSection(state, action, getDefaultPaginationEntityState());
+    return createNewPaginationSection(state, action as CreatePagination, getDefaultPaginationEntityState());
   }
 
   if (action.type === CLEAR_PAGES) {
     return paginationClearPages(state, action);
   }
-
-  if (action.type === RESET_PAGINATION && !action.keepPages) {
-    return paginationResetPagination(state, action);
+  const resetAction = action as ResetPagination;
+  if (action.type === RESET_PAGINATION) {
+    return paginationResetPagination(state, resetAction);
   }
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-    const clearEntityType = action.entityKey || 'application';
+    const clearEntityType = (action as ClearPaginationOfType).entityKey || 'application';
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 
   if (action.type === CLEAR_PAGINATION_OF_ENTITY) {
-    return paginationClearOfEntity(state, action);
+    return paginationClearOfEntity(state, action as ClearPaginationOfEntity);
   }
 
   if (isEndpointAction(action)) {
-    return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
+    return clearEndpointEntities(state, action as EndpointAction, getDefaultPaginationEntityState());
+  }
+
+  if (action.type === UPDATE_MAXED_STATE) {
+    return paginationMaxReached(state, action);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

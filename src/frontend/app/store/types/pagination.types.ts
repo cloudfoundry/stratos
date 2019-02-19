@@ -31,11 +31,11 @@ export interface PaginationClientPagination {
   totalResults: number;
 }
 
-export class PaginationEntityState {
-  currentPage = 0;
-  totalResults = 0;
-  pageCount = 0;
-  ids = {};
+export interface PaginationEntityState {
+  currentPage: number;
+  totalResults: number;
+  pageCount: number;
+  ids: { [id: number]: string[] };
   params: PaginationParam;
   pageRequests: {
     [pageNumber: string]: ActionState
@@ -45,6 +45,15 @@ export class PaginationEntityState {
    * The pagination key from where we share our values.
    */
   seed?: string;
+  /**
+   * Is the pagination state in maxed mode. This means the initial collection contained too many entities too handle, see PaginatedAction
+   * flattenPagination & flattenPaginationMax
+   */
+  maxedMode?: boolean;
+  /**
+   * Does the collection size exceed the max allowed? Used in conjunction maxedMode.
+   */
+  currentlyMaxed?: boolean;
 }
 
 export interface BasePaginatedAction extends Action {
@@ -54,7 +63,14 @@ export interface BasePaginatedAction extends Action {
 
 export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   actions: string[];
+  /*
+   * Fetch all pages and add them to a single page
+   */
   flattenPagination?: boolean;
+  /*
+   * The maximum number of entities to fetch. Note - Should be equal or higher than the page size
+   */
+  flattenPaginationMax?: number;
   initialParams?: PaginationParam;
   pageNumber?: number;
   options?: {

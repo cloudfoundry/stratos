@@ -34,6 +34,7 @@ export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
+export const userFavoritesSchemaKey = 'userFavorites';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -66,7 +67,7 @@ export class EntitySchema extends schema.Entity {
     private entityKey: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
-    public relationKey?: string,
+    public relationKey?: string
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
@@ -198,6 +199,7 @@ const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema,
     apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    space: new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
@@ -309,8 +311,8 @@ const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchema
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
-const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
+const UserFavoritesSchemaKey = new EntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,
@@ -350,6 +352,9 @@ const orgUserEntity = {
     spaces: [SpaceEmptySchema]
   }
 };
+
+const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
   return new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
@@ -395,6 +400,9 @@ export function entityFactory(key: string): EntitySchema {
   return entity;
 }
 
+export function addEntityToCache(entitySchema: EntitySchema) {
+  entityCache[entitySchema.key] = entitySchema;
+}
+
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
 entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
-

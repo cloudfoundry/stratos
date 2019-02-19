@@ -6,12 +6,39 @@ import { AppState } from '../store/app-state';
 import { appReducers } from '../store/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../store/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../store/types/user.types';
+import { getEntitiesFromExtensions } from '../core/extension/extension-service';
+import { EntitySchema, addEntityToCache } from '../store/helpers/entity-factory';
+import { defaultCfEntitiesState } from '../store/types/entity.types';
+import { registerAPIRequestEntity } from '../store/reducers/api-request-reducers.generator';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
 export function getInitialTestStoreState(): AppState {
+  const entities = getEntitiesFromExtensions();
+  const state = getDefaultInitialTestStoreState();
+  entities.forEach(entity => {
+    state.pagination[entity.entityKey] = {};
+    state.request[entity.entityKey] = {};
+    state.requestData[entity.entityKey] = {};
+  });
+
+  return state;
+}
+
+function getDefaultInitialTestStoreState(): AppState {
+
   return {
+    recentlyVisited: {
+      entities: {},
+      hits: []
+    },
+    userFavoritesGroups: {
+      busy: false,
+      error: false,
+      message: '',
+      groups: {}
+    },
     auth: {
       loggedIn: true,
       loggingIn: false,
@@ -282,6 +309,7 @@ export function getInitialTestStoreState(): AppState {
       },
       stack: {},
       space: {},
+      userFavorites: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -583,7 +611,8 @@ export function getInitialTestStoreState(): AppState {
       service: {},
       gitCommits: {},
       domain: {},
-      metrics: {}
+      metrics: {},
+      servicePlan: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -632,6 +661,7 @@ export function getInitialTestStoreState(): AppState {
       featureFlag: {},
       securityRule: {},
       buildpack: {},
+      userFavorites: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3879,6 +3909,7 @@ export function getInitialTestStoreState(): AppState {
       space_quota_definition: {},
     },
     requestData: {
+      userFavorites: {},
       servicePlanVisibility: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
@@ -21832,3 +21863,11 @@ export function createBasicStoreModule(initialState: Partial<AppState> = getInit
   );
 }
 
+export function registerEntitiesForTesting(entities) {
+  entities.forEach(entity => {
+    const entitySchema = new EntitySchema(entity.entityKey, entity.definition, entity.options, entity.relationKey);
+    addEntityToCache(entitySchema);
+    defaultCfEntitiesState[entity.entityKey] = {};
+    registerAPIRequestEntity(entity.entityKey);
+  });
+}

@@ -6,9 +6,9 @@ export interface JetStreamError {
   errorResponse: any;
 }
 
-export function isJetStreamError(obj): JetStreamError {
+export function isJetStreamError(obj: Partial<JetStreamError>): JetStreamError {
   return obj &&
     obj.error && obj.error.status && obj.error.statusCode &&
-    obj.errorResponse ?
+    'errorResponse' in obj ?
     obj as JetStreamError : null;
 }

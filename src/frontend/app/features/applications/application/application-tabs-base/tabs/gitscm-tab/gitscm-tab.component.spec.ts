@@ -12,8 +12,8 @@ import { GitSCMTabComponent } from './gitscm-tab.component';
 import { DatePipe } from '@angular/common';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../../../../core/github.helpers';
-import { HttpModule, Http, ConnectionBackend } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
@@ -34,17 +34,13 @@ describe('GitSCMTabComponent', () => {
           }
         ),
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule,
+        HttpClientTestingModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         DatePipe,
-        Http,
-        {
-          provide: ConnectionBackend,
-          useClass: MockBackend
-        }
       ]
     })
       .compileComponents();

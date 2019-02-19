@@ -40,7 +40,7 @@ export class GithubEffects {
               entities: { gitRepo: {} },
               result: []
             } as NormalizedResponse;
-            const id = repoDetails.full_name;
+            const id = scmType + '-' + repoDetails.full_name;
             mappedData.entities.gitRepo[id] = {
               entity: repoDetails,
               metadata: {}

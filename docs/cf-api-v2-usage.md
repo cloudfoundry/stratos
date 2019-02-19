@@ -31,8 +31,8 @@ Stratos exercises many features of the Cloud Foundry v2 API, in order to underst
 
 ### Entity Relations & Validation
 - Cloud Foundry entities (organisation, route, service plan, etc) are stored client side in an entity store
-- The console provides methods to fetch an entity or collection of entities from the store. At this time the console states if any of the
-  entity's relations are required, for instance when fetching an organisation the spaces and services properties are required
+- The console provides methods to fetch an entity or collection of entities from the store. At this time Stratos states if any of the
+  entity's relations are required, for instance when fetching an organisation the spaces and services properties may be required
 - The console checks if the required entity/s exist in the store.
   - If they're missing they're then fetched via the API, including any required relationships
   - If they exist in the store their relations are checked. Any missing relations are fetched using the `<relation name>_url` property
@@ -41,9 +41,9 @@ Stratos exercises many features of the Cloud Foundry v2 API, in order to underst
 - Example 1
   - To filter the applications in the applications list by cf/org/space we fetch a list of organisations and state each org must have it's
     spaces property
-      - The resulting org entity will only have the spaces relation, each space will have no other relation
+      - The resulting org entity will only have the space's relation, each space will have no other relation
   - The user navigates to a space summary screen
-  - The space summary screen states the space should applications, service instances, space quoata, service binding, etc
+  - The space summary screen states the space should contain applications, service instances, space quota, service binding, etc
   - Entity validation will fetch the missing relations using the `_url` of the relation
 - Examples 2
   - To show the applications in the applications list we fetch a list of apps with the following relations
@@ -105,21 +105,20 @@ the console but also how we have to fetch data.
 - We provide a way for users of all types to view a list of users (at the cf, organisation and space levels) and their roles
 - We have to fetch this information differently between CF administrators with certain scopes and non-cf administrators
 - CF Admins can list users via `/users`
-- Non-CF admins have to fetch users via each org endpoint `/organization/<guid>/users`.
-  - We hide this feature if there are too many organisations.
-  - We have to extract user roles from the `organization` response rather than the user's relations, as the `<x>_url` referenced by the
-    entities in `/users` is only allowed for the connected user. Calls to fetch `<x>_url` for entities other than the connected user result
-    in a api permission error.
+- Non-CF admins cannot access `/users` list (aside from themselves)
+  - At the CF level we do not show a list of all users
+  - At the org level we show all users via `organizations/${guid}/users`
+  - At the space level we show all users via `spaces/${guid}/user_roles`
 
 #### Permissions
 
 - Permissions are dictated by the admin/non-admin state of the connected user, cf feature flags and all of the users organisation and space roles
-- For CF admins we skip fetching roles, as there admin state overrides roles
-- For non-admins we hit each `users/<non-admin's guid>/<role>` endpoint, there's a lot of duplicated data here
+- For CF admins we skip fetching roles, as their admin state overrides roles
+- For non-admins we hit each `users/<non-admin's guid>/<role>` endpoint, there's a lot of duplicated data (orgs and spaces) here
 
 ## API Parameters
 
-### Relations (`inline-relations-depth`, `include-relations`)
+### Relations (`include-relations`, `inline-relations-depth`)
 
 In order to support the entity validation process described above we make heavy use of the generic `inline-relations-depth` and `include-relations` parameters
 
@@ -179,6 +178,14 @@ missing in the api response. If the missing application is not already in the st
   - A route is created in a space, however cannot filter routes via space
   - Service brokers can be filtered by space, however not by organisation
 
+## Scaling
+
+We've recently started updating a lot of features to be sensitive of CFs with large collections of entities. This involves...
+- Local Lists will check the total number of results before fetching them all. If too high we refuse to show the table/cards.
+- Counts of entities are done via `results-per-page` of 1 and `total_results` instead of fetching all entities
+- Inline relations of one to many, and the count might be too high, are removed and the functionality that requires them reworked
+  - For instance space --> routes
+  - Some will remain the same, for instance service --> service plans
 
 ## API Examples
 
@@ -701,9 +708,9 @@ Endpoint | Sorted Locally | Sorted via API | Filtered Locally | Filtered via API
 `apps/${guid}/service_bindings` | `created_at`
 `apps` | __*`name`*__, __*`instances`*__, __*`disk_quota`*__, __*`memory`*__, `created_at` | - | `name`, `organisation`, `space` | `organisation`, `space`
 `organizations/${orgGuid}/spaces` | __*`name`*__, `created_at` | - | `name` | -
-`organizations`| __*`name`*__, `created_at` | - | `name` | -
+`organizations`| `name`, `created_at` | - | `name` | -
 `organizations/${guid}/users` | __*`username`*__ | - | __*`username`*__
-`spaces` | __*`name`*__
+`spaces` | `name`
 `spaces/${spaceGuid}/routes` | - | `created_at` | - | - | Yes | __*Host*__
 `spaces/${spaceGuid}/apps` | - | `created_at` | - | - | Yes | __*Name*__, __*Status*__
 `spaces/${spaceGuid}/services` | __*`name`*__ |  `created_at` | - | - |
@@ -726,6 +733,8 @@ __*``*__
 
 ### Inline Relations
 Below is a list of all the inline relations we use for each of the more fleshed out v3 endpoints of apps, spaces and organisations.
+
+> Note - Some of the one to many relations will be removed in the near future to support scaling, see [Scaling](#Scaling)
 
 #### Application
 Endpoint | Inline Relations
@@ -784,8 +793,9 @@ In terms of api requests we also make use of...
 
 ### Cloud Foundry, Organisation and Space Summary Information
 In the `Cloud Foundry` section of Stratos we show summary pages at the CF, Org and Space levels. These consist of information from the core
-cf/org/space but also statistic such as number of users or memory used within that cf/org/sapce. The only way to fetch these stats is via
-requesting a large amount of additional data, either inline with the org/space or as separate requests.
+cf/org/space but also statistics such as number of users or memory used within that cf/org/space. 
+Some of these can be fetched by `results-per-page` of 1 and `total_results`, however others are derived and require fetching a large amount
+of additional data, either inline with the org/space or as separate requests (`Memory usage` is the count of memory per instance per app).
 Below is a table showing the stats at each level. The counts are respective of that level (number of routes in that specific cf, org or space)
 
 Stat/Info | CF Summary | Org Summary | Space Summary
@@ -798,13 +808,12 @@ Memory Usage | *yep* | *yep* | *yep*
 No. of Routes | | *yep*| *yep*
 No. of Private Domains | |*yep*
 No. of Service Instances | | *yep*| *yep*
-Last 10 updated apps | *yep* | *yep* | *yep*
 
 ## V2 Summary
 
 ### Current v2 Issues
 
-- Most lists fetch all entities up front to provide a reasonable level of sorting and filtering
+- Most lists will fetch all entities up front to provide a reasonable level of sorting and filtering
   - API provides limited sorting and filtering capabilities
   - Sorting is mostly just on `creation_date`
   - Filtering sometimes contains org, space and name, but not all
@@ -813,18 +822,19 @@ Last 10 updated apps | *yep* | *yep* | *yep*
   organisation, number of users etc) requires fetching all entities of a certain type. This can be quite a costly set of requests.
   > Desired - `counts` API which, given a filter, could sum up a selection of numerical properties of collection of entities. Some of this
     may already be possible by making individual requests with `results-per-page=1` & `total_results` and `q` filters, however a neat way to
-    combine these into a single request would be awesome
+    combine these into a single request would be awesome. For instance in a single request, for an org, fetch total number of apps, app
+    instances, routes, etc)
 - Determining an informative application state requires an additional request to the `application/<guid>/stats` endpoint.
   > Desired - It would massively improve Stratos performance if the APIs to list applications and retrieve a specific application could
     return the app stats for the application(s). If this is not possibly, an app stats call that can return stats for all running
     applications would help.
 - Fetching a list of users for non-admins can be expensive if there are many organizations.
   > Desired - In an ideal world non-admins would be able to hit `/users` and get the same response as hitting all if their visible
-    `organization/guid/users` endpoints.
+    `organization/${guid}/users` endpoints.
 - The user entities that are returned by the `/users` request contain a lot of duplicated organisation and space entities.
   > Desired - Entities are listed in a common bucket and referenced by guid inline. Think this might be how v3 works
 - The `<role>_url` in a user entity can only be called by an administrator or by the same user
-  > Desired - URL behaves as per the `/users` suggestion above the response contains the organisaitons that are visible to the user that
+  > Desired - URL behaves as per the `/users` suggestion above the response contains the organisations that are visible to the user that
     calls the url
 - `include-relations` works by specifying the name of the child property. If the `inline-relations-depth` is greater than one this can lead
  relations being fetched that might not actually be required

@@ -131,7 +131,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
-      const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
+      const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
         gitBranchesSchemaKey,
         entityFactory(gitBranchesSchemaKey),
@@ -157,8 +157,9 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   }
 
   private setDeployedCommitDetails() {
+    const scmType = this.scm.getType();
     this.store.select(
-      selectEntity<APIResource<GitCommit>>(gitCommitSchemaKey, this.projectName + '-' + this.deployedCommitSha))
+      selectEntity<APIResource<GitCommit>>(gitCommitSchemaKey, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
       .pipe(
         filter(deployedCommit => !!deployedCommit),
         first(),

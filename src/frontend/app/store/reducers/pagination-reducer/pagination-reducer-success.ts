@@ -1,5 +1,4 @@
 import { PaginationEntityState } from '../../types/pagination.types';
-import { spreadClientPagination } from './pagination-reducer.helper';
 
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
   const { apiAction, response, result } = action;
@@ -7,7 +6,7 @@ export function paginationSuccess(state: PaginationEntityState, action): Paginat
   totalResults = totalResults || (response ? response.result.length : state.totalResults);
   totalPages = totalPages || (response ? response.totalPages : state.pageCount);
   const page = apiAction.pageNumber || state.currentPage;
-  const pageResult = result || (response ? response.result : state[page]);
+  const pageResult = result || (response ? response.result : state.ids[page]);
 
   return {
     ...state,
@@ -26,7 +25,7 @@ export function paginationSuccess(state: PaginationEntityState, action): Paginat
     pageCount: totalPages,
     totalResults,
     clientPagination: {
-      ...spreadClientPagination(state.clientPagination),
+      ...state.clientPagination,
       totalResults
     }
   };

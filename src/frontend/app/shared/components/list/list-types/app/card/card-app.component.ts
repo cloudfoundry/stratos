@@ -4,20 +4,19 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { IApp } from '../../../../../../core/cf-api.types';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/app-state';
-import { endpointSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-  CardStatus,
-} from '../../../../application-state/application-state.service';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
+import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { IAppFavMetadata } from '../../../../../../cf-favourite-types';
 
 @Component({
   selector: 'app-card-app',
@@ -34,6 +33,8 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   multipleConnectedEndpoints$: Observable<boolean>;
   entityConfig: ComponentEntityMonitorConfig;
 
+  public favorite: UserFavorite<IAppFavMetadata>;
+
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService
@@ -48,6 +49,8 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
     this.endpointName$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.row.entity.cfGuid)).pipe(
       map(endpoint => endpoint ? endpoint.name : '')
     );
+
+    this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey);
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(

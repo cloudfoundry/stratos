@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { PaginationClientFilter, PaginationParam, BasePaginatedAction } from '../types/pagination.types';
+import { BasePaginatedAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
@@ -17,6 +17,8 @@ export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
+export const REMOVE_ID_FROM_PAGINATION = '[Pagination] Remove id from pagination';
+export const UPDATE_MAXED_STATE = '[Pagination] Update maxed state';
 
 export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
   const key = `${type}-${id}`;
@@ -30,7 +32,7 @@ export class ClearPaginationOfType implements Action {
 }
 
 export class ClearPaginationOfEntity implements Action {
-  constructor(public entityKey: string, public entityGuid) {
+  constructor(public entityKey: string, public entityGuid, public paginationKey?: string) {
   }
   type = CLEAR_PAGINATION_OF_ENTITY;
 }
@@ -155,4 +157,14 @@ export class RemoveParams implements BasePaginatedAction {
   ) {
   }
   type = REMOVE_PARAMS;
+}
+
+export class UpdatePaginationMaxedState implements Action {
+  type = UPDATE_MAXED_STATE;
+  constructor(
+    public max: number,
+    public allEntities: number,
+    public entityKey: string,
+    public paginationKey: string
+  ) { }
 }

@@ -42,7 +42,7 @@ func GetOrderedMigrations() []stratosMigrationStep {
 func ApplyMigrations(conf *goose.DBConf, db *sql.DB) error {
 	current, err := goose.EnsureDBVersion(conf, db)
 	if err != nil {
-		return fmt.Errorf("Failed to get database version")
+		return fmt.Errorf("Failed to get database version: %s", err.Error())
 	}
 
 	log.Println("========================")

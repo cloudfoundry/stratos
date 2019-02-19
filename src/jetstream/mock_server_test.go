@@ -12,8 +12,8 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
@@ -71,7 +71,7 @@ const mockURLString = "http://localhost:9999/some/fake/url/"
 
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
-	ctx := e.NewContext(standard.NewRequest(req, nil), standard.NewResponse(res, nil))
+	ctx := e.NewContext(req, res)
 
 	return e, ctx
 }
@@ -138,7 +138,7 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		CFAdminIdentifier:    CFAdminIdentifier,
 	}
 
-	pp := newPortalProxy(pc, db, nil, nil)
+	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)
@@ -252,7 +252,7 @@ const mockUAAToken = `eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eX
 
 var mockTokenExpiry = time.Now().AddDate(0, 0, 1).Unix()
 
-var mockUAAResponse = UAAResponse{
+var mockUAAResponse = interfaces.UAAResponse{
 	AccessToken:  mockUAAToken,
 	RefreshToken: mockUAAToken,
 }

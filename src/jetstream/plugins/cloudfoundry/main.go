@@ -86,15 +86,13 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfac
 
 func (c *CloudFoundrySpecification) Init() error {
 	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
-	c.portalProxy.GetConfig().LoginHook = c.cfLoginHook
-
+	c.portalProxy.AddLoginHook(0, c.cfLoginHook)
 	return nil
 }
 
 func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
-
 	// CF auto reg url missing, continue as normal
 	if cfAPI == "" {
 		return nil
@@ -118,13 +116,14 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
 			return nil
 		}
-
-		if c.portalProxy.GetConfig().CloudFoundryInfo != nil {
-			c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
-		}
 	} else {
 		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
 	}
+
+	if c.portalProxy.GetConfig().CloudFoundryInfo == nil {
+		c.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{}
+	}
+	c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
 
 	log.Infof("Determining if user should auto-connect to %s.", cfAPI)
 
@@ -136,7 +135,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
 	if ok && cfTokenRecord.Disconnected {
 		// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
-		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previsouly disoconnected). ", cfAPI)
+		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previously disconnected). ", cfAPI)
 	} else {
 		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
 

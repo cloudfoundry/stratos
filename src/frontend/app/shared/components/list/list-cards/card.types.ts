@@ -4,5 +4,5 @@ import { CardsComponent } from './cards.component';
 export const listCardComponents = [
   CardsComponent,
   CardComponent,
-  ...listCards,
+  ...listCards
 ];

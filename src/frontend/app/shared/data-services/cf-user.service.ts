@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
+import { Http } from '@angular/http';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { environment } from '../../../environments/environment';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
+  fetchTotalResults,
+  filterEntitiesByGuid,
   isOrgAuditor,
   isOrgBillingManager,
   isOrgManager,
@@ -16,12 +18,12 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions,
-  filterEntitiesByGuid,
 } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllOrgUsers } from '../../store/actions/organization.actions';
-import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
+import { GetAllSpaceUsers } from '../../store/actions/space.actions';
+import { GetAllUsersAsAdmin, GetUser } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import { cfUserSchemaKey, entityFactory, organizationSchemaKey } from '../../store/helpers/entity-factory';
+import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import {
   getPaginationObservables,
@@ -40,9 +42,6 @@ import {
   UserRoleInSpace,
 } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
-
-const { proxyAPIVersion, cfAPIVersion } = environment;
 
 @Injectable()
 export class CfUserService {
@@ -75,6 +74,7 @@ export class CfUserService {
     )
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
+    // Attempt to get user from all users first, this better covers case when a non-admin can't his /users
     return this.getUsers(endpointGuid, false).pipe(
       switchMap(users => {
         // `users` will be null if we can't handle the fetch (connected as non-admin with lots of orgs). For those case fall back on the
@@ -240,8 +240,7 @@ export class CfUserService {
     spaceGuid: string,
     cfGuid: string
   ): Observable<UserRoleInSpace> => {
-    return this.getUsers(cfGuid).pipe(
-      this.getUserFromUsers(userGuid),
+    return this.getUser(cfGuid, userGuid).pipe(
       map(user => {
         return createUserRoleInSpace(
           isSpaceManager(user.entity, spaceGuid),
@@ -252,24 +251,40 @@ export class CfUserService {
     );
   }
 
+  fetchTotalUsers(cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<number> {
+    return this.isConnectedUserAdmin(cfGuid).pipe(
+      switchMap(isAdmin => {
+        // Non-admins at the cf level cannot fetch a list of all users easily (non-admins cannot access /users list)
+        return (isAdmin || orgGuid || spaceGuid) ? fetchTotalResults(
+          this.createPaginationActionFromLevel(isAdmin, cfGuid, orgGuid, spaceGuid),
+          this.store,
+          this.paginationMonitorFactory
+        ) : observableOf(null);
+      })
+    );
+  }
+
   private getAllUsers(endpointGuid: string): Observable<PaginationObservables<APIResource<CfUser>>> {
     if (!this.allUsers$) {
       this.allUsers$ = waitForCFPermissions(this.store, endpointGuid).pipe(
-        map(cf => cf.global.isAdmin),
-        combineLatest(this.canFetchAllUsers()),
-        switchMap(([isAdmin, canFetchAllUsers]) => {
+        switchMap(cf => {
+          const isAdmin = cf.global.isAdmin;
           // Note - This service is used at cf, org and space level of the cf pages.
-          // We shouldn't attempt to fetch all users if at the cf level and there's more than x orgs
+          // We shouldn't attempt to fetch all users if at the cf level
           if (
             this.activeRouteCfOrgSpace.cfGuid &&
             (
               isAdmin ||
-              canFetchAllUsers ||
               this.activeRouteCfOrgSpace.orgGuid ||
               this.activeRouteCfOrgSpace.spaceGuid
             )
           ) {
-            return this.createPaginationAction(isAdmin, !!this.activeRouteCfOrgSpace.spaceGuid).pipe(
+            return this.createPaginationAction(
+              isAdmin,
+              this.activeRouteCfOrgSpace.cfGuid,
+              this.activeRouteCfOrgSpace.orgGuid,
+              this.activeRouteCfOrgSpace.spaceGuid
+            ).pipe(
               map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
                 store: this.store,
                 action: allUsersAction,
@@ -279,10 +294,14 @@ export class CfUserService {
                 )
               }))
             );
+
           } else {
-            return observableOf({
+            return observableOf<PaginationObservables<APIResource<CfUser>>>({
               pagination$: observableOf(null),
-              entities$: observableOf(null)
+              entities$: observableOf(null),
+              hasEntities$: observableOf(false),
+              totalEntities$: observableOf(0),
+              fetchingEntities$: observableOf(false),
             });
           }
         }),
@@ -293,50 +312,80 @@ export class CfUserService {
     return this.allUsers$;
   }
 
-  private getUserFromUsers(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {
-    return map(users => {
-      return users.filter(o => o.metadata.guid === userGuid)[0];
-    });
-  }
-
-  public createPaginationAction(isAdmin: boolean, isSpace: boolean): Observable<PaginatedAction> {
+  /**
+   * Create a paginated action that will fetch a list of users. For admins attempt to fetch all users regardless of cf/org/space level if
+   * there's not too many, otherwise fetch list with respect to cf/org/level
+   * @param isAdmin
+   * @param cfGuid
+   * @param orgGuid Populated if user is at org level
+   * @param spaceGuid Populated if user is at space level
+   */
+  public createPaginationAction(isAdmin: boolean, cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<PaginatedAction> {
     if (isAdmin) {
-      return observableOf(new GetAllUsersAsAdmin(this.activeRouteCfOrgSpace.cfGuid));
+
+      const action = this.createCfGetUsersAction(cfGuid);
+      if (!orgGuid) {
+        return observableOf(action);
+      }
+      return this.fetchTotalUsers(cfGuid).pipe(
+        first(),
+        map(count => {
+          if (count < action.flattenPaginationMax) {
+            // We can safely show all users regardless of what cf/org/level list we're showing
+            return action;
+          }
+          // We can't fetch all users, fall back on org or space lists
+          return !spaceGuid ?
+            this.createOrgGetUsersAction(isAdmin, cfGuid, orgGuid) :
+            this.createSpaceGetUsersAction(isAdmin, cfGuid, spaceGuid);
+        })
+      );
     }
-    return this.canFetchAllUsers().pipe(
-      map(canFetchAllUsers => {
-        if (canFetchAllUsers) {
-          return new GetAllUsersAsNonAdmin(this.activeRouteCfOrgSpace.cfGuid, !isSpace);
-        } else {
-          const usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.orgGuid);
-          return new GetAllOrgUsers(this.activeRouteCfOrgSpace.orgGuid, usersPaginationKey, this.activeRouteCfOrgSpace.cfGuid, false);
-        }
-      })
-    );
+    return observableOf(this.createPaginationActionFromLevel(isAdmin, cfGuid, orgGuid, spaceGuid));
   }
 
-  private canFetchAllUsers = (): Observable<boolean> => {
-    // Make a separate request to count orgs. If we do this via the normal pagination orgs call we fail to fill many orgs with their
-    // required properties. This leads to a LOT of request to fill them in when we validate the orgs later on
-    const options = new RequestOptions();
-    options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/organizations`;
-    options.params = new URLSearchParams('');
-    options.params.set('results-per-page', '1');
-    options.method = 'get';
-    options.headers = new Headers();
-    options.headers.set('x-cap-cnsi-list', this.activeRouteCfOrgSpace.cfGuid);
-    options.headers.set('x-cap-passthrough', 'true');
-    return this.http.request(new Request(options)).pipe(
-      map(response => {
-        let resData;
-        try {
-          resData = response.json();
-        } catch (e) {
-          resData = { total_results: Number.MAX_SAFE_INTEGER };
-        }
-        return resData.total_results < 10;
-      }));
+  /**
+   * Create a paginated action that will fetch a list of users with respect to the level (cf, org or space)
+   * @param isAdmin
+   * @param cfGuid
+   * @param orgGuid Populated if user is at org level
+   * @param spaceGuid Populated if user is at space level
+   */
+  private createPaginationActionFromLevel(isAdmin: boolean, cfGuid: string, orgGuid?: string, spaceGuid?: string): PaginatedAction {
+    if (!orgGuid) {
+      // Create an action to fetch all users across the entire cf
+      if (isAdmin) {
+        return this.createCfGetUsersAction(cfGuid);
+      }
+      // Non-admins at cf level should never reach here, this is a genuine issue that if we hit the extra feed back will help
+      throw new Error('Unsupported: Cloud Foundry non-administrators cannot access all users list');
+    } else if (!spaceGuid) {
+      // Create an action to fetch all users in an organisation
+      return this.createOrgGetUsersAction(isAdmin, cfGuid, orgGuid);
+    }
+
+    // Create an action to fetch all users in a space
+    return this.createSpaceGetUsersAction(isAdmin, cfGuid, spaceGuid);
   }
+
+  private createCfGetUsersAction = (cfGuid: string): PaginatedAction => new GetAllUsersAsAdmin(cfGuid);
+
+  private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction =>
+    new GetAllOrgUsers(
+      orgGuid,
+      createEntityRelationPaginationKey(organizationSchemaKey, orgGuid),
+      cfGuid,
+      isAdmin
+    )
+
+  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction =>
+    new GetAllSpaceUsers(
+      spaceGuid,
+      createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
+      cfGuid,
+      isAdmin
+    )
+
 
   public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
     this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(

@@ -2,6 +2,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { StratosActionType } from '../../core/extension/extension-service';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
@@ -59,16 +62,15 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
 } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
-import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
-import { StratosActionType } from '../../core/extension/extension-service';
 
 /* tslint:enable:max-line-length */
 const usersRoles = [
@@ -83,8 +85,18 @@ const usersRoles = [
     pathMatch: 'full'
   },
   {
+    path: 'organizations/:orgId/users/invite',
+    component: InviteUsersComponent,
+    pathMatch: 'full'
+  },
+  {
     path: 'organizations/:orgId/spaces/:spaceId/users/manage',
     component: UsersRolesComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'organizations/:orgId/spaces/:spaceId/users/invite',
+    component: InviteUsersComponent,
     pathMatch: 'full'
   },
 ];
@@ -180,6 +192,10 @@ const cloudFoundry: Routes = [{
             {
               path: 'security-groups',
               component: CloudFoundrySecurityGroupsComponent
+            },
+            {
+              path: 'routes',
+              component: CloudFoundryRoutesComponent
             },
             {
               path: '**',

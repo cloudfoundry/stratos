@@ -1,9 +1,10 @@
 import { ScopeStrings } from '../../core/current-user-permissions.config';
+import { EndpointType } from '../../core/extension/extension-types';
 import { MetricsAPITargets } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
-import { EndpointType } from '../../core/extension/extension-types';
 
+export const endpointListKey = 'endpoint-list';
 export interface INewlyConnectedEndpointInfo {
   account: string;
   admin: boolean;
@@ -45,7 +46,9 @@ export interface EndpointModel {
   metadata?: {
     metrics?: string;
     metrics_job?: string;
+    metrics_environment?: string;
     metrics_targets?: MetricsAPITargets;
+    userInviteAllowed?: 'true' | any;
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
@@ -53,8 +56,6 @@ export interface EndpointModel {
   registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
-  //
-
 }
 
 // Metadata for the user connected to an endpoint

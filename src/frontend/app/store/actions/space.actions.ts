@@ -3,6 +3,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { IUpdateSpace } from '../../core/cf-api.types';
 import {
   applicationSchemaKey,
+  domainSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceInstancesSchemaKey,
@@ -91,7 +92,10 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     public spaceGuid: string,
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations = [],
+    public includeRelations = [
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+    ],
     public populateMissing = true,
     public flattenPagination = true
   ) {
@@ -212,6 +216,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     includeRelations?: string[]) {
     super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
     this.options.url = `spaces/${guid}/user_roles`;
+    this.flattenPaginationMax = 600;
   }
   actions = getActions('Spaces', 'List all user roles');
 }

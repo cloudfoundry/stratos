@@ -1,5 +1,6 @@
-import { by, element, browser, protractor, promise } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
 import { ElementFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
 
@@ -22,8 +23,12 @@ export class StepperComponent extends Component {
     super(locator);
   }
 
+  nextButton(): ElementFinder {
+    return this.locator.element(by.id('stepper_next'));
+  }
+
   next() {
-    return this.locator.element(by.id('stepper_next')).click();
+    return this.nextButton().click();
   }
 
   cancel() {
