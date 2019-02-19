@@ -14,10 +14,10 @@ import {
   SetPage,
 } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
-import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
 import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';
+import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;

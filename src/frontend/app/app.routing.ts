@@ -14,11 +14,10 @@ import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page
 import { SharedModule } from './shared/shared.module';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
-import { environment } from '../environments/environment';
 import { CustomRoutingImportModule } from './custom-import.module';
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: 'applications', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
@@ -29,19 +28,18 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'dashboard', component: HomePageComponent,
+        path: 'home', component: HomePageComponent,
         data: {
           stratosNavigation: {
-            text: 'Dashboard',
-            matIcon: 'assessment',
-            // Experimental - only show in development
-            hidden: observableOf(environment.production),
+            text: 'Home',
+            matIcon: 'home',
             position: 10
           }
         }
       },
       {
-        path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
+        path: 'applications',
+        loadChildren: 'app/features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             text: 'Applications',
@@ -120,7 +118,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes),
+    RouterModule.forRoot(appRoutes, { onSameUrlNavigation: 'reload' }),
     CustomRoutingImportModule,
   ]
 })

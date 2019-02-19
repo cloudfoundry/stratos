@@ -31,7 +31,7 @@ describe('CF - Top Level - ', () => {
       .connectAllEndpoints(ConsoleUserType.user);
   });
 
-  describe('As Admin', () => {
+  describe('As Admin -', () => {
     beforeAll(() => {
       e2eSetup.loginAs(ConsoleUserType.admin);
     });
@@ -48,8 +48,8 @@ describe('CF - Top Level - ', () => {
 
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
-        expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.admin.username);
-        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('Yes');
+        expect(cfPage.waitForUsername().getValue()).toBe(`${defaultCf.creds.admin.username} (Administrator)`);
+        expect(cfPage.isUserInviteIsConfigured(true)).toBeFalsy();
       });
 
       it('Walk Tabs', () => {
@@ -85,7 +85,7 @@ describe('CF - Top Level - ', () => {
       it('Summary Panel', () => {
         expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
-        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('No');
+        expect(cfPage.isUserInviteIsConfigured(false)).toBeFalsy();
       });
 
       it('Walk Tabs', () => {

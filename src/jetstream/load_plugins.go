@@ -6,7 +6,9 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundryhosting"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/metrics"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinvite"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,6 +29,9 @@ func (pp *portalProxy) loadPlugins() {
 		{"cloudfoundryhosting", cloudfoundryhosting.Init},
 		{"metrics", metrics.Init},
 		{"userinfo", userinfo.Init},
+		// userinvite depends on cloudfoundry & cloudfoundryhosting
+		{"userinvite", userinvite.Init},
+		{"userfavorites", userfavorites.Init},
 	} {
 		plugin, err := p.Init(pp)
 		pp.Plugins[p.Name] = plugin

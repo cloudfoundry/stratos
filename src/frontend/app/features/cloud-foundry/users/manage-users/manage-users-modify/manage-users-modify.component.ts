@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -119,6 +119,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
   usersWithWarning$: Observable<string[]>;
+  entered = new Subject<boolean>();
 
   constructor(
     private store: Store<AppState>,
@@ -129,6 +130,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
   ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
+    this.blocked$ = combineLatest(this.entered.asObservable(), cfRolesService.loading$).pipe(
+      map(([entered, loading]) => loading),
+      startWith(false)
+    );
   }
 
   ngOnInit() {
@@ -246,6 +251,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   onEnter = () => {
+    this.entered.next(true);
     if (!this.snackBarRef) {
       this.usersWithWarning$.pipe(first()).subscribe((usersWithWarning => {
         if (usersWithWarning && usersWithWarning.length) {

@@ -7,6 +7,7 @@ import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../core/utils.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -19,6 +20,7 @@ import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../store/types/user-favorites.types';
 import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
@@ -48,6 +50,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
+  public favorite: UserFavorite<IFavoriteMetadata>;
   public orgStatus$: Observable<CardStatus>;
 
   constructor(
@@ -86,6 +89,8 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       }),
       map(u => getOrgRolesString(u)),
     );
+
+    this.favorite = getFavoriteFromCfEntity(this.row, organizationSchemaKey);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))

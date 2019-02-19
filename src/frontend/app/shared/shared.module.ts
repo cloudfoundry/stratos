@@ -5,7 +5,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { MomentModule } from 'ngx-moment';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
@@ -74,6 +73,9 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
+import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
+import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
@@ -114,6 +116,10 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
+import {
+  StackedInputActionComponent,
+} from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
+import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -144,6 +150,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
+
 @NgModule({
   imports: [
     CommonModule,
@@ -155,7 +162,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CdkTableModule,
     NgxChartsModule,
     MaterialDesignFrameworkModule,
-    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -253,7 +259,12 @@ import { UserPermissionDirective } from './user-permission.directive';
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
-    MultilineTitleComponent,
+    StackedInputActionsComponent,
+    StackedInputActionComponent,
+    FavoritesGlobalListComponent,
+    FavoritesMetaCardComponent,
+    FavoritesEntityListComponent,
+    MultilineTitleComponent
   ],
   exports: [
     FormsModule,
@@ -347,12 +358,17 @@ import { UserPermissionDirective } from './user-permission.directive';
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
-    MetricsParentRangeSelectorComponent
+    MetricsParentRangeSelectorComponent,
+    StackedInputActionsComponent,
+    StackedInputActionComponent,
+    FavoritesMetaCardComponent,
+    FavoritesGlobalListComponent,
+    MultilineTitleComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
-    NoServicePlansComponent
+    NoServicePlansComponent,
   ],
   providers: [
     ListConfig,
@@ -365,6 +381,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CloudFoundryService,
     InternalEventMonitorFactory,
     ServiceActionHelperService,
+    MetricsRangeSelectorService,
     GitSCMService,
     MetricsRangeSelectorService
   ]

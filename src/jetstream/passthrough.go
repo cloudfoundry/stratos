@@ -295,7 +295,7 @@ func (p *portalProxy) DoProxyRequest(requests []interfaces.ProxyRequestInfo) (ma
 }
 
 // Convenience helper for a single request
-func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string) (*interfaces.CNSIRequest, error) {
+func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*interfaces.CNSIRequest, error) {
 	requests := make([]interfaces.ProxyRequestInfo, 0)
 
 	proxyURL, err := url.Parse(requestUrl)
@@ -309,6 +309,15 @@ func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUr
 	req.EndpointGUID = cnsiGUID
 	req.Method = method
 	req.URI = proxyURL
+
+	if headers != nil {
+		req.Headers = headers
+	}
+
+	if body != nil {
+		req.Body = body
+	}
+
 	requests = append(requests, req)
 
 	responses, err := p.DoProxyRequest(requests)

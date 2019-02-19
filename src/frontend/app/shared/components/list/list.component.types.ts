@@ -2,11 +2,11 @@ import { BehaviorSubject, combineLatest, Observable, of as observableOf } from '
 import { map, startWith } from 'rxjs/operators';
 
 import { ListView } from '../../../store/actions/list.actions';
-import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
 import { ActionState } from './../../../store/reducers/api-request-reducer/types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
+import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 
 export enum ListViewTypes {

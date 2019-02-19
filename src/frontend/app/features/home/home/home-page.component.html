@@ -1,3 +1,16 @@
-<app-page-header>
-  <h1>Dashboard</h1>
+<app-page-header [showHistory]="false" [endpointIds$]="allEndpointIds$">
+  <h1>Home</h1>
 </app-page-header>
+<div class="home-page" *ngIf="haveRegistered$ | async ; else noEndpoints">
+  <div class="favorites-list">
+    <h2 class="home-page__header">Favorites</h2>
+    <app-favorites-global-list></app-favorites-global-list>
+  </div>
+  <div class="recent-list">
+    <h2 class="home-page__header">Session</h2>
+    <app-recent-entities></app-recent-entities>
+  </div>
+</div>
+<ng-template #noEndpoints>
+  <app-endpoints-missing [showToolbarHint]="false"></app-endpoints-missing>
+</ng-template>

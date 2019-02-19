@@ -8,13 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
-
+	goosedbversion "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
+	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
+
 	// Mysql driver
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"
+
 	// Sqlite driver
 	_ "github.com/mattn/go-sqlite3"
 
@@ -133,7 +134,7 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 }
 
 // GetConnection returns a database connection to either PostgreSQL or SQLite
-func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
+func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	log.Debug("GetConnection")
 
 	if dc.DatabaseProvider == PGSQL {
@@ -146,13 +147,12 @@ func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 	}
 
 	// SQL Lite
-	return GetSQLLiteConnection()
+	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"))
 }
 
 // GetSQLLiteConnection returns an SQLite DB Connection
-func GetSQLLiteConnection() (*sql.DB, error) {
-
-	if !config.IsSet("SQLITE_KEEP_DB") {
+func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
+	if !sqliteKeepDB {
 		os.Remove(SQLiteDatabaseFile)
 	}
 

@@ -29,6 +29,16 @@ export function getInitialTestStoreState(): AppState {
 function getDefaultInitialTestStoreState(): AppState {
 
   return {
+    recentlyVisited: {
+      entities: {},
+      hits: []
+    },
+    userFavoritesGroups: {
+      busy: false,
+      error: false,
+      message: '',
+      groups: {}
+    },
     auth: {
       loggedIn: true,
       loggingIn: false,
@@ -299,6 +309,7 @@ function getDefaultInitialTestStoreState(): AppState {
       },
       stack: {},
       space: {},
+      userFavorites: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -650,6 +661,7 @@ function getDefaultInitialTestStoreState(): AppState {
       featureFlag: {},
       securityRule: {},
       buildpack: {},
+      userFavorites: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3897,6 +3909,7 @@ function getDefaultInitialTestStoreState(): AppState {
       space_quota_definition: {},
     },
     requestData: {
+      userFavorites: {},
       servicePlanVisibility: {},
       serviceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {

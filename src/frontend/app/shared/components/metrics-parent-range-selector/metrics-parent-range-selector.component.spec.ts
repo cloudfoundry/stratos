@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { DateFormatPipe } from 'ngx-moment';
 
 import { CoreModule } from '../../../core/core.module';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
@@ -16,7 +15,7 @@ describe('MetricsParentRangeSelectorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [MetricsParentRangeSelectorComponent, StartEndDateComponent, DateFormatPipe, DateTimeComponent],
+      declarations: [MetricsParentRangeSelectorComponent, StartEndDateComponent, DateTimeComponent],
       imports: [
         CoreModule,
         createBasicStoreModule(),

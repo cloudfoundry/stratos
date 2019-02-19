@@ -9,9 +9,9 @@ import {
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { AppState } from '../../../../../store/app-state';
+import { CfUser } from '../../../../../store/types/user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
-import { CfUser } from '../../../../../store/types/user.types';
 
 @Injectable()
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
@@ -31,7 +31,7 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
       userPerms,
       (user: CfUser): boolean => cfUserService.hasSpaceRoles(user, activeRouteCfOrgSpace.spaceGuid),
       cfOrgService.org$,
-      cfSpaceService.space$
+      cfSpaceService.space$,
     );
   }
 }

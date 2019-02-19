@@ -12,6 +12,7 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/extension/extension-service';
+import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
@@ -19,10 +20,12 @@ import { CfUserService } from '../../../../../../shared/data-services/cf-user.se
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { UserFavorite } from '../../../../../../store/types/user-favorites.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
+import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -77,6 +80,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   private deleteRedirectSub: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
+  public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -85,6 +89,9 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
   ) {
+    this.favorite$ = cfSpaceService.space$.pipe(
+      map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey))
+    );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)
     );

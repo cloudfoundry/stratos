@@ -339,3 +339,31 @@ export function spreadPaginationParams(params: PaginationParam): PaginationParam
     }, []) : null
   };
 }
+
+export const defaultClientPaginationPageSize = 9;
+
+const defaultPaginationEntityState: PaginationEntityState = {
+  pageCount: 0,
+  currentPage: 1,
+  totalResults: 0,
+  ids: {},
+  pageRequests: {
+  },
+  params: {
+  },
+  clientPagination: {
+    pageSize: defaultClientPaginationPageSize,
+    currentPage: 1,
+    filter: {
+      string: '',
+      items: {}
+    },
+    totalResults: 0
+  }
+};
+
+export function getDefaultPaginationEntityState(): PaginationEntityState {
+  return {
+    ...defaultPaginationEntityState
+  };
+}
