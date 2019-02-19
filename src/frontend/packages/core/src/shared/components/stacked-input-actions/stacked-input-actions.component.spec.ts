@@ -1,12 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
-import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
 import {
   BaseCfOrgSpaceRouteMock,
   BaseTestModulesNoShared,
-} from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { testSCFGuid } from '../../../test-framework/store-test-helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { testSCFGuid } from '../../../../test-framework/store-test-helper';
+import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
 import { BooleanIndicatorComponent } from '../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionComponent } from './stacked-input-action/stacked-input-action.component';
 import { StackedInputActionsComponent } from './stacked-input-actions.component';

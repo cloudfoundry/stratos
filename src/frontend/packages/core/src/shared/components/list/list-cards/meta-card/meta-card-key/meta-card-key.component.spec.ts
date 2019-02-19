@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MetaCardKeyComponent } from './meta-card-key.component';
 import { SharedModule } from '../../../../../shared.module';
+import { MetaCardKeyComponent } from './meta-card-key.component';
 
 describe('MetaCardKeyComponent', () => {
   let component: MetaCardKeyComponent;

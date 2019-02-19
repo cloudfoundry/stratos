@@ -3,4 +3,9 @@
   "compilerOptions": {
     "outDir": "../../../../out-tsc/app",
   },
+  "exclude": [
+    "./src/test.ts",
+    "**/*.spec.ts",
+    "**/node_modules/**"
+  ]
 }

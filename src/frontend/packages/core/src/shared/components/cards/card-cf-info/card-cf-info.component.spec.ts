@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserInviteService } from '../../../../../../../app/features/cloud-foundry/user-invites/user-invite.service';
 import {
   BaseTestModulesNoShared,
   generateTestCfEndpointService,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';

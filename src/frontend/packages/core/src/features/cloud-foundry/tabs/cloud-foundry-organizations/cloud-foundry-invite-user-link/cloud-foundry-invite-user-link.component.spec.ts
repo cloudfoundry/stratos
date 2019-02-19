@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryInviteUserLinkComponent } from './cloud-foundry-invite-user-link.component';
 
 describe('CloudFoundryInviteUserLinkComponent', () => {

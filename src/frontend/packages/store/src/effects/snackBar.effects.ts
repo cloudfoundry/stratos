@@ -1,12 +1,11 @@
-
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
-import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
-import { ShowSnackBar, SHOW_SNACK_BAR } from '../actions/snackBar.actions';
 import { MatSnackBar } from '@angular/material';
+import { Actions, Effect } from '@ngrx/effects';
+import { map } from 'rxjs/operators';
+
+import { SHOW_SNACK_BAR, ShowSnackBar } from '../actions/snackBar.actions';
+
+
 @Injectable()
 export class SnackBarEffects {
   constructor(

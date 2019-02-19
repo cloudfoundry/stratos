@@ -1,9 +1,5 @@
-/* tslint:disable:max-line-length */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  CloudFoundryInviteUserLinkComponent,
-} from '../../../../../../../../app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
@@ -13,8 +9,12 @@ import {
 } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CfAdminAddUserWarningComponent } from '../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
+import {
+  CloudFoundryInviteUserLinkComponent,
+} from '../cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 import { CloudFoundryOrganizationUsersComponent } from './cloud-foundry-organization-users.component';
 
+/* tslint:disable:max-line-length */
 describe('CloudFoundryOrganizationUsersComponent', () => {
   let component: CloudFoundryOrganizationUsersComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationUsersComponent>;

@@ -1,8 +1,6 @@
-import { HttpHandler } from '@angular/common/http';
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { inject, TestBed } from '@angular/core/testing';
-import { HttpClient } from 'selenium-webdriver/http';
 
-import { UserInviteService } from '../../../../../../../../app/features/cloud-foundry/user-invites/user-invite.service';
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
@@ -14,6 +12,7 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
 import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
 
 
