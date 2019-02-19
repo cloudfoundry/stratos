@@ -64,17 +64,23 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
   entityKey = usesProvidedServiceInstance;
   options: RequestOptions;
 }
+export interface TUserProvidedServiceInstanceDataCredentials {
+  [name: string]: string;
+}
+export interface IUserProvidedServiceInstanceData {
+  spaceGuid: string;
+  name: string;
+  routeServiceUrl: string;
+  syslogDrainUrl?: string;
+  tags: string[];
+  credentials: TUserProvidedServiceInstanceDataCredentials;
+}
 
 export class CreateUserProvidedServiceInstance extends CFStartAction implements ICFAction {
   constructor(
     public endpointGuid: string,
     public guid: string,
-    spaceGuid: string,
-    name: string,
-    route_service_url: string,
-    syslog_drain_url?: string,
-    tags: string[] = [],
-    credentials: { [name: string]: string } = {}
+    data: IUserProvidedServiceInstanceData
   ) {
     super();
     this.options = new RequestOptions();
@@ -82,13 +88,21 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     this.options.params = new URLSearchParams();
     // this.options.params.set('accepts_incomplete', 'true');
     this.options.method = 'post';
+    const {
+      spaceGuid: space_guid,
+      name,
+      credentials = {},
+      routeServiceUrl: route_service_url,
+      syslogDrainUrl: syslog_drain_url,
+      tags = []
+    } = data;
     // TODO: RC Test empty values
     this.options.body = {
-      space_guid: spaceGuid,
+      space_guid,
       name,
       credentials,
-      syslog_drain_url,
       route_service_url,
+      syslog_drain_url,
       tags
     };
   }
@@ -102,11 +116,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
   constructor(
     public endpointGuid: string,
     public guid: string,
-    name: string,
-    route_service_url?: string,
-    syslog_drain_url?: string,
-    tags?: string[],
-    credentials?: { [name: string]: string }
+    data: Partial<IUserProvidedServiceInstanceData>
   ) {
     super();
     this.options = new RequestOptions();
@@ -115,6 +125,13 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     // this.options.params.set('accepts_incomplete', 'true');
     this.options.method = 'put';
     this.options.body = {};
+    const {
+      name,
+      credentials = {},
+      routeServiceUrl: route_service_url,
+      syslogDrainUrl: syslog_drain_url,
+      tags = []
+    } = data;
     if (name) {
       this.options.body.name = name;
     }
