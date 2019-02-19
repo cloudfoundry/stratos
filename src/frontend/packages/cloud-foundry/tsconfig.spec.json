@@ -3,4 +3,7 @@
   "compilerOptions": {
     "outDir": "../../../../out-tsc/spec",
   },
+  "exclude": [
+    "**/node_modules/**"
+  ]
 }

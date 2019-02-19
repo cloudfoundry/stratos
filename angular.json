@@ -86,9 +86,6 @@
           "options": {
             "tsConfig": [
               "src/test-e2e/tsconfig.e2e.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
             ]
           }
         }
@@ -173,12 +170,10 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/frontend/packages/core/tsconfig.app.json",
-              "src/frontend/packages/core/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/core/tslint.json",
+            "files": [
+              "src/frontend/packages/core/src/**/*.ts"
             ]
           }
         }
@@ -203,10 +198,7 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": "src/frontend/packages/core-e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": "src/frontend/packages/core-e2e/tsconfig.e2e.json"
           }
         }
       }
@@ -235,13 +227,9 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/frontend/packages/store/tsconfig.lib.json",
-              "src/frontend/packages/store/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/store/tslint.json",
+            "files": ["src/frontend/packages/store/src/**/*.ts"]
           }
         }
       }
@@ -270,13 +258,9 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/frontend/packages/store-helpers/tsconfig.lib.json",
-              "src/frontend/packages/store-helpers/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/store-helpers/tslint.json",
+            "files": ["src/frontend/packages/store-helpers/src/**/*.ts"]
           }
         }
       }
@@ -305,13 +289,9 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/frontend/packages/cloud-foundry/tsconfig.lib.json",
-              "src/frontend/packages/cloud-foundry/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/cloud-foundry/tslint.json",
+            "files": ["src/frontend/packages/cloud-foundry/src/**/*.ts"]
           }
         }
       }
