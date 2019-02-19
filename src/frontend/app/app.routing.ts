@@ -31,7 +31,7 @@ const appRoutes: Routes = [
         path: 'home', component: HomePageComponent,
         data: {
           stratosNavigation: {
-            text: 'Home',
+            label: 'Home',
             matIcon: 'home',
             position: 10
           }
