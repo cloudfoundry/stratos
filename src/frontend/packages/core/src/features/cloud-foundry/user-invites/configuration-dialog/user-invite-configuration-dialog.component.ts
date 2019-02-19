@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { ActionState } from '../../../../store/reducers/api-request-reducer/types';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { UserInviteService } from '../user-invite.service';
 
 

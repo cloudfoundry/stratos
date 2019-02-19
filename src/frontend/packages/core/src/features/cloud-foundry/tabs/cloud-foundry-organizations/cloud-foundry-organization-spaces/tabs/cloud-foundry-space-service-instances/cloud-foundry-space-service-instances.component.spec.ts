@@ -1,8 +1,9 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { getCfSpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundrySpaceServiceInstancesComponent } from './cloud-foundry-space-service-instances.component';
-import { BaseTestModules, getCfSpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { DatePipe } from '@angular/common';
 
 describe('CloudFoundrySpaceServiceInstancesComponent', () => {
   let component: CloudFoundrySpaceServiceInstancesComponent;

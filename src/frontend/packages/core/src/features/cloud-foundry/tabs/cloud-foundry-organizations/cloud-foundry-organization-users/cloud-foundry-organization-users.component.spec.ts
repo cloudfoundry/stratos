@@ -1,5 +1,9 @@
+/* tslint:disable:max-line-length */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  CloudFoundryInviteUserLinkComponent,
+} from '../../../../../../../../app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
@@ -17,7 +21,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryOrganizationUsersComponent, CfAdminAddUserWarningComponent],
+      declarations: [CloudFoundryOrganizationUsersComponent, CloudFoundryInviteUserLinkComponent, CfAdminAddUserWarningComponent],
       imports: [...BaseTestModules],
       providers: [
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },

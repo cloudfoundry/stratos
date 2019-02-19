@@ -48,6 +48,7 @@ export interface EndpointModel {
     metrics_job?: string;
     metrics_environment?: string;
     metrics_targets?: MetricsAPITargets;
+    userInviteAllowed?: 'true' | any;
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
@@ -55,8 +56,6 @@ export interface EndpointModel {
   registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
-  //
-
 }
 
 // Metadata for the user connected to an endpoint

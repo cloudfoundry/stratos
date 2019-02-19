@@ -1,11 +1,17 @@
+/* tslint:disable:max-line-length */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  CloudFoundryInviteUserLinkComponent,
+} from '../../../../../../../../../../app/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
+import {
+  BaseTestModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
-import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
@@ -17,12 +23,12 @@ describe('CloudFoundrySpaceUsersComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceUsersComponent, CfAdminAddUserWarningComponent],
+      declarations: [CloudFoundrySpaceUsersComponent, CloudFoundryInviteUserLinkComponent, CfAdminAddUserWarningComponent],
       imports: [...BaseTestModules],
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        ActiveRouteCfOrgSpace,
+        ...generateTestCfEndpointServiceProvider()
       ]
     })
       .compileComponents();

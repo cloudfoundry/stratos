@@ -18,6 +18,9 @@ export interface SessionUser {
   name: string;
   scopes: ScopeStrings[];
 }
+export interface PluginConfig {
+  userInvitationsEnabled: 'true' | 'false';
+}
 export interface SessionEndpoints {
   [type: string]: SessionEndpoint;
 }
@@ -38,6 +41,7 @@ export interface SessionData {
   sessionExpiresOn: number;
   domainMismatch?: boolean;
   diagnostics?: Diagnostics;
+  ['plugin-config']?: PluginConfig;
 }
 export interface Diagnostics {
   deploymentType?: string;

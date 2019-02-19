@@ -1,3 +1,4 @@
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -8,7 +9,7 @@ import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { CloudFoundrySpaceService } from '../src/features/cloud-foundry/services/cloud-foundry-space.service';
+import { UserInviteService } from '../src/features/cloud-foundry/user-invites/user-invite.service';
 import {
   ApplicationStateIconComponent,
 } from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -36,7 +37,6 @@ import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.s
 import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../src/shared/shared.module';
-import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
@@ -45,9 +45,13 @@ export const cfEndpointServiceProviderDeps = [
   CfOrgSpaceDataService,
   CfUserService,
   PaginationMonitorFactory,
-  EntityMonitorFactory
+  EntityMonitorFactory,
+  UserInviteService,
+  HttpClient,
+  HttpHandler,
+  CloudFoundryEndpointService
 ];
-class BaseCFMock {
+export class BaseCfOrgSpaceRouteMock {
   orgGuid: string;
   spaceGuid: string;
   cfGuid: string;
@@ -61,10 +65,13 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
   return [
     {
       provide: ActiveRouteCfOrgSpace,
-      useFactory: () => new BaseCFMock(guid)
+      useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
     },
     CfUserServiceTestProvider,
-    CloudFoundryEndpointService
+    CloudFoundryEndpointService,
+    UserInviteService,
+    HttpClient,
+    HttpHandler
   ];
 }
 
@@ -116,11 +123,6 @@ export const BaseTestModulesNoShared = [
   HttpModule
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
-
-export const getCfSpaceServiceMock = {
-  provide: CloudFoundrySpaceService,
-  useClass: CloudFoundrySpaceServiceMock
-};
 
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,

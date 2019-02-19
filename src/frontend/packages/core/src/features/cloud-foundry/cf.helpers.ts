@@ -321,3 +321,20 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
     return validCF && validOrg && validSpace;
   });
 };
+
+export function createCfOrgSpaceSteppersUrl(
+  cfGuid: string,
+  stepperPath: string = `/users/manage`,
+  orgGuid?: string,
+  spaceGuid?: string,
+): string {
+  let route = `/cloud-foundry/${cfGuid}`;
+  if (orgGuid) {
+    route += `/organizations/${orgGuid}`;
+    if (spaceGuid) {
+      route += `/spaces/${spaceGuid}`;
+    }
+  }
+  route += stepperPath;
+  return route;
+}

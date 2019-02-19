@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../../../../../store/src/app-state';
+import { CfUser } from '../../../../../../../store/src/types/user.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
@@ -10,8 +12,6 @@ import {
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { CfUser } from '../../../../../../../store/src/types/user.types';
 
 @Injectable()
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
@@ -31,7 +31,7 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
       userPerms,
       (user: CfUser): boolean => cfUserService.hasSpaceRoles(user, activeRouteCfOrgSpace.spaceGuid),
       cfOrgService.org$,
-      cfSpaceService.space$
+      cfSpaceService.space$,
     );
   }
 }

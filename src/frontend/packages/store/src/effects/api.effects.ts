@@ -1,10 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
+import { RequestArgs } from '@angular/http/src/interfaces';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
-import { map, mergeMap, withLatestFrom, catchError } from 'rxjs/operators';
+import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+
+import { LoggerService } from '../../../core/src/core/logger.service';
+import { environment } from '../../../core/src/environments/environment.prod';
+import { isJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
@@ -20,39 +25,13 @@ import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagin
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { InternalEventSeverity } from '../types/internal-events.types';
-import {
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
-} from '../types/pagination.types';
-import {
-  APISuccessOrFailedAction,
-  ICFAction,
-  IRequestAction,
-  RequestEntityLocation,
-} from '../types/request.types';
-import {
-  ApiActionTypes,
-  ValidateEntitiesStart,
-} from './../actions/request.actions';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
+import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
+import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import {
-  APIResource,
-  instanceOfAPIResource,
-  NormalizedResponse,
-} from './../types/api.types';
-import {
-  StartRequestAction,
-  WrapperRequestActionFailed,
-} from './../types/request.types';
-import {
-  RecursiveDelete,
-  RecursiveDeleteComplete,
-  RecursiveDeleteFailed,
-} from './recursive-entity-delete.effect';
-import { environment } from '../../../core/src/environments/environment.prod';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { isJetStreamError } from '../../../core/src/jetstream.helpers';
+import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
+import { WrapperRequestActionFailed } from './../types/request.types';
+import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -516,7 +495,7 @@ export class APIEffect {
       : {};
   }
 
-  private makeRequest(options): Observable<any> {
+  private makeRequest(options: RequestArgs): Observable<any> {
     return this.http.request(new Request(options)).pipe(
       map(response => {
         let resData;

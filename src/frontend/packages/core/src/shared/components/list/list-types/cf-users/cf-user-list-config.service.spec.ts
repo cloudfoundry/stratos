@@ -1,22 +1,24 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { AppState } from '../../../../../../../store/src/app-state';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import {
+  CloudFoundryOrganizationServiceMock,
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
-import { CfUserListConfigService } from './cf-user-list-config.service';
-import { Store } from '@ngrx/store';
-import { CfUserService } from '../../../../data-services/cf-user.service';
-import { Router } from '@angular/router';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import {
+  CloudFoundryOrganizationService,
+} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CfUserService } from '../../../../data-services/cf-user.service';
+import { CfUserListConfigService } from './cf-user-list-config.service';
 
 describe('CfUserListConfigService', () => {
   beforeEach(() => {

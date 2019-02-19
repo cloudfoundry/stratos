@@ -5,13 +5,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
+import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { environment } from '../../../environments/environment';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
-import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { AppState } from '../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';

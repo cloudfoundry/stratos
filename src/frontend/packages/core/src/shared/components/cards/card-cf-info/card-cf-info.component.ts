@@ -1,9 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { tap, map } from 'rxjs/operators';
-import { Subscription, Observable } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material';
+import { Observable, Subscription } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+
+import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { ICfV2Info } from '../../../../core/cf-api.types';
-import { EntityInfo, APIResource } from '../../../../../../store/src/types/api.types';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import {
+  UserInviteConfigurationDialogComponent,
+} from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -13,7 +19,12 @@ import { EntityInfo, APIResource } from '../../../../../../store/src/types/api.t
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
-  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
+
+  constructor(
+    public cfEndpointService: CloudFoundryEndpointService,
+    public userInviteService: UserInviteService,
+    private dialog: MatDialog,
+  ) { }
 
   description$: Observable<string>;
 
@@ -23,7 +34,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
         this.apiUrl = this.getApiEndpointUrl(endpoint.entity.api_endpoint);
       })
     );
-
     this.subs.push(obs$.subscribe());
 
     this.description$ = this.cfEndpointService.info$.pipe(
@@ -55,5 +65,17 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
       }
     }
     return '-';
+  }
+
+  configureUserInvites() {
+    this.dialog.open(UserInviteConfigurationDialogComponent, {
+      data: {
+        guid: this.cfEndpointService.cfGuid
+      }
+    });
+  }
+
+  deConfigureUserInvites() {
+    this.userInviteService.unconfigure(this.cfEndpointService.cfGuid);
   }
 }

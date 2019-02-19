@@ -1,14 +1,21 @@
+import { HttpHandler } from '@angular/common/http';
 import { inject, TestBed } from '@angular/core/testing';
+import { HttpClient } from 'selenium-webdriver/http';
 
+import { UserInviteService } from '../../../../../../../../app/features/cloud-foundry/user-invites/user-invite.service';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  CloudFoundryOrganizationServiceMock,
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
+
 
 describe('CfSpaceUsersListConfigService', () => {
   beforeEach(() => {
@@ -17,7 +24,11 @@ describe('CfSpaceUsersListConfigService', () => {
         CfSpaceUsersListConfigService,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        ActiveRouteCfOrgSpace
+        ActiveRouteCfOrgSpace,
+        UserInviteService,
+        HttpClient,
+        HttpHandler,
+        CloudFoundryEndpointService
       ],
       imports: [...BaseTestModules]
     });

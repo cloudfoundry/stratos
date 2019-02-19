@@ -15,7 +15,11 @@ import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
+import {
+  canUpdateOrgSpaceRoles,
+  createCfOrgSpaceSteppersUrl,
+  waitForCFPermissions,
+} from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';
 import {
@@ -105,16 +109,13 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Manage roles`,
   };
 
-  private createManagerUsersUrl(): string {
-    let route = `/cloud-foundry/${this.cfUserService.activeRouteCfOrgSpace.cfGuid}`;
-    if (this.activeRouteCfOrgSpace.orgGuid) {
-      route += `/organizations/${this.activeRouteCfOrgSpace.orgGuid}`;
-      if (this.activeRouteCfOrgSpace.spaceGuid) {
-        route += `/spaces/${this.activeRouteCfOrgSpace.spaceGuid}`;
-      }
-    }
-    route += `/users/manage`;
-    return route;
+  protected createManagerUsersUrl(): string {
+    return createCfOrgSpaceSteppersUrl(
+      this.cfUserService.activeRouteCfOrgSpace.cfGuid,
+      `/users/manage`,
+      this.activeRouteCfOrgSpace.orgGuid,
+      this.activeRouteCfOrgSpace.spaceGuid
+    );
   }
 
   constructor(
