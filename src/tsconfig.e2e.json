@@ -1,10 +1,8 @@
 {
-  "extends": "../tsconfig.e2e.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../out-tsc/e2e",
-    "baseUrl": "./",
+    "outDir": "./out-tsc/app",
     "module": "commonjs",
-    "target": "es5",
     "types": [
       "jasmine",
       "jasminewd2",
