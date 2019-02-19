@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { TabNavService } from '../../../tab-nav.service';
+import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 export interface IPageSideNavTab {
   key?: string;
@@ -24,6 +25,7 @@ export class PageSideNavComponent implements OnInit {
   @Input()
   public header: string;
   public activeTab$: Observable<string>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
 
   constructor(public tabNavService: TabNavService) {
 
@@ -31,6 +33,7 @@ export class PageSideNavComponent implements OnInit {
 
   ngOnInit() {
     this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable(this.tabs);
+    this.breadcrumbs$ = this.tabNavService.breadcrumbs$;
   }
 
 }

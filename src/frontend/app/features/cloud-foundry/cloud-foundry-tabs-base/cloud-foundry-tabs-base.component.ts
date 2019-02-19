@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith, first } from 'rxjs/operators';
-
+import { first, map, startWith } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
@@ -11,12 +10,12 @@ import {
   getTabsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
-  StratosTabType,
+  StratosTabType
 } from '../../../core/extension/extension-service';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 import { UserFavoriteEndpoint } from '../../../store/types/user-favorites.types';
+import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { canUpdateOrgSpaceRoles } from '../cf.helpers';
+
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
@@ -28,7 +27,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   static users = 'users';
   static cells = 'cells';
 
-  public tabLinks: ISubHeaderTabs[];
+  public tabLinks: IPageSideNavTab[];
 
   // Used to hide tab that is not yet implemented when in production
   isDevEnvironment = !environment.production;
@@ -79,9 +78,10 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
+        matIcon: 'select_all',
         hidden: cellsHidden$
       },
-      { link: 'routes', label: 'Routes' },
+      { link: 'routes', label: 'Routes', matIcon: 'network_route', matIconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
@@ -97,8 +97,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       { link: 'feature-flags', label: 'Feature Flags', matIcon: 'flag' },
       { link: 'build-packs', label: 'Build Packs', matIcon: 'build' },
       { link: 'stacks', label: 'Stacks', matIcon: 'code' },
-      { link: 'security-groups', label: 'Security Groups', matIcon: 'security' }
-    ].concat(getTabsFromExtensions(StratosTabType.CloudFoundry));
+      { link: 'security-groups', label: 'Security Groups', matIcon: 'security' },
+      ...getTabsFromExtensions(StratosTabType.CloudFoundry)
+    ];
   }
 
   ngOnInit() {

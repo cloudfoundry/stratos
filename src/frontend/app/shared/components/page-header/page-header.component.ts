@@ -10,10 +10,10 @@ import { InternalEventSeverity } from '../../../store/types/internal-events.type
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
-import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { TabNavService } from '../../../tab-nav.service';
 import { AddRecentlyVisitedEntityAction } from '../../../store/actions/recently-visited.actions';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
+import { IBreadcrumb } from '../breadcrumbs/breadcrumbs.types';
 
 @Component({
   selector: 'app-page-header',
@@ -22,8 +22,6 @@ import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-ma
 })
 export class PageHeaderComponent implements OnInit, OnDestroy {
 
-  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
-  private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public _favorite: UserFavorite<IFavoriteMetadata>;
 
@@ -91,28 +89,12 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
   public username$: Observable<string>;
   public actionsKey: String;
 
-  @Input()
-  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
-    this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
-  }
-
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
   @Input() logoutOnly: boolean;
 
-  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
-    if (!breadcrumbs || !breadcrumbs.length) {
-      return [];
-    }
-    return this.getBreadcrumbFromKey(breadcrumbs).breadcrumbs;
-  }
-
-  private getBreadcrumbFromKey(breadcrumbs: IHeaderBreadcrumb[]) {
-    if (breadcrumbs.length === 1 || !this.breadcrumbKey) {
-      return breadcrumbs[0];
-    }
-    return breadcrumbs.find(breadcrumb => {
-      return breadcrumb.key === this.breadcrumbKey;
-    }) || breadcrumbs[0];
+  @Input()
+  set breadcrumbs(breadcrumbs: IBreadcrumb[]) {
+    this.tabNavService.setBreadcrumbs(breadcrumbs);
   }
 
   toggleSidenav() {
@@ -130,7 +112,6 @@ export class PageHeaderComponent implements OnInit, OnDestroy {
     private tabNavService: TabNavService,
   ) {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
-    this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
       map((auth: AuthState) => auth && auth.sessionData ? auth.sessionData.user.name : 'Unknown')
     );

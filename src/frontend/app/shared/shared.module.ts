@@ -150,6 +150,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 
 
 @NgModule({
@@ -267,7 +268,8 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
     FavoritesGlobalListComponent,
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    BreadcrumbsComponent
   ],
   exports: [
     FormsModule,
@@ -367,7 +369,8 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
     StackedInputActionComponent,
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    BreadcrumbsComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
 import { EndpointTypeConfig, EndpointAuthTypeConfig, ExtensionEntitySchema } from './extension-types';
+import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -213,7 +214,7 @@ export function getRoutesFromExtensions(routeType: StratosRouteType) {
   return extensionMetadata.extensionRoutes[routeType] || [];
 }
 
-export function getTabsFromExtensions(tabType: StratosTabType) {
+export function getTabsFromExtensions(tabType: StratosTabType): IPageSideNavTab[] {
   return extensionMetadata.tabs[tabType] || [];
 }
 

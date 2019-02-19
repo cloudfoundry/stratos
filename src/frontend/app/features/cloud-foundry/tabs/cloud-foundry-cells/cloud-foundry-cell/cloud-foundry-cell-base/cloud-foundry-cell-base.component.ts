@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { entityFactory, metricSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { IBreadcrumb } from '../../../../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 
 @Component({
@@ -38,7 +38,7 @@ export class CloudFoundryCellBaseComponent {
     },
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
   public name$: Observable<string>;
   public waitForEntityId: string;
   public waitForEntitySchema = entityFactory(metricSchemaKey);

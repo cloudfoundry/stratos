@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { AppState } from '../../../store/app-state';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 import { ServicesService } from '../services.service';
+import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 
 @Component({
@@ -35,7 +35,7 @@ export class ServiceTabsBaseComponent {
       label: 'Plans'
     }
   ];
-  breadcrumbs: IHeaderBreadcrumb[] = [
+  breadcrumbs: IBreadcrumb[] = [
     {
       breadcrumbs: [{ value: 'Marketplace', routerLink: '/marketplace' }]
     }

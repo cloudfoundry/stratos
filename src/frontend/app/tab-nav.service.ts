@@ -4,6 +4,7 @@ import { ISubHeaderTabs } from './shared/components/page-subheader/page-subheade
 import { observeOn, map, startWith } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
 import { Router } from '@angular/router';
+import { IBreadcrumb } from './shared/components/breadcrumbs/breadcrumbs.types';
 
 @Injectable()
 export class TabNavService {
@@ -15,6 +16,13 @@ export class TabNavService {
 
   private tabSubNavSubject: BehaviorSubject<Portal<any>>;
   public tabSubNav$: Observable<Portal<any>>;
+
+  private breadcrumbsSubject: BehaviorSubject<IBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
+
+  public setBreadcrumbs(breadcrumbs: IBreadcrumb[]) {
+    this.breadcrumbsSubject.next(breadcrumbs);
+  }
 
   public setTabs(tabs: ISubHeaderTabs[]) {
     this.tabNavsSubject.next(tabs);
@@ -68,6 +76,10 @@ export class TabNavService {
     );
     this.tabSubNavSubject = new BehaviorSubject(undefined);
     this.tabSubNav$ = this.tabSubNavSubject.asObservable().pipe(
+      observeOn(asapScheduler)
+    );
+    this.breadcrumbsSubject = new BehaviorSubject(undefined);
+    this.breadcrumbs$ = this.breadcrumbsSubject.asObservable().pipe(
       observeOn(asapScheduler)
     );
   }

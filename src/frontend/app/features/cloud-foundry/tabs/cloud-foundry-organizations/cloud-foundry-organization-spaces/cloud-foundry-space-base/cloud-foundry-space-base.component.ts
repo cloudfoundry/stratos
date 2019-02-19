@@ -15,7 +15,6 @@ import {
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
-import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
@@ -27,6 +26,7 @@ import { CloudFoundryOrganizationService } from '../../../../services/cloud-foun
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
+import { IBreadcrumb } from '../../../../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -71,7 +71,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     }
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
 
   public name$: Observable<string>;
 

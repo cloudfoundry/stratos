@@ -19,7 +19,6 @@ import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { RestageApplication } from '../../../../store/actions/application.actions';
@@ -37,6 +36,7 @@ import { GitSCMService, GitSCMType } from './../../../../shared/data-services/sc
 import { UserFavorite } from './../../../../store/types/user-favorites.types';
 import { IAppFavMetadata } from '../../../../cf-favourite-types';
 import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
+import { IBreadcrumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 
 // Confirmation dialogs
@@ -169,7 +169,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       });
   }
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
   summaryDataChanging$: Observable<boolean>;

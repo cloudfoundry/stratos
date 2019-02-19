@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { TableCellCustom } from '../../../list.types';
-import { BREADCRUMB_URL_PARAM } from '../../../../page-header/page-header.types';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/app-state';
-import { getCurrentRoutingState, RoutingHistory, RoutingEvent } from '../../../../../../store/types/routing.type';
+import { getCurrentRoutingState, RoutingEvent } from '../../../../../../store/types/routing.type';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { BREADCRUMB_URL_PARAM } from '../../../../breadcrumbs/breadcrumbs.types';
 
 @Component({
   selector: 'app-table-cell-app-name',

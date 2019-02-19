@@ -1,5 +1,5 @@
 
-import {of as observableOf,  BehaviorSubject ,  Observable ,  combineLatest } from 'rxjs';
+import { of as observableOf, BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { Component, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
@@ -8,7 +8,6 @@ import { IOrganization, ISpace } from '../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../core/current-user-permissions.checker';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
@@ -20,6 +19,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
+import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 @Component({
   selector: 'app-cli-info-cloud-foundry',
@@ -47,7 +47,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   };
 
   public context$: Observable<CFAppCLIInfoContext>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
   public route$: Observable<{ url: string, queryParams: any }>;
 
   public endpointOrgSpace$: Observable<[
@@ -63,7 +63,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     @Optional() private cfOrgService: CloudFoundryOrganizationService,
     @Optional() private cfSpaceService: CloudFoundrySpaceService
   ) {
-    this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
+    this.breadcrumbs$ = new BehaviorSubject<IBreadcrumb[]>([]);
     if (activeRouteCfOrgSpace.orgGuid) {
       this.orgGuid = activeRouteCfOrgSpace.orgGuid;
       this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;

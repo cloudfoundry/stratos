@@ -14,10 +14,11 @@
     }
   }
   @include breakpoint(tablet) {
-    border-bottom: none;
+    border-bottom: 0;
     height: 100%;
     position: relative;
   }
+
   &__icon {
     font-size: 18px;
     height: 18px;
@@ -53,16 +54,33 @@
     }
   }
   &__items-header {
+    $item-header-padding: 25px;
     align-items: center;
     border-bottom: 1px solid $border-color;
+    direction: rtl;
     display: none;
     font-weight: bold;
     height: 60px;
     opacity: .6;
-    padding: 0 25px;
+    overflow: hidden;
+    padding: 0 $item-header-padding;
+    position: relative;
+    &::before {
+      bottom: 0;
+      content: '';
+      display: block;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: $item-header-padding;
+      z-index: 1;
+    }
     @include breakpoint(tablet) {
       display: flex;
     }
+  }
+  &__breadcrumbs {
+    direction: ltr;
   }
   &__items-compact-header {
     align-items: baseline;

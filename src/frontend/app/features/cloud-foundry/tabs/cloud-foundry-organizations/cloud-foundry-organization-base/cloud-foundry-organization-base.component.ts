@@ -12,7 +12,6 @@ import {
   StratosTabType
 } from '../../../../../core/extension/extension-service';
 import { getFavoriteFromCfEntity } from '../../../../../core/user-favorite-helpers';
-import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { IPageSideNavTab } from '../../../../dashboard/page-side-nav/page-side-nav.component';
@@ -20,6 +19,7 @@ import { UserFavorite } from '../../../../../store/types/user-favorites.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { IBreadcrumb } from '../../../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 
 @Component({
@@ -53,7 +53,7 @@ export class CloudFoundryOrganizationBaseComponent {
     }
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
 
   public name$: Observable<string>;
 

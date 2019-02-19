@@ -3,11 +3,11 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { ApplicationService } from '../application.service';
+import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 @Component({
   selector: 'app-cli-info-application',
@@ -23,13 +23,13 @@ export class CliInfoApplicationComponent implements OnInit {
   };
 
   public context$: Observable<CFAppCLIInfoContext>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IBreadcrumb[]>;
 
   constructor(
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
   ) {
-    this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
+    this.breadcrumbs$ = new BehaviorSubject<IBreadcrumb[]>([]);
   }
 
   ngOnInit() {

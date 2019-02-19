@@ -8,14 +8,7 @@
               <mat-icon class="page-header__nav-toggle">menu</mat-icon>
             </button>
           </div>
-          <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
-            <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
-              <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
-                [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-              <span class="page-header__breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-              <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
-            </ng-container>
-          </div>
+          <h3>Stratos</h3>
           <ng-content></ng-content>
           <app-entity-favorite-star class="page-header__favorite" *ngIf="_favorite" [favorite]="_favorite">
           </app-entity-favorite-star>
@@ -52,19 +45,20 @@
                   <div class="page-header__username-subtext">user</div>
                   <div>{{ username$ | async }}</div>
                 </div>
-                <div *ngIf="!logoutOnly">
-                  <button mat-menu-item routerLink="/about">
-                    <span>About</span>
-                  </button>
-                  <button mat-menu-item routerLink="/user-profile">
-                    <span>Profile</span>
-                  </button>
-                  <div class="page-header__menu-separator"></div>
-                </div>
-                <button mat-menu-item (click)="logout()">
-                  <span>Logout</span>
-                </button>
               </div>
+              <div *ngIf="!logoutOnly">
+                <button mat-menu-item routerLink="/about">
+                  <span>About</span>
+                </button>
+                <button mat-menu-item routerLink="/user-profile">
+                  <span>Profile</span>
+                </button>
+                <div class="page-header__menu-separator"></div>
+              </div>
+              <button mat-menu-item (click)="logout()">
+                <span>Logout</span>
+              </button>
+            </div>
           </mat-menu>
         </mat-toolbar>
       </div>
