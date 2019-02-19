@@ -80,8 +80,13 @@ Then Stratos should either ..
   - For instance new v3 entities are not `include`s (`/apps` - `package`, `processes`, `route_mappings`, `environment_variables`, `droplets`, `tasks`)
   - ~~Not supported by common CFs used to develop with (SCF, PCFDev)~~.
 - Entities do not contain all properties that were in v2 (where functionality has not changed)
-  - Covers simple values and entities (one to one and one to many) 
+  - Covers simple values and entities (one to one and one to many)
   - For instance `/organizations` and `/spaces` endpoints are not completed and contain only guid, create/updated date and name (space additionally has experimental `organization`)  
+- Entities returned by v2/v3 endpoints are not consistent
+  - For example
+    - push an app with `v3-push` and it shows up in `v2/apps`
+    - `v3/service_bindings` does not return service bindings that aren't attached to a v3 app
+  - Without knowing exactly all these occurrences we won't be able to work in a mixed v2/v3 endpoint state
 - ~~Cannot determine if a CF supports v3 or when it does support v3 which endpoints it has~~
   - v3 version and supported endpoints can be determined by response to `<cf api url>` and `<cf api url>/v3`
   - ~~Getting the v2 version is simple, I don't know if there's correlation to v3 version~~
@@ -126,15 +131,180 @@ Then Stratos should either ..
 ### Questions
 - ~~Will `include` cover children of children? For instance `app` --> `route` --> `domain`~~
   - ~~How will lists be covered? For instance `organization` --> `space` --> `service instances`~~
--  How will the deprecation of v2 endpoints happen?
+- How will the deprecation of v2 endpoints happen?
   - One by one?
   - All together once v2 parity is reached?
 - Will duplicated `include`ed entities only appear once in a top level (entity or pagination) `included`? For example..conceptually..
   - Fetch an application, the application's space, the application's routes and application routes spaces all in a single request
-  - If the application's space appeared in the route's space, would it only appear once in the application's`included` section... or appear twice (once 
+  - If the application's space appeared in the route's space, would it only appear once in the application's`included` section... or appear twice (once
     in application `included` and again in route `included`)?
 - The style guide references a way to fetch one to many relationships as `/v3/apps/:app_guid/relationships/routes` (https://github.com/cloudfoundry/cc-api-v3-style-guide#viewing-1)
   - This doesn't seem to work (404), is it yet to be implemented?
   - `/v3/apps/:app_guid/routes` also does not work (404)
   - `/v3/apps/:app_guid/route_mappings` works, but there doesn't seem to be a way to `include` the `route` such that it appears in the response
 - Which version is the `include=space,space.organization` notation supported in?
+
+## v3 Required `include`s, `order_by`, filters, missing properties
+
+### `/apps`
+Type | Name | Notes
+--- | --- | ---
+`include` | `space` |
+`include` | Organization via `space.organization` |
+`include` | `packages` | Required to determine app state (state, updated_at)
+`include` | `processes` | Required to determine app state (instances)
+`include` | `processes.stats` | Required to determine app state (state).
+`include` | `current_droplet` | Required to determine app state (state).
+`include` | `packages.builds` | v3 currently has no link or relation. Required to determine app state (state).
+`order_by` | sum of `processes` `instances` count | [See below for notes](#v3-Required-Features)
+`order_by` | sum of `processes` `disk_in_mb` count | [See below for notes](#v3-Required-Features)
+`order_by` | sum of `processes` `memory_in_mb` count | [See below for notes](#v3-Required-Features)
+filter | `processes` state |
+filter | organization name | Allows free text search, rather than manual selection of cf and then org
+filter | space name | Allows free text search, rather than manual selection of cf, org and then space
+
+### `/app/${guid}`
+Type | Name | Notes
+--- | --- | ---
+`include` | `route_mappings`
+`include` | Route via `route_mappings.route` | `/route` has no v3 equivalent
+`include` | Route via `route_mappings.route.domain` | `/domain` has no v3 equivalent
+links | `service_bindings`
+`include` | `service_bindings`
+~~`include`~~ | ~~`space`~~
+`include` | `space.organization`
+`include` | `packages` | Required to determine app state (state, updated_at).
+`include` | `processes` | Required to determine app state (instances)
+`include` | `processes.stats` | Required to determine app state (state).
+`include` | `current_droplet` | Required to determine app state (state).
+`include` | `packages.builds` | v3 currently has no link or relation. Required to determine app state (state).
+links | `features` | Required to fetch app ssh and revision info
+`include` | `features` | v3 currently has no link or relation to features. Required to fetch app ssh and revision info
+`include` | `droplets` | Note used at the moment, but it's easy to think that we'll want this info along with the app
+`include` | `tasks` | Note used at the moment, but it's easy to think that we'll want this info along with the app
+property | stack guid/whole entity | Stack name is included inline in an inlined `lifecycle` object. This placement seems like an odd pattern. It's not an entity on it's own with it's own endpoint... but does contain an inline entity (stack). The inlined stack contains only a name and not guid/rest of stack entity.
+property | buildpack guid/whole entity | As per stack guid above
+property | `enable_ssh` | .. or similar property to determine if ssh'ing to an instance is allowed at the app level
+
+### `/apps/{guid}/packages`
+Type | Name | Notes
+--- | --- | ---
+`include` | `app`
+links | `builds`
+`include` | `builds`
+
+### `/apps/{guid}/processes`
+Type | Name | Notes
+--- | --- | ---
+`include` | `stats` |
+`order_by` | `state` |
+`order_by` | `stats` `usage.time` | [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.cpu` | [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.mem` | [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.disk` | [See below for notes](#v3-Required-Features)
+filter | `state`
+
+### `/service_bindings` (functionality for /apps/{guid}/service_bindings only)
+Type | Name | Notes
+--- | --- | ---
+links | `service_instance`
+`include` | `service_instance`
+links | `service_instance.service`
+`include` | `service_instance.service`
+links | `service_instance.service_plan`
+`include` | `service_instance.service_plan`
+links | `service_instance.tags`
+`include` | `service_instance.tags`
+`order_by` | service instance name
+`order_by` | service name
+`order_by` | service plan name
+filter | service instance name
+filter | service name
+filter | service plan name
+
+### `/spaces`
+Type | Name | Notes
+--- | --- | ---
+`order_by` | `created_at`
+`order_by` | `name`
+filter | name
+links | `service_instances`
+`include` | `service_instances`
+links | `space_quota_definition`
+`include` | `space_quota_definition`
+~`include`~ | ~`applications`~ | Previous requirement pre-scaling change
+
+### `/spaces/${guid}`
+Type | Name | Notes
+--- | --- | ---
+links | `organization`
+`include` | `organization`
+links | `domains` | `/domains` has no v3 equivalent
+`include` | `domains` | `/domains` has no v3 equivalent
+links | `routes` | `/routes` has no v3 equivalent
+`include` | `routes` | `/routes` has no v3 equivalent
+links | `routes.domain` | `/routes` has no v3 equivalent
+`include` | `routes.domain` | `/routes` has no v3 equivalent
+links | `routes.applications` | `/routes` has no v3 equivalent. We expect these relations to be 1-to-not-many
+`include` | `routes.applications` | `/routes` has no v3 equivalent. We expect these relations to be 1-to-not-many
+~`include`~ | ~`applications`~ | | Previous requirement pre-scaling change
+links | `service_instances`
+`include` | `service_instances` |
+links | `service_instances.service_bindings` |
+`include` | `service_instances.service_bindings`
+links | space quota | | space quota has no v3 equivalent
+`include` | space quota | | space quota has no v3 equivalent
+property | allow_ssh | | .. or similar property to determine if ssh'ing to an instance is allowed at the space level
+links | `space.developers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+`include` | `space.developers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+links | `space.managers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+`include` | `space.managers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+links | `space.auditors` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+`include` | `space.auditors` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+
+
+### `/spaces/${guid}/routes` (no `/routes` endpoint)
+
+
+### `/service_instances` (functionality for /spaces/{guid}/service_instances only)
+Type | Name | Notes
+--- | --- | --- | ---
+`order_by` | `username`
+filter | space guid
+link | service bindings
+`include` | service bindings
+link | `service_instance.applications`
+`include` | `service_instance.applications`
+link | `service_plan`
+`include` | `service_plan` | `/service_plan` has no v3 equivalent
+link | `service`
+`include` | `service` | `/service` has no v3 equivalent
+
+
+## v3 Required Features
+
+### Single 'included` section per quest
+There should hopefully be a single `included` section even if `included` elements have their own `include`s. Not quite a requirement, but a real nice to have.
+
+### `include`d lists
+Ability to set `include` for lists of entities. See https://github.com/cloudfoundry/cc-api-v3-style-guide#proposal-pagination-of-related-resources
+
+Use case - Routes, packages, builds, process stats, etc in an application
+
+### `order_by` values in `include`d
+Ability to use properties of entities that are from the `included` section in `order_by`.
+
+Covers simple case of sorting by a property in a 1:1 `include` and also summation of numerical properties in 1:M relationship.
+
+Use case - sort applications by instance count. Requires `process` as an `include` and ability to sort applications by sum of `process`s `instance` values
+
+Use case - as above, but instead of instances the sum of memory in a `processes` `memory_in_mb`. Need to consider whether `processes` state value should be taken into account (only include processes that are running)
+
+Use case - as above, but the sum of `processes` `stats` `usage.mem`.
+
+### filter values in `include`d
+As per `order_by`, delve into an `included` entity and filter out given a specific path.
+
+Use case - Filter a list of service bindings by service instance name, service name or service plan name
+
+Use case - Filter a list of apps by organization or space
