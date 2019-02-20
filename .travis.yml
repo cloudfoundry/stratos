@@ -45,11 +45,17 @@ jobs:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
-    name: Frontend Unit Tests
+  - name: Frontend Unit Test - core
     env:
     - CI_ENV=true
     script:
-    - npm test
+    - npm run ng -- test core --watch=false
+    - npm run codecov
+  - name: Frontend Unit Test - store
+    env:
+    - CI_ENV=true
+    script:
+    - npm run ng -- test store --watch=false
     - npm run codecov
   - name: Backend Unit Tests
     before_script:
