@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
+import { IRouterNavPayload } from '../../../../store/actions/router.actions';
+
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -12,6 +14,7 @@ export interface StepOnNextResult {
   message?: string;
   // Should we redirect to the store previous state?
   redirect?: boolean;
+  redirectPayload?: IRouterNavPayload;
   // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
   ignoreSuccess?: boolean;
   data?: any;

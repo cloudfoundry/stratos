@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { endpointSchemaKey, entityFactory, spaceSchemaKey, usesProvidedServiceInstance } from '../helpers/entity-factory';
+import { endpointSchemaKey, entityFactory, spaceSchemaKey, userProvidedServiceInstanceSchemaKey } from '../helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
@@ -30,8 +30,8 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     }
   }
   actions = getActions('User Provided Services', 'Get all User Provided Services');
-  entity = entityFactory(usesProvidedServiceInstance);
-  entityKey = usesProvidedServiceInstance;
+  entity = entityFactory(userProvidedServiceInstanceSchemaKey);
+  entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -60,8 +60,8 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
     this.options.params = new URLSearchParams();
   }
   actions = getActions('User Provided Service', 'Get User Provided Service');
-  entity = entityFactory(usesProvidedServiceInstance);
-  entityKey = usesProvidedServiceInstance;
+  entity = entityFactory(userProvidedServiceInstanceSchemaKey);
+  entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
 }
 export interface TUserProvidedServiceInstanceDataCredentials {
@@ -107,8 +107,8 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     };
   }
   actions = getActions('User Provided Service', 'Create User Provided Service');
-  entity = [entityFactory(usesProvidedServiceInstance)];
-  entityKey = usesProvidedServiceInstance;
+  entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
+  entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
 }
 
@@ -149,7 +149,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     }
   }
   actions = getActions('User Provided Service', 'Create User Provided Service');
-  entity = [entityFactory(usesProvidedServiceInstance)];
-  entityKey = usesProvidedServiceInstance;
+  entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
+  entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
 }

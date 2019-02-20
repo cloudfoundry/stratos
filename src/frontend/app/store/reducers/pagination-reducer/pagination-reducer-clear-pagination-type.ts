@@ -7,7 +7,7 @@ import {
   serviceInstancesSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
-  usesProvidedServiceInstance,
+  userProvidedServiceInstanceSchemaKey,
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
 
@@ -41,7 +41,7 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
         serviceSchemaKey,
         cfUserSchemaKey,
         serviceInstancesSchemaKey,
-        usesProvidedServiceInstance
+        userProvidedServiceInstanceSchemaKey
       ],
       defaultPaginationEntityState
     );

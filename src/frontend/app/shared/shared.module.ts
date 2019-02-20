@@ -150,6 +150,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { AddServiceInstanceBaseStepComponent } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
+import { AddUserProvidedServiceInstanceComponent } from './components/add-service-instance/add-user-provided-service-instance/add-user-provided-service-instance.component';
 
 
 @NgModule({
@@ -265,7 +267,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesEntityListComponent,
     MultilineTitleComponent,
     TileSelectorComponent,
-    SpecifyUserProvidedDetailsComponent
+    SpecifyUserProvidedDetailsComponent,
+    AddServiceInstanceBaseStepComponent,
+    AddUserProvidedServiceInstanceComponent
   ],
   exports: [
     FormsModule,
@@ -362,7 +366,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent,
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
-    TileSelectorComponent
+    TileSelectorComponent,
+    AddServiceInstanceBaseStepComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

@@ -6,6 +6,9 @@ import {
 } from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
 import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
+import {
+  AddServiceInstanceBaseStepComponent
+} from '../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 
 const services: Routes = [
   {
@@ -14,6 +17,10 @@ const services: Routes = [
   },
   {
     path: 'new',
+    component: AddServiceInstanceBaseStepComponent
+  },
+  {
+    path: 'new/:type',
     component: AddServiceInstanceComponent
   },
   {

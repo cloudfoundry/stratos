@@ -9,9 +9,10 @@ import {
   CreateUserProvidedServiceInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
+  IUserProvidedServiceInstanceData,
 } from '../../store/actions/user-provided-service.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, usesProvidedServiceInstance } from '../../store/helpers/entity-factory';
+import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../store/selectors/api.selectors';
@@ -23,7 +24,7 @@ import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory
 // import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 // import { GetAllUserProvidedServices, GetUserProvidedService } from '../../../store/actions/user-provided-service.actions';
 // import { AppState } from '../../../store/app-state';
-// import { entityFactory, usesProvidedServiceInstance } from '../../../store/helpers/entity-factory';
+// import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../../store/helpers/entity-factory';
 // import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 // import { APIResource } from '../../../store/types/api.types';
 
@@ -44,7 +45,7 @@ export class CloudFoundryUserProvidedServicesService {
 
   }
 
-  getUserProvidedServices(cfGuid: string, spaceGuid?: string): Observable<APIResource<IUserProvidedService>[]> {
+  public getUserProvidedServices(cfGuid: string, spaceGuid?: string): Observable<APIResource<IUserProvidedService>[]> {
     const action = new GetAllUserProvidedServices(cfGuid, [], false, spaceGuid);
     const pagObs = getPaginationObservables({
       store: this.store,
@@ -57,10 +58,10 @@ export class CloudFoundryUserProvidedServicesService {
     return pagObs.entities$;
   }
 
-  getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedService>> {
+  public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedService>> {
     const service = this.entityServiceFactory.create<APIResource<IUserProvidedService>>(
-      usesProvidedServiceInstance,
-      entityFactory(usesProvidedServiceInstance),
+      userProvidedServiceInstanceSchemaKey,
+      entityFactory(userProvidedServiceInstanceSchemaKey),
       upsGuid,
       new GetUserProvidedService(upsGuid, cfGuid),
       true
@@ -70,25 +71,20 @@ export class CloudFoundryUserProvidedServicesService {
     );
   }
 
-  createUserProvidedService(
+  public createUserProvidedService(
     cfGuid: string,
-    spaceGuid: string,
     guid: string,
-    name: string,
-    route_service_url: string,
-    syslog_drain_url?: string,
-    tags: string[] = [],
-    credentials?: { [name: string]: string }
+    data: IUserProvidedServiceInstanceData
   ): Observable<RequestInfoState> {
-    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, spaceGuid, name, route_service_url, syslog_drain_url, tags, credentials);
-    const create$ = this.store.select(selectRequestInfo(usesProvidedServiceInstance, guid));
+    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data);
+    const create$ = this.store.select(selectRequestInfo(userProvidedServiceInstanceSchemaKey, guid));
     this.store.dispatch(action);
     return create$.pipe(
       filter(a => !a.creating),
       switchMap(a => {
-        const guid = a.response.result[0];
-        this.store.dispatch(new GetUserProvidedService(guid, cfGuid));
-        return this.store.select(selectRequestInfo(usesProvidedServiceInstance, guid));
+        const createdGuid = a.response.result[0];
+        this.store.dispatch(new GetUserProvidedService(createdGuid, cfGuid));
+        return this.store.select(selectRequestInfo(userProvidedServiceInstanceSchemaKey, createdGuid));
       }),
       map(ri => ({
         ...ri,

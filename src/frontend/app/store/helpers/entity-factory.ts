@@ -35,7 +35,7 @@ export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const userFavoritesSchemaKey = 'userFavorites';
-export const usesProvidedServiceInstance = 'userProvidedServiceInstance';
+export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -393,14 +393,14 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
 entityCache[cfUserSchemaKey] = CFUserSchema;
 
 
-const UserProvidedServiceInstance = new EntitySchema(usesProvidedServiceInstance, {
+const UserProvidedServiceInstanceSchema = new EntitySchema(userProvidedServiceInstanceSchemaKey, {
   entity: {
     space: SpaceEmptySchema,
     service_bindings: [ServiceBindingsSchema],
     routes: [RouteSchema]
   }
 }, { idAttribute: getAPIResourceGuid });
-entityCache[usesProvidedServiceInstance] = UserProvidedServiceInstance;
+entityCache[userProvidedServiceInstanceSchemaKey] = UserProvidedServiceInstanceSchema;
 
 
 export function entityFactory(key: string): EntitySchema {

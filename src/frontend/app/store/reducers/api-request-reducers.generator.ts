@@ -28,7 +28,7 @@ import {
   spaceSchemaKey,
   userFavoritesSchemaKey,
   userProfileSchemaKey,
-  usesProvidedServiceInstance,
+  userProvidedServiceInstanceSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { IRequestDataState, IRequestState } from '../types/entity.types';
@@ -116,7 +116,7 @@ const entities = [
   servicePlanVisibilitySchemaKey,
   serviceBrokerSchemaKey,
   userFavoritesSchemaKey,
-  usesProvidedServiceInstance
+  userProvidedServiceInstanceSchemaKey
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {

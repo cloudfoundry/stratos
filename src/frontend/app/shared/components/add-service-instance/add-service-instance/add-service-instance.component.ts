@@ -1,6 +1,6 @@
 import { TitleCasePipe } from '@angular/common';
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
@@ -42,6 +42,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -69,15 +70,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   bindAppStepperText = 'Bind App (Optional)';
   appId: string;
   public inMarketplaceMode: boolean;
-  public tileSelected: number = null;
-  public tileSelectorConfig = [{
-    key: 0,
-    label: 'Service'
-  }, {
-    key: 1,
-    label: 'User Provided Service'
-  }];
-
+  public serviceType: SERVICE_INSTANCE_TYPES;
+  public serviceTypes = SERVICE_INSTANCE_TYPES;
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
@@ -86,9 +80,11 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     private csiGuidsService: CsiGuidsService,
     private entityServiceFactory: EntityServiceFactory,
     public modeService: CsiModeService,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    route: ActivatedRoute
   ) {
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
+    this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
   }
   ngAfterContentInit(): void {
     // Check if wizard has been initiated from the Services Marketplace

@@ -12,6 +12,15 @@ import { selectCreateServiceInstance } from '../../../../store/selectors/create-
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { isValidJsonValidator } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
+import {
+  CreateUserProvidedServiceInstance,
+  IUserProvidedServiceInstanceData
+} from '../../../../store/actions/user-provided-service.actions';
+import { EntityMonitor } from '../../../monitors/entity-monitor';
+import {
+  entityFactory,
+  userProvidedServiceInstanceSchemaKey
+} from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-specify-user-provided-details',
@@ -19,14 +28,11 @@ import { StepOnNextResult } from '../../stepper/step/step.component';
   styleUrls: ['./specify-user-provided-details.component.scss']
 })
 export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
-
-
-
-  formGroup: FormGroup;
-  tags: { label: string }[] = [];
-  separatorKeysCodes = [ENTER, COMMA, SPACE];
-  allServiceInstanceNames: string[];
-  subs: Subscription[] = [];
+  public formGroup: FormGroup;
+  public tags: { label: string }[] = [];
+  public separatorKeysCodes = [ENTER, COMMA, SPACE];
+  public allServiceInstanceNames: string[];
+  public subs: Subscription[] = [];
 
   constructor(
     private store: Store<AppState>,
@@ -54,18 +60,16 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
   }
 
   onNext = (): Observable<StepOnNextResult> => {
-    return this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p),
-      switchMap(csi => {
-        // TODO: RC editing
-        return this.userProvidedServicesService.createUserProvidedService();
-      }),
-      map(request => {
-        return {
-          success: !request.error,
-          message: `Failed to create user provided service instance: ${request.message}`
-        };
-      }),
+    const data = this.formGroup.value as IUserProvidedServiceInstanceData;
+    const action = new CreateUserProvidedServiceInstance('cfGuid', 'dasd', data);
+    this.store.dispatch(action);
+    return new EntityMonitor(
+      this.store, 'a', 'a', entityFactory(userProvidedServiceInstanceSchemaKey)
+    ).entityRequest$.pipe(
+      filter(er => er.creating),
+      map(er => ({
+        success: !er.error
+      }))
     );
   }
 

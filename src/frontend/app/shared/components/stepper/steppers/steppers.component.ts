@@ -14,11 +14,11 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/logger.service';
-import { RouterNav } from '../../../../store/actions/router.actions';
+import { RouterNav, IRouterNavPayload } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
-import { StepComponent } from './../step/step.component';
+import { StepComponent, StepOnNextResult } from './../step/step.component';
 
 
 
@@ -118,9 +118,16 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         first(),
         catchError(err => {
           this.logger.warn('Stepper failed: ', err);
-          return observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false });
+          return observableOf({
+            success: false,
+            message: 'Failed',
+            redirectPayload: null,
+            redirect: false,
+            data: {},
+            ignoreSuccess: false
+          } as StepOnNextResult);
         }),
-        switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+        switchMap(({ success, data, message, redirect, redirectPayload, ignoreSuccess }) => {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
@@ -128,7 +135,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           if (success && !ignoreSuccess) {
             if (redirect) {
               // Must sub to this
-              return this.redirect();
+              return this.redirect(redirectPayload);
             } else {
               this.setActive(this.currentIndex + 1);
             }
@@ -140,7 +147,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  redirect() {
+  redirect(redirectPayload?: IRouterNavPayload) {
+    if (redirectPayload) {
+      return observableOf(this.store.dispatch(new RouterNav(redirectPayload)));
+    }
     return combineLatest(
       this.cancel$,
       this.cancelQueryParams$
@@ -235,7 +245,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  canGoNext(index) {
+  canGoNext(index: number) {
     if (
       !this.steps[index] ||
       !this.steps[index].valid ||
@@ -246,7 +256,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  canCancel(index) {
+  canCancel(index: number) {
     if (
       !this.steps[index] ||
       !this.steps[index].canClose
