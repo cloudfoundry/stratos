@@ -50,13 +50,13 @@ jobs:
     - CI_ENV=true
     script:
     - npm run ng -- test core --watch=false
-    - npm run codecov
+    - npm run codecov -f coverage/core/*.json
   - name: Frontend Unit Test - store
     env:
     - CI_ENV=true
     script:
     - npm run ng -- test store --watch=false
-    - npm run codecov
+    - npm run codecov -f coverage/store/*.json
   - name: Backend Unit Tests
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme

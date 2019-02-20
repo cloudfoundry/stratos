@@ -22,7 +22,7 @@
     "test": "ng test --code-coverage",
     "test-debug": "ng test --watch=true --source-map=true",
     "test-headless": "HEADLESS=true npm run test",
-    "codecov": "codecov -f coverage/*/*.json",
+    "codecov": "codecov",
     "lint": "ng lint",
     "sass-lint": "sass-lint -v",
     "e2e": "ng e2e",
@@ -34,7 +34,8 @@
     "customize": "gulp customize",
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
-    "store-git-metadata": "gulp store-git-metadata"
+    "store-git-metadata": "gulp store-git-metadata",
+    "postinstall": "npm run customize && gulp dev-setup"
   },
   "author": "",
   "license": "Apache-2.0",
