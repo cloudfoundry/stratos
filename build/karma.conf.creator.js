@@ -1,4 +1,6 @@
-module.exports = function (relPath) {
+module.exports = function (project) {
+  var path = require('path')
+  var repoRoot = path.join(__dirname, '..')
   return function (config) {
     config.set({
       basePath: '',
@@ -10,7 +12,7 @@ module.exports = function (relPath) {
         require('karma-coverage-istanbul-reporter'),
         require('karma-spec-reporter'),
         require('@angular-devkit/build-angular/plugins/karma'),
-        require('../build/karma.test.reporter.js')
+        require(path.join(repoRoot, 'build/karma.test.reporter.js'))
       ],
       client: {
         clearContext: false, // leave Jasmine Spec Runner output visible in browser
@@ -20,7 +22,7 @@ module.exports = function (relPath) {
         }
       },
       coverageIstanbulReporter: {
-        dir: require('path').join(__dirname, '..', 'coverage'),
+        dir: path.join(repoRoot, 'coverage', project),
         reports: ['html', 'lcovonly', 'json'],
         fixWebpackSourcePaths: true
       },
@@ -45,7 +47,7 @@ module.exports = function (relPath) {
           watched: false
         },
         {
-          pattern: relPath + '/node_modules/@angular/material/prebuilt-themes/indigo-pink.css'
+          pattern: path.join(repoRoot, 'node_modules/@angular/material/prebuilt-themes/indigo-pink.css')
         }
       ],
       exclude: [

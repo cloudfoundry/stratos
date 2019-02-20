@@ -3,6 +3,6 @@
 
 module.exports = function (config) {
   config.set({
-    ...require('../../../../build/karma.conf.creator.js')('../../../..')(config)
+    ...require('../../../../build/karma.conf.creator.js')('store')(config)
   })
 }
