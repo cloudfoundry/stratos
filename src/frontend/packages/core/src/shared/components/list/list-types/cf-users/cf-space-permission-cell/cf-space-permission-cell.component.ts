@@ -50,7 +50,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       isOrgLevel$
     ).pipe(
       switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
-        const permissionList = this.createPermissions(user, isOrgLevel, spaces && spaces.length ? spaces : null);
+        const permissionList = this.createPermissions(user, isOrgLevel, spaces);
         // If we're showing spaces from multiple orgs prefix the org name to the space name
         return org ? observableOf(this.getChipConfig(permissionList)) : this.prefixOrgName(permissionList);
       })
@@ -103,8 +103,8 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
   }
 
-  private createPermissions(row: APIResource<CfUser>, isOrgLevel = true, spaces?:
-    APIResource<ISpace>[]): ICellPermissionList<SpaceUserRoleNames>[] {
+  private createPermissions(row: APIResource<CfUser>, isOrgLevel = true, spaces?: APIResource<ISpace>[])
+    : ICellPermissionList<SpaceUserRoleNames>[] {
     const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity, spaces);
     return arrayHelper.flatten<ICellPermissionList<SpaceUserRoleNames>>(
       userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row, isOrgLevel))
