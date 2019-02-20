@@ -45,18 +45,12 @@ jobs:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
-  - name: Frontend Unit Test - core
+  - name: Frontend Unit Tests
     env:
     - CI_ENV=true
     script:
-    - npm run ng -- test core --code-coverage --watch=false
-    - npm run codecov -- -f coverage/core/*.json
-  - name: Frontend Unit Test - store
-    env:
-    - CI_ENV=true
-    script:
-    - npm run ng -- test store --code-coverage --watch=false
-    - npm run codecov -- -f coverage/store/*.json
+    - npm run test
+    - npm run codecov
   - name: Backend Unit Tests
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme

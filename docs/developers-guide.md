@@ -112,10 +112,10 @@ Run `npm run lint` to execute tslint lint checking.
 
 Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in ./coverage
 
+To execute an individual package run `ng test <package name>`. To execute the tests again automatically on code changes add `--watch=true`
+
 > **NOTE** npm test will search for chrome on your path. If this is not so please set an env var CHROME_BIN pointing to your executable
 (chromium is fine too).
-
-Run `npm test-debug` to execute unit tests in a mode that will re-run whenever there's a code change
 
 ### End-to-end tests
 
