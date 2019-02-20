@@ -49,13 +49,13 @@ jobs:
     env:
     - CI_ENV=true
     script:
-    - npm run ng -- test core --watch=false
+    - npm run ng -- test core --code-coverage --watch=false
     - npm run codecov -- -f coverage/core/*.json
   - name: Frontend Unit Test - store
     env:
     - CI_ENV=true
     script:
-    - npm run ng -- test store --watch=false
+    - npm run ng -- test store --code-coverage --watch=false
     - npm run codecov -- -f coverage/store/*.json
   - name: Backend Unit Tests
     before_script:
