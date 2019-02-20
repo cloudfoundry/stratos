@@ -1,9 +1,10 @@
+import { query } from '@angular/animations';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
 import { Component } from '@angular/core';
 import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { of, Observable } from 'rxjs';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
+import { SERVICE_INSTANCE_TYPES, BASE_REDIRECT_QUERY } from './add-service-instance.types';
 interface ICreateServiceTilesData extends ITileData {
   type: string;
 }
@@ -28,7 +29,10 @@ export class AddServiceInstanceBaseStepComponent {
     )
   ];
 
-  public _selectedTile: ITileConfig<ICreateServiceTilesData>;
+  private _selectedTile: ITileConfig<ICreateServiceTilesData>;
+  get selectedTile() {
+    return this._selectedTile;
+  }
   set selectedTile(tile: ITileConfig<ICreateServiceTilesData>) {
     this.serviceType = tile.data.type;
     this._selectedTile = tile;
@@ -39,7 +43,10 @@ export class AddServiceInstanceBaseStepComponent {
       success: true,
       redirect: true,
       redirectPayload: {
-        path: `/services/new/${this.serviceType}`
+        path: `/services/new/${this.serviceType}`,
+        query: {
+          [BASE_REDIRECT_QUERY]: true
+        }
       }
     });
   }

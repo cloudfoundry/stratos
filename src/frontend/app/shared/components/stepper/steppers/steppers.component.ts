@@ -38,6 +38,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @Input() cancel = null;
   @Input() nextButtonProgress = true;
+  @Input() basePreviousRedirect: IRouterNavPayload;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
@@ -65,7 +66,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       map(previousState => {
         // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
         // cancel state is
-        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : this.cancel;
+        if (this.cancel) {
+          return this.cancel;
+        }
+        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home';
       })
     );
     this.cancelQueryParams$ = previousRoute$.pipe(
@@ -104,7 +108,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.snackBarRef) {
       this.snackBar.dismiss();
     }
-
     this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
@@ -149,19 +152,26 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   redirect(redirectPayload?: IRouterNavPayload) {
     if (redirectPayload) {
-      return observableOf(this.store.dispatch(new RouterNav(redirectPayload)));
+      return observableOf(this.dispatchRedirect(redirectPayload));
     }
     return combineLatest(
       this.cancel$,
       this.cancelQueryParams$
     ).pipe(
       map(([path, params]) => {
-        this.store.dispatch(new RouterNav({ path: path, query: params }));
+        this.dispatchRedirect({ path: path, query: params });
       })
     );
   }
 
+  private dispatchRedirect(redirectPayload: IRouterNavPayload) {
+    this.store.dispatch(new RouterNav(redirectPayload));
+  }
+
   setActive(index: number) {
+    if (this.basePreviousRedirect && index < 0) {
+      this.dispatchRedirect(this.basePreviousRedirect);
+    }
     if (!this.canGoto(index)) {
       if (index === 0) {
         if (this.allSteps && this.allSteps.length > 0) {
@@ -223,6 +233,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   canGoto(index: number): boolean {
+    if (index < 0 && this.basePreviousRedirect) {
+      return true;
+    }
     const step = this.steps[this.currentIndex];
     if (!step || step.busy || step.disablePrevious || step.skip) {
       return false;

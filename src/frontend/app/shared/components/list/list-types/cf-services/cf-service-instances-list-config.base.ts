@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -29,6 +30,7 @@ import {
 import {
   TableCellSpaceNameComponent,
 } from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
+import { CANCEL_SPACE_ID_PARAM, CANCEL_ORG_ID_PARAM } from '../../../add-service-instance/csi-mode.service';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
@@ -140,7 +142,10 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IServiceInstance>) =>
-      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
+      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid, {
+        [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
+        [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid
+      }),
     label: 'Edit',
     description: 'Edit Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>

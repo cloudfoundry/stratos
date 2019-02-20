@@ -1,3 +1,4 @@
+import { BASE_REDIRECT_QUERY } from './../add-service-instance-base-step/add-service-instance.types';
 import { TitleCasePipe } from '@angular/common';
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -43,6 +44,7 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
+import { IRouterNavPayload } from '../../../../store/actions/router.actions';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -72,6 +74,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   public inMarketplaceMode: boolean;
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;
+  public basePreviousRedirect: IRouterNavPayload;
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
@@ -85,6 +88,9 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   ) {
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
+    this.basePreviousRedirect = route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
+      path: 'services/new'
+    } : null;
   }
   ngAfterContentInit(): void {
     // Check if wizard has been initiated from the Services Marketplace
