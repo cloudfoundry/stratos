@@ -20,13 +20,14 @@ export class AddServiceInstanceBaseStepComponent {
 
   public tileSelectorConfig = [
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
-      'Service',
-      { matIcon: 'service', matIconFont: 'stratos-icons' },
+      'Marketplace Service',
+      { matIcon: 'store' },
+      // { matIcon: 'service', matIconFont: 'stratos-icons' },
       { type: SERVICE_INSTANCE_TYPES.SERVICE }
     ),
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
       'User Provided Service',
-      { matIcon: 'person_add' },
+      { matIcon: 'person' },
       { type: SERVICE_INSTANCE_TYPES.USER_SERVICE }
     )
   ];
@@ -36,7 +37,7 @@ export class AddServiceInstanceBaseStepComponent {
     return this._selectedTile;
   }
   set selectedTile(tile: ITileConfig<ICreateServiceTilesData>) {
-    this.serviceType = tile.data.type;
+    this.serviceType = tile ? tile.data.type : null;
     this._selectedTile = tile;
   }
 

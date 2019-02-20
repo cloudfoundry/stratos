@@ -6,12 +6,12 @@
   $border-color: darken($background-color, 10%);
   .tile-selector {
     @include mat-elevation-transition;
-    &__selected {
-      @include mat-elevation(1);
-    }
     background: mat-color($background, card);
     border: 1px solid $border-color;
     color: mat-color($foreground, text);
+    &__selected {
+      @include mat-elevation(1);
+    }
     &__content {
       background-color: darken($background-color, 2%);
       border-top: 1px solid $border-color;

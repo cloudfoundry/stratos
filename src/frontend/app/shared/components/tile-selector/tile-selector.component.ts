@@ -17,8 +17,13 @@ export class TileSelectorComponent {
   constructor() { }
 
   selectionChange(tile: ITileConfig) {
-    this.selected = tile;
-    this.selection.emit(tile);
+    if (tile && tile === this.selected) {
+      this.selected = null;
+      this.selection.emit(null);
+    } else {
+      this.selection.emit(tile);
+      this.selected = tile;
+    }
   }
 
 }

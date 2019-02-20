@@ -23,6 +23,7 @@
   min-width: 250px;
   opacity: .5;
   transition: transform .2s ease;
+  user-select: none;
   width: 100%;
   &:hover {
     opacity: 1;

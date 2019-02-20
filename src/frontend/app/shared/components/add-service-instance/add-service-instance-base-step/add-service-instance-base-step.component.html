@@ -5,7 +5,15 @@
   <app-step [valid]="!!selectedTile" [onNext]="next" finishButtonText="Next">
     <div class="select-service-step">
       <h3>Select your service type</h3>
+      <p class="select-service-step__help">
+        Want to know more? Follow the links for information about <a
+          href="https://docs.cloudfoundry.org/devguide/services/" target="_blank">marketplace services</a> and <a
+          href="https://docs.cloudfoundry.org/devguide/services/user-provided.html" target="_blank">user provided
+          services</a>.
+      </p>
       <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
+
     </div>
+
   </app-step>
 </app-steppers>
