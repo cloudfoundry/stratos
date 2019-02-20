@@ -21,10 +21,12 @@ export class AddServiceInstanceBaseStepComponent {
   public tileSelectorConfig = [
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
       'Service',
+      { matIcon: 'service', matIconFont: 'stratos-icons' },
       { type: SERVICE_INSTANCE_TYPES.SERVICE }
     ),
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
       'User Provided Service',
+      { matIcon: 'person_add' },
       { type: SERVICE_INSTANCE_TYPES.USER_SERVICE }
     )
   ];

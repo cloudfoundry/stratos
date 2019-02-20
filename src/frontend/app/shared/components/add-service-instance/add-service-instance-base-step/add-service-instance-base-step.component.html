@@ -2,7 +2,10 @@
   Create Service Instance
 </app-page-header>
 <app-steppers [cancel]="'/services'">
-  <app-step [valid]="!!selectedTile" [onNext]="next" finishButtonText="Next" title="Service Type">
-    <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
+  <app-step [valid]="!!selectedTile" [onNext]="next" finishButtonText="Next">
+    <div class="select-service-step">
+      <h3>Select your service type</h3>
+      <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
+    </div>
   </app-step>
 </app-steppers>

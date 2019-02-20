@@ -12,11 +12,13 @@ export class TileSelectorComponent {
   @Input() options: ITileConfig[];
 
   @Output() selection = new EventEmitter<ITileConfig>();
+  public selected: ITileConfig;
 
   constructor() { }
 
-  selectionChange(event) {
-    this.selection.emit(event.value);
+  selectionChange(tile: ITileConfig) {
+    this.selected = tile;
+    this.selection.emit(tile);
   }
 
 }
