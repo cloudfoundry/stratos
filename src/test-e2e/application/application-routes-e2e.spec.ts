@@ -1,7 +1,7 @@
 import { browser, promise, protractor } from 'protractor';
 
-import { IApp } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { IApp } from '../../frontend/packages/core/src/core/cf-api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';

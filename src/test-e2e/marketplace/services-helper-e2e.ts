@@ -1,6 +1,6 @@
 import { browser, promise, protractor } from 'protractor';
 
-import { CFResponse, createEmptyCfResponse } from '../../frontend/app/store/types/api.types';
+import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
