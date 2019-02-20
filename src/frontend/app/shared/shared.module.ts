@@ -151,7 +151,6 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { AddServiceInstanceBaseStepComponent } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
-import { AddUserProvidedServiceInstanceComponent } from './components/add-service-instance/add-user-provided-service-instance/add-user-provided-service-instance.component';
 
 
 @NgModule({
@@ -268,8 +267,7 @@ import { AddUserProvidedServiceInstanceComponent } from './components/add-servic
     MultilineTitleComponent,
     TileSelectorComponent,
     SpecifyUserProvidedDetailsComponent,
-    AddServiceInstanceBaseStepComponent,
-    AddUserProvidedServiceInstanceComponent
+    AddServiceInstanceBaseStepComponent
   ],
   exports: [
     FormsModule,
