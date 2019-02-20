@@ -46,7 +46,6 @@ export class CsiModeService {
     this.cancelUrl = `/services`;
     const spaceGuid = activatedRoute.snapshot.queryParams[CANCEL_SPACE_ID_PARAM];
     const orgGuid = activatedRoute.snapshot.queryParams[CANCEL_ORG_ID_PARAM];
-    console.log(activatedRoute.snapshot);
     const cfId = getIdFromRoute(activatedRoute, 'endpointId');
     const id = getIdFromRoute(activatedRoute, 'id');
 
