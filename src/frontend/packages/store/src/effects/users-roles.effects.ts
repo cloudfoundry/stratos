@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
+import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../actions/users.actions';
 import { AppState } from '../app-state';
@@ -14,7 +15,6 @@ import { SessionDataEndpoint } from '../types/auth.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
 import { OrgUserRoleNames } from '../types/user.types';
 import { CfRoleChange } from '../types/users-roles.types';
-import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
 
 
 @Injectable()
@@ -25,7 +25,8 @@ export class UsersRolesEffects {
     private store: Store<AppState>,
   ) { }
 
-  @Effect() clearEntityUpdates$ = this.actions$.ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState).pipe(
+  @Effect() clearEntityUpdates$ = this.actions$.pipe(
+    ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState),
     mergeMap(action => {
       const actions = [];
       action.changedRoles.forEach(change => {
@@ -43,7 +44,8 @@ export class UsersRolesEffects {
     })
   );
 
-  @Effect() executeUsersRolesChange$ = this.actions$.ofType<UsersRolesExecuteChanges>(UsersRolesActions.ExecuteChanges).pipe(
+  @Effect() executeUsersRolesChange$ = this.actions$.pipe(
+    ofType<UsersRolesExecuteChanges>(UsersRolesActions.ExecuteChanges),
     withLatestFrom(
       this.store.select(selectUsersRoles),
       this.store.select(selectSessionData())

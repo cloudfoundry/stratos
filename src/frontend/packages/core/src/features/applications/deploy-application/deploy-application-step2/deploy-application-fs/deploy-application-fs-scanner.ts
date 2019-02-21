@@ -44,7 +44,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     if (fileExcludes) {
       this.filter = new GitIgnoreFilter(fileExcludes);
     }
-   }
+  }
 
   isArchiveFile(fileName: string): boolean {
     return archiveRegex.test(name);
@@ -146,7 +146,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = function () {
-        resolve(reader.result);
+        resolve(reader.result as string);
       };
       reader.onerror = function () {
         reject();

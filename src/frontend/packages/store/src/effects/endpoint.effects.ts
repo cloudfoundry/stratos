@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
@@ -57,8 +57,9 @@ export class EndpointsEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
-    .pipe(mergeMap(action => {
+  @Effect() getAllEndpoints$ = this.actions$.pipe(
+    ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
+    mergeMap(action => {
       const { associatedAction } = action;
       const actionType = 'fetch';
       const endpoints = action.payload.endpoints;
@@ -90,7 +91,8 @@ export class EndpointsEffect {
       ];
     }));
 
-  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS).pipe(
+  @Effect() connectEndpoint$ = this.actions$.pipe(
+    ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
     mergeMap(action => {
       const actionType = 'update';
 
@@ -126,7 +128,8 @@ export class EndpointsEffect {
       );
     }));
 
-  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS).pipe(
+  @Effect() disconnect$ = this.actions$.pipe(
+    ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS),
     mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
@@ -146,7 +149,8 @@ export class EndpointsEffect {
       );
     }));
 
-  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS).pipe(
+  @Effect() unregister$ = this.actions$.pipe(
+    ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
     mergeMap(action => {
 
       const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
@@ -166,7 +170,8 @@ export class EndpointsEffect {
       );
     }));
 
-  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS).pipe(
+  @Effect() register$ = this.actions$.pipe(
+    ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);

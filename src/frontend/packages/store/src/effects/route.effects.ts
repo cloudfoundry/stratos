@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
@@ -18,7 +18,8 @@ export class RouteEffect {
   ) { }
 
   @Effect({ dispatch: false })
-  unmapEffect$ = this.actions$.ofType<APISuccessOrFailedAction>(RouteEvents.UNMAP_ROUTE_SUCCESS).pipe(
+  unmapEffect$ = this.actions$.pipe(
+    ofType<APISuccessOrFailedAction>(RouteEvents.UNMAP_ROUTE_SUCCESS),
     map((action: APISuccessOrFailedAction) => {
       const unmapAction: UnmapRoute = action.apiAction as UnmapRoute;
       if (unmapAction.clearPaginationKey) {

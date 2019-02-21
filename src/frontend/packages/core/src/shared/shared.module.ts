@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -6,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
+
 
 import { CoreModule } from '../core/core.module';
 import {
@@ -150,6 +150,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
+
+/* tslint:disable:max-line-length */
 
 @NgModule({
   imports: [

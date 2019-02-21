@@ -1,19 +1,14 @@
-
-
-// RequestTypes.FAILED
-
-
-import { take, map } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
-import { Effect, Actions } from '@ngrx/effects';
-import { RequestTypes } from '../actions/request.actions';
-import { WrapperRequestActionFailed } from '../types/request.types';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { SendEventAction } from '../actions/internal-events.actions';
-import { InternalEventSeverity } from '../types/internal-events.types';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
 
+import { SendEventAction } from '../actions/internal-events.actions';
+import { RequestTypes } from '../actions/request.actions';
+import { AppState } from '../app-state';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { InternalEventSeverity } from '../types/internal-events.types';
+import { WrapperRequestActionFailed } from '../types/request.types';
 
 @Injectable()
 export class EndpointApiError {
@@ -23,7 +18,8 @@ export class EndpointApiError {
     private store: Store<AppState>,
   ) { }
 
-  @Effect({ dispatch: false }) endpointApiError$ = this.actions$.ofType<WrapperRequestActionFailed>(RequestTypes.FAILED).pipe(
+  @Effect({ dispatch: false }) endpointApiError$ = this.actions$.pipe(
+    ofType<WrapperRequestActionFailed>(RequestTypes.FAILED),
     map(action => {
       const internalEndpointError = action.internalEndpointError;
       if (internalEndpointError) {

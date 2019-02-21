@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
+
+import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { ApplicationService } from '../application.service';
-import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 
 @Component({
   selector: 'app-cli-info-application',
@@ -16,7 +19,7 @@ import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actio
 })
 export class CliInfoApplicationComponent implements OnInit {
 
-  cfEndpointEntityService: any;
+  cfEndpointEntityService: EntityService<EndpointModel>;
   public previousUrl: string;
   public previousQueryParams: {
     [key: string]: string;
@@ -39,7 +42,7 @@ export class CliInfoApplicationComponent implements OnInit {
   }
 
   private setupObservables(cfGuid: string) {
-    this.cfEndpointEntityService = this.entityServiceFactory.create(
+    this.cfEndpointEntityService = this.entityServiceFactory.create<EndpointModel>(
       endpointSchemaKey,
       entityFactory(endpointSchemaKey),
       cfGuid,
@@ -53,10 +56,11 @@ export class CliInfoApplicationComponent implements OnInit {
     ).pipe(
       filter(([app, ep]) => !!app && !!ep),
       map(([app, ep]) => {
+        const space = app.app.entity.space;
         return {
           appName: app.app.entity.name,
-          spaceName: app.app.entity.space.entity.name,
-          orgName: app.app.entity.space.entity.organization.entity.name,
+          spaceName: typeof space !== 'string' ? space.entity.name : space,
+          orgName: typeof space !== 'string' ? space.entity.organization.entity.name : '',
           apiEndpoint: getFullEndpointApiUrl(ep.entity),
           username: ep.entity.user ? ep.entity.user.name : ''
         };

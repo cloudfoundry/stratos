@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { RequestArgs } from '@angular/http/src/interfaces';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
@@ -60,14 +60,13 @@ export class APIEffect {
   ) { }
 
   @Effect()
-  apiRequest$ = this.actions$
-    .ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
-    .pipe(
-      withLatestFrom(this.store),
-      mergeMap(([action, state]) => {
-        return this.doApiRequest(action, state);
-      }),
-    );
+  apiRequest$ = this.actions$.pipe(
+    ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
+    withLatestFrom(this.store),
+    mergeMap(([action, state]) => {
+      return this.doApiRequest(action, state);
+    }),
+  );
 
   private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };

@@ -1,22 +1,16 @@
-
-import { of as observableOf, throwError as observableThrowError, Observable } from 'rxjs';
-
-import { catchError, map, withLatestFrom, switchMap } from 'rxjs/operators';
-import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { of as observableOf, throwError as observableThrowError } from 'rxjs';
+import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import {
-  AppNameFree,
-  AppNameTaken,
-  CHECK_NAME,
-  IsNewAppNameFree
-} from '../actions/create-applications-page.actions';
-import { AppState } from './../app-state';
-import { NewAppCFDetails, CreateNewApplicationState } from '../types/create-application.types';
 import { environment } from '../../../core/src/environments/environment.prod';
+import { AppNameFree, AppNameTaken, CHECK_NAME, IsNewAppNameFree } from '../actions/create-applications-page.actions';
+import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
+import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
+import { AppState } from './../app-state';
+
 
 
 @Injectable()
@@ -34,7 +28,8 @@ export class CreateAppPageEffects {
   proxyAPIVersion: string;
   cfAPIVersion: string;
 
-  @Effect() CheckAppNameIsFree$ = this.actions$.ofType<IsNewAppNameFree>(CHECK_NAME).pipe(
+  @Effect() CheckAppNameIsFree$ = this.actions$.pipe(
+    ofType<IsNewAppNameFree>(CHECK_NAME),
     withLatestFrom(this.store.select(selectNewAppCFDetails)),
     switchMap(([action, cfDetails]: [any, NewAppCFDetails]) => {
       const { cloudFoundry, org, space } = cfDetails;

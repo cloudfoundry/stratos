@@ -1,8 +1,9 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
+import { BrowserStandardEncoder } from '../../../core/src/helper';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { GetSystemInfo } from '../actions/system.actions';
 import { SessionData } from '../types/auth.types';
@@ -25,7 +26,6 @@ import {
   VERIFY_SESSION,
   VerifySession,
 } from './../actions/auth.actions';
-import { BrowserStandardEncoder } from '../../../core/src/helper';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -40,7 +40,8 @@ export class AuthEffect {
     private actions$: Actions
   ) { }
 
-  @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN).pipe(
+  @Effect() loginRequest$ = this.actions$.pipe(
+    ofType<Login>(LOGIN),
     switchMap(({ username, password }) => {
       const encoder = new BrowserStandardEncoder();
       const headers = new HttpHeaders();
@@ -61,7 +62,8 @@ export class AuthEffect {
         catchError((err, caught) => [new LoginFailed(err)]));
     }));
 
-  @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION).pipe(
+  @Effect() verifyAuth$ = this.actions$.pipe(
+    ofType<VerifySession>(VERIFY_SESSION),
     switchMap(action => {
       const headers = new HttpHeaders();
       headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
@@ -90,7 +92,8 @@ export class AuthEffect {
         }));
     }));
 
-  @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS).pipe(
+  @Effect() EndpointsSuccess$ = this.actions$.pipe(
+    ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
     mergeMap(action => {
       if (action.login) {
         return [new LoginSuccess()];
@@ -98,12 +101,14 @@ export class AuthEffect {
       return [];
     }));
 
-  @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID).pipe(
+  @Effect() invalidSessionAuth$ = this.actions$.pipe(
+    ofType<VerifySession>(SESSION_INVALID),
     map(() => {
       return new LoginFailed('Invalid session');
     }));
 
-  @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT).pipe(
+  @Effect() logoutRequest$ = this.actions$.pipe(
+    ofType<Logout>(LOGOUT),
     switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {}).pipe(
         mergeMap((data: any) => {
@@ -116,13 +121,15 @@ export class AuthEffect {
         catchError((err, caught) => [new LogoutFailed(err)]));
     }));
 
-  @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH).pipe(
+  @Effect({ dispatch: false }) resetAuth$ = this.actions$.pipe(
+    ofType<ResetAuth>(RESET_AUTH),
     tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       window.location.assign(window.location.origin);
     }));
 
-  @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.ofType<ResetSSOAuth>(RESET_SSO_AUTH).pipe(
+  @Effect({ dispatch: false }) resetSSOAuth$ = this.actions$.pipe(
+    ofType<ResetSSOAuth>(RESET_SSO_AUTH),
     tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       const returnUrl = encodeURI(window.location.origin);
