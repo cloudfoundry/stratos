@@ -60,6 +60,9 @@ export class StepComponent {
   canClose = true;
 
   @Input()
+  hideNextButton = false;
+
+  @Input()
   nextButtonText = 'Next';
 
   @Input()
