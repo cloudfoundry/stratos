@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { ActionReducerMap, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
-import { storeLogger } from 'ngrx-store-logger';
 
 import { environment } from '../../core/src/environments/environment';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
@@ -23,10 +22,13 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
-export function logger(reducer) {
-  // default, no options
-  return storeLogger()(reducer);
-}
+// import { storeLogger } from 'ngrx-store-logger';
+
+// https://github.com/btroncone/ngrx-store-logger/issues/34
+// export function logger(reducer) {
+//   // default, no options
+//   return storeLogger()(reducer);
+// }
 
 export const appReducers = {
   auth: authReducer,
@@ -52,9 +54,9 @@ export const appReducers = {
 const metaReducers = [];
 if (!environment.production) {
   metaReducers.push(storeFreeze);
-  if (environment.logEnableConsoleActions) {
-    metaReducers.push(logger);
-  }
+  // if (environment.logEnableConsoleActions) {
+  //   metaReducers.push(logger);
+  // }
 }
 
 const store = StoreModule.forRoot(
