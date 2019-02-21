@@ -1,16 +1,13 @@
-import { HttpClient, HttpRequest, HttpParams, HttpHeaders, HttpResponse } from '@angular/common/http';
-
-import { throwError as observableThrowError, timer as observableTimer, of as observableOf, Observable } from 'rxjs';
-
-import { take, combineLatest, switchMap, map, catchError, filter } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
-import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
-
+import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
+import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
+
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -50,10 +47,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   @Input() appApplicationNameUnique: AppNameUniqueChecking;
   @Input() appApplicationNameUniqueRequest: UniqueValidatorRequestBuilder;
-  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => {
-    console.log(res)
-    return res.body.total_results > 0;
-  }
+  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
 
   constructor(
     private store: Store<AppState>,
@@ -64,7 +58,10 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     }
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
+    if (!this.appApplicationNameUnique) {
+      this.appApplicationNameUnique = new AppNameUniqueChecking();
+    }
     this.appApplicationNameUnique.set(false);
   }
 

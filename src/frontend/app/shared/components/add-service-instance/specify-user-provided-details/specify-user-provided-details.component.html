@@ -1,6 +1,14 @@
 <form class="stepper-form" [formGroup]="formGroup">
   <mat-form-field>
-    <input matInput class="" formControlName="name" placeholder="Name" required>
+    <!-- <input [(ngModel)]="name" required matInput placeholder="Application Name" name="appName" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
+      <mat-error *ngIf="form.controls.appName?.hasError('appNameTaken')">
+        This name has been taken, please try another.
+      </mat-error>
+      <div *ngIf="!form.controls.appName?.hasError('required')" class="inline-icon inline-icon__form">
+        <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
+      </div> -->
+    <input matInput class="" formControlName="name" placeholder="Name" [appApplicationNameUnique]="appNameChecking"
+      [appApplicationNameUniqueRequest]="getUniqueRequest" required>
     <!-- // TODO: RC can user provided services have same name as non-up -->
     <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
       A service instance with this name already exists. Please enter a different one.
@@ -10,8 +18,8 @@
     </mat-error>
   </mat-form-field>
   <mat-form-field>
-    <input matInput formControlName="url" type="url" required placeholder="User Service URL">
-    <mat-error *ngIf="formGroup.controls.url?.hasError('pattern')">Invalid URL</mat-error>
+    <input matInput formControlName="route_service_url" type="url" required placeholder="User Service URL">
+    <mat-error *ngIf="formGroup.controls.route_service_url?.hasError('pattern')">Invalid URL</mat-error>
   </mat-form-field>
   <mat-form-field>
     <input matInput class="" formControlName="syslogDrainUrl" placeholder="Syslog Drain Url">
@@ -25,8 +33,8 @@
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip>
       <!-- [matChipInputAddOnBlur]="tagsAddOnBlur" -->
-      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-        (matChipInputTokenEnd)="addTag($event)" />
+      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addTag($event)" />
     </mat-chip-list>
   </mat-form-field>
   <mat-form-field class="">

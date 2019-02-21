@@ -45,6 +45,7 @@ import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { IRouterNavPayload } from '../../../../store/actions/router.actions';
+import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -75,6 +76,14 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;
   public basePreviousRedirect: IRouterNavPayload;
+  private cfDetails$ = this.store.select(selectCreateServiceInstance);
+  public cfGuid$ = this.cfDetails$.pipe(
+    map(details => details.cfGuid)
+  );
+  public spaceGuid$ = this.cfDetails$.pipe(
+    map(details => details.spaceGuid)
+  );
+
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,

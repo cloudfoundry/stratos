@@ -1,27 +1,25 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
-
+import { filter, map } from 'rxjs/operators';
+import { environment } from '../../../../../environments/environment';
 import { safeUnsubscribe, urlValidationExpression } from '../../../../core/utils.service';
-import { AppState } from '../../../../store/app-state';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
-import { isValidJsonValidator } from '../../schema-form/schema-form.component';
-import { StepOnNextResult } from '../../stepper/step/step.component';
 import {
   CreateUserProvidedServiceInstance,
   IUserProvidedServiceInstanceData
 } from '../../../../store/actions/user-provided-service.actions';
+import { AppState } from '../../../../store/app-state';
+import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../../monitors/entity-monitor';
-import {
-  entityFactory,
-  userProvidedServiceInstanceSchemaKey
-} from '../../../../store/helpers/entity-factory';
+import { isValidJsonValidator } from '../../schema-form/schema-form.component';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 
+
+const { proxyAPIVersion, cfAPIVersion } = environment;
 @Component({
   selector: 'app-specify-user-provided-details',
   templateUrl: './specify-user-provided-details.component.html',
@@ -34,17 +32,39 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
 
+  @Input()
+  public cfGuid: string;
+  @Input()
+  public spaceGuid: string;
+
   constructor(
     private store: Store<AppState>,
-    private userProvidedServicesService: CloudFoundryUserProvidedServicesService
   ) {
     this.formGroup = new FormGroup({
-      name: new FormControl('', [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)]),
-      url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
+      name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
+      route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
       syslogDrainUrl: new FormControl(''),
-      tags: new FormControl(''),
+      tags: new FormControl([]),
       credentials: new FormControl('', isValidJsonValidator()),
     });
+  }
+
+  public getUniqueRequest = (name: string) => {
+    const params = new HttpParams()
+      .set('q', 'name:' + name)
+      .append('q', 'space_guid:' + this.spaceGuid);
+    const headers = new HttpHeaders({
+      'x-cap-cnsi-list': this.cfGuid,
+      'x-cap-passthrough': 'true'
+    });
+    return new HttpRequest(
+      'GET',
+      `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/user_provided_service_instances`,
+      {
+        headers,
+        params
+      },
+    );
   }
 
   ngOnInit() {
@@ -55,51 +75,30 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
     safeUnsubscribe(...this.subs);
   }
 
-  onEnter = () => {
-    this.setupFormValidatorData();
-  }
+  onEnter() { }
 
   onNext = (): Observable<StepOnNextResult> => {
-    const data = this.formGroup.value as IUserProvidedServiceInstanceData;
-    const action = new CreateUserProvidedServiceInstance('cfGuid', 'dasd', data);
+    const data = {
+      ...this.formGroup.value,
+      spaceGuid: this.spaceGuid
+    };
+    data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
+    const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
+    const action = new CreateUserProvidedServiceInstance(this.cfGuid, guid, data as IUserProvidedServiceInstanceData);
     this.store.dispatch(action);
     return new EntityMonitor(
-      this.store, 'a', 'a', entityFactory(userProvidedServiceInstanceSchemaKey)
+      this.store,
+      guid,
+      userProvidedServiceInstanceSchemaKey,
+      entityFactory(userProvidedServiceInstanceSchemaKey)
     ).entityRequest$.pipe(
       filter(er => er.creating),
       map(er => ({
-        success: !er.error
+        success: !er.error,
+        redirect: !er.error
       }))
     );
   }
-
-  private setupFormValidatorData(): Subscription {
-    return this.store.select(selectCreateServiceInstance).pipe(
-      // TODO: RC Edit case
-      switchMap(csi => this.userProvidedServicesService.getUserProvidedServices(csi.cfGuid, csi.spaceGuid)),
-      map(ups => ups.map(up => up.entity.name)),
-      first()
-    ).subscribe();
-  }
-
-  nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } =>
-      !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
-  }
-
-  checkName = (value: string = null) => {
-    if (this.allServiceInstanceNames) {
-      // const specifiedName = value || this.formGroup.controls.name.value;
-      // if (this.modeService.isEditServiceInstanceMode() && specifiedName === this.serviceInstanceName) {
-      //   return true;
-      // }
-      return this.allServiceInstanceNames.indexOf(value || this.formGroup.controls.name.value) === -1;
-    }
-    return true;
-  }
-
-
-
 
   addTag(event: MatChipInputEvent): void {
     const input = event.input;

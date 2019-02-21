@@ -151,6 +151,7 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { AddServiceInstanceBaseStepComponent } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
+import { AppNameUniqueDirective } from '../features/applications/app-name-unique.directive/app-name-unique.directive';
 
 
 @NgModule({
@@ -267,7 +268,8 @@ import { AddServiceInstanceBaseStepComponent } from './components/add-service-in
     MultilineTitleComponent,
     TileSelectorComponent,
     SpecifyUserProvidedDetailsComponent,
-    AddServiceInstanceBaseStepComponent
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective
   ],
   exports: [
     FormsModule,
@@ -365,7 +367,8 @@ import { AddServiceInstanceBaseStepComponent } from './components/add-service-in
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
     TileSelectorComponent,
-    AddServiceInstanceBaseStepComponent
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective
   ],
   entryComponents: [
     DialogConfirmComponent,

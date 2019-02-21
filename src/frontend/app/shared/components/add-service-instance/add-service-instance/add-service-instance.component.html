@@ -42,7 +42,8 @@
       <!-- // TODO: RC add blocked on loading list of existing user provided services -->
       <!-- [blocked]="!!(specifyDetails.serviceInstancesInit$  | async)" -->
       <app-step title="Service Instance" [onEnter]="supd.onEnter" [onNext]="supd.onNext">
-        <app-specify-user-provided-details #supd></app-specify-user-provided-details>
+        <app-specify-user-provided-details [cfGuid]="cfGuid$ | async" [spaceGuid]="spaceGuid$ | async" #supd>
+        </app-specify-user-provided-details>
       </app-step>
     </ng-container>
 

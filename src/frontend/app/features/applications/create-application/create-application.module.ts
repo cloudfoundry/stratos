@@ -17,8 +17,7 @@ import { CreateApplicationComponent } from './create-application.component';
   declarations: [
     CreateApplicationComponent,
     CreateApplicationStep2Component,
-    CreateApplicationStep3Component,
-    AppNameUniqueDirective
+    CreateApplicationStep3Component
   ],
   exports: [
     CreateApplicationComponent,
