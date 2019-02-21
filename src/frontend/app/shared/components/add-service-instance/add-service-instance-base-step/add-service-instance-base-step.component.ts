@@ -1,3 +1,4 @@
+import { AppState } from './../../../../store/app-state';
 import { query } from '@angular/animations';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
 import { Component } from '@angular/core';
@@ -5,6 +6,8 @@ import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { of, Observable } from 'rxjs';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { SERVICE_INSTANCE_TYPES, BASE_REDIRECT_QUERY } from './add-service-instance.types';
+import { Store } from '@ngrx/store';
+import { RouterNav } from '../../../../store/actions/router.actions';
 interface ICreateServiceTilesData extends ITileData {
   type: string;
 }
@@ -39,19 +42,14 @@ export class AddServiceInstanceBaseStepComponent {
   set selectedTile(tile: ITileConfig<ICreateServiceTilesData>) {
     this.serviceType = tile ? tile.data.type : null;
     this._selectedTile = tile;
-  }
-
-  public next = (): Observable<StepOnNextResult> => {
-    return of({
-      success: true,
-      redirect: true,
-      redirectPayload: {
+    if (tile) {
+      this.store.dispatch(new RouterNav({
         path: `/services/new/${this.serviceType}`,
         query: {
           [BASE_REDIRECT_QUERY]: true
         }
-      }
-    });
+      }));
+    }
   }
-  constructor() { }
+  constructor(public store: Store<AppState>) { }
 }

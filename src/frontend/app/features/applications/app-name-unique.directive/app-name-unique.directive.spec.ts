@@ -11,9 +11,10 @@ import { createBasicStoreModule } from '../../../test-framework/store-test-helpe
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 import { MockBackend } from '@angular/http/testing';
-import { HttpModule, Http, ConnectionBackend } from '@angular/http';
+import { HttpModule, ConnectionBackend } from '@angular/http';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../../core/github.helpers';
 import { ExtensionService } from '../../../core/extension/extension-service';
+import { HttpClient } from '@angular/common/http';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -35,12 +36,12 @@ describe('AppNameUniqueDirective', () => {
           provide: ConnectionBackend,
           useClass: MockBackend
         },
-        Http,
+        HttpClient,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
     });
   });
-  it('should create an instance', inject([Store, Http], (store: Store<AppState>, http: Http) => {
+  it('should create an instance', inject([Store, HttpClient], (store: Store<AppState>, http: HttpClient) => {
     const directive = new AppNameUniqueDirective(store, http);
     expect(directive).toBeTruthy();
   }));

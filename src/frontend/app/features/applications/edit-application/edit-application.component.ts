@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -12,6 +11,7 @@ import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-appli
 import { AppState } from '../../../store/app-state';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
+import { HttpClient } from '@angular/common/http';
 
 
 @Component({
@@ -34,7 +34,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     public applicationService: ApplicationService,
     private store: Store<AppState>,
     private fb: FormBuilder,
-    private http: Http,
+    private http: HttpClient,
   ) {
     this.uniqueNameValidator = new AppNameUniqueDirective(this.store, this.http);
     this.editAppForm = this.fb.group({
