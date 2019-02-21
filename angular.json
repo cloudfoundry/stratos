@@ -80,14 +80,6 @@
             "protractorConfig": "./protractor.conf.js",
             "devServerTarget": "stratos:serve"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/test-e2e/tsconfig.e2e.json"
-            ]
-          }
         }
       }
     },
