@@ -2,18 +2,9 @@ import { DataSource } from '@angular/cdk/table';
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  of as observableOf,
-  OperatorFunction,
-  ReplaySubject,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, OperatorFunction, ReplaySubject, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
-
 import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
 import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
@@ -22,15 +13,10 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
-import {
-  getRowUniqueId,
-  IListDataSource,
-  ListPaginationMultiFilterChange,
-  RowsState,
-  RowState,
-} from './list-data-source-types';
+import { getRowUniqueId, IListDataSource, ListPaginationMultiFilterChange, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+
 
 
 export class DataFunctionDefinition {
@@ -94,7 +80,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private externalDestroy: () => void;
 
   protected store: Store<AppState>;
-  public action: PaginatedAction;
+  public action: PaginatedAction | PaginatedAction[];
+  public masterAction: PaginatedAction;
   protected sourceScheme: schema.Entity;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
@@ -116,6 +103,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     private config: IListDataSourceConfig<A, T>
   ) {
     super();
+
     this.init(config);
     const paginationMonitor = new PaginationMonitor(
       this.store,
@@ -174,7 +162,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.filter$ = this.createFilterObservable();
 
-    this.maxedResults$ = !!this.action.flattenPaginationMax ?
+    this.maxedResults$ = !!this.masterAction.flattenPaginationMax ?
       this.pagination$.pipe(
         map(pagination => pagination.currentlyMaxed),
         distinctUntilChanged(),
@@ -185,7 +173,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.store = config.store;
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
-    this.sourceScheme = config.schema;
+    this.sourceScheme = Array.isArray(config.schema) ? config.schema[0] : config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
@@ -197,11 +185,31 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+    if (Array.isArray(this.action)) {
+      if (!config.isLocal) {
+        // We cannot do multi action lists for none local lists
+        this.action = this.action[0];
+        this.masterAction = this.action as PaginatedAction;
+      } else {
+        const masterAction = this.action[0];
+        this.action = this.action.map((aac, i) => ({
+          ...aac,
+          paginationKey: masterAction.paginationKey,
+          entityKey: masterAction.entityKey,
+          entity: masterAction.entity,
+          __forcedPageNumber__: i + 1,
+          __forcedPageNumberEntityKey__: (config.schema[i] || config.schema).key
+        }) as PaginatedAction);
+        this.masterAction = this.action[0];
+      }
+    } else {
+      this.masterAction = this.action as PaginatedAction;
+    }
     if (!this.isLocal && this.config.listConfig) {
       // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
       // (one for the page size in the action and another when the initial page size is set)
-      this.action.initialParams = this.action.initialParams || {};
-      this.action.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+      this.masterAction.initialParams = this.masterAction.initialParams || {};
+      this.masterAction.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
     }
   }
 
@@ -210,7 +218,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     return config.refresh ? config.refresh : () => {
-      this.store.dispatch(this.metricsAction || this.action);
+      this.store.dispatch(this.metricsAction || this.masterAction);
     };
   }
 

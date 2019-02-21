@@ -50,7 +50,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
     entities: T[],
     paginationState: PaginationEntityState
   ) => T[])[];
-  action: PaginatedAction;
+  action: PaginatedAction | PaginatedAction[];
   entityKey: string;
   paginationKey: string;
 

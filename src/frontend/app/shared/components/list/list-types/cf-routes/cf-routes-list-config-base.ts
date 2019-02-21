@@ -138,7 +138,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
         routeGuid,
         appGuid,
         this.cfGuid,
-        this.removeEntityOnUnmap ? this.getDataSource().action.paginationKey : null
+        this.removeEntityOnUnmap ? this.getDataSource().masterAction.paginationKey : null
       ));
     });
   }

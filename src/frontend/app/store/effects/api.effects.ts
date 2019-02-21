@@ -441,11 +441,16 @@ export class APIEffect {
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
     let entityArray;
-    if (apiAction.entity['length'] > 0) {
-      entityArray = apiAction.entity;
+    const pagAction = apiAction as PaginatedAction;
+    if (pagAction.__forcedPageNumberEntityKey__) {
+      entityArray = [entityFactory(pagAction.__forcedPageNumberEntityKey__)];
     } else {
-      entityArray = new Array<Schema>();
-      entityArray.push(apiAction.entity);
+      if (apiAction.entity['length'] > 0) {
+        entityArray = apiAction.entity;
+      } else {
+        entityArray = new Array<Schema>();
+        entityArray.push(apiAction.entity);
+      }
     }
 
     return {

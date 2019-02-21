@@ -28,6 +28,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
+    console.log(row);
     if (row) {
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
       this.serviceInstanceEntity = row;
@@ -79,8 +80,8 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding
       (this.serviceInstanceEntity.entity.service_bindings,
-      this.serviceInstanceEntity.metadata.guid,
-      this.serviceInstanceEntity.entity.cfGuid);
+        this.serviceInstanceEntity.metadata.guid,
+        this.serviceInstanceEntity.entity.cfGuid);
   }
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(

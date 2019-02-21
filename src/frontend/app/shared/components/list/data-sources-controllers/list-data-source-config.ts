@@ -14,11 +14,11 @@ export interface IListDataSourceConfig<A, T> {
    * An action that, when called, will populate the entries required to show the current state of the list. For example, this action will
    * be dispatched when the page number changes in a non-local list.
    */
-  action: PaginatedAction;
+  action: PaginatedAction | PaginatedAction[];
   /**
    * The entity which will be fetched via the action
    */
-  schema: schema.Entity;
+  schema: schema.Entity | schema.Entity[];
   /**
    * A function which will return a unique id for the given row/entity
    */

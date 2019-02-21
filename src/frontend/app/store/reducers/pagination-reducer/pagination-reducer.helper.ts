@@ -122,16 +122,21 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
 }
 
 export const getPaginationObservables = <T = any>(
-  { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },
+  { store, action, paginationMonitor }: {
+    store: Store<AppState>,
+    action: PaginatedAction | PaginatedAction[],
+    paginationMonitor: PaginationMonitor
+  },
   isLocal = false
 ): PaginationObservables<T> => {
+  const baseAction = Array.isArray(action) ? action[0] : action;
   const paginationKey = paginationMonitor.paginationKey;
   const entityKey = paginationMonitor.schema.key;
 
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
-  if (action.initialParams) {
-    store.dispatch(new SetInitialParams(entityKey, paginationKey, action.initialParams, isLocal));
+  if (baseAction.initialParams) {
+    store.dispatch(new SetInitialParams(entityKey, paginationKey, baseAction.initialParams, isLocal));
   }
 
   const obs = getObservables<T>(
@@ -201,13 +206,13 @@ function getObservables<T = any>(
   store: Store<AppState>,
   entityKey: string,
   paginationKey: string,
-  action: PaginatedAction,
+  paginationAction: PaginatedAction | PaginatedAction[],
   paginationMonitor: PaginationMonitor,
   isLocal = false
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
-
+  const arrayAction = Array.isArray(paginationAction) ? paginationAction : [paginationAction];
   // .pipe(distinctUntilChanged())
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
@@ -219,9 +224,9 @@ function getObservables<T = any>(
     tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
       if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        populatePaginationFromParent(store, action).pipe(
+        combineLatest(arrayAction.map(action => populatePaginationFromParent(store, action))).pipe(
           first(),
-        ).subscribe(newAction => store.dispatch(newAction || action));
+        ).subscribe(newAction => newAction.forEach(action => store.dispatch(action)));
       }
     }),
     map(([prevPag, newPag]) => newPag)
@@ -242,11 +247,11 @@ function getObservables<T = any>(
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
             lastValidationFootprint = newValidationFootprint;
-            store.dispatch(new ValidateEntitiesStart(
+            arrayAction.forEach(action => store.dispatch(new ValidateEntitiesStart(
               action,
               pagination.ids[pagination.currentPage],
               false
-            ));
+            )));
           }
         }),
         switchMap(() => paginationMonitor.currentPage$)

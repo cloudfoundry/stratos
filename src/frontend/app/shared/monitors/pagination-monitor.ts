@@ -14,10 +14,11 @@ import {
 } from 'rxjs/operators';
 
 import { AppState } from '../../store/app-state';
-import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { ActionState, ListActionState } from '../../store/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../store/types/pagination.types';
+import { entityFactory } from '../../store/helpers/entity-factory';
 
 export class PaginationMonitor<T = any> {
   /**
@@ -141,8 +142,11 @@ export class PaginationMonitor<T = any> {
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
+        const pageState = pagination.pageRequests[pagination.currentPage] || {} as ListActionState;
+        console.log('entityKey')
+        const pageSchemaOverride = pageState.entityKey ? entityFactory(pageState.entityKey) : null;
         return page.length
-          ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
+          ? denormalize(page, [pageSchemaOverride || schema], allEntities).filter(ent => !!ent)
           : [];
       }),
       tag('de-norming ' + schema.key),

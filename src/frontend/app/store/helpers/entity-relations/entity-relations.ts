@@ -467,8 +467,9 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  * @returns {Observable<boolean>}
  */
 export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+
   if (!isEntityInlineChildAction(action) || !action.flattenPagination) {
-    return observableOf(null);
+    return observableOf(action);
   }
   const parentEntitySchema = action['parentEntitySchema'] as EntitySchema;
   const parentGuid = action['parentGuid'];

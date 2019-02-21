@@ -12,6 +12,12 @@ export interface ActionState {
   message: string;
 }
 
+// Multi action lists can have different entity types per page
+// We use entityKey to track this type
+export interface ListActionState extends ActionState {
+  entityKey?: string;
+}
+
 export interface DeleteActionState extends ActionState {
   deleted: boolean;
 }

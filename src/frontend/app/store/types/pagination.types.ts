@@ -1,7 +1,7 @@
 import { RequestMethod } from '@angular/http';
 import { Action } from '@ngrx/store';
 
-import { ActionState } from '../reducers/api-request-reducer/types';
+import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
 import { IRequestAction } from './request.types';
 
 export class QParam {
@@ -38,7 +38,7 @@ export class PaginationEntityState {
   ids = {};
   params: PaginationParam;
   pageRequests: {
-    [pageNumber: string]: ActionState
+    [pageNumber: string]: ListActionState
   };
   clientPagination?: PaginationClientPagination;
   /**
@@ -80,6 +80,9 @@ export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
     method?: RequestMethod | string | null
   };
   skipValidation?: boolean;
+  // Internal, used for local multi action lists
+  __forcedPageNumber__?: number;
+  __forcedPageNumberEntityKey__?: string;
 }
 
 export interface PaginationEntityTypeState {

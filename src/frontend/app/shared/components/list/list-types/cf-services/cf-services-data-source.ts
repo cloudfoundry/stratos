@@ -3,21 +3,28 @@ import { Store } from '@ngrx/store';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAllServices } from '../../../../../store/actions/service.actions';
 import { AppState } from '../../../../../store/app-state';
-import { endpointSchemaKey, entityFactory, serviceSchemaKey } from '../../../../../store/helpers/entity-factory';
+import {
+  endpointSchemaKey,
+  entityFactory,
+  serviceSchemaKey,
+  userProvidedServiceInstanceSchemaKey
+} from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { GetAllUserProvidedServices } from '../../../../../store/actions/user-provided-service.actions';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
-    const action = new GetAllServices(paginationKey);
+    const action = [new GetAllServices(paginationKey), new GetAllUserProvidedServices()];
+    const schema = [entityFactory(serviceSchemaKey), entityFactory(userProvidedServiceInstanceSchemaKey)];
     super({
       store,
       action,
-      schema: entityFactory(serviceSchemaKey),
+      schema,
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

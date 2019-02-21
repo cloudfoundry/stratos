@@ -1,6 +1,6 @@
 import { PaginationEntityState } from '../../types/pagination.types';
-export function paginationFailure(state: PaginationEntityState, action) {
-  const page = action.apiAction.pageNumber || state.currentPage;
+export function paginationFailure(state: PaginationEntityState, action): PaginationEntityState {
+  const page = action.apiAction.__forcedPageNumber__ || action.apiAction.pageNumber || state.currentPage;
   return {
     ...state,
     pageRequests: {

@@ -70,8 +70,8 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
     initCfOrgSpaceService(store, cfOrgSpaceService,
-      this.dataSource.action.entityKey,
-      this.dataSource.action.paginationKey).subscribe();
+      this.dataSource.masterAction.entityKey,
+      this.dataSource.masterAction.paginationKey).subscribe();
     cfOrgSpaceService.cf.select.next(cfService.cfGuid);
   }
 }

@@ -8,13 +8,12 @@ import {
 import { PaginatedAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
+import { getServiceInstanceRelations } from './service-instances.actions';
 
 export class GetAllUserProvidedServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string = null,
-    public includeRelations: string[] = [
-      // createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public spaceGuid?: string
   ) {
