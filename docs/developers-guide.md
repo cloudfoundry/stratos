@@ -110,7 +110,7 @@ Run `npm run lint` to execute tslint lint checking.
 
 ### Unit tests
 
-Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in ./coverage
+Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in `./coverage`
 
 To execute an individual package run `ng test <package name>`. To execute the tests again automatically on code changes add `--watch=true`
 
