@@ -116,15 +116,16 @@ export class RequestEffect {
             independentUpdates
           )];
         })
-      ).pipe(catchError(error => {
-        this.logger.warn(`Entity validation process failed`, error);
-        if (validateAction.apiRequestStarted) {
-          return getFailApiRequestActions(apiAction, error, requestType);
-        } else {
-          this.update(apiAction, false, error.message);
-          return [];
-        }
-      }));
+      )
+        .pipe(catchError(error => {
+          this.logger.warn(`Entity validation process failed`, error);
+          if (validateAction.apiRequestStarted) {
+            return getFailApiRequestActions(apiAction, error, requestType);
+          } else {
+            this.update(apiAction, false, error.message);
+            return [];
+          }
+        }));
     })
   );
 

@@ -20,7 +20,7 @@ import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import { EntitySchema } from '../entity-factory';
+import { EntitySchema, entityFactory } from '../entity-factory';
 import { pick } from '../reducer.helper';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
@@ -431,8 +431,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
       completed: Promise.resolve(config.apiResponse)
     };
   }
-
-  const relationAction = action as EntityInlineParentAction;
+  const relationAction = getRelationAction(action);
   const entityTree = fetchEntityTree(relationAction);
 
   const results = validationLoop({
@@ -444,6 +443,21 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   });
 
   return handleValidationLoopResults(store, results, config.apiResponse, action, allEntities);
+}
+
+function getRelationAction(action: IRequestAction): EntityInlineParentAction {
+  const pagAction = action as PaginatedAction;
+  if (pagAction.__forcedPageNumberEntityKey__) {
+    const entityKey = pagAction.__forcedPageNumberEntityKey__;
+    return {
+      ...action,
+      entityKey,
+      entity: entityFactory(entityKey)
+    } as EntityInlineParentAction;
+  }
+  return {
+    ...action
+  } as EntityInlineParentAction;
 }
 
 export function listEntityRelations(action: EntityInlineParentAction, fromCache = true) {

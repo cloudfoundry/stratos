@@ -11,6 +11,7 @@ import {
   publishReplay,
   refCount,
   withLatestFrom,
+  switchMap,
 } from 'rxjs/operators';
 
 import { AppState } from '../../store/app-state';
@@ -19,6 +20,7 @@ import { getAPIRequestDataState, selectEntities } from '../../store/selectors/ap
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { entityFactory } from '../../store/helpers/entity-factory';
+import { IRequestDataState } from '../../store/types/entity.types';
 
 export class PaginationMonitor<T = any> {
   /**
@@ -45,6 +47,7 @@ export class PaginationMonitor<T = any> {
     private store: Store<AppState>,
     public paginationKey: string,
     public schema: normalizrSchema.Entity,
+    public isLocal = false
   ) {
     this.init(store, paginationKey, schema);
   }
@@ -100,9 +103,13 @@ export class PaginationMonitor<T = any> {
       paginationKey,
     );
     this.currentPageIds$ = this.createPagIdObservable(this.pagination$);
-    this.currentPage$ = this.createPageObservable(this.pagination$, schema);
+    this.fetchingCurrentPage$ = this.isLocal ?
+      this.createLocalFetchingObservable(this.pagination$) : this.createFetchingObservable(this.pagination$);
+    this.currentPage$ = this.isLocal ?
+      this.createLocalPageObservable(this.pagination$, schema, this.fetchingCurrentPage$) :
+      this.createPageObservable(this.pagination$, schema);
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
-    this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
+
   }
 
   private createPaginationObservable(
@@ -141,18 +148,65 @@ export class PaginationMonitor<T = any> {
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
-        const page = pagination.ids[pagination.currentPage] || [];
-        const pageState = pagination.pageRequests[pagination.currentPage] || {} as ListActionState;
-        console.log('entityKey')
-        const pageSchemaOverride = pageState.entityKey ? entityFactory(pageState.entityKey) : null;
-        return page.length
-          ? denormalize(page, [pageSchemaOverride || schema], allEntities).filter(ent => !!ent)
-          : [];
+        const { page, pageSchema } = this.getPageInfo(pagination, pagination.currentPage, schema);
+        return this.denormalizePage(page, pageSchema, allEntities);
       }),
       tag('de-norming ' + schema.key),
       publishReplay(1),
       refCount(),
     );
+  }
+
+  private createLocalPageObservable(
+    pagination$: Observable<PaginationEntityState>,
+    schema: normalizrSchema.Entity,
+    fetching$: Observable<boolean>
+  ) {
+    const entityObservable$ = this.store
+      .select(selectEntities<T>(this.schema.key))
+      .pipe(distinctUntilChanged());
+    const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
+
+    const pag$ = pagination$.pipe(
+      // Improve efficiency
+      observeOn(asapScheduler),
+      combineLatestOperator(entityObservable$),
+      withLatestFrom(allEntitiesObservable$),
+      map(([[pagination], allEntities]) => {
+        return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
+          const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
+          console.log(allPageEntities)
+          return [
+            ...allPageEntities,
+            ...this.denormalizePage(page, pageSchema, allEntities)
+          ];
+        }, []);
+      }),
+      tag('de-norming-local ' + schema.key),
+      publishReplay(1),
+      refCount(),
+    );
+
+    return fetching$.pipe(
+      filter(busy => !busy),
+      switchMap(() => pag$)
+    );
+  }
+
+  private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: IRequestDataState) {
+    return page.length
+      ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
+      : [];
+  }
+
+  private getPageInfo(pagination: PaginationEntityState, pageId: number | string, defaultSchema: normalizrSchema.Entity) {
+    const page = pagination.ids[pageId] || [];
+    const pageState = pagination.pageRequests[pageId] || {} as ListActionState;
+    const pageSchema = pageState.entityKey ? entityFactory(pageState.entityKey) : defaultSchema;
+    return {
+      page,
+      pageSchema
+    };
   }
 
   private isPageSameIsh(x: PaginationEntityState, y: PaginationEntityState) {
@@ -192,6 +246,17 @@ export class PaginationMonitor<T = any> {
       map(pagination => {
         const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
         return currentPageRequest.busy;
+      }),
+      distinctUntilChanged(),
+    );
+  }
+
+  private createLocalFetchingObservable(
+    pagination$: Observable<PaginationEntityState>,
+  ) {
+    return pagination$.pipe(
+      map(pagination => {
+        return !!Object.values(pagination.pageRequests).find(pageRequest => pageRequest.busy);
       }),
       distinctUntilChanged(),
     );

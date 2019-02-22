@@ -441,6 +441,7 @@ export class APIEffect {
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
     let entityArray;
+    console.log('hrer')
     const pagAction = apiAction as PaginatedAction;
     if (pagAction.__forcedPageNumberEntityKey__) {
       entityArray = [entityFactory(pagAction.__forcedPageNumberEntityKey__)];

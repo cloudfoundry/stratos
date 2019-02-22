@@ -25,13 +25,15 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
   entityConfig: ComponentEntityMonitorConfig;
+  userProvided: boolean;
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
-    console.log(row);
+
     if (row) {
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
       this.serviceInstanceEntity = row;
+      this.userProvided = !this.serviceInstanceEntity.entity.service;
       this.serviceInstanceTags = row.entity.tags.map(t => ({
         value: t
       }));
@@ -78,24 +80,33 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   detach = () => {
-    this.serviceActionHelperService.detachServiceBinding
-      (this.serviceInstanceEntity.entity.service_bindings,
-        this.serviceInstanceEntity.metadata.guid,
-        this.serviceInstanceEntity.entity.cfGuid);
+    this.serviceActionHelperService.detachServiceBinding(
+      this.serviceInstanceEntity.entity.service_bindings,
+      this.serviceInstanceEntity.metadata.guid,
+      this.serviceInstanceEntity.entity.cfGuid,
+      false,
+      this.userProvided
+    );
   }
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
-    this.serviceInstanceEntity.entity.cfGuid
+    this.serviceInstanceEntity.entity.cfGuid,
+    this.userProvided
   )
 
   edit = () => this.serviceActionHelperService.editServiceBinding(
     this.serviceInstanceEntity.metadata.guid,
-    this.serviceInstanceEntity.entity.cfGuid
+    this.serviceInstanceEntity.entity.cfGuid,
+    null,
+    this.userProvided
   )
 
   getServiceName = () => {
+    if (this.userProvided) {
+      return 'User Provided';
+    }
     const serviceEntity = this.serviceInstanceEntity.entity.service;
     let extraInfo: IServiceExtra = null;
     try {

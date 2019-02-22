@@ -24,11 +24,11 @@ const services: Routes = [
     component: AddServiceInstanceComponent
   },
   {
-    path: ':endpointId/:serviceInstanceId/edit',
+    path: ':type/:endpointId/:serviceInstanceId/edit',
     component: AddServiceInstanceComponent
   },
   {
-    path: ':endpointId/:serviceInstanceId/detach',
+    path: ':type/:endpointId/:serviceInstanceId/detach',
     component: DetachServiceInstanceComponent
   }
 ];

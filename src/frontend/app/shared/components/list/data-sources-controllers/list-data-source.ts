@@ -108,7 +108,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const paginationMonitor = new PaginationMonitor(
       this.store,
       this.paginationKey,
-      this.sourceScheme
+      this.sourceScheme,
+      this.isLocal
     );
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,

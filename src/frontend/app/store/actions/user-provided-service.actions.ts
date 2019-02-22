@@ -152,3 +152,21 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
   entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
 }
+
+export class DeleteUserProvidedInstance extends CFStartAction implements ICFAction {
+  constructor(public endpointGuid: string, public guid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `user_provided_service_instances/${guid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.set('accepts_incomplete', 'true');
+    this.options.params.set('async', 'false');
+    this.options.params.set('recursive', 'true');
+  }
+  actions = getActions('Service Instances', 'Delete Service Instance');
+  entity = entityFactory(userProvidedServiceInstanceSchemaKey);
+  entityKey = userProvidedServiceInstanceSchemaKey;
+  options: RequestOptions;
+  removeEntityOnDelete = true;
+}
