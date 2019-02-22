@@ -154,7 +154,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
 }
 
 export class DeleteUserProvidedInstance extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public guid: string) {
+  constructor(public endpointGuid: string, public guid: string, public proxyPaginationEntityKey?: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `user_provided_service_instances/${guid}`;

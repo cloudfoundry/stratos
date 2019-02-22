@@ -175,7 +175,6 @@ export class PaginationMonitor<T = any> {
       map(([[pagination], allEntities]) => {
         return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
           const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
-          console.log(allPageEntities)
           return [
             ...allPageEntities,
             ...this.denormalizePage(page, pageSchema, allEntities)

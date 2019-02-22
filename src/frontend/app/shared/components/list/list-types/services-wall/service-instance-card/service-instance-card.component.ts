@@ -1,13 +1,17 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { BehaviorSubject, of as observableOf } from 'rxjs';
+import { BehaviorSubject, of as observableOf, Observable } from 'rxjs';
 
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import {
+  entityFactory,
+  serviceInstancesSchemaKey,
+  userProvidedServiceInstanceSchemaKey
+} from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ComponentEntityMonitorConfig, CardStatus } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
@@ -27,13 +31,16 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   entityConfig: ComponentEntityMonitorConfig;
   userProvided: boolean;
 
+  status$: Observable<CardStatus>;
+
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
 
     if (row) {
-      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
       this.serviceInstanceEntity = row;
       this.userProvided = !this.serviceInstanceEntity.entity.service;
+      const schema = this.userProvided ? entityFactory(userProvidedServiceInstanceSchemaKey) : entityFactory(serviceInstancesSchemaKey);
+      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
       this.serviceInstanceTags = row.entity.tags.map(t => ({
         value: t
       }));

@@ -11,6 +11,7 @@ import { APIResource } from '../../store/types/api.types';
 import { RouterNav, RouterQueryParams } from '../../store/actions/router.actions';
 import { SERVICE_INSTANCE_TYPES } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import { DeleteUserProvidedInstance } from '../../store/actions/user-provided-service.actions';
+import { serviceInstancesSchemaKey } from '../../store/helpers/entity-factory';
 
 @Injectable()
 export class ServiceActionHelperService {
@@ -35,7 +36,7 @@ export class ServiceActionHelperService {
       }));
       return;
     }
-    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid) :
+    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesSchemaKey) :
       new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
     if (!noConfirm) {
 
@@ -59,7 +60,7 @@ export class ServiceActionHelperService {
     endpointGuid: string,
     userProvided = false
   ) => {
-    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid) :
+    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesSchemaKey) :
       new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
