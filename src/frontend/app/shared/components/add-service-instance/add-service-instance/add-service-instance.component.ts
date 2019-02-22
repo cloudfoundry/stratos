@@ -71,14 +71,13 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
   appId: string;
+  serviceInstanceId: string;
   public inMarketplaceMode: boolean;
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;
   public basePreviousRedirect: IRouterNavPayload;
   private cfDetails$ = this.store.select(selectCreateServiceInstance);
-  public cfGuid$ = this.cfDetails$.pipe(
-    map(details => details.cfGuid)
-  );
+  public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
     map(details => details.spaceGuid)
   );
@@ -94,6 +93,10 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     private paginationMonitorFactory: PaginationMonitorFactory,
     route: ActivatedRoute
   ) {
+    const cfGuid = getIdFromRoute(this.activatedRoute, 'endpointId');
+    this.cfGuid$ = cfGuid ? observableOf(cfGuid) : this.cfDetails$.pipe(
+      map(details => details.cfGuid)
+    );
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
     this.basePreviousRedirect = route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
@@ -176,41 +179,45 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
 
   private configureForEditServiceInstanceMode() {
     const { endpointId, serviceInstanceId } = this.activatedRoute.snapshot.params;
-    const entityService = this.getServiceInstanceEntityService(serviceInstanceId, endpointId);
-    return entityService.waitForEntity$.pipe(
-      filter(p => !!p),
-      tap(serviceInstance => {
-        const serviceInstanceEntity = serviceInstance.entity.entity;
-        this.csiGuidsService.cfGuid = endpointId;
-        this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
-        const serviceGuid = serviceInstance.entity.entity.service_guid;
-        this.csiGuidsService.serviceGuid = serviceGuid;
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceGuid);
-        this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-        this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
-        this.store.dispatch(new SetCreateServiceInstance(
-          serviceInstanceEntity.name,
-          serviceInstanceEntity.space_guid,
-          serviceInstanceEntity.tags,
-          ''
-        ));
-        this.store.dispatch(new SetCreateServiceInstanceServicePlan(serviceInstanceEntity.service_plan_guid));
-        const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, endpointId);
-        spaceEntityService.waitForEntity$.pipe(
-          filter(p => !!p),
-          tap(spaceEntity => {
-            this.store.dispatch(new SetCreateServiceInstanceCFDetails(
-              endpointId,
-              spaceEntity.entity.entity.organization_guid,
-              spaceEntity.entity.metadata.guid)
-            );
-          }),
-          take(1)
-        ).subscribe();
-      }),
-      take(1),
-      map(o => false),
-    );
+    if (this.serviceType === this.serviceTypes.USER_SERVICE) {
+      this.serviceInstanceId = serviceInstanceId;
+    } else {
+      const entityService = this.getServiceInstanceEntityService(serviceInstanceId, endpointId);
+      return entityService.waitForEntity$.pipe(
+        filter(p => !!p),
+        tap(serviceInstance => {
+          const serviceInstanceEntity = serviceInstance.entity.entity;
+          this.csiGuidsService.cfGuid = endpointId;
+          this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
+          const serviceGuid = serviceInstance.entity.entity.service_guid;
+          this.csiGuidsService.serviceGuid = serviceGuid;
+          this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceGuid);
+          this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+          this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
+          this.store.dispatch(new SetCreateServiceInstance(
+            serviceInstanceEntity.name,
+            serviceInstanceEntity.space_guid,
+            serviceInstanceEntity.tags,
+            ''
+          ));
+          this.store.dispatch(new SetCreateServiceInstanceServicePlan(serviceInstanceEntity.service_plan_guid));
+          const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, endpointId);
+          spaceEntityService.waitForEntity$.pipe(
+            filter(p => !!p),
+            tap(spaceEntity => {
+              this.store.dispatch(new SetCreateServiceInstanceCFDetails(
+                endpointId,
+                spaceEntity.entity.entity.organization_guid,
+                spaceEntity.entity.metadata.guid)
+              );
+            }),
+            take(1)
+          ).subscribe();
+        }),
+        take(1),
+        map(o => false),
+      );
+    }
   }
 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {

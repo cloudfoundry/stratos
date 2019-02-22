@@ -226,7 +226,7 @@ function getObservables<T = any>(
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         combineLatest(arrayAction.map(action => populatePaginationFromParent(store, action))).pipe(
           first(),
-        ).subscribe(newAction => newAction.forEach(action => store.dispatch(action)));
+        ).subscribe(newAction => newAction.forEach(action => action && store.dispatch(action)));
       }
     }),
     map(([prevPag, newPag]) => newPag)

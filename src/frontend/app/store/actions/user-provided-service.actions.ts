@@ -112,10 +112,12 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
 }
 
 export class UpdateUserProvidedServiceInstance extends CFStartAction implements ICFAction {
+  static updateServiceInstance = 'Updating-User-Provided';
   constructor(
     public endpointGuid: string,
     public guid: string,
-    data: Partial<IUserProvidedServiceInstanceData>
+    data: Partial<IUserProvidedServiceInstanceData>,
+    public proxyPaginationEntityKey?: string
   ) {
     super();
     this.options = new RequestOptions();
@@ -147,10 +149,11 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
       this.options.body.credentials = credentials;
     }
   }
-  actions = getActions('User Provided Service', 'Create User Provided Service');
+  actions = getActions('User Provided Service', 'Update User Provided Service');
   entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
   entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
+  updatingKey = UpdateUserProvidedServiceInstance.updateServiceInstance;
 }
 
 export class DeleteUserProvidedInstance extends CFStartAction implements ICFAction {
