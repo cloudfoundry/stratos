@@ -7,6 +7,7 @@ import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
 import { IListConfig } from '../list.component.types';
+import { EntitySchema } from '../../../../store/helpers/entity-factory';
 
 export interface IListDataSourceConfig<A, T> {
   store: Store<AppState>;
@@ -18,7 +19,7 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * The entity which will be fetched via the action
    */
-  schema: schema.Entity | schema.Entity[];
+  schema: EntitySchema | EntitySchema[];
   /**
    * A function which will return a unique id for the given row/entity
    */

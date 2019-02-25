@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema as normalizrSchema } from 'normalizr';
-import { asapScheduler, Observable } from 'rxjs';
+import { asapScheduler, Observable, combineLatest } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
   combineLatest as combineLatestOperator,
@@ -12,6 +12,7 @@ import {
   refCount,
   withLatestFrom,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 
 import { AppState } from '../../store/app-state';
@@ -162,9 +163,21 @@ export class PaginationMonitor<T = any> {
     schema: normalizrSchema.Entity,
     fetching$: Observable<boolean>
   ) {
-    const entityObservable$ = this.store
-      .select(selectEntities<T>(this.schema.key))
-      .pipe(distinctUntilChanged());
+
+    const entityObservable$ =
+      pagination$.pipe(
+        switchMap(pagination => {
+          return combineLatest(Object.keys(pagination.ids).map((pageNumber) => {
+            const { pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
+            return this.store.select(selectEntities<T>(pageSchema.key)).pipe(distinctUntilChanged());
+          }));
+        }),
+        map(allPages => allPages.reduce((mergedPages, page) => ({
+          ...mergedPages,
+          ...page
+        }), {}))
+      );
+
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
     const pag$ = pagination$.pipe(
@@ -175,6 +188,7 @@ export class PaginationMonitor<T = any> {
       map(([[pagination], allEntities]) => {
         return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
           const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
+
           return [
             ...allPageEntities,
             ...this.denormalizePage(page, pageSchema, allEntities)

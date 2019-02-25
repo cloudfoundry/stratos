@@ -16,6 +16,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getRowUniqueId, IListDataSource, ListPaginationMultiFilterChange, RowsState, RowState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { reverseLookupEntityKey } from '../../../../store/helpers/entity-factory';
 
 
 
@@ -192,6 +193,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.action = this.action[0];
         this.masterAction = this.action as PaginatedAction;
       } else {
+
         const masterAction = this.action[0];
         this.action = this.action.map((aac, i) => ({
           ...aac,
@@ -199,7 +201,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           entityKey: masterAction.entityKey,
           entity: masterAction.entity,
           __forcedPageNumber__: i + 1,
-          __forcedPageNumberEntityKey__: (config.schema[i] || config.schema).key
+          __forcedPageNumberEntityKey__: reverseLookupEntityKey(config.schema[i] || config.schema)
         }) as PaginatedAction);
         this.masterAction = this.action[0];
       }
