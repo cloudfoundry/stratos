@@ -184,7 +184,7 @@ export class CreateSpace extends BaseSpaceAction {
     this.options.url = `spaces`;
     this.options.method = 'post';
     this.options.body = {
-      name: name,
+      name,
       organization_guid: orgGuid
     };
   }

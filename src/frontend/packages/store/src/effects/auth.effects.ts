@@ -48,15 +48,15 @@ export class AuthEffect {
       const params = new HttpParams({
         encoder: new BrowserStandardEncoder(),
         fromObject: {
-          username: username,
-          password: password
+          username,
+          password
         }
       });
 
       headers.set('Content-Type', 'application/x-www-form-urlencoded');
       headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
       return this.http.post('/pp/v1/auth/login/uaa', params, {
-        headers: headers,
+        headers,
       }).pipe(
         map(data => new VerifySession()),
         catchError((err, caught) => [new LoginFailed(err)]));
@@ -68,7 +68,7 @@ export class AuthEffect {
       const headers = new HttpHeaders();
       headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
       return this.http.get<SessionData>('/pp/v1/auth/session/verify', {
-        headers: headers,
+        headers,
         observe: 'response',
         withCredentials: true,
       }).pipe(

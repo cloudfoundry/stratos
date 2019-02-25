@@ -36,7 +36,7 @@ export class CreateAppPageEffects {
       const headers = new Headers({ 'x-cap-cnsi-list': cloudFoundry });
       return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/${this.cfAPIVersion}/apps`, {
         params: {
-          'q': `name:${action.name};space_guid:${space}`
+          q: `name:${action.name};space_guid:${space}`
         },
         headers
       }).pipe(

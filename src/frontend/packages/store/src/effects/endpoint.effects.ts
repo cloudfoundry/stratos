@@ -108,10 +108,10 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          ...<any>action.authValues,
-          'cnsi_guid': action.guid,
-          'connect_type': action.authType,
-          'system_shared': action.systemShared,
+          ...action.authValues as any,
+          cnsi_guid: action.guid,
+          connect_type: action.authType,
+          system_shared: action.systemShared,
         },
         // Fix for #angular/18261
         encoder: new BrowserStandardEncoder()
@@ -135,7 +135,7 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          'cnsi_guid': action.guid
+          cnsi_guid: action.guid
         }
       });
 
@@ -156,7 +156,7 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          'cnsi_guid': action.guid
+          cnsi_guid: action.guid
         }
       });
 
@@ -177,12 +177,12 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          'cnsi_name': action.name,
-          'api_endpoint': action.endpoint,
-          'skip_ssl_validation': action.skipSslValidation ? 'true' : 'false',
-          'cnsi_client_id': action.clientID,
-          'cnsi_client_secret': action.clientSecret,
-          'sso_allowed': action.ssoAllowed ? 'true' : 'false',
+          cnsi_name: action.name,
+          api_endpoint: action.endpoint,
+          skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
+          cnsi_client_id: action.clientID,
+          cnsi_client_secret: action.clientSecret,
+          sso_allowed: action.ssoAllowed ? 'true' : 'false',
         }
       });
 
@@ -231,7 +231,7 @@ export class EndpointsEffect {
     actionStrings: [string, string] = [null, null],
     endpointType: EndpointType = 'cf',
     body?: string,
-    errorMessageHandler?: Function,
+    errorMessageHandler?: (e: any) => string,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');

@@ -3,6 +3,8 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { isEntityBlocked } from '../../../../core/src/core/entity-service';
+import { pathGet } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import {
   FetchRelationAction,
@@ -33,8 +35,6 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
-import { pathGet } from '../../../../core/src/core/utils.service';
-import { isEntityBlocked } from '../../../../core/src/core/entity-service';
 
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -43,7 +43,6 @@ interface ValidateResultFetchingState {
 /**
  * An object to represent the action and status of a missing inline depth/entity relation.
  * @export
- * @interface ValidateEntityResult
  */
 interface ValidateEntityResult {
   action: FetchRelationAction;
@@ -54,23 +53,14 @@ interface ValidateEntityResult {
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
   /**
    * List of `{parent entity key} - {child entity key}` strings which should exist in entities structure
-   *
-   * @type {string[]}
-   * @memberof ValidateLoopConfig
    */
   includeRelations: string[];
   /**
    * List of entities to validate
-   *
-   * @type {any[]}
-   * @memberof ValidateLoopConfig
    */
   entities: APIResource[];
   /**
    * Parent entity relation of children in the entities param
-   *
-   * @type {EntityTreeRelation}
-   * @memberof ValidateLoopConfig
    */
   parentRelation: EntityTreeRelation;
 }
@@ -125,9 +115,6 @@ function createEntityWatcher(store, paramAction, guid: string): Observable<Valid
 
 /**
  * Create actions required to populate parent entities with exist children
- *
- * @param {HandleRelationsConfig} config
- * @returns {ValidateEntityResult[]}
  */
 function createActionsForExistingEntities(config: HandleRelationsConfig): Action {
   const { store, allEntities, newEntities, childEntities, childRelation, action } = config;
@@ -158,9 +145,6 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
 
 /**
  * Create actions required to fetch missing relations
- *
- * @param {HandleRelationsConfig} config
- * @returns {ValidateEntityResult[]}
  */
 function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
   const { store, childRelation, childEntitiesUrl, cfGuid, parentRelation } = config;
@@ -200,9 +184,6 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
 /**
  * For a specific relationship check it exists (and if we need to populate other parts of entity store with it) or it does not (and we
  * need to fetch it)
- *
- * @param {HandleRelationsConfig} config
- * @returns {ValidateEntityResult[]}
  */
 function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
   const { cfGuid, childEntities, parentEntity, parentRelation, childRelation, populateMissing } = config;
@@ -235,9 +216,6 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
 
 /**
  * Iterate through required parent-child relationships and check if they exist
- *
- * @param {ValidateLoopConfig} config
- * @returns {ValidateEntityResult[]}
  */
 function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   const { store, cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
@@ -288,7 +266,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
           cfGuid: cfGuid || entity.entity.cfGuid,
           parentEntity: entity,
           childRelation,
-          childEntities: childEntities,
+          childEntities,
           childEntitiesUrl: pathGet(childRelation.path + '_url', entity),
         }));
       }
@@ -419,8 +397,6 @@ function handleValidationLoopResults(
  * - exist - (optionally) return an action that will store them in pagination.
  *
  * @export
- * @param {ValidateEntityRelationsConfig} config See ValidateEntityRelationsConfig
- * @returns {ValidationResult}
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
@@ -462,9 +438,6 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  * Check to see if we already have the result of the pagination action in a parent entity (we've previously fetched it inline). If so
  * create an action that can be used to populate the pagination section with the list from the parent
  * @export
- * @param {Store<AppState>} store
- * @param {PaginatedAction} action
- * @returns {Observable<boolean>}
  */
 export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
   if (!isEntityInlineChildAction(action) || !action.flattenPagination) {

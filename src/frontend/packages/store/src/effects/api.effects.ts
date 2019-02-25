@@ -167,7 +167,8 @@ export class APIEffect {
           this.handleApiEvents(errorsCheck);
         }
 
-        let fakedAction, errorMessage;
+        let fakedAction;
+        let errorMessage;
         errorsCheck.forEach(error => {
           if (error.error) {
             // Dispatch a error action for the specific endpoint that's failed
@@ -283,7 +284,7 @@ export class APIEffect {
       }
       : {
         entity: { ...resource, cfGuid },
-        metadata: { guid: guid },
+        metadata: { guid },
       };
 
     // Inject `cfGuid` in nested entities
@@ -354,7 +355,7 @@ export class APIEffect {
         errorCode: succeeded ? '200' : errorCode,
         guid: cfGuid,
         url: action.options.url,
-        errorResponse: errorResponse,
+        errorResponse,
       };
     });
   }

@@ -66,7 +66,6 @@ export class RequestEffect {
    * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not
    *    been dropped because their count is over 50
    *
-   * @memberof RequestEffect
    */
   @Effect() validateEntities$ = this.actions$.pipe(
     ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
@@ -170,8 +169,8 @@ export class RequestEffect {
     if (apiAction['paginationKey']) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
-        busy: busy,
-        error: error,
+        busy,
+        error,
         apiAction
       });
     } else {

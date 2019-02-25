@@ -37,7 +37,7 @@ export class CloudFoundryEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const headers = new Headers({ 'x-cap-cnsi-list': action.cfGuid });
       const requestArgs = {
-        headers: headers
+        headers
       };
       const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http
