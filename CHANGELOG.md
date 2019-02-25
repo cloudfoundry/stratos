@@ -4,7 +4,7 @@
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.2.0...2.3.0)
 
-**Important**
+### Important Security Fixes
 
 This release fixes two CVEs identified in Stratos related to the Session Cookie - we recommend you update to 2.3.0.
 
