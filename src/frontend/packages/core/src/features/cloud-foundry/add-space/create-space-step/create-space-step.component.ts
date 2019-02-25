@@ -36,7 +36,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   ngOnInit() {
     this.createSpaceForm = new FormGroup({
-      spaceName: new FormControl('', [<any>Validators.required, this.spaceNameTakenValidator()]),
+      spaceName: new FormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
     });
   }
 
@@ -47,7 +47,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.validateNameTaken(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
+      !this.validateNameTaken(formField.value) ? { spaceNameTaken: { value: formField.value } } : null;
   }
 
   submit: StepOnNextFunction = () => {

@@ -34,8 +34,8 @@ export class ServicesWallComponent implements OnDestroy {
   cfIds$: Observable<string[]>;
 
   constructor(public cloudFoundryService: CloudFoundryService,
-    public store: Store<AppState>,
-    private cfOrgSpaceService: CfOrgSpaceDataService) {
+              public store: Store<AppState>,
+              private cfOrgSpaceService: CfOrgSpaceDataService) {
 
     this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(

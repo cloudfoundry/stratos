@@ -3,22 +3,27 @@ import { HttpModule, XHRBackend } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
-import { filter, first, tap, pairwise, map } from 'rxjs/operators';
-import { ENTITY_SERVICE } from '../shared/entity.tokens';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+
 import { GetApplication } from '../../../store/src/actions/application.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { AppState } from '../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../store/src/helpers/entity-factory';
-import { completeApiRequest, startApiRequest, failApiRequest } from '../../../store/src/reducers/api-request-reducer/request-helpers';
+import {
+  completeApiRequest,
+  failApiRequest,
+  startApiRequest,
+} from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
-import { EntityService } from './entity-service';
-import { EntityServiceFactory } from './entity-service-factory.service';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { ENTITY_SERVICE } from '../shared/entity.tokens';
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { EntityService } from './entity-service';
+import { EntityServiceFactory } from './entity-service-factory.service';
 
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';

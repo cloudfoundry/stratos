@@ -1,14 +1,14 @@
-
-import { throwError as observableThrowError, timer as observableTimer, of as observableOf, Observable } from 'rxjs';
-
-import { take, combineLatest, switchMap, map, catchError } from 'rxjs/operators';
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
+import { catchError, combineLatest, map, switchMap, take } from 'rxjs/operators';
+
+import { AppState } from '../../../../../store/src/app-state';
 import { selectNewAppState } from '../../../../../store/src/effects/create-app-effects';
 import { environment } from '../../../environments/environment.prod';
-import { AppState } from '../../../../../store/src/app-state';
+
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {

@@ -225,7 +225,7 @@ export class ServicesService {
             filter(o => !!o && !!o.entity),
             map(o => ({
               isSpaceScoped: true,
-              spaceGuid: spaceGuid,
+              spaceGuid,
               orgGuid: o.entity.entity.organization_guid
             })),
           );

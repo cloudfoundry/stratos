@@ -13,7 +13,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   styleUrls: ['./cloud-foundry-summary-tab.component.scss']
 })
 export class CloudFoundrySummaryTabComponent {
-  appLink: Function;
+  appLink: () => void;
   detailsLoading$: Observable<boolean>;
 
   constructor(store: Store<AppState>, public cfEndpointService: CloudFoundryEndpointService) {

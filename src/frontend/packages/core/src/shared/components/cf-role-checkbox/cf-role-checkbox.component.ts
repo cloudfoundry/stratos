@@ -3,21 +3,21 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { combineLatest, filter, first } from 'rxjs/operators';
 
+import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
+import {
+  CfUser,
+  IUserPermissionInOrg,
+  IUserPermissionInSpace,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+} from '../../../../../store/src/types/user.types';
+import { CfUserRolesSelected } from '../../../../../store/src/types/users-roles.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { CfUserRolesSelected } from '../../../../../store/src/types/users-roles.types';
-import {
-  IUserPermissionInOrg,
-  CfUser,
-  IUserPermissionInSpace,
-  SpaceUserRoleNames,
-  OrgUserRoleNames
-} from '../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
-import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../store/src/actions/users-roles.actions';
 
 /**
  * Component to manage the display and change of a specific org or space role. Will be checked if all users have role or user has selected
@@ -25,9 +25,6 @@ import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../sto
  * Special rules apply to an org user role. If there are any other roles set this will be disabled.
  *
  * @export
- * @class CfRoleCheckboxComponent
- * @implements {OnInit}
- * @implements {OnDestroy}
  */
 @Component({
   selector: 'app-cf-role-checkbox',
@@ -42,7 +39,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   @Input() role: string;
   @Output() changed = new BehaviorSubject(false);
 
-  checked: Boolean = false;
+  checked = false;
   tooltip = '';
   sub: Subscription;
   isOrgRole = false;
@@ -56,7 +53,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  private static hasRole(role: string, orgRoles: IUserPermissionInOrg, spaceGuid: string): Boolean {
+  private static hasRole(role: string, orgRoles: IUserPermissionInOrg, spaceGuid: string): boolean {
     if (!orgRoles) {
       return undefined;
     }
@@ -81,7 +78,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
     spaceGuid?: string): {
-      checked: Boolean;
+      checked: boolean;
       tooltip: string;
     } {
     let tooltip = '';
@@ -202,17 +199,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
    * Determine if the checkbox should be disabled. This is only relevant to the Org User role which should be disabled if there are any
    * existing or new org or space roles set
    *
-   * @private
-   * @static
-   * @param {boolean} isOrgRole
-   * @param {string} role
-   * @param {CfUser[]} users
-   * @param {CfUserRolesSelected} existingRoles
-   * @param {IUserPermissionInOrg} newRoles
-   * @param {string} orgGuid
-   * @param {Boolean} checked
-   * @returns {boolean} True if the checkbox should be disabled
-   * @memberof CfRoleCheckboxComponent
+   * @returns True if the checkbox should be disabled
    */
   private static isDisabled(
     isOrgRole: boolean,
@@ -221,7 +208,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
-    checked: Boolean): boolean {
+    checked: boolean): boolean {
     if (isOrgRole && role === OrgUserRoleNames.USER) {
       // Never disable the org user checkbox if it's not enabled/semi enabled (covers odd cases when cf creates orgs/spaces without the
       // permissions)

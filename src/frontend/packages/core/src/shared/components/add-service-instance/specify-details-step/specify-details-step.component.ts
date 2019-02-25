@@ -114,7 +114,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+      !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   }
 
   constructor(

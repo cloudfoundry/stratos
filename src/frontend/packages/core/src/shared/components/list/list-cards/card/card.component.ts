@@ -68,7 +68,7 @@ export class CardComponent<T> implements OnInit, OnChanges {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
     // Add to target to ensure ngcontent is correct in new component
     const componentRef = this.target.createComponent(componentFactory);
-    this.cardComponent = <CardCell<T>>componentRef.instance;
+    this.cardComponent = componentRef.instance as CardCell<T>;
     this.cardComponent.row = this.item;
     this.cardComponent.dataSource = this.dataSource;
   }

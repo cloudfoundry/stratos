@@ -11,11 +11,11 @@ import { CardCell } from '../list.types';
 export class CardsComponent<T> {
   public columns = CardCell.columns;
   @Input() dataSource: IListDataSource<T>;
-  private _component: CardCell<T>;
+  private pComponent: CardCell<T>;
   @Input()
-  get component() { return this._component; }
+  get component() { return this.pComponent; }
   set component(cardCell) {
-    this._component = cardCell;
+    this.pComponent = cardCell;
     this.columns = cardCell['columns'];
   }
 }

@@ -132,10 +132,10 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   readItemContents(item): Promise<string> {
     const scanner = this;
     return new Promise((resolve, reject) => {
-      item.file(function (file) {
-        scanner.readFileContents(file).then(function (data: string) {
+      item.file(file => {
+        scanner.readFileContents(file).then((data: string) => {
           resolve(data);
-        }).catch(function () {
+        }).catch(() => {
           reject();
         });
       });
@@ -145,15 +145,9 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   readFileContents(file): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = function () {
-        resolve(reader.result as string);
-      };
-      reader.onerror = function () {
-        reject();
-      };
-      reader.onabort = function () {
-        reject();
-      };
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject();
+      reader.onabort = () => reject();
       reader.readAsText(file);
     });
   }

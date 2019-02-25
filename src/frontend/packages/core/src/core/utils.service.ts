@@ -112,8 +112,8 @@ export class UtilsService {
     return Math.floor(Math.log(value) / Math.log(1024));
   }
 
-  getReducedValue(value, number, precision): number {
-    return (value / Math.pow(1024, Math.floor(number)));
+  getReducedValue(value: number, multiplier: number): number {
+    return (value / Math.pow(1024, Math.floor(multiplier)));
   }
 
   usageBytes(usage, usedPrecision?, totalPrecision?): string {
@@ -131,29 +131,28 @@ export class UtilsService {
     totalPrecision = this.getDefaultPrecision(totalPrecision);
 
     // Units
-    const number = this.getNumber(total);
+    const value = this.getNumber(total);
     let usedNumber = null;
 
     // Values to display
-    const totalDisplay = this.getReducedValue(total, number, totalPrecision).toFixed(totalPrecision);
-    const usedValue = this.getReducedValue(used, number, usedPrecision);
+    const totalDisplay = this.getReducedValue(total, value).toFixed(totalPrecision);
+    const usedValue = this.getReducedValue(used, value);
     let usedDisplay = usedValue.toFixed(totalPrecision);
 
     // Is the used value too small to be accurate (for instance 20M consumed of 1GB would show as 0 of 1GB)?
     if (used !== 0 && usedPrecision === 0 && usedValue < 1) {
       // Use the units relative to the used value instead of total (20MB of 1GB instead of 0 of 1GB)
       usedNumber = this.getNumber(used);
-      usedDisplay = this.getReducedValue(used, usedNumber, usedPrecision).toFixed(totalPrecision);
+      usedDisplay = this.getReducedValue(used, usedNumber).toFixed(totalPrecision);
     }
 
-    return usedDisplay + (usedNumber ? ' ' + this.units[usedNumber] : '') + ' / ' + totalDisplay + ' ' + this.units[number];
+    return usedDisplay + (usedNumber ? ' ' + this.units[usedNumber] : '') + ' / ' + totalDisplay + ' ' + this.units[value];
   }
 
   /**
-   * @function formatUptime
    * @description format an uptime in seconds into a days, hours, minutes, seconds string
-   * @param {number} uptime in seconds
-   * @returns {string} formatted uptime string
+   * @param uptime in seconds
+   * @returns formatted uptime string
    */
   formatUptime(uptime): string {
     if (uptime === undefined || uptime === null) {
@@ -206,8 +205,8 @@ export class UtilsService {
 }
 
 /**
-* Return the value in the object for the given dot separated param path
-*/
+ * Return the value in the object for the given dot separated param path
+ */
 export function pathGet(path: string, object: any): any {
   const params = path.split('.');
 

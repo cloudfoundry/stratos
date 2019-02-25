@@ -23,9 +23,9 @@ export class EntityFavoriteStarComponent {
     this.confirmationDialogConfig.message =
       `Are you sure you would you like to unfavorite this ${name ? name.toLocaleLowerCase() : 'favorite'}?`;
     this.isFavorite$ = this.userFavoriteManager.getIsFavoriteObservable(favorite);
-    this._favorite = favorite;
+    this.pFavourite = favorite;
   }
-  private _favorite: UserFavorite<IFavoriteMetadata>;
+  private pFavourite: UserFavorite<IFavoriteMetadata>;
 
   @Input()
   private confirmRemoval = false;
@@ -48,18 +48,18 @@ export class EntityFavoriteStarComponent {
         first(),
         tap(is => {
           if (is) {
-            this.confirmDialog.open(this.confirmationDialogConfig, this._toggleFavorite);
+            this.confirmDialog.open(this.confirmationDialogConfig, this.pToggleFavorite);
           } else {
-            this._toggleFavorite();
+            this.pToggleFavorite();
           }
         })
       ).subscribe();
     } else {
-      this._toggleFavorite();
+      this.pToggleFavorite();
     }
   }
 
-  private _toggleFavorite = () => {
-    this.userFavoriteManager.toggleFavorite(this._favorite);
+  private pToggleFavorite = (res?: any) => {
+    this.userFavoriteManager.toggleFavorite(this.pFavourite);
   }
 }

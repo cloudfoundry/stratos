@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
-import { queryParamMap } from '../../../core/auth-guard.service';
-import { AppState } from '../../../../../store/src/app-state';
-import { RouterRedirect } from '../../../../../store/src/reducers/routing.reducer';
-import { VerifySession, Login } from '../../../../../store/src/actions/auth.actions';
+import { Login, VerifySession } from '../../../../../store/src/actions/auth.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { RouterRedirect } from '../../../../../store/src/reducers/routing.reducer';
+import { queryParamMap } from '../../../core/auth-guard.service';
 
 @Component({
   selector: 'app-login-page',
@@ -67,7 +67,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             return !(loggedIn && validSession);
           }),
         )
-        .subscribe(null, null, () => this.handleSuccess());
+        .subscribe({
+          complete: () => this.handleSuccess()
+        });
   }
 
   ngOnDestroy() {

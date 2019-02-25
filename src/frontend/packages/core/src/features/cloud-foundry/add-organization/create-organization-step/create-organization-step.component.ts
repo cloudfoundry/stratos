@@ -44,7 +44,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.addOrg = new FormGroup({
-      orgName: new FormControl('', [<any>Validators.required, this.nameTakenValidator()]),
+      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
@@ -68,7 +68,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.validateNameTaken(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+      !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
   }
 
   validateNameTaken = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;

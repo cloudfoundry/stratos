@@ -119,21 +119,21 @@ export class CurrentUserPermissionsService {
     }
   }
 
-  private getConfig(config: PermissionConfigType, _tries = 0): PermissionConfig[] | PermissionConfig {
+  private getConfig(config: PermissionConfigType, tries = 0): PermissionConfig[] | PermissionConfig {
     const linkConfig = config as PermissionConfigLink;
     if (linkConfig.link) {
-      if (_tries >= 20) {
+      if (tries >= 20) {
         // Tried too many times to get permission config, circular reference very likely.
         return;
       }
-      ++_tries;
-      return this.getLinkedPermissionConfig(linkConfig, _tries);
+      ++tries;
+      return this.getLinkedPermissionConfig(linkConfig, tries);
     } else {
       return config as PermissionConfig[] | PermissionConfig;
     }
   }
 
-  private getLinkedPermissionConfig(linkConfig: PermissionConfigLink, _tries = 0) {
+  private getLinkedPermissionConfig(linkConfig: PermissionConfigLink, tries = 0) {
     return this.getConfig(permissionConfigs[linkConfig.link]);
   }
 

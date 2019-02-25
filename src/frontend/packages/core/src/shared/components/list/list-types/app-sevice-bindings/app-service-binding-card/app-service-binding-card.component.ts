@@ -155,7 +155,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   edit = () => this.serviceActionHelperService.editServiceBinding(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
-    { 'appId': this.appService.appGuid }
+    { appId: this.appService.appGuid }
   )
 
 }

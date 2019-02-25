@@ -346,7 +346,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
           return this.pollEntityService('starting', 'STARTED').pipe(first());
         }),
-      ).subscribe(null, this.dispatchAppStats, this.dispatchAppStats);
+      ).subscribe({
+        error: this.dispatchAppStats,
+        complete: this.dispatchAppStats
+      });
 
     });
   }

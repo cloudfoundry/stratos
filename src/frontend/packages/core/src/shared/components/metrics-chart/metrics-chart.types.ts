@@ -2,9 +2,9 @@ import { MetricsAction } from '../../../../../store/src/actions/metrics.actions'
 
 export interface IMetricsConfig<T = any> {
   metricsAction: MetricsAction;
-  getSeriesName: (T) => string;
-  mapSeriesItemName?: (any) => any;
-  mapSeriesItemValue?: (any) => any;
+  getSeriesName: (obj: T) => string;
+  mapSeriesItemName?: (anything: any) => any;
+  mapSeriesItemValue?: (anything: any) => any;
 }
 
 export enum MetricsChartTypes {

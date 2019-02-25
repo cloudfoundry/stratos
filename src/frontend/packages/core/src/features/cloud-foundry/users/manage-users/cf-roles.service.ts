@@ -13,6 +13,29 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
+import { GetAllOrganizations, GetOrganization } from '../../../../../../store/src/actions/organization.actions';
+import { UsersRolesSetChanges } from '../../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import {
+  endpointSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../../../store/src/reducers/users-roles.reducer';
+import {
+  selectUsersRolesCf,
+  selectUsersRolesPicked,
+  selectUsersRolesRoles,
+} from '../../../../../../store/src/selectors/users-roles.selector';
+import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../../../store/src/types/user.types';
+import { CfRoleChange, CfUserRolesSelected } from '../../../../../../store/src/types/users-roles.types';
 import { IOrganization } from '../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
@@ -21,29 +44,6 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
-import { CfUserRolesSelected, CfRoleChange } from '../../../../../../store/src/types/users-roles.types';
-import { IUserPermissionInOrg, CfUser, UserRoleInOrg, UserRoleInSpace } from '../../../../../../store/src/types/user.types';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import {
-  selectUsersRolesPicked,
-  selectUsersRolesCf,
-  selectUsersRolesRoles
-} from '../../../../../../store/src/selectors/users-roles.selector';
-import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../../../store/src/reducers/users-roles.reducer';
-import { UsersRolesSetChanges } from '../../../../../../store/src/actions/users-roles.actions';
-import {
-  organizationSchemaKey,
-  entityFactory,
-  spaceSchemaKey,
-  endpointSchemaKey
-} from '../../../../../../store/src/helpers/entity-factory';
-import { GetOrganization, GetAllOrganizations } from '../../../../../../store/src/actions/organization.actions';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey
-} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 
 @Injectable()
@@ -129,11 +129,6 @@ export class CfRolesService {
   /**
    * Take the structure that cf stores user roles in (per user and flat) and convert into a format that's easier to use and compare with
    * (easier to access at specific levels, easier to parse pieces around)
-   *
-   * @param {string} cfGuid
-   * @param {CfUser[]} selectedUsers
-   * @returns {Observable<CfUserRolesSelected>}
-   * @memberof CfRolesService
    */
   populateRoles(cfGuid: string, selectedUsers: CfUser[]): Observable<CfUserRolesSelected> {
     if (!cfGuid || !selectedUsers || selectedUsers.length === 0) {
@@ -180,10 +175,6 @@ export class CfRolesService {
 
   /**
    * Create a collection of role `change` items representing the diff between existing roles and newly selected roles.
-   *
-   * @param {string} orgGuid
-   * @returns {Observable<CfRoleChange[]>}
-   * @memberof CfRolesService
    */
   createRolesDiff(orgGuid: string): Observable<CfRoleChange[]> {
     return this.existingRoles$.pipe(
@@ -273,13 +264,6 @@ export class CfRolesService {
 
   /**
    * Compare a set of org or space permissions and return the differences
-   *
-   * @private
-   * @param {CfRoleChange} template
-   * @param {(UserRoleInOrg | UserRoleInSpace)} oldPerms
-   * @param {(UserRoleInOrg | UserRoleInSpace)} newPerms
-   * @returns {CfRoleChange[]}
-   * @memberof CfRolesService
    */
   private comparePermissions(
     template: CfRoleChange,

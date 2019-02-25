@@ -1,4 +1,15 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, OnInit, Optional, Host, SkipSelf } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Host,
+  Input,
+  OnInit,
+  Optional,
+  Output,
+  SkipSelf,
+  ViewChild,
+} from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 
 @Component({
@@ -13,7 +24,7 @@ export class FileInputComponent implements OnInit {
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
   @Input() fileFormControlName;
 
-  private _files: File[];
+  private files: File[];
 
   public name = '';
 
@@ -21,27 +32,27 @@ export class FileInputComponent implements OnInit {
 
   constructor(
     @Optional() @Host() @SkipSelf() private parent: ControlContainer,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-   if (this.parent instanceof FormGroupName) {
-     this.formGroupControl = this.parent as FormGroupName;
-   }
+    if (this.parent instanceof FormGroupName) {
+      this.formGroupControl = this.parent as FormGroupName;
+    }
   }
 
-  get fileCount(): number { return this._files && this._files.length || 0; }
+  get fileCount(): number { return this.files && this.files.length || 0; }
 
   onNativeInputFileSelect($event) {
-    const _files = $event.srcElement.files;
-    if (_files.length > 0) {
-      this._files = _files;
-      this.onFileSelect.emit(this._files[0]);
+    const fs = $event.srcElement.files;
+    if (fs.length > 0) {
+      this.files = fs;
+      this.onFileSelect.emit(this.files[0]);
 
       if (!!this.formGroupControl) {
-        this.handleFormControl(this._files[0]);
+        this.handleFormControl(this.files[0]);
       }
-      if (this._files.length > 0) {
-        this.name = this._files[0].name;
+      if (this.files.length > 0) {
+        this.name = this.files[0].name;
       }
     }
   }

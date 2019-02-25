@@ -16,7 +16,7 @@ import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.compo
 export interface MetaCardMenuItem {
   icon?: string;
   label: string;
-  action: Function;
+  action: () => void;
   can?: Observable<boolean>;
   disabled?: Observable<boolean>;
 }
@@ -76,7 +76,7 @@ export class MetaCardComponent {
   @Input('actionMenu')
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
     if (actionMenu) {
-      this._actionMenu = actionMenu.map(menuItem => {
+      this.pActionMenu = actionMenu.map(menuItem => {
         if (!menuItem.can) {
           menuItem.can = observableOf(true);
         }
@@ -88,11 +88,11 @@ export class MetaCardComponent {
     }
   }
 
-  public _actionMenu: MetaCardMenuItem[];
+  public pActionMenu: MetaCardMenuItem[];
   public showMenu$: Observable<boolean>;
 
   @Input()
-  clickAction: Function = null;
+  clickAction: () => void = null;
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,

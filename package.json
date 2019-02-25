@@ -24,7 +24,7 @@
     "test-frontend:store": "ng test store --code-coverage --watch=false",
     "posttest": "istanbul report json && node build/combine-coverage.js",
     "codecov": "codecov -f coverage/coverage-final.json",
-    "lint": "ng lint",
+    "lint": "ng lint --format stylish",
     "sass-lint": "sass-lint -v",
     "e2e": "ng e2e",
     "e2e-dev": "ng e2e --dev-server-target= --base-url=https://127.0.0.1:4200",

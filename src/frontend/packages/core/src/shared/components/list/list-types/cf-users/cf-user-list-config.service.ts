@@ -204,8 +204,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   /**
    * Assign the org and/or spaces obs to the cell configs. These will be used to determine which org or space roles to show
    *
-   * @private
-   * @memberof CfUserListConfigService
    */
   private assignColumnConfig = (
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,

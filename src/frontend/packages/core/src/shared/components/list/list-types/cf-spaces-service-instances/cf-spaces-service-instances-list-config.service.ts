@@ -2,23 +2,21 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { IListConfig } from '../../list.component.types';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 /**
  * Service instance list shown for `cf / org / space / service instances` tab
  *
  * @export
- * @class CfSpacesServiceInstancesListConfigService
  * @extends {CfServiceInstancesListConfigBase}
- * @implements {IListConfig<APIResource<IServiceInstance>>}
  */
 @Injectable()
 export class CfSpacesServiceInstancesListConfigService extends CfServiceInstancesListConfigBase

@@ -100,7 +100,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   confirmPasswordValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const same = control.value === this.editProfileForm.value.newPassword;
-      return same ? null : { 'passwordMatch': { value: control.value } };
+      return same ? null : { passwordMatch: { value: control.value } };
     };
   }
 

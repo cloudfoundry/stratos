@@ -74,11 +74,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
     this.addRouteMode = this.addRouteModes[0];
     this.domainFormGroup = new FormGroup({
-      domain: new FormControl('', [<any>Validators.required])
+      domain: new FormControl('', [Validators.required as any])
     });
 
     this.addHTTPRoute = new FormGroup({
-      host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)]),
+      host: new FormControl('', [Validators.required as any, Validators.pattern(hostPattern), Validators.maxLength(63)]),
       path: new FormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
     });
 
