@@ -254,12 +254,6 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 			if strings.HasPrefix(cnsiRequest.URL.Host, apiPrefix) {
 				// Replace 'api.' prefix with supplied prefix
 				cnsiRequest.URL.Host = strings.Replace(cnsiRequest.URL.Host, apiPrefix, apiHost, 1)
-				if apiHost == "autoscaler." {
-					cnsiRequest.URL.Path = strings.Replace(cnsiRequest.URL.Path, "v2", "v1", 1)
-				}
-				if apiHost == "scalingconsole." {
-					cnsiRequest.URL.Path = strings.Replace(cnsiRequest.URL.Path, "v2", "v1", 1)
-				}
 			} else {
 				// Add supplied prefix to the domain
 				cnsiRequest.URL.Host = apiHost + cnsiRequest.URL.Host

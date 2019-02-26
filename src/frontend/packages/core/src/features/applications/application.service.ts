@@ -15,6 +15,9 @@ import {
 } from '../../../../store/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../store/src/app-state';
+import { GetAppAutoscalerHealthAction } from '../../store/actions/app-autoscaler.actions';
+import { AppAutoscalerHealth } from '../../store/types/app-autoscaler.types';
+
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -28,6 +31,7 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
   stackSchemaKey,
+  appAutoscalerHealthSchemaKey,
 } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -86,6 +90,7 @@ export class ApplicationService {
 
   private appEntityService: EntityService<APIResource<IApp>>;
   private appSummaryEntityService: EntityService<APIResource<IAppSummary>>;
+  private appAutoscalerHealthService: EntityService;
 
   constructor(
     @Inject(CF_GUID) public cfGuid: string,
@@ -109,6 +114,14 @@ export class ApplicationService {
       entityFactory(appSummarySchemaKey),
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
+      false
+    );
+
+    this.appAutoscalerHealthService = this.entityServiceFactory.create<APIResource<AppAutoscalerHealth>>(
+      appAutoscalerHealthSchemaKey,
+      entityFactory(appAutoscalerHealthSchemaKey),
+      appGuid,
+      new GetAppAutoscalerHealthAction(appGuid, cfGuid),
       false
     );
 
@@ -144,6 +157,8 @@ export class ApplicationService {
   applicationState$: Observable<ApplicationStateData>;
   applicationUrl$: Observable<string>;
   applicationRunning$: Observable<boolean>;
+
+  waitForAppAutoscalerHealth$: Observable<EntityInfo<AppAutoscalerHealth>>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -213,6 +228,8 @@ export class ApplicationService {
     );
 
     this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
+
+    this.waitForAppAutoscalerHealth$ = this.appAutoscalerHealthService.waitForEntity$.pipe(publishReplay(1), refCount());
   }
 
   public getApplicationEnvVarsMonitor() {

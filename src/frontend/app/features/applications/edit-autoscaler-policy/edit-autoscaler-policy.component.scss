@@ -1,0 +1,42 @@
+.edit-app {
+  flex: 1;
+}
+
+.mat-radio-outer-circle {
+  height: 15px;
+  width: 15px;
+  top: 2.5px;
+}
+
+app-tile-grid {
+  width: 100%;
+}
+
+.app-auto-scaler {
+  display: flex;
+  position: relative;
+  width: 100%;
+  &__actions {
+    bottom: 24px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
+}
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  &__two-cols {
+    flex: 1;
+    margin-right: 3em;
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
+}
+
+.edit-recurring-schedule {
+  max-width: 100%;
+}

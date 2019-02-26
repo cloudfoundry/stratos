@@ -412,27 +412,6 @@ export class APIEffect {
             });
           case RequestEntityLocation.OBJECT: // The response is the entity
             return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
-          case RequestEntityLocation.AUTOSCALER_ARRAY:
-            if (!cfData.resources) {
-              // Treat the response as RequestEntityLocation.OBJECT
-              return this.completeResourceEntity(
-                cfData,
-                cfGuid,
-                apiAction.guid,
-              );
-            }
-            totalResults += cfData['total_results'];
-            totalPages += cfData['total_pages'];
-            if (!cfData.resources.length) {
-              return null;
-            }
-            return cfData.resources.map(resource => {
-              return this.completeResourceEntity(
-                resource,
-                cfGuid,
-                resource.timestamp,
-              );
-            });
           case RequestEntityLocation.RESOURCE: // The response is an object and the entities list is within a 'resource' param
           default:
             if (!cfData.resources) {
