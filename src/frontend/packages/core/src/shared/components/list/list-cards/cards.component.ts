@@ -17,6 +17,6 @@ export class CardsComponent<T> {
   set component(cardCell) {
     this.pComponent = cardCell;
     /* tslint:disable-next-line:no-string-literal  */
-    this.columns = cardCell['no-string-literal'];
+    this.columns = cardCell['columns'];
   }
 }
