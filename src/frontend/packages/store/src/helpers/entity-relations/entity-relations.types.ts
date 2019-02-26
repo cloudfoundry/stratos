@@ -98,8 +98,8 @@ export interface EntityInlineChildAction {
 
 export function isEntityInlineChildAction(anything): EntityInlineChildAction {
   return anything &&
-    !!anything['parentGuid'] &&
-    !!anything['parentEntitySchema']
+    !!anything.parentGuid &&
+    !!anything.parentEntitySchema
     ? anything as EntityInlineChildAction : null;
 }
 
@@ -114,8 +114,8 @@ export interface EntityInlineParentAction extends IRequestAction {
   populateMissing: boolean;
 }
 
-export function isEntityInlineParentAction(action: Action) {
-  return action && !!action['includeRelations'] && action['populateMissing'] !== undefined;
+export function isEntityInlineParentAction(anything: any): boolean {
+  return anything && !!anything.includeRelations && anything.populateMissing !== undefined;
 }
 
 export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }

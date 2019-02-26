@@ -269,7 +269,7 @@ export class GetServiceInstancesForSpace
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (q) {
-      this.initialParams['q'] = q;
+      this.initialParams.q = q;
     }
     this.parentGuid = spaceGuid;
   }
@@ -282,6 +282,7 @@ export class GetServiceInstancesForSpace
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'creation',
+    q: null
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);

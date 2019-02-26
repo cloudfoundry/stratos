@@ -129,7 +129,7 @@
     "stratos-protractor-reporter": "^1.2.3",
     "ts-node": "~3.2.0",
     "tslib": "^1.9.0",
-    "tslint": "~5.11.0",
+    "tslint": "~5.13.0",
     "typescript": "~3.1.6",
     "acorn": "^6.0.0"
   }

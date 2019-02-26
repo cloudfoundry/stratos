@@ -139,7 +139,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(
       oldEntities[applicationSchemaKey][this.guid].entity,
-      Object.keys(applicationEntitySchema['schema'])
+      Object.keys(applicationEntitySchema.schema)
     );
     newEntities[applicationSchemaKey][this.guid].entity = {
       ...newEntities[applicationSchemaKey][this.guid].entity,

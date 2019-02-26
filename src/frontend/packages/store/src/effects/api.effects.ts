@@ -425,8 +425,8 @@ export class APIEffect {
                 apiAction.guid,
               );
             }
-            totalResults += cfData['total_results'];
-            totalPages += cfData['total_pages'];
+            totalResults += cfData.total_results;
+            totalPages += cfData.total_pages;
             if (!cfData.resources.length) {
               return null;
             }
@@ -442,6 +442,7 @@ export class APIEffect {
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
     let entityArray;
+    /* tslint:disable-next-line:no-string-literal  */
     if (apiAction.entity['length'] > 0) {
       entityArray = apiAction.entity;
     } else {

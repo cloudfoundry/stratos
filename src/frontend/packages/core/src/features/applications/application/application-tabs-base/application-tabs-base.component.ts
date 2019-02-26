@@ -388,7 +388,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
       map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection['restaging']) ||
+        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
         return { updating };
       }),

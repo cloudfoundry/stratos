@@ -97,7 +97,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   }
 
   ngAfterContentInit() {
-    this.subs.push(this.jsonForm.controls['json'].valueChanges.subscribe(jsonStr => {
+    this.subs.push(this.jsonForm.controls.json.valueChanges.subscribe(jsonStr => {
       this.jsonData = safeStringToObj(jsonStr);
       this.pDataChange.next(this.jsonData);
       this.pValidChange.next(this.isJsonFormValid());
@@ -124,12 +124,12 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   setJsonFormData(data: object) {
     if (this.jsonForm) {
       const jsonString = data ? JSON.stringify(data) : '';
-      this.jsonForm.controls['json'].setValue(jsonString);
+      this.jsonForm.controls.json.setValue(jsonString);
     }
   }
 
   private isJsonFormValid(): boolean {
-    return !this.jsonForm.controls['json'].value || this.jsonForm.controls['json'].valid;
+    return !this.jsonForm.controls.json.value || this.jsonForm.controls.json.valid;
   }
 
   private filterSchema = (schema?: object): any => {

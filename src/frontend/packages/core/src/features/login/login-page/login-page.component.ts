@@ -112,7 +112,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.ssoLogin = !!this.ssoOptions;
 
     const params = queryParamMap();
-    const ssoMessage = params['SSO_Message'];
+    const ssoMessage = params.SSO_Message;
 
     // Upgrade in progress
     if (auth.sessionData && auth.sessionData.upgradeInProgress) {

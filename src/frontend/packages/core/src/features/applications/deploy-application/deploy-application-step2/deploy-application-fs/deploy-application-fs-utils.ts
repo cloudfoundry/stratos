@@ -26,8 +26,8 @@ export class DeployApplicationFsUtils {
       }
     } else {
       // See if we can find the .cfignore file and/or the manifest file
-      for (let j = 0; j < items.length; j++) {
-        const filePath = items[j].webkitRelativePath.split('/');
+      for (const item of items) {
+        const filePath = item.webkitRelativePath.split('/');
         // First part is the root folder name
         if (filePath.length === 2 && !rootFolderName) {
           rootFolderName = filePath[0];
@@ -37,10 +37,10 @@ export class DeployApplicationFsUtils {
           break;
         }
         if (!cfIgnoreFile && filePath.length === 2 && filePath[1] === CF_IGNORE_FILE) {
-          cfIgnoreFile = items[j];
+          cfIgnoreFile = item;
         }
         if (filePath.length === 2 && filePath[1] === CF_MANIFEST_FILE) {
-          manifestFile = items[j];
+          manifestFile = item;
         }
       }
     }

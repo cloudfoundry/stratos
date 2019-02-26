@@ -35,7 +35,7 @@ import { PaginatedAction } from './../types/pagination.types';
 
 export function createFailedGithubRequestMessage(error) {
   const response = parseHttpPipeError(error);
-  const message = response['message'] || '';
+  const message = response.message || '';
   return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
     'Github ' + message.substring(0, message.indexOf('(')) :
     'Github request failed';

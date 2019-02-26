@@ -5,6 +5,7 @@ import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLates
 
 import { isEntityBlocked } from '../../../../core/src/core/entity-service';
 import { pathGet } from '../../../../core/src/core/utils.service';
+import { environment } from '../../../../core/src/environments/environment';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import {
   FetchRelationAction,
@@ -35,6 +36,7 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
+
 
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -250,8 +252,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
           const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] || {} : {};
           const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] || {} : {};
 
-          for (let i = 0; i < guids.length; i++) {
-            const guid = guids[i];
+          for (const guid of guids) {
             const foundEntity = newEntitiesOfType[guid] || allEntitiesOfType[guid];
             if (foundEntity) {
               childEntities.push(foundEntity);
@@ -331,8 +332,12 @@ function associateChildWithParent(store, action: EntityInlineChildAction, apiRes
           entityKey: action.parentEntitySchema.key,
           type: '[Entity] Associate with parent',
         };
-        // Add for easier debugging
-        parentAction['childEntityKey'] = action.child.entityKey;
+        if (!environment.production) {
+          // Add for easier debugging
+          /* tslint:disable-next-line:no-string-literal  */
+          parentAction['childEntityKey'] = action.child.entityKey;
+        }
+
 
         const successAction = new WrapperRequestActionSuccess(response, parentAction, 'fetch', 1, 1);
         store.dispatch(successAction);
@@ -440,11 +445,12 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  * @export
  */
 export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
-  if (!isEntityInlineChildAction(action) || !action.flattenPagination) {
+  const eicAction = isEntityInlineChildAction(action);
+  if (!eicAction || !action.flattenPagination) {
     return observableOf(null);
   }
-  const parentEntitySchema = action['parentEntitySchema'] as EntitySchema;
-  const parentGuid = action['parentGuid'];
+  const parentEntitySchema = eicAction.parentEntitySchema as EntitySchema;
+  const parentGuid = eicAction.parentGuid;
 
   // What the hell is going on here hey? Well I'll tell you...
   // Ensure that the parent is not blocked (fetching, updating, etc) before we check if it has the child param that we need
@@ -470,11 +476,12 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
         return;
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
+      /* tslint:disable-next-line:no-string-literal  */
       const entities = parentEntitySchema.schema['entity'] || {};
       const params = Object.keys(entities);
-      for (let i = 0; i < params.length; i++) {
-        const paramName = params[i];
+      for (const paramName of params) {
         const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
+        /* tslint:disable-next-line:no-string-literal  */
         const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
         if (arraySafeEntitySchema.key === action.entityKey) {
           // Found it! Does the entity contain a value for the property name?

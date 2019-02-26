@@ -225,8 +225,8 @@ export class CfOrgSpaceDataService implements OnDestroy {
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
         // Ensure we have at least one connected cf
         filter(cfs => {
-          for (let i = 0; i < cfs.length; i++) {
-            if (cfs[i].connectionStatus === 'connected') {
+          for (const cf of cfs) {
+            if (cf.connectionStatus === 'connected') {
               return true;
             }
           }

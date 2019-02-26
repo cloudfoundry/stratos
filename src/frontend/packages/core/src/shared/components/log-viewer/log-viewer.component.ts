@@ -155,11 +155,13 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           containerElement.scrollTop = contentElement.clientHeight;
         }
       }))
-      .subscribe(undefined, e => {
-        this.statusMessage$.next({
-          message: 'An error occurred connecting to the log stream websocket',
-          isError: true
-        });
+      .subscribe({
+        error: e => {
+          this.statusMessage$.next({
+            message: 'An error occurred connecting to the log stream websocket',
+            isError: true
+          });
+        }
       });
 
     if (this.status) {

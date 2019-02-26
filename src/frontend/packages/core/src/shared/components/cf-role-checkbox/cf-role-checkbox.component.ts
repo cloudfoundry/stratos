@@ -99,8 +99,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     let oneWithout = false;
     tooltip = '';
     // Loop through users, determine who hasn't got the role and if there are any that don't
-    for (let i = 0; i < users.length; i++) {
-      const user = users[i];
+    for (const user of users) {
       if (CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, user.guid, orgGuid, spaceGuid)) {
         tooltip += `${user.username}, `;
       } else {
@@ -137,8 +136,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     checkedSpaces: Set<string>
   ): boolean {
     const spaceGuids = Object.keys(spaces || {});
-    for (let y = 0; y < spaceGuids.length; y++) {
-      const spaceGuid = spaceGuids[y];
+    for (const spaceGuid of spaceGuids) {
       if (checkedSpaces.has(spaceGuid)) {
         continue;
       }
@@ -182,8 +180,8 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
     // .. second check existing space roles
     const existingUserGuids = Object.keys(existingRoles);
-    for (let x = 0; x < existingUserGuids.length; x++) {
-      const orgs = existingRoles[existingUserGuids[x]];
+    for (const existingUserGuid of existingUserGuids) {
+      const orgs = existingRoles[existingUserGuid];
       const org = orgs[orgGuid];
       if (!org) {
         continue;

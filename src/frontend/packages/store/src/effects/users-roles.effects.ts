@@ -63,8 +63,7 @@ export class UsersRolesEffects {
       // Split changes into `org user` and `other`
       const orgUserChanges: CfRoleChange[] = [];
       const nonOrgUserChanges: CfRoleChange[] = [];
-      for (let i = 0; i < changes.length; i++) {
-        const change = changes[i];
+      for (const change of changes) {
         if (!change.spaceGuid && change.role === OrgUserRoleNames.USER) {
           orgUserChanges.push(change);
         } else {

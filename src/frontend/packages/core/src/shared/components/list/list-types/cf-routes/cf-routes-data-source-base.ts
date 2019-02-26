@@ -25,6 +25,10 @@ export interface ListCfRoute extends IRoute {
   mappedAppsCountLabel?: string;
 }
 
+function isListCfRoute(anything: any): boolean {
+  return !!anything.url && !!anything.isTCPRoute;
+}
+
 export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
 
   cfGuid: string;
@@ -65,7 +69,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
           return [];
         }
         return routes.map(route => {
-          if (route.entity['url'] && route.entity['isTCPRoute']) {
+          if (isListCfRoute(route)) {
             return route as APIResource<ListCfRoute>;
           }
           const entity: ListCfRoute = {
@@ -149,7 +153,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
           const entityMonitor = new EntityMonitor(store, route.metadata.guid, routeSchemaKey, entityFactory(routeSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
-              const unmapping = request.updating['unmapping'] || { busy: false };
+              const unmapping = request.updating.unmapping || { busy: false };
               const busy = unmapping.busy;
               rowStateManager.setRowState(route.metadata.guid, {
                 deleting: request.deleting.busy,

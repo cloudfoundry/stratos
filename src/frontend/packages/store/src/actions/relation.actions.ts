@@ -1,7 +1,11 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { EntitySchema } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations/entity-relations.types';
+import {
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+  EntityTreeRelation,
+} from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../types/request.types';
 
@@ -35,8 +39,8 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
   ];
   options: RequestOptions;
   parentEntitySchema: EntitySchema;
-  static is(anything): FetchRelationAction {
-    return (anything['isId'] === relationActionId) ? anything as FetchRelationAction : null;
+  static is(anything: any): FetchRelationAction {
+    return (anything.isId === relationActionId) ? anything as FetchRelationAction : null;
   }
 }
 

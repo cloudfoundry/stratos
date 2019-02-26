@@ -2,12 +2,12 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { EntityMonitor } from '../../../../monitors/entity-monitor';
-import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { EntityMonitor } from '../../../../monitors/entity-monitor';
+import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
+import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 
 export class SpaceRouteDataSourceHelper {
   static getRowStateManager(
@@ -43,7 +43,7 @@ export class SpaceRouteDataSourceHelper {
           const entityMonitor = new EntityMonitor(store, route.metadata.guid, routeSchemaKey, entityFactory(routeSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
-              const unmapping = request.updating['unmapping'] || { busy: false };
+              const unmapping = request.updating.unmapping || { busy: false };
               const busy = unmapping.busy;
               rowStateManager.setRowState(route.metadata.guid, {
                 deleting: request.deleting.busy,

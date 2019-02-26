@@ -166,7 +166,7 @@ export class RequestEffect {
 
 
   update(apiAction, busy: boolean, error: string) {
-    if (apiAction['paginationKey']) {
+    if (apiAction.paginationKey) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
         busy,
