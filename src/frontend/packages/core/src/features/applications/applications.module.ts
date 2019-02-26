@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
@@ -17,13 +18,16 @@ import { EventsTabComponent } from './application/application-tabs-base/tabs/eve
 import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
-import { AutoScalerTabComponent } from './application/application-tabs-base/tabs/auto-scaler-tab/auto-scaler-tab.component';
+import { AutoscalerTabComponent } from './application/application-tabs-base/tabs/autoscaler-tab/autoscaler-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
 import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
+import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-autoscaler-policy.component';
+import { AutoscalerMetricChartPageComponent } from './autoscaler-metric-chart-page/autoscaler-metric-chart-page.component';
+import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page/autoscaler-scale-history-page.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
@@ -40,14 +44,15 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     CoreModule,
     SharedModule,
     ApplicationsRoutingModule,
-    CustomImportModule
+    CustomImportModule,
+    NgxChartsModule
   ],
   declarations: [
     ApplicationWallComponent,
     ApplicationBaseComponent,
     EventsTabComponent,
     LogStreamTabComponent,
-    AutoScalerTabComponent,
+    AutoscalerTabComponent,
     ServicesTabComponent,
     BuildTabComponent,
     VariablesTabComponent,
@@ -55,6 +60,9 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     ApplicationTabsBaseComponent,
     SshApplicationComponent,
     EditApplicationComponent,
+    EditAutoscalerPolicyComponent,
+    AutoscalerMetricChartPageComponent,
+    AutoscalerScaleHistoryPageComponent,
     InstancesTabComponent,
     AddRoutesComponent,
     GitSCMTabComponent,

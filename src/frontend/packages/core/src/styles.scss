@@ -65,3 +65,21 @@ button.mat-simple-snackbar-action {
 //   flex: 1;
 //   flex-direction: column;
 // }
+
+.autoscaler-chart-legend {
+  .ngx-charts {
+    display: none;
+  }
+  header {
+    display: none;
+  }
+  .legend-wrap {
+    width: unset;
+    .legend-labels {
+      width:unset;
+      li {
+        display: inline-block;
+      }
+    }
+  }
+}

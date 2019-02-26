@@ -1,0 +1,198 @@
+<app-page-header>
+  <h1>Edit AutoScaler Policy: {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
+  <div class="page-header-right">
+    <button mat-icon-button mat-button routerLink="{{parentUrl}}">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+</app-page-header>
+<app-steppers cancel="{{parentUrl}}" *ngIf="appAutoscalerPolicy$ | async as policy">
+  <app-step [title]="'Default Instance Limits'" [valid]="editAppForm.valid">
+    <form [formGroup]="editAppForm" validate class="stepper-form edit-app">
+      <mat-form-field>
+        <input matInput placeholder="Minimum Instance Count" formControlName="instance_min_count" type="number">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Minimum Instance Count" formControlName="instance_max_count" type="number">
+      </mat-form-field>
+    </form>
+  </app-step>
+  <app-step [title]="'Scaling Rules'" [valid]="editAppForm.valid">
+    <app-tile-grid>
+      <app-tile-group *ngFor="let rule of policy && policy.scaling_rules; let index = index">
+        <app-tile>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                Rule {{index+1}}:
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              If average
+              <mat-form-field *ngIf="metricTypes.length > 1">
+                <mat-select class="reset-margin" placeholder="Metric Type" name="metricType" [(ngModel)]="sourceType"
+                  (selectionChange)="setSourceType($event.value)" required value="{{rule.metric_type}}">
+                  <mat-option *ngFor="let metricType of metricTypes" [value]="metricType">
+                    {{ metricType }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field *ngIf="metricTypes.length > 1">
+                <mat-select class="reset-margin" placeholder="Operator" name="operator" [(ngModel)]="sourceType"
+                  (selectionChange)="setSourceType($event.value)" required value="{{rule.operator}}">
+                  <mat-option *ngFor="let operator of operatorTypes" [value]="operator">
+                    {{ operator }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field>
+                <input matInput placeholder="Threshold" type="number" value="{{rule.threshold}}">
+              </mat-form-field>
+              for
+              <mat-form-field>
+                <input matInput placeholder="Breach Duration" type="number" value="{{rule.breach_duration_secs}}">
+              </mat-form-field>
+              seconsds, then
+              <mat-form-field>
+                <input matInput placeholder="Adjustment" type="number" value="{{rule.adjustment}}">
+              </mat-form-field>
+              instances. Cooldown:
+              <mat-form-field>
+                <input matInput placeholder="Cooldown" type="number" value="{{rule.cool_down_secs}}">
+              </mat-form-field>
+              seconds.
+            </mat-card-content>
+            <mat-card-actions class="app-auto-scaler__actions">
+              <button (click)="remove()" mat-icon-button>
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </app-tile>
+      </app-tile-group>
+    </app-tile-grid>
+  </app-step>
+  <app-step [title]="'Recurring Schedules'" [valid]="editAppForm.valid">
+    <app-tile-grid>
+      <app-tile-group *ngFor="let rule of policy && policy.schedules.recurring_schedule; let index = index">
+        <app-tile>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                Schedule {{index+1}}:
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="editAppForm" validate class="edit-recurring-schedule">
+                <div class="app-metadata">
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Effective Duration">
+                      <mat-radio-group>
+                        <mat-radio-button value="1" checked="{{rule.start_date==undefined}}">Always</mat-radio-button>
+                        <mat-radio-button value="2" checked="{{rule.start_date!=undefined}}" style="margin-left: 0.5em">
+                          <mat-form-field class="autoscaler-date-input" style="width:50%">
+                            <input matInput placeholder="From" type="date" value="{{rule.start_date}}">
+                          </mat-form-field>
+                          <mat-form-field class="autoscaler-date-input" style="width:50%">
+                            <input matInput placeholder="To" type="date" value="{{rule.end_date}}">
+                          </mat-form-field>
+                        </mat-radio-button>
+                      </mat-radio-group>
+                    </app-metadata-item>
+                    <app-metadata-item label="Repeat By">
+                      <mat-radio-group>
+                        <mat-radio-button value="week" checked="{{rule.days_of_week!=undefined}}">Week
+                        </mat-radio-button>
+                        <mat-radio-button value="month" checked="{{rule.days_of_month!=undefined}}"
+                          style="margin-left: 0.5em">Month</mat-radio-button>
+                      </mat-radio-group>
+                    </app-metadata-item>
+                    <mat-form-field>
+                      <mat-select placeholder="Repeat On" multiple value="{{rule.days_of_week}}">
+                        <mat-option *ngFor="let day of weekdayOptions; let dayIndex = index" [value]="dayIndex">{{day}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Repeat Time">
+                      <mat-form-field>
+                        <input matInput placeholder="Start" type="time" value="{{rule.start_time}}">
+                      </mat-form-field>
+                      <mat-form-field style="margin-left: 0.5em">
+                        <input matInput placeholder="End" type="time" value="{{rule.end_time}}">
+                      </mat-form-field>
+                    </app-metadata-item>
+                    <app-metadata-item label="Instance Count">
+                      <mat-form-field style="width:30%; ">
+                        <input matInput placeholder="Minimum" type="number" value="{{rule.instance_min_count}}">
+                      </mat-form-field>
+                      <mat-form-field style="width:30%; margin-left: 0.5em"> <input matInput
+                          placeholder="Initial Minimum" type="number" value="{{rule.initial_min_instance_count}}">
+                      </mat-form-field>
+                      <mat-form-field style="width:30%; margin-left: 0.5em"><input matInput placeholder="Maximum"
+                          type="number" value="{{rule.instance_max_count}}"></mat-form-field>
+                    </app-metadata-item>
+                  </div>
+                </div>
+              </form>
+            </mat-card-content>
+            <mat-card-actions class="app-auto-scaler__actions">
+              <button (click)="remove()" mat-icon-button>
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </app-tile>
+      </app-tile-group>
+    </app-tile-grid>
+  </app-step>
+  <app-step [title]="'Specific Dates'" [valid]="editAppForm.valid && editAppForm.dirty" [onNext]="updateApp">
+    <app-tile-grid>
+      <app-tile-group *ngFor="let rule of policy && policy.schedules.specific_date; let index = index">
+        <app-tile>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                Schedule {{index+1}}:
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="editAppForm" validate class="edit-recurring-schedule">
+                <div class="app-metadata">
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Effective Date Time">
+                      <mat-form-field>
+                        <input matInput placeholder="Start" type="datetime-local" value="{{rule.start_date_time}}">
+                      </mat-form-field>
+                      <mat-form-field style="margin-left: 0.5em">
+                        <input matInput placeholder="End" type="datetime-local" value="{{rule.end_date_time}}">
+                      </mat-form-field>
+                    </app-metadata-item>
+                  </div>
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Instance Count">
+                      <mat-form-field style="width:30%; ">
+                        <input matInput placeholder="Minimum" type="number" value="{{rule.instance_min_count}}">
+                      </mat-form-field>
+                      <mat-form-field style="width:30%; margin-left: 0.5em"> <input matInput
+                          placeholder="Initial Minimum" type="number" value="{{rule.initial_min_instance_count}}">
+                      </mat-form-field>
+                      <mat-form-field style="width:30%; margin-left: 0.5em"><input matInput placeholder="Maximum"
+                          type="number" value="{{rule.instance_max_count}}"></mat-form-field>
+                    </app-metadata-item>
+                  </div>
+                </div>
+              </form>
+            </mat-card-content>
+            <mat-card-actions class="app-auto-scaler__actions">
+              <button (click)="remove()" mat-icon-button>
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </app-tile>
+      </app-tile-group>
+    </app-tile-grid>
+  </app-step>
+</app-steppers>

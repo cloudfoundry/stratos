@@ -1,17 +1,22 @@
 export interface AppAutoscalerPolicy {
-  guid: string;
+  instance_min_count: number;
+  instance_max_count: number;
 }
 
 export interface AppAutoscalerHealth {
-  status: boolean;
-  error: {
-    cloudfoundry_autoscaler: string;
-    cloudfoundry_autoscaler_timestamp: string;
-  }
+  entity: {
+    uptime: number;
+  };
 }
 
 export interface AppAutoscalerScalingHistory {
+  total_results: number;
 }
 
 export interface AppAutoscalerAppMetric {
+  total_results: number;
+}
+
+export interface AppAutoscalerInsMetric {
+  total_results: number;
 }

@@ -24,6 +24,24 @@ import {
 import {
   TableCellEventTypeComponent,
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
+import {
+  TableCellAutoscalerEventActionComponent,
+} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
+import {
+  TableCellAutoscalerEventTimestampComponent,
+} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-timestamp/table-cell-autoscaler-event-timestamp.component';
+import {
+  TableCellAutoscalerEventTypeComponent,
+} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
+import {
+  TableCellAutoscalerEventChangeComponent,
+} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
+import {
+  TableCellAutoscalerEventErrorComponent,
+} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
+import {
+  TableCellAutoscalerEventStatusComponent,
+} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
@@ -116,6 +134,7 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
+import { TableCellAutoscalerEventStatusIconPipe } from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status-icon.pipe';
 
 /* tslint:enable:max-line-length */
 export const listTableCells = [
@@ -128,6 +147,12 @@ export const listTableCells = [
   TableCellEventTypeComponent,
   TableCellEventActionComponent,
   TableCellEventDetailComponent,
+  TableCellAutoscalerEventTimestampComponent,
+  TableCellAutoscalerEventTypeComponent,
+  TableCellAutoscalerEventActionComponent,
+  TableCellAutoscalerEventStatusComponent,
+  TableCellAutoscalerEventChangeComponent,
+  TableCellAutoscalerEventErrorComponent,
   TableCellActionsComponent,
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,

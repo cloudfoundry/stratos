@@ -67,6 +67,7 @@
     "lodash-es": "^4.17.11",
     "marked": "^0.6.2",
     "moment": "^2.24.0",
+    "moment-timezone": "^0.5.23",
     "ngx-moment": "^3.3.0",
     "normalizr": "^3.2.3",
     "reselect": "^3.0.1",

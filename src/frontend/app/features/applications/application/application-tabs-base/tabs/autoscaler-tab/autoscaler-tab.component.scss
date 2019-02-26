@@ -2,6 +2,13 @@
   display: flex;
   position: relative;
   width: 100%;
+  &__actions {
+    bottom: 24px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
 }
 
 .app-metadata {
@@ -13,14 +20,24 @@
       margin-top: 0;
     }
   }
+  &__actions {
+    bottom: 24px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
+  app-metadata-item {
+    margin-bottom: 0;
+  }
 }
 
 app-tile-grid {
-  width: 100%
+  width: 100%;
 }
 
 table {
-  width: 100%
+  width: 100%;
 }
 
 .app-auto-scaler-policy-left {
@@ -31,6 +48,10 @@ table {
   flex: 0 0 50%;
 }
 
+.app-auto-scaler-tile-1of3 {
+  flex: 0 0 30%;
+}
+
 .app-auto-scaler-tile-1of6 {
   flex: 0 0 16.78%;
 }
@@ -38,6 +59,6 @@ table {
 .app-auto-scaler-limit {
   display: inherit;
   mat-card {
-    width: 50%
+    width: 50%;
   }
 }

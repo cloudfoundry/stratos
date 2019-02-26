@@ -41,6 +41,7 @@ import { CardAppInstancesComponent } from './components/cards/card-app-instances
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
+import { CardAutoscalerDefaultComponent } from './components/cards/card-autoscaler-default/card-autoscaler-default.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import {
   CardCfOrgUserDetailsComponent,
@@ -102,6 +103,15 @@ import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+import {
+  TableCellAutoscalerEventActionLabelPipe,
+} from './components/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-action/table-cell-autoscaler-event-action-label.pipe';
+import {
+  TableCellAutoscalerEventStatusIconPipe,
+} from './components/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status-icon.pipe';
+import {
+  TableCellAutoscalerEventChangeIconPipe,
+} from './components/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change-icon.pipe';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -192,6 +202,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     UniqueDirective,
     CodeBlockComponent,
     EventTabActorIconPipe,
+    TableCellAutoscalerEventActionLabelPipe,
+    TableCellAutoscalerEventStatusIconPipe,
+    TableCellAutoscalerEventChangeIconPipe,
     LogViewerComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
@@ -208,6 +221,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardAppStatusComponent,
     CardAppInstancesComponent,
     CardAppUsageComponent,
+    CardAutoscalerDefaultComponent,
     RunningInstancesComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
@@ -319,6 +333,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardAppInstancesComponent,
     UsageGaugeComponent,
     CardAppUsageComponent,
+    CardAutoscalerDefaultComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
     ListComponent,

@@ -1,19 +1,15 @@
-import { RequestOptions, Headers, URLSearchParams } from '@angular/http';
 import { PaginatedAction } from '../types/pagination.types';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types'
-import { RequestEntityLocation } from '../types/request.types';
-
+import { CFStartAction } from '../types/request.types';
 import {
   appAutoscalerHealthSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerInsMetricSchemaKey,
-  entityFactory,
+  entityFactory
 } from '../helpers/entity-factory';
-import { CFStartAction, ICFAction } from '../types/request.types';
-
-const endpointApiHostHeader = 'x-cap-api-host'; 
+import { IRequestAction } from '../types/request.types';
+import { RequestOptions } from '@angular/http';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -27,10 +23,10 @@ export const AppAutoscalerScalingHistoryEvents = {
   GET_APP_AUTOSCALER_SCALING_HISTORY_FAILED: '[App Autoscaler] Get autoscaler scaling history failed'
 };
 
-export const AppAutoscalerAppMetricEvents = {
-  GET_APP_AUTOSCALER_APP_METRIC: '[App Autoscaler] Get autoscaler app metric',
-  GET_APP_AUTOSCALER_APP_METRIC_SUCCESS: '[App Autoscaler] Get autoscaler app metric success',
-  GET_APP_AUTOSCALER_APP_METRIC_FAILED: '[App Autoscaler] Get autoscaler app metric failed'
+export const AppAutoscalerMetricEvents = {
+  GET_APP_AUTOSCALER_METRIC: '[App Autoscaler] Get autoscaler metric',
+  GET_APP_AUTOSCALER_METRIC_SUCCESS: '[App Autoscaler] Get autoscaler metric success',
+  GET_APP_AUTOSCALER_METRIC_FAILED: '[App Autoscaler] Get autoscaler metric failed'
 };
 
 export const AppAutoscalerHealthEvents = {
@@ -39,99 +35,130 @@ export const AppAutoscalerHealthEvents = {
   GET_APP_AUTOSCALER_HEALTH_FAILED: '[App Autoscaler] Get autoscaler health failed'
 };
 
-export class GetAppAutoscalerHealthAction extends CFStartAction implements ICFAction {
-  options: RequestOptions;
+export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
+export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
+export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy';
+export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
+export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
+export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
+
+export class GetAppAutoscalerHealthAction implements IRequestAction {
   constructor(
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `public/health_check`
-    this.options.method = 'get'
-    this.options.headers = new Headers();
-    this.options.headers.set(endpointApiHostHeader, 'scalingconsole');
-  }
-  entity = [entityFactory(appAutoscalerHealthSchemaKey)];
+    public appGuid: string,
+    public cfGuid: string,
+  ) { }
+  type = APP_AUTOSCALER_HEALTH;
   entityKey = appAutoscalerHealthSchemaKey;
-  paginationKey: string;
-  actions = [
-    AppAutoscalerHealthEvents.GET_APP_AUTOSCALER_HEALTH,
-    AppAutoscalerHealthEvents.GET_APP_AUTOSCALER_HEALTH_SUCCESS,
-    AppAutoscalerHealthEvents.GET_APP_AUTOSCALER_HEALTH_FAILED
-  ];
 }
 
-export class GetAppAutoscalerPolicyAction extends CFStartAction implements ICFAction {
-  options: RequestOptions;
+export class GetAppAutoscalerPolicyAction implements IRequestAction {
   constructor(
-    public guid: string,
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/policy`
-    this.options.method = 'get'
-    this.options.headers = new Headers();
-    this.options.headers.set(endpointApiHostHeader, 'autoscaler');
-  }
-  entity = [entityFactory(appAutoscalerPolicySchemaKey)];
+    public appGuid: string,
+    public cfGuid: string,
+  ) { }
+  type = APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;
-  paginationKey: string;
-  actions = [
-    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY,
-    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_SUCCESS,
-    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_FAILED
-  ];
 }
 
-export class GetAppAutoscalerAppMetricAction extends CFStartAction implements PaginatedAction {
-  constructor(public paginationKey: string, public appGuid: string, public cfGuid: string, public metricName: string, public params: any) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${appGuid}/aggregated_metric_histories/${metricName}`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('', '');
-    this.options.headers = new Headers();
-    this.options.headers.set(endpointApiHostHeader, 'autoscaler');
-  }
-  actions = [
-    AppAutoscalerAppMetricEvents.GET_APP_AUTOSCALER_APP_METRIC,
-    AppAutoscalerAppMetricEvents.GET_APP_AUTOSCALER_APP_METRIC_SUCCESS,
-    AppAutoscalerAppMetricEvents.GET_APP_AUTOSCALER_APP_METRIC_FAILED
-  ];
-
-  entity = [entityFactory(appAutoscalerAppMetricSchemaKey)];
-  entityKey = appAutoscalerAppMetricSchemaKey;
-  options: RequestOptions;
-  initialParams = this.params;
-  skipValidation = false
-  entityLocation = RequestEntityLocation.AUTOSCALER_ARRAY;
-}
-
-export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implements ICFAction {
-  options: RequestOptions;
+export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
+  static updateKey = 'Updating-Existing-Application-Policy';
   constructor(
-    public guid: string,
+    public appGuid: string,
+    public cfGuid: string,
+    public policy: any,
+  ) { }
+  type = UPDATE_APP_AUTOSCALER_POLICY;
+  entityKey = appAutoscalerPolicySchemaKey;
+}
+
+export class DetachAppAutoscalerPolicyAction implements IRequestAction {
+  static updateKey = 'Detaching-Existing-Application-Policy';
+  constructor(
+    public appGuid: string,
+    public cfGuid: string,
+    public policy: any,
+  ) { }
+  type = DETACH_APP_AUTOSCALER_POLICY;
+  entityKey = appAutoscalerPolicySchemaKey;
+}
+
+export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implements PaginatedAction {
+  private static sortField = 'timestamp';
+  constructor(
+    public paginationKey: string,
+    public appGuid: string,
+    public cfGuid: string,
+    public normalFormat?,
+    public params?,
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/scaling_histories`
-    this.options.method = 'get'
-    this.options.headers = new Headers();
-    this.options.headers.set(endpointApiHostHeader, 'autoscaler');
-    this.options.params = new URLSearchParams();
-    this.options.params.append('start-time', '1542124800000000000');
-    this.options.params.append('end-time', '1542729600000000000');
-    this.options.params.append('page', '1');
-    this.options.params.append('results-per-page', '10');
-    this.options.params.append('order', 'desc');
   }
-  entity = [entityFactory(appAutoscalerScalingHistorySchemaKey)];
-  entityKey = appAutoscalerScalingHistorySchemaKey;
-  paginationKey: string;
-  flattenPagination: false;
   actions = [
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY,
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY_SUCCESS,
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY_FAILED
   ];
+  type = APP_AUTOSCALER_SCALING_HISTORY;
+  entity = [entityFactory(appAutoscalerScalingHistorySchemaKey)];
+  entityKey = appAutoscalerScalingHistorySchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
+    'order-direction': 'desc',
+    'start-time': 0,
+    'end-time': (new Date()).getTime().toString() + '000000',
+  };
+}
+
+export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
+  constructor(
+    public appGuid: string,
+    public cfGuid: string,
+    public metricName: string,
+    public skipFormat: boolean,
+    public trigger,
+    public params
+  ) {
+    this.paginationKey = appGuid + '-' + metricName;
+  }
+  actions = [
+    AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC,
+    AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC_SUCCESS,
+    AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC_FAILED
+  ];
+  url: string;
+  type = FETCH_APP_AUTOSCALER_METRIC;
+  entityKey: string;
+  paginationKey: string;
+  initialParams = this.params;
+}
+
+export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricAction implements PaginatedAction {
+  constructor(
+    public appGuid: string,
+    public cfGuid: string,
+    public metricName: string,
+    public skipFormat: boolean,
+    public trigger,
+    public params
+  ) {
+    super(appGuid, cfGuid, metricName, skipFormat, trigger, params);
+    this.url = `apps/${appGuid}/aggregated_metric_histories/${metricName}`;
+  }
+  entityKey = appAutoscalerAppMetricSchemaKey;
+}
+
+export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricAction implements PaginatedAction {
+  constructor(
+    public appGuid: string,
+    public cfGuid: string,
+    public metricName: string,
+    public skipFormat: boolean,
+    public trigger,
+    public params
+  ) {
+    super(appGuid, cfGuid, metricName, skipFormat, trigger, params);
+    this.url = `apps/${appGuid}/metric_histories/${metricName}`;
+  }
+  entityKey = appAutoscalerInsMetricSchemaKey;
 }
