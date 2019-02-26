@@ -68,9 +68,9 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnIn
   }
 
   private showSnackBar(show: boolean) {
-    if (!this.snackBar && show) {
+    if (!this.snackBarRef && show) {
       this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
-    } else if (this.snackBar && !show) {
+    } else if (this.snackBarRef && !show) {
       this.snackBarRef.dismiss();
     }
   }
