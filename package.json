@@ -65,6 +65,7 @@
     "core-js": "^2.6.5",
     "hammerjs": "^2.0.8",
     "moment": "^2.24.0",
+    "moment-timezone": "^0.5.23",
     "ngx-moment": "^3.3.0",
     "normalizr": "^3.2.3",
     "reselect": "^3.0.1",

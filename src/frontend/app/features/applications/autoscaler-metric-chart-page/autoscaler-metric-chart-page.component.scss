@@ -1,0 +1,63 @@
+app-tile-grid {
+  width: 100%;
+}
+
+.autoscaler-metric-page {
+  display: flex;
+  position: relative;
+  width: 100%;
+  &__actions {
+    bottom: 24px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
+}
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  &__two-cols {
+    flex: 1;
+    margin-right: 3em;
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
+}
+
+.autoscaler-chart-gauge {
+  margin-top: 1em;
+  width: 30%;
+  display: inline-block;
+}
+
+.autoscaler-chart-bar {
+  margin-top: 1em;
+  width: 70%;
+  display: inline-block;
+}
+
+.autoscaler-chart-legend {
+  width: 100%;
+  svg {
+    width: 0px;
+  }
+  .ngx-charts {
+    width: 0em;
+  }
+  .legend-labels {
+    width: 15em;
+  }
+}
+
+.ngx-charts {
+  width: 0px;
+}
+
+.autoscaler-metric-subtitle {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.9em;
+  margin-top: 0.3em;
+}

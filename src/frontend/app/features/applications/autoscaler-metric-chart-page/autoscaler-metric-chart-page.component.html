@@ -1,0 +1,61 @@
+<app-page-header>
+  <h1>AutoScaler Metric Charts: {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
+  <div class="page-header-right">
+    <button mat-icon-button mat-button routerLink="{{parentUrl}}">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+</app-page-header>
+<div class="autoscaler-metric-page">
+  <app-tile-grid *ngIf="appAutoscalerPolicy$ | async as policy">
+    <app-tile-group *ngFor="let metricName of appAutoscalerAppMetricNames; let index = index">
+      <app-tile *ngIf="appAutoscalerAppMetrics[metricName] | async as metricData">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              {{metricName}} <br />
+              <div class="autoscaler-metric-subtitle">
+                {{paramsMetrics['start-time'] / 1000000 | date:'medium'}} ~
+                {{paramsMetrics['end-time'] / 1000000 | date:'medium'}}
+              </div>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="autoscaler-chart-legend">
+              <ngx-charts-bar-vertical [view]="[1000, 100]" [scheme]="'cool'" [schemeType]="'ordinal'"
+                [customColors]="appAutoscalerAppMetricLegend[metricName].legendColor"
+                [results]="appAutoscalerAppMetricLegend[metricName].legendValue" [legend]="true" [animations]="true"
+                [xAxis]="true" [yAxis]="true" [showXAxisLabel]="true" [showYAxisLabel]="true" [tooltipDisabled]="false"
+                [yAxisLabel]="metricData[0].entity.unit" [showGridLines]="true" [barPadding]="'2'"
+                [roundDomains]="false" [roundEdges]="true" [yScaleMax]="metricData[0].entity.chartMaxValue"
+                [showDataLabel]="false" (select)="select($event)">
+              </ngx-charts-bar-vertical>
+            </div>
+            <div class="autoscaler-chart-gauge">
+              <!-- <ngx-charts-pie-chart  *ngIf="index==0" [view]="[300, 250]" [scheme]="'cool'"
+                [customColors]="metricData[0].entity.latest.colorTarget" [results]="metricData[0].entity.latest.target"
+                [animations]="true" [explodeSlices]="false" [labels]="true" [doughnut]="true" [arcWidth]="0.25"
+                [tooltipDisabled]="false" [tooltipText]="pieTooltipText" (select)="select($event)">
+              </ngx-charts-pie-chart> -->
+              <ngx-charts-gauge [view]="[300, 250]" [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
+                [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [textValue]="" [scheme]="'cool'"
+                [min]="0" [max]="metricData[0].entity.chartMaxValue" [units]="metricData[0].entity.unit"
+                [angleSpan]="240" [startAngle]="-120" [showAxis]="true" [bigSegments]="10" [smallSegments]="5"
+                [tooltipDisabled]="false" (select)="select($event)">
+              </ngx-charts-gauge>
+            </div>
+            <div class="autoscaler-chart-bar">
+              <ngx-charts-bar-vertical [view]="[700, 250]" [scheme]="'cool'" [schemeType]="'ordinal'"
+                [customColors]="metricData[0].entity.formated.colorTarget"
+                [results]="metricData[0].entity.formated.target" [animations]="true" [xAxis]="true" [yAxis]="true"
+                [showXAxisLabel]="true" [showYAxisLabel]="true" [tooltipDisabled]="false"
+                [yAxisLabel]="metricData[0].entity.unit" [showGridLines]="true" [barPadding]="'2'"
+                [roundDomains]="false" [roundEdges]="true" [yScaleMax]="metricData[0].entity.chartMaxValue"
+                [showDataLabel]="false" (select)="select($event)">
+              </ngx-charts-bar-vertical>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>

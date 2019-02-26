@@ -26,7 +26,6 @@ export enum RequestEntityLocation {
   RESOURCE, // The response is an object and the entities list is within a 'resource' param. Falls back to 'OBJECT' if missing.
   ARRAY, // The response is an array which contains the entities
   OBJECT, // The response is the entity
-  AUTOSCALER_ARRAY, // The response is for autoscaler
 }
 
 export type IRequestActionEntity = EntitySchema | EntitySchema[];
