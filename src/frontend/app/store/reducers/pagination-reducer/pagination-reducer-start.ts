@@ -12,7 +12,8 @@ export function paginationStart(state, action): PaginationEntityState {
         busy: true,
         error: false,
         message: '',
-        schemaKey
+        schemaKey,
+        entityKey: action.apiAction.entityKey
       }
     }
   };

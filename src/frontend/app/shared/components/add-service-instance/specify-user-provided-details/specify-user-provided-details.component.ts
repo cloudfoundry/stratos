@@ -15,7 +15,7 @@ import {
   UpdateUserProvidedServiceInstance
 } from '../../../../store/actions/user-provided-service.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, userProvidedServiceInstanceSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../../monitors/entity-monitor';
 import { isValidJsonValidator } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
@@ -115,7 +115,12 @@ export class SpecifyUserProvidedDetailsComponent {
     };
     data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
     const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
-    const action = new CreateUserProvidedServiceInstance(this.cfGuid, guid, data as IUserProvidedServiceInstanceData);
+    const action = new CreateUserProvidedServiceInstance(
+      this.cfGuid,
+      guid,
+      data as IUserProvidedServiceInstanceData,
+      serviceInstancesSchemaKey
+    );
     this.store.dispatch(action);
     return new EntityMonitor(
       this.store,

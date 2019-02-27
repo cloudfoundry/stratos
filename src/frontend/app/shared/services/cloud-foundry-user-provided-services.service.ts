@@ -12,7 +12,7 @@ import {
   IUserProvidedServiceInstanceData,
 } from '../../store/actions/user-provided-service.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../store/helpers/entity-factory';
+import { entityFactory, userProvidedServiceInstanceSchemaKey, serviceInstancesSchemaKey } from '../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../store/selectors/api.selectors';
@@ -76,7 +76,7 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: IUserProvidedServiceInstanceData
   ): Observable<RequestInfoState> {
-    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data);
+    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, serviceInstancesSchemaKey);
     const create$ = this.store.select(selectRequestInfo(userProvidedServiceInstanceSchemaKey, guid));
     this.store.dispatch(action);
     return create$.pipe(

@@ -18,6 +18,7 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
+  userProvidedServiceInstanceSchemaKey,
 } from './entity-factory';
 
 export interface IFlatTree {
@@ -67,6 +68,13 @@ export class EntitySchemaTreeBuilder {
     ],
     // Delete service instance
     [serviceInstancesSchemaKey]: [
+      servicePlanSchemaKey,
+      // Service bindings
+      applicationSchemaKey,
+      serviceInstancesSchemaKey,
+      serviceSchemaKey
+    ],
+    [userProvidedServiceInstanceSchemaKey]: [
       servicePlanSchemaKey,
       // Service bindings
       applicationSchemaKey,

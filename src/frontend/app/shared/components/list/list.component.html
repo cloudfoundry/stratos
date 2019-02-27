@@ -55,7 +55,8 @@
         <div class="list-component__header__right">
           <div class="filter" *ngIf="entitySelectConfig">
             <mat-form-field [floatLabel]="'never'">
-              <mat-select matInput (selectionChange)="setEntityPage($event.value)">
+              <mat-select matInput [value]="initialEntitySelection$ | async"
+                (selectionChange)="setEntityPage($event.value)">
                 <mat-option>{{ entitySelectConfig.selectEmptyText }}</mat-option>
                 <mat-option *ngFor="let item of entitySelectConfig.entitySelectItems" [value]="item.page">
                   {{item.label}}

@@ -198,6 +198,7 @@ export class PaginationMonitor<T = any> {
           ];
         }, []);
       }),
+      tap(console.log),
       tag('de-norming-local ' + schema.key),
       publishReplay(1),
       refCount(),

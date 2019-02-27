@@ -43,7 +43,6 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
 
     return newState;
   } else if (action.response && action.response.entities) {
-    const { entities } = action.response;
     return createRequestStateFromResponse(action.response, state);
   }
   return state;

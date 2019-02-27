@@ -102,6 +102,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
+  initialEntitySelection$: Observable<number>;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator) {
@@ -271,6 +272,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
+    this.initialEntitySelection$ = this.dataSource.pagination$.pipe(
+      first(),
+      map(pag => pag.forcedLocalPage)
+    );
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {

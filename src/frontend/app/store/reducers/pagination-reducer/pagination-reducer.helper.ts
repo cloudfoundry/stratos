@@ -111,9 +111,9 @@ export function getAction(action): PaginatedAction {
   return action.apiAction ? action.apiAction : action;
 }
 
-export function getActionKey(action) {
+export function getActionPaginationEntityKey(action) {
   const apiAction = getAction(action);
-  return apiAction.entityKey || null;
+  return apiAction.proxyPaginationEntityKey || apiAction.entityKey || null;
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {

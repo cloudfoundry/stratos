@@ -42,7 +42,7 @@ import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
-import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
+import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 
 export const defaultClientPaginationPageSize = 9;
 
@@ -115,11 +115,10 @@ const getPaginationUpdater = function (types: [string, string, string]) {
 };
 
 export function createPaginationReducer(types: [string, string, string]) {
-  return paginationReducer(getPaginationUpdater(types), types);
+  return paginationReducer(getPaginationUpdater(types));
 }
 
-function paginationReducer(updatePagination, types) {
-  const [requestType, successType, failureType] = types;
+function paginationReducer(updatePagination) {
   return function (state, action) {
     state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
@@ -172,7 +171,7 @@ function isEndpointAction(action) {
 
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
-  const key = getActionKey(action);
+  const key = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
 
   if (actionType && key && paginationKey) {
