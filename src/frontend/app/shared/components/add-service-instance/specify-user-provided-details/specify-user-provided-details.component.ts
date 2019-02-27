@@ -1,20 +1,17 @@
-import { serviceSchemaKey } from './../../../../store/helpers/entity-factory';
-import { APIResource } from './../../../../store/types/api.types';
-import { EntityService } from './../../../../core/entity-service';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, first } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
-import { safeUnsubscribe, urlValidationExpression } from '../../../../core/utils.service';
+import { urlValidationExpression } from '../../../../core/utils.service';
 import {
   CreateUserProvidedServiceInstance,
-  IUserProvidedServiceInstanceData,
   GetUserProvidedService,
+  IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance
 } from '../../../../store/actions/user-provided-service.actions';
 import { AppState } from '../../../../store/app-state';
@@ -22,7 +19,9 @@ import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../../..
 import { EntityMonitor } from '../../../monitors/entity-monitor';
 import { isValidJsonValidator } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { ActivatedRoute } from '@angular/router';
+import { EntityService } from './../../../../core/entity-service';
+import { serviceSchemaKey } from './../../../../store/helpers/entity-factory';
+import { APIResource } from './../../../../store/types/api.types';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -31,9 +30,8 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
   templateUrl: './specify-user-provided-details.component.html',
   styleUrls: ['./specify-user-provided-details.component.scss']
 })
-export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
+export class SpecifyUserProvidedDetailsComponent {
   public formGroup: FormGroup;
-  public tags: { label: string }[] = [];
   public separatorKeysCodes = [ENTER, COMMA, SPACE];
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
@@ -54,9 +52,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
     this.isUpdate = endpointId && serviceInstanceId;
     this.formGroup = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-      route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
-      syslogDrainUrl: new FormControl(''),
-      tags: new FormControl([]),
+      syslogDrainUrl: new FormControl('', [Validators.pattern(urlValidationExpression)]),
       credentials: new FormControl('', isValidJsonValidator()),
     });
     if (this.isUpdate) {
@@ -83,9 +79,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
           const serviceEntity = entity.entity;
           this.formGroup.setValue({
             name: entity.entity.name,
-            route_service_url: entity.entity.route_service_url,
             syslogDrainUrl: entity.entity.syslog_drain_url,
-            tags: entity.entity.tags,
             credentials: JSON.stringify(serviceEntity.credentials)
           });
         });
@@ -108,18 +102,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
         params
       },
     );
-  }
-
-  ngOnInit() {
-
-  }
-
-  ngOnDestroy(): void {
-    safeUnsubscribe(...this.subs);
-  }
-
-  onEnter() {
-
   }
 
   onNext = (): Observable<StepOnNextResult> => {
@@ -174,25 +156,5 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
         redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error
       }))
     );
-  }
-
-  addTag(event: MatChipInputEvent): void {
-    const input = event.input;
-    const value = event.value;
-    if ((value || '').trim()) {
-      this.tags.push({ label: value.trim() });
-    }
-
-    if (input) {
-      input.value = '';
-    }
-  }
-
-  removeTag(tag: any): void {
-    const index = this.tags.indexOf(tag);
-
-    if (index >= 0) {
-      this.tags.splice(index, 1);
-    }
   }
 }

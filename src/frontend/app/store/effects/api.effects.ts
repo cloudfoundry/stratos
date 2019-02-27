@@ -442,8 +442,8 @@ export class APIEffect {
 
     let entityArray;
     const pagAction = apiAction as PaginatedAction;
-    if (pagAction.__forcedPageNumberEntityKey__) {
-      entityArray = [entityFactory(pagAction.__forcedPageNumberEntityKey__)];
+    if (pagAction.__forcedPageSchemaKey__) {
+      entityArray = [entityFactory(pagAction.__forcedPageSchemaKey__)];
     } else {
       if (apiAction.entity['length'] > 0) {
         entityArray = apiAction.entity;

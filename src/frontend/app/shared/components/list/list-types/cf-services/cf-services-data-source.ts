@@ -19,12 +19,10 @@ import { GetAllUserProvidedServices } from '../../../../../store/actions/user-pr
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
-    const action = [new GetAllServices(paginationKey), new GetAllUserProvidedServices()];
-    const schema = [entityFactory(serviceSchemaKey), entityFactory(userProvidedServiceInstanceSchemaKey)];
     super({
       store,
-      action,
-      schema,
+      action: new GetAllServices(paginationKey),
+      schema: entityFactory(serviceSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

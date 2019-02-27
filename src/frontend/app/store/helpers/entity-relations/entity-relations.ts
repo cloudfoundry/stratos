@@ -447,8 +447,8 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
 
 function getRelationAction(action: IRequestAction): EntityInlineParentAction {
   const pagAction = action as PaginatedAction;
-  if (pagAction.__forcedPageNumberEntityKey__) {
-    const entityKey = pagAction.__forcedPageNumberEntityKey__;
+  if (pagAction.__forcedPageSchemaKey__) {
+    const entityKey = pagAction.__forcedPageSchemaKey__;
     return {
       ...action,
       entityKey,

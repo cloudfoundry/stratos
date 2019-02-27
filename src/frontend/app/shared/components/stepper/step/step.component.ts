@@ -97,13 +97,15 @@ export class StepComponent {
 
   constructor() {
     this._onEnter = (data?: any) => {
-      if (this.destructiveStep) {
-        this.busy = true;
-        setTimeout(() => {
-          this.busy = false;
-        }, 1000);
+      if (this.onEnter) {
+        if (this.destructiveStep) {
+          this.busy = true;
+          setTimeout(() => {
+            this.busy = false;
+          }, 1000);
+        }
+        this.onEnter(data);
       }
-      this.onEnter(data);
     };
   }
 

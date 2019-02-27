@@ -1,7 +1,7 @@
+import { EntitySchema, entityFactory } from './../../../../store/helpers/entity-factory';
 import { DataSource } from '@angular/cdk/table';
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, OperatorFunction, ReplaySubject, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
@@ -12,13 +12,18 @@ import { AppState } from '../../../../store/app-state';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { IListDataSourceConfig } from './list-data-source-config';
-import { getRowUniqueId, IListDataSource, ListPaginationMultiFilterChange, RowsState, RowState } from './list-data-source-types';
+import { IListDataSourceConfig, Multi̦Actio̦nConfig } from './list-data-source-config';
+import {
+  getRowUniqueId,
+  IListDataSource,
+  ListPaginationMultiFilterChange,
+  RowsState,
+  RowState,
+  EntitySelectConfig,
+  IEntitySelectItem
+} from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { reverseLookupEntityKey } from '../../../../store/helpers/entity-factory';
-
-
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -83,7 +88,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   protected store: Store<AppState>;
   public action: PaginatedAction | PaginatedAction[];
   public masterAction: PaginatedAction;
-  protected sourceScheme: schema.Entity;
+  protected sourceScheme: EntitySchema;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
@@ -95,6 +100,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
   private metricsAction: MetricsAction;
+  public entitySelectConfig: EntitySelectConfig;
 
   public refresh: () => void;
 
@@ -104,7 +110,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     private config: IListDataSourceConfig<A, T>
   ) {
     super();
-
     this.init(config);
     const paginationMonitor = new PaginationMonitor(
       this.store,
@@ -141,10 +146,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).subscribe();
 
     const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
-      // if (paginationEntity.currentlyMaxed) {
-      //   // If we're currently maxed the entities are junk, don't try to update total counts
-      //   return;
-      // }
       const newLength = entities.length;
       if (
         paginationEntity.ids[paginationEntity.currentPage] &&
@@ -175,7 +176,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.store = config.store;
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
-    this.sourceScheme = Array.isArray(config.schema) ? config.schema[0] : config.schema;
+    this.sourceScheme = config.schema instanceof Multi̦Actio̦nConfig ?
+      entityFactory(config.schema.schemaConfigs[0].schemaKey) : config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
@@ -187,26 +189,23 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
-    if (Array.isArray(this.action)) {
+    this.masterAction = this.action as PaginatedAction;
+    if (config.schema instanceof Multi̦Actio̦nConfig) {
       if (!config.isLocal) {
         // We cannot do multi action lists for none local lists
-        this.action = this.action[0];
+        this.action = config.schema[0].paginationAction;
         this.masterAction = this.action as PaginatedAction;
       } else {
-
-        const masterAction = this.action[0];
-        this.action = this.action.map((aac, i) => ({
-          ...aac,
-          paginationKey: masterAction.paginationKey,
-          entityKey: masterAction.entityKey,
-          entity: masterAction.entity,
+        this.action = config.schema.schemaConfigs.map((multiActionConfig, i) => ({
+          ...multiActionConfig.paginationAction,
+          paginationKey: this.masterAction.paginationKey,
+          entityKey: this.masterAction.entityKey,
+          entity: this.masterAction.entity,
           __forcedPageNumber__: i + 1,
-          __forcedPageNumberEntityKey__: reverseLookupEntityKey(config.schema[i] || config.schema)
+          __forcedPageSchemaKey__: multiActionConfig.schemaKey
         }) as PaginatedAction);
-        this.masterAction = this.action[0];
       }
-    } else {
-      this.masterAction = this.action as PaginatedAction;
+      this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
     }
     if (!this.isLocal && this.config.listConfig) {
       // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
@@ -214,6 +213,28 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.masterAction.initialParams = this.masterAction.initialParams || {};
       this.masterAction.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
     }
+  }
+
+  private getEntitySelectConfig(multiActionConfig: Multi̦Actio̦nConfig) {
+    if (!multiActionConfig.selectPlaceholder) {
+      return null;
+    }
+    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((map, schemaConfig, i) => ([
+      ...map,
+      {
+        page: i + 1,
+        label: schemaConfig.prettyName,
+        schemaKey: schemaConfig.schemaKey
+      }
+    ]), [] as IEntitySelectItem[]);
+    if (Object.keys(pageToIdMap).length < 2) {
+      return null;
+    }
+    return new EntitySelectConfig(
+      multiActionConfig.selectPlaceholder,
+      multiActionConfig.deselectText,
+      pageToIdMap
+    );
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {

@@ -32,6 +32,8 @@ export interface PaginationClientPagination {
 }
 
 export class PaginationEntityState {
+  // For multi action lists, this is used to force a particular entity type.
+  forcedLocalPage?: number;
   currentPage = 0;
   totalResults = 0;
   pageCount = 0;
@@ -82,7 +84,7 @@ export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;
-  __forcedPageNumberEntityKey__?: string;
+  __forcedPageSchemaKey__?: string;
 }
 
 export interface PaginationEntityTypeState {

@@ -50,7 +50,7 @@ import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { ListView } from './../../../store/actions/list.actions';
-import { getDefaultRowState, IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
+import { getDefaultRowState, IListDataSource, RowState, EntitySelectConfig } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
@@ -64,6 +64,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { SetPage } from '../../../store/actions/pagination.actions';
 
 
 @Component({
@@ -89,6 +90,7 @@ import {
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
+  public entitySelectConfig: EntitySelectConfig;
 
   @Input() addForm: NgForm;
 
@@ -268,6 +270,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
+    this.entitySelectConfig = this.dataSource.entitySelectConfig;
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
@@ -608,6 +611,16 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         takeWhile(isLoading => isLoading)
       );
     }
+  }
+
+  public setEntityPage(page: number) {
+    this.store.dispatch(new SetPage(
+      this.dataSource.entityKey,
+      this.dataSource.paginationKey,
+      page,
+      true,
+      true
+    ));
   }
 
   private setupActionsDefaultObservables<Y extends IOptionalAction<T>>(actions: Y[]) {

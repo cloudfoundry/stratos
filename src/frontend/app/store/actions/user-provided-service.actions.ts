@@ -91,7 +91,6 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       spaceGuid: space_guid,
       name,
       credentials = {},
-      routeServiceUrl: route_service_url,
       syslogDrainUrl: syslog_drain_url,
       tags = []
     } = data;
@@ -100,7 +99,6 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       space_guid,
       name,
       credentials,
-      route_service_url,
       syslog_drain_url,
       tags
     };
@@ -129,16 +127,13 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     const {
       name,
       credentials = {},
-      routeServiceUrl: route_service_url,
       syslogDrainUrl: syslog_drain_url,
       tags = []
     } = data;
     if (name) {
       this.options.body.name = name;
     }
-    if (route_service_url) {
-      this.options.body.route_service_url = route_service_url;
-    }
+
     if (syslog_drain_url) {
       this.options.body.syslog_drain_url = syslog_drain_url;
     }

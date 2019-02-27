@@ -66,8 +66,12 @@ export class SetPage implements BasePaginatedAction {
     public entityKey: string,
     public paginationKey: string,
     public pageNumber: number,
-    public keepPages = false
+    public keepPages = false,
+    public forceLocalPage = false
   ) {
+    if (forceLocalPage) {
+      keepPages = true;
+    }
   }
   type = SET_PAGE;
 }

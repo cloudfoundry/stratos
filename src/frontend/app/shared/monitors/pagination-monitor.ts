@@ -186,9 +186,12 @@ export class PaginationMonitor<T = any> {
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
+        if (pagination.forcedLocalPage) {
+          const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, schema);
+          return this.denormalizePage(page, pageSchema, allEntities);
+        }
         return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
           const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
-
           return [
             ...allPageEntities,
             ...this.denormalizePage(page, pageSchema, allEntities)
@@ -215,7 +218,7 @@ export class PaginationMonitor<T = any> {
   private getPageInfo(pagination: PaginationEntityState, pageId: number | string, defaultSchema: normalizrSchema.Entity) {
     const page = pagination.ids[pageId] || [];
     const pageState = pagination.pageRequests[pageId] || {} as ListActionState;
-    const pageSchema = pageState.entityKey ? entityFactory(pageState.entityKey) : defaultSchema;
+    const pageSchema = pageState.schemaKey ? entityFactory(pageState.schemaKey) : defaultSchema;
     return {
       page,
       pageSchema

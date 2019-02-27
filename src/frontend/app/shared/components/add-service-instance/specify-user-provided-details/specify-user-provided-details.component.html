@@ -9,7 +9,6 @@
       </div> -->
     <input matInput class="" formControlName="name" placeholder="Name" [appApplicationNameUnique]="appNameChecking"
       [appApplicationNameUniqueRequest]="getUniqueRequest" required>
-    <!-- // TODO: RC can user provided services have same name as non-up -->
     <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
       A service instance with this name already exists. Please enter a different one.
     </mat-error>
@@ -18,30 +17,14 @@
     </mat-error>
   </mat-form-field>
   <mat-form-field>
-    <input matInput formControlName="route_service_url" type="url" required placeholder="User Service URL">
-    <mat-error *ngIf="formGroup.controls.route_service_url?.hasError('pattern')">Invalid URL</mat-error>
-  </mat-form-field>
-  <mat-form-field>
     <input matInput class="" formControlName="syslogDrainUrl" placeholder="Syslog Drain Url">
-  </mat-form-field>
-  <mat-form-field class="stepper-form__tags">
-    <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
-      <!-- [selectable]="tagsSelectable" [removable]="tagsRemovable"-->
-      <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" (removed)="removeTag(tag)">
-        {{tag.label}}
-        <!-- *ngIf="tagsRemovable" -->
-        <mat-icon matChipRemove>cancel</mat-icon>
-      </mat-chip>
-      <!-- [matChipInputAddOnBlur]="tagsAddOnBlur" -->
-      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList"
-        [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addTag($event)" />
-    </mat-chip-list>
+    <mat-error *ngIf="formGroup.controls.syslogDrainUrl?.hasError('pattern')">Invalid URL</mat-error>
   </mat-form-field>
   <mat-form-field class="">
     <textarea matInput formControlName="credentials" placeholder="Credentials" matAutosizeMinRows="2"
       matAutosizeMaxRows="5"></textarea>
     <mat-error *ngIf="formGroup.controls.credentials.hasError('notValidJson')">
-      Not valid JSON. Please specify a valid JSON Object // TODO: RC valid key pairs no arrays/nesting
+      Not valid JSON.
     </mat-error>
   </mat-form-field>
 </form>

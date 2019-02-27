@@ -156,7 +156,6 @@ export interface IUserProvidedService {
   space_url: string;
   type: string;
   syslog_drain_url: string;
-  route_service_url: string;
   tags: string[];
   service_bindings: APIResource<IServiceBinding>[];
   service_bindings_url: string;

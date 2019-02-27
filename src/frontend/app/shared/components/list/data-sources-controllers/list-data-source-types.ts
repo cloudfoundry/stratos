@@ -1,3 +1,4 @@
+import { EntitySchema } from './../../../../store/helpers/entity-factory';
 import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
@@ -7,6 +8,32 @@ import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
 import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
 
+export interface IEntitySelectItem {
+  page: number;
+  label: string;
+  schemaKey: string;
+}
+
+/**
+ * Drives the entity list entity select
+ *
+ * @class EntitySelectConfig
+ */
+export class EntitySelectConfig {
+  /**
+   * Creates an instance of EntitySelectConfig.
+   * @param {string} selectPlaceholder Placeholder text to show.
+   * @param {string} selectEmptyText The text shown when no value is selected
+   * @param {IEntitySelectItem} entitySelectItems Dictates which pagination page 
+   * is storing which entity ids. Used in the pagination monitor.
+   * @memberof EntitySelectConfig
+   */
+  constructor(
+    public selectPlaceholder: string,
+    public selectEmptyText: string,
+    public entitySelectItems: IEntitySelectItem[]
+  ) { }
+}
 export interface AppEvent {
   actee_name: string;
   actee_type: string;
@@ -71,6 +98,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
+  entitySelectConfig?: EntitySelectConfig;
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
   selectClear();

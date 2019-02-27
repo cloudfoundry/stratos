@@ -13,9 +13,9 @@ export interface ActionState {
 }
 
 // Multi action lists can have different entity types per page
-// We use entityKey to track this type
+// We use schemaKey to track this type
 export interface ListActionState extends ActionState {
-  entityKey?: string;
+  schemaKey?: string;
 }
 
 export interface DeleteActionState extends ActionState {
