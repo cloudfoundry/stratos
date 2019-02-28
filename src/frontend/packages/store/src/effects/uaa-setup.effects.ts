@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -26,8 +26,7 @@ export class UAASetupEffect {
 
   baseUrl = '/pp/v1/setup';
 
-  @Effect() uaaSetupRequest$ = this.actions$.pipe(
-    ofType<SetupUAA>(SETUP_UAA),
+  @Effect() uaaSetupRequest$ = this.actions$.ofType<SetupUAA>(SETUP_UAA).pipe(
     switchMap(({ setupData }) => {
 
       const headers = new Headers();
@@ -54,8 +53,7 @@ export class UAASetupEffect {
     }));
 
 
-  @Effect() uassSetScope = this.actions$.pipe(
-    ofType<SetUAAScope>(SETUP_UAA_SCOPE),
+  @Effect() uassSetScope = this.actions$.ofType<SetUAAScope>(SETUP_UAA_SCOPE).pipe(
     switchMap(({ scope }) => {
       const headers = new Headers();
       const params = new URLSearchParams();

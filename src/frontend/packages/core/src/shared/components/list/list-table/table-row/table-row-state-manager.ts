@@ -1,7 +1,6 @@
-import { ReplaySubject } from 'rxjs';
-
-import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
-
+import { Subject, ReplaySubject } from 'rxjs';
+import { RowState, RowsState } from '../../data-sources-controllers/list-data-source-types';
+import { debounceTime } from 'rxjs/operators';
 /**
  * A manager that helps manage list table row state.
  */
@@ -9,7 +8,7 @@ export class TableRowStateManager {
   private stateSubject: ReplaySubject<RowsState>;
 
   get rowState(): RowState {
-    return this.rs;
+    return this._rowState;
   }
 
   /**
@@ -23,17 +22,17 @@ export class TableRowStateManager {
 
   private mergeRowState(id: string, state) {
     const mergeIdState = {
-      ...(this.rs[id] || {}),
+      ...(this._rowState[id] || {}),
       ...state
     };
-    this.rs[id] = mergeIdState;
+    this._rowState[id] = mergeIdState;
   }
   /**
    * Set the state of a row and triggers the observable to emit the state.
    * This method will replace the row state with the provided values.
    */
   setRowState(id: string, state: RowState) {
-    this.rs[id] = state;
+    this._rowState[id] = state;
     this.syncObservableState();
   }
 
@@ -42,7 +41,7 @@ export class TableRowStateManager {
    * This method will replace the whole state with provided values.
    */
   setState(state: RowsState) {
-    this.rs = state;
+    this._rowState = state;
     this.syncObservableState();
   }
 
@@ -58,7 +57,7 @@ export class TableRowStateManager {
   }
 
   private syncObservableState() {
-    this.stateSubject.next(this.rs);
+    this.stateSubject.next(this._rowState);
   }
   /**
    * The observable that will emit the state.
@@ -68,9 +67,9 @@ export class TableRowStateManager {
   }
 
   /**
-   * @param rs: Initial state.
+   * @param _rowState: Initial state.
    */
-  constructor(private rs: RowsState = {}) {
+  constructor(private _rowState: RowsState = {}) {
     this.stateSubject = new ReplaySubject<RowsState>(1);
     this.syncObservableState();
   }

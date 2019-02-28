@@ -207,7 +207,7 @@ describe('PaginationReducer', () => {
           currentPage: 1,
           totalResults: 0,
           ids: {},
-          pageRequests: { 1: { busy: false, error: true, message } },
+          pageRequests: { 1: { busy: false, error: true, message: message } },
           clientPagination: {
             ...defaultClientPagination
           }

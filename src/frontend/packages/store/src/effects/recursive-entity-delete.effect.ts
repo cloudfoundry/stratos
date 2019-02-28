@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, Effect } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -71,8 +71,7 @@ export class RecursiveDeleteEffect {
   };
 
   @Effect()
-  delete$ = this.actions$.pipe(
-    ofType<RecursiveDelete>(RECURSIVE_ENTITY_DELETE),
+  delete$ = this.actions$.ofType<RecursiveDelete>(RECURSIVE_ENTITY_DELETE).pipe(
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);
@@ -81,8 +80,7 @@ export class RecursiveDeleteEffect {
   );
 
   @Effect()
-  deleteComplete$ = this.actions$.pipe(
-    ofType<RecursiveDeleteComplete>(RECURSIVE_ENTITY_DELETE_COMPLETE),
+  deleteComplete$ = this.actions$.ofType<RecursiveDeleteComplete>(RECURSIVE_ENTITY_DELETE_COMPLETE).pipe(
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     mergeMap(([action, state]) => {
       const tree = this.getTree(action, state);
@@ -100,8 +98,7 @@ export class RecursiveDeleteEffect {
   );
 
   @Effect()
-  deleteFailed$ = this.actions$.pipe(
-    ofType<RecursiveDeleteFailed>(RECURSIVE_ENTITY_DELETE_FAILED),
+  deleteFailed$ = this.actions$.ofType<RecursiveDeleteFailed>(RECURSIVE_ENTITY_DELETE_FAILED).pipe(
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);

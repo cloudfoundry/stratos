@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../list.types';
 
@@ -10,11 +10,11 @@ import { TableCellCustom } from '../../list.types';
 export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
   disable: boolean;
 
-  private r: T;
+  private _row: T;
   @Input('row')
-  get row() { return this.r; }
+  get row() { return this._row; }
   set row(row: T) {
-    this.r = row;
+    this._row = row;
     if (row) {
       this.updateDisabled();
     }

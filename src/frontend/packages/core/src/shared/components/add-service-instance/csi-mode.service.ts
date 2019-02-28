@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { SpaceScopedService } from '../../../features/service-catalog/services.service';
 
@@ -52,9 +51,9 @@ export class CsiModeService {
         showSelectService: false,
       };
       this.spaceScopedDetails = {
-        isSpaceScoped: activatedRoute.snapshot.queryParams.isSpaceScoped === 'true' ? true : false,
-        spaceGuid: activatedRoute.snapshot.queryParams.spaceGuid,
-        orgGuid: activatedRoute.snapshot.queryParams.orgGuid,
+        isSpaceScoped: activatedRoute.snapshot.queryParams['isSpaceScoped'] === 'true' ? true : false,
+        spaceGuid: activatedRoute.snapshot.queryParams['spaceGuid'],
+        orgGuid: activatedRoute.snapshot.queryParams['orgGuid'],
       };
     }
 

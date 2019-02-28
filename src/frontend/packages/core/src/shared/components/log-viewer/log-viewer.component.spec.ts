@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { from as observableFrom, Subject } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
-
-import { CoreModule } from '../../../core/core.module';
+import { Observable, Subject, from as observableFrom } from 'rxjs';
 import { MDAppModule } from '../../../core/md.module';
+import { RouterTestingModule } from '@angular/router/testing';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../../core/core.module';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { LogViewerComponent } from './log-viewer.component';
+import { Component, ViewChild } from '@angular/core';
+import { first, filter } from 'rxjs/operators';
 
 describe('LogViewerComponent', () => {
   @Component({
@@ -21,7 +21,7 @@ describe('LogViewerComponent', () => {
 
   let component: TestHostComponent;
   let fixture: ComponentFixture<TestHostComponent>;
-  let stream: Subject<string>;
+  let stream: Subject<String>;
   let contentEl: HTMLDivElement;
 
   beforeEach(async(() => {

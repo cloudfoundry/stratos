@@ -1,5 +1,3 @@
-import { Action } from '@ngrx/store';
-
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -26,25 +24,26 @@ import {
   serviceSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
-  userFavoritesSchemaKey,
   userProfileSchemaKey,
+  userFavoritesSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
-import { IRequestDataState, IRequestState } from '../types/entity.types';
 import { RequestTypes } from './../actions/request.actions';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { IRequestArray } from './api-request-reducer/types';
 import { appStatsReducer } from './app-stats-request.reducer';
-import { applicationAddRemoveReducer } from './application-add-remove-reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
-import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
+import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
+import { applicationAddRemoveReducer } from './application-add-remove-reducer';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
+import { IRequestDataState, IRequestState } from '../types/entity.types';
+import { Action } from '@ngrx/store';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -59,12 +58,12 @@ const requestActions = [
 ] as IRequestArray;
 
 function chainReducers(baseReducer, extraReducers) {
-  return (state, action) => {
+  return function (state, action) {
     let newState = baseReducer(state, action);
     let nextState;
     Object.keys(extraReducers).forEach(key => {
-      nextState = extraReducers[key].reduce((s, reducer) => {
-        return reducer(s, action);
+      nextState = extraReducers[key].reduce((_state, reducer) => {
+        return reducer(_state, action);
       }, newState[key]);
       if (nextState !== newState[key]) {
         newState = {

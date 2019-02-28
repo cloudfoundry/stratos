@@ -27,13 +27,13 @@ export type StepOnNextFunction = () => Observable<StepOnNextResult>;
 })
 export class StepComponent {
 
-  public pOnEnter: (data?: any) => void;
+  public _onEnter: (data?: any) => void;
   active = false;
   complete = false;
   error = false;
   busy = false;
 
-  pHidden = false;
+  _hidden = false;
 
   @Input()
   title: string;
@@ -42,12 +42,12 @@ export class StepComponent {
 
   @Input()
   set hidden(hidden: boolean) {
-    this.pHidden = hidden;
-    this.onHidden.emit(this.pHidden);
+    this._hidden = hidden;
+    this.onHidden.emit(this._hidden);
   }
 
   get hidden() {
-    return this.pHidden;
+    return this._hidden;
   }
 
   @Input()
@@ -90,7 +90,7 @@ export class StepComponent {
   onLeave: (isNext?: boolean) => void = () => { }
 
   constructor() {
-    this.pOnEnter = (data?: any) => {
+    this._onEnter = (data?: any) => {
       if (this.destructiveStep) {
         this.busy = true;
         setTimeout(() => {

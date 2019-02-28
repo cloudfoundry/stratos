@@ -1,8 +1,8 @@
+import { register } from 'ts-node/dist';
 import { createSelector } from '@ngrx/store';
-
 import { AppState, IRequestEntityTypeState } from '../app-state';
 import { EndpointModel, EndpointState, endpointStoreNames } from '../types/endpoint.types';
-import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors';
+import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors';
 
 // The custom status section
 export const endpointStatusSelector = (state: AppState): EndpointState => state.endpoints;

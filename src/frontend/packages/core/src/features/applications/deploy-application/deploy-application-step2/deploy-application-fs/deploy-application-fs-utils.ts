@@ -1,12 +1,11 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-
 import { DeployApplicationFSScanner, FileScannerInfo } from './deploy-application-fs-scanner';
+import { Observable ,  BehaviorSubject } from 'rxjs';
 
 export const CF_IGNORE_FILE = '.cfignore';
 export const CF_DEFAULT_IGNORES = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn\n';
 export const CF_MANIFEST_FILE = 'manifest.yml';
 
-export class DeployApplicationFsUtils {
+export class DeployApplicatioNFsUtils {
 
   constructor() { }
 
@@ -26,8 +25,8 @@ export class DeployApplicationFsUtils {
       }
     } else {
       // See if we can find the .cfignore file and/or the manifest file
-      for (const item of items) {
-        const filePath = item.webkitRelativePath.split('/');
+      for (let j = 0; j < items.length; j++) {
+        const filePath = items[j].webkitRelativePath.split('/');
         // First part is the root folder name
         if (filePath.length === 2 && !rootFolderName) {
           rootFolderName = filePath[0];
@@ -37,10 +36,10 @@ export class DeployApplicationFsUtils {
           break;
         }
         if (!cfIgnoreFile && filePath.length === 2 && filePath[1] === CF_IGNORE_FILE) {
-          cfIgnoreFile = item;
+          cfIgnoreFile = items[j];
         }
         if (filePath.length === 2 && filePath[1] === CF_MANIFEST_FILE) {
-          manifestFile = item;
+          manifestFile = items[j];
         }
       }
     }

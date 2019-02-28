@@ -16,21 +16,21 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 })
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T> {
 
-  private pRow: T;
+  private _row: T;
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return this._row; }
   set row(row: T) {
-    this.pRow = row;
+    this._row = row;
     if (this.config) {
       this.enabled = this.config.isEnabled(row);
     }
   }
 
-  private pConfig: TableCellBooleanIndicatorComponentConfig<T>;
+  private _config: TableCellBooleanIndicatorComponentConfig<T>;
   @Input('config')
-  get config() { return this.pConfig; }
+  get config() { return this._config; }
   set config(config: TableCellBooleanIndicatorComponentConfig<T>) {
-    this.pConfig = config;
+    this._config = config;
     if (!config) {
       return;
     }

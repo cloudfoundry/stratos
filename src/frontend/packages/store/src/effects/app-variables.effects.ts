@@ -1,13 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+
+import {map} from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
-
-import { AppMetadataTypes } from '../actions/app-metadata.actions';
-import { AppVariables, AppVariablesUpdate } from '../actions/app-variables.actions';
-import { UpdateExistingApplication } from '../actions/application.actions';
 import { AppState } from '../app-state';
-
+import { Injectable } from '@angular/core';
+import { Effect, Actions } from '@ngrx/effects';
+import { AppVariablesUpdate, AppVariables } from '../actions/app-variables.actions';
+import { UpdateExistingApplication } from '../actions/application.actions';
+import { AppMetadataTypes } from '../actions/app-metadata.actions';
 
 
 @Injectable()
@@ -18,8 +17,7 @@ export class AppVariablesEffect {
     private store: Store<AppState>,
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.pipe(
-    ofType<AppVariablesUpdate>(AppVariables.UPDATE),
+  @Effect() apiRequestStart$ = this.actions$.ofType<AppVariablesUpdate>(AppVariables.UPDATE).pipe(
     map((apiAction: AppVariablesUpdate) => {
       return new UpdateExistingApplication(
         apiAction.appGuid,

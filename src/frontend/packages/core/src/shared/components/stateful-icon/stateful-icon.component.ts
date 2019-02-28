@@ -32,7 +32,7 @@ export class StatefulIconComponent implements OnInit, OnChanges {
   selectedState: StatefulIconDefinition;
 
   isTemplate(icon: StatefulIconDefinition): icon is IconTemplateDefinition {
-    return !!(icon as IconTemplateDefinition).template;
+    return !!(<IconTemplateDefinition>icon).template;
   }
 
   ngOnInit() {

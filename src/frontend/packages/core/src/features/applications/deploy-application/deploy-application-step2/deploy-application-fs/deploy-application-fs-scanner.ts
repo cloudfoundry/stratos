@@ -44,7 +44,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     if (fileExcludes) {
       this.filter = new GitIgnoreFilter(fileExcludes);
     }
-  }
+   }
 
   isArchiveFile(fileName: string): boolean {
     return archiveRegex.test(name);
@@ -132,10 +132,10 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   readItemContents(item): Promise<string> {
     const scanner = this;
     return new Promise((resolve, reject) => {
-      item.file(file => {
-        scanner.readFileContents(file).then((data: string) => {
+      item.file(function (file) {
+        scanner.readFileContents(file).then(function (data: string) {
           resolve(data);
-        }).catch(() => {
+        }).catch(function () {
           reject();
         });
       });
@@ -145,9 +145,15 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   readFileContents(file): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject();
-      reader.onabort = () => reject();
+      reader.onload = function () {
+        resolve(reader.result);
+      };
+      reader.onerror = function () {
+        reject();
+      };
+      reader.onabort = function () {
+        reject();
+      };
       reader.readAsText(file);
     });
   }

@@ -1,7 +1,6 @@
-import { CFAuthChecker, CFAuthResource, CFFeatureFlagTypes } from '../cf-auth.types';
 import { CfAuthPrinciple } from '../principal';
 import { CfAuthBaseAccess } from './base-access';
-
+import { CFAuthResource, CFAuthChecker, CFFeatureFlagTypes } from '../cf-auth.types';
 export class CFAuthCheckerOrganization extends CfAuthBaseAccess implements CFAuthChecker {
 
   /**
@@ -12,10 +11,11 @@ export class CFAuthCheckerOrganization extends CfAuthBaseAccess implements CFAut
   }
 
   /**
-   * Users can create an organization if:
-   * 1. User is and admin
-   * 2. the `user_org_creation` feature flag is enabled
-   */
+    * @name create
+    * @description Users can create an organization if:
+    * 1. User is and admin
+    * 2. the `user_org_creation` feature flag is enabled
+    */
   create(orgGuid: string): boolean {
 
     // Admin
@@ -28,7 +28,8 @@ export class CFAuthCheckerOrganization extends CfAuthBaseAccess implements CFAut
   }
 
   /**
-   * Users can update an organization if:
+   * @name update
+   * @description Users can update an organization if:
    * 1. User is and admin
    * 2. is Org Manager
    */
@@ -43,6 +44,7 @@ export class CFAuthCheckerOrganization extends CfAuthBaseAccess implements CFAut
   }
 
   /**
+   * @name delete
    * @description Users can delete an organization if:
    * 1. User is and admin
    * 2. is Org Manager
@@ -58,8 +60,10 @@ export class CFAuthCheckerOrganization extends CfAuthBaseAccess implements CFAut
   }
 
   /**
-   * Specifies that this ACL checker can handle `application` permission
-   * @param resource - String representing the resource
+   * @name canHandle
+   * @description Specifies that this ACL checker can handle `application` permission
+   * @param {String} resource - String representing the resource
+   * @returns {boolean}
    */
   canHandle(resource: CFAuthResource): boolean {
     return resource === CFAuthResource.organization;

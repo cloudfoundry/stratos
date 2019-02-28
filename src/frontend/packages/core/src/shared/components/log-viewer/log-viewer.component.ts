@@ -1,12 +1,13 @@
+
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {
   BehaviorSubject,
+  Observable,
+  Subscription,
   combineLatest as observableCombineLatest,
   fromEvent as observableFromEvent,
   interval as observableInterval,
-  NEVER,
-  Observable,
-  Subscription,
+  never as observableNever
 } from 'rxjs';
 import {
   buffer,
@@ -15,16 +16,16 @@ import {
   filter,
   map,
   sampleTime,
+  scan,
   share,
   startWith,
   switchMap,
   tap,
   throttle,
   timeInterval,
+  catchError
 } from 'rxjs/operators';
-
 import { AnsiColors } from './ansi-colors';
-
 
 interface LogStreamMessage {
   message: string;
@@ -39,7 +40,7 @@ interface LogStreamMessage {
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input() filter: (a: any) => void;
+  @Input() filter: Function;
 
   @Input() status: Observable<number>;
 
@@ -75,7 +76,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     const stoppableLogStream$ = this.stopped$.pipe(
       switchMap(
-        stopped => (stopped ? NEVER : this.logStream)
+        stopped => (stopped ? observableNever() : this.logStream)
       ),
       share()
     );
@@ -110,7 +111,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         return high;
       }),
       distinctUntilChanged(),
-      startWith(false));
+      startWith(false), );
 
     const buffer$ = observableInterval().pipe(
       combineLatest(this.isHighThroughput$),
@@ -118,7 +119,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
         );
-      }));
+      }), );
 
     const addedLogs$ = stoppableLogStream$.pipe(
       buffer(buffer$))
@@ -155,28 +156,24 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           containerElement.scrollTop = contentElement.clientHeight;
         }
       }))
-      .subscribe({
-        error: e => {
-          this.statusMessage$.next({
-            message: 'An error occurred connecting to the log stream websocket',
-            isError: true
-          });
-        }
+      .subscribe(undefined, e => {
+        this.statusMessage$.next({
+          message: 'An error occurred connecting to the log stream websocket',
+          isError: true
+        });
       });
 
     if (this.status) {
-      this.statusSub = this.status.subscribe({
-        next: wsStatus => {
-          switch (wsStatus) {
-            case 0:
-              this.statusMessage$.next({ message: 'Connecting....' });
-              break;
-            default:
-              this.statusMessage$.next({ message: '' });
-              break;
-          }
+      this.statusSub = this.status.subscribe((wsStatus => {
+        switch (wsStatus) {
+          case 0:
+            this.statusMessage$.next({ message: 'Connecting....' });
+            break;
+          default:
+            this.statusMessage$.next({ message: '' });
+            break;
         }
-      });
+      }));
     }
   }
 

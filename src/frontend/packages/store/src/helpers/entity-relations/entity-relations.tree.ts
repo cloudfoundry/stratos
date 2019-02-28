@@ -16,11 +16,10 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
-  const actionEntity = action.entity;
-  /* tslint:disable-next-line:no-string-literal  */
-  const isArray = actionEntity['length'] > 0;
-  const entity: EntitySchema = isArray ? actionEntity[0] : actionEntity;
-  const entityKey = entity.key;
+  let entity = action.entity;
+  const isArray = entity['length'] > 0;
+  entity = isArray ? entity[0] : entity;
+  const entityKey = entity['key'];
   const cacheKey = generateCacheKey(entityKey, action);
   const cachedTree = entityTreeCache[cacheKey];
   const entityTree = fromCache && cachedTree ? cachedTree : createEntityTree(entity as EntitySchema, isArray);
@@ -48,10 +47,10 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
 }
 
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
-  const rootEntitySchema = schemaObj || entityRelation.entity.schema;
+  const rootEntitySchema = schemaObj || entityRelation.entity['schema'];
   Object.keys(rootEntitySchema).forEach(key => {
     let value = rootEntitySchema[key];
-    const isArray = value.length > 0;
+    const isArray = value['length'] > 0;
     value = isArray ? value[0] : value;
 
     const newPath = path ? path + '.' + key : key;

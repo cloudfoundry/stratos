@@ -3,6 +3,7 @@ import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith, tap } from 'rxjs/operators';
 
+import { UserService } from '../../../core/user.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 
 @Component({
@@ -35,7 +36,7 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnIn
     },
   };
 
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
   constructor(private snackBar: MatSnackBar, public endpointsService: EndpointsService) { }
   ngOnInit() {
@@ -68,10 +69,10 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnIn
   }
 
   private showSnackBar(show: boolean) {
-    if (!this.snackBarRef && show) {
-      this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
-    } else if (this.snackBarRef && !show) {
-      this.snackBarRef.dismiss();
+    if (!this._snackBar && show) {
+      this._snackBar = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
+    } else if (this._snackBar && !show) {
+      this._snackBar.dismiss();
     }
   }
 

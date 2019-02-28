@@ -1,7 +1,6 @@
-import { CFAuthChecker, CFAuthResource } from '../cf-auth.types';
 import { CfAuthPrinciple } from '../principal';
 import { CfAuthBaseAccess } from './base-access';
-
+import { CFAuthResource, CFAuthChecker } from '../cf-auth.types';
 export class CFAuthCheckerUser extends CfAuthBaseAccess implements CFAuthChecker {
 
   constructor(private principal: CfAuthPrinciple) {
@@ -13,10 +12,11 @@ export class CFAuthCheckerUser extends CfAuthBaseAccess implements CFAuthChecker
   }
 
   /**
-   * User can update a space if:
-   * 1. User is an admin
-   * 2. User is org manager
-   * 3. user is space manager
+   * @name update
+       * @description User can update a space if:
+       * 1. User is an admin
+       * 2. User is org manager
+       * 3. user is space manager
    */
   update(spaceGuid: string, orgGuid: string, isSpace: boolean): boolean {
     // Admin
@@ -37,7 +37,8 @@ export class CFAuthCheckerUser extends CfAuthBaseAccess implements CFAuthChecker
   }
 
   /**
-   * Specifies that this ACL checker can handle `application` permission
+   * @name canHandle
+   * @description Specifies that this ACL checker can handle `application` permission
    */
   canHandle(resource: CFAuthResource): boolean {
     return resource === CFAuthResource.user;

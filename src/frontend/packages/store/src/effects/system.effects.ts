@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
@@ -20,8 +20,7 @@ export class SystemEffects {
 
   static guid = 'info';
 
-  @Effect() getInfo$ = this.actions$.pipe(
-    ofType<GetSystemInfo>(GET_SYSTEM_INFO),
+  @Effect() getInfo$ = this.actions$.ofType<GetSystemInfo>(GET_SYSTEM_INFO).pipe(
     mergeMap(action => {
       const apiAction = {
         entityKey: systemStoreNames.type,

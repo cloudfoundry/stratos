@@ -1,9 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MDAppModule } from '../../../core/md.module';
+import { UpgradePageComponent } from './upgrade-page.component';
+import { SharedModule } from '../../../shared/shared.module';
+import { CoreModule } from '../../../core/core.module';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { UpgradePageComponent } from './upgrade-page.component';
+import { MDAppModule } from '../../../core/md.module';
 
 describe('UpgradePageComponent', () => {
   let component: UpgradePageComponent;
