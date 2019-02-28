@@ -22,12 +22,12 @@ export class Multi̦Actio̦nConfig {
    * If this is null then the dropdown will be hidden
    * @param {string} [deselectText=null] What string should be shown for the "deselect" select item.
    * A null value will show an empty item
-   * @memberof Multi̦Actio̦nConfig
+   * @memberof MultiActio̦nConfig
    */
   constructor(
     public schemaConfigs: ActionSchemaConfig[],
     public selectPlaceholder: string = 'Select entity type',
-    public deselectText: string = null
+    public deselectText: string = 'All'
   ) { }
 }
 
