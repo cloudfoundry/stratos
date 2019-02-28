@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 const kubernetes: Routes = [{
   path: 'kubernetes',
-  loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule',
+  loadChildren: './kubernetes/kubernetes.module#KubernetesModule',
   data: {
     stratosNavigation: {
       text: 'Kubernetes',
