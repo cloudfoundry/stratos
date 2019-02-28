@@ -1,6 +1,6 @@
-import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { HomePage } from '../home/home.po';
 import { LoginPage } from '../login/login.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
@@ -8,7 +8,6 @@ import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
-import { HomePage } from '../home/home.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();

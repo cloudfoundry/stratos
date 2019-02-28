@@ -4,7 +4,6 @@ import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ssoHelper } from '../helpers/sso-helper';
 import { Component } from '../po/component.po';
 import { SSOLoginPage } from './sso-login.po';
-import { EndpointsPage } from '../endpoints/endpoints.po';
 
 const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
 const until = protractor.ExpectedConditions;

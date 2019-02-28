@@ -1,8 +1,9 @@
-import { Page } from '../po/page.po';
+import { promise } from 'protractor';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { StepperComponent } from '../po/stepper.po';
 import { FormComponent } from '../po/form.po';
-import { protractor, promise } from 'protractor';
+import { Page } from '../po/page.po';
+import { StepperComponent } from '../po/stepper.po';
 
 export class RegisterDialog extends Page {
 
