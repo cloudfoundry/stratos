@@ -38,8 +38,8 @@ describe('Endpoints', () => {
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
-            expect(items['connect']).toBeDefined();
-            items['connect'].click();
+            expect(items.connect).toBeDefined();
+            items.connect.click();
             connectDialog.waitUntilShown();
             // Connect dialog should be shown
             expect(connectDialog.isPresent()).toBeTruthy();
@@ -50,12 +50,12 @@ describe('Endpoints', () => {
 
       it('should have empty username and password fields in the form', () => {
         connectDialog.form.getControlsMap().then((ctrls: FormItemMap) => {
-          expect(ctrls['authtype']).toBeDefined();
-          expect(ctrls['username']).toBeDefined();
-          expect(ctrls['password']).toBeDefined();
-          expect(ctrls['authtype'].value).toEqual('creds');
-          expect(ctrls['username'].text).toEqual('');
-          expect(ctrls['password'].text).toEqual('');
+          expect(ctrls.authtype).toBeDefined();
+          expect(ctrls.username).toBeDefined();
+          expect(ctrls.password).toBeDefined();
+          expect(ctrls.authtype.value).toEqual('creds');
+          expect(ctrls.username.text).toEqual('');
+          expect(ctrls.password.text).toEqual('');
         });
       });
 
@@ -85,10 +85,10 @@ describe('Endpoints', () => {
           const menu = new MenuComponent();
           menu.waitUntilShown('Endpoint Action Menu');
           return menu.getItemMap().then(items => {
-            expect(items['connect']).not.toBeDefined();
-            expect(items['disconnect']).toBeDefined();
+            expect(items.connect).not.toBeDefined();
+            expect(items.disconnect).toBeDefined();
             // Only admins can unregister
-            expect(items['unregister']).not.toBeDefined();
+            expect(items.unregister).not.toBeDefined();
             return menu.close();
           });
 
@@ -131,9 +131,9 @@ describe('Endpoints', () => {
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
-            expect(items['connect']).not.toBeDefined();
-            expect(items['disconnect']).toBeDefined();
-            items['disconnect'].click();
+            expect(items.connect).not.toBeDefined();
+            expect(items.disconnect).toBeDefined();
+            items.disconnect.click();
             ConfirmDialogComponent.expectDialogAndConfirm('Disconnect', 'Disconnect Endpoint');
 
             // Wait for snackbar
