@@ -234,7 +234,7 @@ export function pathSet(path: string, object: any, value: any) {
   }
 }
 
-export function parseHttpPipeError(res): {} {
+export function parseHttpPipeError(res): { message?: string } {
   if (!res.status) {
     return res;
   }
