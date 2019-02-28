@@ -101,6 +101,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "preserveSymlinks": true,
             "outputPath": "dist/core",
             "index": "src/frontend/packages/core/src/index.html",
             "main": "src/frontend/packages/core/src/main.ts",
@@ -153,6 +154,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "preserveSymlinks": true,
             "main": "src/frontend/packages/core/src/test.ts",
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.spec.json",
