@@ -57,6 +57,7 @@ export class CardComponent<T> implements OnInit, OnChanges {
 
   @ViewChild('target', { read: ViewContainerRef }) target;
 
+  @Input() schemaKey: string;
   cardComponent: CardCell<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
@@ -71,6 +72,7 @@ export class CardComponent<T> implements OnInit, OnChanges {
     this.cardComponent = <CardCell<T>>componentRef.instance;
     this.cardComponent.row = this.item;
     this.cardComponent.dataSource = this.dataSource;
+    this.cardComponent.schemaKey = this.schemaKey;
   }
 
   ngOnChanges(changes: SimpleChanges) {

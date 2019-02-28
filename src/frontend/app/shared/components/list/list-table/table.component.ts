@@ -60,7 +60,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       }
       this.columns = newColumns;
     }
-
     this.columnNames = this.columns.map(x => x.columnId);
     if (this.paginationController) {
       this.initWidgetStore();

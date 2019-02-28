@@ -7,6 +7,7 @@ import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
 import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
+import { IMultiActionListEntity } from '../../../monitors/pagination-monitor';
 
 export interface IEntitySelectItem {
   page: number;
@@ -62,6 +63,7 @@ export class ListActionConfig<T> {
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
+
   getRowState?(row: T): Observable<RowState>;
   trackBy(index: number, item: T);
 }
@@ -81,7 +83,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   entityKey: string;
   paginationKey: string;
 
+
   page$: Observable<T[]>;
+
+  multiActionPage$?: Observable<IMultiActionListEntity[]>;
 
   addItem: T;
   isAdding$: BehaviorSubject<boolean>;
@@ -98,7 +103,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
-  entitySelectConfig?: EntitySelectConfig;
+  entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
   selectClear();

@@ -6,6 +6,7 @@ import { IListDataSource, RowState } from './data-sources-controllers/list-data-
 export abstract class TableCellCustom<T> {
   dataSource: IListDataSource<T>;
   row: T;
+  schemaKey: string;
   config: any;
   rowState: Observable<RowState>;
 }

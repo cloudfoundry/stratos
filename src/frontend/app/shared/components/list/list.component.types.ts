@@ -8,7 +8,6 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
 
-
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
   TABLE_ONLY = 'tableOnly',
@@ -24,11 +23,11 @@ export interface IListConfig<T> {
   /**
    * List of actions that are presented as individual buttons when one or more rows are selected. For example `Delete` of selected rows.
    */
-  getMultiActions: () => IMultiListAction<T>[];
+  getMultiActions: (schemaKey: string) => IMultiListAction<T>[];
   /**
    * List of actions that are presented in a mat-menu for an individual entity. For example `unmap` an application route
    */
-  getSingleActions: () => IListAction<T>[];
+  getSingleActions: (schemaKey: string) => IListAction<T>[];
   /**
    * Collection of column definitions to show when the list is in table mode
    */

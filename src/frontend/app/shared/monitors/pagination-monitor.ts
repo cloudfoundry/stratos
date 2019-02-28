@@ -23,6 +23,10 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 import { entityFactory } from '../../store/helpers/entity-factory';
 import { IRequestDataState } from '../../store/types/entity.types';
 
+export interface IMultiActionListEntity {
+  entity: any;
+  schemaKey: string;
+}
 export class PaginationMonitor<T = any> {
   /**
    * Emits the current page of entities.
@@ -43,6 +47,7 @@ export class PaginationMonitor<T = any> {
 
 
   public currentPageIds$: Observable<string[]>;
+  public multiActionPage$: Observable<IMultiActionListEntity[]>;
 
   constructor(
     private store: Store<AppState>,
@@ -104,11 +109,15 @@ export class PaginationMonitor<T = any> {
       paginationKey,
     );
     this.currentPageIds$ = this.createPagIdObservable(this.pagination$);
-    this.fetchingCurrentPage$ = this.isLocal ?
-      this.createLocalFetchingObservable(this.pagination$) : this.createFetchingObservable(this.pagination$);
-    this.currentPage$ = this.isLocal ?
-      this.createLocalPageObservable(this.pagination$, schema, this.fetchingCurrentPage$) :
-      this.createPageObservable(this.pagination$, schema);
+    if (this.isLocal) {
+      this.fetchingCurrentPage$ = this.createLocalFetchingObservable(this.pagination$);
+      const { entities$, multiActionPage$ } = this.createLocalPageObservable(this.pagination$, schema, this.fetchingCurrentPage$);
+      this.currentPage$ = entities$;
+      this.multiActionPage$ = multiActionPage$;
+    } else {
+      this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
+      this.currentPage$ = this.createPageObservable(this.pagination$, schema);
+    }
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
 
   }
@@ -180,7 +189,8 @@ export class PaginationMonitor<T = any> {
 
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
-    const pag$ = pagination$.pipe(
+    const baseObs$ = pagination$.pipe(
+      distinctUntilChanged(),
       // Improve efficiency
       observeOn(asapScheduler),
       combineLatestOperator(entityObservable$),
@@ -188,26 +198,56 @@ export class PaginationMonitor<T = any> {
       map(([[pagination], allEntities]) => {
         if (pagination.forcedLocalPage) {
           const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, schema);
-          return this.denormalizePage(page, pageSchema, allEntities);
+          return {
+            [pageSchema.key]: this.denormalizePage(page, pageSchema, allEntities)
+          };
         }
         return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
           const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
-          return [
+          return {
             ...allPageEntities,
-            ...this.denormalizePage(page, pageSchema, allEntities)
-          ];
-        }, []);
+            [pageSchema.key]: this.denormalizePage(page, pageSchema, allEntities)
+          };
+        }, {});
       }),
-      tap(console.log),
       tag('de-norming-local ' + schema.key),
-      publishReplay(1),
-      refCount(),
     );
 
-    return fetching$.pipe(
-      filter(busy => !busy),
-      switchMap(() => pag$)
+    const multiActionPage$ = baseObs$.pipe<IMultiActionListEntity[]>(
+      map(entityMap => {
+        return Object.keys(entityMap).reduce((multiActionPage, schemaKey) => {
+          return entityMap[schemaKey].reduce((page: IMultiActionListEntity[], entity: any) => {
+            return [
+              ...page,
+              {
+                entity,
+                schemaKey
+              }
+            ];
+          }, multiActionPage);
+        }, [] as IMultiActionListEntity[]);
+      })
     );
+
+    const entities$ = baseObs$.pipe(
+      map(entityMap => {
+        return Object.values(entityMap).reduce((mappedEntities, entities) => {
+          return [
+            ...mappedEntities,
+            ...entities
+          ];
+        }, []);
+      })
+    );
+    return {
+      entities$: fetching$.pipe(
+        filter(busy => !busy),
+        switchMap(() => entities$),
+        publishReplay(1),
+        refCount(),
+      ),
+      multiActionPage$
+    };
   }
 
   private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: IRequestDataState) {

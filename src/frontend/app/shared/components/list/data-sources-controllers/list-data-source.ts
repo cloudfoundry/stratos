@@ -1,3 +1,4 @@
+import { IMultiActionListEntity } from './../../../monitors/pagination-monitor';
 import { EntitySchema, entityFactory } from './../../../../store/helpers/entity-factory';
 import { DataSource } from '@angular/cdk/table';
 import { SortDirection } from '@angular/material';
@@ -104,6 +105,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public refresh: () => void;
 
+  public multiActionPage$: Observable<IMultiActionListEntity[]>;
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
   constructor(
@@ -160,6 +162,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
+    this.multiActionPage$ = paginationMonitor.multiActionPage$.pipe(tap(console.log));
 
     this.sort$ = this.createSortObservable();
 

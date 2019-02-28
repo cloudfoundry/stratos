@@ -8,7 +8,7 @@ import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-fa
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from './../../../store/types/base-metric.types';
-import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
