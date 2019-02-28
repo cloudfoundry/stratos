@@ -15,6 +15,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesendpoints"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -148,10 +149,13 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 			"Missing target endpoint",
 			"Need CNSI GUID passed as form param")
 	}
-
+	// Should check for errors?
 	p.unsetCNSIRecord(cnsiGUID)
 
 	p.unsetCNSITokenRecords(cnsiGUID)
+
+	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
+	ufe.RemoveFavorites()
 
 	return nil
 }
@@ -339,6 +343,26 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	}
 
 	return nil
+}
+
+func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord) error {
+	log.Debug("SaveEndpointToken")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return err
+	}
+
+	return tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, tokenRecord, p.Config.EncryptionKeyInBytes)
+}
+
+func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) error {
+	log.Debug("DeleteEndpointToken")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return err
+	}
+
+	return tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
 }
 
 func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {

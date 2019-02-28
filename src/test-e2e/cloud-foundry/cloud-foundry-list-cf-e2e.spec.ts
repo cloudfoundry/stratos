@@ -1,5 +1,3 @@
-import { browser } from 'protractor';
-
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';

@@ -457,8 +457,8 @@ export class ListComponent extends Component {
     return browser.wait(until.visibilityOf(this.getLoadingIndicator()), 1000);
   }
 
-  waitForNoLoadingIndicator(): promise.Promise<any> {
-    return browser.wait(until.invisibilityOf(this.getLoadingIndicator()), 10000);
+  waitForNoLoadingIndicator(timeout = 10000): promise.Promise<any> {
+    return browser.wait(until.invisibilityOf(this.getLoadingIndicator()), timeout);
   }
 
   getTotalResults(): promise.Promise<number> {

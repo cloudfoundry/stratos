@@ -1,9 +1,8 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
-import { E2EHelpers } from '../helpers/e2e-helpers';
-import { MenuComponent } from '../po/menu.po';
-import { FormComponent } from '../po/form.po';
+import { by, element } from 'protractor';
+
 import { Component } from '../po/component.po';
+import { FormComponent } from '../po/form.po';
+import { MenuComponent } from '../po/menu.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 
 /**
