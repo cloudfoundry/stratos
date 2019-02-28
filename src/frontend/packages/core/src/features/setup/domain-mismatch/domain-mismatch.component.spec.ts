@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DomainMismatchComponent } from './domain-mismatch.component';
 import { MDAppModule } from '../../../core/md.module';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
+import { DomainMismatchComponent } from './domain-mismatch.component';
 
 describe('DomainMismatchComponent', () => {
   let component: DomainMismatchComponent;
@@ -11,12 +11,12 @@ describe('DomainMismatchComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DomainMismatchComponent, IntroScreenComponent, StratosTitleComponent ],
+      declarations: [DomainMismatchComponent, IntroScreenComponent, StratosTitleComponent],
       imports: [
         MDAppModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
