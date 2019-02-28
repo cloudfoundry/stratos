@@ -12,7 +12,7 @@ export enum MetricsChartTypes {
 }
 
 export type YAxisTickFormattingFunc = (label: string) => string;
-interface IMetricsChartConfig {
+export interface IMetricsChartConfig {
   chartType: MetricsChartTypes;
   xAxisLabel?: string;
   yAxisLabel?: string;
