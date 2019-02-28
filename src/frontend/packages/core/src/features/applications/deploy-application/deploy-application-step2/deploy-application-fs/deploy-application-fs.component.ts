@@ -1,9 +1,10 @@
-import { Component, OnInit, Input, forwardRef, ViewChild } from '@angular/core';
-import { DeployApplicatioNFsUtils } from './deploy-application-fs-utils';
-import { filter, first, map } from 'rxjs/operators';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Component, forwardRef, Input } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
+import { filter, first } from 'rxjs/operators';
+
 import { FileScannerInfo } from './deploy-application-fs-scanner';
+import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 
 @Component({
   selector: 'app-deploy-application-fs',
@@ -19,7 +20,7 @@ import { FileScannerInfo } from './deploy-application-fs-scanner';
 })
 export class DeployApplicationFsComponent implements ControlValueAccessor {
 
-  private propagateChange: Function;
+  private propagateChange: (fsi: FileScannerInfo) => void;
   constructor() { }
 
   @Input() sourceType: string;
@@ -29,7 +30,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   // Handle result of a file input form field selection
   onFileChange(event) {
     const files = event.srcElement.files;
-    const utils = new DeployApplicatioNFsUtils();
+    const utils = new DeployApplicationFsUtils();
     utils.handleFileInputSelection(files).pipe(
       filter(res => !!res),
       first()
