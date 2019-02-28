@@ -7,7 +7,7 @@ import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/kubernetes-node-condition.component';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 
-describe('KubernetesNodeConditionCardComponent', () => {
+xdescribe('KubernetesNodeConditionCardComponent', () => {
   let component: KubernetesNodeConditionCardComponent;
   let fixture: ComponentFixture<KubernetesNodeConditionCardComponent>;
 

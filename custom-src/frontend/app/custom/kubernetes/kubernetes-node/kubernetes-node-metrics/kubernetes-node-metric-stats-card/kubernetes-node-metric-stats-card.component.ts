@@ -30,7 +30,6 @@ export class KubernetesNodeMetricStatsCardComponent implements OnInit, OnDestroy
   ) {}
 
   ngOnInit() {
-
     const maxMetric = this.kubeNodeService.setupMetricObservable(this.metric, MetricStatistic.MAXIMUM);
     this.subscriptions.push(maxMetric.pollerSub);
     this.max$ = maxMetric.entity$;

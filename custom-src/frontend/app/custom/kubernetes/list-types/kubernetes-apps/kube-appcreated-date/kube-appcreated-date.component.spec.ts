@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubeAppcreatedDateComponent } from './kube-appcreated-date.component';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 
 describe('KubeAppcreatedDateComponent', () => {
   let component: KubeAppcreatedDateComponent;
@@ -10,7 +10,7 @@ describe('KubeAppcreatedDateComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubeAppcreatedDateComponent],
-      imports: BaseTestModules
+      imports: KubernetesBaseTestModules
     })
       .compileComponents();
   }));
