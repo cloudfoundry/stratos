@@ -87,8 +87,11 @@ export class MetaCardComponent {
       );
     }
   }
+  get actionMenu(): MetaCardMenuItem[] {
+    return this.pActionMenu;
+  }
 
-  public pActionMenu: MetaCardMenuItem[];
+  private pActionMenu: MetaCardMenuItem[];
   public showMenu$: Observable<boolean>;
 
   @Input()
