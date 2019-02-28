@@ -4,10 +4,10 @@ import { Store } from '@ngrx/store';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../store/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { EndpointModel } from '../../../store/types/endpoint.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 import { map, shareReplay, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';

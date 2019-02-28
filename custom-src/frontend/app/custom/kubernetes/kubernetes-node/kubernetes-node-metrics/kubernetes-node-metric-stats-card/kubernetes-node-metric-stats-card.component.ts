@@ -2,7 +2,6 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Observable, of as observableOf, Subscription, observable } from 'rxjs';
 import { KubernetesNodeService, KubeNodeMetric } from '../../../services/kubernetes-node.service';
 import { MetricStatistic } from '../../../store/kube.types';
-import { IMetrics } from '../../../../../store/types/base-metric.types';
 
 @Component({
   selector: 'app-kubernetes-node-metric-stats-card',

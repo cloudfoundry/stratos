@@ -13,14 +13,14 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap, combineLatest } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
-import { AppState } from '../../../store/app-state';
-import { NormalizedResponse } from '../../../store/types/api.types';
+import { environment } from '../../../environments/environment';
+import { AppState } from '../../../../../store/src/app-state';
+import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from '../../../store/types/request.types';
+} from '../../../../../store/src/types/request.types';
 import {
   KubernetesConfigMap,
   KubernetesDeployment,

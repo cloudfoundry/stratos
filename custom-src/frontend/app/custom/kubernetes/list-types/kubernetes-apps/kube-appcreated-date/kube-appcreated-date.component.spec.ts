@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubeAppcreatedDateComponent } from './kube-appcreated-date.component';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('KubeAppcreatedDateComponent', () => {
   let component: KubeAppcreatedDateComponent;

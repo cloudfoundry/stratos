@@ -1,13 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { KubernetesService } from '../services/kubernetes.service';
 import { Store } from '@ngrx/store';
 import { map, filter, first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { AppState } from '../../../store/app-state';
-import { RouterNav } from '../../../store/actions/router.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import {KubernetesEndpointsListConfigService} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
-import { EndpointModel } from '../../../store/types/endpoint.types';
+
 @Component({
   selector: 'app-kubernetes',
   templateUrl: './kubernetes.component.html',

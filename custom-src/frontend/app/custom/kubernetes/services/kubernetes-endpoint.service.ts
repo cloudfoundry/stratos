@@ -6,15 +6,15 @@ import { filter, first, map, shareReplay } from 'rxjs/operators';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { AppState } from '../../../store/app-state';
+import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import {
   endpointSchemaKey,
   entityFactory,
-} from '../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { EntityInfo } from '../../../store/types/api.types';
-import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
+} from '../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { EntityInfo } from '../../../../../store/src/types/api.types';
+import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesDeployment, KubernetesStatefulSet, KubeService, KubernetesPod } from '../store/kube.types';
 import {

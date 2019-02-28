@@ -10,9 +10,9 @@ import { SuseLoginComponent } from './suse-login/suse-login.component';
 import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
 import { EndpointsService } from '../core/endpoints.service';
 import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
+import { AppState } from '../../../store/src/app-state';
 import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
-import { EndpointHealthCheck } from '../core/endpoints-health-checks';
+import { EndpointHealthCheck } from '../../endpoints-health-checks';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',

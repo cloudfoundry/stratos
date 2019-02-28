@@ -1,6 +1,5 @@
 import { DataFunction } from '../../../shared/components/list/data-sources-controllers/list-data-source';
-import { ConditionType, KubernetesNode, KubernetesPod } from '../store/kube.types';
-import { TableCellCustom } from '../../../shared/components/list/list.types';
+import { ConditionType, KubernetesNode } from '../store/kube.types';
 
 export function getConditionSort(condition: ConditionType): DataFunction<KubernetesNode> {
   return (entities, paginationState) => {

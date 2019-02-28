@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { KubernetesNode } from '../../../../store/kube.types';
 import { AppChip } from '../../../../../../shared/components/chips/chips.component';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
-import { map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-kubernetes-node-summary-card',

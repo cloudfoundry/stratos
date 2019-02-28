@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { KubernetesApp } from '../../../store/kube.types';
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
 

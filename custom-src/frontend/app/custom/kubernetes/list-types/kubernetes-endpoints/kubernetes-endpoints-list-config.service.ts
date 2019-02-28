@@ -7,8 +7,8 @@ import {
 } from '../../../../shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 import { endpointColumns } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../store/app-state';
-import { EndpointModel } from '../../../../store/types/endpoint.types';
+import { AppState } from '../../../../../../store/src/app-state';
+import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { BaseEndpointsDataSource } from '../../../../shared/components/list/list-types/cf-endpoints/base-endpoints-data-source';
 
 @Injectable()

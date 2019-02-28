@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { KubernetesService } from '../../../services/kubernetes.service';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
 import { KubernetesNode } from '../../../store/kube.types';

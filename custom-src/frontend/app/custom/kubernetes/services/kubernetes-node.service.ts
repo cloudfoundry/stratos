@@ -8,10 +8,10 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { MetricQueryConfig, MetricsAction } from '../../../store/actions/metrics.actions';
-import { AppState } from '../../../store/app-state';
-import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
-import { EntityInfo } from '../../../store/types/api.types';
+import { MetricQueryConfig, MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { entityFactory, metricSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
