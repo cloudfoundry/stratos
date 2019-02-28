@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
 
-import { KubernetesNode } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
+import { KubernetesNode } from '../../store/kube.types';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../store/app-state';
-import { entityFactory } from '../../../../store/helpers/entity-factory';
+import { getPaginationKey } from '../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { GetKubernetesNodes } from '../../store/kubernetes.actions';
 import { kubernetesNodesSchemaKey } from '../../store/kubernetes.entities';

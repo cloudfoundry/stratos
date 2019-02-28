@@ -1,5 +1,5 @@
 import { getKubeAPIResourceGuid } from './kube.selectors';
-import { getAPIResourceGuid } from '../../../store/selectors/api.selectors';
+import { getAPIResourceGuid } from '../../../../../store/src/selectors/api.selectors';
 import { ExtensionEntitySchema } from '../../../core/extension/extension-types';
 
 export const kubernetesSchemaKey = 'kubernetesInfo';

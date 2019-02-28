@@ -1,5 +1,5 @@
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { SharedModule } from './../../../../../../../src/frontend/app/shared/shared.module';
+import { SharedModule } from '../../../../shared/shared.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesConfigAuthFormComponent } from './kubernetes-config-auth-form.component';

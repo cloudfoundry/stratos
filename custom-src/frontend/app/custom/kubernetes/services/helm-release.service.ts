@@ -6,9 +6,9 @@ import { filter, first, map, share } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../store/app-state';
-import { entityFactory } from '../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { AppState } from '../../../../../store/src/app-state';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { KubernetesApp, KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
 import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';

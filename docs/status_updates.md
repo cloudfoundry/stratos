@@ -2,6 +2,37 @@
 
 Weekly status updates are published here.
 
+## 22 February 2019
+
+This week:
+
+- The user invite feature has been reviewed and merged
+- Front-end code restructuring to support next phase of extensions work
+- Pre-work for update to Angular 7
+- Add support for User Provided Services
+- Updates to our documentation on our needs for the Cloud Foundry V3 API
+
+**Important:**
+
+Hello All - Two CVEs in Stratos were recently discovered - both are fixed in 2.3.0 - so we **encourage you to update** to that latest version to address these issues. Both relate to the session cookie:
+
+https://www.cloudfoundry.org/blog/cve-2019-3783/
+https://www.cloudfoundry.org/blog/cve-2019-3784/
+
+**Deployment Survey**
+
+We want to understand more about how everyone is deploying Stratos - so we can better support the most used deployment scenarios and (possibly) remove some of the deployment mechanisms that aren’t being used - we’ve got a quick survey we’d love it if you could fill out: https://www.surveymonkey.co.uk/r/MLXDMKG
+
+## 15 February 2019
+
+This week:
+
+- 2.3.0 was Released!
+- The user Favourites feature has been reviewed and merged
+- We continue to fix and merge many of the outstanding PRs around User Favourites and Scalability
+- We spent half a day reviewing our next steps to re-structure the front-end code as part of our work towards the next phase of extensibility.
+- We continue to improve the suite of automated deployment tests that run continuosuly
+
 ## 8 February 2019
 
 Release 2.3.0 is all ready to go and we will publish this on Monday.

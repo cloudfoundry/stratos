@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ConditionType, KubernetesNode } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
+import { ConditionType, KubernetesNode } from '../../store/kube.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../../store/src/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { getConditionSort } from '../kube-sort.helper';
 import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';

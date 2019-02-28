@@ -1,7 +1,7 @@
 import { KubernetesStoreModule } from './kubernetes.store.module';
 import { NgModule } from '@angular/core';
 import { kubernetesEntities } from './store/kubernetes.entities';
-import { registerEntitiesForTesting, createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { registerEntitiesForTesting, createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';

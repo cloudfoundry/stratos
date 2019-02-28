@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 
 import {
   KubernetesNamespacesDataSource,
-} from '../../../../../../../src/frontend/app/custom/kubernetes/list-types/kubernetes-namespaces/kubernetes-namespaces-data-source';
-import { KubernetesNamespace } from '../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
+} from './kubernetes-namespaces-data-source';
+import { KubernetesNamespace } from '../../../kubernetes/store/kube.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../../store/src/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';

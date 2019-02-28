@@ -26,6 +26,11 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    // Ensure we destroy the component and clean up the polling subscription
+    fixture.destroy();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });

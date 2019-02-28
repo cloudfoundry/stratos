@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesCertsAuthFormComponent } from './kubernetes-certs-auth-form.component';
 import { FormBuilder } from '@angular/forms';
-import { SharedModule } from '../../../../../../../src/frontend/app/shared/shared.module';
+import { SharedModule } from '../../../../shared/shared.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('KubernetesCertsAuthFormComponent', () => {

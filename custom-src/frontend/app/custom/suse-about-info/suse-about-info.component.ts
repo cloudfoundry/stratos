@@ -3,9 +3,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../store/app-state';
-import { AuthState } from '../../store/reducers/auth.reducer';
-import { SessionData } from './../../store/types/auth.types';
+import { AppState } from '../../../../store/src/app-state';
+import { AuthState } from '../../../../store/src/reducers/auth.reducer';
+import { SessionData } from './../../../../store/src/types/auth.types';
 
 @Component({
   selector: 'app-suse-about-info',

@@ -1,5 +1,4 @@
 import { StepperComponent } from '../po/stepper.po';
-import { by, element, promise, browser } from 'protractor';
 
 
 export class CreateServiceInstanceStepper extends StepperComponent {

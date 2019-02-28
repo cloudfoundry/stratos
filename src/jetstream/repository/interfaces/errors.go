@@ -24,6 +24,10 @@ func (e ErrHTTPShadow) Error() string {
 	return fmt.Sprintf("HTTP Error: %v\nLog Message: %s", e.HTTPError, e.LogMessage)
 }
 
+func NewHTTPError(status int, userFacingError string) error {
+	return NewHTTPShadowError(status, userFacingError, "")
+}
+
 func NewHTTPShadowError(status int, userFacingError string, fmtString string, args ...interface{}) error {
 	shadowError := ErrHTTPShadow{
 		UserFacingError: userFacingError,
