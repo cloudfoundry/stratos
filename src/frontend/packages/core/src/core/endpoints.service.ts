@@ -25,6 +25,8 @@ export class EndpointsService implements CanActivate {
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
 
+  disablePersistenceFeatures$: Observable<boolean>;
+
   constructor(
     private store: Store<AppState>,
     private userService: UserService
@@ -33,6 +35,10 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
+
+    this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
+      map((auth) => auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true')
+    );
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
