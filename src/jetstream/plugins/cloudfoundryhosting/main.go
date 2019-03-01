@@ -101,8 +101,6 @@ func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 // Init performs plugin initialization
 func (ch *CFHosting) Init() error {
 
-	ch.portalProxy.GetConfig().PluginConfig["disablePersistenceFeatures"] = strconv.FormatBool(true)
-
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if ch.portalProxy.Env().IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
