@@ -1,0 +1,19 @@
+<!-- <app-meta-card class="endpoint-card" [routerLink]="getRouterPath(row)" [status$]="status$" [favorite]="favorite" [statusIcon]="false"></app-meta-card> -->
+<app-meta-card class="endpoint-card" [routerLink]="getLinkForEndpoint(row)">
+  <app-meta-card-title class="endpoint__title">
+    <app-multiline-title class="endpoint__title-link">{{ row.name }}</app-multiline-title>
+    // TODO: RC fav
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Status</app-meta-card-key>
+    <app-meta-card-value></app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Type</app-meta-card-key>
+    <app-meta-card-value></app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Address</app-meta-card-key>
+    <app-meta-card-value></app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

@@ -12,7 +12,7 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import {
   BaseEndpointsDataSource
 } from './base-endpoints-data-source';
-import { EndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
+import { CfEndpointCardComponent } from './cf-endpoint-card/cf-endpoint-card.component';
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
@@ -20,7 +20,7 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   isLocal = true;
   dataSource: BaseEndpointsDataSource;
   viewType = ListViewTypes.CARD_ONLY;
-  cardComponent = EndpointCardComponent;
+  cardComponent = CfEndpointCardComponent;
   text = {
     title: '',
     filter: 'Filter Endpoints',

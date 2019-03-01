@@ -149,6 +149,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 
 
 @NgModule({
@@ -264,7 +265,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesGlobalListComponent,
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    EndpointCardComponent
   ],
   exports: [
     FormsModule,

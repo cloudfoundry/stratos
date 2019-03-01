@@ -15,7 +15,7 @@ import { IListDataSource } from '../../data-sources-controllers/list-data-source
 
 import { CardCell } from '../../list.types';
 import { CardAppComponent } from '../../list-types/app/card/card-app.component';
-import { EndpointCardComponent } from '../../list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
+import { CfEndpointCardComponent } from '../../list-types/cf-endpoints/cf-endpoint-card/cf-endpoint-card.component';
 import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
@@ -28,10 +28,11 @@ import {
   AppServiceBindingCardComponent
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
+import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 
 export const listCards = [
   CardAppComponent,
-  EndpointCardComponent,
+  CfEndpointCardComponent,
   CfOrgCardComponent,
   CfSpaceCardComponent,
   CfBuildpackCardComponent,
@@ -39,7 +40,8 @@ export const listCards = [
   CfStacksCardComponent,
   CfServiceCardComponent,
   AppServiceBindingCardComponent,
-  ServiceInstanceCardComponent
+  ServiceInstanceCardComponent,
+  EndpointCardComponent
 ];
 @Component({
   selector: 'app-card',

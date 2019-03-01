@@ -10,11 +10,11 @@ import { CardCell } from '../../../list.types';
 
 
 @Component({
-  selector: 'app-endpoint-card',
-  templateUrl: './endpoint-card.component.html',
-  styleUrls: ['./endpoint-card.component.scss']
+  selector: 'app-cf-endpoint-card',
+  templateUrl: './cf-endpoint-card.component.html',
+  styleUrls: ['./cf-endpoint-card.component.scss']
 })
-export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
+export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
   static columns = 2;
 

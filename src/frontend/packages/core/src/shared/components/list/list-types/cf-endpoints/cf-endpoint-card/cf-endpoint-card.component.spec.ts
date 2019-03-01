@@ -6,11 +6,11 @@ import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.fac
 import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { EndpointCardComponent } from './endpoint-card.component';
+import { CfEndpointCardComponent } from './cf-endpoint-card.component';
 
-describe('EndpointCardComponent', () => {
-  let component: EndpointCardComponent;
-  let fixture: ComponentFixture<EndpointCardComponent>;
+describe('CfEndpointCardComponent', () => {
+  let component: CfEndpointCardComponent;
+  let fixture: ComponentFixture<CfEndpointCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -29,7 +29,7 @@ describe('EndpointCardComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EndpointCardComponent);
+    fixture = TestBed.createComponent(CfEndpointCardComponent);
     component = fixture.componentInstance;
     component.row = {
       name: 'test',

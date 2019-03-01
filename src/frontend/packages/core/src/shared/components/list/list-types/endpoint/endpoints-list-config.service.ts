@@ -34,6 +34,8 @@ import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
   return getNameForEndpointType(endpoint.cnsi_type);
@@ -116,6 +118,8 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
+  cardComponent = EndpointCardComponent;
+
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
       const confirmation = new ConfirmationDialogConfig(
@@ -195,7 +199,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   ];
   isLocal = true;
   dataSource: EndpointsDataSource;
-  viewType = ListViewTypes.TABLE_ONLY;
+  viewType = ListViewTypes.BOTH;
+  defaultView = 'cards' as ListView;
   text = {
     title: '',
     filter: 'Filter Endpoints'

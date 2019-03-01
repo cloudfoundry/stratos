@@ -1,20 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../../list.types';
 import { getEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { EndpointsService } from '../../../../../../core/endpoints.service';
 
 @Component({
   selector: 'app-table-cell-endpoint-name',
   templateUrl: './table-cell-endpoint-name.component.html',
   styleUrls: ['./table-cell-endpoint-name.component.scss']
 })
-export class TableCellEndpointNameComponent<T> extends TableCellCustom<T> {
+export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel> {
 
-  getLinkForEndpoint(row) {
-    const ext = getEndpointTypes().find(ep => ep.value === row.cnsi_type);
-    if (ext && ext.homeLink) {
-      return ext.homeLink(row.guid).join('/');
-    }
-    return '';
+  private _row: EndpointModel;
+  @Input('row')
+  set row(row: EndpointModel) {
+    this._row = row;
+  }
+
+  getLinkForEndpoint(row = this._row) {
+    return EndpointsService.getLinkForEndpoint(row);
   }
 }
