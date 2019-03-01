@@ -27,6 +27,9 @@ export class EndpointsService implements CanActivate {
   haveConnected$: Observable<boolean>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
+    if (!endpoint) {
+      return '';
+    }
     const ext = getEndpointTypes().find(ep => ep.value === endpoint.cnsi_type);
     if (ext && ext.homeLink) {
       return ext.homeLink(endpoint.guid).join('/');
