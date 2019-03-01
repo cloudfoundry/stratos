@@ -56,6 +56,7 @@ import { ApplicationStateService } from './shared/components/application-state/a
 import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { LoggerService } from './core/logger.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -130,13 +131,14 @@ export class AppModule {
     private permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
     private store: Store<AppState>,
+    private logger: LoggerService
   ) {
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);
     // Once the CF modules become an extension point, these should be moved to a CF specific module
     this.registerCfFavoriteMappers();
-    this.userFavoriteManager = new UserFavoriteManager(store);
+    this.userFavoriteManager = new UserFavoriteManager(store,  logger);
     const allFavs$ = this.userFavoriteManager.getAllFavorites();
     const recents$ = this.store.select(recentlyVisitedSelector);
     const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));

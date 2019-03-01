@@ -31,6 +31,7 @@ import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
+import { LoggerService } from '../../../core/src/core/logger.service';
 
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
@@ -39,13 +40,16 @@ const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 @Injectable()
 export class UserFavoritesEffect {
 
+  private userFavoriteManager: UserFavoriteManager;
+
   constructor(
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
-  ) { }
-
-  private userFavoriteManager = new UserFavoriteManager(this.store);
+    private logger: LoggerService
+  ) {
+    this.userFavoriteManager = new UserFavoriteManager(this.store, this.logger);
+  }
 
   @Effect() saveFavorite = this.actions$.ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE).pipe(
     mergeMap(action => {
