@@ -45,7 +45,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         value: t
       }));
       this.cfGuid = row.entity.cfGuid;
-      this.hasMultipleBindings.next(!(row.entity.service_bindings.length > 0));
+      this.hasMultipleBindings.next(!(row.entity.service_bindings && row.entity.service_bindings.length > 0));
       this.cardMenu = [
         {
           label: 'Edit',

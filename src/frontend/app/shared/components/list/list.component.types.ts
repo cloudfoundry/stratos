@@ -7,6 +7,9 @@ import { ActionState } from './../../../store/reducers/api-request-reducer/types
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
+import { CardCell } from './list.types';
+import { CardMultiActionComponents } from './list-cards/card/card.component.types';
+import { Type } from '@angular/core';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -78,7 +81,7 @@ export interface IListConfig<T> {
   /**
    * The card component used in card view
    */
-  cardComponent?: any;
+  cardComponent?: Type<CardCell<T>> | CardMultiActionComponents;
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions

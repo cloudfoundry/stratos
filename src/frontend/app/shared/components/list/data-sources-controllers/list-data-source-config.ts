@@ -14,7 +14,7 @@ import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
  * @export
  * @class Multi̦Actio̦nConfig
  */
-export class Multi̦Actio̦nConfig {
+export class MultiActionConfig {
   /**
    * Creates an instance of Multi̦Actio̦nConfig.
    * @param {ActionSchemaConfig[]} schemaConfigs configs to drive a multi action list
@@ -61,7 +61,7 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * The entity which will be fetched via the action
    */
-  schema: EntitySchema | Multi̦Actio̦nConfig;
+  schema: EntitySchema | MultiActionConfig;
   /**
    * A function which will return a unique id for the given row/entity
    */

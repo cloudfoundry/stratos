@@ -13,6 +13,7 @@ export abstract class TableCellCustom<T> {
 
 export abstract class CardCell<T> extends TableCellCustom<T> {
   static columns = 3;
+  public columns = CardCell.columns;
 }
 
 export interface IListRowCell {

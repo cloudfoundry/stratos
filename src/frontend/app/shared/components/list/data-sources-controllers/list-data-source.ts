@@ -13,7 +13,7 @@ import { AppState } from '../../../../store/app-state';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { IListDataSourceConfig, Multi̦Actio̦nConfig } from './list-data-source-config';
+import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
   getRowUniqueId,
   IListDataSource,
@@ -162,7 +162,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
-    this.multiActionPage$ = paginationMonitor.multiActionPage$.pipe(tap(console.log));
+    this.multiActionPage$ = paginationMonitor.multiActionPage$;
 
     this.sort$ = this.createSortObservable();
 
@@ -179,7 +179,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.store = config.store;
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
-    this.sourceScheme = config.schema instanceof Multi̦Actio̦nConfig ?
+    this.sourceScheme = config.schema instanceof MultiActionConfig ?
       entityFactory(config.schema.schemaConfigs[0].schemaKey) : config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
@@ -193,7 +193,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
     this.masterAction = this.action as PaginatedAction;
-    if (config.schema instanceof Multi̦Actio̦nConfig) {
+    if (config.schema instanceof MultiActionConfig) {
       if (!config.isLocal) {
         // We cannot do multi action lists for none local lists
         this.action = config.schema[0].paginationAction;
@@ -218,7 +218,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     }
   }
 
-  private getEntitySelectConfig(multiActionConfig: Multi̦Actio̦nConfig) {
+  private getEntitySelectConfig(multiActionConfig: MultiActionConfig) {
     if (!multiActionConfig.selectPlaceholder) {
       return null;
     }

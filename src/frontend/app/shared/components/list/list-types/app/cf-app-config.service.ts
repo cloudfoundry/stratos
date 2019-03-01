@@ -8,7 +8,7 @@ import { IApp } from '../../../../../core/cf-api.types';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
-import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, userProvidedServiceInstanceSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { UserFavorite, IFavoriteMetadata } from '../../../../../store/types/user-favorites.types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
@@ -24,6 +24,8 @@ import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/tab
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
+import { CardMultiActionComponents } from '../../list-cards/card/card.component.types';
+import { ServiceInstanceCardComponent } from '../services-wall/service-instance-card/service-instance-card.component';
 
 @Injectable()
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
@@ -135,7 +137,10 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     noEntries: 'There are no applications'
   };
   enableTextFilter = true;
-  cardComponent = CardAppComponent;
+  cardComponent = new CardMultiActionComponents({
+    [applicationSchemaKey]: CardAppComponent,
+    [userProvidedServiceInstanceSchemaKey]: ServiceInstanceCardComponent
+  });
   defaultView = 'cards' as ListView;
 
   getGlobalActions = () => null;

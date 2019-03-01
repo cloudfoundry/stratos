@@ -11,7 +11,7 @@ import {
 import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { ActionSchemaConfig, Multi̦Actio̦nConfig } from '../../data-sources-controllers/list-data-source-config';
+import { ActionSchemaConfig, MultiActionConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
 
 
@@ -33,7 +33,7 @@ export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> 
         'User Provided'
       ),
     ];
-    const multiAction = new Multi̦Actio̦nConfig(
+    const multiAction = new MultiActionConfig(
       actionSchemaConfigs,
       'Service Type'
     );

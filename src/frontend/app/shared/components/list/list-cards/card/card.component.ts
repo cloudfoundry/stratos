@@ -1,3 +1,4 @@
+
 import {
   Component,
   ComponentFactoryResolver,
@@ -28,6 +29,7 @@ import {
   AppServiceBindingCardComponent
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
+import { CardMultiActionComponents } from './card.component.types';
 
 export const listCards = [
   CardAppComponent,
@@ -51,7 +53,7 @@ export const listCards = [
 })
 export class CardComponent<T> implements OnInit, OnChanges {
 
-  @Input() component: Type<{}>;
+  @Input() component: Type<CardCell<T>> | CardMultiActionComponents;
   @Input() item: T;
   @Input() dataSource = null as IListDataSource<T>;
 
@@ -66,10 +68,11 @@ export class CardComponent<T> implements OnInit, OnChanges {
     if (!this.component) {
       return;
     }
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
+    const component = this.getComponent(this.component, this.schemaKey);
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     // Add to target to ensure ngcontent is correct in new component
     const componentRef = this.target.createComponent(componentFactory);
-    this.cardComponent = <CardCell<T>>componentRef.instance;
+    this.cardComponent = componentRef.instance as CardCell<T>;
     this.cardComponent.row = this.item;
     this.cardComponent.dataSource = this.dataSource;
     this.cardComponent.schemaKey = this.schemaKey;
@@ -85,5 +88,10 @@ export class CardComponent<T> implements OnInit, OnChanges {
       this.cardComponent.row = row.currentValue;
     }
   }
-
+  private getComponent(component: Type<CardCell<T>> | CardMultiActionComponents, schemaKey: string) {
+    if (component instanceof CardMultiActionComponents) {
+      return component.getComponent(schemaKey);
+    }
+    return component;
+  }
 }

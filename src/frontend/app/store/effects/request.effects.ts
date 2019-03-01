@@ -80,8 +80,6 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
-          const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
             started: false,
             completed: Promise.resolve(apiResponse),

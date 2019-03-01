@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { normalize, Schema } from 'normalizr';
+import { normalize, Schema, schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -551,9 +551,8 @@ export class APIEffect {
 
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
-      const relationInfo = listEntityRelations(
-        action as EntityInlineParentAction,
-      );
+      const relationInfo = this.getEntityRelations(action);
+      console.log(relationInfo);
       options.params = options.params || new URLSearchParams();
       if (relationInfo.maxDepth > 0) {
         options.params.set(
@@ -568,6 +567,28 @@ export class APIEffect {
         );
       }
     }
+  }
+
+  private getEntityRelations(action: any) {
+    if (action.__forcedPageSchemaKey__) {
+      console.log(action.__forcedPageSchemaKey__)
+      const forcedSchema = entityFactory(action.__forcedPageSchemaKey__);
+      console.log({
+        ...action,
+        entity: forcedSchema,
+        entityKey: forcedSchema.key
+      });
+      return listEntityRelations(
+        {
+          ...action,
+          schema: forcedSchema,
+          entityKey: forcedSchema.key
+        }
+      );
+    }
+    return listEntityRelations(
+      action as EntityInlineParentAction,
+    );
   }
 
   private setRequestParams(

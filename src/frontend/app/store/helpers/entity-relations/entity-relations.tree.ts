@@ -1,6 +1,6 @@
 import { schema } from 'normalizr';
 
-import { EntitySchema } from '../entity-factory';
+import { EntitySchema, entityFactory } from '../entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
 
 const entityTreeCache: {
@@ -17,7 +17,7 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
   let entity = action.entity;
-  const isArray = entity['length'] > 0;
+  const isArray = Array.isArray(entity);
   entity = isArray ? entity[0] : entity;
   const entityKey = entity['key'];
   const cacheKey = generateCacheKey(entityKey, action);
@@ -30,8 +30,9 @@ export function fetchEntityTree(action: EntityInlineParentAction, fromCache = tr
 }
 
 function createEntityTree(entity: EntitySchema, isArray: boolean) {
+
   const rootEntityRelation = new EntityTreeRelation(
-    entity as EntitySchema,
+    entity,
     isArray,
     null,
     '',
@@ -42,17 +43,26 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
     rootRelation: rootEntityRelation,
     requiredParamNames: new Array<string>(),
   };
+  //123
   buildEntityTree(entityTree, rootEntityRelation);
+  // if (rootEntityRelation.entity.key === 'userProvidedServiceInstance') {
+  //   console.log(rootEntityRelation.entity.key)
+  //   console.log(rootEntityRelation)
+  //   console.log(entityTree);
+  // }
   return entityTree;
 }
 
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity['schema'];
+
   Object.keys(rootEntitySchema).forEach(key => {
     let value = rootEntitySchema[key];
     const isArray = value['length'] > 0;
     value = isArray ? value[0] : value;
-
+    if (entityRelation.entity.key === 'userProvidedServiceInstance') {
+      // debugger;
+    }
     const newPath = path ? path + '.' + key : key;
     if (value instanceof schema.Entity) {
       const newEntityRelation = new EntityTreeRelation(
@@ -68,6 +78,10 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
       buildEntityTree(tree, entityRelation, value, newPath);
     }
   });
+  // if (entityRelation.entity.key === 'userProvidedServiceInstance') {
+  //   console.log('rootEntitySchema');
+  //   console.log(rootEntitySchema);
+  // }
 }
 
 export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [], )
@@ -89,6 +103,11 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
   if (entityRelation.childRelations.length) {
     tree.maxDepth = tree.maxDepth || 0;
     tree.maxDepth++;
+  }
+  if (entityRelation.entity.key === 'userProvidedServiceInstance') {
+    debugger;
+    console.log('newChildRelations');
+    console.log(newChildRelations);
   }
   return newChildRelations;
 }

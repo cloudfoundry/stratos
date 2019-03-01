@@ -11,10 +11,10 @@ import { CreatePagination } from '../../../../../store/actions/pagination.action
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
-  entityFactory,
   organizationSchemaKey,
   routeSchemaKey,
   spaceSchemaKey,
+  userProvidedServiceInstanceSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -23,6 +23,8 @@ import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-or
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
+import { GetAllUserProvidedServices } from '../../../../../store/actions/user-provided-service.actions';
+import { ActionSchemaConfig, MultiActionConfig } from '../../data-sources-controllers/list-data-source-config';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
   return new GetAllApplications(paginationKey, null, [
@@ -66,10 +68,28 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
     }
 
+    const userProvidedAction = new GetAllUserProvidedServices();
+    const actionSchemaConfigs = [
+      new ActionSchemaConfig(
+        action,
+        applicationSchemaKey,
+        'Cloud Foundry Applications'
+      ),
+      new ActionSchemaConfig(
+        userProvidedAction,
+        userProvidedServiceInstanceSchemaKey,
+        'User Provided'
+      ),
+    ];
+    const multiAction = new MultiActionConfig(
+      actionSchemaConfigs,
+      'Type'
+    );
+
     super({
       store,
       action,
-      schema: entityFactory(applicationSchemaKey),
+      schema: multiAction,
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

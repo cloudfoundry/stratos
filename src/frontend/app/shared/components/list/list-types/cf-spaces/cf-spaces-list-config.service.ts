@@ -14,7 +14,7 @@ import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
 
 @Injectable()
-export class CfSpacesListConfigService implements IListConfig<APIResource> {
+export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace>> {
   viewType = ListViewTypes.CARD_ONLY;
   dataSource: CfSpacesDataSourceService;
   cardComponent = CfSpaceCardComponent;
