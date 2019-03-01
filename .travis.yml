@@ -45,7 +45,7 @@ jobs:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
-  - name: Frontend Unit Tests
+    name: Frontend Unit Tests
     env:
     - CI_ENV=true
     script:
