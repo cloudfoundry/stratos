@@ -5,20 +5,21 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { CoreModule } from '../../../core/core.module';
+import { ListView } from '../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
 import { CfEndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-card/cf-endpoint-card.component';
+import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { ListView } from '../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 class MockedNgZone {
   run = fn => fn();
@@ -58,6 +59,7 @@ describe('ListComponent', () => {
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
           // Fun fact, NgZone will execute something on import which causes an undefined error
           { provide: MockedNgZone, useValue: new MockedNgZone },
+          EndpointListHelper
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone) => {
@@ -119,7 +121,8 @@ describe('ListComponent', () => {
           { provide: ListConfig, useClass: EndpointsListConfigService },
           ApplicationStateService,
           PaginationMonitorFactory,
-          EntityMonitorFactory
+          EntityMonitorFactory,
+          EndpointListHelper
         ],
         imports: [
           CoreModule,

@@ -72,6 +72,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   ngOnInit() {
     this.favorite = getFavoriteFromEndpointEntity(this.row);
+    const e = getEndpointType(this.pRow.cnsi_type);
+    this.hasDetails = !!e.listDetailsComponent;
   }
 
   getLinkForEndpoint() {
@@ -97,7 +99,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     const e = getEndpointType(this.pRow.cnsi_type);
     if (!e.listDetailsComponent) {
-      this.hasDetails = false;
       return;
     }
 
