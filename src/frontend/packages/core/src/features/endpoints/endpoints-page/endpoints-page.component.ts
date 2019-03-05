@@ -1,18 +1,23 @@
-import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
+import { delay, filter, first, map } from 'rxjs/operators';
 
+import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { queryParamMap } from '../../../core/auth-guard.service';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { EndpointsService } from '../../../core/endpoints.service';
+import {
+  getActionsFromExtensions,
+  StratosActionMetadata,
+  StratosActionType,
+} from '../../../core/extension/extension-service';
+import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { Subscription, } from 'rxjs';
-import { queryParamMap } from '../../../core/auth-guard.service';
-import { delay, first, map, filter } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { StratosActionType, getActionsFromExtensions, StratosActionMetadata } from '../../../core/extension/extension-service';
-import { AppState } from '../../../../../store/src/app-state';
-import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -21,7 +26,7 @@ import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions'
   providers: [{
     provide: ListConfig,
     useClass: EndpointsListConfigService,
-  }]
+  }, EndpointListHelper]
 })
 
 export class EndpointsPageComponent implements OnDestroy, OnInit {

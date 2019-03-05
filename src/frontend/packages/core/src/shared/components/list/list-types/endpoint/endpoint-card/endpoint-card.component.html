@@ -1,4 +1,5 @@
-<app-meta-card class="endpoint-card" [routerLink]="getLinkForEndpoint(row)" [status$]="status$"  [favorite]="favorite" [statusIcon]="false" [actionMenu]="cardMenu">
+<app-meta-card class="endpoint-card" [routerLink]="getLinkForEndpoint()" [status$]="status$" [favorite]="favorite"
+  [statusIcon]="false" [actionMenu]="cardMenu">
   <app-meta-card-title class="endpoint__title">
     <app-multiline-title class="endpoint__title-link">{{ row?.name }}</app-multiline-title>
   </app-meta-card-title>
@@ -11,4 +12,3 @@
     <app-meta-card-value>{{ address }}</app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>
-// TODO: RC actions
