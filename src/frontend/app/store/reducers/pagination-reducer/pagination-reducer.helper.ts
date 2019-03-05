@@ -249,7 +249,7 @@ function getObservables<T = any>(
             lastValidationFootprint = newValidationFootprint;
             arrayAction.forEach(action => store.dispatch(new ValidateEntitiesStart(
               action,
-              pagination.ids[pagination.currentPage],
+              pagination.ids[action.__forcedPageNumber__ || pagination.currentPage],
               false
             )));
           }

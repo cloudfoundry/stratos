@@ -20,7 +20,7 @@ import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import { EntitySchema, entityFactory } from '../entity-factory';
+import { entityFactory, EntitySchema } from '../entity-factory';
 import { pick } from '../reducer.helper';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
@@ -423,6 +423,14 @@ function handleValidationLoopResults(
  * @returns {ValidationResult}
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
+  if (config.action['__forcedPageSchemaKey__']) {
+    const forcedSchema = entityFactory(config.action['__forcedPageSchemaKey__']);
+    config.action = {
+      ...config.action,
+      entity: [forcedSchema],
+      entityKey: forcedSchema.key
+    }
+  }
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
   const { action, populateMissing, newEntities, allEntities, store, parentEntities } = config;
   if (!action.entity || !parentEntities || parentEntities.length === 0) {

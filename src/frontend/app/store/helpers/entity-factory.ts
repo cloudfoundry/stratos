@@ -397,7 +397,7 @@ entityCache[cfUserSchemaKey] = CFUserSchema;
 
 const UserProvidedServiceInstanceSchema = new EntitySchema(userProvidedServiceInstanceSchemaKey, {
   entity: {
-    space: SpaceEmptySchema,
+    space: SpaceWithOrgsEntitySchema,
     service_bindings: [ServiceBindingsSchema],
     routes: [RouteSchema]
   }

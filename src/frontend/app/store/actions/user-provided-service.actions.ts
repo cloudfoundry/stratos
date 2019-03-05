@@ -1,19 +1,35 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { endpointSchemaKey, entityFactory, spaceSchemaKey, userProvidedServiceInstanceSchemaKey } from '../helpers/entity-factory';
 import {
+  applicationSchemaKey,
+  endpointSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  serviceBindingSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+  userProvidedServiceInstanceSchemaKey,
+} from '../helpers/entity-factory';
+import {
+  createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
 } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { getServiceInstanceRelations } from './service-instances.actions';
+
+export const getUserProvidedServiceInstanceRelations = [
+  createEntityRelationKey(userProvidedServiceInstanceSchemaKey, spaceWithOrgKey),
+  createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+  createEntityRelationKey(userProvidedServiceInstanceSchemaKey, serviceBindingSchemaKey),
+  createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+];
 
 export class GetAllUserProvidedServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string = null,
-    public includeRelations: string[] = getServiceInstanceRelations,
+    public includeRelations: string[] = getUserProvidedServiceInstanceRelations,
     public populateMissing = true,
     public spaceGuid?: string
   ) {
