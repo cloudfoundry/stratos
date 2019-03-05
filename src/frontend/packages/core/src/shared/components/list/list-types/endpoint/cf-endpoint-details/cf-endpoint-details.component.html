@@ -1,0 +1,7 @@
+<div class="cf-details" *ngIf="row?.user as user else noUser">
+  <div class="cf-details__row" [ngClass]="{'cf-details__row-space': spaceBetween}"><span class="cf-details__title">Username: </span>{{ row.user.name}}</div>
+  <div class="cf-details__row" [ngClass]="{'cf-details__row-space': spaceBetween}"><span class="cf-details__title">Admin: </span>
+    <app-boolean-indicator [isTrue]="row.user.admin" type="yes-no"></app-boolean-indicator>
+  </div>
+</div>
+<ng-template #noUser>-</ng-template>

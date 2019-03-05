@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -94,6 +93,7 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -149,8 +149,8 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 
+/* tslint:disable:max-line-length */
 
 @NgModule({
   imports: [
@@ -266,7 +266,7 @@ import { EndpointCardComponent } from './components/list/list-types/endpoint/end
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
     MultilineTitleComponent,
-    EndpointCardComponent
+    EndpointCardComponent,
   ],
   exports: [
     FormsModule,

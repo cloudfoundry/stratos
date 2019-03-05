@@ -1,7 +1,9 @@
-<app-meta-card class="endpoint-card" [routerLink]="getLinkForEndpoint()" [status$]="status$" [favorite]="favorite"
-  [statusIcon]="false" [actionMenu]="cardMenu">
-  <app-meta-card-title class="endpoint__title">
-    <app-multiline-title class="endpoint__title-link">{{ row?.name }}</app-multiline-title>
+<app-meta-card class="endpoint-card" [routerLink]="getLinkForEndpoint()" [status$]="status$" [favorite]="favorite" [statusIcon]="false" [actionMenu]="cardMenu">
+  <app-meta-card-title>
+    <div class="endpoint-card__title">
+      <mat-icon [fontSet]="icon.font" matTooltip="{{ type }}">{{icon.name}}</mat-icon>
+      <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
+    </div>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Type</app-meta-card-key>
@@ -10,5 +12,11 @@
   <app-meta-card-item>
     <app-meta-card-key>Address</app-meta-card-key>
     <app-meta-card-value>{{ address }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="hasDetails" customStyle="row-top">
+    <app-meta-card-key>Details</app-meta-card-key>
+    <app-meta-card-value>
+      <div #endpointDetails></div>
+    </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

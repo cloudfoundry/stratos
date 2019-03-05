@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustom } from '../../../list.types';
-import { getEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-endpoint-name',
@@ -16,6 +15,9 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
   @Input('row')
   set row(row: EndpointModel) {
     this._row = row;
+  }
+  get row(): EndpointModel {
+    return this._row;
   }
 
   getLinkForEndpoint(row = this._row) {

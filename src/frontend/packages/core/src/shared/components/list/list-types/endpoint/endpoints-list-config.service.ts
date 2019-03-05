@@ -5,11 +5,7 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../store/src/types/user-favorites.types';
-import {
-  getEndpointUsername,
-  getFullEndpointApiUrl,
-  getNameForEndpointType,
-} from '../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getNameForEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
@@ -19,7 +15,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
-import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
@@ -64,30 +60,6 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
     cellFlex: '2'
   },
   {
-    columnId: 'username',
-    headerCell: () => 'Username',
-    cellDefinition: {
-      getValue: getEndpointUsername
-    },
-    sort: {
-      type: 'sort',
-      orderKey: 'username',
-      field: 'user.name'
-    },
-    cellFlex: '2'
-  },
-  {
-    columnId: 'user-type',
-    headerCell: () => 'Admin',
-    cellComponent: TableCellEndpointIsAdminComponent,
-    sort: {
-      type: 'sort',
-      orderKey: 'user-type',
-      field: 'user.admin'
-    },
-    cellFlex: '2'
-  },
-  {
     columnId: 'address',
     headerCell: () => 'Address',
     cellDefinition: {
@@ -100,6 +72,12 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
     },
     cellFlex: '5'
   },
+  {
+    columnId: 'details',
+    headerCell: () => 'Details',
+    cellComponent: TableCellEndpointDetailsComponent,
+    cellFlex: '4'
+  }
 ];
 
 @Injectable()

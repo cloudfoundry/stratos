@@ -3,4 +3,12 @@
   &:focus {
     outline: 0;
   }
+
+  &__title {
+    align-items: center;
+    display: flex;
+    mat-icon {
+      padding-right: 10px;
+    }
+  }
 }
