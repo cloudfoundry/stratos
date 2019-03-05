@@ -4,7 +4,7 @@
     <app-multiline-title class="service-instance-card__title">{{ serviceInstanceEntity.entity.name }}
     </app-multiline-title>
   </app-meta-card-title>
-  <!-- <app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Space</app-meta-card-key>
     <app-meta-card-value>
       <a [routerLink]="getSpaceURL()" [queryParams]="getSpaceBreadcrumbs()">{{ getSpaceName() }}</a>
@@ -26,7 +26,7 @@
     <app-meta-card-key>Last Updated</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.last_operation?.updated_at | date:'medium' }}
     </app-meta-card-value>
-  </app-meta-card-item> -->
+  </app-meta-card-item>
   <app-meta-card-item *ngIf="!userProvided">
     <app-meta-card-key>Dashboard</app-meta-card-key>
     <app-meta-card-value>
@@ -43,11 +43,22 @@
       <ng-template #none>None</ng-template>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="!userProvided">
+  <app-meta-card-item *ngIf="userProvided">
+    <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceInstanceEntity.entity.syslog_drain_url || 'None' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="userProvided">
+    <app-meta-card-key>Route Service URL</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceInstanceEntity.entity.route_service_url  || 'None' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
       <app-chips [chips]="serviceInstanceTags"></app-chips>
     </app-meta-card-value>
   </app-meta-card-item>
-
 </app-meta-card>

@@ -22,6 +22,7 @@ import { StepOnNextResult } from '../../stepper/step/step.component';
 import { EntityService } from './../../../../core/entity-service';
 import { serviceSchemaKey } from './../../../../store/helpers/entity-factory';
 import { APIResource } from './../../../../store/types/api.types';
+import { MatChipInputEvent } from '@angular/material';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -36,6 +37,7 @@ export class SpecifyUserProvidedDetailsComponent {
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
+  public tags: { label: string }[] = [];
 
   @Input()
   public cfGuid: string;
@@ -52,8 +54,10 @@ export class SpecifyUserProvidedDetailsComponent {
     this.isUpdate = endpointId && serviceInstanceId;
     this.formGroup = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-      syslogDrainUrl: new FormControl('', [Validators.pattern(urlValidationExpression)]),
+      syslog_drain_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
       credentials: new FormControl('', isValidJsonValidator()),
+      route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
+      tags: new FormControl([]),
     });
     if (this.isUpdate) {
       this.formGroup.disable();
@@ -78,9 +82,11 @@ export class SpecifyUserProvidedDetailsComponent {
           this.formGroup.enable();
           const serviceEntity = entity.entity;
           this.formGroup.setValue({
-            name: entity.entity.name,
-            syslogDrainUrl: entity.entity.syslog_drain_url,
-            credentials: JSON.stringify(serviceEntity.credentials)
+            name: serviceEntity.name,
+            syslog_drain_url: serviceEntity.syslog_drain_url,
+            credentials: JSON.stringify(serviceEntity.credentials),
+            route_service_url: serviceEntity.route_service_url,
+            tags: this.tagsArrayToChips(serviceEntity.tags),
           });
         });
     }
@@ -104,16 +110,19 @@ export class SpecifyUserProvidedDetailsComponent {
     );
   }
 
-  onNext = (): Observable<StepOnNextResult> => {
+  public onNext = (): Observable<StepOnNextResult> => {
     return this.isUpdate ? this.onNextUpdate() : this.onNextCreate();
   }
 
-  onNextCreate() {
+  private onNextCreate() {
     const data = {
       ...this.formGroup.value,
       spaceGuid: this.spaceGuid
     };
     data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
+
+    data.tags = this.getTagsArray();
+    debugger;
     const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
     const action = new CreateUserProvidedServiceInstance(
       this.cfGuid,
@@ -136,7 +145,7 @@ export class SpecifyUserProvidedDetailsComponent {
     );
   }
 
-  onNextUpdate() {
+  private onNextUpdate() {
     const updateData = this.formGroup.value;
     updateData.credentials = updateData.credentials ? JSON.parse(updateData.credentials) : {};
     const updateAction = new UpdateUserProvidedServiceInstance(
@@ -162,4 +171,36 @@ export class SpecifyUserProvidedDetailsComponent {
       }))
     );
   }
+
+  private getTagsArray() {
+    return this.tags && Array.isArray(this.tags) ? this.tags.map(tag => tag.label) : [];
+  }
+
+  private tagsArrayToChips(tagsArray: string[]) {
+    return tagsArray && Array.isArray(tagsArray) ? tagsArray.map(label => ({ label })) : [];
+  }
+
+
+  public addTag(event: MatChipInputEvent): void {
+    const input = event.input;
+
+    const label = (event.value || '').trim();
+    if (label) {
+      console.log(label)
+      this.tags.push({ label });
+    }
+
+    if (input) {
+      input.value = '';
+    }
+  }
+
+  public removeTag(tag: any): void {
+    const index = this.tags.indexOf(tag);
+
+    if (index >= 0) {
+      this.tags.splice(index, 1);
+    }
+  }
+
 }

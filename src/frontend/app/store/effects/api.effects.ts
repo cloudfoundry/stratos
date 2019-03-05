@@ -552,7 +552,6 @@ export class APIEffect {
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
       const relationInfo = this.getEntityRelations(action);
-      console.log(relationInfo);
       options.params = options.params || new URLSearchParams();
       if (relationInfo.maxDepth > 0) {
         options.params.set(
@@ -571,13 +570,7 @@ export class APIEffect {
 
   private getEntityRelations(action: any) {
     if (action.__forcedPageSchemaKey__) {
-      console.log(action.__forcedPageSchemaKey__)
       const forcedSchema = entityFactory(action.__forcedPageSchemaKey__);
-      console.log({
-        ...action,
-        entity: forcedSchema,
-        entityKey: forcedSchema.key
-      });
       return listEntityRelations(
         {
           ...action,

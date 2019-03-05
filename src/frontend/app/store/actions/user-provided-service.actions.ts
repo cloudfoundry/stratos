@@ -69,10 +69,10 @@ export interface TUserProvidedServiceInstanceDataCredentials {
 export interface IUserProvidedServiceInstanceData {
   spaceGuid: string;
   name: string;
-  routeServiceUrl: string;
-  syslogDrainUrl?: string;
-  tags: string[];
-  credentials: TUserProvidedServiceInstanceDataCredentials;
+  route_service_url?: string;
+  syslog_drain_url?: string;
+  tags?: string[];
+  credentials?: TUserProvidedServiceInstanceDataCredentials;
 }
 
 export class CreateUserProvidedServiceInstance extends CFStartAction implements ICFAction {
@@ -92,7 +92,8 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       spaceGuid: space_guid,
       name,
       credentials = {},
-      syslogDrainUrl: syslog_drain_url,
+      syslog_drain_url,
+      route_service_url,
       tags = []
     } = data;
     // TODO: RC Test empty values
@@ -101,6 +102,7 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       name,
       credentials,
       syslog_drain_url,
+      route_service_url,
       tags
     };
   }

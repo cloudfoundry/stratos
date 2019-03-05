@@ -60,9 +60,6 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
     let value = rootEntitySchema[key];
     const isArray = value['length'] > 0;
     value = isArray ? value[0] : value;
-    if (entityRelation.entity.key === 'userProvidedServiceInstance') {
-      // debugger;
-    }
     const newPath = path ? path + '.' + key : key;
     if (value instanceof schema.Entity) {
       const newEntityRelation = new EntityTreeRelation(
@@ -105,7 +102,6 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
     tree.maxDepth++;
   }
   if (entityRelation.entity.key === 'userProvidedServiceInstance') {
-    debugger;
     console.log('newChildRelations');
     console.log(newChildRelations);
   }
