@@ -130,7 +130,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     const {
       name,
       credentials = {},
-      syslogDrainUrl: syslog_drain_url,
+      syslog_drain_url,
       tags = []
     } = data;
     if (name) {
