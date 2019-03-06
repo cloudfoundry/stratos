@@ -29,30 +29,30 @@ app-tile-grid {
 
 .autoscaler-chart-gauge {
   display: inline-block;
+  height: 250px;
   margin-top: 1em;
   width: 20%;
-  height: 250px;
 }
 
 .autoscaler-chart-bar {
   display: inline-block;
+  height: 250px;
   margin-top: 1em;
   width: 80%;
-  height: 250px;
 }
 
 .autoscaler-chart-bar-combo {
-  width: 75%;
-  height: 250px;
   display: inline-block;
+  height: 250px;
   margin-top: 1em;
+  width: 75%;
 }
 
 .autoscaler-chart-bar-legend {
-  position: absolute;
   display: inline-block;
-  margin-top: 1em;
   margin-left: 1.75em;
+  margin-top: 1em;
+  position: absolute;
 }
 
 .autoscaler-metric-subtitle {

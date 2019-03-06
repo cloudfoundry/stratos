@@ -8,7 +8,7 @@ import {
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerInsMetricSchemaKey,
-} from '../../../../../../store/helpers/entity-factory';
+} from '../../../../../../../../store/src/helpers/entity-factory';
 import { ApplicationService } from '../../../../application.service';
 import {
   GetAppAutoscalerPolicyAction,
@@ -17,21 +17,21 @@ import {
   GetAppAutoscalerInsMetricAction,
   UpdateAppAutoscalerPolicyAction,
   DetachAppAutoscalerPolicyAction,
-} from '../../../../../../store/actions/app-autoscaler.actions';
+} from '../../../../../../../../store/src/actions/app-autoscaler.actions';
 import {
   AppAutoscalerPolicy,
   AppAutoscalerScalingHistory,
   AppAutoscalerAppMetric,
   AppAutoscalerInsMetric
-} from '../../../../../../store/types/app-autoscaler.types';
+} from '../../../../../../../../store/src/types/app-autoscaler.types';
 import { map, filter, distinctUntilChanged, first } from 'rxjs/operators';
-import { getPaginationObservables } from '../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/app-state';
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { ActionState } from '../../../../../../store/reducers/api-request-reducer/types';
-import { selectUpdateInfo } from '../../../../../../store/selectors/api.selectors';
+import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
+import { selectUpdateInfo } from '../../../../../../../../store/src/selectors/api.selectors';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
@@ -41,8 +41,8 @@ import {
   CfAppRoutesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { CfOrgSpaceDataService } from '../../../../../../shared/data-services/cf-org-space-service.service';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { MetricTypes } from '../../../../../../store/helpers/autoscaler-helpers';
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { MetricTypes } from '../../../../../../../../store/src/helpers/autoscaler-helpers';
 
 @Component({
   selector: 'app-autoscaler-tab',
