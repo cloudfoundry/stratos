@@ -92,6 +92,9 @@ export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implemen
     public params?,
   ) {
     super();
+    this.query = {
+      metric: 'history'
+    };
   }
   actions = [
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY,
@@ -108,6 +111,8 @@ export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implemen
     'start-time': 0,
     'end-time': (new Date()).getTime().toString() + '000000',
   };
+  query: any;
+  windowValue: string;
 }
 
 export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {

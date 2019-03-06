@@ -1,3 +1,4 @@
+// import * as moment from 'moment';
 import moment from 'moment-timezone';
 
 export const PolicyDefaultSetting = {
@@ -14,32 +15,20 @@ export const MomentFormateTimeS = 'HH:mm:ss';
 
 export const metricMap = {
   memoryused: {
-    unit: 'metric_unit_mb',
     unit_internal: 'MB',
-    type: 'value',
-    type_string: 'metric_type_memoryused',
-    interval: 15,
+    interval: 40,
   },
   memoryutil: {
-    unit: 'metric_unit_percentage',
-    unit_internal: 'percent',
-    type: 'percentage',
-    type_string: 'metric_type_memoryutil',
-    interval: 15,
+    unit_internal: '%',
+    interval: 40,
   },
   responsetime: {
-    unit: 'metric_unit_ms',
     unit_internal: 'ms',
-    type: 'value',
-    type_string: 'metric_type_responsetime',
-    interval: 30,
+    interval: 40,
   },
   throughput: {
-    unit: 'metric_unit_rps',
-    unit_internal: 'RPS',
-    type: 'value',
-    type_string: 'metric_type_throughput',
-    interval: 30,
+    unit_internal: 'rps',
+    interval: 40,
   }
 };
 
@@ -98,7 +87,7 @@ function setUpperColor(array) {
         color10 = max;
       }
       // let color16 = color10.toString(16)
-      // if (color16.length == 1) color16 = '0' + color16
+      // if (color16.length === 1) color16 = '0' + color16
       array[i].color = 'rgba(255, ' + color10 + ', 0, 0.6)'; // '#ff' + color16 + '00'
     }
   }
@@ -118,7 +107,7 @@ function setLowerColor(array) {
         color10 = min;
       }
       // let color16 = color10.toString(16)
-      // if (color16.length == 1) color16 = '0' + color16
+      // if (color16.length === 1) color16 = '0' + color16
       array[i].color = 'rgba(51, ' + color10 + ', 255, 0.6)'; // '#33' + color16 + 'ff'
     }
   }
@@ -204,22 +193,16 @@ function deleteIf(fatherEntity, childName, condition) {
   }
 }
 
-export function buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger) {
-  const result = {
+function initMeticData(metricName) {
+  return {
     latest: {
       target: [{
         name: metricName,
-        value: 0
-      }, {
-        name: '',
         value: 0
       }],
       colorTarget: [
         {
           name: metricName,
-          value: 'rgba(0,0,0,0.2)'
-        }, {
-          name: '',
           value: 'rgba(0,0,0,0.2)'
         }
       ]
@@ -228,73 +211,71 @@ export function buildMetricData(metricName, data, startTime, endTime, skipFormat
       target: [],
       colorTarget: []
     },
-    unit: '',
-    maxValue: 0,
+    markline: [],
+    unit: metricMap[metricName]['unit_internal'],
     chartMaxValue: 0,
   };
+}
+
+export function buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger) {
+  const result = initMeticData(metricName);
   if (data.resources.length > 0) {
     const basicInfo = getMetricBasicInfo(metricName, data.resources, trigger);
     result.unit = basicInfo.unit;
-    result.maxValue = basicInfo.maxValue;
     result.chartMaxValue = basicInfo.chartMaxValue;
     if (!skipFormat) {
-      const transformed = transformMetricData(data.resources, basicInfo.interval, startTime, endTime, trigger);
+      startTime = Math.round(startTime / S2NS);
+      endTime = Math.round(endTime / S2NS);
+      const target = transformMetricData(data.resources, basicInfo.interval, startTime, endTime);
+      const colorTarget = buildMetricColorData(target, trigger);
       result.formated = {
-        target: transformed['target'],
-        colorTarget: transformed['colorTarget']
+        target: target,
+        colorTarget
       };
+      result.markline = buildMarkLineData(target, trigger);
     }
-    result.latest = {
-      target: [{
-        name: metricName,
-        value: data.resources[data.resources.length - 1].value
-      }, {
-        name: '',
-        value: basicInfo.chartMaxValue - data.resources[data.resources.length - 1].value
-      }],
-      colorTarget: [
-        {
-          name: metricName,
-          value: getColor(trigger, data.resources[data.resources.length - 1].value)
-        }, {
-          name: '',
-          value: 'rgba(0,0,0,0.2)'
-        }
-      ]
-    };
+    result.latest.target = [{
+      name: metricName,
+      value: Number(data.resources[data.resources.length - 1].value)
+    }];
+    result.latest.colorTarget = buildMetricColorData(result.latest.target, trigger);
   }
   return result;
 }
 
-function transformMetricData(source, interval, startTime, endTime, trigger) {
-  startTime = Math.round(startTime / S2NS);
-  endTime = Math.round(endTime / S2NS);
+export function insertEmptyMetrics(data, startTime, endTime, interval) {
+  const insertEmptyNumber = Math.floor((endTime - startTime) / interval) + 1;
+  for (let i = 0; i < insertEmptyNumber; i++) {
+    const emptyMetric = buildSingleMetricData(startTime + i * interval, 0);
+    if (interval < 0) {
+      data.unshift(emptyMetric);
+    } else {
+      data.push(emptyMetric);
+    }
+  }
+  return data;
+}
+
+function buildSingleMetricData(timestamp, value) {
+  return {
+    time: timestamp,
+    name: moment(timestamp * 1000).format(MomentFormateTimeS),
+    value
+  };
+}
+
+function transformMetricData(source, interval, startTime, endTime) {
   if (source.length === 0) {
     return [];
   }
   const scope = Math.round(interval / 2);
   const target = [];
   let targetTimestamp = Math.round(source[0].timestamp / S2NS);
-  let targetIndex = 0;
-
-  const insertEmptyNumber = Math.floor((targetTimestamp - startTime) / interval);
-  const startTimestamp = targetTimestamp - insertEmptyNumber * interval;
-  for (; targetIndex < insertEmptyNumber; targetIndex++) {
-    target[targetIndex] = {
-      time: startTimestamp + targetIndex * interval,
-      name: moment((startTimestamp + targetIndex * interval) * 1000).format(MomentFormateTimeS),
-      value: 0
-    };
-  }
-
+  let targetIndex = insertEmptyMetrics(target, targetTimestamp - interval, startTime, -interval).length;
   let sourceIndex = 0;
   while (sourceIndex < source.length) {
     if (!target[targetIndex]) {
-      target[targetIndex] = {
-        time: targetTimestamp,
-        name: moment(targetTimestamp * 1000).format(MomentFormateTimeS),
-        value: 0
-      };
+      target[targetIndex] = buildSingleMetricData(targetTimestamp, 0);
     }
     const metric = source[sourceIndex];
     const sourceTimestamp = Math.round(metric.timestamp / S2NS);
@@ -304,109 +285,232 @@ function transformMetricData(source, interval, startTime, endTime, trigger) {
       targetIndex++;
       targetTimestamp += interval;
     } else {
-      target[targetIndex]['value'] = parseInt(metric.value, 10);
+      target[targetIndex]['value'] = Number(metric.value);
       sourceIndex++;
     }
   }
-  let currentLatestTime = target[targetIndex].time + interval;
-  while (currentLatestTime < endTime) {
-    target.push({
-      time: currentLatestTime,
-      name: moment(currentLatestTime * 1000).format(MomentFormateTimeS),
-      value: 0
-    });
-    currentLatestTime = currentLatestTime + interval;
-  }
+  return insertEmptyMetrics(target, target[targetIndex].time + interval, endTime, interval);
+}
+
+function buildMetricColorData(metricData, trigger) {
   const colorTarget = [];
-  target.map((cell) => {
+  metricData.map((item) => {
     colorTarget.push({
-      name: cell.name,
-      value: getColor(trigger, cell.value),
+      name: item.name,
+      value: getColor(trigger, item.value),
     });
   });
-  return {
-    target,
-    colorTarget
-  };
+  if (trigger.upper && trigger.upper.length > 0) {
+    buildSingleColor(colorTarget, trigger.upper);
+  }
+  if (trigger.lower && trigger.lower.length > 0) {
+    buildSingleColor(colorTarget, trigger.lower);
+  }
+  return colorTarget;
+}
+
+function buildSingleColor(lineChartSeries, ul) {
+  ul.map((item) => {
+    const lineData = {
+      name: `${item.operator} ${item.threshold}`,
+      value: item.color
+    };
+    lineChartSeries.push(lineData);
+  });
+}
+
+function getOppositeOperator(operator) {
+  switch (operator) {
+    case '>':
+      return '<=';
+    case '>=':
+      return '<';
+    case '<':
+      return '>=';
+    default:
+      return '>';
+  }
+}
+
+function getRightOperator(operator) {
+  switch (operator) {
+    case '>':
+      return '<=';
+    case '>=':
+      return '<';
+    default:
+      return operator;
+  }
+}
+
+function getLeftOperator(operator) {
+  switch (operator) {
+    case '>':
+      return '<';
+    case '>=':
+      return '<=';
+    case '<':
+      return '<=';
+    default:
+      return '<';
+  }
+}
+
+function buildMarkLineData(metricData, trigger) {
+  const lineChartSeries = [];
+  if (trigger.upper && trigger.upper.length > 0) {
+    buildSingleMarkLine(lineChartSeries, metricData, trigger.upper);
+  }
+  if (trigger.lower && trigger.lower.length > 0) {
+    buildSingleMarkLine(lineChartSeries, metricData, trigger.lower);
+  }
+  return lineChartSeries;
+}
+
+export function buildLegendData(trigger) {
+  const legendData = [];
+  let latestUl = {};
+  if (trigger.upper && trigger.upper.length > 0) {
+    latestUl = buildUpperLegendData(legendData, trigger.upper, !trigger.lower || trigger.lower.length === 0);
+  }
+  if (trigger.lower && trigger.lower.length > 0) {
+    latestUl = buildLowerLegendData(legendData, trigger.lower, latestUl);
+  }
+  return legendData;
+}
+
+function buildUpperLegendData(legendData, upper, nolower) {
+  let latestUl = {};
+  upper.map((item, index) => {
+    let name = '';
+    if (index === 0) {
+      name = `${item.metric_type} ${item.operator} ${item.threshold}`;
+    } else {
+      name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
+        metric_type} ${getRightOperator(latestUl['operator'])} ${latestUl['threshold']}`;
+    }
+    legendData.push({
+      name,
+      value: item.color
+    });
+    latestUl = item;
+  });
+  if (nolower) {
+    legendData.push({
+      name: `${upper[0].metric_type} ${getOppositeOperator(latestUl['operator'])} ${latestUl['threshold']}`,
+      value: normalColor
+    });
+  }
+  return latestUl;
+}
+
+function buildLowerLegendData(legendData, lower, latestUl) {
+  lower.map((item, index) => {
+    let name = '';
+    if (!latestUl['threshold']) {
+      name = `${item.metric_type} ${getOppositeOperator(item.operator)} ${item.threshold}`;
+    } else {
+      name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
+        metric_type} ${getRightOperator(latestUl['operator'])} ${latestUl['threshold']}`;
+    }
+    legendData.push({
+      name,
+      value: index === 0 ? normalColor : latestUl.color
+    });
+    latestUl = item;
+  });
+  legendData.push({
+    name: `${lower[0].metric_type} ${latestUl['operator']} ${latestUl['threshold']}`,
+    value: latestUl['color']
+  });
+  return {};
+}
+
+function buildSingleMarkLine(lineChartSeries, metricData, ul) {
+  ul.map((item) => {
+    const lineData = {
+      name: `${item.operator} ${item.threshold}`,
+      series: []
+    };
+    metricData.map((data) => {
+      lineData.series.push({
+        name: data.name,
+        value: item.threshold,
+      });
+    });
+    lineChartSeries.push(lineData);
+  });
 }
 
 function getColor(trigger, value) {
-  if (!isNaN(value)) {
+  let color = normalColor;
+  if (!Number.isNaN(value)) {
     for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
       if (trigger.upper[i].operator === '>=' && value >= trigger.upper[i].threshold) {
-        return trigger.upper[i].color;
+        color = trigger.upper[i].color;
+        break;
       }
       if (trigger.upper[i].operator === '>' && value > trigger.upper[i].threshold) {
-        return trigger.upper[i].color;
+        color = trigger.upper[i].color;
+        break;
       }
     }
     for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
       const index = trigger.lower.length - 1 - i;
       if (trigger.lower[index].operator === '<=' && value <= trigger.lower[index].threshold) {
-        return trigger.lower[index].color;
+        color = trigger.lower[index].color;
+        break;
       }
       if (trigger.lower[index].operator === '<' && value < trigger.lower[index].threshold) {
-        return trigger.lower[index].color;
+        color = trigger.lower[index].color;
+        break;
       }
     }
   }
-  return normalColor;
+  return color;
 }
 
 function getMetricBasicInfo(metricName, source, trigger) {
   const map = {};
   let interval = metricMap[metricName]['interval'];
-  let maxCount = 0;
-  const preTimestampMap = {};
-  let maxIndex = -1;
+  let maxCount = 1, preTimestamp = 0;
   let maxValue = -1;
+  let unit = metricMap[metricName]['unit_internal'];
+  map[interval] = 1;
   for (let i = 0; i < source.length; i++) {
-    maxValue = parseInt(source[i].value, 10) > maxValue ? parseInt(source[i].value, 10) : maxValue;
+    maxValue = Number(source[i].value) > maxValue ? Number(source[i].value) : maxValue;
     const thisTimestamp = Math.round(parseInt(source[i].timestamp, 10) / S2NS);
-    const thisIndex = source[i].instance_index ? source[i].instance_index : 0;
-    if (preTimestampMap[thisIndex] === undefined) {
-      if (thisIndex > maxIndex) {
-        maxIndex = thisIndex;
-      }
-      preTimestampMap[thisIndex] = thisTimestamp;
+    const currentInterval = thisTimestamp - preTimestamp;
+    if (map[currentInterval] === undefined) {
+      map[currentInterval] = 1;
     } else {
-      const currentInterval = thisTimestamp - preTimestampMap[thisIndex];
-      if (map[currentInterval] === undefined) {
-        map[currentInterval] = 1;
-      } else {
-        map[currentInterval]++;
-      }
-      if (map[currentInterval] > maxCount) {
-        interval = currentInterval;
-        maxCount = map[currentInterval];
-      }
-      preTimestampMap[thisIndex] = thisTimestamp;
+      map[currentInterval]++;
     }
+    if (map[currentInterval] > maxCount) {
+      interval = currentInterval;
+      maxCount = map[currentInterval];
+    }
+    preTimestamp = thisTimestamp;
+    unit = source[i].unit === '' ? unit : source[i].unit;
   }
   return {
     interval: interval,
-    maxIndex: maxIndex,
-    unit: source[0].unit,
-    maxValue: maxValue,
+    unit: unit,
     chartMaxValue: getChartMax(trigger, maxValue)
   };
 }
 
 function getChartMax(trigger, maxValue) {
-  let upperThresholdCount = 0;
-  let lowerThresholdCount = 0;
-  let maxThreshold = 0;
+  let thresholdCount = 0, maxThreshold = 0, thresholdmax = 0;
   if (trigger.upper && trigger.upper.length > 0) {
-    upperThresholdCount = trigger.upper.length;
+    thresholdCount += trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;
   }
   if (trigger.lower && trigger.lower.length > 0) {
-    lowerThresholdCount = trigger.lower.length;
+    thresholdCount += trigger.lower.length;
     maxThreshold = trigger.lower[0].threshold > maxThreshold ? trigger.lower[0].threshold : maxThreshold;
   }
-  let thresholdmax = 0;
   if (maxThreshold > 0) {
-    const thresholdCount = upperThresholdCount + lowerThresholdCount;
     thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
   }
   thresholdmax = maxValue > thresholdmax ? maxValue : thresholdmax;

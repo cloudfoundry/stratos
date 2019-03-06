@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { MetricQueryType } from '../../services/metrics-range-selector.types';
+import { MetricQueryType, ITimeRange } from '../../services/metrics-range-selector.types';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
@@ -58,6 +58,19 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
       entityFactory(metricSchemaKey)
     );
     this.rangeSelectorManager.init(this.metricsMonitor, action);
+  }
+
+  @Input()
+  set times(customTimes: ITimeRange[]) {
+    if (customTimes && customTimes.length > 0) {
+      this.rangeSelectorManager.times = customTimes;
+      this.rangeSelectorManager.metricRangeService.times = customTimes;
+    }
+  }
+
+  @Input()
+  set selectedTimeValue(timeValue: string) {
+    this.rangeSelectorManager.metricRangeService.defaultTimeValue = timeValue;
   }
 
   get baseAction() {

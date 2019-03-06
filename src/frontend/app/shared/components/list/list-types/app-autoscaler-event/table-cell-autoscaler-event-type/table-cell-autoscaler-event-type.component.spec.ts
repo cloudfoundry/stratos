@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableCellAutoscalerEventTypeComponent } from './table-cell-event-type.component';
+import { TableCellAutoscalerEventTypeComponent } from './table-cell-autoscaler-event-type.component';
 import { EntityInfo } from '../../../../../../store/types/api.types';
 
 describe('TableCellAutoscalerEventTypeComponent', () => {
