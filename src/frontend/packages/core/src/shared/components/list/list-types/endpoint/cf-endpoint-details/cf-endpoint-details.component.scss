@@ -1,14 +1,7 @@
 .cf-details {
-  padding: 2px 0;
-  text-align: end;
-
-  &__row {
-    display: flex;
-    &-space {
-      justify-content: space-between;
-    }
-  }
-  &__title {
-    padding-right: 5px;
+  align-items: center;
+  display: flex;
+  &__admin {
+    padding-left: 5px;
   }
 }

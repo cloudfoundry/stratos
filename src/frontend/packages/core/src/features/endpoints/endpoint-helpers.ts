@@ -41,6 +41,7 @@ const endpointTypes: EndpointTypeConfig[] = [
     urlValidation: urlValidationExpression,
     icon: 'cloud_foundry',
     iconFont: 'stratos-icons',
+    imagePath: '/core/assets/endpoint-icons/cloudfoundry.png',
     homeLink: (guid) => ['/cloud-foundry', guid],
     listDetailsComponent: CfEndpointDetailsComponent
   },
@@ -48,6 +49,7 @@ const endpointTypes: EndpointTypeConfig[] = [
     value: 'metrics',
     label: 'Metrics',
     allowTokenSharing: true,
+    imagePath: '/core/assets/endpoint-icons/metrics.svg',
     homeLink: (guid) => ['/endpoints/metrics', guid]
   },
 ];

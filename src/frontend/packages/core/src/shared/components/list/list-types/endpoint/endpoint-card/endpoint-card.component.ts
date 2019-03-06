@@ -4,18 +4,16 @@ import { ReplaySubject } from 'rxjs';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
+import { EndpointTypeConfig } from '../../../../../../core/extension/extension-types';
 import { getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
 import {
-  EndpointIcon,
   endpointListDetailsComponents,
   getEndpointType,
   getFullEndpointApiUrl,
-  getIconForEndpoint,
-  getNameForEndpointType,
 } from '../../../../../../features/endpoints/endpoint-helpers';
-import { CardStatus } from '../../../../../shared.types';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { BaseEndpointsDataSource } from '../../cf-endpoints/base-endpoints-data-source';
 import { CfEndpointDetailsComponent } from '../cf-endpoint-details/cf-endpoint-details.component';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 
@@ -27,13 +25,11 @@ import { EndpointListHelper } from '../endpoint-list.helpers';
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit {
 
-  public status$ = new ReplaySubject<CardStatus>();
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite: UserFavoriteEndpoint;
-  public type: string;
   public address: string;
   public cardMenu: MetaCardMenuItem[];
-  public icon: EndpointIcon;
+  public endpointConfig: EndpointTypeConfig;
   public hasDetails = true;
 
   @Input() component: CfEndpointDetailsComponent;
@@ -46,32 +42,40 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
+    if (!row) {
+      return;
+    }
     this.pRow = row;
-    this.type = row ? getNameForEndpointType(row.cnsi_type) : '';
-    this.icon = row ? getIconForEndpoint(row.cnsi_type) : null;
-    this.address = row ? getFullEndpointApiUrl(row) : '';
-    this.status$.next(this.determineEndpointStatus(row));
+    this.endpointConfig = getEndpointType(row.cnsi_type);
+    this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
     this.updateDetails();
+
   }
   get row(): EndpointModel {
     return this.pRow;
   }
 
+  @Input('dataSource')
+  set dataSource(ds: BaseEndpointsDataSource) {
+    if (ds.endpointType !== 'cf' && !this.cardMenu) {
+      this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
+        label: endpointAction.label,
+        action: () => endpointAction.action(this.pRow),
+        can: endpointAction.createVisible(this.rowObs)
+      }));
+    }
+  }
+
   constructor(
-    endpointListHelper: EndpointListHelper,
+    private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver
   ) {
     super();
-    this.cardMenu = endpointListHelper.endpointActions().map(endpointAction => ({
-      label: endpointAction.label,
-      action: () => endpointAction.action(this.pRow),
-      can: endpointAction.createVisible(this.rowObs)
-    }));
   }
 
   ngOnInit() {
-    this.favorite = getFavoriteFromEndpointEntity(this.row);
+    this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
     const e = getEndpointType(this.pRow.cnsi_type);
     this.hasDetails = !!e.listDetailsComponent;
   }
@@ -80,21 +84,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     return EndpointsService.getLinkForEndpoint(this.row);
   }
 
-  determineEndpointStatus(row: EndpointModel): CardStatus {
-    switch (row.connectionStatus) {
-      case 'connected':
-        return CardStatus.OK;
-      case 'disconnected':
-        return CardStatus.TENTATIVE;
-      case 'checking':
-        return CardStatus.BUSY;
-      default:
-        return CardStatus.INCOMPLETE;
-    }
-  }
-
   updateDetails() {
-    if (!this.endpointDetails) {
+    if (!this.endpointDetails || !this.pRow) {
       return;
     }
     const e = getEndpointType(this.pRow.cnsi_type);
@@ -108,6 +99,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.component = componentRef.instance as CfEndpointDetailsComponent;
     }
     this.component.row = this.pRow;
-    this.component.spaceBetween = true;
+    this.component.spaceBetween = false;
   }
 }

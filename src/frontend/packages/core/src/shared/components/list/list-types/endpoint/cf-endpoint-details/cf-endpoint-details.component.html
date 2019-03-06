@@ -1,7 +1,5 @@
 <div class="cf-details" *ngIf="row?.user as user else noUser">
-  <div class="cf-details__row" [ngClass]="{'cf-details__row-space': spaceBetween}"><span class="cf-details__title">Username: </span>{{ row.user.name}}</div>
-  <div class="cf-details__row" [ngClass]="{'cf-details__row-space': spaceBetween}"><span class="cf-details__title">Admin: </span>
-    <app-boolean-indicator [isTrue]="row.user.admin" type="yes-no"></app-boolean-indicator>
-  </div>
+  {{ user.name}}
+  <mat-icon *ngIf="user.admin" fontSet="stratos-icons" matTooltip="Admin" [ngClass]="{'cf-details__admin': spaceBetween}">admin</mat-icon>
 </div>
 <ng-template #noUser>-</ng-template>

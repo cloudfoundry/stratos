@@ -10,5 +10,5 @@ import { TableCellCustom } from '../../../list.types';
 })
 export class CfEndpointDetailsComponent extends TableCellCustom<EndpointModel> {
 
-  @Input() spaceBetween = false;
+  @Input() spaceBetween = true;
 }

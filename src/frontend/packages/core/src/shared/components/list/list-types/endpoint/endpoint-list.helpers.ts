@@ -36,25 +36,6 @@ export class EndpointListHelper {
       {
         action: (item) => {
           const confirmation = new ConfirmationDialogConfig(
-            'Unregister Endpoint',
-            `Are you sure you want to unregister endpoint '${item.name}'?`,
-            'Unregister',
-            true
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-            this.handleDeleteAction(item, ([oldVal, newVal]) => {
-              this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-            });
-          });
-        },
-        label: 'Unregister',
-        description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
-      },
-      {
-        action: (item) => {
-          const confirmation = new ConfirmationDialogConfig(
             'Disconnect Endpoint',
             `Are you sure you want to disconnect endpoint '${item.name}'?`,
             'Disconnect',
@@ -95,6 +76,25 @@ export class EndpointListHelper {
         label: 'Connect',
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
+      },
+      {
+        action: (item) => {
+          const confirmation = new ConfirmationDialogConfig(
+            'Unregister Endpoint',
+            `Are you sure you want to unregister endpoint '${item.name}'?`,
+            'Unregister',
+            true
+          );
+          this.confirmDialog.open(confirmation, () => {
+            this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
+            this.handleDeleteAction(item, ([oldVal, newVal]) => {
+              this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+            });
+          });
+        },
+        label: 'Unregister',
+        description: 'Remove the endpoint',
+        createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
       }
     ];
   }

@@ -5,7 +5,7 @@ import { BaseTestModules } from '../../../../../../../test-framework/cloud-found
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { EndpointCardComponent } from './endpoint-card.component';
 
-fdescribe('EndpointCardComponent', () => {
+describe('EndpointCardComponent', () => {
   let component: EndpointCardComponent;
   let fixture: ComponentFixture<EndpointCardComponent>;
 

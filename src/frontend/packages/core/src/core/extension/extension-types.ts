@@ -15,6 +15,7 @@ export interface EndpointTypeConfig {
   allowTokenSharing?: boolean;
   icon?: string;
   iconFont?: string;
+  imagePath?: string;
   authTypes?: string[];
   /**
    * Get the link to the home page for the given endpoint GUID
