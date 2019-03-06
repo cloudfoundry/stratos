@@ -73,13 +73,31 @@ button.mat-simple-snackbar-action {
   header {
     display: none;
   }
+  li {
+    display: inline-block;
+  }
   .legend-wrap {
     width: unset;
     .legend-labels {
-      width:unset;
-      li {
-        display: inline-block;
-      }
+      width: unset;
+    }
+  }
+}
+
+.autoscaler-chart-bar-legend {
+  .ngx-charts {
+    display: none;
+  }
+  // header {
+  //   display: none;
+  // }
+  // li {
+  //   display: inline-block;
+  // }
+  .legend-wrap {
+    width: unset;
+    .legend-labels {
+      width: unset;
     }
   }
 }

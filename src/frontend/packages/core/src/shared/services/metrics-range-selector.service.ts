@@ -9,6 +9,7 @@ export class MetricsRangeSelectorService {
 
   constructor() { }
 
+  public defaultTimeValue: string;
   public times: ITimeRange[] = [
     {
       value: '5:minute',
@@ -87,7 +88,11 @@ export class MetricsRangeSelectorService {
   }
 
   private getDefaultTimeRange(times = this.times) {
-    return times.find(time => time.value === '1:hour') || this.times[0];
+    if (this.defaultTimeValue) {
+      return times.find(time => time.value === this.defaultTimeValue) || this.times[0];
+    } else {
+      return times.find(time => time.value === '1:hour') || this.times[0];
+    }
   }
 
 }

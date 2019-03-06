@@ -28,6 +28,8 @@ import { EditApplicationComponent } from './edit-application/edit-application.co
 import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-autoscaler-policy.component';
 import { AutoscalerMetricChartPageComponent } from './autoscaler-metric-chart-page/autoscaler-metric-chart-page.component';
 import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page/autoscaler-scale-history-page.component';
+import { ComboChartComponent } from './autoscaler-metric-chart-page/combo-chart/combo-chart.component';
+import { ComboSeriesVerticalComponent } from './autoscaler-metric-chart-page/combo-chart/combo-series-vertical.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
@@ -63,6 +65,8 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     EditAutoscalerPolicyComponent,
     AutoscalerMetricChartPageComponent,
     AutoscalerScaleHistoryPageComponent,
+    ComboChartComponent,
+    ComboSeriesVerticalComponent,
     InstancesTabComponent,
     AddRoutesComponent,
     GitSCMTabComponent,

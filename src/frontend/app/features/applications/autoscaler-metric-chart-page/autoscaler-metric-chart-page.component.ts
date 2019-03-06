@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, NgZone, ContentChild, Input } from '@angular/core';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, map, take, tap } from 'rxjs/operators';
 import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../store/app-state';
 import { ApplicationService } from '../application.service';
@@ -26,7 +26,19 @@ import {
 } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { normalColor } from '../../../store/helpers/autoscaler-helpers';
+import { normalColor, buildLegendData } from '../../../store/helpers/autoscaler-helpers';
+import { MetricsRangeSelectorComponent } from '../../../shared/components/metrics-range-selector/metrics-range-selector.component';
+import { MetricsAction } from '../../../store/actions/metrics.actions';
+import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from './../../../store/types/base-metric.types';
+
+export interface MetricsConfig<T = any> {
+  metricsAction: MetricsAction;
+  getSeriesName: (T) => string;
+  mapSeriesItemName?: (value) => string | Date;
+  mapSeriesItemValue?: (value) => any;
+  filterSeries?: MetricsFilterSeries;
+  sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
+}
 
 const monthName = new Intl.DateTimeFormat('en-us', { month: 'short' });
 const weekdayName = new Intl.DateTimeFormat('en-us', { weekday: 'short' });
@@ -48,6 +60,13 @@ function formatLabel(label: any): string {
   ]
 })
 export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
+  @Input()
+  public metricsConfig: MetricsConfig;
+  @ContentChild(MetricsRangeSelectorComponent)
+  public timeRangeSelector: MetricsRangeSelectorComponent;
+
+  private timeSelectorSub: Subscription;
+  private committedAction: MetricsAction;
 
   parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/auto-scaler`;
   current = (new Date()).getTime();
@@ -63,12 +82,26 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   appAutoscalerAppMetricNames = [];
   appAutoscalerAppMetricLegend = {};
 
+  comboBarScheme = {
+    name: 'singleLightBlue',
+    selectable: true,
+    group: 'Ordinal',
+    domain: ['#01579b']
+  };
+  lineChartScheme = {
+    name: 'coolthree',
+    selectable: true,
+    group: 'Ordinal',
+    domain: ['#01579b']
+  };
+
   constructor(
     public applicationService: ApplicationService,
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private ngZone: NgZone,
   ) {
   }
 
@@ -82,6 +115,12 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
+  entityServiceAppRefresh$: Subscription;
+
+  private refreshTime = 0;
+  private refreshInterval = 60000;
+  private autoRefreshString = 'auto-refresh';
+
   clearSub() {
     if (this.sub) {
       this.sub.unsubscribe();
@@ -90,6 +129,33 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.appAutoscalerPolicyService = this.entityServiceFactory.create(
+      appAutoscalerPolicySchemaKey,
+      entityFactory(appAutoscalerPolicySchemaKey),
+      this.applicationService.appGuid,
+      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
+      false
+    );
+    this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
+      map(({ entity }) => {
+        if (entity && entity.entity) {
+          const current = (new Date()).getTime()
+          if (this.refreshTime === 0 || current - this.refreshTime > 0.5 * this.refreshInterval) {
+            this.refreshTime = current;
+            this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
+            this.loadLatestMetricsUponPolicy(entity);
+          }
+        }
+        return entity && entity.entity;
+      })
+    );
+    this.ngZone.runOutsideAngular(() => {
+      this.entityServiceAppRefresh$ = this.appAutoscalerPolicyService
+        .poll(this.refreshInterval, this.autoRefreshString).pipe(
+          tap(() => { }))
+        .subscribe();
+    });
+
     this.sub = this.applicationService.application$.pipe(
       filter(app => !!app.app.entity),
       take(1),
@@ -105,26 +171,26 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
       // Don't want the values to change while the user is editing
       this.clearSub();
     });
+  }
 
-    this.appAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
-      this.applicationService.appGuid,
-      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
-      false
-    );
-    this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      map(({ entity }) => {
-        if (entity && entity.entity) {
-          this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
-          this.loadLatestMetricsUponPolicy(entity);
-        }
-        return entity && entity.entity;
-      })
-    );
+  ngAfterContentInit() {
+    if (this.timeRangeSelector) {
+      this.timeRangeSelector.baseAction = this.metricsConfig.metricsAction;
+      this.timeSelectorSub = this.timeRangeSelector.metricsAction.subscribe((action) => {
+        this.commitAction(action);
+      });
+    }
+  }
+
+  private commitAction(action: MetricsAction) {
+    this.committedAction = action;
+    this.store.dispatch(action);
   }
 
   ngOnDestroy(): void {
+    if (this.timeSelectorSub) {
+      this.timeSelectorSub.unsubscribe();
+    }
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
     }
@@ -137,6 +203,7 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   getAppMetric(metricName: string, trigger: any, params: any) {
     const action = new GetAppAutoscalerAppMetricAction(this.applicationService.appGuid,
       this.applicationService.cfGuid, metricName, false, trigger, params);
+    this.store.dispatch(action);
     return getPaginationObservables<AppAutoscalerAppMetric>({
       store: this.store,
       action,
@@ -151,7 +218,7 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
     if (policyEntity && policyEntity.entity && policyEntity.entity.scaling_rules_map) {
       this.appAutoscalerAppMetrics = {};
       Object.keys(policyEntity.entity.scaling_rules_map).map((metricName) => {
-        this.appAutoscalerAppMetricLegend[metricName] = this.getLegend(policyEntity.entity.scaling_rules_map[metricName]);
+        this.appAutoscalerAppMetricLegend[metricName] = this.getLegend2(policyEntity.entity.scaling_rules_map[metricName]);
         this.appAutoscalerAppMetrics[metricName] =
           this.getAppMetric(metricName, policyEntity.entity.scaling_rules_map[metricName], this.paramsMetrics);
       });
@@ -167,20 +234,26 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
     `;
   }
 
+  getLegend2(trigger) {
+    const legendColor = buildLegendData(trigger);
+    const legendValue = [];
+    legendColor.map((item) => {
+      legendValue.push({
+        name: item.name,
+        value: 1
+      });
+    });
+    return {
+      legendValue,
+      legendColor
+    };
+  }
+
   getLegend(trigger) {
     const legendValue = [];
     const legendColor = [];
-    for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
-      const current = trigger.upper[i];
-      const name = `${current.adjustment} if ${current.metric_type} ${current.operator} ${current.threshold}`;
-      legendValue.push({
-        name,
-        value: 1
-      });
-      legendColor.push({
-        name,
-        value: current.color
-      });
+    if (trigger.upper) {
+      this.buildSingleLegend(legendValue, legendColor, trigger.upper);
     }
     legendValue.push({
       name: 'ideal state',
@@ -190,9 +263,24 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
       name: 'ideal state',
       value: normalColor
     });
+    if (trigger.lower) {
+      this.buildSingleLegend(legendValue, legendColor, trigger.lower);
+    }
+    return {
+      legendValue,
+      legendColor
+    };
+  }
 
-    for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
-      const current = trigger.lower[i];
+  updateSingleLineChartScheme(colors, ul) {
+    ul.map((item) => {
+      colors.push(item.color);
+    });
+  }
+
+  buildSingleLegend(legendValue, legendColor, ul) {
+    for (let i = 0; i < ul.length; i++) {
+      const current = ul[i];
       const name = `${current.adjustment} if ${current.metric_type} ${current.operator} ${current.threshold}`;
       legendValue.push({
         name,
@@ -203,10 +291,18 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
         value: current.color
       });
     }
-    return {
-      legendValue,
-      legendColor
-    };
+  }
+
+  yLeftTickFormat(data) {
+    return `${data.toLocaleString()}`;
+  }
+
+  yRightTickFormat(data) {
+    return `${data}%`;
+  }
+
+  yLeftAxisScale(min, max) {
+    return { min: `${min}`, max: `${max}` };
   }
 
 }
