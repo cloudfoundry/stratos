@@ -6,27 +6,11 @@ import { delay } from 'rxjs/operators';
 import { JsonPointer } from 'stratos-angular6-json-schema-form';
 
 import { safeStringToObj } from '../../../core/utils.service';
+import { isValidJsonValidator } from '../../form-validators';
 
 export interface SchemaFormValidationError {
   dataPath: {};
   message: string;
-}
-
-export function isValidJsonValidator(): ValidatorFn {
-  return (formField: AbstractControl): { [key: string]: any } => {
-    try {
-      if (formField.value) {
-        const jsonObj = JSON.parse(formField.value);
-        // Check if jsonObj is actually an obj
-        if (jsonObj.constructor !== {}.constructor) {
-          throw new Error('not an object');
-        }
-      }
-    } catch (e) {
-      return { 'notValidJson': { value: formField.value } };
-    }
-    return null;
-  };
 }
 
 export class SchemaFormConfig {

@@ -159,7 +159,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
-    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
+    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items), tap(console.log)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
     this.multiActionPage$ = paginationMonitor.multiActionPage$;

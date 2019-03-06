@@ -39,9 +39,7 @@
         <app-create-application-step1 [stepperText]="stepperText" [isMarketplaceMode]="inMarketplaceMode" #selectCF>
         </app-create-application-step1>
       </app-step>
-      <!-- // TODO: RC add blocked on loading list of existing user provided services -->
-      <!-- [blocked]="!!(specifyDetails.serviceInstancesInit$  | async)" -->
-      <app-step title="Service Instance" [onEnter]="supd.onEnter" [onNext]="supd.onNext">
+      <app-step title="Service Instance" [onEnter]="supd.onEnter" [onNext]="supd.onNext" [valid]="supd.formGroup.valid">
         <app-specify-user-provided-details [cfGuid]="cfGuid$ | async" [spaceGuid]="spaceGuid$ | async"
           [serviceInstanceId]="serviceInstanceId" #supd>
         </app-specify-user-provided-details>

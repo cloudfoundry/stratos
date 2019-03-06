@@ -43,13 +43,7 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
     rootRelation: rootEntityRelation,
     requiredParamNames: new Array<string>(),
   };
-  //123
   buildEntityTree(entityTree, rootEntityRelation);
-  // if (rootEntityRelation.entity.key === 'userProvidedServiceInstance') {
-  //   console.log(rootEntityRelation.entity.key)
-  //   console.log(rootEntityRelation)
-  //   console.log(entityTree);
-  // }
   return entityTree;
 }
 
@@ -75,10 +69,6 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
       buildEntityTree(tree, entityRelation, value, newPath);
     }
   });
-  // if (entityRelation.entity.key === 'userProvidedServiceInstance') {
-  //   console.log('rootEntitySchema');
-  //   console.log(rootEntitySchema);
-  // }
 }
 
 export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [], )
@@ -100,10 +90,6 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
   if (entityRelation.childRelations.length) {
     tree.maxDepth = tree.maxDepth || 0;
     tree.maxDepth++;
-  }
-  if (entityRelation.entity.key === 'userProvidedServiceInstance') {
-    console.log('newChildRelations');
-    console.log(newChildRelations);
   }
   return newChildRelations;
 }

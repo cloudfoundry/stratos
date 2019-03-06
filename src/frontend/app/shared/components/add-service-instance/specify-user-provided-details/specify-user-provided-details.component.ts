@@ -1,11 +1,11 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest, HttpHeaders } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, tap, startWith, publishReplay } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { urlValidationExpression } from '../../../../core/utils.service';
 import {
@@ -17,12 +17,12 @@ import {
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, userProvidedServiceInstanceSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { EntityMonitor } from '../../../monitors/entity-monitor';
-import { isValidJsonValidator } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { EntityService } from './../../../../core/entity-service';
 import { serviceSchemaKey } from './../../../../store/helpers/entity-factory';
 import { APIResource } from './../../../../store/types/api.types';
 import { MatChipInputEvent } from '@angular/material';
+import { isValidJsonValidator } from '../../../form-validators';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -38,7 +38,6 @@ export class SpecifyUserProvidedDetailsComponent {
   public subs: Subscription[] = [];
   public isUpdate: boolean;
   public tags: { label: string }[] = [];
-
   @Input()
   public cfGuid: string;
   @Input()
@@ -86,8 +85,9 @@ export class SpecifyUserProvidedDetailsComponent {
             syslog_drain_url: serviceEntity.syslog_drain_url,
             credentials: JSON.stringify(serviceEntity.credentials),
             route_service_url: serviceEntity.route_service_url,
-            tags: this.tagsArrayToChips(serviceEntity.tags),
+            tags: []
           });
+          this.tags = this.tagsArrayToChips(serviceEntity.tags);
         });
     }
   }
@@ -115,14 +115,7 @@ export class SpecifyUserProvidedDetailsComponent {
   }
 
   private onNextCreate() {
-    const data = {
-      ...this.formGroup.value,
-      spaceGuid: this.spaceGuid
-    };
-    data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
-
-    data.tags = this.getTagsArray();
-    debugger;
+    const data = this.getServiceData();
     const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
     const action = new CreateUserProvidedServiceInstance(
       this.cfGuid,
@@ -137,7 +130,7 @@ export class SpecifyUserProvidedDetailsComponent {
       userProvidedServiceInstanceSchemaKey,
       entityFactory(userProvidedServiceInstanceSchemaKey)
     ).entityRequest$.pipe(
-      filter(er => er.creating),
+      filter(er => !er.creating),
       map(er => ({
         success: !er.error,
         redirect: !er.error
@@ -146,8 +139,7 @@ export class SpecifyUserProvidedDetailsComponent {
   }
 
   private onNextUpdate() {
-    const updateData = this.formGroup.value;
-    updateData.credentials = updateData.credentials ? JSON.parse(updateData.credentials) : {};
+    const updateData = this.getServiceData();
     const updateAction = new UpdateUserProvidedServiceInstance(
       this.cfGuid,
       this.serviceInstanceId,
@@ -172,11 +164,25 @@ export class SpecifyUserProvidedDetailsComponent {
     );
   }
 
+  private getServiceData() {
+    console.log(this.formGroup.value);
+    const data = {
+      ...this.formGroup.value,
+      spaceGuid: this.spaceGuid
+    };
+    data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
+
+    data.tags = this.getTagsArray();
+    return data;
+  }
+
+
   private getTagsArray() {
     return this.tags && Array.isArray(this.tags) ? this.tags.map(tag => tag.label) : [];
   }
 
   private tagsArrayToChips(tagsArray: string[]) {
+    console.log(tagsArray);
     return tagsArray && Array.isArray(tagsArray) ? tagsArray.map(label => ({ label })) : [];
   }
 
@@ -186,7 +192,6 @@ export class SpecifyUserProvidedDetailsComponent {
 
     const label = (event.value || '').trim();
     if (label) {
-      console.log(label)
       this.tags.push({ label });
     }
 

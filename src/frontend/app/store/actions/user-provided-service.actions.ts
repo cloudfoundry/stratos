@@ -147,6 +147,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
       name,
       credentials = {},
       syslog_drain_url,
+      route_service_url,
       tags = []
     } = data;
     if (name) {
@@ -161,6 +162,9 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     }
     if (credentials) {
       this.options.body.credentials = credentials;
+    }
+    if (route_service_url) {
+      this.options.body.route_service_url = route_service_url;
     }
   }
   actions = getActions('User Provided Service', 'Update User Provided Service');
