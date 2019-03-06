@@ -8,21 +8,6 @@
 </app-page-header>
 <div class="autoscaler-metric-page">
   <app-tile-grid *ngIf="appAutoscalerPolicy$ | async as policy">
-    <app-tile-group>
-      <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>
-              Select time range:
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <ng-content select="app-metrics-range-selector"></ng-content>
-            <app-metrics-range-selector [baseAction]="metricsConfig.metricsAction" (metricsAction)="config.getDataSource().updateMetricsAction($event)"></app-metrics-range-selector>
-          </mat-card-content>
-        </mat-card>
-      </app-tile>
-    </app-tile-group>
     <app-tile-group *ngFor="let metricName of appAutoscalerAppMetricNames; let index = index">
       <app-tile *ngIf="appAutoscalerAppMetrics[metricName] | async as metricData">
         <mat-card>

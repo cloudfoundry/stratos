@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
-import { LoggerService } from '../../core/logger.service';
+import { LoggerService } from '../../../core/src/core/logger.service';
 import {
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerHealthAction,
@@ -25,7 +25,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { AppState } from '../app-state';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../core/src/environments/environment.prod';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { PaginatedAction } from './../types/pagination.types';
 import {
@@ -139,7 +139,7 @@ export class AutoscalerEffects {
         return this.http
           .request(new Request(options)).pipe(
             mergeMap(response => {
-              const policyInfo = autoscalerTransformArrayToMap(response.json(), undefined);
+              const policyInfo = autoscalerTransformArrayToMap(response.json());
               const mappedData = {
                 entities: { [action.entityKey]: {} },
                 result: []

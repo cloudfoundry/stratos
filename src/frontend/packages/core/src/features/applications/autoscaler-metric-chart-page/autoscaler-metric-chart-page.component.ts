@@ -3,8 +3,8 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
-import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../store/app-state';
+import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import { ApplicationService } from '../application.service';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { EntityService } from '../../../core/entity-service';
@@ -12,24 +12,23 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import {
   entityFactory,
   appAutoscalerPolicySchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction } from '../../../store/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../store/types/app-autoscaler.types';
+} from '../../../../../store/src/helpers/entity-factory';
+import { GetAppAutoscalerPolicyAction } from '../../../../../store/src/actions/app-autoscaler.actions';
+import { AppAutoscalerPolicy } from '../../../../../store/src/types/app-autoscaler.types';
 import {
   GetAppAutoscalerAppMetricAction,
-} from '../../../store/actions/app-autoscaler.actions';
+} from '../../../../../store/src/actions/app-autoscaler.actions';
 import {
   AppAutoscalerAppMetric,
-} from '../../../store/types/app-autoscaler.types';
+} from '../../../../../store/src/types/app-autoscaler.types';
 import {
   appAutoscalerAppMetricSchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+} from '../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { normalColor, buildLegendData } from '../../../store/helpers/autoscaler-helpers';
-import { MetricsRangeSelectorComponent } from '../../../shared/components/metrics-range-selector/metrics-range-selector.component';
-import { MetricsAction } from '../../../store/actions/metrics.actions';
-import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from './../../../store/types/base-metric.types';
+import { normalColor, buildLegendData } from '../../../../../store/src/helpers/autoscaler-helpers';
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { ChartSeries, MetricsFilterSeries } from './../../../../../store/src/types/base-metric.types';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -62,11 +61,6 @@ function formatLabel(label: any): string {
 export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   @Input()
   public metricsConfig: MetricsConfig;
-  @ContentChild(MetricsRangeSelectorComponent)
-  public timeRangeSelector: MetricsRangeSelectorComponent;
-
-  private timeSelectorSub: Subscription;
-  private committedAction: MetricsAction;
 
   parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/auto-scaler`;
   current = (new Date()).getTime();
@@ -139,7 +133,7 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
       map(({ entity }) => {
         if (entity && entity.entity) {
-          const current = (new Date()).getTime()
+          const current = (new Date()).getTime();
           if (this.refreshTime === 0 || current - this.refreshTime > 0.5 * this.refreshInterval) {
             this.refreshTime = current;
             this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
@@ -173,24 +167,7 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngAfterContentInit() {
-    if (this.timeRangeSelector) {
-      this.timeRangeSelector.baseAction = this.metricsConfig.metricsAction;
-      this.timeSelectorSub = this.timeRangeSelector.metricsAction.subscribe((action) => {
-        this.commitAction(action);
-      });
-    }
-  }
-
-  private commitAction(action: MetricsAction) {
-    this.committedAction = action;
-    this.store.dispatch(action);
-  }
-
   ngOnDestroy(): void {
-    if (this.timeSelectorSub) {
-      this.timeSelectorSub.unsubscribe();
-    }
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
     }
