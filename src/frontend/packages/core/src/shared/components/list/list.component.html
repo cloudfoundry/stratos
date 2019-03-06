@@ -16,7 +16,8 @@
           <div class="list-component__header__left--metrics-range"
             *ngIf="config.showMetricsRange && !(isAddingOrSelecting$ | async)">
             <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
-              (metricsAction)="config.getDataSource().updateMetricsAction($event)"></app-metrics-range-selector>
+              (metricsAction)="config.getDataSource().updateMetricsAction($event)"
+              [times]="config.times" [selectedTimeValue]="config.selectedTimeValue"></app-metrics-range-selector>
           </div>
 
           <!-- Multi actions (those applied to selection) -->

@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppState } from '../../../../../store/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, ListConfig, ListViewTypes, IListMultiFilterConfig } from '../../list.component.types';
+import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import { TableCellAutoscalerEventActionComponent } from './table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
 import {
@@ -15,10 +14,7 @@ import { TableCellAutoscalerEventTypeComponent } from './table-cell-autoscaler-e
 import { TableCellAutoscalerEventStatusComponent } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 import { TableCellAutoscalerEventChangeComponent } from './table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
 import { TableCellAutoscalerEventErrorComponent } from './table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
-import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
-import { filter, first } from 'rxjs/operators';
-import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
+import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 
 @Injectable()
 export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
@@ -49,7 +45,30 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> i
     title: null,
     noEntries: 'There are no scale events'
   };
-  private multiFilterConfigs: IListMultiFilterConfig[];
+
+  showMetricsRange = true;
+  selectedTimeValue = '1:week';
+  times: ITimeRange[] = [
+    {
+      value: '1:day',
+      label: 'The past day',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '1:week',
+      label: 'The past week',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '1:month',
+      label: 'The past month',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      label: 'Custom time window',
+      queryType: MetricQueryType.RANGE_QUERY
+    }
+  ];
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
     super();
@@ -58,9 +77,6 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> i
       this.appService.cfGuid,
       this.appService.appGuid,
     );
-
-    this.assignMultiConfig();
-    this.initialiseMultiFilter(this.autoscalerEventSource.action);
   }
 
   getGlobalActions = () => null;
@@ -68,47 +84,5 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> i
   getSingleActions = () => null;
   getColumns = () => this.columns;
   getDataSource = () => this.autoscalerEventSource;
-  getMultiFiltersConfigs = () => this.multiFilterConfigs;
-
-  private assignMultiConfig = () => {
-    this.multiFilterConfigs = [
-      {
-        key: 'queryRange',
-        label: 'Last week',
-        allLabel: 'Last week',
-        list$: observableOf([
-          {
-            label: 'Last month',
-            item: 'month',
-            value: 'month'
-          },
-          {
-            label: 'Custom range',
-            item: 'custom',
-            value: 'custom'
-          }
-        ]),
-        loading$: observableOf(false),
-        select: new BehaviorSubject('month')
-      }
-    ];
-  }
-
-  private initialiseMultiFilter(action: PaginatedAction) {
-    this.store.select(selectPaginationState(action.entityKey, action.paginationKey)).pipe(
-      filter((pag) => !!pag),
-      first(),
-    ).subscribe(pag => {
-      const currentFilter = pag.clientPagination.filter.items['queryRange'];
-      if (!currentFilter) {
-        this.store.dispatch(new SetClientFilter(action.entityKey, action.paginationKey, {
-          string: '',
-          items: {
-            ['queryRange']: 'week'
-          }
-        }));
-      }
-    });
-  }
-
+  getMultiFiltersConfigs = () => [];
 }

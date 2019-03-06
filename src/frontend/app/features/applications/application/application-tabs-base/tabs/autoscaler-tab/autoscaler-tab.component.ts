@@ -156,7 +156,8 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       appAutoscalerScalingHistorySchemaKey,
       entityFactory(appAutoscalerScalingHistorySchemaKey),
       this.applicationService.appGuid,
-      new GetAppAutoscalerScalingHistoryAction('', this.applicationService.appGuid, this.applicationService.cfGuid, this.paramsHistory),
+      new GetAppAutoscalerScalingHistoryAction('', this.applicationService.appGuid,
+        this.applicationService.cfGuid, true, this.paramsHistory),
       false
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
@@ -205,7 +206,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       this.appAutoscalerAppMetrics = {};
       Object.keys(policyEntity.entity.scaling_rules_map).map((metricName) => {
         this.appAutoscalerAppMetrics[metricName] =
-        this.getAppMetric(metricName, policyEntity.entity.scaling_rules_map[metricName], this.paramsMetrics);
+          this.getAppMetric(metricName, policyEntity.entity.scaling_rules_map[metricName], this.paramsMetrics);
       });
     }
   }
@@ -255,7 +256,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       ).subscribe(actionState => {
         if (actionState.error) {
           this.appAutoscalerPolicySnackBarRef =
-          this.appAutoscalerPolicySnackBar.open(`Failed to detach policy: ${actionState.message}`, 'Dismiss');
+            this.appAutoscalerPolicySnackBar.open(`Failed to detach policy: ${actionState.message}`, 'Dismiss');
         }
       });
     });
@@ -332,7 +333,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       ).subscribe(actionState => {
         if (actionState.error) {
           this.appAutoscalerPolicySnackBarRef =
-          this.appAutoscalerPolicySnackBar.open(`Failed to create policy: ${actionState.message}`, 'Dismiss');
+            this.appAutoscalerPolicySnackBar.open(`Failed to create policy: ${actionState.message}`, 'Dismiss');
         }
       });
       this.detachConfirmOk = 0;

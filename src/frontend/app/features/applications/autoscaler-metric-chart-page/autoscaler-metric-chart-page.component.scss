@@ -28,36 +28,35 @@ app-tile-grid {
 }
 
 .autoscaler-chart-gauge {
-  margin-top: 1em;
-  width: 30%;
   display: inline-block;
+  margin-top: 1em;
+  width: 20%;
+  height: 250px;
 }
 
 .autoscaler-chart-bar {
-  margin-top: 1em;
-  width: 70%;
   display: inline-block;
+  margin-top: 1em;
+  width: 80%;
+  height: 250px;
 }
 
-.autoscaler-chart-legend {
-  width: 100%;
-  svg {
-    width: 0px;
-  }
-  .ngx-charts {
-    width: 0em;
-  }
-  .legend-labels {
-    width: 15em;
-  }
+.autoscaler-chart-bar-combo {
+  width: 75%;
+  height: 250px;
+  display: inline-block;
+  margin-top: 1em;
 }
 
-.ngx-charts {
-  width: 0px;
+.autoscaler-chart-bar-legend {
+  position: absolute;
+  display: inline-block;
+  margin-top: 1em;
+  margin-left: 1.75em;
 }
 
 .autoscaler-metric-subtitle {
-  color: rgba(0, 0, 0, 0.54);
-  font-size: 0.9em;
-  margin-top: 0.3em;
+  color: rgba(0, 0, 0, .54);
+  font-size: .9em;
+  margin-top: .3em;
 }
