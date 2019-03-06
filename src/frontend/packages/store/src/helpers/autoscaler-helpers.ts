@@ -1,5 +1,5 @@
-// import * as moment from 'moment';
-import moment from 'moment-timezone';
+import * as moment from 'moment';
+// import moment from 'moment-timezone';
 
 export const PolicyDefaultSetting = {
   breach_duration_secs_default: 120,
@@ -34,10 +34,10 @@ export const metricMap = {
 
 export const S2NS = 1000000000;
 
-export function autoscalerTransformArrayToMap(newPolicy, timezone) {
-  if (timezone === undefined || timezone === '') {
-    timezone = moment.tz.guess();
-  }
+export function autoscalerTransformArrayToMap(newPolicy, timezone?) {
+  // if (timezone) {
+  //   timezone = moment.tz.guess();
+  // }
   newPolicy.enabled = true;
   newPolicy.scaling_rules_map = {};
   newPolicy.scaling_rules_form = [];

@@ -7,9 +7,9 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, take, first } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
-import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../store/app-state';
+import { AppMetadataTypes } from '../../../../../store/src/actions/app-metadata.actions';
+import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
 
@@ -19,13 +19,13 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import {
   entityFactory,
   appAutoscalerPolicySchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../store/types/app-autoscaler.types';
-import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-import { SourceType } from '../../../store/types/deploy-application.types';
-import { MetricTypes, UpperOperators, LowerOperators } from '../../../store/helpers/autoscaler-helpers';
+} from '../../../../../store/src/helpers/entity-factory';
+import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../store/src/actions/app-autoscaler.actions';
+import { AppAutoscalerPolicy } from '../../../../../store/src/types/app-autoscaler.types';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { SourceType } from '../../../../../store/src/types/deploy-application.types';
+import { MetricTypes, UpperOperators, LowerOperators } from '../../../../../store/src/helpers/autoscaler-helpers';
 
 @Component({
   selector: 'app-edit-autoscaler-policy',

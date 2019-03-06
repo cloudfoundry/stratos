@@ -14,7 +14,7 @@
   .card {
     &.active,
     &:hover {
-      opacity: 0.8;
+      opacity: .8;
       transition: opacity 100ms ease-in-out;
     }
 
@@ -33,8 +33,8 @@
   .line-series-range,
   .area-series {
     &.inactive {
+      opacity: .2;
       transition: opacity 100ms ease-in-out;
-      opacity: .2
     }
   }
 
@@ -47,7 +47,7 @@
   }
 
   .area {
-    opacity: 0.6;
+    opacity: .6;
   }
 
   .circle {
@@ -62,13 +62,13 @@
   }
 
   .tooltip-anchor {
-    fill: rgb(0,0,0);
+    fill: rgb(0, 0, 0);
   }
 
   .gridline-path {
+    fill: none;
     stroke: #ddd;
     stroke-width: 1;
-    fill: none;
   }
 
   .grid-panel {
@@ -78,7 +78,7 @@
 
     &.odd {
       rect {
-        fill: rgba(0,0,0,0.05);
+        fill: rgba(0, 0, 0, .05);
       }
     }
   }

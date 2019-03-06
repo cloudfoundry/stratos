@@ -13,7 +13,7 @@ import { AppState } from '../../store/src/app-state';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { Observable, of as observableOf } from 'rxjs';
-import { AppAutoscalerPolicy, AppAutoscalerHealth } from '../store/types/app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerHealth } from '../../store/src/types/app-autoscaler.types'
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

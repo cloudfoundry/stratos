@@ -15,8 +15,8 @@ import {
 } from '../../../../store/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { GetAppAutoscalerHealthAction } from '../../store/actions/app-autoscaler.actions';
-import { AppAutoscalerHealth } from '../../store/types/app-autoscaler.types';
+import { GetAppAutoscalerHealthAction } from '../../../../store/src/actions/app-autoscaler.actions';
+import { AppAutoscalerHealth } from '../../../../store/src/types/app-autoscaler.types';
 
 import {
   appEnvVarsSchemaKey,

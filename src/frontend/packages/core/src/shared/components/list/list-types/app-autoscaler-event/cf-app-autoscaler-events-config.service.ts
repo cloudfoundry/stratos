@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppState } from '../../../../../store/app-state';
-import { EntityInfo } from '../../../../../store/types/api.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
