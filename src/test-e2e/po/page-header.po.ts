@@ -20,12 +20,12 @@ export class PageHeader extends Component {
   }
 
   getIconButton(iconName: string) {
-    return this.getIconButtons().map(button => {
-      return button.getText();
-    }).then(icons => {
-      const index = icons.findIndex(name => name === iconName);
-      return this.getIconButtons().get(index);
-    });
+    return this.getIconButtons()
+      .map(button => button.getText())
+      .then(icons => {
+        const index = icons.findIndex(name => name === iconName);
+        return index >= 0 ? this.getIconButtons().get(index) : null;
+      });
   }
 
   clickIconButton(iconName: string): promise.Promise<void> {
