@@ -69,7 +69,7 @@ describe('Endpoints', () => {
         expect(connectDialog.canConnect()).toBeTruthy();
       });
 
-      it('should update service instance data on register', () => {
+      it('should update endpoints data on register', () => {
         connectDialog.connect();
         // Wait for snackbar
         connectDialog.snackBar.waitForMessage(`Connected endpoint '${toConnect.name}'`);
@@ -78,19 +78,18 @@ describe('Endpoints', () => {
           expect(ep.connected).toBeTruthy();
         });
         connectDialog.waitUntilNotShown();
-        endpointsPage.cards.findCardByTitle(toConnect.name).then(card => {
-          card.openActionMenu();
-          const menu = new MenuComponent();
-          menu.waitUntilShown('Endpoint Action Menu');
-          return menu.getItemMap().then(items => {
-            expect(items['connect']).not.toBeDefined();
-            expect(items['disconnect']).toBeDefined();
-            // Only admins can unregister
-            expect(items['unregister']).not.toBeDefined();
-            return menu.close();
+        endpointsPage.cards.findCardByTitle(toConnect.name)
+          .then(card => card.openActionMenu())
+          .then(menu => {
+            menu.waitUntilShown('Endpoint Action Menu');
+            return menu.getItemMap().then(items => {
+              expect(items['connect']).not.toBeDefined();
+              expect(items['disconnect']).toBeDefined();
+              // Only admins can unregister
+              expect(items['unregister']).not.toBeDefined();
+              return menu.close();
+            });
           });
-
-        });
       });
 
       // NOTE: We connected as the User not the Admin, so logging in as admin will NOT have the endpoint connected

@@ -1,4 +1,4 @@
-import { browser, by, element, promise, protractor } from 'protractor';
+import { browser, by, element, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 
 import { E2EEndpointConfig } from '../e2e.types';
@@ -7,8 +7,6 @@ import { ListCardComponent, ListComponent, ListHeaderComponent, ListTableCompone
 import { MetaCard, MetaCardItem } from '../po/meta-card.po';
 import { Page } from '../po/page.po';
 import { SnackBarComponent } from '../po/snackbar.po';
-
-const until = protractor.ExpectedConditions;
 
 export class EndpointCards extends ListCardComponent {
   constructor(locator: ElementFinder, header: ListHeaderComponent) {

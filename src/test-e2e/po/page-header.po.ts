@@ -24,7 +24,7 @@ export class PageHeader extends Component {
       .map(button => button.getText())
       .then(icons => {
         const index = icons.findIndex(name => name === iconName);
-        return this.getIconButtons().get(index);
+        return index >= 0 ? this.getIconButtons().get(index) : null;
       });
   }
 
@@ -51,14 +51,16 @@ export class PageHeader extends Component {
   }
 
   logout(): promise.Promise<any> {
-    return this.clickIconButton('more_vert').then(() => {
-      browser.driver.sleep(2000);
-      const menu = new MenuComponent();
-      menu.waitUntilShown();
-      menu.clickItem('Logout');
-      browser.driver.sleep(2000);
-      return browser.waitForAngular();
-    });
+    return this.locator.element(by.id('userMenu'))
+      .click()
+      .then(() => {
+        // browser.driver.sleep(2000);
+        const menu = new MenuComponent();
+        menu.waitUntilShown();
+        menu.clickItem('Logout');
+        // browser.driver.sleep(2000);
+        return browser.waitForAngular();
+      });
   }
 
 }
