@@ -20,12 +20,12 @@ export class EndpointCards extends ListCardComponent {
   }
 
   getEndpointDataForEndpoint(title: string, subtitle = 'Cloud Foundry'): promise.Promise<EndpointMetadata> {
-    return this.findCardByTitle(title, subtitle).then(card => this.getEndpointData(card))
+    return this.findCardByTitle(title, subtitle).then(card => this.getEndpointData(card));
   }
 
   getEndpointData(card: MetaCard): promise.Promise<EndpointMetadata> {
     const title = card.getTitle();
-    const metaCardItems = card.getMetaCardItemsAsText()
+    const metaCardItems = card.getMetaCardItemsAsText();
     return promise.all<string | MetaCardItem<string>[]>([
       title,
       metaCardItems
@@ -35,8 +35,8 @@ export class EndpointCards extends ListCardComponent {
       const safeDetails = details ? details.value : '';
       // If we have details, assume they're cf details
       const cleanDetails = safeDetails.split('\n');
-      const user = cleanDetails[1] ? cleanDetails[1].replace(' (Administrator)', '') : ''
-      const isAdmin = safeDetails.endsWith(' (Administrator)')
+      const user = cleanDetails[1] ? cleanDetails[1].replace(' (Administrator)', '') : '';
+      const isAdmin = safeDetails.endsWith(' (Administrator)');
       return {
         name: t.substring(0, t.indexOf('\n')),
         connected: m.find(item => item.key === 'Status').value === 'cloud_done',
@@ -46,7 +46,7 @@ export class EndpointCards extends ListCardComponent {
         url: m.find(item => item.key === 'Address').value,
         // favorite: data[6]
       } as EndpointMetadata;
-    })
+    });
   }
 }
 

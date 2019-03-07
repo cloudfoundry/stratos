@@ -74,7 +74,6 @@ describe('Endpoints', () => {
         // Wait for snackbar
         connectDialog.snackBar.waitForMessage(`Connected endpoint '${toConnect.name}'`);
         endpointsPage.cards.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
-          console.log('EP: ', ep);
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });

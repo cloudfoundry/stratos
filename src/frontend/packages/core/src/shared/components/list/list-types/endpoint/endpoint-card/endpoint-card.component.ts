@@ -50,7 +50,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointConfig = getEndpointType(row.cnsi_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    this.endpointLink = row.connectionStatus === 'connected' ? EndpointsService.getLinkForEndpoint(row) : null
+    this.endpointLink = row.connectionStatus === 'connected' ? EndpointsService.getLinkForEndpoint(row) : null;
     this.updateDetails();
 
   }

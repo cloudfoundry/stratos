@@ -126,7 +126,7 @@ describe('Endpoints', () => {
                 });
                 return menu.close();
               });
-            })
+            });
           });
 
           it('Welcome snackbar message should be displayed', () => {
