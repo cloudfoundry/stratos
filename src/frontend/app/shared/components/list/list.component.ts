@@ -105,15 +105,18 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   initialEntitySelection$: Observable<number>;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
-    if (!paginator) {
+    if (!paginator || this.paginationWidgetToStore) {
       return;
     }
+    console.log('subscribing')
     // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
     // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
     // event which handles either page or pageSize changes.
-    this.paginationWidgetToStore = paginator.page.pipe(startWith(this.initialPageEvent)).pipe(
+    this.paginationWidgetToStore = paginator.page.pipe(
+      startWith(this.initialPageEvent),
       pairwise(),
     ).subscribe(([oldV, newV]) => {
+
       const pageSizeChanged = oldV.pageSize !== newV.pageSize;
       const pageChanged = oldV.pageIndex !== newV.pageIndex;
       if (pageSizeChanged) {
@@ -128,7 +131,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   @ViewChild('filter') set setFilter(filterValue: NgModel) {
-    if (!filterValue) {
+    if (!filterValue || this.filterWidgetToStore) {
       return;
     }
     this.filterWidgetToStore = filterValue.valueChanges.pipe(
