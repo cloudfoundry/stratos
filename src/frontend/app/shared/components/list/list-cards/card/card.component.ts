@@ -116,18 +116,30 @@ export class CardComponent<T> {
     }
   }
 
-  public getComponent(component: any | CardMultiActionComponents, item: T | MultiActionListEntity) {
-    const { schemaKey, entity } = item as MultiActionListEntity;
+  private getComponent(component: any | CardMultiActionComponents, item: T | MultiActionListEntity) {
+    const { schemaKey, entity } = this.getEntity(item);
     if (component instanceof CardMultiActionComponents && schemaKey) {
       return {
         component: component.getComponent(schemaKey),
         schemaKey,
         entity
-      }
+      };
     }
     return {
       component,
-      entity: item
+      entity
     };
+  }
+
+  private getEntity(item: T | MultiActionListEntity) {
+    if (item instanceof MultiActionListEntity) {
+      return {
+        schemaKey: item.schemaKey,
+        entity: item.entity
+      };
+    }
+    return {
+      entity: item
+    }
   }
 }
